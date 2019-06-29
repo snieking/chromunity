@@ -1,30 +1,30 @@
 import {GTX, PRIV_KEY} from "./Postchain";
 import {generatePublicKey, toBuffer, decrypt} from "./CryptoService";
 import {uniqueId} from "../util/util";
-import {Thread} from "../types";
+import {Thread, User} from "../types";
 
-export function createThread(encryptedPrivateKey: string, message: string) {
-    const privKeyHex = decrypt(PRIV_KEY, encryptedPrivateKey);
+export function createThread(user: User, message: string) {
+    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
     const pubKeyHex = generatePublicKey(privKeyHex);
 
     const privKey = toBuffer(privKeyHex);
     const pubKey = toBuffer(pubKeyHex);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation('create_thread', pubKey, uniqueId(), "", message);
+    tx.addOperation('create_thread', user.name, uniqueId(), "", message);
     tx.sign(privKey, pubKey);
     tx.postAndWaitConfirmation().catch(console.log);
 }
 
-export function createSubThread(encryptedPrivateKey: string, parentId: string, message: string) {
-    const privKeyHex = decrypt(PRIV_KEY, encryptedPrivateKey);
+export function createSubThread(user: User, parentId: string, message: string) {
+    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
     const pubKeyHex = generatePublicKey(privKeyHex);
 
     const privKey = toBuffer(privKeyHex);
     const pubKey = toBuffer(pubKeyHex);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation('create_thread', pubKey, uniqueId(), parentId, message);
+    tx.addOperation('create_thread', user.name, uniqueId(), parentId, message);
     tx.sign(privKey, pubKey);
     tx.postAndWaitConfirmation().catch(console.log);
 }
@@ -49,30 +49,30 @@ export function getSubThreadsByParentId(parentId: string): Promise<Thread[]> {
     return GTX.query("get_sub_threads", {parent_id: parentId});
 }
 
-export function starRate(encryptedPrivateKey: string, id: string) {
-    console.log("Running rateStar: ", encryptedPrivateKey, id);
-    const privKeyHex = decrypt(PRIV_KEY, encryptedPrivateKey);
+export function starRate(user: User, id: string) {
+    console.log("Running rateStar: ", user.encryptedKey, id);
+    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
     const pubKeyHex = generatePublicKey(privKeyHex);
 
     const privKey = toBuffer(privKeyHex);
     const pubKey = toBuffer(pubKeyHex);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation('star_rate_thread', pubKey, id);
+    tx.addOperation('star_rate_thread', user.name, id);
     tx.sign(privKey, pubKey);
     tx.postAndWaitConfirmation().catch(console.log);
 }
 
-export function removeStarRate(encryptedPrivateKey: string, id: string) {
-    console.log("Running removeStarRating: ", encryptedPrivateKey, id);
-    const privKeyHex = decrypt(PRIV_KEY, encryptedPrivateKey);
+export function removeStarRate(user: User, id: string) {
+    console.log("Running removeStarRating: ", user.encryptedKey, id);
+    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
     const pubKeyHex = generatePublicKey(privKeyHex);
 
     const privKey = toBuffer(privKeyHex);
     const pubKey = toBuffer(pubKeyHex);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation('remove_star_rate_thread', pubKey, id);
+    tx.addOperation('remove_star_rate_thread', user.name, id);
     tx.sign(privKey, pubKey);
     tx.postAndWaitConfirmation().catch(console.log);
 }

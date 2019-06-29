@@ -77,7 +77,7 @@ export default function HeaderNav() {
     function createNewThread(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         console.log("Creating new thread with message", threadMessage);
-        createThread(user.encryptedKey, threadMessage || "");
+        createThread(getUser(), threadMessage || "");
         setThreadMessage("");
         handleNewThreadDialogClose();
     }

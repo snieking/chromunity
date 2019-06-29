@@ -8,7 +8,7 @@ import {
     starRate
 } from "../../blockchain/MessageService";
 import {Thread} from "../../types";
-import {Container, Dialog} from "@material-ui/core";
+import {Container} from "@material-ui/core";
 
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
@@ -102,14 +102,14 @@ export class FullThread extends React.Component<FullThreadProps, FullThreadState
         const encryptedKey = getUser().encryptedKey;
         if (encryptedKey != null) {
             if (this.state.starRatedByMe) {
-                removeStarRate(encryptedKey, id);
+                removeStarRate(getUser(), id);
                 this.setState(prevState => ({
                     thread: prevState.thread,
                     stars: prevState.stars-1,
                     starRatedByMe: false
                 }))
             } else {
-                starRate(encryptedKey, id);
+                starRate(getUser(), id);
                 this.setState(prevState => ({
                     thread: prevState.thread,
                     stars: prevState.stars+1,

@@ -3,7 +3,7 @@ import {Link} from 'react-router-dom';
 import './Wall.css';
 import Header from '../Header/Header'
 import {Container} from "@material-ui/core";
-import {getAllThreads, getThreadsByUserId, getThreadStarRating} from "../../blockchain/MessageService";
+import {getAllThreads, getThreadsByUserId} from "../../blockchain/MessageService";
 import {Thread} from "../../types";
 
 import Card from '@material-ui/core/Card';

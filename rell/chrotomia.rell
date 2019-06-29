@@ -12,9 +12,9 @@ class thread_with_upvotes {
   id: text;
 }
 
-operation create_thread(pubkey, id: text, parent_id: text, message: text) {
-  require(is_signer(pubkey));
-  val user = user@{ .pubkey == pubkey};
+operation create_thread(username: text, id: text, parent_id: text, message: text) {
+  val user = user@{ .name == username};
+  require(is_signer(user.pubkey));
   val time = op_context.last_block_time;
   create thread(id, parent_id, user, message, timestamp=time);
 }
@@ -46,14 +46,16 @@ class thread_star_rate {
   key id: text, user: user;
 }
 
-operation star_rate_thread(pubkey, id: text) {
-  require(is_signer(pubkey));
-  val user = user@{ .pubkey == pubkey};
+operation star_rate_thread(username: text, id: text) {
+  val user = user@{ .name == username };
+  require(is_signer(user.pubkey));
   create thread_star_rate(id, user);
 }
 
-operation remove_star_rate_thread(pubkey, id: text) {
-  delete thread_star_rate @ {.id == id, .user == user@{ .pubkey == pubkey}};
+operation remove_star_rate_thread(username: text, id: text) {
+  val user = user@{ .name == username };
+  require(is_signer(user.pubkey));
+  delete thread_star_rate @ {.id == id, .user == user};
 }
 
 query get_star_rating_for_id(id: text) {
