@@ -96,7 +96,7 @@ export default function HeaderNav() {
         if (user.name != null) {
             return (
                 <div>
-                    <Link to="/user/profile">{profileIcon()}</Link>
+                    <Link to={"/u/" + user.name}>{profileIcon()}</Link>
                     <Link to="/user/logout">
                         <IconButton>
                             <ExitToApp/>

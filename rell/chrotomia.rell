@@ -59,7 +59,7 @@ operation remove_star_rate_thread(username: text, id: text) {
 }
 
 query get_star_rating_for_id(id: text) {
-  return thread_star_rate@*{.id == id}(.user.name);
+  return thread_star_rate@*{ .id == id }(thread_star_rate.user.name);
 }
 
 // ------------ User operations ------------
