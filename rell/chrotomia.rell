@@ -16,8 +16,8 @@ operation create_thread(username: text, id: text, parent_id: text, message: text
 }
 
 query get_all_threads() {
-  return thread @* { .parent_id != "" }
-    (.id, author=.author.name, .message, -sort .timestamp);
+  return thread @* {}
+    (.id, author=.author.name, parentId=.parent_id, .message, -sort .timestamp);
 }
 
 query get_sub_threads(parent_id: text) {
