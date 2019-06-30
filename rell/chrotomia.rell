@@ -8,10 +8,6 @@ class thread {
   timestamp;
 }
 
-class thread_with_upvotes {
-  id: text;
-}
-
 operation create_thread(username: text, id: text, parent_id: text, message: text) {
   val user = user@{ .name == username};
   require(is_signer(user.pubkey));
@@ -20,7 +16,7 @@ operation create_thread(username: text, id: text, parent_id: text, message: text
 }
 
 query get_all_threads() {
-  return thread @* {}
+  return thread @* { .parent_id != "" }
     (.id, author=.author.name, .message, -sort .timestamp);
 }
 

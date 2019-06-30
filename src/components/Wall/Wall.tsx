@@ -60,6 +60,7 @@ export class Wall extends React.Component<WallProps, WallState> {
                     {this.state.threads.map(thread => <ThreadCard
                         key={"card-" + thread.id}
                         truncated={true}
+                        isSubCard={false}
                         thread={thread}
                     />)}
                 </Container>

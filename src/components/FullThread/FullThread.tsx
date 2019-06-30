@@ -19,6 +19,7 @@ export interface FullThreadProps extends RouteComponentProps<MatchParams> {
 
 export interface FullThreadState {
     thread: Thread,
+    replyBoxOpen: boolean
 }
 
 export class FullThread extends React.Component<FullThreadProps, FullThreadState> {
@@ -35,6 +36,7 @@ export class FullThread extends React.Component<FullThreadProps, FullThreadState
 
         this.state = {
             thread: initialThread,
+            replyBoxOpen: false
         };
     }
 
@@ -48,7 +50,7 @@ export class FullThread extends React.Component<FullThreadProps, FullThreadState
     }
 
     renderThread() {
-         return (<ThreadCard truncated={false} thread={this.state.thread}/> );
+        return (<ThreadCard truncated={false} isSubCard={false} thread={this.state.thread}/>);
     }
 
     render() {

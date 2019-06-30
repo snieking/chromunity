@@ -1,7 +1,13 @@
 import React from "react";
 import {Link} from 'react-router-dom'
 import {Thread} from "../../types";
-import {getSubThreadsByParentId, getThreadStarRating, removeStarRate, starRate} from "../../blockchain/MessageService";
+import {
+    createSubThread,
+    getSubThreadsByParentId,
+    getThreadStarRating,
+    removeStarRate,
+    starRate
+} from "../../blockchain/MessageService";
 import {getUser} from "../../util/user-util";
 import {Reply, StarRate} from "@material-ui/icons";
 import Typography from "@material-ui/core/Typography";
@@ -12,16 +18,25 @@ import CardContent from "@material-ui/core/CardContent";
 import Card from "@material-ui/core/Card";
 import {Redirect} from "react-router";
 import {CardActionArea} from "@material-ui/core";
+import TextField from "@material-ui/core/TextField";
+import Container from "@material-ui/core/Container";
+import Button from "@material-ui/core/Button";
+
+import './ThreadCard.css';
 
 export interface ThreadCardProps {
     thread: Thread,
-    truncated: boolean
+    truncated: boolean,
+    isSubCard: boolean
 }
 
 export interface ThreadCardState {
     stars: number,
     ratedByMe: boolean,
-    redirectToFullCard: boolean
+    redirectToFullCard: boolean,
+    replyBoxOpen: boolean,
+    replyMessage: string,
+    subThreads: Thread[]
 }
 
 export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState> {
@@ -32,13 +47,30 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         this.state = {
             stars: 0,
             ratedByMe: false,
-            redirectToFullCard: false
-        }
+            redirectToFullCard: false,
+            replyBoxOpen: false,
+            replyMessage: "",
+            subThreads: []
+        };
+
+        this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
     }
 
     static isRatedByMe(upvoters: string[]): boolean {
         const username = getUser().name;
         return username !== null && upvoters.includes(username);
+    }
+
+    handleReplyMessageChange(event: React.ChangeEvent<HTMLInputElement>): void {
+        this.setState({replyMessage: event.target.value})
+    }
+
+    handleReplySubmit(): void {
+        createSubThread(getUser(), this.props.thread.id, this.state.replyMessage)
+            .then(() => getSubThreadsByParentId(this.props.thread.id)
+                .then(threads => this.setState({subThreads: threads})));
+        this.setState({replyMessage: ""});
+        this.toggleReplyBox();
     }
 
     componentDidMount(): void {
@@ -68,6 +100,8 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
                     ratedByMe: ratedByMe
                 }));
             });
+            getSubThreadsByParentId(parentId)
+                .then(threads => this.setState({subThreads: threads}));
         }
     }
 
@@ -77,17 +111,13 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         const encryptedKey = getUser().encryptedKey;
         if (encryptedKey != null) {
             if (this.state.ratedByMe) {
-                removeStarRate(getUser(), id);
-                this.setState(prevState => ({
-                    stars: prevState.stars - 1,
-                    ratedByMe: false
-                }));
+                removeStarRate(getUser(), id)
+                    .then(() => this.setState(prevState => ({stars: prevState.stars - 1, ratedByMe: false})))
+                    .catch(() => this.setState(prevState => ({stars: prevState.stars, ratedByMe: true})));
             } else {
-                starRate(getUser(), id);
-                this.setState(prevState => ({
-                    stars: prevState.stars + 1,
-                    ratedByMe: true
-                }));
+                starRate(getUser(), id)
+                    .then(() => this.setState(prevState => ({stars: prevState.stars + 1, ratedByMe: true})))
+                    .catch(() => this.setState(prevState => ({stars: prevState.stars, ratedByMe: false})));
             }
         }
     }
@@ -106,17 +136,28 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
                 <CardActionArea className="thread-card" onClick={() => this.doNavigate()}>
                     {this.renderCardContent(this.props.thread.message)}
                 </CardActionArea>
-                {this.renderCardActions()}
+                {this.renderCardActions(false)}
             </Card>
         )
     }
 
     renderFullThreadCard() {
         return (
-            <Card key={this.props.thread.id} className="thread-card">
-                {this.renderCardContent(this.props.thread.message)}
-                {this.renderCardActions()}
-            </Card>
+            <div>
+                <Card key={this.props.thread.id} className="thread-card">
+                    {this.renderCardContent(this.props.thread.message)}
+                    {this.renderCardActions(!this.props.isSubCard)}
+                </Card>
+                {this.state.replyBoxOpen ? this.renderReplyBox() : <div></div>}
+                {this.state.subThreads.map(thread => {
+                    console.log("======== Subthread: ", thread);
+                    return <ThreadCard key={"sub-thread-" + thread.id}
+                                       thread={thread}
+                                       truncated={false}
+                                       isSubCard={true}
+                    />
+                })}
+            </div>
         )
     }
 
@@ -133,19 +174,64 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         )
     }
 
-    renderCardActions() {
+    renderCardActions(renderReplyButton: boolean) {
         return (
             <CardActions>
-                <IconButton className={(this.state.ratedByMe ? 'yellow-icon' : '')} aria-label="Like"
-                            onClick={() => this.toggleStarRate()}>
+                <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
                     <Badge className="star-badge" color="secondary" badgeContent={this.state.stars}>
-                        <StarRate/>
+                        <StarRate className={(this.state.ratedByMe ? 'yellow-icon' : '')}/>
                     </Badge>
                 </IconButton>
-                <IconButton aria-label="Like">
-                    <Reply/>
-                </IconButton>
+                {this.renderReplyButton(renderReplyButton)}
             </CardActions>
+        )
+    }
+
+    toggleReplyBox(): void {
+        this.setState(prevState => ({replyBoxOpen: !prevState.replyBoxOpen}));
+    }
+
+    renderReplyButton(renderReplyButton: boolean) {
+        if (renderReplyButton) {
+            return (
+                <IconButton aria-label="Like" onClick={() => this.toggleReplyBox()}>
+                    <Reply className={(this.state.replyBoxOpen ? 'green-icon' : '')}/>
+                </IconButton>
+            )
+        } else {
+            return (<div></div>)
+        }
+    }
+
+    renderReplyBox() {
+        if (this.state.replyBoxOpen) {
+            return (
+                <Card key={"reply-box"}>
+                    {this.renderReplyForm()}
+                </Card>
+            )
+        }
+    }
+
+    renderReplyForm() {
+        return (
+            <div className="reply-container">
+                <Container>
+                    <TextField
+                        margin="normal"
+                        id="message"
+                        multiline
+                        type="text"
+                        fullWidth
+                        value={this.state.replyMessage}
+                        onChange={this.handleReplyMessageChange}
+                    />
+                    <Button type="button" onClick={() => this.toggleReplyBox()}>Cancel</Button>
+                    <Button type="submit" onClick={() => this.handleReplySubmit()}>Reply</Button>
+                    <br/>
+                    <br/>
+                </Container>
+            </div>
         )
     }
 

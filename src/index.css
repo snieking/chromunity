@@ -14,5 +14,9 @@ code {
 }
 
 .yellow-icon {
-  color: yellow;
+  color: darkorange;
+}
+
+.green-icon {
+  color: darkgreen;
 }

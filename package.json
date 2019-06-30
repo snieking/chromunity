@@ -19,7 +19,8 @@
     "cryptico": "1.0.2",
     "postchain-client": "bitbucket:chromawallet/postchain-client",
     "@material-ui/core": "^4.1.3",
-    "@material-ui/icons": "^4.2.1"
+    "@material-ui/icons": "^4.2.1",
+    "boomerang-cache": "1.2.0"
   },
   "scripts": {
     "start": "react-scripts start",

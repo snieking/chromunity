@@ -80,6 +80,7 @@ export default function HeaderNav() {
         createThread(getUser(), threadMessage || "");
         setThreadMessage("");
         handleNewThreadDialogClose();
+        window.location.reload();
     }
 
     function createThreadButton() {
