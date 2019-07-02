@@ -76,7 +76,7 @@ export class Wall extends React.Component<WallProps, WallState> {
         return (
             <div>
                 <Header/>
-                <Container fixed>
+                <Container fixed maxWidth="md">
                     <br/>
                     {this.state.threads.map(thread => <ThreadCard
                         key={"card-" + thread.id}

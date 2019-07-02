@@ -11,7 +11,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import {createThread} from "../../blockchain/MessageService";
 import {getUser} from "../../util/user-util";
 import IconButton from "@material-ui/core/IconButton";
-import MessageIcon from '@material-ui/icons/Message';
+import MessageIconRounded from '@material-ui/icons/Message';
 
 
 export interface NewThreadButtonProps {
@@ -59,10 +59,10 @@ export class NewThreadButton extends React.Component<NewThreadButtonProps, NewTh
 
     createThreadButton() {
         return (
-            <div className="bottom-right-corner">
-                <IconButton className="new-thread-button" aria-label="New thread"
+            <div className="bottom-right-corner rounded-pink">
+                <IconButton aria-label="New thread"
                             onClick={() => this.toggleNewThreadDialog()}>
-                    <MessageIcon fontSize="large" className="nav-button"/>
+                    <MessageIconRounded fontSize="large" className="new-thread-button"/>
                 </IconButton>
             </div>
         )
