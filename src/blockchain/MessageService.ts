@@ -6,7 +6,7 @@ import * as BoomerangCache from "boomerang-cache";
 
 const boomerang = BoomerangCache.create('bucket1', {storage: 'local', encrypt: true});
 
-export function createThread(user: User, message: string) {
+export function createThread(user: User, message: string): Promise<any> {
     boomerang.remove("threads");
     const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
     const pubKeyHex = generatePublicKey(privKeyHex);
@@ -19,8 +19,16 @@ export function createThread(user: User, message: string) {
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation('create_thread', user.name, threadId, "", message);
     tx.sign(privKey, pubKey);
-    tx.postAndWaitConfirmation().then(() => storeTagsFromThread(user, threadId, message));
-    console.log("Created thread for message: ", message);
+
+    return tx.postAndWaitConfirmation()
+        .then((promise: any) => {
+            const tags = getHashTags(message);
+            if (tags != null) {
+                return storeTagsFromThread(user, threadId, tags);
+            } else {
+                return promise;
+            }
+        });
 }
 
 
@@ -74,21 +82,18 @@ export function getSubThreadsByParentId(parentId: string): Promise<Thread[]> {
     return GTX.query("get_sub_threads", {parent_id: parentId});
 }
 
-function storeTagsFromThread(user: User, threadId: string, message: string) {
+function storeTagsFromThread(user: User, threadId: string, tags: string[]) {
     const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
     const pubKeyHex = generatePublicKey(privKeyHex);
 
     const privKey = toBuffer(privKeyHex);
     const pubKey = toBuffer(pubKeyHex);
 
-    const tags = getHashTags(message);
+    const tx = GTX.newTransaction([pubKey]);
+    tx.addOperation('create_thread_tag', user.name, tags, threadId);
+    tx.sign(privKey, pubKey);
+    return tx.postAndWaitConfirmation();
 
-    if (tags != null) {
-        const tx = GTX.newTransaction([pubKey]);
-        tx.addOperation('create_thread_tag', user.name, tags, threadId);
-        tx.sign(privKey, pubKey);
-        tx.postAndWaitConfirmation();
-    }
 }
 
 function getHashTags(inputText: string): string[] {

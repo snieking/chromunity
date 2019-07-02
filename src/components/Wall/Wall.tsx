@@ -7,6 +7,7 @@ import {Thread} from "../../types";
 
 import {RouteComponentProps} from "react-router";
 import {ThreadCard} from "../ThreadCard/ThreadCard";
+import {NewThreadButton} from "../buttons/NewThreadButton";
 
 interface MatchParams {
     userId: string,
@@ -32,9 +33,16 @@ export class Wall extends React.Component<WallProps, WallState> {
             id: "",
             truncated: true
         };
+
+        this.retrieveThreads = this.retrieveThreads.bind(this);
     }
 
     componentDidMount(): void {
+        this.retrieveThreads();
+    }
+
+    retrieveThreads() {
+        console.log("Retrieving threads!");
         const userId = this.props.match.params.userId;
         const tag = this.props.match.params.tag;
         if (userId != null) {
@@ -62,7 +70,6 @@ export class Wall extends React.Component<WallProps, WallState> {
                 });
             });
         }
-
     }
 
     render() {
@@ -78,6 +85,7 @@ export class Wall extends React.Component<WallProps, WallState> {
                         thread={thread}
                     />)}
                 </Container>
+                <NewThreadButton updateFunction={this.retrieveThreads}/>
             </div>
         );
     }

@@ -1,4 +1,4 @@
-import React, {FormEvent} from 'react';
+import React from 'react';
 import {Link} from 'react-router-dom'
 
 import {getUser} from '../../../util/user-util';
@@ -9,17 +9,9 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Home from '@material-ui/icons/Home';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import MessageIcon from '@material-ui/icons/Message';
-import {Dialog} from "@material-ui/core";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import DialogContent from "@material-ui/core/DialogContent";
-import TextField from "@material-ui/core/TextField";
-import DialogActions from "@material-ui/core/DialogActions";
-import Button from "@material-ui/core/Button";
 import {ExitToApp} from "@material-ui/icons";
 
 import './HeaderNav.css';
-import {createThread} from "../../../blockchain/MessageService";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -56,42 +48,6 @@ const useStyles = makeStyles((theme: Theme) =>
 export default function HeaderNav() {
     const classes = useStyles();
     const user = getUser();
-    const [dialogAnchorEl, setDialogAnchorEl] = React.useState<null | HTMLElement>(null);
-    const [threadMessage, setThreadMessage] = React.useState<null | string>("");
-
-    const isDialogOpen = Boolean(dialogAnchorEl);
-
-    function handleNewThreadClickOpen(event: React.MouseEvent<HTMLElement>) {
-        setDialogAnchorEl(event.currentTarget);
-    }
-
-    function handleNewThreadDialogClose() {
-        setDialogAnchorEl(null);
-    }
-
-    function handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
-        event.persist();
-        setThreadMessage(event.target.value);
-    }
-
-    function createNewThread(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        console.log("Creating new thread with message", threadMessage);
-        createThread(getUser(), threadMessage || "");
-        setThreadMessage("");
-        handleNewThreadDialogClose();
-        window.location.reload();
-    }
-
-    function createThreadButton() {
-        return (
-            <div>
-                <IconButton aria-label="New thread" onClick={handleNewThreadClickOpen}>
-                    <MessageIcon className="nav-button"/>
-                </IconButton>
-            </div>
-        )
-    }
 
     function profileSpecificNavigation() {
         if (user.name != null) {
@@ -120,39 +76,6 @@ export default function HeaderNav() {
         )
     }
 
-    function newThreadDialog() {
-        return (
-            <div>
-                <Dialog open={isDialogOpen}
-                        aria-labelledby="form-dialog-title">
-                    <form onSubmit={createNewThread}>
-                        <DialogTitle id="form-dialog-title">What's on your mind?</DialogTitle>
-                        <DialogContent>
-                            <TextField
-                                autoFocus
-                                margin="dense"
-                                id="message"
-                                multiline
-                                type="text"
-                                fullWidth
-                                onChange={handleDialogMessageChange}
-                                value={threadMessage}
-                            />
-                        </DialogContent>
-                        <DialogActions>
-                            <Button onClick={handleNewThreadDialogClose} color="primary">
-                                Cancel
-                            </Button>
-                            <Button type="submit" color="primary">
-                                Send
-                            </Button>
-                        </DialogActions>
-                    </form>
-                </Dialog>
-            </div>
-        )
-    }
-
     return (
         <div className={classes.grow}>
             <AppBar position="static">
@@ -168,8 +91,6 @@ export default function HeaderNav() {
                     </Link>
                     <div className={classes.grow}/>
                     <div className={classes.sectionDesktop}>
-                        {createThreadButton()}
-                        {newThreadDialog()}
                         {profileSpecificNavigation()}
                     </div>
                 </Toolbar>
