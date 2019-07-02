@@ -15,7 +15,7 @@ function initAdmin(username: string) {
 }
 
 export function register(name: string, password: string) {
-    if (name === "chrotomia_admin") {
+    if (name === "admin") {
         initAdmin(name);
     } else {
         const uPrivKey = generatePrivateKey();

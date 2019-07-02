@@ -1,5 +1,4 @@
 import React from "react";
-import {Link} from 'react-router-dom'
 import {getThreadById} from "../../blockchain/MessageService";
 import {Thread} from "../../types";
 import {Container} from "@material-ui/core";
@@ -14,7 +13,7 @@ interface MatchParams {
 }
 
 export interface FullThreadProps extends RouteComponentProps<MatchParams> {
-
+    pathName: string
 }
 
 export interface FullThreadState {

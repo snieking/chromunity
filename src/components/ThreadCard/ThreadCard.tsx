@@ -9,7 +9,7 @@ import {
     starRate
 } from "../../blockchain/MessageService";
 import {getUser} from "../../util/user-util";
-import {Reply, StarRate} from "@material-ui/icons";
+import {Backspace, MoreHoriz, Sms, StarRate} from "@material-ui/icons";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import Badge from "@material-ui/core/Badge";
@@ -17,7 +17,6 @@ import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import Card from "@material-ui/core/Card";
 import {Redirect} from "react-router";
-import {CardActionArea} from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import Container from "@material-ui/core/Container";
 import Button from "@material-ui/core/Button";
@@ -54,6 +53,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         };
 
         this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
+        this.navigateBack = this.navigateBack.bind(this);
     }
 
     static isRatedByMe(upvoters: string[]): boolean {
@@ -126,27 +126,37 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         return "/thread/" + this.props.thread.id;
     }
 
-    doNavigate(): void {
-        this.setState({redirectToFullCard: true});
-    }
-
     renderTruncatedThreadCard() {
         return (
             <Card key={this.props.thread.id} className="thread-card">
-                <CardActionArea className="thread-card" onClick={() => this.doNavigate()}>
-                    {this.renderCardContent(this.props.thread.message)}
-                </CardActionArea>
-                {this.renderCardActions(false)}
+                {this.renderCardContent(this.props.thread.message)}
+                {this.renderCardActions(false, true)}
             </Card>
         )
+    }
+
+    renderReturnButton() {
+        return (
+            <IconButton aria-label="Return" className="return-button" onClick={() => this.navigateBack()}>
+                <Backspace/>
+            </IconButton>
+        )
+    }
+
+    navigateBack(): void {
+    }
+
+    static parseHashtags(message: string): string {
+        return message.replace(/(#)([a-z\d-]+)/ig, "<a  href='/tag/$2'>$1$2</a>");
     }
 
     renderFullThreadCard() {
         return (
             <div>
                 <Card key={this.props.thread.id} className="thread-card">
+                    {this.renderReturnButton()}
                     {this.renderCardContent(this.props.thread.message)}
-                    {this.renderCardActions(!this.props.isSubCard)}
+                    {this.renderCardActions(!this.props.isSubCard, false)}
                 </Card>
                 {this.state.replyBoxOpen ? this.renderReplyBox() : <div></div>}
                 {this.state.subThreads.map(thread => {
@@ -168,13 +178,13 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
                     <Link to={"/u/" + this.props.thread.author}>@{this.props.thread.author}</Link>
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
-                    {content}
+                    <span dangerouslySetInnerHTML={{__html: ThreadCard.parseHashtags(content)}}/>
                 </Typography>
             </CardContent>
         )
     }
 
-    renderCardActions(renderReplyButton: boolean) {
+    renderCardActions(renderReplyButton: boolean, renderReadMoreButton: boolean) {
         return (
             <CardActions>
                 <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
@@ -182,9 +192,24 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
                         <StarRate className={(this.state.ratedByMe ? 'yellow-icon' : '')}/>
                     </Badge>
                 </IconButton>
+                {this.renderReadMoreButton(renderReadMoreButton)}
                 {this.renderReplyButton(renderReplyButton)}
             </CardActions>
         )
+    }
+
+    renderReadMoreButton(renderReadMoreButton: boolean) {
+        if (renderReadMoreButton) {
+            return (
+                <Link to={this.getPostId()}>
+                    <IconButton aria-label="Read more">
+                        <MoreHoriz />
+                    </IconButton>
+                </Link>
+            )
+        } else {
+            return <div></div>
+        }
     }
 
     toggleReplyBox(): void {
@@ -195,7 +220,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         if (renderReplyButton) {
             return (
                 <IconButton aria-label="Like" onClick={() => this.toggleReplyBox()}>
-                    <Reply className={(this.state.replyBoxOpen ? 'green-icon' : '')}/>
+                    <Sms className={(this.state.replyBoxOpen ? 'green-icon' : '')}/>
                 </IconButton>
             )
         } else {

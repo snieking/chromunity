@@ -3,3 +3,7 @@
     border: 2px solid #FFAFC1;
     color: #FFAFC1;
 }
+
+.return-button {
+    float: right;
+}

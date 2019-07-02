@@ -1,3 +1,28 @@
+// ------------ Hashtag operations ------------
+
+class thread_tag {
+  key name, thread;
+}
+
+operation create_thread_tag(username: text, tags: set<text>, thread_id: text) {
+  val user = user@{ .name == username};
+  require(is_signer(user.pubkey));
+
+  val thread = thread@{ .id == thread_id};
+  for(tag in tags) {
+    create thread_tag(name = tag, thread);
+  }
+}
+
+query get_threads_by_tag(tag: text) {
+  return thread_tag @* { .name == tag}
+    (id=.thread.id, author=.thread.author.name, parentId=.thread.parent_id, message=.thread.message, -sort timestamp=.thread.timestamp);
+}
+
+query get_all_tags() {
+  return thread_tag @* {} (.name);
+}
+
 // ------------ Thread operations ------------
 
 class thread {
@@ -12,6 +37,7 @@ operation create_thread(username: text, id: text, parent_id: text, message: text
   val user = user@{ .name == username};
   require(is_signer(user.pubkey));
   val time = op_context.last_block_time;
+  log("Storing thread: " + id);
   create thread(id, parent_id, user, message, timestamp=time);
 }
 
@@ -69,7 +95,7 @@ class user {
 }
 
 operation register_user(name, password: text, pubkey, encryptedPrivKey: text) {
-  val admin = "chrotomia_admin";
+  val admin = "admin";
   if (name == admin) {
     require(is_signer(pubkey));
     create user(name=admin, password=password, pubkey, encryptedPrivKey, op_context.last_block_time);

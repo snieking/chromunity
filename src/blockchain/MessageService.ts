@@ -14,11 +14,15 @@ export function createThread(user: User, message: string) {
     const privKey = toBuffer(privKeyHex);
     const pubKey = toBuffer(pubKeyHex);
 
+    const threadId = uniqueId();
+
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation('create_thread', user.name, uniqueId(), "", message);
+    tx.addOperation('create_thread', user.name, threadId, "", message);
     tx.sign(privKey, pubKey);
-    tx.postAndWaitConfirmation();
+    tx.postAndWaitConfirmation().then(() => storeTagsFromThread(user, threadId, message));
+    console.log("Created thread for message: ", message);
 }
+
 
 export function createSubThread(user: User, parentId: string, message: string) {
     const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
@@ -68,6 +72,40 @@ export function getThreadById(threadId: string): Promise<Thread> {
 export function getSubThreadsByParentId(parentId: string): Promise<Thread[]> {
     console.log("Running getSubThreadsByParentId: ", parentId);
     return GTX.query("get_sub_threads", {parent_id: parentId});
+}
+
+function storeTagsFromThread(user: User, threadId: string, message: string) {
+    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
+    const pubKeyHex = generatePublicKey(privKeyHex);
+
+    const privKey = toBuffer(privKeyHex);
+    const pubKey = toBuffer(pubKeyHex);
+
+    const tags = getHashTags(message);
+
+    if (tags != null) {
+        const tx = GTX.newTransaction([pubKey]);
+        tx.addOperation('create_thread_tag', user.name, tags, threadId);
+        tx.sign(privKey, pubKey);
+        tx.postAndWaitConfirmation();
+    }
+}
+
+function getHashTags(inputText: string): string[] {
+    const regex = /(?:^|\s)(?:#)([a-zA-Z\d]+)/gm;
+    const matches = [];
+    let match;
+
+    while ((match = regex.exec(inputText))) {
+        matches.push(match[1]);
+    }
+
+    return matches;
+}
+
+export function getThreadsByTag(tag: string): Promise<Thread[]> {
+    console.log("Running getThreadsByTag: ", tag);
+    return GTX.query("get_threads_by_tag", {tag: tag});
 }
 
 export function starRate(user: User, id: string) {

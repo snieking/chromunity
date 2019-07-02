@@ -18,6 +18,7 @@ export class App extends React.Component {
                     <Route path="/user/logout" component={Logout} />
                     <Route path="/u/:userId" component={Wall} />
                     <Route path="/thread/:id" component={FullThread} />
+                    <Route path="/tag/:tag" component={Wall} />
                 </div>
             </Router>
         );
