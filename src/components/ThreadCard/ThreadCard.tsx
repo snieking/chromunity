@@ -9,7 +9,7 @@ import {
     starRate
 } from "../../blockchain/MessageService";
 import {getUser} from "../../util/user-util";
-import {Backspace, MoreHoriz, Sms, StarRate} from "@material-ui/icons";
+import {MoreHoriz, StarRate, SubdirectoryArrowRight} from "@material-ui/icons";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import Badge from "@material-ui/core/Badge";
@@ -61,6 +61,18 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         return username !== null && upvoters.includes(username);
     }
 
+    static parseContent(message: string): string {
+        return this.parseUsers(this.parseHashtags(message));
+    }
+
+    static parseHashtags(message: string): string {
+        return message.replace(/(#)([a-z\d-]+)/ig, "<a  class='pink-typography' href='/tag/$2'>$1$2</a>");
+    }
+
+    static parseUsers(message: string): string {
+        return message.replace(/(@)([a-z\d-]+)/ig, "<a  class='purple-typography' href='/u/$2'><b>$1$2</b></a>");
+    }
+
     handleReplyMessageChange(event: React.ChangeEvent<HTMLInputElement>): void {
         this.setState({replyMessage: event.target.value})
     }
@@ -107,7 +119,6 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
 
     toggleStarRate() {
         const id = this.props.thread.id;
-        console.log("Thread to rate star: ", id);
         const encryptedKey = getUser().encryptedKey;
         if (encryptedKey != null) {
             if (this.state.ratedByMe) {
@@ -122,45 +133,33 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         }
     }
 
-    getPostId(): string {
-        return "/thread/" + this.props.thread.id;
+    getRootPostId(): string {
+        const threadId = this.props.thread.rootThreadId === "" ? this.props.thread.id : this.props.thread.rootThreadId;
+        return "/thread/" + threadId;
     }
 
     renderTruncatedThreadCard() {
         return (
             <Card key={this.props.thread.id} className="thread-card">
                 {this.renderCardContent(this.props.thread.message)}
-                {this.renderCardActions(false, true)}
+                {this.renderCardActions(true)}
             </Card>
-        )
-    }
-
-    renderReturnButton() {
-        return (
-            <IconButton aria-label="Return" className="return-button" onClick={() => this.navigateBack()}>
-                <Backspace/>
-            </IconButton>
         )
     }
 
     navigateBack(): void {
     }
 
-    static parseHashtags(message: string): string {
-        return message.replace(/(#)([a-z\d-]+)/ig, "<a  class='pink-typography' href='/tag/$2'>$1$2</a>");
-    }
-
     renderFullThreadCard() {
         return (
             <div>
                 <Card key={this.props.thread.id} className="thread-card">
-                    {this.renderReturnButton()}
                     {this.renderCardContent(this.props.thread.message)}
-                    {this.renderCardActions(!this.props.isSubCard, false)}
+                    {this.renderCardActions(false)}
                 </Card>
                 {this.state.replyBoxOpen ? this.renderReplyBox() : <div></div>}
+                {this.state.subThreads.length > 0 ? <SubdirectoryArrowRight className="nav-button button-center"/> : <div></div>}
                 {this.state.subThreads.map(thread => {
-                    console.log("======== Subthread: ", thread);
                     return <ThreadCard key={"sub-thread-" + thread.id}
                                        thread={thread}
                                        truncated={false}
@@ -178,30 +177,33 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
                     <Link className="pink-typography" to={"/u/" + this.props.thread.author}>@{this.props.thread.author}</Link>
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
-                    <span dangerouslySetInnerHTML={{__html: ThreadCard.parseHashtags(content)}}/>
+                    <span dangerouslySetInnerHTML={{__html: ThreadCard.parseContent(content)}}/>
                 </Typography>
             </CardContent>
         )
     }
 
-    renderCardActions(renderReplyButton: boolean, renderReadMoreButton: boolean) {
-        return (
-            <CardActions>
-                <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
-                    <Badge className="star-badge" color="secondary" badgeContent={this.state.stars}>
-                        <StarRate className={(this.state.ratedByMe ? 'yellow-icon' : '')}/>
-                    </Badge>
-                </IconButton>
-                {this.renderReadMoreButton(renderReadMoreButton)}
-                {this.renderReplyButton(renderReplyButton)}
-            </CardActions>
-        )
+    renderCardActions(renderReadMoreButton: boolean) {
+        if (getUser().name != null) {
+            return (
+                <CardActions>
+                    <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
+                        <Badge className="star-badge" color="secondary" badgeContent={this.state.stars}>
+                            <StarRate className={(this.state.ratedByMe ? 'yellow-icon' : '')}/>
+                        </Badge>
+                    </IconButton>
+                    {this.renderReadMoreButton(renderReadMoreButton)}
+                </CardActions>
+            )
+        } else {
+            return (<div></div>)
+        }
     }
 
     renderReadMoreButton(renderReadMoreButton: boolean) {
         if (renderReadMoreButton) {
             return (
-                <Link to={this.getPostId()}>
+                <Link to={this.getRootPostId()}>
                     <IconButton aria-label="Read more">
                         <MoreHoriz />
                     </IconButton>
@@ -214,18 +216,6 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
 
     toggleReplyBox(): void {
         this.setState(prevState => ({replyBoxOpen: !prevState.replyBoxOpen}));
-    }
-
-    renderReplyButton(renderReplyButton: boolean) {
-        if (renderReplyButton) {
-            return (
-                <IconButton aria-label="Like" onClick={() => this.toggleReplyBox()}>
-                    <Sms className={(this.state.replyBoxOpen ? 'green-icon' : '')}/>
-                </IconButton>
-            )
-        } else {
-            return (<div></div>)
-        }
     }
 
     renderReplyBox() {
@@ -262,7 +252,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
 
     render() {
         if (this.state.redirectToFullCard) {
-            return <Redirect key={"red-" + this.props.thread.id} to={this.getPostId()}/>
+            return <Redirect key={"red-" + this.props.thread.id} to={this.getRootPostId()}/>
         } else if (this.props.truncated) {
             return this.renderTruncatedThreadCard();
         } else {

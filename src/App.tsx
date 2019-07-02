@@ -5,6 +5,7 @@ import {Register} from "./components/user/Register/Register";
 import {Login} from "./components/user/Login/Login";
 import Logout from "./components/user/Logout/Logout";
 import {FullThread} from "./components/FullThread/FullThread";
+import {UserNotifications} from "./components/Notification/UserNotifications";
 
 
 export class App extends React.Component {
@@ -17,6 +18,7 @@ export class App extends React.Component {
                     <Route path="/user/login" component={Login} />
                     <Route path="/user/logout" component={Logout} />
                     <Route path="/u/:userId" component={Wall} />
+                    <Route path="/notifications/:userId" component={UserNotifications} />
                     <Route path="/thread/:id" component={FullThread} />
                     <Route path="/tag/:tag" component={Wall} />
                 </div>

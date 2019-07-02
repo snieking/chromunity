@@ -12,6 +12,7 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import {ExitToApp} from "@material-ui/icons";
 
 import './HeaderNav.css';
+import {NotificationsButton} from "../../buttons/NotificationsButton";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -49,10 +50,14 @@ export default function HeaderNav() {
     const classes = useStyles();
     const user = getUser();
 
+
     function profileSpecificNavigation() {
         if (user.name != null) {
             return (
                 <div>
+                <Link to={"/notifications/" + user.name}>
+                    <NotificationsButton username={user.name}/>
+                </Link>
                     <Link to={"/u/" + user.name}>{profileIcon()}</Link>
                     <Link to="/user/logout">
                         <IconButton>

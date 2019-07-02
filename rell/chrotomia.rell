@@ -1,3 +1,32 @@
+// ------------ Notification operations ------------
+class notification {
+  key thread, user;
+  mutable read: boolean;
+  timestamp;
+}
+
+operation create_notification(name, thread_id: text, usernames: set<text>) {
+  val user = user@{ .name == name};
+  require(is_signer(user.pubkey));
+
+  val thread = thread@{ .id == thread_id };
+  for (username in usernames) {
+    val toUser = user@{ .name == username };
+    create notification(thread, toUser, false, op_context.last_block_time);
+  }
+}
+
+operation mark_notifications_since_timestamp_read (name, timestamp) {
+  val user = user@{ .name == name};
+  require(is_signer(user.pubkey));
+  update notification @* { .user == user, .timestamp > timestamp } ( read = true );
+}
+
+query get_user_notifications(name) {
+  val user = user@{ .name == name};
+  return notification @* { .user == user } ( .thread, .read, -sort .timestamp);
+}
+
 // ------------ Hashtag operations ------------
 
 class thread_tag {

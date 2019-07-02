@@ -3,8 +3,10 @@ import {generatePublicKey, toBuffer, decrypt} from "./CryptoService";
 import {uniqueId} from "../util/util";
 import {Thread, User} from "../types";
 import * as BoomerangCache from "boomerang-cache";
+import {storeTagsFromThread} from "./TagService";
+import {sendUserNotifications} from "./NotificationService";
 
-const boomerang = BoomerangCache.create('bucket1', {storage: 'local', encrypt: true});
+const boomerang = BoomerangCache.create('message-bucket', {storage: 'local', encrypt: true});
 
 export function createThread(user: User, message: string): Promise<any> {
     boomerang.remove("threads");
@@ -23,16 +25,22 @@ export function createThread(user: User, message: string): Promise<any> {
     return tx.postAndWaitConfirmation()
         .then((promise: any) => {
             const tags = getHashTags(message);
+
             if (tags != null) {
-                return storeTagsFromThread(user, threadId, tags);
-            } else {
-                return promise;
+                storeTagsFromThread(user, threadId, tags);
             }
+
+            const users = getUsers(message);
+
+            if (users != null) {
+                sendUserNotifications(user, threadId, users);
+            }
+
+            return promise;
         });
 }
 
-
-export function createSubThread(user: User, parentId: string, message: string) {
+export function createSubThread(user: User, rootThreadId: string, message: string) {
     const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
     const pubKeyHex = generatePublicKey(privKeyHex);
 
@@ -40,9 +48,22 @@ export function createSubThread(user: User, parentId: string, message: string) {
     const pubKey = toBuffer(pubKeyHex);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation('create_thread', user.name, uniqueId(), parentId, message);
+
+    const threadId = uniqueId();
+    tx.addOperation('create_thread', user.name, threadId, rootThreadId, message);
     tx.sign(privKey, pubKey);
-    return tx.postAndWaitConfirmation().catch(console.log);
+    return tx.postAndWaitConfirmation().then(() => {
+        const tags = getHashTags(message);
+        if (tags != null) {
+            storeTagsFromThread(user, threadId, tags);
+        }
+
+        const users = getUsers(message);
+
+        if (users != null) {
+            sendUserNotifications(user, threadId, users);
+        }
+    });
 }
 
 export function getAllThreads(): Promise<Thread[]> {
@@ -77,27 +98,25 @@ export function getThreadById(threadId: string): Promise<Thread> {
     }
 }
 
-export function getSubThreadsByParentId(parentId: string): Promise<Thread[]> {
-    console.log("Running getSubThreadsByParentId: ", parentId);
-    return GTX.query("get_sub_threads", {parent_id: parentId});
-}
-
-function storeTagsFromThread(user: User, threadId: string, tags: string[]) {
-    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
-    const pubKeyHex = generatePublicKey(privKeyHex);
-
-    const privKey = toBuffer(privKeyHex);
-    const pubKey = toBuffer(pubKeyHex);
-
-    const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation('create_thread_tag', user.name, tags, threadId);
-    tx.sign(privKey, pubKey);
-    return tx.postAndWaitConfirmation();
-
+export function getSubThreadsByParentId(rootThreadId: string): Promise<Thread[]> {
+    console.log("Running getSubThreadsByParentId: ", rootThreadId);
+    return GTX.query("get_sub_threads", {root_thread_id: rootThreadId});
 }
 
 function getHashTags(inputText: string): string[] {
     const regex = /(?:^|\s)(?:#)([a-zA-Z\d]+)/gm;
+    const matches = [];
+    let match;
+
+    while ((match = regex.exec(inputText))) {
+        matches.push(match[1]);
+    }
+
+    return matches;
+}
+
+function getUsers(inputText: string): string[] {
+    const regex = /(?:^|\s)(?:@)([a-zA-Z\d]+)/gm;
     const matches = [];
     let match;
 

@@ -8,24 +8,25 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import {createThread} from "../../blockchain/MessageService";
-import {getUser} from "../../util/user-util";
+import {createSubThread} from "../../blockchain/MessageService";
 import IconButton from "@material-ui/core/IconButton";
-import {AddComment} from "@material-ui/icons";
+import {ReplyAll} from "@material-ui/icons";
+import {getUser} from "../../util/user-util";
 
 
-export interface NewThreadButtonProps {
-    updateFunction: Function
+export interface ReplyThreadButtonProps {
+    updateFunction: Function,
+    rootThreadId: string
 }
 
-export interface NewThreadButtonState {
+export interface ReplyThreadButtonState {
     dialogOpen: boolean,
     threadMessage: string
 }
 
-export class NewThreadButton extends React.Component<NewThreadButtonProps, NewThreadButtonState> {
+export class ReplyThreadButton extends React.Component<ReplyThreadButtonProps, ReplyThreadButtonState> {
 
-    constructor(props: NewThreadButtonProps) {
+    constructor(props: ReplyThreadButtonProps) {
         super(props);
 
         this.state = {
@@ -33,12 +34,12 @@ export class NewThreadButton extends React.Component<NewThreadButtonProps, NewTh
             dialogOpen: false
         };
 
-        this.toggleNewThreadDialog = this.toggleNewThreadDialog.bind(this);
+        this.toggleReplyThreadDialog = this.toggleReplyThreadDialog.bind(this);
         this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
-        this.createNewThread = this.createNewThread.bind(this);
+        this.createSubThread = this.createSubThread.bind(this);
     }
 
-    toggleNewThreadDialog() {
+    toggleReplyThreadDialog() {
         this.setState(prevState => ({dialogOpen: !prevState.dialogOpen}));
     }
 
@@ -47,22 +48,22 @@ export class NewThreadButton extends React.Component<NewThreadButtonProps, NewTh
         this.setState({threadMessage: event.target.value});
     }
 
-    createNewThread(event: FormEvent<HTMLFormElement>) {
+    createSubThread(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const threadMessage = this.state.threadMessage;
         this.setState({threadMessage: ""});
 
-        createThread(getUser(), threadMessage || "")
+        createSubThread(getUser(), this.props.rootThreadId, threadMessage || "")
             .then(() => this.props.updateFunction());
-        this.toggleNewThreadDialog();
+        this.toggleReplyThreadDialog();
     }
 
     createThreadButton() {
         return (
             <div className="bottom-right-corner rounded-pink">
-                <IconButton aria-label="New thread" className="new-thread-button"
-                            onClick={() => this.toggleNewThreadDialog()}>
-                    <AddComment fontSize="large" className="new-thread-button"/>
+                <IconButton aria-label="Reply to thread" className="new-thread-button"
+                            onClick={() => this.toggleReplyThreadDialog()}>
+                    <ReplyAll fontSize="large" className="new-thread-button"/>
                 </IconButton>
             </div>
         )
@@ -72,9 +73,9 @@ export class NewThreadButton extends React.Component<NewThreadButtonProps, NewTh
         return (
             <div>
                 <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title"
-                    fullWidth={true} maxWidth={"sm"}>
-                    <form onSubmit={this.createNewThread}>
-                        <DialogTitle id="form-dialog-title">What's on your mind?</DialogTitle>
+                        fullWidth={true} maxWidth={"sm"}>
+                    <form onSubmit={this.createSubThread}>
+                        <DialogTitle id="form-dialog-title">Reply</DialogTitle>
                         <DialogContent>
                             <TextField
                                 autoFocus
@@ -88,7 +89,7 @@ export class NewThreadButton extends React.Component<NewThreadButtonProps, NewTh
                             />
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={() => this.toggleNewThreadDialog()} color="primary">
+                            <Button onClick={() => this.toggleReplyThreadDialog()} color="primary">
                                 Cancel
                             </Button>
                             <Button type="submit" color="primary">
