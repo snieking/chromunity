@@ -56,7 +56,7 @@ export class UserNotifications extends React.Component<UserNotificationsProps, U
                             message: notification.message,
                             timestamp: notification.timestamp
                         };
-                        return (<ThreadCard key={"noti-" + thread.id} truncated={true} isSubCard={false} thread={thread}/>);
+                        return (<ThreadCard key={"noti-" + thread.id} truncated={true} isSubCard={false} isUserPage={false} thread={thread}/>);
                     })}
                 </Container>
             </div>

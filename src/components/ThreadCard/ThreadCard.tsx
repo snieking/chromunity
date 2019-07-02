@@ -26,7 +26,8 @@ import './ThreadCard.css';
 export interface ThreadCardProps {
     thread: Thread,
     truncated: boolean,
-    isSubCard: boolean
+    isSubCard: boolean,
+    isUserPage: boolean
 }
 
 export interface ThreadCardState {
@@ -164,18 +165,27 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
                                        thread={thread}
                                        truncated={false}
                                        isSubCard={true}
+                                       isUserPage={this.props.isUserPage}
                     />
                 })}
             </div>
         )
     }
 
-    renderCardContent(content: string) {
-        return (
-            <CardContent>
+    renderAuthor() {
+        if (!this.props.isUserPage) {
+            return (
                 <Typography gutterBottom variant="h6" component="h6" className="typography">
                     <Link className="pink-typography" to={"/u/" + this.props.thread.author}>@{this.props.thread.author}</Link>
                 </Typography>
+            )
+        }
+    }
+
+    renderCardContent(content: string) {
+        return (
+            <CardContent>
+                {this.renderAuthor()}
                 <Typography variant="body2" color="textSecondary" component="p">
                     <span dangerouslySetInnerHTML={{__html: ThreadCard.parseContent(content)}}/>
                 </Typography>

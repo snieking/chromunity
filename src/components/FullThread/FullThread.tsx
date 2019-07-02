@@ -56,7 +56,7 @@ export class FullThread extends React.Component<FullThreadProps, FullThreadState
     }
 
     renderThread() {
-        return (<ThreadCard truncated={false} isSubCard={false} thread={this.state.thread}/>);
+        return (<ThreadCard truncated={false} isSubCard={false} isUserPage={false} thread={this.state.thread}/>);
     }
 
     renderReplyButton() {

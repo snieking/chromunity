@@ -8,6 +8,7 @@ import {Thread} from "../../types";
 import {RouteComponentProps} from "react-router";
 import {ThreadCard} from "../ThreadCard/ThreadCard";
 import {NewThreadButton} from "../buttons/NewThreadButton";
+import {ProfileCard} from "../user/Profile/ProfileCard";
 
 interface MatchParams {
     userId: string,
@@ -35,6 +36,7 @@ export class Wall extends React.Component<WallProps, WallState> {
         };
 
         this.retrieveThreads = this.retrieveThreads.bind(this);
+        this.renderUserPageIntro = this.renderUserPageIntro.bind(this);
     }
 
     componentDidMount(): void {
@@ -72,20 +74,30 @@ export class Wall extends React.Component<WallProps, WallState> {
         }
     }
 
+    renderUserPageIntro() {
+        if (this.props.match.params.userId != null) {
+            return (
+                <ProfileCard username={this.props.match.params.userId}/>
+            )
+        }
+    }
+
     render() {
         return (
             <div>
                 <Header/>
                 <Container fixed maxWidth="md">
                     <br/>
+                    {this.renderUserPageIntro()}
                     {this.state.threads.map(thread => <ThreadCard
                         key={"card-" + thread.id}
                         truncated={true}
                         isSubCard={false}
+                        isUserPage={this.props.match.params.userId != null}
                         thread={thread}
                     />)}
                 </Container>
-                <NewThreadButton updateFunction={this.retrieveThreads}/>
+                {this.props.match.params.userId == null ? <NewThreadButton updateFunction={this.retrieveThreads}/> : <div></div>}
             </div>
         );
     }

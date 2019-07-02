@@ -11,6 +11,7 @@ operation create_notification(name, thread_id: text, usernames: set<text>) {
 
   val thread = thread@{ .id == thread_id };
   for (username in usernames) {
+    log("Creating notifiaction for username: ", username);
     val toUser = user@{ .name == username };
     create notification(thread, toUser, false, op_context.last_block_time);
   }
@@ -22,9 +23,15 @@ operation mark_notifications_since_timestamp_read (name, timestamp) {
   update notification @* { .user == user, .timestamp > timestamp } ( read = true );
 }
 
-query get_user_notifications(name) {
+query count_unread_user_notifications(name) {
   val user = user@{ .name == name};
-  return notification @* { .user == user } ( .thread, .read, -sort .timestamp);
+  return notification @* { .user == user, .read == false } (id = .thread.id);
+}
+
+query get_all_user_notifications(name) {
+  val user = user@{ .name == name};
+  return notification @* { .user == user }
+    ( threadId=.thread.id, author=.thread.author.name, rootThreadId=.thread.root_thread_id, message=.thread.message, .read, -sort .timestamp);
 }
 
 // ------------ Hashtag operations ------------
@@ -45,7 +52,7 @@ operation create_thread_tag(username: text, tags: set<text>, thread_id: text) {
 
 query get_threads_by_tag(tag: text) {
   return thread_tag @* { .name == tag}
-    (id=.thread.id, author=.thread.author.name, parentId=.thread.parent_id, message=.thread.message, -sort timestamp=.thread.timestamp);
+    (id=.thread.id, author=.thread.author.name, rootThreadId=.thread.root_thread_id, message=.thread.message, -sort timestamp=.thread.timestamp);
 }
 
 query get_all_tags() {
@@ -56,39 +63,40 @@ query get_all_tags() {
 
 class thread {
   key id: text;
-  index parent_id: text;
+  index root_thread_id: text;
   index author: user;
   message: text;
   timestamp;
 }
 
-operation create_thread(username: text, id: text, parent_id: text, message: text) {
+operation create_thread(username: text, id: text, root_thread_id: text, message: text) {
   val user = user@{ .name == username};
   require(is_signer(user.pubkey));
   val time = op_context.last_block_time;
-  log("Storing thread: " + id);
-  create thread(id, parent_id, user, message, timestamp=time);
+  create thread(id, root_thread_id, user, message, timestamp=time);
 }
 
 query get_all_threads() {
   return thread @* {}
-    (.id, author=.author.name, parentId=.parent_id, .message, -sort .timestamp);
+    (.id, author=.author.name, rootThreadId=.root_thread_id, .message, -sort .timestamp);
 }
 
-query get_sub_threads(parent_id: text) {
-  return thread@*{.parent_id == parent_id}(.id, author=.author.name, .message, sort .timestamp);
+query get_sub_threads(root_thread_id: text) {
+  return thread@*{.root_thread_id == root_thread_id}
+    (.id, author=.author.name, rootThreadId=.root_thread_id, .message, sort .timestamp);
 }
 
 query get_threads_by_user_id(name) {
   return thread@*{user@{.name == name}}(
     .id,
     author=.author.name,
+    rootThreadId=.root_thread_id,
     .message,
     -sort .timestamp);
 }
 
 query get_thread_by_id(id: text) {
-  return thread@{.id == id}(.id, author=.author.name, .message);
+  return thread@{.id == id}(.id, author=.author.name, rootThreadId=.root_thread_id, .message);
 }
 
 // ------------ Thread Star Rateoperations ------------
