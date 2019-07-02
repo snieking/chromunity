@@ -147,7 +147,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
     }
 
     static parseHashtags(message: string): string {
-        return message.replace(/(#)([a-z\d-]+)/ig, "<a  href='/tag/$2'>$1$2</a>");
+        return message.replace(/(#)([a-z\d-]+)/ig, "<a  class='pink-typography' href='/tag/$2'>$1$2</a>");
     }
 
     renderFullThreadCard() {
@@ -174,8 +174,8 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
     renderCardContent(content: string) {
         return (
             <CardContent>
-                <Typography gutterBottom variant="h6" component="h6">
-                    <Link to={"/u/" + this.props.thread.author}>@{this.props.thread.author}</Link>
+                <Typography gutterBottom variant="h6" component="h6" className="typography">
+                    <Link className="pink-typography" to={"/u/" + this.props.thread.author}>@{this.props.thread.author}</Link>
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
                     <span dangerouslySetInnerHTML={{__html: ThreadCard.parseHashtags(content)}}/>

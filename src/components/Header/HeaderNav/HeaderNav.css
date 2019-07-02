@@ -1,3 +1,8 @@
 .nav-toolbar {
-    background-color: #FFAFC1;
+    /*background-color: #FFAFC1;*/
+    background-color: #100d14;
+}
+
+.nav-button {
+    color: #FFAFC1;
 }

@@ -87,7 +87,7 @@ export default function HeaderNav() {
         return (
             <div>
                 <IconButton aria-label="New thread" onClick={handleNewThreadClickOpen}>
-                    <MessageIcon/>
+                    <MessageIcon className="nav-button"/>
                 </IconButton>
             </div>
         )
@@ -100,7 +100,7 @@ export default function HeaderNav() {
                     <Link to={"/u/" + user.name}>{profileIcon()}</Link>
                     <Link to="/user/logout">
                         <IconButton>
-                            <ExitToApp/>
+                            <ExitToApp className="nav-button"/>
                         </IconButton>
                     </Link>
                 </div>
@@ -114,7 +114,7 @@ export default function HeaderNav() {
         return (
             <div>
                 <IconButton>
-                    <AccountCircle/>
+                    <AccountCircle className="nav-button"/>
                 </IconButton>
             </div>
         )
@@ -163,7 +163,7 @@ export default function HeaderNav() {
                             className={classes.menuButton}
                             aria-label="Open drawer"
                         >
-                            <Home/>
+                            <Home className="nav-button"/>
                         </IconButton>
                     </Link>
                     <div className={classes.grow}/>
