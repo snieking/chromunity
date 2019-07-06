@@ -4,7 +4,6 @@ import {Thread} from "../../types";
 import {Container} from "@material-ui/core";
 
 import {RouteComponentProps} from "react-router";
-import Header from "../Header/Header";
 import {ThreadCard} from "../ThreadCard/ThreadCard";
 import {ReplyThreadButton} from "../buttons/ReplyThreadButton";
 
@@ -60,19 +59,21 @@ export class FullThread extends React.Component<FullThreadProps, FullThreadState
     }
 
     renderReplyButton() {
-        return (<ReplyThreadButton updateFunction={this.retrieveThreads} rootThreadId={this.props.match.params.id}/>)
+        return (
+            <ReplyThreadButton updateFunction={this.retrieveThreads}
+                               rootThreadId={this.props.match.params.id}
+                               rootThreadAuthor={this.state.thread.author}
+            />
+        )
     }
 
     render() {
         return (
-            <div>
-                <Header/>
-                <Container fixed>
-                    <br/>
-                    {this.renderThread()}
-                    {this.renderReplyButton()}
-                </Container>
-            </div>
+            <Container fixed>
+                <br/>
+                {this.renderThread()}
+                {this.renderReplyButton()}
+            </Container>
         )
     }
 }

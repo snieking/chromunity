@@ -2,7 +2,6 @@ import * as React from 'react';
 import {register} from '../../../blockchain/UserService';
 import {Redirect} from 'react-router-dom'
 import '../../../styles/fade.css';
-import Header from "../../Header/Header";
 
 import AccountCircle from '@material-ui/icons/AccountCircle'
 
@@ -38,23 +37,20 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
         }
 
         return (
-            <div>
-                <Header/>
-                <div className="wrapper fadeInDown">
-                    <div id="formContent">
-                        <br/>
-                        <div className="fadeIn first">
-                            <AccountCircle fontSize="large" />
-                        </div>
-
-                        <input type="text" id="login" className="fadeIn second" name="register" placeholder="user"
-                               onChange={this.handleUsernameChange}/>
-                        <input type="password" id="password" className="fadeIn third" name="register"
-                               placeholder="password"
-                               onChange={this.handlePasswordChange}/>
-                        <input type="button" className="fadeIn fourth" value="Register" onClick={this.signUp}/>
-
+            <div className="wrapper fadeInDown">
+                <div id="formContent">
+                    <br/>
+                    <div className="fadeIn first">
+                        <AccountCircle fontSize="large"/>
                     </div>
+
+                    <input type="text" id="login" className="fadeIn second" name="register" placeholder="user"
+                           onChange={this.handleUsernameChange}/>
+                    <input type="password" id="password" className="fadeIn third" name="register"
+                           placeholder="password"
+                           onChange={this.handlePasswordChange}/>
+                    <input type="button" className="fadeIn fourth" value="Register" onClick={this.signUp}/>
+
                 </div>
             </div>
         );

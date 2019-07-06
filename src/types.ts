@@ -19,3 +19,8 @@ export interface UserNotification {
     read: boolean,
     timestamp: number
 }
+
+export interface Election {
+    id: string,
+    timestamp: number
+}

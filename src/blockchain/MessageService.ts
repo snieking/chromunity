@@ -6,7 +6,7 @@ import * as BoomerangCache from "boomerang-cache";
 import {storeTagsFromThread} from "./TagService";
 import {sendUserNotifications} from "./NotificationService";
 
-const boomerang = BoomerangCache.create('message-bucket', {storage: 'local', encrypt: true});
+const boomerang = BoomerangCache.create("message-bucket", {storage: "local", encrypt: true});
 
 export function createThread(user: User, message: string): Promise<any> {
     boomerang.remove("threads");
@@ -19,7 +19,7 @@ export function createThread(user: User, message: string): Promise<any> {
     const threadId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation('create_thread', user.name, threadId, "", message);
+    tx.addOperation("createThread", user.name, threadId, "", message);
     tx.sign(privKey, pubKey);
 
     return tx.postAndWaitConfirmation()
@@ -40,7 +40,7 @@ export function createThread(user: User, message: string): Promise<any> {
         });
 }
 
-export function createSubThread(user: User, rootThreadId: string, message: string) {
+export function createSubThread(user: User, rootThreadId: string, rootThreadAuthor: string, message: string) {
     const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
     const pubKeyHex = generatePublicKey(privKeyHex);
 
@@ -50,7 +50,7 @@ export function createSubThread(user: User, rootThreadId: string, message: strin
     const tx = GTX.newTransaction([pubKey]);
 
     const threadId = uniqueId();
-    tx.addOperation('create_thread', user.name, threadId, rootThreadId, message);
+    tx.addOperation("createThread", user.name, threadId, rootThreadId, message);
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation().then(() => {
         const tags = getHashTags(message);
@@ -59,6 +59,7 @@ export function createSubThread(user: User, rootThreadId: string, message: strin
         }
 
         const users = getUsers(message);
+        users.add(rootThreadAuthor);
 
         if (users != null) {
             sendUserNotifications(user, threadId, users);
@@ -73,7 +74,7 @@ export function getAllThreads(): Promise<Thread[]> {
     if (cachedThreads != null) {
         return new Promise<Thread[]>(resolve => resolve(cachedThreads));
     } else {
-        return GTX.query("get_all_threads", {})
+        return GTX.query("getAllThreads", {})
             .then((threads: Thread[]) => {
                 boomerang.set("threads", threads, 60);
                 threads.forEach(thread => boomerang.set(thread.id, thread));
@@ -84,7 +85,7 @@ export function getAllThreads(): Promise<Thread[]> {
 
 export function getThreadsByUserId(userId: string): Promise<Thread[]> {
     console.log("Running getAllThreads");
-    return GTX.query("get_threads_by_user_id", {name: userId});
+    return GTX.query("getThreadsByUserId", { name: userId });
 }
 
 export function getThreadById(threadId: string): Promise<Thread> {
@@ -94,13 +95,51 @@ export function getThreadById(threadId: string): Promise<Thread> {
     if (thread != null) {
         return new Promise<Thread>(resolve => resolve(thread));
     } else {
-        return GTX.query("get_thread_by_id", {id: threadId});
+        return GTX.query("getThreadById", { id: threadId });
     }
 }
 
 export function getSubThreadsByParentId(rootThreadId: string): Promise<Thread[]> {
     console.log("Running getSubThreadsByParentId: ", rootThreadId);
-    return GTX.query("get_sub_threads", {root_thread_id: rootThreadId});
+    return GTX.query("getSubThreads", { rootThreadId: rootThreadId });
+}
+
+export function getThreadsByTag(tag: string): Promise<Thread[]> {
+    console.log("Running getThreadsByTag: ", tag);
+    return GTX.query("getThreadsByTag", { tag: tag });
+}
+
+export function starRate(user: User, id: string) {
+    console.log("Running star rate: ", user.encryptedKey, id);
+    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
+    const pubKeyHex = generatePublicKey(privKeyHex);
+
+    const privKey = toBuffer(privKeyHex);
+    const pubKey = toBuffer(pubKeyHex);
+
+    const tx = GTX.newTransaction([pubKey]);
+    tx.addOperation("starRateThread", user.name, id);
+    tx.sign(privKey, pubKey);
+    return tx.postAndWaitConfirmation();
+}
+
+export function removeStarRate(user: User, id: string) {
+    console.log("Running removeStarRating: ", user.encryptedKey, id);
+    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
+    const pubKeyHex = generatePublicKey(privKeyHex);
+
+    const privKey = toBuffer(privKeyHex);
+    const pubKey = toBuffer(pubKeyHex);
+
+    const tx = GTX.newTransaction([pubKey]);
+    tx.addOperation("removeStarRateThread", user.name, id);
+    tx.sign(privKey, pubKey);
+    return tx.postAndWaitConfirmation();
+}
+
+export function getThreadStarRating(threadId: string): Promise<string[]> {
+    console.log("Running getThreadStarRating: ", threadId);
+    return GTX.query("getStarRatingForId", {id: threadId});
 }
 
 function getHashTags(inputText: string): string[] {
@@ -115,52 +154,14 @@ function getHashTags(inputText: string): string[] {
     return matches;
 }
 
-function getUsers(inputText: string): string[] {
+function getUsers(inputText: string): Set<string> {
     const regex = /(?:^|\s)(?:@)([a-zA-Z\d]+)/gm;
-    const matches = [];
+    const matches = new Set<string>();
     let match;
 
     while ((match = regex.exec(inputText))) {
-        matches.push(match[1]);
+        matches.add(match[1]);
     }
 
     return matches;
-}
-
-export function getThreadsByTag(tag: string): Promise<Thread[]> {
-    console.log("Running getThreadsByTag: ", tag);
-    return GTX.query("get_threads_by_tag", {tag: tag});
-}
-
-export function starRate(user: User, id: string) {
-    console.log("Running rateStar: ", user.encryptedKey, id);
-    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
-    const pubKeyHex = generatePublicKey(privKeyHex);
-
-    const privKey = toBuffer(privKeyHex);
-    const pubKey = toBuffer(pubKeyHex);
-
-    const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation('star_rate_thread', user.name, id);
-    tx.sign(privKey, pubKey);
-    return tx.postAndWaitConfirmation();
-}
-
-export function removeStarRate(user: User, id: string) {
-    console.log("Running removeStarRating: ", user.encryptedKey, id);
-    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
-    const pubKeyHex = generatePublicKey(privKeyHex);
-
-    const privKey = toBuffer(privKeyHex);
-    const pubKey = toBuffer(pubKeyHex);
-
-    const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation('remove_star_rate_thread', user.name, id);
-    tx.sign(privKey, pubKey);
-    return tx.postAndWaitConfirmation().catch(console.log);
-}
-
-export function getThreadStarRating(threadId: string): Promise<string[]> {
-    console.log("Running getThreadStarRating: ", threadId);
-    return GTX.query("get_star_rating_for_id", {id: threadId});
 }

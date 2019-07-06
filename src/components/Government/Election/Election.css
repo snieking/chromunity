@@ -1,0 +1,31 @@
+.election-card {
+    text-align: center;
+    margin-top: 28px;
+}
+
+.election-candidates {
+    display: flex;
+    align-items: flex-start;
+}
+
+.voted-for {
+    border: solid darkgreen 3px;
+}
+
+.candidate-card {
+    margin-top: 6px;
+    margin-left: 3px;
+    margin-right: 3px;
+    max-width: 22%;
+    height: 300px;
+    text-align: center;
+}
+
+.countdown-wrapper {
+    margin-top: 20px;
+    margin-bottom: -10px;
+}
+
+.election-icon {
+    transform: scale(1.8);
+}

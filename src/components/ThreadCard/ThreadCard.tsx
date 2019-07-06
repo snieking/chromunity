@@ -79,7 +79,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
     }
 
     handleReplySubmit(): void {
-        createSubThread(getUser(), this.props.thread.id, this.state.replyMessage)
+        createSubThread(getUser(), this.props.thread.id, this.props.thread.author, this.state.replyMessage)
             .then(() => getSubThreadsByParentId(this.props.thread.id)
                 .then(threads => this.setState({subThreads: threads})));
         this.setState({replyMessage: ""});
@@ -141,7 +141,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
 
     renderTruncatedThreadCard() {
         return (
-            <Card key={this.props.thread.id} className="thread-card">
+            <Card raised={true} key={this.props.thread.id} className="thread-card">
                 {this.renderCardContent(this.props.thread.message)}
                 {this.renderCardActions(true)}
             </Card>
@@ -154,7 +154,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
     renderFullThreadCard() {
         return (
             <div>
-                <Card key={this.props.thread.id} className="thread-card">
+                <Card raised={true} key={this.props.thread.id} className="thread-card">
                     {this.renderCardContent(this.props.thread.message)}
                     {this.renderCardActions(false)}
                 </Card>

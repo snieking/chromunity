@@ -9,55 +9,26 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Home from '@material-ui/icons/Home';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import {ExitToApp} from "@material-ui/icons";
+import {ExitToApp, LocationCity, Poll, TrendingUp} from "@material-ui/icons";
 
 import './HeaderNav.css';
 import {NotificationsButton} from "../../buttons/NotificationsButton";
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        grow: {
-            flexGrow: 1
-        },
-        menuButton: {
-            marginRight: theme.spacing(2),
-        },
-        title: {
-            display: 'none',
-            [theme.breakpoints.up('sm')]: {
-                display: 'block',
-            },
-            color: "#000000"
-        },
-        inputRoot: {
-            color: 'inherit',
-        },
-        inputInput: {
-            padding: theme.spacing(1, 1, 1, 7),
-            transition: theme.transitions.create('width'),
-            width: '100%',
-            [theme.breakpoints.up('md')]: {
-                width: 200,
-            },
-        },
-        sectionDesktop: {
-            display: 'flex'
-        }
-    }),
-);
+export interface HeaderNavProps {
+    toggleSidebarFunction: Function
+}
 
-export default function HeaderNav() {
+export default function HeaderNav(props: HeaderNavProps) {
     const classes = useStyles();
     const user = getUser();
-
 
     function profileSpecificNavigation() {
         if (user.name != null) {
             return (
                 <div>
-                <Link to={"/notifications/" + user.name}>
-                    <NotificationsButton username={user.name}/>
-                </Link>
+                    <Link to={"/notifications/" + user.name}>
+                        <NotificationsButton username={user.name}/>
+                    </Link>
                     <Link to={"/u/" + user.name}>{profileIcon()}</Link>
                     <Link to="/user/logout">
                         <IconButton>
@@ -94,6 +65,19 @@ export default function HeaderNav() {
                             <Home className="nav-button"/>
                         </IconButton>
                     </Link>
+                    <IconButton onClick={() => props.toggleSidebarFunction()}>
+                        <TrendingUp className="nav-button"/>
+                    </IconButton>
+                    <Link to="/gov/representatives">
+                        <IconButton>
+                            <LocationCity className="nav-button"/>
+                        </IconButton>
+                    </Link>
+                    <Link to="/gov/election">
+                        <IconButton>
+                            <Poll className="nav-button"/>
+                        </IconButton>
+                    </Link>
                     <div className={classes.grow}/>
                     <div className={classes.sectionDesktop}>
                         {profileSpecificNavigation()}
@@ -101,5 +85,37 @@ export default function HeaderNav() {
                 </Toolbar>
             </AppBar>
         </div>
-    );
+    )
 }
+
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        grow: {
+            flexGrow: 1
+        },
+        menuButton: {
+            marginRight: theme.spacing(2),
+        },
+        title: {
+            display: 'none',
+            [theme.breakpoints.up('sm')]: {
+                display: 'block',
+            },
+            color: "#000000"
+        },
+        inputRoot: {
+            color: 'inherit',
+        },
+        inputInput: {
+            padding: theme.spacing(1, 1, 1, 7),
+            transition: theme.transitions.create('width'),
+            width: '100%',
+            [theme.breakpoints.up('md')]: {
+                width: 200,
+            },
+        },
+        sectionDesktop: {
+            display: 'flex'
+        }
+    }),
+);

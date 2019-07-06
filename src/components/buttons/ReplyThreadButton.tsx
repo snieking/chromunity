@@ -16,7 +16,8 @@ import {getUser} from "../../util/user-util";
 
 export interface ReplyThreadButtonProps {
     updateFunction: Function,
-    rootThreadId: string
+    rootThreadId: string,
+    rootThreadAuthor: string
 }
 
 export interface ReplyThreadButtonState {
@@ -53,7 +54,7 @@ export class ReplyThreadButton extends React.Component<ReplyThreadButtonProps, R
         const threadMessage = this.state.threadMessage;
         this.setState({threadMessage: ""});
 
-        createSubThread(getUser(), this.props.rootThreadId, threadMessage || "")
+        createSubThread(getUser(), this.props.rootThreadId, this.props.rootThreadAuthor, threadMessage || "")
             .then(() => this.props.updateFunction());
         this.toggleReplyThreadDialog();
     }

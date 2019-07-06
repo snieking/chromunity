@@ -1,17 +1,15 @@
 import React from "react";
-import { Redirect } from "react-router-dom";
 
 const Logout: React.FC = () => {
     logout();
+    window.location.replace("/");
     return (
-        <div>
-            return <Redirect to="/user/login" />
-        </div>
+        <div></div>
     );
 };
 
 function logout() {
-    localStorage.removeItem("user");
+    localStorage.clear();
 }
 
 export default Logout;

@@ -1,0 +1,14 @@
+.sidebar-title {
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+.list-container {
+    padding-top: 8px;
+    text-align: center;
+    width: 100%;
+}
+
+.sidebar-list-item-text {
+    text-overflow: ellipsis;
+}

@@ -1,6 +1,4 @@
 import * as React from "react";
-import {Redirect} from 'react-router-dom'
-import Header from "../../Header/Header";
 import {login} from "../../../blockchain/UserService";
 import {AccountCircle} from "@material-ui/icons";
 
@@ -32,31 +30,28 @@ export class Login extends React.Component<LoginProps, LoginState> {
 
     render() {
         if (this.state.redirect === true) {
-            return <Redirect to='/'/>
+            window.location.replace("/");
         }
 
         return (
-            <div>
-                <Header />
-                <div className="wrapper fadeInDown">
-                    <div id="formContent">
-                        <br/>
-                        <div className="fadeIn first">
-                            <AccountCircle fontSize="large" />
-                        </div>
-
-                        <input type="text" id="login" className="fadeIn second" name="login" placeholder="user"
-                               onChange={this.handleUsernameChange}/>
-                        <input type="password" id="password" className="fadeIn third" name="login"
-                               placeholder="password"
-                               onChange={this.handlePasswordChange}/>
-                        <input type="button" className="fadeIn fourth" value="Login" onClick={this.login}/>
-
-                        <div id="formFooter">
-                            <a className="underlineHover no-text-decorator" href="/user/register">Sign up</a>
-                        </div>
-
+            <div className="wrapper fadeInDown">
+                <div id="formContent">
+                    <br/>
+                    <div className="fadeIn first">
+                        <AccountCircle fontSize="large"/>
                     </div>
+
+                    <input type="text" id="login" className="fadeIn second" name="login" placeholder="user"
+                           onChange={this.handleUsernameChange}/>
+                    <input type="password" id="password" className="fadeIn third" name="login"
+                           placeholder="password"
+                           onChange={this.handlePasswordChange}/>
+                    <input type="button" className="fadeIn fourth" value="Login" onClick={this.login}/>
+
+                    <div id="formFooter">
+                        <a className="underlineHover no-text-decorator" href="/user/register">Sign up</a>
+                    </div>
+
                 </div>
             </div>
         );
@@ -82,14 +77,12 @@ export class Login extends React.Component<LoginProps, LoginState> {
 
     private login() {
         login(this.state.username, this.state.password)
-            .then(user => {
-                localStorage.setItem("user", JSON.stringify(user));
-                this.setState(prevState => ({
+            .then(() => this.setState(prevState => ({
                     username: prevState.username,
                     password: prevState.password,
                     redirect: true
                 }))
-            })
+            )
             .catch(error => console.log("Error logging in: ", error));
     }
 }

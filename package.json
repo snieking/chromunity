@@ -8,6 +8,7 @@
     "@types/react": "16.8.22",
     "@types/react-dom": "16.8.4",
     "@types/react-router": "^5.0.2",
+    "react-countdown-now": "2.1.1",
     "bip39": "3.0.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",

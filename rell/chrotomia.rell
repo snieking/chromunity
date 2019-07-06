@@ -1,147 +1,346 @@
+// ------------ Representative operations ------------
+
+/*
+** Triggers a new election with an identifier, and a timestamp for when it is finished
+*/
+operation triggerElection(id: text, timestamp) {
+  require(is_signer(user@{ .name == "admin" }( .pubkey )));
+  log("Created election with id: " + id);
+  create representativeElection(id, timestamp, false);
+}
+
+operation completeElection(id: text, representatives: set<text>) {
+    require(is_signer(user@{ .name == "admin" }( .pubkey )));
+
+    log("Searching for election with id: " + id);
+    update representativeElection@{ .id == id } (completed = true);
+
+    for (representative in representatives) {
+        log("Searching for representative user: " + representative);
+        val user = user@{ .name == representative };
+        create representative(user, id);
+    }
+}
+
+operation voteForCandidate(voter: name, candidate: name, electionId: text) {
+    val user = user@{ .name == voter };
+    require(is_signer(user.pubkey));
+    create representativeElectionVote(
+        user = user,
+        candidate = user@{ .name == candidate },
+        representativeElection@{ .id == electionId }
+    );
+}
+
+operation update_vote_for_candidate(voter: name, candidate: name, electionId: text) {
+    val user = user@{ .name == voter };
+    require(is_signer(user.pubkey));
+
+    val election = representativeElection@{ .id == electionId };
+    val election_candidate = representativeElectionCandidate@{
+        .representativeElection == election,
+        .user == user@{ .name == candidate }
+    };
+
+    delete representativeElectionVote@?{
+        .user == user,
+        .representativeElection == election
+    };
+
+    create representativeElectionVote(
+        user = user,
+        election,
+        candidate = user@{ .name == candidate }
+    );
+}
+
+operation signUpForElection(name, electionId: text) {
+    val user = user@{ .name == name };
+    require(is_signer(user.pubkey));
+
+    val election = representativeElection@{
+        .id == electionId,
+        .timestamp > op_context.last_block_time
+    };
+
+    create representativeElectionCandidate(election, user);
+}
+
+query getElectionVotes(electionId: text) {
+    return representativeElectionVote@*{
+        .representativeElection == representativeElection@{
+            .id == electionId
+        }
+    } ( .candidate.name );
+}
+
+query getElectionCandidates(electionId: text) {
+    val election = representativeElection@{ .id == electionId };
+    return representativeElectionCandidate @* {
+        .representativeElection == election
+    } ( .user.name );
+}
+
+query getNextElection(timestamp) {
+    return representativeElection@?{ .timestamp > timestamp } ( .id, -sort .timestamp ) limit 1;
+}
+
+query getUncompletedElection() {
+    return representativeElection@?{
+        .completed == false
+    } ( .id );
+}
+
+query getCurrentRepresentativePeriod(timestamp) {
+    return representativeElection@?{ .timestamp < timestamp } ( .id, -sort .timestamp ) limit 1;
+}
+
+query getUserVoteInElection(name, electionId: text) {
+    return representativeElectionVote@?{
+        .user == user@{ .name == name },
+        .representativeElection == representativeElection@{ .id == electionId }
+    } ( .candidate.name );
+}
+
+query getRepresentatives(representativePeriodId: text) {
+    return representative@*{
+        .representativePeriodId == representativePeriodId
+    } ( .user.name );
+}
+
+class representativeElection {
+    key id: text;
+    index timestamp;
+    mutable completed: boolean; // Need index
+}
+
+class representativeElectionCandidate {
+  key representativeElection, user;
+}
+
+class representativeElectionVote {
+    key user, representativeElection;
+    index candidate: user;
+}
+
+class representative {
+    key user, representativePeriodId: text;
+}
+
+// ------------ Following operations ------------
+class following {
+    key follower: user, follows: user;
+}
+
+operation createFollowing(follower: text, follows: text) {
+    require(follower != follows);
+    val user = user@{ .name == follower };
+    require(is_signer(user.pubkey));
+    create following(follower = user, follows = user@{ .name == follows });
+}
+
+operation removeFollowing(follower: text, follows: text) {
+    require(follower != follows);
+    val user = user@{ .name == follower };
+    require(is_signer(user.pubkey));
+
+    delete following@{ .follower == user, .follows == user@{ .name == follows } };
+}
+
+query getUserFollowers(name) {
+    return following@*{ .follows == user @ { .name == name} }(.follower.name);
+}
+
+query getUserFollows(name) {
+    return following@*{ .follower == user@{ .name == name } } ( .follows.name );
+}
+
 // ------------ Notification operations ------------
 class notification {
-  key thread, user;
-  mutable read: boolean;
-  timestamp;
+    key thread, user;
+    mutable read: boolean;
+    timestamp;
 }
 
-operation create_notification(name, thread_id: text, usernames: set<text>) {
-  val user = user@{ .name == name};
-  require(is_signer(user.pubkey));
+operation createNotification(name, threadId: text, usernames: set<text>) {
+    val user = user@{ .name == name };
+    require(is_signer(user.pubkey));
 
-  val thread = thread@{ .id == thread_id };
-  for (username in usernames) {
-    log("Creating notifiaction for username: ", username);
-    val toUser = user@{ .name == username };
-    create notification(thread, toUser, false, op_context.last_block_time);
-  }
+    val thread = thread@{ .id == threadId };
+    for (username in usernames) {
+        val toUser = user@?{ .name == username };
+        if (toUser != null) {
+            create notification(thread, toUser, false, op_context.last_block_time);
+        }
+    }
 }
 
-operation mark_notifications_since_timestamp_read (name, timestamp) {
-  val user = user@{ .name == name};
-  require(is_signer(user.pubkey));
-  update notification @* { .user == user, .timestamp > timestamp } ( read = true );
+operation markNotificationsSinceTimestampRead(name, timestamp) {
+    val user = user@{ .name == name };
+    require(is_signer(user.pubkey));
+    update notification@*{ .user == user, .timestamp > timestamp } ( read = true );
 }
 
-query count_unread_user_notifications(name) {
-  val user = user@{ .name == name};
-  return notification @* { .user == user, .read == false } (id = .thread.id);
+query countUnreadUserNotifications(name) {
+    val user = user@{ .name == name };
+    return notification@*{ .user == user, .read == false } ( id = .thread.id );
 }
 
-query get_all_user_notifications(name) {
-  val user = user@{ .name == name};
-  return notification @* { .user == user }
-    ( threadId=.thread.id, author=.thread.author.name, rootThreadId=.thread.root_thread_id, message=.thread.message, .read, -sort .timestamp);
+query getAllUserNotifications(name) {
+    val user = user@{ .name == name };
+    return notification@*{ .user == user } (
+        threadId=.thread.id,
+        author=.thread.author.name,
+        rootThreadId=.thread.rootThreadId,
+        message=.thread.message,
+        .read,
+        -sort .timestamp
+    );
 }
 
 // ------------ Hashtag operations ------------
 
-class thread_tag {
-  key name, thread;
+class threadTag {
+    key name, thread;
+    index timestamp;
 }
 
-operation create_thread_tag(username: text, tags: set<text>, thread_id: text) {
-  val user = user@{ .name == username};
-  require(is_signer(user.pubkey));
+operation createThreadTag(username: text, tags: set<text>, threadId: text) {
+    val user = user@{ .name == username};
+    require(is_signer(user.pubkey));
 
-  val thread = thread@{ .id == thread_id};
-  for(tag in tags) {
-    create thread_tag(name = tag, thread);
-  }
+    val thread = thread@{ .id == threadId };
+    for(tag in tags) {
+    create threadTag(name = tag, thread, op_context.last_block_time);
+    }
 }
 
-query get_threads_by_tag(tag: text) {
-  return thread_tag @* { .name == tag}
-    (id=.thread.id, author=.thread.author.name, rootThreadId=.thread.root_thread_id, message=.thread.message, -sort timestamp=.thread.timestamp);
+query getThreadsByTag(tag: text) {
+    return threadTag@*{ .name == tag } (
+        id=.thread.id,
+        author=.thread.author.name,
+        rootThreadId=.thread.rootThreadId,
+        message=.thread.message,
+        -sort timestamp=.thread.timestamp
+    );
 }
 
-query get_all_tags() {
-  return thread_tag @* {} (.name);
+query getAllTags() {
+    return threadTag@*{} ( .name );
+}
+
+query getTagsSince(timestamp) {
+    return threadTag@*{ .timestamp > timestamp }( .name );
 }
 
 // ------------ Thread operations ------------
 
 class thread {
-  key id: text;
-  index root_thread_id: text;
-  index author: user;
-  message: text;
-  timestamp;
+    key id: text;
+    index rootThreadId: text;
+    index author: user;
+    index visible: boolean;
+    message: text;
+    timestamp;
 }
 
-operation create_thread(username: text, id: text, root_thread_id: text, message: text) {
-  val user = user@{ .name == username};
-  require(is_signer(user.pubkey));
-  val time = op_context.last_block_time;
-  create thread(id, root_thread_id, user, message, timestamp=time);
+operation createThread(username: text, id: text, rootThreadId: text, message: text) {
+    val user = user@{ .name == username };
+    require(is_signer(user.pubkey));
+
+    val time = op_context.last_block_time;
+    create thread(id, rootThreadId, user, true, message, timestamp=time);
 }
 
-query get_all_threads() {
-  return thread @* {}
-    (.id, author=.author.name, rootThreadId=.root_thread_id, .message, -sort .timestamp);
+query getAllThreads() {
+    return thread @* { .visible == true } (
+        .id,
+        author=.author.name,
+        rootThreadId=.rootThreadId,
+        .message,
+        -sort .timestamp
+    );
 }
 
-query get_sub_threads(root_thread_id: text) {
-  return thread@*{.root_thread_id == root_thread_id}
-    (.id, author=.author.name, rootThreadId=.root_thread_id, .message, sort .timestamp);
+query getSubThreads(rootThreadId: text) {
+    return thread@*{ .rootThreadId == rootThreadId } (
+        .id,
+        author=.author.name,
+        rootThreadId=.rootThreadId,
+        .message,
+        sort .timestamp
+    );
 }
 
-query get_threads_by_user_id(name) {
-  return thread@*{user@{.name == name}}(
-    .id,
-    author=.author.name,
-    rootThreadId=.root_thread_id,
-    .message,
-    -sort .timestamp);
+query getThreadsByUserId(name) {
+    return thread@*{ user@{ .name == name } } (
+        .id,
+        author=.author.name,
+        rootThreadId=.rootThreadId,
+        .message,
+        -sort .timestamp
+    );
 }
 
-query get_thread_by_id(id: text) {
-  return thread@{.id == id}(.id, author=.author.name, rootThreadId=.root_thread_id, .message);
+query getThreadById(id: text) {
+    return thread@{ .id == id } (
+        .id,
+        author=.author.name,
+        rootThreadId=.rootThreadId,
+        .message
+    );
 }
 
 // ------------ Thread Star Rateoperations ------------
 
-class thread_star_rate {
-  key id: text, user: user;
+class threadStarRate {
+    key id: text, user: user;
 }
 
-operation star_rate_thread(username: text, id: text) {
-  val user = user@{ .name == username };
-  require(is_signer(user.pubkey));
-  create thread_star_rate(id, user);
+operation starRateThread(username: text, id: text) {
+    val user = user@{ .name == username };
+    require(is_signer(user.pubkey));
+    create threadStarRate(id, user);
 }
 
-operation remove_star_rate_thread(username: text, id: text) {
-  val user = user@{ .name == username };
-  require(is_signer(user.pubkey));
-  delete thread_star_rate @ {.id == id, .user == user};
+operation removeStarRateThread(username: text, id: text) {
+    val user = user@{ .name == username };
+    require(is_signer(user.pubkey));
+    delete threadStarRate@{ .id == id, .user == user };
 }
 
-query get_star_rating_for_id(id: text) {
-  return thread_star_rate@*{ .id == id }(thread_star_rate.user.name);
+query getStarRatingForId(id: text) {
+    return threadStarRate@*{ .id == id } ( .user.name );
 }
 
 // ------------ User operations ------------
 
 class user {
-  key name;
-  password: text;
-  index pubkey;
-  encryptedPrivKey: text;
-  registered: timestamp;
+    key name;
+    password: text;
+    index pubkey;
+    encryptedPrivKey: text;
+    registered: timestamp;
 }
 
-operation register_user(name, password: text, pubkey, encryptedPrivKey: text) {
-  val admin = "admin";
-  if (name == admin) {
+operation registerUser(name, password: text, pubkey, encryptedPrivKey: text) {
     require(is_signer(pubkey));
-    create user(name=admin, password=password, pubkey, encryptedPrivKey, op_context.last_block_time);
-  } else {
-    require(is_signer(user@{ .name == admin }(.pubkey)));
-    create user(name=name, password=password, pubkey, encryptedPrivKey, op_context.last_block_time);
-  }
+    create user(
+        name = name,
+        password=password,
+        pubkey,
+        encryptedPrivKey,
+        op_context.last_block_time
+    );
 }
 
 query login(name, password: text) {
-  return user@{.name == name, .password == password}(user.encryptedPrivKey);
+    return user@{
+        .name == name,
+        .password == password
+    } ( .encryptedPrivKey );
+}
+
+query isUserRegistered(name) {
+  return user@*{ .name == name } ( .name );
 }

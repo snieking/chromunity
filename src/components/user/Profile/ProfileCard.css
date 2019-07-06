@@ -17,3 +17,17 @@
     float: bottom;
 }
 
+.bottom-bar {
+    position: absolute;
+    bottom: 8px;
+    left: 144px;
+    margin-top: 8px;
+}
+
+.profile-card {
+    position: relative;
+}
+
+.profile-title {
+    padding-top: 5px;
+}
