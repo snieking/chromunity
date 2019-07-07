@@ -9,7 +9,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Home from '@material-ui/icons/Home';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import {ExitToApp, LocationCity, Poll, TrendingUp} from "@material-ui/icons";
+import {ExitToApp, Gavel, LocationCity, Poll, TrendingUp} from "@material-ui/icons";
 
 import './HeaderNav.css';
 import {NotificationsButton} from "../../buttons/NotificationsButton";
@@ -76,6 +76,11 @@ export default function HeaderNav(props: HeaderNavProps) {
                     <Link to="/gov/election">
                         <IconButton>
                             <Poll className="nav-button"/>
+                        </IconButton>
+                    </Link>
+                    <Link to="/gov/log">
+                        <IconButton>
+                            <Gavel className="nav-button"/>
                         </IconButton>
                     </Link>
                     <div className={classes.grow}/>

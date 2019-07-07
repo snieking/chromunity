@@ -8,8 +8,8 @@ import {
     removeStarRate,
     starRate
 } from "../../blockchain/MessageService";
-import {getUser} from "../../util/user-util";
-import {MoreHoriz, StarRate, SubdirectoryArrowRight} from "@material-ui/icons";
+import {getUser, isRepresentative} from "../../util/user-util";
+import {DeleteSweep, MoreHoriz, StarRate, SubdirectoryArrowRight} from "@material-ui/icons";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import Badge from "@material-ui/core/Badge";
@@ -22,6 +22,8 @@ import Container from "@material-ui/core/Container";
 import Button from "@material-ui/core/Button";
 
 import './ThreadCard.css';
+import {Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle} from "@material-ui/core";
+import {setThreadNotVisible} from "../../blockchain/RepresentativesService";
 
 export interface ThreadCardProps {
     thread: Thread,
@@ -36,7 +38,9 @@ export interface ThreadCardState {
     redirectToFullCard: boolean,
     replyBoxOpen: boolean,
     replyMessage: string,
-    subThreads: Thread[]
+    subThreads: Thread[],
+    isRepresentative: boolean,
+    hideThreadConfirmDialogOpen: boolean
 }
 
 export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState> {
@@ -50,11 +54,16 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
             redirectToFullCard: false,
             replyBoxOpen: false,
             replyMessage: "",
-            subThreads: []
+            subThreads: [],
+            isRepresentative: false,
+            hideThreadConfirmDialogOpen: false
         };
 
         this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
         this.navigateBack = this.navigateBack.bind(this);
+        this.closeHideThreadConfirmDialog = this.closeHideThreadConfirmDialog.bind(this);
+        this.hideThread = this.hideThread.bind(this);
+        this.toggleHideConfirmation = this.toggleHideConfirmation.bind(this);
     }
 
     static isRatedByMe(upvoters: string[]): boolean {
@@ -99,6 +108,8 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
                 }));
             });
         }
+
+        isRepresentative().then(bool => this.setState({isRepresentative: bool}));
     }
 
     componentWillReceiveProps(nextProps: Readonly<ThreadCardProps>, nextContext: any): void {
@@ -120,8 +131,8 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
 
     toggleStarRate() {
         const id = this.props.thread.id;
-        const encryptedKey = getUser().encryptedKey;
-        if (encryptedKey != null) {
+        const name = getUser().name;
+        if (name != null) {
             if (this.state.ratedByMe) {
                 removeStarRate(getUser(), id)
                     .then(() => this.setState(prevState => ({stars: prevState.stars - 1, ratedByMe: false})))
@@ -159,7 +170,8 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
                     {this.renderCardActions(false)}
                 </Card>
                 {this.state.replyBoxOpen ? this.renderReplyBox() : <div></div>}
-                {this.state.subThreads.length > 0 ? <SubdirectoryArrowRight className="nav-button button-center"/> : <div></div>}
+                {this.state.subThreads.length > 0 ? <SubdirectoryArrowRight className="nav-button button-center"/> :
+                    <div></div>}
                 {this.state.subThreads.map(thread => {
                     return <ThreadCard key={"sub-thread-" + thread.id}
                                        thread={thread}
@@ -176,10 +188,15 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         if (!this.props.isUserPage) {
             return (
                 <Typography gutterBottom variant="h6" component="h6" className="typography">
-                    <Link className="pink-typography" to={"/u/" + this.props.thread.author}>@{this.props.thread.author}</Link>
+                    <Link className="pink-typography"
+                          to={"/u/" + this.props.thread.author}>@{this.props.thread.author}</Link>
                 </Typography>
             )
         }
+    }
+
+    toggleHideConfirmation() {
+        this.setState({ hideThreadConfirmDialogOpen: true });
     }
 
     renderCardContent(content: string) {
@@ -193,6 +210,53 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         )
     }
 
+    closeHideThreadConfirmDialog() {
+        this.setState({ hideThreadConfirmDialogOpen: false });
+    }
+
+    hideThread() {
+        setThreadNotVisible(getUser(), this.props.thread.id);
+        this.setState({ hideThreadConfirmDialogOpen: false });
+    }
+
+    renderRepresentativeActions() {
+        if (this.state.isRepresentative) {
+            return (
+                <div>
+                    <IconButton aria-label="Hide" onClick={() => this.toggleHideConfirmation()}>
+                        <DeleteSweep/>
+                    </IconButton>
+
+                    <Dialog
+                        open={this.state.hideThreadConfirmDialogOpen}
+                        onClose={() => this.closeHideThreadConfirmDialog()}
+                        aria-labelledby="alert-dialog-title"
+                        aria-describedby="alert-dialog-description"
+                    >
+                        <DialogTitle id="alert-dialog-title">{"Are you sure you want to hide the post?"}</DialogTitle>
+                        <DialogContent>
+                            <DialogContentText id="alert-dialog-description">
+                                Your action will be logged and visible to the community.
+                            </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={() => this.closeHideThreadConfirmDialog()} color="primary">
+                                Cancel
+                            </Button>
+                            <Button onClick={() => this.hideThread()} color="primary" autoFocus>
+                                I am sure
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+                </div>
+            )
+        } else {
+            return (
+                <div></div>
+            )
+        }
+    }
+
     renderCardActions(renderReadMoreButton: boolean) {
         if (getUser().name != null) {
             return (
@@ -203,6 +267,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
                         </Badge>
                     </IconButton>
                     {this.renderReadMoreButton(renderReadMoreButton)}
+                    {this.renderRepresentativeActions()}
                 </CardActions>
             )
         } else {
@@ -215,7 +280,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
             return (
                 <Link to={this.getRootPostId()}>
                     <IconButton aria-label="Read more">
-                        <MoreHoriz />
+                        <MoreHoriz/>
                     </IconButton>
                 </Link>
             )

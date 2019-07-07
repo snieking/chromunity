@@ -56,7 +56,8 @@ export class Representatives extends React.Component<{}, RepresentativesState> {
     render() {
         return (
             <Container fixed maxWidth="md">
-                {this.state.representatives.map(name => this.renderRepresentativeCard(name))};
+                <br/>
+                {this.state.representatives.map(name => this.renderRepresentativeCard(name))}
             </Container>
         )
     }

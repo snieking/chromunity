@@ -1,6 +1,6 @@
 export interface User {
     name: string,
-    encryptedKey: string
+    seed: string
 }
 
 export interface Thread {

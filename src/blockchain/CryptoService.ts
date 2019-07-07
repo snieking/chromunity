@@ -1,27 +1,19 @@
-import * as cryptoJS from "crypto-js";
-import * as secp256k1 from 'secp256k1';
-import * as crypto from "crypto";
+import * as bip39 from "bip39";
+import * as hdkey from "hdkey";
 
-export function toBuffer(keyAsHex: string): Buffer {
+export function generateRandomMnemonic(): string {
+    return bip39.generateMnemonic();
+}
+
+export function seedFromMnemonic(mnemonic: string, password: string) {
+    return bip39.mnemonicToSeedSync(mnemonic, password).toString("hex");
+}
+
+export function seedToKey(seed: string): {privKey: Buffer, pubKey: Buffer} {
+    const node = hdkey.fromMasterSeed(toBuffer(seed));
+    return { privKey: node.privateKey, pubKey: node.publicKey };
+}
+
+function toBuffer(keyAsHex: string): Buffer {
     return Buffer.from(keyAsHex, "hex");
-}
-
-export function generatePrivateKey(): string {
-    return crypto.randomBytes(32).toString("hex");
-}
-
-export function generatePublicKey(privateKeyHex: string): string {
-    return secp256k1.publicKeyCreate(toBuffer(privateKeyHex)).toString("hex");
-}
-
-export function encrypt(privateKey: Buffer, data: string): string {
-    return cryptoJS.AES.encrypt(data, privateKey.toString("hex")).toString();
-}
-
-export function decrypt(privateKey: Buffer, data: string): string {
-    return cryptoJS.AES.decrypt(data, privateKey.toString("hex")).toString(cryptoJS.enc.Utf8);
-}
-
-export function hash(message: string) {
-    return cryptoJS.SHA3(message).toString();
 }

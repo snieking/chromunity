@@ -1,5 +1,5 @@
-import {GTX, PRIV_KEY} from "./Postchain";
-import {generatePublicKey, toBuffer, decrypt} from "./CryptoService";
+import {GTX} from "./Postchain";
+import {seedToKey} from "./CryptoService";
 import {uniqueId} from "../util/util";
 import {Thread, User} from "../types";
 import * as BoomerangCache from "boomerang-cache";
@@ -10,12 +10,8 @@ const boomerang = BoomerangCache.create("message-bucket", {storage: "local", enc
 
 export function createThread(user: User, message: string): Promise<any> {
     boomerang.remove("threads");
-    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
-    const pubKeyHex = generatePublicKey(privKeyHex);
 
-    const privKey = toBuffer(privKeyHex);
-    const pubKey = toBuffer(pubKeyHex);
-
+    const {privKey, pubKey} = seedToKey(user.seed);
     const threadId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
@@ -41,12 +37,7 @@ export function createThread(user: User, message: string): Promise<any> {
 }
 
 export function createSubThread(user: User, rootThreadId: string, rootThreadAuthor: string, message: string) {
-    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
-    const pubKeyHex = generatePublicKey(privKeyHex);
-
-    const privKey = toBuffer(privKeyHex);
-    const pubKey = toBuffer(pubKeyHex);
-
+    const {privKey, pubKey} = seedToKey(user.seed);
     const tx = GTX.newTransaction([pubKey]);
 
     const threadId = uniqueId();
@@ -68,8 +59,6 @@ export function createSubThread(user: User, rootThreadId: string, rootThreadAuth
 }
 
 export function getAllThreads(): Promise<Thread[]> {
-    console.log("Running getAllThreads");
-
     const cachedThreads = boomerang.get("threads");
     if (cachedThreads != null) {
         return new Promise<Thread[]>(resolve => resolve(cachedThreads));
@@ -84,12 +73,10 @@ export function getAllThreads(): Promise<Thread[]> {
 }
 
 export function getThreadsByUserId(userId: string): Promise<Thread[]> {
-    console.log("Running getAllThreads");
     return GTX.query("getThreadsByUserId", { name: userId });
 }
 
 export function getThreadById(threadId: string): Promise<Thread> {
-    console.log("Running getThreadById: ", threadId);
     const thread: Thread = boomerang.get(threadId);
 
     if (thread != null) {
@@ -100,22 +87,15 @@ export function getThreadById(threadId: string): Promise<Thread> {
 }
 
 export function getSubThreadsByParentId(rootThreadId: string): Promise<Thread[]> {
-    console.log("Running getSubThreadsByParentId: ", rootThreadId);
     return GTX.query("getSubThreads", { rootThreadId: rootThreadId });
 }
 
 export function getThreadsByTag(tag: string): Promise<Thread[]> {
-    console.log("Running getThreadsByTag: ", tag);
     return GTX.query("getThreadsByTag", { tag: tag });
 }
 
 export function starRate(user: User, id: string) {
-    console.log("Running star rate: ", user.encryptedKey, id);
-    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
-    const pubKeyHex = generatePublicKey(privKeyHex);
-
-    const privKey = toBuffer(privKeyHex);
-    const pubKey = toBuffer(pubKeyHex);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("starRateThread", user.name, id);
@@ -124,12 +104,7 @@ export function starRate(user: User, id: string) {
 }
 
 export function removeStarRate(user: User, id: string) {
-    console.log("Running removeStarRating: ", user.encryptedKey, id);
-    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
-    const pubKeyHex = generatePublicKey(privKeyHex);
-
-    const privKey = toBuffer(privKeyHex);
-    const pubKey = toBuffer(pubKeyHex);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("removeStarRateThread", user.name, id);
@@ -138,7 +113,6 @@ export function removeStarRate(user: User, id: string) {
 }
 
 export function getThreadStarRating(threadId: string): Promise<string[]> {
-    console.log("Running getThreadStarRating: ", threadId);
     return GTX.query("getStarRatingForId", {id: threadId});
 }
 

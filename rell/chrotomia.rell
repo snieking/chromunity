@@ -1,16 +1,72 @@
 // ------------ Representative operations ------------
+class representative {
+    key user, representativePeriodId: text;
+}
+
+operation hideThread(username: text, threadId: text) {
+    val user = user@{ .name == username };
+    require(is_signer(user.pubkey));
+    log("User: ", user);
+
+    val currentRepresentativePeriod = representativeElection@{
+        .timestamp < op_context.last_block_time
+    } ( .id, -sort .timestamp ) limit 1;
+    log("Current representative period: ", currentRepresentativePeriod);
+
+    representative@{
+        .user == user,
+        .representativePeriodId == currentRepresentativePeriod.id
+    };
+
+    // Replace while we don't have a mutable index
+    val threadToReplace = thread@{ .id == threadId };
+    log("Thread to be hidden: ", threadToReplace.id);
+
+    // Delete thread tags created
+    delete threadTag@*{ .thread == threadToReplace };
+    log("Deleted thread tags for thread: ", threadToReplace.id);
+
+    for (t in thread@*{}) {
+        log("Found thread: ", t.id);
+    }
+
+    delete threadToReplace;
+    log("Deleted thread: ", threadToReplace.id);
+    log("Will re-create thread: ", threadToReplace.id);
+    create thread(
+        .id = threadToReplace.id,
+        .rootThreadId = threadToReplace.rootThreadId,
+        threadToReplace.author,
+        false,
+        .message = threadToReplace.message,
+        threadToReplace.timestamp
+    );
+    log("Re-created thread as hidden");
+}
+
+query getCurrentRepresentativePeriod(timestamp) {
+    return representativeElection@?{ .timestamp < timestamp } ( .id, -sort .timestamp ) limit 1;
+}
+
+query getRepresentatives(representativePeriodId: text) {
+    return representative@*{
+        .representativePeriodId == representativePeriodId
+    } ( .user.name );
+}
+
+// ------------ Election operations ------------
 
 /*
 ** Triggers a new election with an identifier, and a timestamp for when it is finished
 */
-operation triggerElection(id: text, timestamp) {
-  require(is_signer(user@{ .name == "admin" }( .pubkey )));
+operation triggerElection(adminUser: text, id: text, timestamp) {
+  require(is_signer(admin@{ .user.name == adminUser}( .user.pubkey )));
   log("Created election with id: " + id);
   create representativeElection(id, timestamp, false);
 }
 
-operation completeElection(id: text, representatives: set<text>) {
-    require(is_signer(user@{ .name == "admin" }( .pubkey )));
+operation completeElection(adminUser: text, id: text, representatives: set<text>) {
+    require(is_signer(user@{ .name == adminUser }( .pubkey )));
 
     log("Searching for election with id: " + id);
     update representativeElection@{ .id == id } (completed = true);
@@ -91,21 +147,11 @@ query getUncompletedElection() {
     } ( .id );
 }
 
-query getCurrentRepresentativePeriod(timestamp) {
-    return representativeElection@?{ .timestamp < timestamp } ( .id, -sort .timestamp ) limit 1;
-}
-
 query getUserVoteInElection(name, electionId: text) {
     return representativeElectionVote@?{
         .user == user@{ .name == name },
         .representativeElection == representativeElection@{ .id == electionId }
     } ( .candidate.name );
-}
-
-query getRepresentatives(representativePeriodId: text) {
-    return representative@*{
-        .representativePeriodId == representativePeriodId
-    } ( .user.name );
 }
 
 class representativeElection {
@@ -121,10 +167,6 @@ class representativeElectionCandidate {
 class representativeElectionVote {
     key user, representativeElection;
     index candidate: user;
-}
-
-class representative {
-    key user, representativePeriodId: text;
 }
 
 // ------------ Following operations ------------
@@ -253,7 +295,7 @@ operation createThread(username: text, id: text, rootThreadId: text, message: te
 }
 
 query getAllThreads() {
-    return thread @* { .visible == true } (
+    return thread @* { .visible == true }(
         .id,
         author=.author.name,
         rootThreadId=.rootThreadId,
@@ -263,7 +305,10 @@ query getAllThreads() {
 }
 
 query getSubThreads(rootThreadId: text) {
-    return thread@*{ .rootThreadId == rootThreadId } (
+    return thread@*{
+        .rootThreadId == rootThreadId,
+        .visible == true
+    }(
         .id,
         author=.author.name,
         rootThreadId=.rootThreadId,
@@ -273,7 +318,10 @@ query getSubThreads(rootThreadId: text) {
 }
 
 query getThreadsByUserId(name) {
-    return thread@*{ user@{ .name == name } } (
+    return thread@*{
+        user@{ .name == name },
+        .visible == true
+    }(
         .id,
         author=.author.name,
         rootThreadId=.rootThreadId,
@@ -283,7 +331,21 @@ query getThreadsByUserId(name) {
 }
 
 query getThreadById(id: text) {
-    return thread@{ .id == id } (
+    return thread@{
+        .id == id,
+        .visible == true
+    }(
+        .id,
+        author=.author.name,
+        rootThreadId=.rootThreadId,
+        .message
+    );
+}
+
+query getThreadByIdIncludingNonVisible(id: text) {
+    return thread@{
+        .id == id
+    }(
         .id,
         author=.author.name,
         rootThreadId=.rootThreadId,
@@ -315,32 +377,27 @@ query getStarRatingForId(id: text) {
 
 // ------------ User operations ------------
 
+class admin {
+    user;
+}
+
 class user {
     key name;
-    password: text;
     index pubkey;
-    encryptedPrivKey: text;
-    registered: timestamp;
+    registered: integer;
 }
 
-operation registerUser(name, password: text, pubkey, encryptedPrivKey: text) {
+operation registerUser(name, pubkey) {
     require(is_signer(pubkey));
-    create user(
-        name = name,
-        password=password,
-        pubkey,
-        encryptedPrivKey,
-        op_context.last_block_time
-    );
+
+    if (name == "admin") {
+        val newAdmin = create user(name, pubkey, op_context.transaction.block.block_height);
+        create admin(newAdmin);
+    } else {
+        create user(name, pubkey, op_context.transaction.block.block_height);
+    }
 }
 
-query login(name, password: text) {
-    return user@{
-        .name == name,
-        .password == password
-    } ( .encryptedPrivKey );
-}
-
-query isUserRegistered(name) {
-  return user@*{ .name == name } ( .name );
+query getUser(name) {
+    return user@{ .name == name } ( .name, .pubkey, .registered );
 }

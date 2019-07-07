@@ -11,3 +11,7 @@
 .button-center {
     margin: 0 auto;
 }
+
+.representative-actions {
+    float: right;
+}

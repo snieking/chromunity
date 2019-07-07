@@ -1,17 +1,14 @@
 import {User} from "../types";
-import {decrypt, generatePublicKey, toBuffer} from "./CryptoService";
-import {GTX, PRIV_KEY} from "./Postchain";
+import {seedToKey} from "./CryptoService";
+import {GTX} from "./Postchain";
 import * as BoomerangCache from "boomerang-cache";
 
 const boomerang = BoomerangCache.create("following-bucket", {storage: "local", encrypt: true});
 
 export function createFollowing(user: User, following: string) {
     boomerang.remove("user-" + user.name);
-    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
-    const pubKeyHex = generatePublicKey(privKeyHex);
 
-    const privKey = toBuffer(privKeyHex);
-    const pubKey = toBuffer(pubKeyHex);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("createFollowing", user.name, following);
@@ -21,11 +18,8 @@ export function createFollowing(user: User, following: string) {
 
 export function removeFollowing(user: User, following: string) {
     boomerang.remove("user-" + user.name);
-    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
-    const pubKeyHex = generatePublicKey(privKeyHex);
 
-    const privKey = toBuffer(privKeyHex);
-    const pubKey = toBuffer(pubKeyHex);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("removeFollowing", user.name, following);

@@ -1,6 +1,7 @@
 import * as React from "react";
 import {login} from "../../../blockchain/UserService";
 import {AccountCircle} from "@material-ui/icons";
+import {getMnemonic} from "../../../util/user-util";
 
 export interface LoginProps {
     login: Function
@@ -9,6 +10,7 @@ export interface LoginProps {
 export interface LoginState {
     username: string,
     password: string,
+    mnemonic: string,
     redirect: boolean
 }
 
@@ -20,11 +22,13 @@ export class Login extends React.Component<LoginProps, LoginState> {
         this.state = {
             username: "",
             password: "",
+            mnemonic: getMnemonic(),
             redirect: false
         };
 
         this.handleUsernameChange = this.handleUsernameChange.bind(this);
         this.handlePasswordChange = this.handlePasswordChange.bind(this);
+        this.handleMnemonicChange = this.handleMnemonicChange.bind(this);
         this.login = this.login.bind(this);
     }
 
@@ -46,6 +50,10 @@ export class Login extends React.Component<LoginProps, LoginState> {
                     <input type="password" id="password" className="fadeIn third" name="login"
                            placeholder="password"
                            onChange={this.handlePasswordChange}/>
+                    <input type="text" id="mnemonic" className="fadeIn third" name="login"
+                           placeholder="mnemonic phrase"
+                           value={this.state.mnemonic || ""}
+                           onChange={this.handleMnemonicChange}/>
                     <input type="button" className="fadeIn fourth" value="Login" onClick={this.login}/>
 
                     <div id="formFooter">
@@ -55,6 +63,11 @@ export class Login extends React.Component<LoginProps, LoginState> {
                 </div>
             </div>
         );
+    }
+
+    private handleMnemonicChange(event: React.ChangeEvent<HTMLInputElement>) {
+        event.persist();
+        this.setState({ mnemonic: event.target.value });
     }
 
     private handleUsernameChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -76,7 +89,7 @@ export class Login extends React.Component<LoginProps, LoginState> {
     }
 
     private login() {
-        login(this.state.username, this.state.password)
+        login(this.state.username, this.state.password, this.state.mnemonic)
             .then(() => this.setState(prevState => ({
                     username: prevState.username,
                     password: prevState.password,

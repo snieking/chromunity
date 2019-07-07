@@ -1,16 +1,12 @@
-import {GTX, PRIV_KEY} from "./Postchain";
-import {generatePublicKey, toBuffer, decrypt} from "./CryptoService";
+import {GTX} from "./Postchain";
+import {seedToKey} from "./CryptoService";
 import * as BoomerangCache from "boomerang-cache";
 import {User, UserNotification} from "../types";
 
 const boomerang = BoomerangCache.create("notification-bucket", {storage: "local", encrypt: true});
 
 export function sendUserNotifications(fromUser: User, threadId: string, usernames: Set<string>) {
-    const privKeyHex = decrypt(PRIV_KEY, fromUser.encryptedKey);
-    const pubKeyHex = generatePublicKey(privKeyHex);
-
-    const privKey = toBuffer(privKeyHex);
-    const pubKey = toBuffer(pubKeyHex);
+    const {privKey, pubKey} = seedToKey(fromUser.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("createNotification", fromUser.name, threadId, Array.from(usernames));
@@ -21,11 +17,7 @@ export function sendUserNotifications(fromUser: User, threadId: string, username
 export function markNotificationsRead(user: User) {
     boomerang.remove("notis-" + user.name);
 
-    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
-    const pubKeyHex = generatePublicKey(privKeyHex);
-
-    const privKey = toBuffer(privKeyHex);
-    const pubKey = toBuffer(pubKeyHex);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     const epochSeconds = Math.round(new Date().getTime() / 1000);

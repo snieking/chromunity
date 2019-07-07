@@ -1,15 +1,11 @@
 import {User} from "../types";
-import {decrypt, generatePublicKey, toBuffer} from "./CryptoService";
-import {GTX, PRIV_KEY} from "./Postchain";
+import {seedToKey} from "./CryptoService";
+import {GTX} from "./Postchain";
 import {sortByFrequency} from "../util/util";
 
 
 export function storeTagsFromThread(user: User, threadId: string, tags: string[]) {
-    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
-    const pubKeyHex = generatePublicKey(privKeyHex);
-
-    const privKey = toBuffer(privKeyHex);
-    const pubKey = toBuffer(pubKeyHex);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("createThreadTag", user.name, tags, threadId);

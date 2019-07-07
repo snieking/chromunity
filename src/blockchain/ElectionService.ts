@@ -1,48 +1,36 @@
 import {Election, User} from "../types";
-import {GTX, PRIV_KEY} from "./Postchain";
-import {decrypt, generatePublicKey, toBuffer} from "./CryptoService";
+import {GTX} from "./Postchain";
+import {seedToKey} from "./CryptoService";
 import {sortByFrequency, uniqueId} from "../util/util";
 
 //const dayInMilliseconds: number = 86400000;
 const dayInMilliseconds: number = 10000;
 
 export function triggerElection(user: User): void {
-    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
-    const pubKeyHex = generatePublicKey(privKeyHex);
-
-    const privKey = toBuffer(privKeyHex);
-    const pubKey = toBuffer(pubKeyHex);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("triggerElection", uniqueId(), Date.now() + (dayInMilliseconds * 7));
+    tx.addOperation("triggerElection", user.name, uniqueId(), Date.now() + (dayInMilliseconds * 7));
     tx.sign(privKey, pubKey);
     tx.postAndWaitConfirmation();
 }
 
 export function completeElection(user: User, electionId: string): void {
-    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
-    const pubKeyHex = generatePublicKey(privKeyHex);
-
-    const privKey = toBuffer(privKeyHex);
-    const pubKey = toBuffer(pubKeyHex);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     GTX.query("getElectionVotes", { electionId: electionId })
         .then((candidates: any[]) => {
             const sortedCandidates: string[] = sortByFrequency(candidates);
             const tx = GTX.newTransaction([pubKey]);
 
-            tx.addOperation("completeElection", electionId, sortedCandidates);
+            tx.addOperation("completeElection", user.name, electionId, sortedCandidates);
             tx.sign(privKey, pubKey);
             tx.postAndWaitConfirmation();
         });
 }
 
 export function signUpForElection(user: User, electionId: string): Promise<any> {
-    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
-    const pubKeyHex = generatePublicKey(privKeyHex);
-
-    const privKey = toBuffer(privKeyHex);
-    const pubKey = toBuffer(pubKeyHex);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("signUpForElection", user.name, electionId);
@@ -51,11 +39,7 @@ export function signUpForElection(user: User, electionId: string): Promise<any> 
 }
 
 export function voteForCandidate(user: User, candidate: string, electionId: string): Promise<any> {
-    const privKeyHex = decrypt(PRIV_KEY, user.encryptedKey);
-    const pubKeyHex = generatePublicKey(privKeyHex);
-
-    const privKey = toBuffer(privKeyHex);
-    const pubKey = toBuffer(pubKeyHex);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("voteForCandidate", user.name, candidate, electionId);

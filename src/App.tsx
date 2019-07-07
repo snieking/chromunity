@@ -9,6 +9,7 @@ import {UserNotifications} from "./components/Notification/UserNotifications";
 import {Header} from "./components/Header/Header";
 import {Election} from "./components/Government/Election/Election";
 import {Representatives} from "./components/Government/Representatives/Representatives";
+import {GovLog} from "./components/Government/Log/GovLog";
 
 
 export class App extends React.Component {
@@ -26,6 +27,7 @@ export class App extends React.Component {
                 <Route path="/tag/:tag" component={Wall}/>
                 <Route path="/gov/representatives" component={Representatives}/>
                 <Route path="/gov/election" component={Election}/>
+                <Route path="/gov/log" component={GovLog}/>
             </Router>
         );
     }
