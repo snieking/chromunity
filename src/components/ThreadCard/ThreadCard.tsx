@@ -1,6 +1,6 @@
 import React from "react";
-import {Link} from 'react-router-dom'
-import {Thread} from "../../types";
+import { Link } from "react-router-dom";
+import { Thread } from "../../types";
 import {
     createSubThread,
     getSubThreadsByParentId,
@@ -8,43 +8,53 @@ import {
     removeStarRate,
     starRate
 } from "../../blockchain/MessageService";
-import {getUser, isRepresentative} from "../../util/user-util";
-import {DeleteSweep, MoreHoriz, StarRate, SubdirectoryArrowRight} from "@material-ui/icons";
+import { getUser, isRepresentative } from "../../util/user-util";
+import {
+    DeleteSweep,
+    MoreHoriz,
+    StarRate,
+    SubdirectoryArrowRight
+} from "@material-ui/icons";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import Badge from "@material-ui/core/Badge";
 import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import Card from "@material-ui/core/Card";
-import {Redirect} from "react-router";
+import { Redirect } from "react-router";
 import TextField from "@material-ui/core/TextField";
 import Container from "@material-ui/core/Container";
 import Button from "@material-ui/core/Button";
 
-import './ThreadCard.css';
-import {Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle} from "@material-ui/core";
-import {setThreadNotVisible} from "../../blockchain/RepresentativesService";
+import "./ThreadCard.css";
+import {
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle
+} from "@material-ui/core";
+import { setThreadNotVisible } from "../../blockchain/RepresentativesService";
 
 export interface ThreadCardProps {
-    thread: Thread,
-    truncated: boolean,
-    isSubCard: boolean,
-    isUserPage: boolean
+    thread: Thread;
+    truncated: boolean;
+    isSubCard: boolean;
+    isUserPage: boolean;
 }
 
 export interface ThreadCardState {
-    stars: number,
-    ratedByMe: boolean,
-    redirectToFullCard: boolean,
-    replyBoxOpen: boolean,
-    replyMessage: string,
-    subThreads: Thread[],
-    isRepresentative: boolean,
-    hideThreadConfirmDialogOpen: boolean
+    stars: number;
+    ratedByMe: boolean;
+    redirectToFullCard: boolean;
+    replyBoxOpen: boolean;
+    replyMessage: string;
+    subThreads: Thread[];
+    isRepresentative: boolean;
+    hideThreadConfirmDialogOpen: boolean;
 }
 
 export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState> {
-
     constructor(props: ThreadCardProps) {
         super(props);
 
@@ -60,8 +70,9 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         };
 
         this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
-        this.navigateBack = this.navigateBack.bind(this);
-        this.closeHideThreadConfirmDialog = this.closeHideThreadConfirmDialog.bind(this);
+        this.closeHideThreadConfirmDialog = this.closeHideThreadConfirmDialog.bind(
+            this
+        );
         this.hideThread = this.hideThread.bind(this);
         this.toggleHideConfirmation = this.toggleHideConfirmation.bind(this);
     }
@@ -76,22 +87,32 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
     }
 
     static parseHashtags(message: string): string {
-        return message.replace(/(#)([a-z\d-]+)/ig, "<a  class='pink-typography' href='/tag/$2'>$1$2</a>");
+        return message.replace(
+            /(#)([a-z\d-]+)/gi,
+            "<a  class='pink-typography' href='/tag/$2'>$1$2</a>"
+        );
     }
 
     static parseUsers(message: string): string {
-        return message.replace(/(@)([a-z\d-]+)/ig, "<a  class='purple-typography' href='/u/$2'><b>$1$2</b></a>");
+        return message.replace(
+            /(@)([a-z\d-]+)/gi,
+            "<a  class='purple-typography' href='/u/$2'><b>$1$2</b></a>"
+        );
     }
 
     handleReplyMessageChange(event: React.ChangeEvent<HTMLInputElement>): void {
-        this.setState({replyMessage: event.target.value})
+        this.setState({ replyMessage: event.target.value });
     }
 
     handleReplySubmit(): void {
-        createSubThread(getUser(), this.props.thread.id, this.props.thread.author, this.state.replyMessage)
-            .then(() => getSubThreadsByParentId(this.props.thread.id)
-                .then(threads => this.setState({subThreads: threads})));
-        this.setState({replyMessage: ""});
+        createSubThread(
+            getUser(),
+            this.props.thread.id,
+            this.props.thread.author,
+            this.state.replyMessage
+        ).then(() => getSubThreadsByParentId(this.props.thread.id)
+            .then(threads => this.setState({ subThreads: threads })));
+        this.setState({ replyMessage: "" });
         this.toggleReplyBox();
     }
 
@@ -100,16 +121,15 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
 
         if (parentId !== null) {
             getThreadStarRating(parentId).then(usersWhoRated => {
-                console.log("Upvoters: ", usersWhoRated);
                 const ratedByMe: boolean = ThreadCard.isRatedByMe(usersWhoRated);
-                this.setState(prevState => ({
+                this.setState({
                     stars: usersWhoRated.length,
                     ratedByMe: ratedByMe
-                }));
+                });
             });
         }
 
-        isRepresentative().then(bool => this.setState({isRepresentative: bool}));
+        isRepresentative().then(bool => this.setState({ isRepresentative: bool }));
     }
 
     componentWillReceiveProps(nextProps: Readonly<ThreadCardProps>, nextContext: any): void {
@@ -117,15 +137,15 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
 
         if (parentId !== null) {
             getThreadStarRating(parentId).then(usersWhoRated => {
-                console.log("Upvoters: ", usersWhoRated);
                 const ratedByMe: boolean = ThreadCard.isRatedByMe(usersWhoRated);
-                this.setState(prevState => ({
+                this.setState({
                     stars: usersWhoRated.length,
                     ratedByMe: ratedByMe
-                }));
+                });
             });
-            getSubThreadsByParentId(parentId)
-                .then(threads => this.setState({subThreads: threads}));
+            getSubThreadsByParentId(parentId).then(threads =>
+                this.setState({ subThreads: threads })
+            );
         }
     }
 
@@ -135,18 +155,40 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         if (name != null) {
             if (this.state.ratedByMe) {
                 removeStarRate(getUser(), id)
-                    .then(() => this.setState(prevState => ({stars: prevState.stars - 1, ratedByMe: false})))
-                    .catch(() => this.setState(prevState => ({stars: prevState.stars, ratedByMe: true})));
+                    .then(() =>
+                        this.setState(prevState => ({
+                            stars: prevState.stars - 1,
+                            ratedByMe: false
+                        }))
+                    )
+                    .catch(() =>
+                        this.setState(prevState => ({
+                            stars: prevState.stars,
+                            ratedByMe: true
+                        }))
+                    );
             } else {
                 starRate(getUser(), id)
-                    .then(() => this.setState(prevState => ({stars: prevState.stars + 1, ratedByMe: true})))
-                    .catch(() => this.setState(prevState => ({stars: prevState.stars, ratedByMe: false})));
+                    .then(() =>
+                        this.setState(prevState => ({
+                            stars: prevState.stars + 1,
+                            ratedByMe: true
+                        }))
+                    )
+                    .catch(() =>
+                        this.setState(prevState => ({
+                            stars: prevState.stars,
+                            ratedByMe: false
+                        }))
+                    );
             }
         }
     }
 
     getRootPostId(): string {
-        const threadId = this.props.thread.rootThreadId === "" ? this.props.thread.id : this.props.thread.rootThreadId;
+        const threadId = this.props.thread.rootThreadId === ""
+            ? this.props.thread.id
+            : this.props.thread.rootThreadId;
         return "/thread/" + threadId;
     }
 
@@ -156,10 +198,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
                 {this.renderCardContent(this.props.thread.message)}
                 {this.renderCardActions(true)}
             </Card>
-        )
-    }
-
-    navigateBack(): void {
+        );
     }
 
     renderFullThreadCard() {
@@ -169,29 +208,42 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
                     {this.renderCardContent(this.props.thread.message)}
                     {this.renderCardActions(false)}
                 </Card>
-                {this.state.replyBoxOpen ? this.renderReplyBox() : <div></div>}
-                {this.state.subThreads.length > 0 ? <SubdirectoryArrowRight className="nav-button button-center"/> :
-                    <div></div>}
+                {this.state.replyBoxOpen ? this.renderReplyBox() : <div />}
+                {this.state.subThreads.length > 0
+                    ? (<SubdirectoryArrowRight className="nav-button button-center" />)
+                    : (<div />)}
                 {this.state.subThreads.map(thread => {
-                    return <ThreadCard key={"sub-thread-" + thread.id}
-                                       thread={thread}
-                                       truncated={false}
-                                       isSubCard={true}
-                                       isUserPage={this.props.isUserPage}
-                    />
+                    return (
+                        <ThreadCard
+                            key={"sub-thread-" + thread.id}
+                            thread={thread}
+                            truncated={false}
+                            isSubCard={true}
+                            isUserPage={this.props.isUserPage}
+                        />
+                    );
                 })}
             </div>
-        )
+        );
     }
 
     renderAuthor() {
         if (!this.props.isUserPage) {
             return (
-                <Typography gutterBottom variant="h6" component="h6" className="typography">
-                    <Link className="pink-typography"
-                          to={"/u/" + this.props.thread.author}>@{this.props.thread.author}</Link>
+                <Typography
+                    gutterBottom
+                    variant="h6"
+                    component="h6"
+                    className="typography"
+                >
+                    <Link
+                        className="pink-typography"
+                        to={"/u/" + this.props.thread.author}
+                    >
+                        @{this.props.thread.author}
+                    </Link>
                 </Typography>
-            )
+            );
         }
     }
 
@@ -204,10 +256,12 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
             <CardContent>
                 {this.renderAuthor()}
                 <Typography variant="body2" color="textSecondary" component="p">
-                    <span dangerouslySetInnerHTML={{__html: ThreadCard.parseContent(content)}}/>
+                    <span dangerouslySetInnerHTML={{
+                        __html: ThreadCard.parseContent(content)
+                    }} />
                 </Typography>
             </CardContent>
-        )
+        );
     }
 
     closeHideThreadConfirmDialog() {
@@ -223,8 +277,11 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         if (this.state.isRepresentative) {
             return (
                 <div>
-                    <IconButton aria-label="Hide" onClick={() => this.toggleHideConfirmation()}>
-                        <DeleteSweep/>
+                    <IconButton
+                        aria-label="Hide"
+                        onClick={() => this.toggleHideConfirmation()}
+                    >
+                        <DeleteSweep />
                     </IconButton>
 
                     <Dialog
@@ -233,27 +290,32 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
                         aria-labelledby="alert-dialog-title"
                         aria-describedby="alert-dialog-description"
                     >
-                        <DialogTitle id="alert-dialog-title">{"Are you sure you want to hide the post?"}</DialogTitle>
+                        <DialogTitle id="alert-dialog-title">
+                            {"Are you sure you want to hide the post?"}
+                        </DialogTitle>
                         <DialogContent>
                             <DialogContentText id="alert-dialog-description">
                                 Your action will be logged and visible to the community.
                             </DialogContentText>
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={() => this.closeHideThreadConfirmDialog()} color="primary">
+                            <Button
+                                onClick={() => this.closeHideThreadConfirmDialog()}
+                                color="primary"
+                            >
                                 Cancel
                             </Button>
-                            <Button onClick={() => this.hideThread()} color="primary" autoFocus>
+                            <Button
+                                onClick={() => this.hideThread()}
+                                color="primary"
+                                autoFocus
+                            >
                                 I am sure
                             </Button>
                         </DialogActions>
                     </Dialog>
                 </div>
-            )
-        } else {
-            return (
-                <div></div>
-            )
+            );
         }
     }
 
@@ -262,16 +324,18 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
             return (
                 <CardActions>
                     <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
-                        <Badge className="star-badge" color="secondary" badgeContent={this.state.stars}>
-                            <StarRate className={(this.state.ratedByMe ? 'yellow-icon' : '')}/>
+                        <Badge
+                            className="star-badge"
+                            color="secondary"
+                            badgeContent={this.state.stars}
+                        >
+                            <StarRate className={this.state.ratedByMe ? "yellow-icon" : ""} />
                         </Badge>
                     </IconButton>
                     {this.renderReadMoreButton(renderReadMoreButton)}
                     {this.renderRepresentativeActions()}
                 </CardActions>
-            )
-        } else {
-            return (<div></div>)
+            );
         }
     }
 
@@ -280,26 +344,20 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
             return (
                 <Link to={this.getRootPostId()}>
                     <IconButton aria-label="Read more">
-                        <MoreHoriz/>
+                        <MoreHoriz />
                     </IconButton>
                 </Link>
-            )
-        } else {
-            return <div></div>
+            );
         }
     }
 
     toggleReplyBox(): void {
-        this.setState(prevState => ({replyBoxOpen: !prevState.replyBoxOpen}));
+        this.setState(prevState => ({ replyBoxOpen: !prevState.replyBoxOpen }));
     }
 
     renderReplyBox() {
         if (this.state.replyBoxOpen) {
-            return (
-                <Card key={"reply-box"}>
-                    {this.renderReplyForm()}
-                </Card>
-            )
+            return <Card key={"reply-box"}>{this.renderReplyForm()}</Card>;
         }
     }
 
@@ -316,23 +374,31 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
                         value={this.state.replyMessage}
                         onChange={this.handleReplyMessageChange}
                     />
-                    <Button type="button" onClick={() => this.toggleReplyBox()}>Cancel</Button>
-                    <Button type="submit" onClick={() => this.handleReplySubmit()}>Reply</Button>
-                    <br/>
-                    <br/>
+                    <Button type="button" onClick={() => this.toggleReplyBox()}>
+                        Cancel
+                    </Button>
+                    <Button type="submit" onClick={() => this.handleReplySubmit()}>
+                        Reply
+                    </Button>
+                    <br />
+                    <br />
                 </Container>
             </div>
-        )
+        );
     }
 
     render() {
         if (this.state.redirectToFullCard) {
-            return <Redirect key={"red-" + this.props.thread.id} to={this.getRootPostId()}/>
+            return (
+                <Redirect
+                    key={"red-" + this.props.thread.id}
+                    to={this.getRootPostId()}
+                />
+            );
         } else if (this.props.truncated) {
             return this.renderTruncatedThreadCard();
         } else {
             return this.renderFullThreadCard();
         }
     }
-
 }

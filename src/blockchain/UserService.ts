@@ -30,7 +30,9 @@ export function login(name: string, password: string, mnemonic: string): Promise
 }
 
 export function isRegistered(name: string): Promise<boolean> {
-    return GTX.query("isUserRegistered", {name: name}).then((arr: []) => arr.length > 0);
+    return GTX.query("getUser", {name: name})
+        .then((any: any) => any != null)
+        .catch(false);
 }
 
 interface BlockchainUser {

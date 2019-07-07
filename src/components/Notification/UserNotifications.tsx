@@ -30,10 +30,7 @@ export class UserNotifications extends React.Component<UserNotificationsProps, U
 
     componentDidMount(): void {
         const userId = this.props.match.params.userId;
-        getUserNotifications(userId).then(notifications => {
-            console.log("Retrieved notifications: ", notifications);
-            this.setState({notifications: notifications});
-        });
+        getUserNotifications(userId).then(notifications => this.setState({notifications: notifications}));
 
         const loggedInUser = getUser();
         if (loggedInUser != null && loggedInUser.name === userId) {

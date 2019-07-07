@@ -55,32 +55,20 @@ export class Wall extends React.Component<WallProps, WallState> {
     }
 
     retrieveThreads() {
-        console.log("Retrieving threads!");
         const userId = this.props.match.params.userId;
         const tag = this.props.match.params.tag;
         if (userId != null) {
             getThreadsByUserId(userId).then(retrievedThreads => {
-                this.setState(prevState => ({
-                    threads: retrievedThreads,
-                    id: prevState.id,
-                    truncated: prevState.truncated
-                }));
+                this.setState({ threads: retrievedThreads });
             });
 
         } else if (tag != null) {
             getThreadsByTag(tag).then(retrievedThreads => {
-                this.setState(prevState => ({
-                    threads: retrievedThreads,
-                    id: prevState.id,
-                    truncated: prevState.truncated
-                }));
+                this.setState({ threads: retrievedThreads });
             });
         } else {
             getAllThreads().then(retrievedThreads => {
-                console.log("Retrieved threads: ", retrievedThreads);
-                this.setState({
-                    threads: retrievedThreads
-                });
+                this.setState({ threads: retrievedThreads });
             });
         }
     }
