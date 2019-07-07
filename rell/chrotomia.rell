@@ -123,25 +123,27 @@ query get_star_rating_for_id(id: text) {
 
 // ------------ User operations ------------
 
-class user {
-  key name;
-  password: text;
-  index pubkey;
-  encryptedPrivKey: text;
-  registered: timestamp;
+class admin {
+    key user;
 }
 
-operation register_user(name, password: text, pubkey, encryptedPrivKey: text) {
-  val admin = "admin";
-  if (name == admin) {
+class user {
+  key name;
+  index pubkey;
+  registered: integer;
+}
+
+operation register_user(signerAdmin: pubkey, name, pubkey) {
+  if (name == 'admin') {
     require(is_signer(pubkey));
-    create user(name=admin, password=password, pubkey, encryptedPrivKey, op_context.last_block_time);
+    val newAdmin = create user(name, pubkey, op_context.transaction.block.block_height);
+    create admin(newAdmin);
   } else {
-    require(is_signer(user@{ .name == admin }(.pubkey)));
-    create user(name=name, password=password, pubkey, encryptedPrivKey, op_context.last_block_time);
+    require(is_signer(admin@{.user.pubkey == signerAdmin}.user.pubkey));
+    create user(name=name, pubkey, op_context.transaction.block.block_height);
   }
 }
 
-query login(name, password: text) {
-  return user@{.name == name, .password == password}(user.encryptedPrivKey);
+query getUser(name) {
+  return user@{.name == name}(.name, .pubkey, .registered);
 }
