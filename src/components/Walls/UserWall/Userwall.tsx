@@ -1,12 +1,13 @@
 import React from 'react';
 import '../Wall.css';
-import { Container } from "@material-ui/core";
-import { getThreadsByUserId } from "../../../blockchain/MessageService";
+import { Container, Button } from "@material-ui/core";
+import { getThreadsByUserIdPriorToTimestamp } from "../../../blockchain/MessageService";
 import { Thread } from "../../../types";
 
 import { RouteComponentProps } from "react-router";
 import { ThreadCard } from "../../ThreadCard/ThreadCard";
 import { ProfileCard } from "../../user/Profile/ProfileCard";
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 interface MatchParams {
     userId: string
@@ -21,7 +22,10 @@ export interface UserWallState {
     id: string;
     truncated: boolean;
     timestampOnOldestThread: number;
+    existsOlder: boolean;
 }
+
+const chromiaTheme = createMuiTheme({ palette: { primary: { main: "#FFAFC1" } } })
 
 export class UserWall extends React.Component<UserWallProps, UserWallState> {
 
@@ -31,10 +35,12 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
             threads: [],
             id: "",
             truncated: true,
-            timestampOnOldestThread: Date.now()
+            timestampOnOldestThread: Date.now(),
+            existsOlder: true
         };
 
         this.retrieveThreads = this.retrieveThreads.bind(this);
+        this.retrieveOlderThreads = this.retrieveOlderThreads.bind(this);
         this.renderUserPageIntro = this.renderUserPageIntro.bind(this);
     }
 
@@ -45,9 +51,27 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
     retrieveThreads() {
         const userId = this.props.match.params.userId;
         if (userId != null) {
-            getThreadsByUserId(userId).then(retrievedThreads => {
-                this.setState({ threads: retrievedThreads });
-            });
+            getThreadsByUserIdPriorToTimestamp(userId, Date.now())
+                .then(retrievedThreads => {
+                    this.setState(prevState => ({ threads: retrievedThreads.concat(prevState.threads) }));
+                });
+        }
+    }
+
+    retrieveOlderThreads() {
+        if (this.state.threads.length > 0) {
+            const userId = this.props.match.params.userId;
+            const oldestTimestamp: number = this.state.threads[this.state.threads.length - 1].timestamp;
+            getThreadsByUserIdPriorToTimestamp(userId, oldestTimestamp)
+                .then(retrievedThreads => {
+                    if (retrievedThreads.length > 0) {
+                        this.setState(prevState => ({
+                            threads: prevState.threads.concat(retrievedThreads)
+                        }));
+                    } else {
+                        this.setState({ existsOlder: false })
+                    }
+                });
         }
     }
 
@@ -55,6 +79,20 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
         if (this.props.match.params.userId != null) {
             return (
                 <ProfileCard username={this.props.match.params.userId} />
+            )
+        }
+    }
+
+    renderLoadMoreButton() {
+        if (this.state.existsOlder && this.state.threads.length % 25 === 0) {
+            return (
+                <MuiThemeProvider theme={chromiaTheme}>
+                    <Button type="submit" fullWidth color="primary"
+                        onClick={() => this.retrieveOlderThreads()}
+                    >
+                        Load more
+                    </Button>
+                </MuiThemeProvider>
             )
         }
     }
@@ -74,6 +112,7 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
                             thread={thread}
                         />)}
                     </div>
+                    {this.renderLoadMoreButton()}
                 </Container>
             </div>
         );

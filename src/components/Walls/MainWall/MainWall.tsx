@@ -99,7 +99,7 @@ export class MainWall extends React.Component<{}, MainWallState> {
     }
 
     renderLoadMoreButton() {
-        if (this.state.existsOlder) {
+        if (this.state.existsOlder && this.state.threads.length % 25 === 0) {
             return (
                 <MuiThemeProvider theme={chromiaTheme}>
                     <Button type="submit" fullWidth color="primary"

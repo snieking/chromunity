@@ -74,8 +74,8 @@ export function getThreadsAfter(timestamp: number): Promise<Thread[]> {
         });
 }
 
-export function getThreadsByUserId(userId: string): Promise<Thread[]> {
-    return GTX.query("getThreadsByUserId", { name: userId });
+export function getThreadsByUserIdPriorToTimestamp(userId: string, timestamp: number): Promise<Thread[]> {
+    return GTX.query("getThreadsByUserIdPriorToTimestamp", { name: userId, timestamp: timestamp });
 }
 
 export function getThreadById(threadId: string): Promise<Thread> {
@@ -92,8 +92,8 @@ export function getSubThreadsByParentId(rootThreadId: string): Promise<Thread[]>
     return GTX.query("getSubThreads", { rootThreadId: rootThreadId });
 }
 
-export function getThreadsByTag(tag: string): Promise<Thread[]> {
-    return GTX.query("getThreadsByTag", { tag: tag });
+export function getThreadsByTagPriorToTimestamp(tag: string, timestamp: number): Promise<Thread[]> {
+    return GTX.query("getThreadsByTagPriorToTimestamp", { tag: tag, timestamp: timestamp });
 }
 
 export function starRate(user: User, id: string) {

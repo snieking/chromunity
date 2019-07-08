@@ -257,8 +257,11 @@ operation createThreadTag(username: text, tags: set<text>, threadId: text) {
     }
 }
 
-query getThreadsByTag(tag: text) {
-    return threadTag@*{ .name == tag } (
+query getThreadsByTagPriorToTimestamp(tag: text, timestamp) {
+    return threadTag@*{ 
+        .name == tag, 
+        .thread.timestamp < timestamp 
+    }(
         id=.thread.id,
         author=.thread.author.name,
         rootThreadId=.thread.rootThreadId,
@@ -333,10 +336,11 @@ query getSubThreads(rootThreadId: text) {
     );
 }
 
-query getThreadsByUserId(name) {
+query getThreadsByUserIdPriorToTimestamp(name, timestamp) {
     return thread@*{
         user@{ .name == name },
-        .visible == true
+        .visible == true,
+        .timestamp < timestamp
     }(
         .id,
         author=.author.name,
