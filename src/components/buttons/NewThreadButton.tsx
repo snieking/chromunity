@@ -1,17 +1,17 @@
-import React, {FormEvent} from "react";
+import React, { FormEvent } from "react";
 
 import './Buttons.css';
 
-import {Dialog} from "@material-ui/core";
+import { Dialog } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import {createThread} from "../../blockchain/MessageService";
-import {getUser} from "../../util/user-util";
+import { createThread } from "../../blockchain/MessageService";
+import { getUser } from "../../util/user-util";
 import IconButton from "@material-ui/core/IconButton";
-import {AddComment} from "@material-ui/icons";
+import { AddComment } from "@material-ui/icons";
 
 
 export interface NewThreadButtonProps {
@@ -39,33 +39,34 @@ export class NewThreadButton extends React.Component<NewThreadButtonProps, NewTh
     }
 
     toggleNewThreadDialog() {
-        this.setState(prevState => ({dialogOpen: !prevState.dialogOpen}));
+        this.setState(prevState => ({ dialogOpen: !prevState.dialogOpen }));
     }
 
     handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.persist();
-        this.setState({threadMessage: event.target.value});
+        this.setState({ threadMessage: event.target.value });
     }
 
     createNewThread(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const threadMessage = this.state.threadMessage;
-        this.setState({threadMessage: ""});
+        this.setState({ threadMessage: "" });
 
-        createThread(getUser(), threadMessage || "")
-            .then(() => this.props.updateFunction());
+        createThread(getUser(), threadMessage || "").then(() => this.props.updateFunction());
         this.toggleNewThreadDialog();
     }
 
     createThreadButton() {
-        return (
-            <div className="bottom-right-corner rounded-pink">
-                <IconButton aria-label="New thread" className="new-thread-button"
-                            onClick={() => this.toggleNewThreadDialog()}>
-                    <AddComment fontSize="large" className="new-thread-button"/>
-                </IconButton>
-            </div>
-        )
+        if (getUser().name != null) {
+            return (
+                <div className="bottom-right-corner rounded-pink">
+                    <IconButton aria-label="New thread" className="new-thread-button"
+                        onClick={() => this.toggleNewThreadDialog()}>
+                        <AddComment fontSize="large" className="new-thread-button" />
+                    </IconButton>
+                </div>
+            )
+        }
     }
 
     newThreadDialog() {

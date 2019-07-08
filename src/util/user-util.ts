@@ -18,11 +18,11 @@ export function getMnemonic(): string {
 }
 
 export function setUser(user: User): void {
-    LOCAL_CACHE.set(USER_KEY, user);
+    SESSION_CACHE.set(USER_KEY, user);
 }
 
 export function getUser(): User {
-    return LOCAL_CACHE.get(USER_KEY, {});
+    return SESSION_CACHE.get(USER_KEY, {});
 }
 
 export function godAlias(): string {

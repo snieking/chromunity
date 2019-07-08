@@ -283,7 +283,7 @@ class thread {
     index author: user;
     index visible: boolean;
     message: text;
-    timestamp;
+    index timestamp;
 }
 
 operation createThread(username: text, id: text, rootThreadId: text, message: text) {
@@ -294,14 +294,30 @@ operation createThread(username: text, id: text, rootThreadId: text, message: te
     create thread(id, rootThreadId, user, true, message, timestamp=time);
 }
 
-query getAllThreads() {
-    return thread @* { .visible == true }(
+query getThreadsAfter(timestamp) {
+    return thread @* { 
+        .visible == true,
+        .timestamp > timestamp
+    }(
         .id,
         author=.author.name,
         rootThreadId=.rootThreadId,
         .message,
         -sort .timestamp
     );
+}
+
+query getThreadsPriorTo(timestamp) {
+    return thread @* { 
+        .visible == true,
+        .timestamp < timestamp
+    }(
+        .id,
+        author=.author.name,
+        rootThreadId=.rootThreadId,
+        .message,
+        -sort .timestamp
+    ) limit 25;
 }
 
 query getSubThreads(rootThreadId: text) {

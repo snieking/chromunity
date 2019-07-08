@@ -1,17 +1,17 @@
-import {GTX} from "./Postchain";
-import {seedToKey} from "./CryptoService";
-import {uniqueId} from "../util/util";
-import {Thread, User} from "../types";
+import { GTX } from "./Postchain";
+import { seedToKey } from "./CryptoService";
+import { uniqueId } from "../util/util";
+import { Thread, User } from "../types";
 import * as BoomerangCache from "boomerang-cache";
-import {storeTagsFromThread} from "./TagService";
-import {sendUserNotifications} from "./NotificationService";
+import { storeTagsFromThread } from "./TagService";
+import { sendUserNotifications } from "./NotificationService";
 
-const boomerang = BoomerangCache.create("message-bucket", {storage: "local", encrypt: true});
+const boomerang = BoomerangCache.create("message-bucket", { storage: "local", encrypt: true });
 
 export function createThread(user: User, message: string): Promise<any> {
     boomerang.remove("threads");
 
-    const {privKey, pubKey} = seedToKey(user.seed);
+    const { privKey, pubKey } = seedToKey(user.seed);
     const threadId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
@@ -37,7 +37,7 @@ export function createThread(user: User, message: string): Promise<any> {
 }
 
 export function createSubThread(user: User, rootThreadId: string, rootThreadAuthor: string, message: string) {
-    const {privKey, pubKey} = seedToKey(user.seed);
+    const { privKey, pubKey } = seedToKey(user.seed);
     const tx = GTX.newTransaction([pubKey]);
 
     const threadId = uniqueId();
@@ -58,18 +58,20 @@ export function createSubThread(user: User, rootThreadId: string, rootThreadAuth
     });
 }
 
-export function getAllThreads(): Promise<Thread[]> {
-    const cachedThreads = boomerang.get("threads");
-    if (cachedThreads != null) {
-        return new Promise<Thread[]>(resolve => resolve(cachedThreads));
-    } else {
-        return GTX.query("getAllThreads", {})
-            .then((threads: Thread[]) => {
-                boomerang.set("threads", threads, 60);
-                threads.forEach(thread => boomerang.set(thread.id, thread));
-                return threads;
-            });
-    }
+export function getThreadsPriorTo(timestamp: number): Promise<Thread[]> {
+    return GTX.query("getThreadsPriorTo", { timestamp: timestamp })
+        .then((threads: Thread[]) => {
+            threads.forEach(thread => boomerang.set(thread.id, thread));
+            return threads;
+        });
+}
+
+export function getThreadsAfter(timestamp: number): Promise<Thread[]> {
+    return GTX.query("getThreadsAfter", { timestamp: timestamp })
+        .then((threads: Thread[]) => {
+            threads.forEach(thread => boomerang.set(thread.id, thread));
+            return threads;
+        });
 }
 
 export function getThreadsByUserId(userId: string): Promise<Thread[]> {
@@ -95,7 +97,7 @@ export function getThreadsByTag(tag: string): Promise<Thread[]> {
 }
 
 export function starRate(user: User, id: string) {
-    const {privKey, pubKey} = seedToKey(user.seed);
+    const { privKey, pubKey } = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("starRateThread", user.name, id);
@@ -104,7 +106,7 @@ export function starRate(user: User, id: string) {
 }
 
 export function removeStarRate(user: User, id: string) {
-    const {privKey, pubKey} = seedToKey(user.seed);
+    const { privKey, pubKey } = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("removeStarRateThread", user.name, id);
@@ -113,7 +115,7 @@ export function removeStarRate(user: User, id: string) {
 }
 
 export function getThreadStarRating(threadId: string): Promise<string[]> {
-    return GTX.query("getStarRatingForId", {id: threadId});
+    return GTX.query("getStarRatingForId", { id: threadId });
 }
 
 function getHashTags(inputText: string): string[] {
