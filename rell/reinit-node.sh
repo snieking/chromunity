@@ -1,5 +1,5 @@
 #!/bin/bash
 
-psql --host=localhost --dbname=ft --username=postchain -U postchain -c "drop schema chrotonomy cascade"
+psql --host=localhost --dbname=chrotonomy --username=postchain -U postchain -c "drop schema blockchain cascade"
 
 ./init-node.sh
