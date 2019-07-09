@@ -1,0 +1,7 @@
+include 'user/index';
+include 'thread/index';
+include 'notifications/index';
+include 'hashtag/index';
+include 'follow/index';
+include 'election/index';
+include 'representative/index';

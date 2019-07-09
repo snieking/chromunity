@@ -1,0 +1,7 @@
+
+class threadStarRate {
+    key id: text, user: user;
+}
+
+include 'operations';
+include 'queries';

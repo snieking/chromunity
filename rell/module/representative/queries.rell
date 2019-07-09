@@ -1,0 +1,5 @@
+query getRepresentatives(representativePeriodId: text) {
+    return representative@*{
+        .representativePeriodId == representativePeriodId
+    } ( .user.name );
+}

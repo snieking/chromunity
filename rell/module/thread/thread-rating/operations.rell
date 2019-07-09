@@ -1,0 +1,12 @@
+
+operation starRateThread(username: text, id: text) {
+    val user = user@{ .name == username };
+    require(is_signer(user.pubkey));
+    create threadStarRate(id, user);
+}
+
+operation removeStarRateThread(username: text, id: text) {
+    val user = user@{ .name == username };
+    require(is_signer(user.pubkey));
+    delete threadStarRate@{ .id == id, .user == user };
+}

@@ -1,0 +1,40 @@
+operation hideThread(username: text, threadId: text) {
+    val user = user@{ .name == username };
+    require(is_signer(user.pubkey));
+    log("User: ", user);
+
+    val currentRepresentativePeriod = representativeElection@{
+        .timestamp < op_context.last_block_time
+    } ( .id, -sort .timestamp ) limit 1;
+    log("Current representative period: ", currentRepresentativePeriod);
+
+    representative@{
+        .user == user,
+        .representativePeriodId == currentRepresentativePeriod.id
+    };
+
+    // Replace while we don't have a mutable index
+    val threadToReplace = thread@{ .id == threadId };
+    log("Thread to be hidden: ", threadToReplace.id);
+
+    // Delete thread tags created
+    delete threadTag@*{ .thread == threadToReplace };
+    log("Deleted thread tags for thread: ", threadToReplace.id);
+
+    for (t in thread@*{}) {
+        log("Found thread: ", t.id);
+    }
+
+    delete threadToReplace;
+    log("Deleted thread: ", threadToReplace.id);
+    log("Will re-create thread: ", threadToReplace.id);
+    create thread(
+        .id = threadToReplace.id,
+        .rootThreadId = threadToReplace.rootThreadId,
+        threadToReplace.author,
+        false,
+        .message = threadToReplace.message,
+        threadToReplace.timestamp
+    );
+    log("Re-created thread as hidden");
+}

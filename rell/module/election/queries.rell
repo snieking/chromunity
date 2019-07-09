@@ -1,0 +1,35 @@
+query getElectionVotes(electionId: text) {
+    return representativeElectionVote@*{
+        .representativeElection == representativeElection@{
+            .id == electionId
+        }
+    } ( .candidate.name );
+}
+
+query getElectionCandidates(electionId: text) {
+    val election = representativeElection@{ .id == electionId };
+    return representativeElectionCandidate @* {
+        .representativeElection == election
+    } ( .user.name );
+}
+
+query getNextElection(timestamp) {
+    return representativeElection@?{ .timestamp > timestamp } ( .id, -sort .timestamp ) limit 1;
+}
+
+query getUncompletedElection() {
+    return representativeElection@?{
+        .completed == false
+    } ( .id );
+}
+
+query getUserVoteInElection(name, electionId: text) {
+    return representativeElectionVote@?{
+        .user == user@{ .name == name },
+        .representativeElection == representativeElection@{ .id == electionId }
+    } ( .candidate.name );
+}
+
+query getCurrentRepresentativePeriod(timestamp) {
+    return representativeElection @? { .timestamp < timestamp } ( .id, -sort .timestamp ) limit 1;
+}

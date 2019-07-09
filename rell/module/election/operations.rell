@@ -1,0 +1,62 @@
+operation triggerElection(adminUser: text, id: text, timestamp) {
+    require(is_signer(admin@{ .user.name == adminUser}( .user.pubkey )));
+    log("Created election with id: " + id);
+    create representativeElection(id, timestamp, false);
+  }
+  
+  operation completeElection(adminUser: text, id: text, representatives: set<text>) {
+      require(is_signer(user@{ .name == adminUser }( .pubkey )));
+  
+      log("Searching for election with id: " + id);
+      update representativeElection@{ .id == id } (completed = true);
+  
+      for (representative in representatives) {
+          log("Searching for representative user: " + representative);
+          val user = user@{ .name == representative };
+          create representative(user, id);
+      }
+  }
+  
+  operation voteForCandidate(voter: name, candidate: name, electionId: text) {
+      val user = user@{ .name == voter };
+      require(is_signer(user.pubkey));
+      create representativeElectionVote(
+          user = user,
+          candidate = user@{ .name == candidate },
+          representativeElection@{ .id == electionId }
+      );
+  }
+  
+  operation update_vote_for_candidate(voter: name, candidate: name, electionId: text) {
+      val user = user@{ .name == voter };
+      require(is_signer(user.pubkey));
+  
+      val election = representativeElection@{ .id == electionId };
+      val election_candidate = representativeElectionCandidate@{
+          .representativeElection == election,
+          .user == user@{ .name == candidate }
+      };
+  
+      delete representativeElectionVote@?{
+          .user == user,
+          .representativeElection == election
+      };
+  
+      create representativeElectionVote(
+          user = user,
+          election,
+          candidate = user@{ .name == candidate }
+      );
+  }
+  
+  operation signUpForElection(name, electionId: text) {
+      val user = user@{ .name == name };
+      require(is_signer(user.pubkey));
+  
+      val election = representativeElection@{
+          .id == electionId,
+          .timestamp > op_context.last_block_time
+      };
+  
+      create representativeElectionCandidate(election, user);
+  }

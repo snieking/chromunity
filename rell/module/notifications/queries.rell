@@ -1,0 +1,16 @@
+query countUnreadUserNotifications(name) {
+    val user = user@{ .name == name };
+    return notification@*{ .user == user, .read == false } ( id = .thread.id );
+}
+
+query getAllUserNotifications(name) {
+    val user = user@{ .name == name };
+    return notification@*{ .user == user } (
+        threadId=.thread.id,
+        author=.thread.author.name,
+        rootThreadId=.thread.rootThreadId,
+        message=.thread.message,
+        .read,
+        -sort .timestamp
+    );
+}

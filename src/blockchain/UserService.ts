@@ -12,7 +12,7 @@ export function register(name: string, password: string, mnemonic: string) {
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("registerUser", name, pubKey);
     tx.sign(privKey, pubKey);
-    tx.postAndWaitConfirmation().catch(console.log);
+    return tx.postAndWaitConfirmation().catch(console.log);
 }
 
 export function login(name: string, password: string, mnemonic: string): Promise<User> {

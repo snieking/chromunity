@@ -1,0 +1,9 @@
+operation createThreadTag(username: text, tags: set<text>, threadId: text) {
+    val user = user@{ .name == username};
+    require(is_signer(user.pubkey));
+
+    val thread = thread@{ .id == threadId };
+    for(tag in tags) {
+    create threadTag(name = tag, thread, op_context.last_block_time);
+    }
+}

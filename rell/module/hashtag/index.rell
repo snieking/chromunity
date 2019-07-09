@@ -1,0 +1,7 @@
+class threadTag {
+    key name, thread;
+    index timestamp;
+}
+
+include 'operations';
+include 'queries';

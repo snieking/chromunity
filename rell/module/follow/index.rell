@@ -1,0 +1,6 @@
+class follow {
+    key follower: user, follows: user;
+}
+
+include 'operations';
+include 'queries';

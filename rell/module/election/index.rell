@@ -1,0 +1,18 @@
+class representativeElection {
+    key id: text;
+    index timestamp;
+    mutable completed: boolean;
+    index completed;
+}
+
+class representativeElectionCandidate {
+  key representativeElection, user;
+}
+
+class representativeElectionVote {
+    key user, representativeElection;
+    index candidate: user;
+}
+
+include 'operations';
+include 'queries';

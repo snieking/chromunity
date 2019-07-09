@@ -1,0 +1,3 @@
+query getStarRatingForId(id: text) {
+    return threadStarRate@*{ .id == id } ( .user.name );
+}

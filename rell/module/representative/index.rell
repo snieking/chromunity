@@ -1,0 +1,6 @@
+class representative {
+    key user, representativePeriodId: text;
+}
+
+include 'operations';
+include 'queries';
