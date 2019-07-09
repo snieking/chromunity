@@ -1,0 +1,4 @@
+
+query getUser(name) {
+    return user@{ .name == name } ( .name, .pubkey, .registered );
+}

@@ -1,0 +1,58 @@
+query getAllThreads() {
+    return thread @* { .visible == true }(
+        .id,
+        author=.author.name,
+        rootThreadId=.rootThreadId,
+        .message,
+        -sort .timestamp
+    );
+}
+
+query getSubThreads(rootThreadId: text) {
+    return thread@*{
+        .rootThreadId == rootThreadId,
+        .visible == true
+    }(
+        .id,
+        author=.author.name,
+        rootThreadId=.rootThreadId,
+        .message,
+        sort .timestamp
+    );
+}
+
+query getThreadsByUserId(name) {
+    return thread@*{
+        user@{ .name == name },
+        .visible == true
+    }(
+        .id,
+        author=.author.name,
+        rootThreadId=.rootThreadId,
+        .message,
+        -sort .timestamp
+    );
+}
+
+query getThreadById(id: text) {
+    return thread@{
+        .id == id,
+        .visible == true
+    }(
+        .id,
+        author=.author.name,
+        rootThreadId=.rootThreadId,
+        .message
+    );
+}
+
+query getThreadByIdIncludingNonVisible(id: text) {
+    return thread@{
+        .id == id
+    }(
+        .id,
+        author=.author.name,
+        rootThreadId=.rootThreadId,
+        .message
+    );
+}

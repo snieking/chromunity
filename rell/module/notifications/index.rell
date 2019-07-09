@@ -1,0 +1,8 @@
+class notification {
+    key thread, user;
+    mutable read: boolean;
+    timestamp;
+}
+
+include 'operations';
+include 'queries';

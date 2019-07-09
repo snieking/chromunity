@@ -1,0 +1,17 @@
+query getThreadsByTag(tag: text) {
+    return threadTag@*{ .name == tag } (
+        id=.thread.id,
+        author=.thread.author.name,
+        rootThreadId=.thread.rootThreadId,
+        message=.thread.message,
+        -sort timestamp=.thread.timestamp
+    );
+}
+
+query getAllTags() {
+    return threadTag@*{} ( .name );
+}
+
+query getTagsSince(timestamp) {
+    return threadTag@*{ .timestamp > timestamp }( .name );
+}

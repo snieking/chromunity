@@ -1,0 +1,8 @@
+
+query getUserFollowers(name) {
+    return follow@*{ .follows == user @ { .name == name} }(.follower.name);
+}
+
+query getUserFollows(name) {
+    return follow@*{ .follower == user@{ .name == name } } ( .follows.name );
+}

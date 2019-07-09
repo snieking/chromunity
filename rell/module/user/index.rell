@@ -1,0 +1,12 @@
+class admin {
+    user;
+}
+
+class user {
+    key name;
+    index pubkey;
+    registered: integer;
+}
+
+include 'operations';
+include 'queries';
