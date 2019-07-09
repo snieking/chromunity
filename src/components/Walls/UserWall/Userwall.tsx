@@ -22,10 +22,10 @@ export interface UserWallState {
     id: string;
     truncated: boolean;
     timestampOnOldestThread: number;
-    existsOlder: boolean;
 }
 
-const chromiaTheme = createMuiTheme({ palette: { primary: { main: "#FFAFC1" } } })
+const chromiaTheme = createMuiTheme({ palette: { primary: { main: "#FFAFC1" } } });
+const threadsPageLimit: number = 25;
 
 export class UserWall extends React.Component<UserWallProps, UserWallState> {
 
@@ -36,7 +36,6 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
             id: "",
             truncated: true,
             timestampOnOldestThread: Date.now(),
-            existsOlder: true
         };
 
         this.retrieveThreads = this.retrieveThreads.bind(this);
@@ -68,8 +67,6 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
                         this.setState(prevState => ({
                             threads: prevState.threads.concat(retrievedThreads)
                         }));
-                    } else {
-                        this.setState({ existsOlder: false })
                     }
                 });
         }
@@ -84,7 +81,8 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
     }
 
     renderLoadMoreButton() {
-        if (this.state.existsOlder && this.state.threads.length % 25 === 0) {
+        if (this.state.threads.length >= threadsPageLimit && 
+            this.state.threads.length % threadsPageLimit === 0) {
             return (
                 <MuiThemeProvider theme={chromiaTheme}>
                     <Button type="submit" fullWidth color="primary"

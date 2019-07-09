@@ -1,5 +1,8 @@
-query getThreadsByTag(tag: text) {
-    return threadTag@*{ .name == tag } (
+query getThreadsByTagPriorToTimestamp(tag: text, timestamp) {
+    return threadTag@*{ 
+        .name == tag,
+        .thread.timestamp < timestamp
+    } (
         id=.thread.id,
         author=.thread.author.name,
         rootThreadId=.thread.rootThreadId,

@@ -21,10 +21,10 @@ export interface TagWallState {
     id: string;
     truncated: boolean;
     timestampOnOldestThread: number;
-    existsOlder: boolean;
 }
 
 const chromiaTheme = createMuiTheme({ palette: { primary: { main: "#FFAFC1" } } })
+const threadsPageLimit: number = 25;
 
 export class TagWall extends React.Component<TagWallProps, TagWallState> {
 
@@ -35,7 +35,6 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
             id: "",
             truncated: true,
             timestampOnOldestThread: Date.now(),
-            existsOlder: true
         };
 
         this.retrieveThreads = this.retrieveThreads.bind(this);
@@ -66,15 +65,14 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
                         this.setState(prevState => ({
                             threads: prevState.threads.concat(retrievedThreads)
                         }));
-                    } else {
-                        this.setState({ existsOlder: false })
                     }
                 });
         }
     }
 
     renderLoadMoreButton() {
-        if (this.state.existsOlder && this.state.threads.length % 25 === 0) {
+        if (this.state.threads.length >= threadsPageLimit && 
+            this.state.threads.length % threadsPageLimit === 0) {
             return (
                 <MuiThemeProvider theme={chromiaTheme}>
                     <Button type="submit" fullWidth color="primary"

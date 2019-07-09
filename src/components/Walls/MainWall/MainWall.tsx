@@ -1,7 +1,7 @@
 import React from 'react';
 import '../Wall.css';
 import { Container, Button, createMuiTheme } from "@material-ui/core";
-import { getThreadsPriorTo } from "../../../blockchain/MessageService";
+import { getThreadsPriorTo, getThreadsFromFollowsPriorToTimestamp } from "../../../blockchain/MessageService";
 import { Thread } from "../../../types";
 
 import { ThreadCard } from "../../ThreadCard/ThreadCard";
@@ -19,7 +19,7 @@ export interface MainWallState {
     truncated: boolean;
     displayFollowersOnlySwitch: boolean;
     followersOnly: boolean;
-    existsOlder: boolean;
+    //existsOlder: boolean;
 }
 
 function shouldDisplayFollowersOnlySwitch(): boolean {
@@ -27,6 +27,7 @@ function shouldDisplayFollowersOnlySwitch(): boolean {
 }
 
 const chromiaTheme = createMuiTheme({ palette: { primary: { main: "#FFAFC1" } } })
+const threadsPageLimit: number = 25;
 
 export class MainWall extends React.Component<{}, MainWallState> {
 
@@ -37,8 +38,7 @@ export class MainWall extends React.Component<{}, MainWallState> {
             id: "",
             truncated: true,
             displayFollowersOnlySwitch: shouldDisplayFollowersOnlySwitch(),
-            followersOnly: false,
-            existsOlder: true
+            followersOnly: false
         };
 
         this.retrieveNewThreads = this.retrieveNewThreads.bind(this);
@@ -50,29 +50,40 @@ export class MainWall extends React.Component<{}, MainWallState> {
     }
 
     retrieveNewThreads() {
-        getThreadsPriorTo(Date.now())
-            .then(retrievedThreads => {
-                if (retrievedThreads.length > 0) {
-                    this.setState(prevState => ({
-                        threads: retrievedThreads.concat(prevState.threads)
-                    }));
-                }
-            });
+        var threads: Promise<Thread[]>;
+        if (this.state.followersOnly) {
+            threads = getThreadsFromFollowsPriorToTimestamp(getUser(), Date.now());
+        } else {
+            threads = getThreadsPriorTo(Date.now());
+        }
+
+        threads.then(retrievedThreads => {
+            if (retrievedThreads.length > 0) {
+                this.setState(prevState => ({
+                    threads: retrievedThreads.concat(prevState.threads)
+                }));
+            }
+        });
     }
 
     retrieveOlderThreads() {
         if (this.state.threads.length > 0) {
             const oldestTimestamp: number = this.state.threads[this.state.threads.length - 1].timestamp;
-            getThreadsPriorTo(oldestTimestamp)
-                .then(retrievedThreads => {
-                    if (retrievedThreads.length > 0) {
-                        this.setState(prevState => ({
-                            threads: prevState.threads.concat(retrievedThreads)
-                        }));
-                    } else {
-                        this.setState({ existsOlder: false })
-                    }
-                });
+
+            var threads: Promise<Thread[]>;
+            if (this.state.followersOnly) {
+                threads = getThreadsFromFollowsPriorToTimestamp(getUser(), oldestTimestamp);
+            } else {
+                threads = getThreadsPriorTo(oldestTimestamp);
+            }
+
+            threads.then(retrievedThreads => {
+                if (retrievedThreads.length > 0) {
+                    this.setState(prevState => ({
+                        threads: prevState.threads.concat(retrievedThreads)
+                    }));
+                }
+            });
         }
     }
 
@@ -95,11 +106,14 @@ export class MainWall extends React.Component<{}, MainWallState> {
     }
 
     toggleFollowersOnly() {
-        this.setState(prevState => ({ followersOnly: !prevState.followersOnly }));
+        this.setState(prevState => ({
+            followersOnly: !prevState.followersOnly, threads: []
+        }), () => this.retrieveNewThreads());
     }
 
     renderLoadMoreButton() {
-        if (this.state.existsOlder && this.state.threads.length % 25 === 0) {
+        if (this.state.threads.length >= threadsPageLimit &&
+            this.state.threads.length % threadsPageLimit === 0) {
             return (
                 <MuiThemeProvider theme={chromiaTheme}>
                     <Button type="submit" fullWidth color="primary"

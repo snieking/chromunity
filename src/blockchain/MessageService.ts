@@ -78,6 +78,10 @@ export function getThreadsByUserIdPriorToTimestamp(userId: string, timestamp: nu
     return GTX.query("getThreadsByUserIdPriorToTimestamp", { name: userId, timestamp: timestamp });
 }
 
+export function getThreadsFromFollowsPriorToTimestamp(user: User, timestamp: number): Promise<Thread[]> {
+    return GTX.query("getThreadsPriorToForFollowers", { name: user.name, timestamp: timestamp });
+}
+
 export function getThreadById(threadId: string): Promise<Thread> {
     const thread: Thread = boomerang.get(threadId);
 
