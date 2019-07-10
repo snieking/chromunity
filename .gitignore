@@ -30,3 +30,4 @@ config.js
 .idea/
 
 *.pid
+package-lock.json
