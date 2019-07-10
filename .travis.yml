@@ -1,0 +1,30 @@
+---
+language: generic
+jdk: "openjdk8"
+node_js: "9.8"
+
+dist: trusty
+
+services:
+  - postgresql
+
+addons:
+  postgresql: "9.6"
+
+before_script:
+  - npm i yarn
+  - bash rell/install-postgres-10.sh
+  - psql -c "create database chrotonomy;" -U postgres
+  - psql -c "create role postchain LOGIN ENCRYPTED PASSWORD 'postchain';" -U postgres
+  - psql -c "grant ALL ON DATABASE chrotonomy TO postchain;" -U postgres
+
+cache:
+  directories:
+    - node_modules
+
+script:
+  - cd rell
+  - ./init-node.sh
+  - ./run-node.sh &
+  - npm install
+  - npm run test-bc
