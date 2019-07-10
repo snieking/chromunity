@@ -1,12 +1,12 @@
 import * as React from 'react';
-import {register} from '../../../blockchain/UserService';
-import {Redirect} from 'react-router-dom'
+import { register } from '../../../blockchain/UserService';
+import { Redirect } from 'react-router-dom'
 import '../../../styles/fade.css';
 import './Register.css';
 
 import AccountCircle from '@material-ui/icons/AccountCircle'
-import {Button, Chip, Typography} from "@material-ui/core";
-import {generateRandomMnemonic} from "../../../blockchain/CryptoService";
+import { Button, Chip, Typography } from "@material-ui/core";
+import { generateRandomMnemonic } from "../../../blockchain/CryptoService";
 
 export interface RegisterProps {
 
@@ -88,12 +88,15 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
     generateMnemonicChip(mnemonic: string) {
         if (this.state.currentClickableMnemonic === mnemonic) {
             return (
-                <Chip key={"mnemonic-" + mnemonic} label={mnemonic} onDelete={this.handleMnemonicClicked}
-                      color="primary"/>
+                <Chip key={"mnemonic-" + mnemonic}
+                    label={mnemonic}
+                    clickable onClick={this.handleMnemonicClicked}
+                    style={{backgroundColor: '#FFAFC1'}}
+                />
             )
         } else {
             return (
-                <Chip key={"mnemonic-" + mnemonic} label={mnemonic}/>
+                <Chip key={"mnemonic-" + mnemonic} label={mnemonic} />
             )
         }
     }
@@ -115,7 +118,7 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
                     <Button type="submit" color="primary" onClick={() => this.copyMnemonicToClipboard()}>
                         Copy to clipboard
                     </Button>
-                    <br/>
+                    <br />
                     <Typography variant="body2" color="textSecondary" component="p">
                         Save your mnemonic seed, you will need it later
                     </Typography>
@@ -131,7 +134,7 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
                     <Typography variant="body2" color="textSecondary" component="p">
                         Click the marked phrases
                     </Typography>
-                    <br/>
+                    <br />
                 </div>
             )
         }
@@ -139,35 +142,35 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
 
     render() {
         if (this.state.redirect === true) {
-            return <Redirect to='/user/login'/>
+            return <Redirect to='/user/login' />
         }
 
         return (
             <div className="wrapper fadeInDown">
                 <div id="formContent">
-                    <br/>
+                    <br />
                     <div className="fadeIn first">
-                        <AccountCircle fontSize="large"/>
+                        <AccountCircle fontSize="large" />
                     </div>
 
                     <input type="text" id="login" className="fadeIn second" name="register" placeholder="user"
-                           onChange={this.handleUsernameChange}/>
+                        onChange={this.handleUsernameChange} />
                     <input type="password" id="password" className="fadeIn third" name="register"
-                           placeholder="password"
-                           onChange={this.handlePasswordChange}/>
+                        placeholder="password"
+                        onChange={this.handlePasswordChange} />
 
                     <div className="mnemonic-area">
                         {this.renderMnemonicDescription()}
                         {this.state.generatedMnemonics.map(mnemonic => this.generateMnemonicChip(mnemonic))}
-                        <br/>
-                        <br/>
+                        <br />
+                        <br />
                         <input type="text" readOnly id="mnemonic" className="fadeIn second"
-                               value={this.state.reBuiltMnemonics}/>
-                        <br/>
+                            value={this.state.reBuiltMnemonics} />
+                        <br />
                         {this.renderCopyToClipboardButton()}
-                        <br/>
+                        <br />
                     </div>
-                    <input type="button" className="fadeIn fourth" value="Register" onClick={this.signUp}/>
+                    <input type="button" className="fadeIn fourth" value="Register" onClick={this.signUp} />
                 </div>
             </div>
         );
@@ -193,6 +196,6 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
 
     private signUp() {
         register(this.state.username, this.state.password, this.state.reBuiltMnemonics);
-        this.setState({redirect: true});
+        this.setState({ redirect: true });
     }
 }
