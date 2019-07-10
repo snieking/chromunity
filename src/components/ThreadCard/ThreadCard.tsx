@@ -35,6 +35,7 @@ import {
     DialogTitle
 } from "@material-ui/core";
 import { setThreadNotVisible } from "../../blockchain/RepresentativesService";
+import { timeAgoReadable } from "../../util/util";
 
 export interface ThreadCardProps {
     thread: Thread;
@@ -195,6 +196,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
     renderTruncatedThreadCard() {
         return (
             <Card raised={true} key={this.props.thread.id} className="thread-card">
+                {this.renderTimeAgo(this.props.thread.timestamp)}
                 {this.renderCardContent(this.props.thread.message)}
                 {this.renderCardActions(true)}
             </Card>
@@ -205,6 +207,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         return (
             <div>
                 <Card raised={true} key={this.props.thread.id} className="thread-card">
+                    {this.renderTimeAgo(this.props.thread.timestamp)}
                     {this.renderCardContent(this.props.thread.message)}
                     {this.renderCardActions(false)}
                 </Card>
@@ -337,6 +340,14 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
                 </CardActions>
             );
         }
+    }
+
+    renderTimeAgo(timestamp: number) {
+        return (
+            <Typography className="thread-timestamp" variant="body2" component="span">
+                {timeAgoReadable(timestamp)}
+            </Typography>
+        )
     }
 
     renderReadMoreButton(renderReadMoreButton: boolean) {

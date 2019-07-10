@@ -23,21 +23,23 @@ describe('User Authentication', () => {
     };
 
 
-    it("register user " + user01.name, async () => {
+    it("register user " + user01.name, async done => {
         expect.assertions(1);
         
         await expect(register(user01.name, user01.password, user01.mnemonic)).resolves.toBe(null);
         console.log("Registered", user01.name, " with mnemonic", user01.mnemonic);
+        done();
     });
 
-    it("register and login admin user", async () => {
+    it("register and login admin user", async done => {
         expect.assertions(1);
 
         await expect(register(admin.name, admin.password, admin.mnemonic)).resolves.toBe(null);
         console.log("Registered", admin.name, "with mnemonic", admin.mnemonic);
+        done();
     });
 
-    it("login user " + user01.name, async () => {
+    it("login user " + user01.name, async done => {
         expect.assertions(3);
 
         const user: User = await login(user01.name, user01.password, user01.mnemonic);
@@ -46,5 +48,6 @@ describe('User Authentication', () => {
         expect(user).toBeDefined();
         expect(user.name).toBe(user01.name);
         expect(user.seed).toBeDefined();
+        done();
     });
 });
