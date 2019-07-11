@@ -12,6 +12,7 @@ describe("user utilities tests", () => {
         expect(localStorage.getItem("mnemonic")).toBeDefined();
         expect(localStorage.getItem("mnemonic")).not.toBe(mnemonic);
         expect(getMnemonic()).toBe(mnemonic);
+        done();
     });
 
     it("user cached in sessionStorage encrypted", async done => {
@@ -19,11 +20,15 @@ describe("user utilities tests", () => {
         expect(sessionStorage.getItem("user")).toBeDefined();
         expect(sessionStorage.getItem("user")).not.toBe(user);
         expect(getUser()).toBe(user);
+        done();
     });
 
     it("representative status cached in sessionStorage encrypted", async done => {
-        expect(isRepresentative()).toBe(false);
-        expect(sessionStorage.getItem("representative")).not.toBe(false);
+        isRepresentative().then(bool => {
+            expect(bool).toBe(false);
+            expect(sessionStorage.getItem("representative")).not.toBe(false);
+            done();
+        });
     });
 
 });
