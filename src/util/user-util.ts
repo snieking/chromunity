@@ -2,8 +2,8 @@ import {User} from "../types";
 import * as BoomerangCache from "boomerang-cache";
 import {getCurrentRepresentativePeriod, getRepresentatives} from "../blockchain/RepresentativesService";
 
-const LOCAL_CACHE = BoomerangCache.create('local-bucket', {storage: 'local', encrypt: false});
-const SESSION_CACHE = BoomerangCache.create('session-bucket', {storage: 'session', encrypt: false});
+const LOCAL_CACHE = BoomerangCache.create('local-bucket', {storage: 'local', encrypt: true});
+const SESSION_CACHE = BoomerangCache.create('session-bucket', {storage: 'session', encrypt: true});
 
 const USER_KEY = "user";
 const MNEMONIC_KEY = "mnemonic";
