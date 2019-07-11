@@ -35,7 +35,7 @@ import {
     DialogTitle
 } from "@material-ui/core";
 import { setThreadNotVisible } from "../../blockchain/RepresentativesService";
-import { timeAgoReadable } from "../../util/util";
+import { timeAgoReadable, needsToBeSliced } from "../../util/util";
 
 export interface ThreadCardProps {
     thread: Thread;
@@ -191,7 +191,11 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         return (
             <Card raised={true} key={this.props.thread.id} className="thread-card">
                 {this.renderTimeAgo(this.props.thread.timestamp)}
-                {this.renderCardContent(this.props.thread.message)}
+                {
+                    needsToBeSliced(this.props.thread.message)
+                        ? this.renderCardContent(this.props.thread.message.slice(0, 300) + "...")
+                        : this.renderCardContent(this.props.thread.message)
+                }
                 {this.renderCardActions(true)}
             </Card>
         );
@@ -227,19 +231,22 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
     renderAuthor() {
         if (!this.props.isUserPage) {
             return (
-                <Typography
-                    gutterBottom
-                    variant="h6"
-                    component="h6"
-                    className="typography"
-                >
-                    <Link
-                        className="pink-typography"
-                        to={"/u/" + this.props.thread.author}
+                <div>
+                    <Typography
+                        gutterBottom
+                        variant="h6"
+                        component="h6"
+                        className="typography"
                     >
-                        @{this.props.thread.author}
-                    </Link>
-                </Typography>
+                        <Link
+                            className="pink-typography"
+                            to={"/u/" + this.props.thread.author}
+                        >
+                            @{this.props.thread.author}
+                        </Link>
+                    </Typography>
+                    <img src={"https://i.pravatar.cc/84"} className="author-avatar" alt="Profile Avatar" />
+                </div>
             );
         }
     }

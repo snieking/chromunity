@@ -38,3 +38,7 @@ export function timeAgoReadable(timestamp: number): string {
         return `${minutesAgo} ${minutesAgo === 1 ? "minute" : "minutes"} ago`;
     }
 }
+
+export function needsToBeSliced(message: string): boolean {
+    return message.length > 300;
+}

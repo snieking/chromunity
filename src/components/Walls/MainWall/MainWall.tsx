@@ -19,7 +19,6 @@ export interface MainWallState {
     truncated: boolean;
     displayFollowersOnlySwitch: boolean;
     followersOnly: boolean;
-    //existsOlder: boolean;
 }
 
 function shouldDisplayFollowersOnlySwitch(): boolean {

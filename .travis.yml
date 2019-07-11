@@ -28,3 +28,4 @@ script:
   - ./run-node.sh &
   - npm install
   - npm run test-bc
+  - npm run coveralls

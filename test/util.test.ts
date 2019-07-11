@@ -1,4 +1,4 @@
-import { timeAgoReadable, sortByFrequency } from "../src/util/util";
+import { timeAgoReadable, sortByFrequency, needsToBeSliced } from "../src/util/util";
 
 jest.setTimeout(30000);
 
@@ -46,6 +46,27 @@ describe("Sorting by frequently tests", () => {
         expect(timeAgoReadable(Date.now())).toBe("0 minutes ago");
         expect(timeAgoReadable(Date.now() - minuteInMillis)).toBe("1 minute ago");
         expect(timeAgoReadable(Date.now() - (minuteInMillis * 2))).toBe("2 minutes ago");
+        done();
+    });
+
+});
+
+describe("message should be sliced tests", () => {
+
+    it("message longer than 300 chars should be sliced", async done => {
+        expect(needsToBeSliced("a".repeat(350))).toBe(true);
+        done();
+    });
+
+    it("message shorter than 300 chars should not be sliced", async done => {
+        expect(needsToBeSliced("a".repeat(250))).toBe(false);
+        done();
+    });
+
+    it("message with 300 chars should not be sliced", async done => {
+        const message: string = "a".repeat(300);
+        expect(message.length).toBe(300);
+        expect(needsToBeSliced("a".repeat(300))).toBe(false);
         done();
     });
 
