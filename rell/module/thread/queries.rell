@@ -51,6 +51,20 @@ query getThreadsByUserIdPriorToTimestamp(name, timestamp) {
     );
 }
 
+query getThreadsAfterTimestampForFollows(name, timestamp) {
+    return thread@*{
+        user@{ .name == name },
+        .visible == true,
+        .timestamp > timestamp
+    }(
+        .id,
+        author=.author.name,
+        rootThreadId=.rootThreadId,
+        .message,
+        -sort .timestamp
+    );
+}
+
 query getThreadById(id: text) {
     return thread@{
         .id == id,

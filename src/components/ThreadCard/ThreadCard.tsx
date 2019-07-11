@@ -71,9 +71,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         };
 
         this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
-        this.closeHideThreadConfirmDialog = this.closeHideThreadConfirmDialog.bind(
-            this
-        );
+        this.closeHideThreadConfirmDialog = this.closeHideThreadConfirmDialog.bind(this);
         this.hideThread = this.hideThread.bind(this);
         this.toggleHideConfirmation = this.toggleHideConfirmation.bind(this);
     }
@@ -106,13 +104,9 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
     }
 
     handleReplySubmit(): void {
-        createSubThread(
-            getUser(),
-            this.props.thread.id,
-            this.props.thread.author,
-            this.state.replyMessage
-        ).then(() => getSubThreadsByParentId(this.props.thread.id)
-            .then(threads => this.setState({ subThreads: threads })));
+        createSubThread(getUser(), this.props.thread.id, this.props.thread.author, this.state.replyMessage)
+            .then(() => getSubThreadsByParentId(this.props.thread.id)
+                .then(threads => this.setState({ subThreads: threads })));
         this.setState({ replyMessage: "" });
         this.toggleReplyBox();
     }

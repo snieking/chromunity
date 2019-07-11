@@ -1,7 +1,7 @@
 import React from 'react';
 import '../Wall.css';
 import { Container, Button, createMuiTheme } from "@material-ui/core";
-import { getThreadsPriorTo, getThreadsFromFollowsPriorToTimestamp } from "../../../blockchain/MessageService";
+import { getThreadsPriorTo, getThreadsFromFollowsPriorToTimestamp, getThreadsAfter } from "../../../blockchain/MessageService";
 import { Thread } from "../../../types";
 
 import { ThreadCard } from "../../ThreadCard/ThreadCard";
@@ -46,10 +46,6 @@ export class MainWall extends React.Component<{}, MainWallState> {
     }
 
     componentDidMount(): void {
-        this.retrieveNewThreads();
-    }
-
-    retrieveNewThreads() {
         var threads: Promise<Thread[]>;
         if (this.state.followersOnly) {
             threads = getThreadsFromFollowsPriorToTimestamp(getUser(), Date.now());
@@ -60,7 +56,34 @@ export class MainWall extends React.Component<{}, MainWallState> {
         threads.then(retrievedThreads => {
             if (retrievedThreads.length > 0) {
                 this.setState(prevState => ({
-                    threads: retrievedThreads.concat(prevState.threads)
+                    threads: Array.from(new Set(retrievedThreads.concat(prevState.threads)))
+                }));
+            }
+        });
+    }
+
+    retrieveNewThreads() {
+        var threads: Promise<Thread[]>;
+        const latestThread: Thread = this.state.threads[0];
+
+        if (latestThread == null) {
+            if (this.state.followersOnly) {
+                threads = getThreadsFromFollowsPriorToTimestamp(getUser(), Date.now());
+            } else {
+                threads = getThreadsPriorTo(Date.now());
+            }
+        } else {
+            if (this.state.followersOnly) {
+                
+            } else {
+                threads = getThreadsAfter(this.state.threads[0].timestamp);
+            }
+        }
+
+        threads.then(retrievedThreads => {
+            if (retrievedThreads.length > 0) {
+                this.setState(prevState => ({
+                    threads: Array.from(new Set(retrievedThreads.concat(prevState.threads)))
                 }));
             }
         });
@@ -80,7 +103,7 @@ export class MainWall extends React.Component<{}, MainWallState> {
             threads.then(retrievedThreads => {
                 if (retrievedThreads.length > 0) {
                     this.setState(prevState => ({
-                        threads: prevState.threads.concat(retrievedThreads)
+                        threads: Array.from(new Set(prevState.threads.concat(retrievedThreads)))
                     }));
                 }
             });
