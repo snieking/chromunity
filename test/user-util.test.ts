@@ -9,24 +9,25 @@ describe("user utilities tests", () => {
     it("mnemonic cached in localstorage encrypted", async done => {
         const mnemonic: string = "car boat airplane";
         setMnemonic(mnemonic);
-        expect(localStorage.getItem("mnemonic")).toBeDefined();
-        expect(localStorage.getItem("mnemonic")).not.toBe(mnemonic);
+        expect(localStorage.getItem("local-bucket:mnemonic")).toBeDefined();
+        expect(localStorage.getItem("local-bucket:mnemonic")).not.toBe(mnemonic);
         expect(getMnemonic()).toBe(mnemonic);
         done();
     });
 
     it("user cached in sessionStorage encrypted", async done => {
         setUser(user);
-        expect(sessionStorage.getItem("user")).toBeDefined();
-        expect(sessionStorage.getItem("user")).not.toBe(user);
-        expect(getUser()).toBe(user);
+        expect(sessionStorage.getItem("session-bucket:user")).toBeDefined();
+        expect(sessionStorage.getItem("session-bucket:user")).not.toMatch(/snieking/);
+        expect(getUser().name).toBe(user.name);
+        expect(getUser().seed).toBe(user.seed);
         done();
     });
 
     it("representative status cached in sessionStorage encrypted", async done => {
         isRepresentative().then(bool => {
             expect(bool).toBe(false);
-            expect(sessionStorage.getItem("representative")).not.toBe(false);
+            expect(sessionStorage.getItem("session-bucket:representative")).not.toBe(false);
             done();
         });
     });
