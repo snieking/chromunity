@@ -28,7 +28,7 @@
     "test": "react-scripts test",
     "test-bc": "jest",
     "eject": "react-scripts eject",
-    "coveralls": "jest --coverage && cat ./tests/coverage/lcov.info | coveralls"
+    "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls"
   },
   "eslintConfig": {
     "extends": "react-app"
