@@ -27,5 +27,4 @@ script:
   - ./init-node.sh
   - ./run-node.sh &
   - npm install
-  - npm run test-bc
   - npm run coveralls
