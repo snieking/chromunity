@@ -1,7 +1,7 @@
 import React from 'react';
 import '../Wall.css';
 import { Container, Button, createMuiTheme } from "@material-ui/core";
-import { getThreadsPriorTo, getThreadsFromFollowsPriorToTimestamp, getThreadsAfter } from "../../../blockchain/MessageService";
+import { getThreadsPriorTo, getThreadsFromFollowsPriorToTimestamp, getThreadsAfter, getThreadsFromFollowsAfterTimestamp } from "../../../blockchain/MessageService";
 import { Thread } from "../../../types";
 
 import { ThreadCard } from "../../ThreadCard/ThreadCard";
@@ -46,20 +46,7 @@ export class MainWall extends React.Component<{}, MainWallState> {
     }
 
     componentDidMount(): void {
-        var threads: Promise<Thread[]>;
-        if (this.state.followersOnly) {
-            threads = getThreadsFromFollowsPriorToTimestamp(getUser(), Date.now());
-        } else {
-            threads = getThreadsPriorTo(Date.now());
-        }
-
-        threads.then(retrievedThreads => {
-            if (retrievedThreads.length > 0) {
-                this.setState(prevState => ({
-                    threads: Array.from(new Set(retrievedThreads.concat(prevState.threads)))
-                }));
-            }
-        });
+        this.retrieveNewThreads();
     }
 
     retrieveNewThreads() {
@@ -74,7 +61,7 @@ export class MainWall extends React.Component<{}, MainWallState> {
             }
         } else {
             if (this.state.followersOnly) {
-                
+                threads = getThreadsFromFollowsAfterTimestamp(getUser(), latestThread.timestamp);
             } else {
                 threads = getThreadsAfter(this.state.threads[0].timestamp);
             }
