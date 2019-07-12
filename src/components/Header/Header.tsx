@@ -1,19 +1,14 @@
 import React from 'react';
-import './Header.css';
 import HeaderNav from "./HeaderNav/HeaderNav";
 import {Sidebar} from "./Sidebar/Sidebar";
-
-export interface HeaderProps {
-
-}
 
 export interface HeaderState {
     sidebarOpen: boolean
 }
 
-export class Header extends React.Component<HeaderProps, HeaderState> {
+export class Header extends React.Component<{}, HeaderState> {
 
-    constructor(props: HeaderProps) {
+    constructor(props: any) {
         super(props);
 
         this.state = { sidebarOpen: false };
@@ -32,4 +27,4 @@ export class Header extends React.Component<HeaderProps, HeaderState> {
             </div>
         );
     }
-};
+}

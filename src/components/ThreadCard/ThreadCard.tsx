@@ -74,6 +74,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         this.closeHideThreadConfirmDialog = this.closeHideThreadConfirmDialog.bind(this);
         this.hideThread = this.hideThread.bind(this);
         this.toggleHideConfirmation = this.toggleHideConfirmation.bind(this);
+        this.updateRatingStatus = this.updateRatingStatus.bind(this);
     }
 
     static isRatedByMe(upvoters: string[]): boolean {
@@ -115,13 +116,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         const parentId: string = this.props.thread.id;
 
         if (parentId !== null) {
-            getThreadStarRating(parentId).then(usersWhoRated => {
-                const ratedByMe: boolean = ThreadCard.isRatedByMe(usersWhoRated);
-                this.setState({
-                    stars: usersWhoRated.length,
-                    ratedByMe: ratedByMe
-                });
-            });
+            this.updateRatingStatus(parentId);
         }
 
         isRepresentative().then(bool => this.setState({ isRepresentative: bool }));
@@ -131,17 +126,21 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         const parentId: string = nextProps.thread.id;
 
         if (parentId !== null) {
-            getThreadStarRating(parentId).then(usersWhoRated => {
-                const ratedByMe: boolean = ThreadCard.isRatedByMe(usersWhoRated);
-                this.setState({
-                    stars: usersWhoRated.length,
-                    ratedByMe: ratedByMe
-                });
-            });
+            this.updateRatingStatus(parentId);
             getSubThreadsByParentId(parentId).then(threads =>
                 this.setState({ subThreads: threads })
             );
         }
+    }
+
+    updateRatingStatus(parentId: string) {
+        getThreadStarRating(parentId).then(usersWhoRated => {
+            const ratedByMe: boolean = ThreadCard.isRatedByMe(usersWhoRated);
+            this.setState({
+                stars: usersWhoRated.length,
+                ratedByMe: ratedByMe
+            });
+        });
     }
 
     toggleStarRate() {
@@ -401,12 +400,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
 
     render() {
         if (this.state.redirectToFullCard) {
-            return (
-                <Redirect
-                    key={"red-" + this.props.thread.id}
-                    to={this.getRootPostId()}
-                />
-            );
+            return (<Redirect key={"red-" + this.props.thread.id} to={this.getRootPostId()}/>);
         } else if (this.props.truncated) {
             return this.renderTruncatedThreadCard();
         } else {

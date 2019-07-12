@@ -59,15 +59,15 @@ export function createSubThread(user: User, rootThreadId: string, rootThreadAuth
 }
 
 export function getThreadsPriorTo(timestamp: number): Promise<Thread[]> {
-    return GTX.query("getThreadsPriorTo", { timestamp: timestamp })
-        .then((threads: Thread[]) => {
-            threads.forEach(thread => boomerang.set(thread.id, thread));
-            return threads;
-        });
+    return getThreadsForTimestamp(timestamp, "getThreadsPriorTo");
 }
 
 export function getThreadsAfter(timestamp: number): Promise<Thread[]> {
-    return GTX.query("getThreadsAfter", { timestamp: timestamp })
+    return getThreadsForTimestamp(timestamp, "getThreadsAfter");
+}
+
+function getThreadsForTimestamp(timestamp: number, rellOperation: string): Promise<Thread[]> {
+    return GTX.query(rellOperation, { timestamp: timestamp })
         .then((threads: Thread[]) => {
             threads.forEach(thread => boomerang.set(thread.id, thread));
             return threads;
@@ -105,19 +105,18 @@ export function getThreadsByTagPriorToTimestamp(tag: string, timestamp: number):
 }
 
 export function starRate(user: User, id: string) {
-    const { privKey, pubKey } = seedToKey(user.seed);
-
-    const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("starRateThread", user.name, id);
-    tx.sign(privKey, pubKey);
-    return tx.postAndWaitConfirmation();
+    return updateStarRating(user, id, "starRateThread");
 }
 
 export function removeStarRate(user: User, id: string) {
+    return updateStarRating(user, id, "removeStarRateThread");
+}
+
+function updateStarRating(user: User, id: string, rellOperation: string) {
     const { privKey, pubKey } = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("removeStarRateThread", user.name, id);
+    tx.addOperation(rellOperation, user.name, id);
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }

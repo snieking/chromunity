@@ -1,10 +1,6 @@
 
 /* BASIC */
 
-html {
-
-}
-
 body {
     font-family: "Poppins", sans-serif;
     height: 100vh;
@@ -45,7 +41,6 @@ h2 {
     -webkit-border-radius: 10px 10px 10px 10px;
     border-radius: 10px 10px 10px 10px;
     background: #fff;
-    padding: 30px;
     width: 90%;
     max-width: 450px;
     position: relative;
@@ -118,7 +113,6 @@ input[type=button]:active, input[type=submit]:active, input[type=reset]:active  
 
 input[type=text], input[type=password] {
     background-color: #f6f6f6;
-    border: none;
     color: #0d0d0d;
     padding: 15px 32px;
     text-align: center;
