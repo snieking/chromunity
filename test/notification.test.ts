@@ -6,6 +6,8 @@ import * as bip39 from "bip39";
 import { register, login } from '../src/blockchain/UserService';
 import { sendUserNotifications, countUnreadUserNotifications, markNotificationsRead, getUserNotifications } from '../src/blockchain/NotificationService';
 
+jest.setTimeout(30000);
+
 describe("notification tests", () => {
 
     const user = {

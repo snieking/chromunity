@@ -31,5 +31,5 @@ query getUserVoteInElection(name, electionId: text) {
 }
 
 query getCurrentRepresentativePeriod(timestamp) {
-    return representativeElection @? { .timestamp < timestamp } ( .id, -sort .timestamp ) limit 1;
+    return representativeElection @? { .timestamp <= timestamp } ( .id, -sort .timestamp ) limit 1;
 }

@@ -1,36 +1,34 @@
-import {Election, User} from "../types";
-import {GTX} from "./Postchain";
-import {seedToKey} from "./CryptoService";
-import {sortByFrequency, uniqueId} from "../util/util";
+import { Election, User } from "../types";
+import { GTX } from "./Postchain";
+import { seedToKey } from "./CryptoService";
+import { sortByFrequency, uniqueId } from "../util/util";
 
-//const dayInMilliseconds: number = 86400000;
-const dayInMilliseconds: number = 10000;
-
-export function triggerElection(user: User): void {
-    const {privKey, pubKey} = seedToKey(user.seed);
+export function triggerElection(user: User, completionTimestamp: number) {
+    const { privKey, pubKey } = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("triggerElection", user.name, uniqueId(), Date.now() + (dayInMilliseconds * 7));
+    tx.addOperation("triggerElection", user.name, uniqueId(), completionTimestamp);
     tx.sign(privKey, pubKey);
-    tx.postAndWaitConfirmation();
+    return tx.postAndWaitConfirmation();
 }
 
-export function completeElection(user: User, electionId: string): void {
-    const {privKey, pubKey} = seedToKey(user.seed);
+export function getElectionVotes(electionId: string) {
+    return GTX.query("getElectionVotes", { electionId: electionId })
+        .then((candidates: any[]) => sortByFrequency(candidates));
+}
 
-    GTX.query("getElectionVotes", { electionId: electionId })
-        .then((candidates: any[]) => {
-            const sortedCandidates: string[] = sortByFrequency(candidates);
-            const tx = GTX.newTransaction([pubKey]);
+export function completeElection(user: User, electionId: string, sortedCandidates: string[]) {
+    const { privKey, pubKey } = seedToKey(user.seed);
 
-            tx.addOperation("completeElection", user.name, electionId, sortedCandidates);
-            tx.sign(privKey, pubKey);
-            tx.postAndWaitConfirmation();
-        });
+    const tx = GTX.newTransaction([pubKey]);
+
+    tx.addOperation("completeElection", user.name, electionId, sortedCandidates);
+    tx.sign(privKey, pubKey);
+    return tx.postAndWaitConfirmation();
 }
 
 export function signUpForElection(user: User, electionId: string): Promise<any> {
-    const {privKey, pubKey} = seedToKey(user.seed);
+    const { privKey, pubKey } = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("signUpForElection", user.name, electionId);
@@ -39,7 +37,7 @@ export function signUpForElection(user: User, electionId: string): Promise<any> 
 }
 
 export function voteForCandidate(user: User, candidate: string, electionId: string): Promise<any> {
-    const {privKey, pubKey} = seedToKey(user.seed);
+    const { privKey, pubKey } = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("voteForCandidate", user.name, candidate, electionId);
