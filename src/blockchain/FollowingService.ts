@@ -6,23 +6,20 @@ import * as BoomerangCache from "boomerang-cache";
 const boomerang = BoomerangCache.create("following-bucket", {storage: "local", encrypt: true});
 
 export function createFollowing(user: User, following: string) {
-    boomerang.remove("user-" + user.name);
-
-    const {privKey, pubKey} = seedToKey(user.seed);
-
-    const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("createFollowing", user.name, following);
-    tx.sign(privKey, pubKey);
-    return tx.postAndWaitConfirmation();
+    return updateFollowing(user, following, "createFollowing");
 }
 
 export function removeFollowing(user: User, following: string) {
+    return updateFollowing(user, following, "removeFollowing");
+}
+
+function updateFollowing(user: User, following: string, rellOperation: string) {
     boomerang.remove("user-" + user.name);
 
     const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("removeFollowing", user.name, following);
+    tx.addOperation(rellOperation, user.name, following);
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
