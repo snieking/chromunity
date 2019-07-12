@@ -25,8 +25,7 @@ describe("thread tagging tests", () => {
     it("create thread with tag", async () => {
         await createThread(loggedInUser, "Hello #world");
         const userThreads: Thread[] = await getThreadsByUserIdPriorToTimestamp(loggedInUser.name, Date.now())
-        sleepUntil(Date.now() + 20000);
-        await storeTagsFromThread(loggedInUser, userThreads[0].id, ["world"]);
+        sleepUntil(Date.now() + 10000);
         const threads: Thread[] = await getThreadsByTagPriorToTimestamp("world", Date.now() + 3000);
         expect(threads.length).toBe(1);
 
