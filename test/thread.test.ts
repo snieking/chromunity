@@ -1,6 +1,6 @@
 import { Thread } from './../src/types';
 import { register, login } from "../src/blockchain/UserService";
-import { createThread, getThreadsByUserIdPriorToTimestamp, createSubThread, getSubThreadsByParentId, starRate, getThreadStarRating, removeStarRate } from "../src/blockchain/MessageService"
+import { createThread, getThreadsByUserIdPriorToTimestamp, createSubThread, getSubThreadsByParentId, starRate, getThreadStarRating, removeStarRate, getThreadsAfter, getThreadById, getThreadsPriorTo } from "../src/blockchain/MessageService"
 import { getANumber } from "./helper";
 
 import * as bip39 from "bip39";
@@ -57,6 +57,25 @@ describe("Thread tests", () => {
         await removeStarRate(userLoggedIn, thread.id);
         const usersWhoRated: string[] = await getThreadStarRating(thread.id);
         expect(usersWhoRated.length).toBe(0);
+    });
+
+    it("get threads after timestamp", async () => {
+        const message: string = "It is fun to program in Rell";
+        await createThread(userLoggedIn, message);
+        const threads: Thread[] = await getThreadsAfter(Date.now() - 30000);
+        expect(threads.length).toBeGreaterThan(0);
+    });
+
+    it("get threads prior to timestamp", async () => {
+        const message: string = "Rell makes using a blockchain so easy";
+        await createThread(userLoggedIn, message);
+        const threads: Thread[] = await getThreadsPriorTo(Date.now() + 30000);
+        expect(threads.length).toBeGreaterThan(0);
+    });
+
+    it("get thread by id", async () => {
+        const fetchedThread: Thread = await getThreadById(thread.id);
+        expect(thread.message).toBe(fetchedThread.message);
     });
 
 });

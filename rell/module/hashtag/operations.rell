@@ -4,6 +4,6 @@ operation createThreadTag(username: text, tags: set<text>, threadId: text) {
 
     val thread = thread@{ .id == threadId };
     for(tag in tags) {
-    create threadTag(name = tag, thread, op_context.last_block_time);
+        create threadTag(name = tag, thread, op_context.last_block_time);
     }
 }
