@@ -1,8 +1,9 @@
-import { setMnemonic, getMnemonic, setUser, getUser, isGod, setRepresentative, isRepresentative } from "../src/util/user-util";
+import { setMnemonic, getMnemonic, setUser, getUser, isGod, setRepresentative, isRepresentative, godAlias } from "../src/util/user-util";
 import { User } from "../src/types";
 
 describe("user utilities tests", () => {
 
+    const admin: User = { name: "admin", seed: "abc123" };
     const user: User = { name: "snieking", seed: "abc123" };
 
     it("mnemonic cached in localstorage encrypted", async () => {
@@ -25,6 +26,21 @@ describe("user utilities tests", () => {
         const representative: boolean = await isRepresentative();
         expect(representative).toBe(false);
         expect(sessionStorage.getItem("session-bucket:representative")).not.toBe(false);
+    });
+
+    it("god alias is admin", async () => {
+        setUser(user);
+        expect(isGod()).toBe(false);
+
+        expect(godAlias()).toBe("admin");
+        setUser(admin)
+        expect(isGod()).toBe(true);
+    });
+
+    it("set representative", async () => {
+        setRepresentative(true);
+        const representative: boolean = await isRepresentative();
+        expect(representative).toBe(true);
     });
 
 });
