@@ -1,6 +1,6 @@
 import { register, login } from "../src/blockchain/UserService";
 import { triggerElection, signUpForElection, getUncompletedElection, completeElection, voteForCandidate, getElectionCandidates, getElectionVoteForUser, getElectionVotes } from "../src/blockchain/ElectionService";
-import { getANumber } from "./helper";
+import { getANumber, sleepUntil } from "./helper";
 
 
 import * as bip39 from "bip39";
@@ -61,14 +61,3 @@ describe("election test", () => {
     })
 
 });
-
-function sleepUntil(timestampToSleepToAfter: number) {
-    console.log("Sleeping until: ", timestampToSleepToAfter);
-    var start = new Date().getTime();
-    while (true) {
-        console.log("Sleeping");
-        if (Date.now() > timestampToSleepToAfter) {
-            break;
-        }
-    }
-}
