@@ -1,6 +1,6 @@
 import { Thread } from './../src/types';
 import { register, login } from "../src/blockchain/UserService";
-import { createThread } from "../src/blockchain/MessageService"
+import { createThread, getThreadsByUserIdPriorToTimestamp, createSubThread, getSubThreadsByParentId, starRate, getThreadStarRating, removeStarRate } from "../src/blockchain/MessageService"
 import { getANumber } from "./helper";
 
 import * as bip39 from "bip39";
@@ -16,21 +16,47 @@ describe("Thread tests", () => {
         mnemonic: bip39.generateMnemonic(160)
     };
 
-    it("register user " + user.name, async done => {
-        expect.assertions(1);
+    var userLoggedIn: User;
+    var thread: Thread;
 
-        await expect(register(user.name, user.password, user.mnemonic)).resolves.toBe(null);
-        console.log("Registered", user.name, " with mnemonic", user.mnemonic);
-        done();
+    it("register user " + user.name, async () => {
+        await register(user.name, user.password, user.mnemonic);
     });
 
-    it("create a thread", async done => {
-        expect.assertions(2);
-        const loggedInUser: User = await login(user.name, user.password, user.mnemonic);
-        expect(loggedInUser).toBeDefined();
+    it("login first user to use for creating threads", async () => {
+        userLoggedIn = await login(user.name, user.password, user.mnemonic);
+        expect(userLoggedIn.name).toBe(user.name);
+    });
+
+    it("create a thread", async () => {
         const message: string = "It's pretty neat that this forum is powered by a blockchain";
-        await expect(createThread(loggedInUser, message)).toBeDefined();
-        done();
+        await createThread(userLoggedIn, message);
+    });
+
+    it("get thread created by the user", async () => {
+        const threads: Thread[] = await getThreadsByUserIdPriorToTimestamp(userLoggedIn.name, Date.now());
+        thread = threads[0];
+    });
+
+    it("reply to thread", async () => {
+        await createSubThread(userLoggedIn, thread.id, thread.author, "This is a reply!");
+    });
+
+    it("get thread replies", async () => {
+        const threads: Thread[] = await getSubThreadsByParentId(thread.id);
+        expect(threads.length).toBe(1);
+    });
+
+    it("star rate thread", async () => {
+        await starRate(userLoggedIn, thread.id);
+        const usersWhoRated: string[] = await getThreadStarRating(thread.id);
+        expect(usersWhoRated.length).toBe(1);
+    });
+
+    it("remove star rate on thread", async () => {
+        await removeStarRate(userLoggedIn, thread.id);
+        const usersWhoRated: string[] = await getThreadStarRating(thread.id);
+        expect(usersWhoRated.length).toBe(0);
     });
 
 });
