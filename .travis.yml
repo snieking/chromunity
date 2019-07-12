@@ -10,6 +10,10 @@ services:
 
 addons:
   postgresql: "9.6"
+  sonarcloud:
+    organization: "snieking"
+    token:
+      secure: "VKnB387z+RQctdyt7FjWPXwwkCmxbLstyey72k5mauMkmWLMkFJFSM/VaiGnJKqik3DfGpV0W/wqTktLYQ+SawP17nK+IqzIB9z5ZzfRo9o8nyea0Nkb/6pIxkABnNJGAQLRIG3w8cNvPvf1FHHmZXOi613Rbq4EvYynPaMVndJU0Vrzas+StfHNWilhZ0hApB0ZTa62w3o36FMCY4hzqueip7B+qDUHRbddWe580TzPExqaKUwa26OWENtMsS/MrsvzIOsw41mkTvEnV3P7Lp8Dg+x7WwcGBfYPZ0H1VD91hEgdy+wJOoEyKWoA7lSTR7k7wx+SGXtiQBJarGCgh1UQenUr5rMtDrajVgQpJJcHc/k8MDNk1N7DLiruoW6CCy3vlZYaiC52Yu2U8z8SS0uIlE3tTiHHXG2tVoH2jJOgB7X8IAa9XruWomeHvS55KRVjta4CIebLZGVbavL4cPEVND44uHePfgdE8KbN3d2FOe/ikuq46PzijUmgfGp3lxWPYg/RjsRoPxXbbt3sCNq3TxEkCANdfDrbAqBqN0EyIMDmDYPVVI9AW5K1eRLIZfHBwrXA9Bv76QYnV0GJXWMuuXej0Q45pbVpOLrcC6WCfdEOTzmjTsgAfQSyyMgtzowDa4CS1+ZaXyQs2TxzE7Z+px2E9YQ9Bprfk5QHQ08="
 
 before_script:
   - npm i yarn
@@ -26,5 +30,7 @@ script:
   - cd rell
   - ./init-node.sh
   - ./run-node.sh &
+  - cd ..
   - npm install
   - npm run coveralls
+  - sonar-scanner
