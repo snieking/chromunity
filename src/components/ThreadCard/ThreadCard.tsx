@@ -36,7 +36,7 @@ import {
 } from "@material-ui/core";
 import { setThreadNotVisible } from "../../blockchain/RepresentativesService";
 import { timeAgoReadable, needsToBeSliced } from "../../util/util";
-import { getUserSettings, getUserForumAvatar } from "../../blockchain/UserService";
+import { getUserForumAvatar } from "../../blockchain/UserService";
 
 export interface ThreadCardProps {
     thread: Thread;

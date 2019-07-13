@@ -1,5 +1,4 @@
 import React from 'react';
-import { Button, Typography } from '@material-ui/core';
 
 import './AvatarChanger.css';
 import Avatar from 'react-avatar-edit';
@@ -32,7 +31,7 @@ class AvatarChanger extends React.Component<AvatarChangerProps, AvatarChangerSta
         if (elem.target.files[0].size > 71680) {
             alert("File is too big!");
             elem.target.value = "";
-        };
+        }
     }
 
     render() {

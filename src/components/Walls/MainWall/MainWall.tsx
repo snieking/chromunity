@@ -1,6 +1,6 @@
 import React from 'react';
 import '../Wall.css';
-import { Container, Button, createMuiTheme } from "@material-ui/core";
+import { Container, Button } from "@material-ui/core";
 import { getThreadsPriorTo, getThreadsFromFollowsPriorToTimestamp, getThreadsAfter, getThreadsFromFollowsAfterTimestamp } from "../../../blockchain/MessageService";
 import { Thread } from "../../../types";
 
@@ -12,6 +12,7 @@ import FormGroup from "@material-ui/core/FormGroup";
 import { getUser } from "../../../util/user-util";
 import { } from '@material-ui/core/colors';
 import { MuiThemeProvider } from '@material-ui/core/styles';
+import { chromiaTheme } from '../Wall';
 
 export interface MainWallState {
     threads: Thread[];
@@ -25,7 +26,7 @@ function shouldDisplayFollowersOnlySwitch(): boolean {
     return getUser().name != null;
 }
 
-const chromiaTheme = createMuiTheme({ palette: { primary: { main: "#FFAFC1" } } })
+const theme = chromiaTheme()
 const threadsPageLimit: number = 25;
 
 export class MainWall extends React.Component<{}, MainWallState> {
@@ -124,7 +125,7 @@ export class MainWall extends React.Component<{}, MainWallState> {
         if (this.state.threads.length >= threadsPageLimit &&
             this.state.threads.length % threadsPageLimit === 0) {
             return (
-                <MuiThemeProvider theme={chromiaTheme}>
+                <MuiThemeProvider theme={theme}>
                     <Button type="submit" fullWidth color="primary"
                         onClick={() => this.retrieveOlderThreads()}
                     >
@@ -158,3 +159,4 @@ export class MainWall extends React.Component<{}, MainWallState> {
     }
 
 }
+

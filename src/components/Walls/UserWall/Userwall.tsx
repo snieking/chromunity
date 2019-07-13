@@ -7,7 +7,8 @@ import { Thread } from "../../../types";
 import { RouteComponentProps } from "react-router";
 import { ThreadCard } from "../../ThreadCard/ThreadCard";
 import { ProfileCard } from "../../user/Profile/ProfileCard";
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import { chromiaTheme } from '../Wall';
 
 interface MatchParams {
     userId: string
@@ -24,7 +25,7 @@ export interface UserWallState {
     timestampOnOldestThread: number;
 }
 
-const chromiaTheme = createMuiTheme({ palette: { primary: { main: "#FFAFC1" } } });
+const theme = chromiaTheme();
 const threadsPageLimit: number = 25;
 
 export class UserWall extends React.Component<UserWallProps, UserWallState> {
@@ -84,7 +85,7 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
         if (this.state.threads.length >= threadsPageLimit && 
             this.state.threads.length % threadsPageLimit === 0) {
             return (
-                <MuiThemeProvider theme={chromiaTheme}>
+                <MuiThemeProvider theme={theme}>
                     <Button type="submit" fullWidth color="primary"
                         onClick={() => this.retrieveOlderThreads()}
                     >
