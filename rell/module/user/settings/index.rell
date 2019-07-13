@@ -1,0 +1,7 @@
+class userSettings {
+    key user;
+    mutable avatar: text;
+}
+
+include 'operations';
+include 'queries';

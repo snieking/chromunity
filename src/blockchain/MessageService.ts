@@ -92,7 +92,11 @@ export function getThreadById(threadId: string): Promise<Thread> {
     if (thread != null) {
         return new Promise<Thread>(resolve => resolve(thread));
     } else {
-        return GTX.query("getThreadById", { id: threadId });
+        return GTX.query("getThreadById", { id: threadId })
+            .then((retrievedThread: Thread) => {
+                boomerang.set(threadId, retrievedThread);
+                return retrievedThread;
+            });
     }
 }
 

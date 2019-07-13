@@ -9,7 +9,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Home from '@material-ui/icons/Home';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import {ExitToApp, Gavel, LocationCity, Poll, TrendingUp} from "@material-ui/icons";
+import {ExitToApp, Gavel, LocationCity, Poll, TrendingUp, Settings} from "@material-ui/icons";
 
 import './HeaderNav.css';
 import {NotificationsButton} from "../../buttons/NotificationsButton";
@@ -28,6 +28,11 @@ export default function HeaderNav(props: HeaderNavProps) {
                 <div>
                     <Link to={"/notifications/" + user.name}>
                         <NotificationsButton username={user.name}/>
+                    </Link>
+                    <Link to={"/user/settings"}>
+                        <IconButton>
+                            <Settings className="nav-button"/>
+                        </IconButton>
                     </Link>
                     <Link to={"/u/" + user.name}>{profileIcon()}</Link>
                     <Link to="/user/logout">
