@@ -12,6 +12,7 @@ import {Representatives} from "./components/Government/Representatives/Represent
 import {GovLog} from "./components/Government/Log/GovLog";
 import { UserWall } from "./components/Walls/UserWall/Userwall";
 import { TagWall } from "./components/Walls/TagWall/TagWall";
+import Settings from "./components/user/Settings/Settings";
 
 
 export class App extends React.Component {
@@ -23,6 +24,7 @@ export class App extends React.Component {
                 <Route path="/user/register" component={Register}/>
                 <Route path="/user/login" component={Login}/>
                 <Route path="/user/logout" component={Logout}/>
+                <Route path="/user/settings" component={Settings}/>
                 <Route path="/u/:userId" component={UserWall}/>
                 <Route path="/notifications/:userId" component={UserNotifications}/>
                 <Route path="/thread/:id" component={FullThread}/>

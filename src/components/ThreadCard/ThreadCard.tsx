@@ -8,7 +8,7 @@ import {
     removeStarRate,
     starRate
 } from "../../blockchain/MessageService";
-import { getUser, isRepresentative } from "../../util/user-util";
+import { getUser, isRepresentative, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import {
     DeleteSweep,
     MoreHoriz,
@@ -36,6 +36,7 @@ import {
 } from "@material-ui/core";
 import { setThreadNotVisible } from "../../blockchain/RepresentativesService";
 import { timeAgoReadable, needsToBeSliced } from "../../util/util";
+import { getUserSettings, getUserForumAvatar } from "../../blockchain/UserService";
 
 export interface ThreadCardProps {
     thread: Thread;
@@ -53,6 +54,7 @@ export interface ThreadCardState {
     subThreads: Thread[];
     isRepresentative: boolean;
     hideThreadConfirmDialogOpen: boolean;
+    avatar: string;
 }
 
 export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState> {
@@ -67,7 +69,8 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
             replyMessage: "",
             subThreads: [],
             isRepresentative: false,
-            hideThreadConfirmDialogOpen: false
+            hideThreadConfirmDialogOpen: false,
+            avatar: ""
         };
 
         this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
@@ -120,6 +123,9 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         }
 
         isRepresentative().then(bool => this.setState({ isRepresentative: bool }));
+        getUserForumAvatar(this.props.thread.author, 1440).then(avatar => {
+            this.setState({ avatar: ifEmptyAvatarThenPlaceholder(avatar) });
+        })
     }
 
     componentWillReceiveProps(nextProps: Readonly<ThreadCardProps>, nextContext: any): void {
@@ -244,7 +250,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
                             @{this.props.thread.author}
                         </Link>
                     </Typography>
-                    <img src={"https://i.pravatar.cc/84"} className="author-avatar" alt="Profile Avatar" />
+                    {this.state.avatar !== "" ? <img src={this.state.avatar} className="author-avatar" alt="Profile Avatar" /> : <div></div>}
                 </div>
             );
         }
@@ -400,7 +406,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
 
     render() {
         if (this.state.redirectToFullCard) {
-            return (<Redirect key={"red-" + this.props.thread.id} to={this.getRootPostId()}/>);
+            return (<Redirect key={"red-" + this.props.thread.id} to={this.getRootPostId()} />);
         } else if (this.props.truncated) {
             return this.renderTruncatedThreadCard();
         } else {

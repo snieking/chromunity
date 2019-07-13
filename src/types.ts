@@ -24,3 +24,7 @@ export interface Election {
     id: string,
     timestamp: number
 }
+
+export interface UserSettings {
+    avatar: string;
+}

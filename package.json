@@ -9,6 +9,7 @@
     "@types/react": "16.8.22",
     "@types/react-dom": "16.8.4",
     "@types/react-router": "^5.0.2",
+    "react-avatar-edit": "0.8.3",
     "bip39": "3.0.2",
     "boomerang-cache": "1.2.0",
     "hdkey": "1.1.1",

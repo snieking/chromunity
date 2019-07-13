@@ -8,8 +8,8 @@
     float: right;
     color: #1E1A22;
     opacity: 0.35;
-    padding-right: 10px;
-    padding-top: 10px;
+    padding-right: 15px;
+    padding-top: 15px;
 }
 
 .author-avatar {
@@ -17,8 +17,4 @@
     width: 84px;
     height: 84px;
     margin-bottom: 12px;
-    background-color: white;
-    box-shadow: 0 1px 3px rgba(34, 25, 25, 0.4);
-    -moz-box-shadow: 0 1px 2px rgba(34,25,25,0.4);
-    -webkit-box-shadow: 0 1px 3px rgba(34, 25, 25, 0.4);
 }

@@ -2,9 +2,13 @@ operation registerUser(name, pubkey) {
     require(is_signer(pubkey));
 
     if (name == "admin") {
-        val newAdmin = create user(name, pubkey, op_context.transaction.block.block_height);
-        create admin(newAdmin);
+        val admin = create user(name, pubkey, op_context.transaction.block.block_height);
+        create admin(admin);
+        create userSettings(admin, "");
     } else {
-        create user(name, pubkey, op_context.transaction.block.block_height);
+        val user = create user(name, pubkey, op_context.transaction.block.block_height);
+        create userSettings(user, "");
     }
+
+    
 }
