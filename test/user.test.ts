@@ -1,5 +1,5 @@
 import { UserSettings } from './../src/types';
-import { register, login, getUserSettings, updateUserSettings, getUserForumAvatar } from "../src/blockchain/UserService";
+import { register, login, getUserSettings, updateUserSettings, getUserForumAvatar, isRegistered } from "../src/blockchain/UserService";
 import { getANumber } from "./helper";
 
 
@@ -22,6 +22,7 @@ describe('User tests', () => {
     it("register user " + user01.name, async () => {
         await expect(register(user01.name, user01.password, user01.mnemonic)).resolves.toBe(null);
         console.log("Registered", user01.name, " with mnemonic", user01.mnemonic);
+        expect(await isRegistered(user01.name)).toBe(true);
     });
 
     it("login user " + user01.name, async () => {

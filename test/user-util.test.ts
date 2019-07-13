@@ -1,4 +1,4 @@
-import { setMnemonic, getMnemonic, setUser, getUser, isGod, setRepresentative, isRepresentative, godAlias } from "../src/util/user-util";
+import { setMnemonic, getMnemonic, setUser, getUser, isGod, setRepresentative, isRepresentative, godAlias, ifEmptyAvatarThenPlaceholder } from "../src/util/user-util";
 import { User } from "../src/types";
 
 describe("user utilities tests", () => {
@@ -42,5 +42,16 @@ describe("user utilities tests", () => {
         const representative: boolean = await isRepresentative();
         expect(representative).toBe(true);
     });
+
+    it("avatar placeholder", async () => {
+        const placeholder: string = ifEmptyAvatarThenPlaceholder("");
+        expect(placeholder).not.toBe("");
+
+        const placeholder2: string = ifEmptyAvatarThenPlaceholder("");
+        expect(placeholder2).not.toBe("");
+
+        const noPlaceholder: string = ifEmptyAvatarThenPlaceholder("test");
+        expect(noPlaceholder).toBe("test");
+    })
 
 });
