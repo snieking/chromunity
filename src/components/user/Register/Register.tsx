@@ -15,10 +15,12 @@ export interface RegisterProps {
 export interface RegisterState {
     username: string,
     password: string,
+    secondPassword: string,
     redirect: boolean,
     generatedMnemonics: string[],
     currentClickableMnemonic: string,
-    reBuiltMnemonics: string
+    reBuiltMnemonics: string,
+    conditionsNotMet: boolean
 }
 
 export class Register extends React.Component<RegisterProps, RegisterState> {
@@ -29,14 +31,17 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
         this.state = {
             username: "",
             password: "",
+            secondPassword: "",
             redirect: false,
             generatedMnemonics: [],
             currentClickableMnemonic: "",
-            reBuiltMnemonics: ""
+            reBuiltMnemonics: "",
+            conditionsNotMet: true
         };
 
         this.handleUsernameChange = this.handleUsernameChange.bind(this);
         this.handlePasswordChange = this.handlePasswordChange.bind(this);
+        this.handleSecondPasswordChange = this.handleSecondPasswordChange.bind(this);
         this.signUp = this.signUp.bind(this);
         this.handleMnemonicClicked = this.handleMnemonicClicked.bind(this);
         this.retrieveRandomMnemonic = this.retrieveRandomMnemonic.bind(this);
@@ -81,7 +86,8 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
         this.setState(prevState => ({
             reBuiltMnemonics: prevState.reBuiltMnemonics + clickedMnemonic + (updatedMnemonics.length > 0 ? " " : ""),
             currentClickableMnemonic: this.retrieveRandomMnemonic(updatedMnemonics),
-            generatedMnemonics: updatedMnemonics
+            generatedMnemonics: updatedMnemonics,
+            conditionsNotMet: updatedMnemonics.length > 0
         }));
     }
 
@@ -91,7 +97,7 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
                 <Chip key={"mnemonic-" + mnemonic}
                     label={mnemonic}
                     clickable onClick={this.handleMnemonicClicked}
-                    style={{backgroundColor: '#FFAFC1'}}
+                    style={{ backgroundColor: '#FFAFC1' }}
                 />
             )
         } else {
@@ -157,7 +163,12 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
                         onChange={this.handleUsernameChange} />
                     <input type="password" id="password" className="fadeIn third" name="register"
                         placeholder="password"
-                        onChange={this.handlePasswordChange} />
+                        onChange={this.handlePasswordChange} 
+                        value={this.state.password}/>
+                    <input type="password" id="secondPassword" className="fadeIn third" name="register"
+                        placeholder="verify password"
+                        onChange={this.handleSecondPasswordChange}
+                        value={this.state.secondPassword} />
 
                     <div className="mnemonic-area">
                         {this.renderMnemonicDescription()}
@@ -170,32 +181,44 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
                         {this.renderCopyToClipboardButton()}
                         <br />
                     </div>
-                    <input type="button" className="fadeIn fourth" value="Register" onClick={this.signUp} />
+                    <input type="button" 
+                        className="fadeIn fourth" 
+                        value="Register"
+                        onClick={this.signUp}
+                        disabled={this.state.conditionsNotMet}
+                    />
                 </div>
             </div>
         );
     }
 
     private handleUsernameChange(event: React.ChangeEvent<HTMLInputElement>) {
-        event.persist();
-        this.setState(prevState => ({
-            username: event.target.value,
-            password: prevState.password,
-            redirect: false
-        }));
+        event.preventDefault();
+        event.stopPropagation();
+        this.setState({ username: event.target.value });
     }
 
     private handlePasswordChange(event: React.ChangeEvent<HTMLInputElement>) {
-        event.persist();
-        this.setState(prevState => ({
-            username: prevState.username,
-            password: event.target.value,
-            redirect: false
-        }));
+        event.preventDefault();
+        event.stopPropagation();
+        this.setState({ password: event.target.value });
+    }
+
+    private handleSecondPasswordChange(event: React.ChangeEvent<HTMLInputElement>) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.setState({ secondPassword: event.target.value });
     }
 
     private signUp() {
-        register(this.state.username, this.state.password, this.state.reBuiltMnemonics);
-        this.setState({ redirect: true });
+        if (this.state.password === this.state.secondPassword && 
+            this.state.password.length > 5) {
+            console.log("It's a match!");
+            register(this.state.username, this.state.password, this.state.reBuiltMnemonics);
+            this.setState({ redirect: true });
+        } else {
+            console.log("It's not a match");
+            this.setState({ password: "", secondPassword: "" });
+        }
     }
 }

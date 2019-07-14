@@ -1,6 +1,6 @@
 import React from 'react';
 import '../Wall.css';
-import { Container, Button } from "@material-ui/core";
+import { Container, Button, LinearProgress } from "@material-ui/core";
 import { getThreadsPriorTo, getThreadsFromFollowsPriorToTimestamp, getThreadsAfter, getThreadsFromFollowsAfterTimestamp } from "../../../blockchain/MessageService";
 import { Thread } from "../../../types";
 
@@ -20,6 +20,7 @@ export interface MainWallState {
     truncated: boolean;
     displayFollowersOnlySwitch: boolean;
     followersOnly: boolean;
+    isLoading: boolean;
 }
 
 function shouldDisplayFollowersOnlySwitch(): boolean {
@@ -38,7 +39,8 @@ export class MainWall extends React.Component<{}, MainWallState> {
             id: "",
             truncated: true,
             displayFollowersOnlySwitch: shouldDisplayFollowersOnlySwitch(),
-            followersOnly: false
+            followersOnly: false,
+            isLoading: true
         };
 
         this.retrieveNewThreads = this.retrieveNewThreads.bind(this);
@@ -50,6 +52,7 @@ export class MainWall extends React.Component<{}, MainWallState> {
     }
 
     retrieveNewThreads() {
+        this.setState({ isLoading: true });
         var threads: Promise<Thread[]>;
         const latestThread: Thread = this.state.threads[0];
 
@@ -70,7 +73,8 @@ export class MainWall extends React.Component<{}, MainWallState> {
         threads.then(retrievedThreads => {
             if (retrievedThreads.length > 0) {
                 this.setState(prevState => ({
-                    threads: Array.from(new Set(retrievedThreads.concat(prevState.threads)))
+                    threads: Array.from(new Set(retrievedThreads.concat(prevState.threads))),
+                    isLoading: false
                 }));
             }
         });
@@ -78,6 +82,7 @@ export class MainWall extends React.Component<{}, MainWallState> {
 
     retrieveOlderThreads() {
         if (this.state.threads.length > 0) {
+            this.setState({ isLoading: true });
             const oldestTimestamp: number = this.state.threads[this.state.threads.length - 1].timestamp;
 
             var threads: Promise<Thread[]>;
@@ -90,7 +95,8 @@ export class MainWall extends React.Component<{}, MainWallState> {
             threads.then(retrievedThreads => {
                 if (retrievedThreads.length > 0) {
                     this.setState(prevState => ({
-                        threads: Array.from(new Set(prevState.threads.concat(retrievedThreads)))
+                        threads: Array.from(new Set(prevState.threads.concat(retrievedThreads))),
+                        isLoading: false
                     }));
                 }
             });
@@ -143,6 +149,7 @@ export class MainWall extends React.Component<{}, MainWallState> {
                     <div className="thread-wall-container">
                         <br />
                         {this.renderFollowersOnlySwitch()}
+                        {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
                         {this.state.threads.map(thread => <ThreadCard
                             key={"card-" + thread.id}
                             truncated={true}

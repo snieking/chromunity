@@ -1,6 +1,6 @@
 import React from 'react';
 import '../Wall.css';
-import { Container, Button } from "@material-ui/core";
+import { Container, Button, LinearProgress } from "@material-ui/core";
 import { getThreadsByUserIdPriorToTimestamp } from "../../../blockchain/MessageService";
 import { Thread } from "../../../types";
 
@@ -23,6 +23,7 @@ export interface UserWallState {
     id: string;
     truncated: boolean;
     timestampOnOldestThread: number;
+    isLoading: boolean;
 }
 
 const theme = chromiaTheme();
@@ -37,6 +38,7 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
             id: "",
             truncated: true,
             timestampOnOldestThread: Date.now(),
+            isLoading: true
         };
 
         this.retrieveThreads = this.retrieveThreads.bind(this);
@@ -49,24 +51,30 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
     }
 
     retrieveThreads() {
+        this.setState({ isLoading: true });
         const userId = this.props.match.params.userId;
         if (userId != null) {
             getThreadsByUserIdPriorToTimestamp(userId, Date.now())
                 .then(retrievedThreads => {
-                    this.setState(prevState => ({ threads: retrievedThreads.concat(prevState.threads) }));
+                    this.setState(prevState => ({
+                        threads: retrievedThreads.concat(prevState.threads),
+                        isLoading: false
+                    }));
                 });
         }
     }
 
     retrieveOlderThreads() {
         if (this.state.threads.length > 0) {
+            this.setState({ isLoading: true });
             const userId = this.props.match.params.userId;
             const oldestTimestamp: number = this.state.threads[this.state.threads.length - 1].timestamp;
             getThreadsByUserIdPriorToTimestamp(userId, oldestTimestamp)
                 .then(retrievedThreads => {
                     if (retrievedThreads.length > 0) {
                         this.setState(prevState => ({
-                            threads: prevState.threads.concat(retrievedThreads)
+                            threads: prevState.threads.concat(retrievedThreads),
+                            isLoading: false
                         }));
                     }
                 });
@@ -82,7 +90,7 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
     }
 
     renderLoadMoreButton() {
-        if (this.state.threads.length >= threadsPageLimit && 
+        if (this.state.threads.length >= threadsPageLimit &&
             this.state.threads.length % threadsPageLimit === 0) {
             return (
                 <MuiThemeProvider theme={theme}>
@@ -102,6 +110,7 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
                 <Container fixed maxWidth="md">
                     <div className="thread-wall-container">
                         <br />
+                        {this.state.isLoading ? <LinearProgress variant="query"/> : <div></div>}
                         {this.renderUserPageIntro()}
                         {this.state.threads.map(thread => <ThreadCard
                             key={"card-" + thread.id}

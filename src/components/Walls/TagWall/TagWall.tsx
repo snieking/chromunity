@@ -1,6 +1,6 @@
 import React from 'react';
 import '../Wall.css';
-import { Container, Button } from "@material-ui/core";
+import { Container, Button, LinearProgress } from "@material-ui/core";
 import { getThreadsByTagPriorToTimestamp } from "../../../blockchain/MessageService";
 import { Thread } from "../../../types";
 
@@ -22,6 +22,7 @@ export interface TagWallState {
     id: string;
     truncated: boolean;
     timestampOnOldestThread: number;
+    isLoading: boolean;
 }
 
 const theme = chromiaTheme();
@@ -36,6 +37,7 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
             id: "",
             truncated: true,
             timestampOnOldestThread: Date.now(),
+            isLoading: true
         };
 
         this.retrieveThreads = this.retrieveThreads.bind(this);
@@ -47,24 +49,30 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
     }
 
     retrieveThreads() {
+        this.setState({ isLoading: true });
         const tag = this.props.match.params.tag;
         if (tag != null) {
             getThreadsByTagPriorToTimestamp(tag, Date.now())
                 .then(retrievedThreads => {
-                    this.setState(prevState => ({ threads: retrievedThreads.concat(prevState.threads) }));
+                    this.setState(prevState => ({ 
+                        threads: retrievedThreads.concat(prevState.threads), 
+                        isLoading: false
+                    }));
                 });
         }
     }
 
     retrieveOlderThreads() {
         if (this.state.threads.length > 0) {
+            this.setState({ isLoading: true });
             const tag = this.props.match.params.tag;
             const oldestTimestamp: number = this.state.threads[this.state.threads.length - 1].timestamp;
             getThreadsByTagPriorToTimestamp(tag, oldestTimestamp)
                 .then(retrievedThreads => {
                     if (retrievedThreads.length > 0) {
                         this.setState(prevState => ({
-                            threads: prevState.threads.concat(retrievedThreads)
+                            threads: prevState.threads.concat(retrievedThreads),
+                            isLoading: false
                         }));
                     }
                 });
@@ -92,6 +100,7 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
                 <Container fixed maxWidth="md">
                     <div className="thread-wall-container">
                         <br />
+                        {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
                         {this.state.threads.map(thread => <ThreadCard
                             key={"card-" + thread.id}
                             truncated={true}
