@@ -59,7 +59,7 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
                         }
 
                         getUserForumAvatar(this.props.username, 1440)
-                        .then(avatar => this.setState({ avatar: ifEmptyAvatarThenPlaceholder(avatar) }));
+                        .then(avatar => this.setState({ avatar: ifEmptyAvatarThenPlaceholder(avatar, this.props.username) }));
                         countUserFollowers(this.props.username).then(count => this.setState({ followers: count }));
                         countUserFollowings(this.props.username).then(count => this.setState({ userFollowings: count }));
                     }

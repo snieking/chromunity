@@ -124,7 +124,7 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
 
         isRepresentative().then(bool => this.setState({ isRepresentative: bool }));
         getUserForumAvatar(this.props.thread.author, 1440).then(avatar => {
-            this.setState({ avatar: ifEmptyAvatarThenPlaceholder(avatar) });
+            this.setState({ avatar: ifEmptyAvatarThenPlaceholder(avatar, this.props.thread.author) });
         })
     }
 

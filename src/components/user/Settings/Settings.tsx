@@ -55,7 +55,7 @@ class Settings extends React.Component<{}, SettingsState> {
             window.location.replace("/login");
         } else {
             getUserSettings(user).then((settings: UserSettings) => {
-                this.setState({ avatar: ifEmptyAvatarThenPlaceholder(settings.avatar) });
+                this.setState({ avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, user.name) });
             });
         }
     }

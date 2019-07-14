@@ -17,4 +17,7 @@
     width: 84px;
     height: 84px;
     margin-bottom: 12px;
+    border-radius: 50%;
+    border: 1px solid black;
+    background-color: #1E1A22;
 }
