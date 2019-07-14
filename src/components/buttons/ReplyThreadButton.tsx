@@ -1,17 +1,17 @@
-import React, {FormEvent} from "react";
+import React, { FormEvent } from "react";
 
 import './Buttons.css';
 
-import {Dialog} from "@material-ui/core";
+import { Dialog } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import {createSubThread} from "../../blockchain/MessageService";
+import { createSubThread } from "../../blockchain/MessageService";
 import IconButton from "@material-ui/core/IconButton";
-import {ReplyAll} from "@material-ui/icons";
-import {getUser} from "../../util/user-util";
+import { ReplyAll } from "@material-ui/icons";
+import { getUser } from "../../util/user-util";
 
 
 export interface ReplyThreadButtonProps {
@@ -41,18 +41,18 @@ export class ReplyThreadButton extends React.Component<ReplyThreadButtonProps, R
     }
 
     toggleReplyThreadDialog() {
-        this.setState(prevState => ({dialogOpen: !prevState.dialogOpen}));
+        this.setState(prevState => ({ dialogOpen: !prevState.dialogOpen }));
     }
 
     handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.persist();
-        this.setState({threadMessage: event.target.value});
+        this.setState({ threadMessage: event.target.value });
     }
 
     createSubThread(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const threadMessage = this.state.threadMessage;
-        this.setState({threadMessage: ""});
+        this.setState({ threadMessage: "" });
 
         createSubThread(getUser(), this.props.rootThreadId, this.props.rootThreadAuthor, threadMessage || "")
             .then(() => this.props.updateFunction());
@@ -62,9 +62,11 @@ export class ReplyThreadButton extends React.Component<ReplyThreadButtonProps, R
     createThreadButton() {
         return (
             <div className="bottom-right-corner rounded-pink">
-                <IconButton aria-label="Reply to thread" className="new-thread-button"
-                            onClick={() => this.toggleReplyThreadDialog()}>
-                    <ReplyAll fontSize="large" className="new-thread-button"/>
+                <IconButton aria-label="Reply to thread"
+                    onClick={() => this.toggleReplyThreadDialog()}
+                    style={{ backgroundColor: "#FFAFC1", marginRight: "5px", marginBottom: "5px" }}
+                >
+                    <ReplyAll fontSize="large" className="new-thread-button" />
                 </IconButton>
             </div>
         )
@@ -74,7 +76,7 @@ export class ReplyThreadButton extends React.Component<ReplyThreadButtonProps, R
         return (
             <div>
                 <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title"
-                        fullWidth={true} maxWidth={"sm"}>
+                    fullWidth={true} maxWidth={"sm"}>
                     <form onSubmit={this.createSubThread}>
                         <DialogTitle id="form-dialog-title">Reply</DialogTitle>
                         <DialogContent>
