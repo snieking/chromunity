@@ -13,7 +13,7 @@ import {
 } from "../../../blockchain/FollowingService";
 import { getUser, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import { User } from "../../../types";
-import { isRegistered, getUserForumAvatar } from "../../../blockchain/UserService";
+import { isRegistered, getUserSettingsCached } from "../../../blockchain/UserService";
 import { NotFound } from "../../NotFound/NotFound";
 
 export interface ProfileCardProps {
@@ -25,7 +25,8 @@ export interface ProfileCardState {
     following: boolean,
     followers: number,
     userFollowings: number,
-    avatar: string
+    avatar: string,
+    description: string
 }
 
 export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardState> {
@@ -38,7 +39,8 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
             following: false,
             followers: 0,
             userFollowings: 0,
-            avatar: ""
+            avatar: "",
+            description: ""
         };
 
         this.renderUserPage = this.renderUserPage.bind(this);
@@ -58,8 +60,11 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
                         amIAFollowerOf(getUser(), this.props.username).then(isAFollower => this.setState({ following: isAFollower }));
                     }
 
-                    getUserForumAvatar(this.props.username, 1440)
-                        .then(avatar => this.setState({ avatar: ifEmptyAvatarThenPlaceholder(avatar, this.props.username) }));
+                    getUserSettingsCached(this.props.username, 1440)
+                        .then(settings => this.setState({ 
+                            avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.username),
+                            description: settings.description
+                        }));
                     countUserFollowers(this.props.username).then(count => this.setState({ followers: count }));
                     countUserFollowings(this.props.username).then(count => this.setState({ userFollowings: count }));
                 }
@@ -111,8 +116,7 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
 
                     <div className="profile-desc">
                         <Typography variant="body2" color="textSecondary" component="p">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-                            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                            {this.state.description}
                         </Typography>
                     </div>
                     {this.renderFollowButton()}

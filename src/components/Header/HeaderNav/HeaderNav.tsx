@@ -49,7 +49,7 @@ export default function HeaderNav(props: HeaderNavProps) {
                         <NotificationsButton username={user.name} />
                     </Link>
                     <Button aria-controls="profile-menu" aria-haspopup="true" onClick={handleProfileClick}>
-                        {profileIcon()}
+                        <AccountCircle className="nav-button" />
                     </Button>
                     <Menu
                         id="profile-menu"
@@ -61,16 +61,16 @@ export default function HeaderNav(props: HeaderNavProps) {
                         <Link to={"/u/" + user.name}>
                             <MenuItem onClick={handleProfileClose}>
                                 <ListItemIcon>
-                                    <AccountCircle className="menu-item-button"/>
+                                    <AccountCircle className="menu-item-button" />
                                 </ListItemIcon>
                                 <Typography className="menu-item-text">Profile</Typography>
                             </MenuItem>
                         </Link>
-                        <br/>
+                        <br />
                         <Link to={"/user/settings"}>
                             <MenuItem onClick={handleProfileClose}>
                                 <ListItemIcon>
-                                    <Settings className="menu-item-button"/>
+                                    <Settings className="menu-item-button" />
                                 </ListItemIcon>
                                 <Typography className="menu-item-text">Settings</Typography>
                             </MenuItem>
@@ -79,7 +79,7 @@ export default function HeaderNav(props: HeaderNavProps) {
                         <Link to="/user/logout">
                             <MenuItem onClick={handleProfileClose}>
                                 <ListItemIcon>
-                                    <ExitToApp className="menu-item-button"/>
+                                    <ExitToApp className="menu-item-button" />
                                 </ListItemIcon>
                                 <Typography className="menu-item-text">Logout</Typography>
                             </MenuItem>
@@ -88,18 +88,14 @@ export default function HeaderNav(props: HeaderNavProps) {
                 </div>
             )
         } else {
-            return (<Link to="/user/login">{profileIcon()}</Link>)
+            return (
+                <Link to="/user/login">
+                    <IconButton>
+                        <AccountCircle className="nav-button" />
+                    </IconButton>
+                </Link>
+            )
         }
-    }
-
-    function profileIcon() {
-        return (
-            <div>
-                <IconButton>
-                    <AccountCircle className="nav-button" />
-                </IconButton>
-            </div>
-        )
     }
 
     return (
@@ -132,16 +128,16 @@ export default function HeaderNav(props: HeaderNavProps) {
                         <Link to="/gov/representatives">
                             <MenuItem onClick={handleGovClose}>
                                 <ListItemIcon>
-                                    <Face className="menu-item-button"/>
+                                    <Face className="menu-item-button" />
                                 </ListItemIcon>
                                 <Typography className="menu-item-text">Representatives</Typography>
                             </MenuItem>
                         </Link>
-                        <br/>
+                        <br />
                         <Link to="/gov/election">
                             <MenuItem onClick={handleGovClose}>
                                 <ListItemIcon>
-                                    <Poll className="menu-item-button"/>
+                                    <Poll className="menu-item-button" />
                                 </ListItemIcon>
                                 <Typography className="menu-item-text">Election</Typography>
                             </MenuItem>
@@ -150,7 +146,7 @@ export default function HeaderNav(props: HeaderNavProps) {
                         <Link to="/gov/log">
                             <MenuItem onClick={handleGovClose}>
                                 <ListItemIcon>
-                                    <Gavel className="menu-item-button"/>
+                                    <Gavel className="menu-item-button" />
                                 </ListItemIcon>
                                 <Typography className="menu-item-text">Log</Typography>
                             </MenuItem>

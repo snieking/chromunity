@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from "react-router-dom";
 import { Card, CardMedia, CardContent, Typography } from '@material-ui/core';
-import { getUserForumAvatar } from '../../../../blockchain/UserService';
+import { getUserSettingsCached } from '../../../../blockchain/UserService';
 import { ifEmptyAvatarThenPlaceholder } from '../../../../util/user-util';
 
 export interface RepresentativeCardProps {
@@ -44,8 +44,8 @@ class RepresentativeCard extends React.Component<RepresentativeCardProps, Repres
     }
 
     componentDidMount() {
-        getUserForumAvatar(this.props.name, 1440)
-            .then(avatar => this.setState({ avatar: ifEmptyAvatarThenPlaceholder(avatar, this.props.name) }));
+        getUserSettingsCached(this.props.name, 1440)
+            .then(settings => this.setState({ avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.name) }));
     }
 }
 

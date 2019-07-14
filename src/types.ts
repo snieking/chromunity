@@ -26,5 +26,6 @@ export interface Election {
 }
 
 export interface UserSettings {
-    avatar: string;
+    avatar: string,
+    description: string
 }

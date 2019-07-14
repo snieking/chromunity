@@ -7,3 +7,28 @@
 .settings-container {
     margin-top: 15px;
 }
+
+.avatar-preview {
+    width: 84px;
+    height: 84px;
+    cursor: pointer;
+    border-radius: 50%;
+    border: 1px solid black;
+    background-color: #1E1A22;
+    margin: 25px;
+    float: left;
+}
+
+.description-wrapper {
+    margin-top: 25px;
+    margin-left: 100px;
+}
+
+.description-editor {
+    width: 75%;
+}
+
+.commit-button-wrapper {
+    margin-top: 25px;
+    text-align: center;
+}

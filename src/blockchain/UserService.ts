@@ -43,31 +43,28 @@ export function getUserSettings(user: User): Promise<UserSettings> {
     return GTX.query("getUserSettings", { name: user.name });
 }
 
-export function getUserForumAvatar(name: string, cacheDuration: number): Promise<string> {
-    const cachedAvatar: string = boomerang.get(name);
+export function getUserSettingsCached(name: string, cacheDuration: number): Promise<UserSettings> {
+    const cachedAvatar: UserSettings = boomerang.get(name);
 
     if (cachedAvatar != null) {
-        return new Promise<string>(resolve => resolve(cachedAvatar));
+        return new Promise<UserSettings>(resolve => resolve(cachedAvatar));
     }
 
-    return GTX.query("getUserForumAvatar", { name: name }).then((avatar: string) => {
-        boomerang.set(name, avatar, cacheDuration);
-        return avatar;
+    return GTX.query("getUserSettings", { name: name }).then((settings: UserSettings) => {
+        boomerang.set(name, settings, cacheDuration);
+        return settings;
     });
 }
 
-export function updateUserSettings(user: User, avatar: string) {
+export function updateUserSettings(user: User, avatar: string, description: string) {
     boomerang.remove(user.name);
-    return upsertUserSettings(user, avatar, "updateUserSettings");
-}
 
-function upsertUserSettings(user: User, avatar: string, rellOperation: string) {
     const {privKey, pubKey} = seedToKey(user.seed);
 
-    console.log(rellOperation, "for user", user.name, "with avatar", avatar);
+    console.log("updateUserSettings", "for user", user.name, "with avatar", avatar);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation(rellOperation, user.name, avatar);
+    tx.addOperation("updateUserSettings", user.name, avatar, description);
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
