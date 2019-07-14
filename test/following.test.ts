@@ -4,6 +4,7 @@ import * as bip39 from "bip39";
 import { register, login } from "../src/blockchain/UserService";
 import { User, Thread } from "../src/types";
 import { createFollowing, countUserFollowers, countUserFollowings, amIAFollowerOf, removeFollowing } from "../src/blockchain/FollowingService";
+import { createThread, getThreadsFromFollowsPriorToTimestamp, getThreadsFromFollowsAfterTimestamp } from "../src/blockchain/MessageService"
 
 jest.setTimeout(30000);
 
@@ -43,6 +44,14 @@ describe("following tests", () => {
         expect(followings).toBe(1);
 
         expect(await amIAFollowerOf(loggedInUser, loggedInUser2.name)).toBe(true);
+
+        await createThread(loggedInUser2, "This message is perhaps only of interest to my followers");
+        
+        const followingsThreads: Thread[] = await getThreadsFromFollowsPriorToTimestamp(loggedInUser, Date.now());
+        expect(followingsThreads.length).toBe(1);
+
+        const followingsThreads2: Thread[] = await getThreadsFromFollowsAfterTimestamp(loggedInUser, Date.now() - 20000);
+        expect(followingsThreads2.length).toBe(1);
 
         await removeFollowing(loggedInUser, loggedInUser2.name);
         expect(await amIAFollowerOf(loggedInUser, loggedInUser2.name)).toBe(false);
