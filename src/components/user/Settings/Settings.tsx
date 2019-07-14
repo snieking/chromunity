@@ -1,50 +1,83 @@
 import React from 'react';
 import { getUser, ifEmptyAvatarThenPlaceholder } from '../../../util/user-util';
 import { User, UserSettings } from '../../../types';
-import { Container, Paper, Button, Grid, Typography } from '@material-ui/core';
+import { Container, Button, Dialog, DialogContent, DialogActions, DialogTitle, Card, TextField } from '@material-ui/core';
 import AvatarChanger from './AvatarChanger/AvatarChanger';
 
 import './Settings.css';
 import { getUserSettings, updateUserSettings } from '../../../blockchain/UserService';
 
 interface SettingsState {
-    avatar: string
+    avatar: string,
+    editedAvatar: string,
+    editAvatarOpen: boolean,
+    description: string
 }
 
 class Settings extends React.Component<{}, SettingsState> {
 
     constructor(props: any) {
         super(props);
-        this.state = { avatar: "" };
+        this.state = {
+            avatar: "",
+            editedAvatar: "",
+            editAvatarOpen: false,
+            description: ""
+        };
 
         this.updateAvatar = this.updateAvatar.bind(this);
+        this.commitAvatar = this.commitAvatar.bind(this);
         this.saveSettings = this.saveSettings.bind(this);
+        this.toggleEditAvatarDialog = this.toggleEditAvatarDialog.bind(this);
+        this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
     }
 
     render() {
         return (
-            <Container fixed maxWidth="md" className={"settings-container"}>
-                <Grid container justify="center">
-                    <Paper className="settings-paper">
-                        <Typography gutterBottom variant="h4" component="h4"
-                            className="typography purple-typography">
-                            User settings
-                        </Typography>
-                        <hr/>
-                        <Typography gutterBottom variant="h5" component="h5"
-                            className="typography purple-typography">
-                            Avatar
-                        </Typography>
-                        <AvatarChanger updateFunction={this.updateAvatar} previousPicture={this.state.avatar} />
-                        <br />
-                        {this.state.avatar !== "" ? <img src={this.state.avatar} alt="preview" /> : <div></div>}
-                        <br />
-                        <hr />
-                        <Button variant="contained" color="primary" onClick={() => this.saveSettings()}>
-                            Save
+            <Container fixed maxWidth="sm" className={"settings-container"}>
+                <Card key={"user-card"} className="profile-card">
+
+                    <Dialog open={this.state.editAvatarOpen} aria-labelledby="form-dialog-title"
+                        fullWidth={true} maxWidth={"sm"}>
+                        <DialogTitle>Edit your avatar</DialogTitle>
+                        <DialogContent>
+                            <AvatarChanger updateFunction={this.updateAvatar} previousPicture={this.state.avatar} />
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={() => this.toggleEditAvatarDialog()} color="primary">
+                                Cancel
+                                    </Button>
+                            <Button onClick={() => this.commitAvatar()} color="primary">
+                                Send
+                                    </Button>
+                        </DialogActions>
+                    </Dialog>
+                    {this.state.avatar !== ""
+                        ? <img src={this.state.avatar}
+                            className="avatar-preview"
+                            alt="preview"
+                            onClick={() => this.toggleEditAvatarDialog()}
+                        />
+                        : <div></div>
+                    }
+                    <div className="description-wrapper">
+                        <label className="description-label">Description</label>
+                        <TextField
+                            className="description-editor"
+                            margin="dense"
+                            id="description"
+                            multiline
+                            type="text"
+                            onChange={this.handleDescriptionChange}
+                            value={this.state.description}
+                        />
+                    </div>
+                </Card>
+                <div className="commit-button-wrapper">
+                    <Button size="large" variant="contained" color="primary" onClick={() => this.saveSettings()}>
+                        Save
                     </Button>
-                    </Paper>
-                </Grid>
+                </div>
             </Container>
         )
     }
@@ -55,17 +88,32 @@ class Settings extends React.Component<{}, SettingsState> {
             window.location.replace("/login");
         } else {
             getUserSettings(user).then((settings: UserSettings) => {
-                this.setState({ avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, user.name) });
+                this.setState({ 
+                    avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, user.name),
+                    description: settings.description
+                });
             });
         }
     }
 
+    handleDescriptionChange(event: React.ChangeEvent<HTMLInputElement>) {
+        this.setState({ description: event.target.value });
+    }
+
+    toggleEditAvatarDialog() {
+        this.setState(prevState => ({ editAvatarOpen: !prevState.editAvatarOpen }));
+    }
+
     updateAvatar(updatedAvatar: string) {
-        this.setState({ avatar: updatedAvatar });
+        this.setState({ editedAvatar: updatedAvatar });
+    }
+
+    commitAvatar() {
+        this.setState(prevState => ({ avatar: prevState.editedAvatar, editAvatarOpen: false }));
     }
 
     saveSettings() {
-        updateUserSettings(getUser(), this.state.avatar);
+        updateUserSettings(getUser(), this.state.avatar, this.state.description);
     }
 
 }

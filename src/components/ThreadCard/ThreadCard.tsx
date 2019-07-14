@@ -36,7 +36,7 @@ import {
 } from "@material-ui/core";
 import { setThreadNotVisible } from "../../blockchain/RepresentativesService";
 import { timeAgoReadable, needsToBeSliced } from "../../util/util";
-import { getUserForumAvatar } from "../../blockchain/UserService";
+import { getUserSettingsCached } from "../../blockchain/UserService";
 
 export interface ThreadCardProps {
     thread: Thread;
@@ -123,8 +123,8 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
         }
 
         isRepresentative().then(bool => this.setState({ isRepresentative: bool }));
-        getUserForumAvatar(this.props.thread.author, 1440).then(avatar => {
-            this.setState({ avatar: ifEmptyAvatarThenPlaceholder(avatar, this.props.thread.author) });
+        getUserSettingsCached(this.props.thread.author, 1440).then(settings => {
+            this.setState({ avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.thread.author) });
         })
     }
 

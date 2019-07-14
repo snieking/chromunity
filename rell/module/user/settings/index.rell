@@ -1,6 +1,7 @@
 class userSettings {
     key user;
     mutable avatar: text;
+    mutable description: text;
 }
 
 include 'operations';

@@ -1,5 +1,5 @@
 import { UserSettings } from './../src/types';
-import { register, login, getUserSettings, updateUserSettings, getUserForumAvatar, isRegistered } from "../src/blockchain/UserService";
+import { register, login, getUserSettings, updateUserSettings, isRegistered, getUserSettingsCached } from "../src/blockchain/UserService";
 import { getANumber } from "./helper";
 
 
@@ -40,13 +40,16 @@ describe('User tests', () => {
         
         userSettings = await getUserSettings(loggedInUser);
         expect(userSettings.avatar).toBe("");
+        expect(userSettings.description).toBe("");
 
-        await updateUserSettings(loggedInUser, "BB==");
+        await updateUserSettings(loggedInUser, "BB==", "Description");
         userSettings = await getUserSettings(loggedInUser);
         expect(userSettings.avatar).toBe("BB==");
+        expect(userSettings.description).toBe("Description");
 
-        const avatar: string = await getUserForumAvatar(loggedInUser.name, 0);
-        expect(avatar).toBe("BB==");
+        const settings: UserSettings = await getUserSettingsCached(loggedInUser.name, 0);
+        expect(settings.avatar).toBe("BB==");
+        expect(settings.description).toBe("Description");
     })
 
 });

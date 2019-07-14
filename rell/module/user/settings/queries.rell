@@ -1,7 +1,3 @@
 query getUserSettings(name) {
-    return userSettings@?{ user@{ .name == name }} ( avatar = .avatar );
-}
-
-query getUserForumAvatar(name) {
-    return userSettings@?{ user@{ .name == name }} ( .avatar );
+    return userSettings@?{ user@{ .name == name }} ( .avatar, .description );
 }
