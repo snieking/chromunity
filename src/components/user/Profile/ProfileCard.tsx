@@ -90,7 +90,7 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
     renderFollowButton() {
         if (this.props.username !== getUser().name) {
             return (
-                <div className="top-right-corner">
+                <div className="float-right">
                     <IconButton onClick={() => this.toggleFollowing()}>
                         <Favorite fontSize="large" className={(this.state.following ? 'red-icon' : '')} />
                     </IconButton>
@@ -104,7 +104,6 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
             return (
                 <Card key={"user-card"} className="profile-card">
                     {this.state.avatar !== "" ? <img src={this.state.avatar} className="avatar" alt="Profile Avatar" /> : <div></div>}
-                    {this.renderFollowButton()}
                     <Typography gutterBottom variant="h6" component="h6"
                         className="typography pink-typography profile-title">
                         @{this.props.username}
@@ -116,6 +115,7 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
                             sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                         </Typography>
                     </div>
+                    {this.renderFollowButton()}
                     <div className="bottom-bar">
                         <Typography variant="body1" color="textSecondary" component="p" className="stats-bar">
                             <span className="stat"><b>{this.state.followers}</b></span> followers,

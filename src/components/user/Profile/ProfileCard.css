@@ -8,7 +8,7 @@
     background-color: #1E1A22;
 }
 
-.top-right-corner {
+.float-right {
     float: right;
 }
 
@@ -17,12 +17,13 @@
 }
 
 .bottom-bar {
-    margin-left: 20px;
+    margin-left: 25px;
     margin-top: 20px;
 }
 
 .profile-desc {
-    margin-left: 20px;
+    margin-left: 25px;
+    margin-right: 12px;
 }
 
 .profile-card {

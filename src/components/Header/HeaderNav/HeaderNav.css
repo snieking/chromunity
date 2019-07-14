@@ -5,3 +5,12 @@
 .nav-button {
     color: #FFAFC1;
 }
+
+.menu-item-button {
+    color: #1E1A22;
+}
+
+a {
+    text-decoration: none;
+    color: #1E1A22;
+}
