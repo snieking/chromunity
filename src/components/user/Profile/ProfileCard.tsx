@@ -1,9 +1,9 @@
 import React from 'react';
-import {Card} from "@material-ui/core";
+import { Card } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 
 import './ProfileCard.css';
-import {Favorite} from "@material-ui/icons";
+import { Favorite } from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
 import {
     amIAFollowerOf,
@@ -11,10 +11,10 @@ import {
     createFollowing,
     removeFollowing
 } from "../../../blockchain/FollowingService";
-import {getUser, ifEmptyAvatarThenPlaceholder} from "../../../util/user-util";
-import {User} from "../../../types";
-import {isRegistered, getUserForumAvatar} from "../../../blockchain/UserService";
-import {NotFound} from "../../NotFound/NotFound";
+import { getUser, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
+import { User } from "../../../types";
+import { isRegistered, getUserForumAvatar } from "../../../blockchain/UserService";
+import { NotFound } from "../../NotFound/NotFound";
 
 export interface ProfileCardProps {
     username: string
@@ -49,21 +49,21 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
     componentDidMount(): void {
         isRegistered(this.props.username)
             .then(isRegistered => {
-                    this.setState({registered: isRegistered});
-                    console.log("Registered: ", isRegistered);
+                this.setState({ registered: isRegistered });
+                console.log("Registered: ", isRegistered);
 
-                    if (isRegistered) {
-                        const user: User = getUser();
-                        if (user.name != null) {
-                            amIAFollowerOf(getUser(), this.props.username).then(isAFollower => this.setState({following: isAFollower}));
-                        }
-
-                        getUserForumAvatar(this.props.username, 1440)
-                        .then(avatar => this.setState({ avatar: ifEmptyAvatarThenPlaceholder(avatar, this.props.username) }));
-                        countUserFollowers(this.props.username).then(count => this.setState({ followers: count }));
-                        countUserFollowings(this.props.username).then(count => this.setState({ userFollowings: count }));
+                if (isRegistered) {
+                    const user: User = getUser();
+                    if (user.name != null) {
+                        amIAFollowerOf(getUser(), this.props.username).then(isAFollower => this.setState({ following: isAFollower }));
                     }
+
+                    getUserForumAvatar(this.props.username, 1440)
+                        .then(avatar => this.setState({ avatar: ifEmptyAvatarThenPlaceholder(avatar, this.props.username) }));
+                    countUserFollowers(this.props.username).then(count => this.setState({ followers: count }));
+                    countUserFollowings(this.props.username).then(count => this.setState({ userFollowings: count }));
                 }
+            }
             );
 
 
@@ -92,7 +92,7 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
             return (
                 <div className="top-right-corner">
                     <IconButton onClick={() => this.toggleFollowing()}>
-                        <Favorite fontSize="large" className={(this.state.following ? 'red-icon' : '')}/>
+                        <Favorite fontSize="large" className={(this.state.following ? 'red-icon' : '')} />
                     </IconButton>
                 </div>
             )
@@ -103,10 +103,10 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
         if (this.state.registered) {
             return (
                 <Card key={"user-card"} className="profile-card">
-                    {this.state.avatar !== "" ? <img src={this.state.avatar} className="avatar" alt="Profile Avatar"/> : <div></div>}
+                    {this.state.avatar !== "" ? <img src={this.state.avatar} className="avatar" alt="Profile Avatar" /> : <div></div>}
                     {this.renderFollowButton()}
                     <Typography gutterBottom variant="h6" component="h6"
-                                className="typography pink-typography profile-title">
+                        className="typography pink-typography profile-title">
                         @{this.props.username}
                     </Typography>
 
@@ -126,7 +126,7 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
             )
         } else {
             return (
-                <NotFound/>
+                <NotFound />
             )
         }
     }
