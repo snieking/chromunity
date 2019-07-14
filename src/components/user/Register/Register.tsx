@@ -5,8 +5,9 @@ import '../../../styles/fade.css';
 import './Register.css';
 
 import AccountCircle from '@material-ui/icons/AccountCircle'
-import { Button, Chip, Typography } from "@material-ui/core";
+import { Button, Chip, Typography, Snackbar } from "@material-ui/core";
 import { generateRandomMnemonic } from "../../../blockchain/CryptoService";
+import { CustomSnackbarContentWrapper } from '../../utils/CustomSnackbar';
 
 export interface RegisterProps {
 
@@ -20,7 +21,9 @@ export interface RegisterState {
     generatedMnemonics: string[],
     currentClickableMnemonic: string,
     reBuiltMnemonics: string,
-    conditionsNotMet: boolean
+    conditionsNotMet: boolean,
+    snackbarOpen: boolean,
+    snackbarText: string
 }
 
 export class Register extends React.Component<RegisterProps, RegisterState> {
@@ -36,7 +39,9 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
             generatedMnemonics: [],
             currentClickableMnemonic: "",
             reBuiltMnemonics: "",
-            conditionsNotMet: true
+            conditionsNotMet: true,
+            snackbarOpen: false,
+            snackbarText: ""
         };
 
         this.handleUsernameChange = this.handleUsernameChange.bind(this);
@@ -49,6 +54,7 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
         this.copyMnemonicToClipboard = this.copyMnemonicToClipboard.bind(this);
         this.renderCopyToClipboardButton = this.renderCopyToClipboardButton.bind(this);
         this.renderMnemonicDescription = this.renderMnemonicDescription.bind(this);
+        this.handleClose = this.handleClose.bind(this);
     }
 
     componentDidMount(): void {
@@ -163,8 +169,8 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
                         onChange={this.handleUsernameChange} />
                     <input type="password" id="password" className="fadeIn third" name="register"
                         placeholder="password"
-                        onChange={this.handlePasswordChange} 
-                        value={this.state.password}/>
+                        onChange={this.handlePasswordChange}
+                        value={this.state.password} />
                     <input type="password" id="secondPassword" className="fadeIn third" name="register"
                         placeholder="verify password"
                         onChange={this.handleSecondPasswordChange}
@@ -181,15 +187,39 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
                         {this.renderCopyToClipboardButton()}
                         <br />
                     </div>
-                    <input type="button" 
-                        className="fadeIn fourth" 
+                    <input type="button"
+                        className="fadeIn fourth"
                         value="Register"
                         onClick={this.signUp}
                         disabled={this.state.conditionsNotMet}
                     />
                 </div>
-            </div>
+
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    open={this.state.snackbarOpen}
+                    autoHideDuration={6000}
+                    onClose={this.handleClose}
+                >
+                    <CustomSnackbarContentWrapper
+                        variant="error"
+                        message={this.state.snackbarText}
+                    />
+                </Snackbar>
+
+            </div >
         );
+    }
+
+    private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        this.setState({ snackbarOpen: false, snackbarText: "" });
     }
 
     private handleUsernameChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -211,14 +241,24 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
     }
 
     private signUp() {
-        if (this.state.password === this.state.secondPassword && 
+        if (this.state.password === this.state.secondPassword &&
             this.state.password.length > 5) {
-            console.log("It's a match!");
-            register(this.state.username, this.state.password, this.state.reBuiltMnemonics);
-            this.setState({ redirect: true });
+            register(this.state.username, this.state.password, this.state.reBuiltMnemonics)
+                .then(() => this.setState({ redirect: true }))
+                .catch(() => this.setState({
+                    snackbarOpen: true,
+                    snackbarText: "Error signing up, try another username",
+                    username: "",
+                    password: "",
+                    secondPassword: ""
+                }));
         } else {
-            console.log("It's not a match");
-            this.setState({ password: "", secondPassword: "" });
+            this.setState({
+                password: "",
+                secondPassword: "",
+                snackbarOpen: true,
+                snackbarText: "Passwords must be at least 6 chars and match"
+            });
         }
     }
 }

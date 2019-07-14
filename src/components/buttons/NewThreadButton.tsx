@@ -2,7 +2,7 @@ import React, { FormEvent } from "react";
 
 import './Buttons.css';
 
-import { Dialog } from "@material-ui/core";
+import { Dialog, Snackbar } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -12,15 +12,17 @@ import { createThread } from "../../blockchain/MessageService";
 import { getUser } from "../../util/user-util";
 import IconButton from "@material-ui/core/IconButton";
 import { Forum } from "@material-ui/icons";
+import { CustomSnackbarContentWrapper } from "../utils/CustomSnackbar";
 
 
 export interface NewThreadButtonProps {
-    updateFunction: Function
+    updateFunction: Function;
 }
 
 export interface NewThreadButtonState {
-    dialogOpen: boolean,
-    threadMessage: string
+    dialogOpen: boolean;
+    threadMessage: string;
+    snackbarOpen: boolean;
 }
 
 export class NewThreadButton extends React.Component<NewThreadButtonProps, NewThreadButtonState> {
@@ -30,12 +32,14 @@ export class NewThreadButton extends React.Component<NewThreadButtonProps, NewTh
 
         this.state = {
             threadMessage: "",
-            dialogOpen: false
+            dialogOpen: false,
+            snackbarOpen: false
         };
 
         this.toggleNewThreadDialog = this.toggleNewThreadDialog.bind(this);
         this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
         this.createNewThread = this.createNewThread.bind(this);
+        this.handleClose = this.handleClose.bind(this);
     }
 
     toggleNewThreadDialog() {
@@ -51,7 +55,7 @@ export class NewThreadButton extends React.Component<NewThreadButtonProps, NewTh
     createNewThread(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const threadMessage = this.state.threadMessage;
-        this.setState({ threadMessage: "" });
+        this.setState({ threadMessage: "", snackbarOpen: true });
 
         createThread(getUser(), threadMessage || "").then(() => this.props.updateFunction());
         this.toggleNewThreadDialog();
@@ -101,8 +105,31 @@ export class NewThreadButton extends React.Component<NewThreadButtonProps, NewTh
                         </DialogActions>
                     </form>
                 </Dialog>
+
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    open={this.state.snackbarOpen}
+                    autoHideDuration={3000}
+                    onClose={this.handleClose}
+                >
+                    <CustomSnackbarContentWrapper
+                        variant="success"
+                        message={"Thread created"}
+                    />
+                </Snackbar>
             </div>
         )
+    }
+
+    private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        this.setState({ snackbarOpen: false });
     }
 
     render() {
