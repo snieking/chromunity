@@ -1,7 +1,7 @@
 .avatar {
     float: left;
-    height: 128px;
-    width: 128px;
+    height: 84px;
+    width: 84px;
     margin: 12px;
 }
 
@@ -14,10 +14,12 @@
 }
 
 .bottom-bar {
-    position: absolute;
-    bottom: 8px;
-    left: 148px;
-    margin-top: 8px;
+    margin-left: 20px;
+    margin-top: 20px;
+}
+
+.profile-desc {
+    margin-left: 20px;
 }
 
 .profile-card {

@@ -51,11 +51,25 @@ query getThreadsByUserIdPriorToTimestamp(name, timestamp) {
     );
 }
 
-query getThreadsAfterTimestampForFollows(name, timestamp) {
+query getThreadsFromFollowsAfterTimestamp(name, timestamp) {
     return thread@*{
-        user@{ .name == name },
+        follow@{ .follower.name == name } ( .follows ),
         .visible == true,
         .timestamp > timestamp
+    }(
+        .id,
+        author=.author.name,
+        rootThreadId=.rootThreadId,
+        .message,
+        -sort .timestamp
+    );
+}
+
+query getThreadsFromFollowsPriorToTimestamp(name, timestamp) {
+    return thread@*{
+        follow@{ .follower.name == name } ( .follows ),
+        .visible == true,
+        .timestamp < timestamp
     }(
         .id,
         author=.author.name,

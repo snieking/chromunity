@@ -79,11 +79,11 @@ export function getThreadsByUserIdPriorToTimestamp(userId: string, timestamp: nu
 }
 
 export function getThreadsFromFollowsPriorToTimestamp(user: User, timestamp: number): Promise<Thread[]> {
-    return GTX.query("getThreadsPriorToForFollowers", { name: user.name, timestamp: timestamp });
+    return GTX.query("getThreadsFromFollowsPriorToTimestamp", { name: user.name, timestamp: timestamp });
 }
 
 export function getThreadsFromFollowsAfterTimestamp(user: User, timestamp: number): Promise<Thread[]> {
-    return GTX.query("getThreadsAfterTimestampForFollows", { name: user.name, timestamp: timestamp });
+    return GTX.query("getThreadsFromFollowsAfterTimestamp", { name: user.name, timestamp: timestamp });
 }
 
 export function getThreadById(threadId: string): Promise<Thread> {
