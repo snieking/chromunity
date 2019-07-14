@@ -44,13 +44,13 @@ describe("user utilities tests", () => {
     });
 
     it("avatar placeholder", async () => {
-        const placeholder: string = ifEmptyAvatarThenPlaceholder("");
+        const placeholder: string = ifEmptyAvatarThenPlaceholder("", "snieking");
         expect(placeholder).not.toBe("");
 
-        const placeholder2: string = ifEmptyAvatarThenPlaceholder("");
+        const placeholder2: string = ifEmptyAvatarThenPlaceholder("", "snieking");
         expect(placeholder2).not.toBe("");
 
-        const noPlaceholder: string = ifEmptyAvatarThenPlaceholder("test");
+        const noPlaceholder: string = ifEmptyAvatarThenPlaceholder("test", "snieking");
         expect(noPlaceholder).toBe("test");
     })
 
