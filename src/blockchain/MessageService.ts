@@ -15,7 +15,7 @@ export function createThread(user: User, message: string): Promise<any> {
     const threadId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("createThread", user.name, threadId, "", message);
+    tx.addOperation("createThread", user.name, threadId, "", formatMessage(message));
     tx.sign(privKey, pubKey);
 
     return tx.postAndWaitConfirmation()
@@ -41,7 +41,7 @@ export function createSubThread(user: User, rootThreadId: string, rootThreadAuth
     const tx = GTX.newTransaction([pubKey]);
 
     const threadId = uniqueId();
-    tx.addOperation("createThread", user.name, threadId, rootThreadId, message);
+    tx.addOperation("createThread", user.name, threadId, rootThreadId, formatMessage(message));
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation().then(() => {
         const tags = getHashTags(message);
@@ -56,6 +56,10 @@ export function createSubThread(user: User, rootThreadId: string, rootThreadAuth
             sendUserNotifications(user, threadId, users);
         }
     });
+}
+
+function formatMessage(message: string) {
+    return message.replace(/[\r\n]\s*/g, '\n\n');
 }
 
 export function getThreadsPriorTo(timestamp: number): Promise<Thread[]> {

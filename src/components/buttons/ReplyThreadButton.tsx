@@ -45,7 +45,8 @@ export class ReplyThreadButton extends React.Component<ReplyThreadButtonProps, R
     }
 
     handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
-        event.persist();
+        event.preventDefault();
+        event.stopPropagation();
         this.setState({ threadMessage: event.target.value });
     }
 

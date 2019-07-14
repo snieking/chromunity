@@ -267,7 +267,8 @@ export class ThreadCard extends React.Component<ThreadCardProps, ThreadCardState
                 <Typography variant="body2" color="textSecondary" component="p">
                     <span dangerouslySetInnerHTML={{
                         __html: ThreadCard.parseContent(content)
-                    }} />
+                    }}
+                        style={{ whiteSpace: "pre-line" }} />
                 </Typography>
             </CardContent>
         );

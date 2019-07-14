@@ -43,7 +43,8 @@ export class NewThreadButton extends React.Component<NewThreadButtonProps, NewTh
     }
 
     handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
-        event.persist();
+        event.preventDefault();
+        event.stopPropagation();
         this.setState({ threadMessage: event.target.value });
     }
 
