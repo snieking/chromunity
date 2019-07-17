@@ -6,9 +6,7 @@ import { User, Topic, TopicReply } from "../types";
 import { storeTagsFromTopic } from "./TagService";
 import { sendUserNotifications } from "./NotificationService";
 
-const topicsCache = BoomerangCache.create("topic-bucket", { storage: "session", encrypt: true });
-const topicsKey = "topics";
-const repliesKey = "replies";
+const topicsCache = BoomerangCache.create("topic-bucket", { storage: "session", encrypt: false });
 
 export function createTopic(user: User, title: string, message: string) {
     const { privKey, pubKey } = seedToKey(user.seed);
@@ -68,20 +66,26 @@ export function getTopicReplies(topicId: string): Promise<TopicReply[]> {
 }
 
 export function getTopicsByUserPriorToTimestamp(username: string, timestamp: number): Promise<Topic[]> {
-    return GTX.query("getTopicsByUserIdPriorToTimestamp", { name: username, timestamp: timestamp });
+    return GTX.query("getTopicsByUserIdPriorToTimestamp", { name: username, timestamp: timestamp })
+        .then((topics: Topic[]) => {
+            topics.forEach(topic => topicsCache.set(topic.id, topic));
+            return topics;
+        });
 }
 
 export function getTopicsByTagPriorToTimestamp(tag: string, timestamp: number): Promise<Topic[]> {
-    return GTX.query("getTopicsByTagPriorToTimestamp", { tag: tag, timestamp: timestamp });
+    return GTX.query("getTopicsByTagPriorToTimestamp", { tag: tag, timestamp: timestamp })
+        .then((topics: Topic[]) => {
+            topics.forEach(topic => topicsCache.set(topic.id, topic));
+            return topics;
+        });
 }
 
 export function giveTopicStarRating(user: User, topicId: string) {
-    console.log("Upvoting topic: ", topicId);
     return modifyTopicStarRating(user, topicId, "giveTopicStarRating");
 }
 
 export function removeTopicStarRating(user: User, topicId: string) {
-    console.log("Removing upvote of topic: ", topicId);
     return modifyTopicStarRating(user, topicId, "removeTopicStarRating");
 }
 
@@ -90,6 +94,7 @@ function modifyTopicStarRating(user: User, topicId: string, rellOperation: strin
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation(rellOperation, user.name, topicId);
+    tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
@@ -111,6 +116,7 @@ function modifyReplyStarRating(user: User, topicId: string, rellOperation: strin
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation(rellOperation, user.name, topicId);
+    tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
@@ -120,6 +126,12 @@ export function getReplyStarRaters(topicId: string): Promise<string[]> {
 }
 
 export function getTopicById(id: string): Promise<Topic> {
+    const cachedTopic: Topic = topicsCache.get(id);
+
+    if (cachedTopic != null) {
+        return new Promise<Topic>(resolve => resolve(cachedTopic));
+    }
+
     return GTX.query("getTopicById", { id: id })
         .then((topic: Topic) => {
             topicsCache.set(id, topic);
@@ -128,7 +140,7 @@ export function getTopicById(id: string): Promise<Topic> {
 }
 
 export function getTopicsPriorToTimestamp(timestamp: number) {
-    return getTopicsForTimestamp(timestamp, "getTopicsPriorToTimestamp");
+    return getTopicsForTimestamp(timestamp, "getTopicsPriorToTimestamp")
 }
 
 export function getTopicsAfterTimestamp(timestamp: number) {
@@ -138,7 +150,7 @@ export function getTopicsAfterTimestamp(timestamp: number) {
 function getTopicsForTimestamp(timestamp: number, rellOperation: string) {
     return GTX.query(rellOperation, { timestamp: timestamp })
         .then((topics: Topic[]) => {
-            topics.forEach(topics => topicsCache.set(topics.id, topics));
+            topics.forEach(topic => topicsCache.set(topic.id, topic));
             return topics;
         });
 }

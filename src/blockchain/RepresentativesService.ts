@@ -8,7 +8,6 @@ export function setThreadNotVisible(user: User, threadId: string) {
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("hideThread", user.name, threadId);
     tx.sign(privKey, pubKey);
-    return tx.postAndWaitConfirmation();
 }
 
 export function getCurrentRepresentativePeriod(): Promise<Election> {

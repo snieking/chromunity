@@ -2,6 +2,7 @@ import {User} from "../types";
 import {seedToKey} from "./CryptoService";
 import {GTX} from "./Postchain";
 import * as BoomerangCache from "boomerang-cache";
+import { uniqueId } from "../util/util";
 
 const boomerang = BoomerangCache.create("following-bucket", {storage: "local", encrypt: true});
 
@@ -20,6 +21,7 @@ function updateFollowing(user: User, following: string, rellOperation: string) {
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation(rellOperation, user.name, following);
+    tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }

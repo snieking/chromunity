@@ -23,6 +23,7 @@ export function completeElection(user: User, electionId: string, sortedCandidate
     const tx = GTX.newTransaction([pubKey]);
 
     tx.addOperation("completeElection", user.name, electionId, sortedCandidates);
+    tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
@@ -32,6 +33,7 @@ export function signUpForElection(user: User, electionId: string): Promise<any> 
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("signUpForElection", user.name, electionId);
+    tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }

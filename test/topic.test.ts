@@ -39,15 +39,15 @@ describe("topic tests", () => {
         expect(replies.length).toBe(1);
         const reply: TopicReply = replies[0];
 
-        await giveReplyStarRating(userLoggedIn, topic.id);
+        await giveReplyStarRating(userLoggedIn, reply.id);
         const upvotedBy: string[] = await getReplyStarRaters(reply.id);
         expect(upvotedBy.length).toBe(1);
 
-        await removeReplyStarRating(userLoggedIn, topic.id);
+        await removeReplyStarRating(userLoggedIn, reply.id);
         const upvotedBy2: string[] = await getReplyStarRaters(reply.id);
         expect(upvotedBy2.length).toBe(0);
 
-        await giveReplyStarRating(userLoggedIn, topic.id);
+        await giveReplyStarRating(userLoggedIn, reply.id);
         const upvotedBy3: string[] = await getReplyStarRaters(reply.id);
         expect(upvotedBy3.length).toBe(1);
     });
