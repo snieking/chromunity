@@ -1,10 +1,10 @@
-import { User, Thread, UserNotification } from '../src/types';
+import { User, UserNotification, Topic } from '../src/types';
 import { getANumber } from './helper';
-import { createThread, getThreadsByUserIdPriorToTimestamp } from '../src/blockchain/MessageService';
 
 import * as bip39 from "bip39";
 import { register, login } from '../src/blockchain/UserService';
 import { sendUserNotifications, countUnreadUserNotifications, markNotificationsRead, getUserNotifications } from '../src/blockchain/NotificationService';
+import { createTopic, getTopicsByUserPriorToTimestamp } from '../src/blockchain/TopicService';
 
 jest.setTimeout(30000);
 
@@ -24,7 +24,7 @@ describe("notification tests", () => {
 
     var loggedInUser: User;
     var secondLoggedInUser: User;
-    var thread: Thread;
+    var topic: Topic;
 
     it("register first user to use for notifications", async () => {
         await register(user.name, user.password, user.mnemonic);
@@ -45,17 +45,17 @@ describe("notification tests", () => {
     });
 
     it("create thread to use for notifications", async () => {
-        await createThread(loggedInUser, "Hello World!");
+        await createTopic(loggedInUser, "Hello!", "Hello World!");
     })
 
     it("get thread to use for notifications", async () => {
-        const threads: Thread[] = await getThreadsByUserIdPriorToTimestamp(loggedInUser.name, Date.now());
-        expect(threads.length).toBe(1);
-        thread = threads[0];
+        const topics: Topic[] = await getTopicsByUserPriorToTimestamp(loggedInUser.name, Date.now());
+        expect(topics.length).toBe(1);
+        topic = topics[0];
     });
 
     it("send notification, expect unread to be 1", async () => {
-        await sendUserNotifications(secondLoggedInUser, thread.id, new Set([loggedInUser.name]));
+        await sendUserNotifications(secondLoggedInUser, topic.id, new Set([loggedInUser.name]));
         const count: number = await countUnreadUserNotifications(loggedInUser.name);
         expect(count).toBe(1);
     });

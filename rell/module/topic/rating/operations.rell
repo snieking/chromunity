@@ -1,0 +1,23 @@
+operation giveTopicStarRating(username: text, id: text) {
+    val user = user@{ .name == username };
+    require(is_signer(user.pubkey));
+    create topicStarRating(topic@{ .id == id }, user);
+}
+
+operation removeTopicStarRating(username: text, id: text) {
+    val user = user@{ .name == username };
+    require(is_signer(user.pubkey));
+    delete topicStarRating@{ topic@{ .id == id }, user };
+}
+
+operation giveReplyStarRating(username: text, id: text) {
+    val user = user@{ .name == username };
+    require(is_signer(user.pubkey));
+    create replyStarRating(topicReply@{ .id == id }, user);
+}
+
+operation removeReplyStarRating(username: text, id: text) {
+    val user = user@{ .name == username };
+    require(is_signer(user.pubkey));
+    delete replyStarRating@{ topicReply@{ .id == id }, user };
+}

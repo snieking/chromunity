@@ -1,17 +1,17 @@
 import React from 'react';
 import '../Wall.css';
 import { Container, Button, LinearProgress } from "@material-ui/core";
-import { getThreadsByUserIdPriorToTimestamp } from "../../../blockchain/MessageService";
-import { Thread } from "../../../types";
+import { Topic } from "../../../types";
 
 import { RouteComponentProps } from "react-router";
-import { ThreadCard } from "../../ThreadCard/ThreadCard";
 import { ProfileCard } from "../../user/Profile/ProfileCard";
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import { chromiaTheme } from '../Wall';
+import { getTopicsByUserPriorToTimestamp } from '../../../blockchain/TopicService';
+import TopicOverviewCard from '../../Topic/TopicOverViewCard/TopicOverviewCard';
 
 interface MatchParams {
-    userId: string
+    userId: string;
 }
 
 export interface UserWallProps extends RouteComponentProps<MatchParams> {
@@ -19,61 +19,57 @@ export interface UserWallProps extends RouteComponentProps<MatchParams> {
 }
 
 export interface UserWallState {
-    threads: Thread[];
-    id: string;
-    truncated: boolean;
+    topics: Topic[];
     timestampOnOldestThread: number;
     isLoading: boolean;
 }
 
 const theme = chromiaTheme();
-const threadsPageLimit: number = 25;
+const topicsPageLimit: number = 25;
 
 export class UserWall extends React.Component<UserWallProps, UserWallState> {
 
     constructor(props: UserWallProps) {
         super(props);
         this.state = {
-            threads: [],
-            id: "",
-            truncated: true,
+            topics: [],
             timestampOnOldestThread: Date.now(),
             isLoading: true
         };
 
-        this.retrieveThreads = this.retrieveThreads.bind(this);
-        this.retrieveOlderThreads = this.retrieveOlderThreads.bind(this);
+        this.retrieveTopics = this.retrieveTopics.bind(this);
+        this.retrieveOlderTopics = this.retrieveOlderTopics.bind(this);
         this.renderUserPageIntro = this.renderUserPageIntro.bind(this);
     }
 
     componentDidMount(): void {
-        this.retrieveThreads();
+        this.retrieveTopics();
     }
 
-    retrieveThreads() {
+    retrieveTopics() {
         this.setState({ isLoading: true });
         const userId = this.props.match.params.userId;
         if (userId != null) {
-            getThreadsByUserIdPriorToTimestamp(userId, Date.now())
-                .then(retrievedThreads => {
+            getTopicsByUserPriorToTimestamp(userId, Date.now())
+                .then(retrievedTopics => {
                     this.setState(prevState => ({
-                        threads: retrievedThreads.concat(prevState.threads),
+                        topics: retrievedTopics.concat(prevState.topics),
                         isLoading: false
                     }));
                 });
         }
     }
 
-    retrieveOlderThreads() {
-        if (this.state.threads.length > 0) {
+    retrieveOlderTopics() {
+        if (this.state.topics.length > 0) {
             this.setState({ isLoading: true });
             const userId = this.props.match.params.userId;
-            const oldestTimestamp: number = this.state.threads[this.state.threads.length - 1].timestamp;
-            getThreadsByUserIdPriorToTimestamp(userId, oldestTimestamp)
-                .then(retrievedThreads => {
-                    if (retrievedThreads.length > 0) {
+            const oldestTimestamp: number = this.state.topics[this.state.topics.length - 1].timestamp;
+            getTopicsByUserPriorToTimestamp(userId, oldestTimestamp)
+                .then(retrievedTopics => {
+                    if (retrievedTopics.length > 0) {
                         this.setState(prevState => ({
-                            threads: prevState.threads.concat(retrievedThreads),
+                            topics: prevState.topics.concat(retrievedTopics),
                             isLoading: false
                         }));
                     }
@@ -90,12 +86,12 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
     }
 
     renderLoadMoreButton() {
-        if (this.state.threads.length >= threadsPageLimit &&
-            this.state.threads.length % threadsPageLimit === 0) {
+        if (this.state.topics.length >= topicsPageLimit &&
+            this.state.topics.length % topicsPageLimit === 0) {
             return (
                 <MuiThemeProvider theme={theme}>
                     <Button type="submit" fullWidth color="primary"
-                        onClick={() => this.retrieveOlderThreads()}
+                        onClick={() => this.retrieveOlderTopics()}
                     >
                         Load more
                     </Button>
@@ -110,15 +106,9 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
                 <Container fixed maxWidth="md">
                     <div className="thread-wall-container">
                         <br />
-                        {this.state.isLoading ? <LinearProgress variant="query"/> : <div></div>}
+                        {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
                         {this.renderUserPageIntro()}
-                        {this.state.threads.map(thread => <ThreadCard
-                            key={"card-" + thread.id}
-                            truncated={true}
-                            isSubCard={false}
-                            isUserPage={true}
-                            thread={thread}
-                        />)}
+                        {this.state.topics.map(topic => <TopicOverviewCard topic={topic}/>)}
                     </div>
                     {this.renderLoadMoreButton()}
                 </Container>

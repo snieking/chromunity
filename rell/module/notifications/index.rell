@@ -1,5 +1,5 @@
 class notification {
-    key thread, user;
+    key topic, user;
     mutable read: boolean;
     timestamp;
 }

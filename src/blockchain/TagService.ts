@@ -13,6 +13,15 @@ export function storeTagsFromThread(user: User, threadId: string, tags: string[]
     return tx.postAndWaitConfirmation();
 }
 
+export function storeTagsFromTopic(user: User, topicId: string, tags: string[]) {
+    const {privKey, pubKey} = seedToKey(user.seed);
+
+    const tx = GTX.newTransaction([pubKey]);
+    tx.addOperation("createTopicTag", user.name, tags, topicId);
+    tx.sign(privKey, pubKey);
+    return tx.postAndWaitConfirmation();
+}
+
 export function getTrendingTags(sinceDaysAgo: number): Promise<string[]> {
     const date: Date = new Date();
     const pastDate: number = date.getDate() - sinceDaysAgo;

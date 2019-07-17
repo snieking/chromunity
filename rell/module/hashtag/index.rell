@@ -1,5 +1,5 @@
-class threadTag {
-    key name, thread;
+class topicTag {
+    key name, topic;
     index timestamp;
 }
 

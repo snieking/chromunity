@@ -1,7 +1,0 @@
-operation createThread(username: text, id: text, rootThreadId: text, message: text) {
-    val user = user@{ .name == username };
-    require(is_signer(user.pubkey));
-
-    val time = op_context.last_block_time;
-    create thread(id, rootThreadId, user, true, message, timestamp=time);
-}

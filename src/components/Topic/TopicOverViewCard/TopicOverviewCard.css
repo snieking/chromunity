@@ -1,0 +1,30 @@
+.topic-timestamp {
+    color: #1E1A22;
+    opacity: 0.35;
+}
+
+.author-avatar {
+    float: right;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid black;
+    background-color: #1E1A22;
+    margin-bottom: 8px;
+}
+
+.topic-card {
+    margin-bottom: 3px;
+}
+
+.right {
+    float: right;
+}
+
+.left {
+    float: left;
+}
+
+.author-name {
+    padding-top: 20px;
+}
