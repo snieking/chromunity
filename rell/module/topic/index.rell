@@ -1,0 +1,19 @@
+class topic {
+    key id: text;
+    index author: user;
+    index timestamp;
+    title: name;
+    message: text;
+}
+
+class topicReply {
+    key id: text;
+    index topic;
+    index author: user;
+    index timestamp;
+    message: text;
+}
+
+include 'operations';
+include 'queries';
+include '/topic/rating/index';

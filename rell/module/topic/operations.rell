@@ -1,0 +1,23 @@
+operation createTopic(id: text, username: text, title: name, message: text) {
+    val author = user@{ .name == username };
+    require(is_signer(author.pubkey));
+    create topic(
+        id = id, 
+        author,
+        timestamp = op_context.last_block_time,
+        title = title,
+        message = message
+    );
+}
+
+operation createReply(topicId: text, id: text, username: text, message: text) {
+    val author = user@{ .name == username };
+    require(is_signer(author.pubkey));
+    create topicReply(
+        id = id,
+        topic@{ .id == topicId },
+        author,
+        timestamp = op_context.last_block_time,
+        message = message
+    );
+}

@@ -1,0 +1,85 @@
+query getTopicsAfterTimestamp(timestamp) {
+    return topic @* { 
+        .timestamp > timestamp
+    }(
+        .id,
+        author=.author.name,
+        .title,
+        .message,
+        -sort .timestamp
+    );
+}
+
+query getTopicsPriorToTimestamp(timestamp) {
+    return topic @* { 
+        .timestamp < timestamp
+    }(
+        .id,
+        author=.author.name,
+        .title,
+        .message,
+        -sort .timestamp
+    );
+}
+
+query getTopicReplies(topicId: text) {
+    return topicReply@*{
+        topic@{ .id == topicId }
+    }(
+        .id,
+        author=.author.name,
+        .message,
+        -sort .timestamp
+    );
+}
+
+query getTopicsByUserIdPriorToTimestamp(name, timestamp) {
+    return topic@*{
+        user@{ .name == name },
+        .timestamp < timestamp
+    }(
+        .id,
+        author=.author.name,
+        .title,
+        .message,
+        -sort .timestamp
+    );
+}
+
+query getTopicsFromFollowsAfterTimestamp(name, timestamp) {
+    return topic@*{
+        follow@{ .follower.name == name } ( .follows ),
+        .timestamp > timestamp
+    }(
+        .id,
+        author=.author.name,
+        .title,
+        .message,
+        -sort .timestamp
+    );
+}
+
+query getTopicsFromFollowsPriorToTimestamp(name, timestamp) {
+    return topic@*{
+        follow@{ .follower.name == name } ( .follows ),
+        .timestamp < timestamp
+    }(
+        .id,
+        author=.author.name,
+        .title,
+        .message,
+        -sort .timestamp
+    );
+}
+
+query getTopicById(id: text) {
+    return topic@{
+        .id == id
+    }(
+        .id,
+        author=.author.name,
+        .title,
+        .message,
+        .timestamp
+    );
+}

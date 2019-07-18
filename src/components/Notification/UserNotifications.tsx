@@ -3,9 +3,9 @@ import {Container} from "@material-ui/core";
 
 import {RouteComponentProps} from "react-router";
 import {getUserNotifications, markNotificationsRead} from "../../blockchain/NotificationService";
-import {ThreadCard} from "../ThreadCard/ThreadCard";
-import {Thread, UserNotification} from "../../types";
+import {UserNotification} from "../../types";
 import {getUser} from "../../util/user-util";
+import NotificationCard from './NotificationCard';
 
 interface MatchParams {
     userId: string
@@ -42,17 +42,7 @@ export class UserNotifications extends React.Component<UserNotificationsProps, U
         return (
             <Container fixed maxWidth="md">
                 <br/>
-                {this.state.notifications.map(notification => {
-                    const thread: Thread = {
-                        id: notification.threadId,
-                        rootThreadId: notification.rootThreadId,
-                        author: notification.author,
-                        message: notification.message,
-                        timestamp: notification.timestamp
-                    };
-                    return (<ThreadCard key={"noti-" + thread.id} truncated={true} isSubCard={false} isUserPage={false}
-                                        thread={thread}/>);
-                })}
+                {this.state.notifications.map(notification => <NotificationCard key={notification.id} notification={notification}/>)}
             </Container>
         );
     }

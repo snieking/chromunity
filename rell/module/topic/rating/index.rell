@@ -1,0 +1,10 @@
+class topicStarRating {
+    key topic, user;
+}
+
+class replyStarRating {
+    key topicReply, user;
+}
+
+include 'operations';
+include 'queries';

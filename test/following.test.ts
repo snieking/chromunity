@@ -2,9 +2,9 @@ import { getANumber } from "./helper";
 
 import * as bip39 from "bip39";
 import { register, login } from "../src/blockchain/UserService";
-import { User, Thread } from "../src/types";
+import { User, Topic } from "../src/types";
 import { createFollowing, countUserFollowers, countUserFollowings, amIAFollowerOf, removeFollowing } from "../src/blockchain/FollowingService";
-import { createThread, getThreadsFromFollowsPriorToTimestamp, getThreadsFromFollowsAfterTimestamp } from "../src/blockchain/MessageService"
+import { createTopic, getTopicsFromFollowsPriorToTimestamp, getTopicsFromFollowsAfterTimestamp } from "../src/blockchain/TopicService";
 
 jest.setTimeout(30000);
 
@@ -45,13 +45,15 @@ describe("following tests", () => {
 
         expect(await amIAFollowerOf(loggedInUser, loggedInUser2.name)).toBe(true);
 
-        await createThread(loggedInUser2, "This message is perhaps only of interest to my followers");
+        const title: string = "Message to my followers";
+        const message: string = "This message is perhaps only of interest to my followers";
+        await createTopic(loggedInUser2, title, message);
         
-        const followingsThreads: Thread[] = await getThreadsFromFollowsPriorToTimestamp(loggedInUser, Date.now());
-        expect(followingsThreads.length).toBe(1);
+        const followingsTopics: Topic[] = await getTopicsFromFollowsPriorToTimestamp(loggedInUser, Date.now());
+        expect(followingsTopics.length).toBe(1);
 
-        const followingsThreads2: Thread[] = await getThreadsFromFollowsAfterTimestamp(loggedInUser, Date.now() - 20000);
-        expect(followingsThreads2.length).toBe(1);
+        const followingsTopics2: Topic[] = await getTopicsFromFollowsAfterTimestamp(loggedInUser, Date.now() - 20000);
+        expect(followingsTopics2.length).toBe(1);
 
         await removeFollowing(loggedInUser, loggedInUser2.name);
         expect(await amIAFollowerOf(loggedInUser, loggedInUser2.name)).toBe(false);

@@ -4,6 +4,7 @@ import {seedFromMnemonic, seedToKey} from "./CryptoService";
 import {User} from "../types";
 import {setMnemonic, setUser} from "../util/user-util";
 import * as BoomerangCache from "boomerang-cache";
+import { uniqueId } from '../util/util';
 
 const boomerang = BoomerangCache.create("avatar-bucket", { storage: "local", encrypt: false });
 
@@ -65,6 +66,7 @@ export function updateUserSettings(user: User, avatar: string, description: stri
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("updateUserSettings", user.name, avatar, description);
+    tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }

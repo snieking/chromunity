@@ -1,20 +1,20 @@
-query getThreadsByTagPriorToTimestamp(tag: text, timestamp) {
-    return threadTag@*{ 
+query getTopicsByTagPriorToTimestamp(tag: text, timestamp) {
+    return topicTag@*{ 
         .name == tag,
-        .thread.timestamp < timestamp
+        .topic.timestamp < timestamp
     } (
-        id=.thread.id,
-        author=.thread.author.name,
-        rootThreadId=.thread.rootThreadId,
-        message=.thread.message,
-        -sort timestamp=.thread.timestamp
+        id=.topic.id,
+        author=.topic.author.name,
+        title=.topic.title,
+        message=.topic.message,
+        -sort timestamp=.topic.timestamp
     );
 }
 
 query getAllTags() {
-    return threadTag@*{} ( .name );
+    return topicTag@*{} ( .name );
 }
 
 query getTagsSince(timestamp) {
-    return threadTag@*{ .timestamp > timestamp }( .name );
+    return topicTag@*{ .timestamp > timestamp }( .name );
 }

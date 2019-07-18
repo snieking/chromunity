@@ -1,5 +1,5 @@
 include 'user/index';
-include 'thread/index';
+include 'topic/index';
 include 'notifications/index';
 include 'hashtag/index';
 include 'follow/index';

@@ -8,68 +8,78 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { createThread } from "../../blockchain/MessageService";
 import { getUser } from "../../util/user-util";
 import IconButton from "@material-ui/core/IconButton";
 import { Forum } from "@material-ui/icons";
 import { CustomSnackbarContentWrapper } from "../utils/CustomSnackbar";
+import { createTopic } from "../../blockchain/TopicService";
 
 
-export interface NewThreadButtonProps {
+export interface NewTopicButtonProps {
     updateFunction: Function;
 }
 
-export interface NewThreadButtonState {
+export interface NewTopicButtonState {
     dialogOpen: boolean;
-    threadMessage: string;
+    topicTitle: string;
+    topicMessage: string;
     snackbarOpen: boolean;
 }
 
-export class NewThreadButton extends React.Component<NewThreadButtonProps, NewThreadButtonState> {
+export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopicButtonState> {
 
-    constructor(props: NewThreadButtonProps) {
+    constructor(props: NewTopicButtonProps) {
         super(props);
 
         this.state = {
-            threadMessage: "",
+            topicTitle: "",
+            topicMessage: "",
             dialogOpen: false,
             snackbarOpen: false
         };
 
-        this.toggleNewThreadDialog = this.toggleNewThreadDialog.bind(this);
+        this.toggleNewTopicDialog = this.toggleNewTopicDialog.bind(this);
+        this.handleDialogTitleChange = this.handleDialogTitleChange.bind(this);
         this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
-        this.createNewThread = this.createNewThread.bind(this);
+        this.createNewTopic = this.createNewTopic.bind(this);
         this.handleClose = this.handleClose.bind(this);
     }
 
-    toggleNewThreadDialog() {
+    toggleNewTopicDialog() {
         this.setState(prevState => ({ dialogOpen: !prevState.dialogOpen }));
     }
 
     handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
         event.stopPropagation();
-        this.setState({ threadMessage: event.target.value });
+        this.setState({ topicMessage: event.target.value });
     }
 
-    createNewThread(event: FormEvent<HTMLFormElement>) {
+    handleDialogTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
-        const threadMessage = this.state.threadMessage;
-        this.setState({ threadMessage: "", snackbarOpen: true });
-
-        createThread(getUser(), threadMessage || "").then(() => this.props.updateFunction());
-        this.toggleNewThreadDialog();
+        event.stopPropagation();
+        this.setState({ topicTitle: event.target.value });
     }
 
-    createThreadButton() {
+    createNewTopic(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        const topicTitle: string = this.state.topicTitle;
+        const topicMessage = this.state.topicMessage;
+        this.setState({ topicTitle: "", topicMessage: "", snackbarOpen: true });
+
+        createTopic(getUser(), topicTitle || "", topicMessage || "").then(() => this.props.updateFunction());
+        this.toggleNewTopicDialog();
+    }
+
+    createTopicButton() {
         if (getUser().name != null) {
             return (
                 <div className="bottom-right-corner rounded-pink">
-                    <IconButton aria-label="New thread"
-                        onClick={() => this.toggleNewThreadDialog()}
+                    <IconButton aria-label="New topic"
+                        onClick={() => this.toggleNewTopicDialog()}
                         style={{ backgroundColor: "#FFAFC1", marginRight: "5px", marginBottom: "5px" }}
                     >
-                        <Forum fontSize="large" className="new-thread-button" />
+                        <Forum fontSize="large" className="new-topic-button" />
                     </IconButton>
                 </div>
             )
@@ -81,26 +91,40 @@ export class NewThreadButton extends React.Component<NewThreadButtonProps, NewTh
             <div>
                 <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title"
                     fullWidth={true} maxWidth={"sm"}>
-                    <form onSubmit={this.createNewThread}>
-                        <DialogTitle id="form-dialog-title">What's on your mind?</DialogTitle>
+                    <form onSubmit={this.createNewTopic}>
+                        <DialogTitle>New topic</DialogTitle>
                         <DialogContent>
-                            <TextField
+                            <br/>
+                            <label>Title</label>
+                        <TextField
                                 autoFocus
+                                margin="dense"
+                                id="title"
+                                multiline
+                                fullWidth
+                                onChange={this.handleDialogTitleChange}
+                                value={this.state.topicTitle}
+                            />
+                            <br/>
+                            <br/>
+                            <br/>
+                            <label>Content</label>
+                            <TextField
                                 margin="dense"
                                 id="message"
                                 multiline
                                 type="text"
                                 fullWidth
                                 onChange={this.handleDialogMessageChange}
-                                value={this.state.threadMessage}
+                                value={this.state.topicMessage}
                             />
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={() => this.toggleNewThreadDialog()} color="primary">
+                            <Button onClick={() => this.toggleNewTopicDialog()} color="primary">
                                 Cancel
                             </Button>
                             <Button type="submit" color="primary">
-                                Send
+                                Create
                             </Button>
                         </DialogActions>
                     </form>
@@ -117,7 +141,7 @@ export class NewThreadButton extends React.Component<NewThreadButtonProps, NewTh
                 >
                     <CustomSnackbarContentWrapper
                         variant="success"
-                        message={"Thread created"}
+                        message={"Topic created"}
                     />
                 </Snackbar>
             </div>
@@ -135,7 +159,7 @@ export class NewThreadButton extends React.Component<NewThreadButtonProps, NewTh
     render() {
         return (
             <div>
-                {this.createThreadButton()}
+                {this.createTopicButton()}
                 {this.newThreadDialog()}
             </div>
         )

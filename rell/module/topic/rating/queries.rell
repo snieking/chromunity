@@ -1,0 +1,7 @@
+query getStarRatingForTopic(id: text) {
+    return topicStarRating@*{ topic@{ .id == id }} ( .user.name );
+}
+
+query getStarRatingForReply(id: text) {
+    return replyStarRating@*{ topicReply@{ .id == id }} ( .user.name );
+}

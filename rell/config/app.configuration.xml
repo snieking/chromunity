@@ -65,24 +65,24 @@
                                 <string>module/user/settings/queries.rell</string>
                             </entry>
 
-                            <entry key="thread/index.rell">
-                                <string>module/thread/index.rell</string>
+                            <entry key="topic/index.rell">
+                                <string>module/topic/index.rell</string>
                             </entry>
-                            <entry key="thread/operations.rell">
-                                <string>module/thread/operations.rell</string>
+                            <entry key="topic/operations.rell">
+                                <string>module/topic/operations.rell</string>
                             </entry>
-                            <entry key="thread/queries.rell">
-                                <string>module/thread/queries.rell</string>
+                            <entry key="topic/queries.rell">
+                                <string>module/topic/queries.rell</string>
                             </entry>
 
-                            <entry key="thread/thread-rating/index.rell">
-                                <string>module/thread/thread-rating//index.rell</string>
+                            <entry key="topic/rating/index.rell">
+                                <string>module/topic/rating/index.rell</string>
                             </entry>
-                            <entry key="thread/thread-rating/operations.rell">
-                                <string>module/thread/thread-rating//operations.rell</string>
+                            <entry key="topic/rating/operations.rell">
+                                <string>module/topic/rating/operations.rell</string>
                             </entry>
-                            <entry key="thread/thread-rating/queries.rell">
-                                <string>module/thread/thread-rating//queries.rell</string>
+                            <entry key="topic/rating/queries.rell">
+                                <string>module/topic/rating/queries.rell</string>
                             </entry>
 
                             <entry key="notifications/index.rell">

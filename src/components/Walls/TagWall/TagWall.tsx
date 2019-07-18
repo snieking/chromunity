@@ -1,13 +1,13 @@
 import React from 'react';
 import '../Wall.css';
 import { Container, Button, LinearProgress } from "@material-ui/core";
-import { getThreadsByTagPriorToTimestamp } from "../../../blockchain/MessageService";
-import { Thread } from "../../../types";
+import { Topic } from "../../../types";
 
 import { RouteComponentProps } from "react-router";
-import { ThreadCard } from "../../ThreadCard/ThreadCard";
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import { chromiaTheme } from '../Wall';
+import { getTopicsByTagPriorToTimestamp } from '../../../blockchain/TopicService';
+import TopicOverviewCard from '../../Topic/TopicOverViewCard/TopicOverviewCard';
 
 interface MatchParams {
     tag: string
@@ -18,74 +18,74 @@ export interface TagWallProps extends RouteComponentProps<MatchParams> {
 }
 
 export interface TagWallState {
-    threads: Thread[];
+    topics: Topic[];
     id: string;
-    truncated: boolean;
-    timestampOnOldestThread: number;
+    timestampOnOldestTopic: number;
     isLoading: boolean;
 }
 
 const theme = chromiaTheme();
-const threadsPageLimit: number = 25;
+const topicsPageLimit: number = 25;
 
 export class TagWall extends React.Component<TagWallProps, TagWallState> {
 
     constructor(props: TagWallProps) {
         super(props);
         this.state = {
-            threads: [],
+            topics: [],
             id: "",
-            truncated: true,
-            timestampOnOldestThread: Date.now(),
+            timestampOnOldestTopic: Date.now(),
             isLoading: true
         };
 
-        this.retrieveThreads = this.retrieveThreads.bind(this);
-        this.retrieveOlderThreads = this.retrieveOlderThreads.bind(this);
+        this.retrieveTopics = this.retrieveTopics.bind(this);
+        this.retrieveOlderTopics = this.retrieveOlderTopics.bind(this);
     }
 
     componentDidMount(): void {
-        this.retrieveThreads();
+        this.retrieveTopics();
     }
 
-    retrieveThreads() {
+    retrieveTopics() {
         this.setState({ isLoading: true });
         const tag = this.props.match.params.tag;
         if (tag != null) {
-            getThreadsByTagPriorToTimestamp(tag, Date.now())
-                .then(retrievedThreads => {
-                    this.setState(prevState => ({ 
-                        threads: retrievedThreads.concat(prevState.threads), 
+            getTopicsByTagPriorToTimestamp(tag, Date.now())
+                .then(retrievedTopics => {
+                    this.setState(prevState => ({
+                        topics: retrievedTopics.concat(prevState.topics),
                         isLoading: false
                     }));
                 });
         }
     }
 
-    retrieveOlderThreads() {
-        if (this.state.threads.length > 0) {
+    retrieveOlderTopics() {
+        if (this.state.topics.length > 0) {
             this.setState({ isLoading: true });
             const tag = this.props.match.params.tag;
-            const oldestTimestamp: number = this.state.threads[this.state.threads.length - 1].timestamp;
-            getThreadsByTagPriorToTimestamp(tag, oldestTimestamp)
-                .then(retrievedThreads => {
-                    if (retrievedThreads.length > 0) {
+            const oldestTimestamp: number = this.state.topics[this.state.topics.length - 1].timestamp;
+            getTopicsByTagPriorToTimestamp(tag, oldestTimestamp)
+                .then(retrievedTopics => {
+                    if (retrievedTopics.length > 0) {
                         this.setState(prevState => ({
-                            threads: prevState.threads.concat(retrievedThreads),
+                            topics: prevState.topics.concat(retrievedTopics),
                             isLoading: false
                         }));
+                    } else {
+                        this.setState({ isLoading: false });
                     }
                 });
         }
     }
 
     renderLoadMoreButton() {
-        if (this.state.threads.length >= threadsPageLimit && 
-            this.state.threads.length % threadsPageLimit === 0) {
+        if (this.state.topics.length >= topicsPageLimit &&
+            this.state.topics.length % topicsPageLimit === 0) {
             return (
                 <MuiThemeProvider theme={theme}>
                     <Button type="submit" fullWidth color="primary"
-                        onClick={() => this.retrieveOlderThreads()}
+                        onClick={() => this.retrieveOlderTopics()}
                     >
                         Load more
                     </Button>
@@ -101,13 +101,7 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
                     <div className="thread-wall-container">
                         <br />
                         {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
-                        {this.state.threads.map(thread => <ThreadCard
-                            key={"card-" + thread.id}
-                            truncated={true}
-                            isSubCard={false}
-                            isUserPage={false}
-                            thread={thread}
-                        />)}
+                        {this.state.topics.map(topic => <TopicOverviewCard topic={topic} />)}
                     </div>
                     {this.renderLoadMoreButton()}
                 </Container>

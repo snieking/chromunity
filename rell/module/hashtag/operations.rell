@@ -1,9 +1,9 @@
-operation createThreadTag(username: text, tags: set<text>, threadId: text) {
+operation createTopicTag(username: text, tags: set<text>, topicId: text) {
     val user = user@{ .name == username};
     require(is_signer(user.pubkey));
 
-    val thread = thread@{ .id == threadId };
+    val topic = topic@{ .id == topicId };
     for(tag in tags) {
-        create threadTag(name = tag, thread, op_context.last_block_time);
+        create topicTag(name = tag, topic, op_context.last_block_time);
     }
 }
