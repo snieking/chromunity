@@ -9,6 +9,7 @@ import { MuiThemeProvider } from '@material-ui/core/styles';
 import { chromiaTheme } from '../Wall';
 import { getTopicsByUserPriorToTimestamp } from '../../../blockchain/TopicService';
 import TopicOverviewCard from '../../Topic/TopicOverViewCard/TopicOverviewCard';
+import { SubdirectoryArrowRight } from '@material-ui/icons';
 
 interface MatchParams {
     userId: string;
@@ -108,7 +109,10 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
                         <br />
                         {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
                         {this.renderUserPageIntro()}
-                        {this.state.topics.map(topic => <TopicOverviewCard topic={topic}/>)}
+                        {this.state.topics.length > 0
+                            ? (<SubdirectoryArrowRight className="nav-button button-center" />)
+                            : (<div />)}
+                        {this.state.topics.map(topic => <TopicOverviewCard topic={topic} />)}
                     </div>
                     {this.renderLoadMoreButton()}
                 </Container>

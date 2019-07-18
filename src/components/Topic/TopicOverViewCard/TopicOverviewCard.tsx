@@ -6,6 +6,7 @@ import { timeAgoReadable } from '../../../util/util';
 import { getUser, ifEmptyAvatarThenPlaceholder } from '../../../util/user-util';
 import { StarRate, MoreHoriz } from '@material-ui/icons';
 import './TopicOverviewCard.css';
+import '../Topic.css'
 import { getUserSettingsCached } from '../../../blockchain/UserService';
 import { Redirect } from 'react-router';
 import { getTopicStarRaters, removeTopicStarRating, giveTopicStarRating } from '../../../blockchain/TopicService';
@@ -80,10 +81,10 @@ class TopicOverviewCard extends React.Component<Props, State> {
                     avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.topic.author)
                 });
             });
-            getTopicStarRaters(this.props.topic.id).then(usersWhoStarRated => this.setState({ 
-                stars: usersWhoStarRated.length,
-                ratedByMe: usersWhoStarRated.includes(getUser().name)
-            }));
+        getTopicStarRaters(this.props.topic.id).then(usersWhoStarRated => this.setState({
+            stars: usersWhoStarRated.length,
+            ratedByMe: usersWhoStarRated.includes(getUser().name)
+        }));
     }
 
     renderReadMoreButton() {
@@ -96,14 +97,10 @@ class TopicOverviewCard extends React.Component<Props, State> {
         );
     }
 
-    updateRatingStatus(parentId: string) {
-
-    }
-
     toggleStarRate() {
         const id = this.props.topic.id;
         const name = getUser().name;
-        
+
         if (name != null) {
             if (this.state.ratedByMe) {
                 removeTopicStarRating(getUser(), id)
@@ -117,39 +114,23 @@ class TopicOverviewCard extends React.Component<Props, State> {
         }
     }
 
-    renderLoggedInRequiredActions() {
-        if (getUser().name != null) {
-            return (
-                <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
-                    <Badge
-                        className="star-badge"
-                        color="secondary"
-                        badgeContent={this.state.stars}
-                    >
-                        <StarRate className={this.state.ratedByMe ? "yellow-icon" : ""} />
-                    </Badge>
-                </IconButton>
-            );
-        }
-    }
-
     renderAuthor() {
         return (
             <div className="right">
-                <Typography
-                    gutterBottom
-                    variant="body2"
-                    component="span"
-                    className="typography"
+                <Link
+                    className="pink-typography"
+                    to={"/u/" + this.props.topic.author}
                 >
-                    <Link
-                        className="pink-typography"
-                        to={"/u/" + this.props.topic.author}
+                    <Typography
+                        gutterBottom
+                        variant="body2"
+                        component="span"
+                        className="typography"
                     >
                         <span className="author-name">@{this.props.topic.author}</span>
-                        {this.state.avatar !== "" ? <img src={this.state.avatar} className="author-avatar" alt="Profile Avatar" /> : <div></div>}
-                    </Link>
-                </Typography>
+                    </Typography>
+                </Link>
+                {this.state.avatar !== "" ? <img src={this.state.avatar} className="author-avatar" alt="Profile Avatar" /> : <div></div>}
             </div>
         );
     }
@@ -157,9 +138,8 @@ class TopicOverviewCard extends React.Component<Props, State> {
     renderCardContent() {
         return (
             <CardContent>
-                {this.renderTimeAgo(this.props.topic.timestamp)}
                 <div className="left">
-                    <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
+                    <div className="overview-rating">
                         <Badge
                             className="star-badge"
                             color="secondary"
@@ -167,13 +147,16 @@ class TopicOverviewCard extends React.Component<Props, State> {
                         >
                             <StarRate className={this.state.ratedByMe ? "yellow-icon" : ""} />
                         </Badge>
-                    </IconButton>
+                    </div>
                 </div>
                 {this.renderAuthor()}
-                <Typography variant="body2" className='purple-typography' component="p">
-                    {this.props.topic.title}
-                </Typography>
-            </CardContent>
+                <div className="topic-overview-details">
+                    {this.renderTimeAgo(this.props.topic.timestamp)}
+                    <Typography variant="body2" className='purple-typography' component="p">
+                        {this.props.topic.title}
+                    </Typography>
+                </div>
+            </CardContent >
         );
     }
 

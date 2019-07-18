@@ -8,7 +8,7 @@ import { getTopicById, removeTopicStarRating, giveTopicStarRating, getTopicStarR
 import { Topic, User, TopicReply } from "../../../types";
 import { getUser, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import { timeAgoReadable } from "../../../util/util";
-import { StarRate } from "@material-ui/icons";
+import { StarRate, SubdirectoryArrowRight } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
 import TopicReplyCard from "../TopicReplyCard/TopicReplyCard";
 
@@ -255,6 +255,9 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             <Container fixed>
                 <br />
                 {this.renderTopic()}
+                {this.state.topicReplies.length > 0
+                    ? (<SubdirectoryArrowRight className="nav-button button-center" />)
+                    : (<div />)}
                 {this.state.topicReplies.map(reply => <TopicReplyCard key={"reply-" + reply.id} reply={reply}/>)}
                 {this.renderReplyButton()}
             </Container>

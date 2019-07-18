@@ -4,6 +4,8 @@ import { User, Topic, TopicReply } from '../src/types';
 import { register, login } from '../src/blockchain/UserService';
 import { createTopic, getTopicsByUserPriorToTimestamp, giveTopicStarRating, getTopicStarRaters, removeTopicStarRating, getTopicsAfterTimestamp, getTopicsPriorToTimestamp, getTopicById, createTopicReply, getTopicReplies, giveReplyStarRating, getReplyStarRaters, removeReplyStarRating } from '../src/blockchain/TopicService';
 
+jest.setTimeout(30000);
+
 describe("topic tests", () => {
 
     const user = {

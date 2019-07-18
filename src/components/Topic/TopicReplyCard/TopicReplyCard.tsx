@@ -8,6 +8,9 @@ import { StarRate } from '@material-ui/icons';
 import { getUserSettingsCached } from '../../../blockchain/UserService';
 import { removeReplyStarRating, giveReplyStarRating, getReplyStarRaters } from '../../../blockchain/TopicService';
 
+import './TopicReplyCard.css';
+import '../Topic.css';
+
 interface Props {
     reply: TopicReply;
 }
@@ -113,20 +116,21 @@ class TopicReplyCard extends React.Component<Props, State> {
     renderAuthor() {
         return (
             <div className="right">
-                <Typography
-                    gutterBottom
-                    variant="body2"
-                    component="span"
-                    className="typography"
+
+                <Link
+                    className="pink-typography"
+                    to={"/u/" + this.props.reply.author}
                 >
-                    <Link
-                        className="pink-typography"
-                        to={"/u/" + this.props.reply.author}
-                    >
-                        <span className="author-name">@{this.props.reply.author}</span>
-                        {this.state.avatar !== "" ? <img src={this.state.avatar} className="author-avatar" alt="Profile Avatar" /> : <div></div>}
-                    </Link>
-                </Typography>
+                    <Typography
+                        gutterBottom
+                        variant="body2"
+                        component="p"
+                        className="typography"
+                    ><span className="author-name">@{this.props.reply.author}</span>
+                    </Typography>
+                </Link>
+                {this.state.avatar !== "" ? <img src={this.state.avatar} className="author-avatar" alt="Profile Avatar" /> : <div></div>}
+
             </div>
         );
     }
@@ -134,7 +138,6 @@ class TopicReplyCard extends React.Component<Props, State> {
     renderCardContent() {
         return (
             <CardContent>
-                {this.renderTimeAgo(this.props.reply.timestamp)}
                 <div className="left">
                     <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
                         <Badge
@@ -147,9 +150,12 @@ class TopicReplyCard extends React.Component<Props, State> {
                     </IconButton>
                 </div>
                 {this.renderAuthor()}
-                <Typography variant="body2" className='purple-typography' component="p">
-                    {this.props.reply.message}
-                </Typography>
+                <div className="reply-overview-details">
+                    {this.renderTimeAgo(this.props.reply.timestamp)}
+                    <Typography variant="body2" className='purple-typography' component="p">
+                        {this.props.reply.message}
+                    </Typography>
+                </div>
             </CardContent>
         );
     }

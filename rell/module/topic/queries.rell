@@ -29,7 +29,7 @@ query getTopicReplies(topicId: text) {
         .id,
         author=.author.name,
         .message,
-        sort .timestamp
+        -sort .timestamp
     );
 }
 

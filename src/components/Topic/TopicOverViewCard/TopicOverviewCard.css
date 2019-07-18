@@ -1,6 +1,7 @@
 .topic-timestamp {
     color: #1E1A22;
     opacity: 0.35;
+    margin-left: 40px;
 }
 
 .author-avatar {
@@ -25,6 +26,10 @@
     float: left;
 }
 
-.author-name {
-    padding-top: 20px;
+.overview-rating {
+    margin-top: 10px;
+}
+
+.topic-overview-details {
+    margin-left: 50px;
 }
