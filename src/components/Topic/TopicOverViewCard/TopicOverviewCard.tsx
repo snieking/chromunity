@@ -144,7 +144,7 @@ class TopicOverviewCard extends React.Component<Props, State> {
 
     renderTimeAgo(timestamp: number) {
         return (
-            <Typography className='topic-timestamp' variant='body2' component='span'>
+            <Typography className='topic-timestamp' variant='inherit' component='span'>
                 {timeAgoReadable(timestamp)}
             </Typography>
         )

@@ -64,7 +64,7 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
             <div className="bottom-right-corner rounded-pink">
                 <IconButton aria-label="Reply to topic"
                     onClick={() => this.toggleReplyTopicDialog()}
-                    style={{ backgroundColor: "#FFAFC1", marginRight: "5px", marginBottom: "5px" }}
+                    style={{ backgroundColor: "#FFAFC1", marginRight: "5px", marginBottom: "5px", height: "64px", width: "64px" }}
                 >
                     <ReplyAll fontSize="large" className="new-topic-button" />
                 </IconButton>

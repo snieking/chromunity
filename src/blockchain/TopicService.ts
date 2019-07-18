@@ -78,40 +78,30 @@ export function getTopicsByTagPriorToTimestamp(tag: string, timestamp: number): 
 }
 
 export function giveTopicStarRating(user: User, topicId: string) {
-    return modifyTopicStarRating(user, topicId, "giveTopicStarRating");
+    return modifyStarRating(user, topicId, "giveTopicStarRating");
 }
 
 export function removeTopicStarRating(user: User, topicId: string) {
-    return modifyTopicStarRating(user, topicId, "removeTopicStarRating");
-}
-
-function modifyTopicStarRating(user: User, topicId: string, rellOperation: string) {
-    const { privKey, pubKey } = seedToKey(user.seed);
-
-    const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation(rellOperation, user.name, topicId);
-    tx.addOperation('nop', uniqueId());
-    tx.sign(privKey, pubKey);
-    return tx.postAndWaitConfirmation();
+    return modifyStarRating(user, topicId, "removeTopicStarRating");
 }
 
 export function getTopicStarRaters(topicId: string): Promise<string[]> {
     return GTX.query("getStarRatingForTopic", { id: topicId });
 }
 
-export function giveReplyStarRating(user: User, topicId: string) {
-    return modifyReplyStarRating(user, topicId, "giveReplyStarRating");
+export function giveReplyStarRating(user: User, replyId: string) {
+    return modifyStarRating(user, replyId, "giveReplyStarRating");
 }
 
-export function removeReplyStarRating(user: User, topicId: string) {
-    return modifyReplyStarRating(user, topicId, "removeReplyStarRating");
+export function removeReplyStarRating(user: User, replyId: string) {
+    return modifyStarRating(user, replyId, "removeReplyStarRating");
 }
 
-function modifyReplyStarRating(user: User, topicId: string, rellOperation: string) {
+function modifyStarRating(user: User, id: string, rellOperation: string) {
     const { privKey, pubKey } = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation(rellOperation, user.name, topicId);
+    tx.addOperation(rellOperation, user.name, id);
     tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();

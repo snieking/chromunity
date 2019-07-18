@@ -77,9 +77,9 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                 <div className="bottom-right-corner rounded-pink">
                     <IconButton aria-label="New topic"
                         onClick={() => this.toggleNewTopicDialog()}
-                        style={{ backgroundColor: "#FFAFC1", marginRight: "5px", marginBottom: "5px" }}
+                        style={{ backgroundColor: "#FFAFC1", marginRight: "5px", marginBottom: "5px", height: "64px", width: "64px" }}
                     >
-                        <Forum fontSize="large" className="new-topic-button" />
+                        <Forum fontSize="inherit" className="new-topic-button" />
                     </IconButton>
                 </div>
             )
