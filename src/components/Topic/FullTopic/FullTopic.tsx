@@ -11,6 +11,7 @@ import { timeAgoReadable } from "../../../util/util";
 import { StarRate, SubdirectoryArrowRight } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
 import TopicReplyCard from "../TopicReplyCard/TopicReplyCard";
+import { parseContent } from "../../../util/text-parsing";
 
 
 interface MatchParams {
@@ -72,24 +73,6 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             stars: usersWhoStarRated.length,
             ratedByMe: usersWhoStarRated.includes(getUser().name)
         }));
-    }
-
-    static parseContent(message: string): string {
-        return this.parseUsers(this.parseHashtags(message));
-    }
-
-    static parseHashtags(message: string): string {
-        return message.replace(
-            /(#)([a-z\d-]+)/gi,
-            "<a  class='pink-typography' href='/tag/$2'>$1$2</a>"
-        );
-    }
-
-    static parseUsers(message: string): string {
-        return message.replace(
-            /(@)([a-z\d-]+)/gi,
-            "<a  class='purple-typography' href='/u/$2'><b>$1$2</b></a>"
-        );
     }
 
     retrieveReplies(): void {
@@ -160,7 +143,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
                     <span dangerouslySetInnerHTML={{
-                        __html: FullTopic.parseContent(content)
+                        __html: parseContent(content)
                     }}
                         style={{ whiteSpace: "pre-line" }} />
                 </Typography>

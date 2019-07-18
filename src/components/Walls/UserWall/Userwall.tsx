@@ -73,6 +73,8 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
                             topics: prevState.topics.concat(retrievedTopics),
                             isLoading: false
                         }));
+                    } else {
+                        this.setState({ isLoading: false });
                     }
                 });
         }

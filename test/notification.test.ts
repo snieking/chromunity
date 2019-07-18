@@ -3,7 +3,7 @@ import { getANumber } from './helper';
 
 import * as bip39 from "bip39";
 import { register, login } from '../src/blockchain/UserService';
-import { sendUserNotifications, countUnreadUserNotifications, markNotificationsRead, getUserNotifications } from '../src/blockchain/NotificationService';
+import { sendNotifications, countUnreadUserNotifications, markNotificationsRead, getUserNotifications } from '../src/blockchain/NotificationService';
 import { createTopic, getTopicsByUserPriorToTimestamp } from '../src/blockchain/TopicService';
 
 jest.setTimeout(30000);
@@ -44,18 +44,8 @@ describe("notification tests", () => {
         expect(secondLoggedInUser.name).toBe(user2.name);
     });
 
-    it("create thread to use for notifications", async () => {
-        await createTopic(loggedInUser, "Hello!", "Hello World!");
-    })
-
-    it("get thread to use for notifications", async () => {
-        const topics: Topic[] = await getTopicsByUserPriorToTimestamp(loggedInUser.name, Date.now());
-        expect(topics.length).toBe(1);
-        topic = topics[0];
-    });
-
     it("send notification, expect unread to be 1", async () => {
-        await sendUserNotifications(secondLoggedInUser, topic.id, new Set([loggedInUser.name]));
+        await sendNotifications(secondLoggedInUser, "test", "test", [loggedInUser.name]);
         const count: number = await countUnreadUserNotifications(loggedInUser.name);
         expect(count).toBe(1);
     });

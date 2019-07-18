@@ -4,7 +4,7 @@ import { uniqueId } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 import { User, Topic, TopicReply } from "../types";
 import { storeTagsFromTopic } from "./TagService";
-import { sendUserNotifications } from "./NotificationService";
+import { sendNotifications } from "./NotificationService";
 
 const topicsCache = BoomerangCache.create("topic-bucket", { storage: "session", encrypt: false });
 
@@ -22,12 +22,6 @@ export function createTopic(user: User, title: string, message: string) {
 
             if (tags != null) {
                 storeTagsFromTopic(user, topicId, tags);
-            }
-
-            const users = getUsers(message);
-
-            if (users != null) {
-                sendUserNotifications(user, topicId, users);
             }
 
             return promise;
@@ -51,14 +45,16 @@ export function createTopicReply(user: User, topicId: string, message: string) {
                 storeTagsFromTopic(user, topicId, tags);
             }
 
-            const users = getUsers(message);
-
-            if (users != null) {
-                sendUserNotifications(user, topicId, users);
-            }
+            getTopicStarRaters(topicId)
+                .then(users => sendNotifications(user,
+                    createReplyTriggerString(user.name, topicId), message, users.filter(item => item !== user.name)));
 
             return promise;
         });
+}
+
+function createReplyTriggerString(name: string, id: string): string {
+    return "@" + name + " replied to /t/" + id;
 }
 
 export function getTopicReplies(topicId: string): Promise<TopicReply[]> {
@@ -178,18 +174,6 @@ function getHashTags(inputText: string): string[] {
 
     while ((match = regex.exec(inputText))) {
         matches.push(match[1]);
-    }
-
-    return matches;
-}
-
-function getUsers(inputText: string): Set<string> {
-    const regex = /(?:^|\s)(?:@)([a-zA-Z\d]+)/gm;
-    const matches = new Set<string>();
-    let match;
-
-    while ((match = regex.exec(inputText))) {
-        matches.add(match[1]);
     }
 
     return matches;

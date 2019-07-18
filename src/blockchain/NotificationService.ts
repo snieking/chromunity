@@ -6,12 +6,11 @@ import { uniqueId } from "../util/util";
 
 const boomerang = BoomerangCache.create("notification-bucket", {storage: "local", encrypt: true});
 
-export function sendUserNotifications(fromUser: User, threadId: string, usernames: Set<string>) {
+export function sendNotifications(fromUser: User, trigger: string, content: string, usernames: string[]) {
     const {privKey, pubKey} = seedToKey(fromUser.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("createNotification", fromUser.name, threadId, Array.from(usernames));
-    tx.addOperation('nop', uniqueId());
+    tx.addOperation("createNotificationsForUsers", fromUser.name, uniqueId(), trigger, content, Array.from(usernames));
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }

@@ -42,24 +42,6 @@ class TopicOverviewCard extends React.Component<Props, State> {
         };
     }
 
-    static parseContent(message: string): string {
-        return this.parseUsers(this.parseHashtags(message));
-    }
-
-    static parseHashtags(message: string): string {
-        return message.replace(
-            /(#)([a-z\d-]+)/gi,
-            "<a  class='pink-typography' href='/tag/$2'>$1$2</a>"
-        );
-    }
-
-    static parseUsers(message: string): string {
-        return message.replace(
-            /(@)([a-z\d-]+)/gi,
-            "<a  class='purple-typography' href='/u/$2'><b>$1$2</b></a>"
-        );
-    }
-
     render() {
         if (this.state.redirectToFullCard) {
             return (<Redirect to={"/t/" + this.props.topic.id} />);

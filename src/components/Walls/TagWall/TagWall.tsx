@@ -52,8 +52,8 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
         if (tag != null) {
             getTopicsByTagPriorToTimestamp(tag, Date.now())
                 .then(retrievedTopics => {
-                    this.setState(prevState => ({ 
-                        topics: retrievedTopics.concat(prevState.topics), 
+                    this.setState(prevState => ({
+                        topics: retrievedTopics.concat(prevState.topics),
                         isLoading: false
                     }));
                 });
@@ -72,13 +72,15 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
                             topics: prevState.topics.concat(retrievedTopics),
                             isLoading: false
                         }));
+                    } else {
+                        this.setState({ isLoading: false });
                     }
                 });
         }
     }
 
     renderLoadMoreButton() {
-        if (this.state.topics.length >= topicsPageLimit && 
+        if (this.state.topics.length >= topicsPageLimit &&
             this.state.topics.length % topicsPageLimit === 0) {
             return (
                 <MuiThemeProvider theme={theme}>
@@ -98,8 +100,8 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
                 <Container fixed maxWidth="md">
                     <div className="thread-wall-container">
                         <br />
-                        {this.state.isLoading ? <LinearProgress variant="query"/> : <div></div>}
-                        {this.state.topics.map(topic => <TopicOverviewCard topic={topic}/>)}
+                        {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
+                        {this.state.topics.map(topic => <TopicOverviewCard topic={topic} />)}
                     </div>
                     {this.renderLoadMoreButton()}
                 </Container>

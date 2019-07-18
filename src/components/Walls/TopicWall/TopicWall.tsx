@@ -96,6 +96,8 @@ class TopicWall extends React.Component<{}, State> {
                     topics: Array.from(new Set(retrievedTopics.concat(prevState.topics))),
                     isLoading: false
                 }));
+            } else {
+                this.setState({ isLoading: false });
             }
         })
     }

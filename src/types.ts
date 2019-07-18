@@ -19,10 +19,9 @@ export interface TopicReply {
 }
 
 export interface UserNotification {
-    topicId: string;
-    author: string;
-    title: string;
-    message: string;
+    id: string;
+    trigger: string;
+    content: any;
     read: boolean;
     timestamp: number;
 }

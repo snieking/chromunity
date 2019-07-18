@@ -1,13 +1,19 @@
 
-operation createNotification(name, topicId: text, usernames: set<text>) {
+operation createNotificationsForUsers(name, id: text, trigger: text, content: text, usernames: set<text>) {
     val user = user@{ .name == name };
     require(is_signer(user.pubkey));
 
-    val topic = topic@{ .id == topicId };
     for (username in usernames) {
         val toUser = user@?{ .name == username };
         if (toUser != null) {
-           create notification(topic, toUser!!, false, op_context.last_block_time);
+            create notification(
+                id = id, 
+                toUser!!, 
+                trigger = trigger,
+                content = content,
+                false, 
+                op_context.last_block_time
+            );
         }
     }
 }
