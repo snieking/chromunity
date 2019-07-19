@@ -17,3 +17,4 @@ class topicReply {
 include 'operations';
 include 'queries';
 include '/topic/rating/index';
+include '/topic/subscription/index';

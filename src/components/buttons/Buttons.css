@@ -7,3 +7,7 @@
 .new-topic-button {
     color: #1E1A22 ;
 }
+
+.text-field {
+    border: solid black 1px;
+}

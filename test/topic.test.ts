@@ -2,7 +2,7 @@ import { getANumber } from './helper';
 import * as bip39 from 'bip39';
 import { User, Topic, TopicReply } from '../src/types';
 import { register, login } from '../src/blockchain/UserService';
-import { createTopic, getTopicsByUserPriorToTimestamp, giveTopicStarRating, getTopicStarRaters, removeTopicStarRating, getTopicsAfterTimestamp, getTopicsPriorToTimestamp, getTopicById, createTopicReply, getTopicReplies, giveReplyStarRating, getReplyStarRaters, removeReplyStarRating } from '../src/blockchain/TopicService';
+import { createTopic, getTopicsByUserPriorToTimestamp, giveTopicStarRating, getTopicStarRaters, removeTopicStarRating, getTopicsAfterTimestamp, getTopicsPriorToTimestamp, getTopicById, createTopicReply, getTopicReplies, giveReplyStarRating, getReplyStarRaters, removeReplyStarRating, subscribeToTopic, getTopicSubscribers, unsubscribeFromTopic } from '../src/blockchain/TopicService';
 
 jest.setTimeout(30000);
 
@@ -14,7 +14,14 @@ describe("topic tests", () => {
         mnemonic: bip39.generateMnemonic(160)
     };
 
+    const user2 = {
+        name: 'alex_' + getANumber(),
+        password: 'userPSW1',
+        mnemonic: bip39.generateMnemonic(160)
+    };
+
     var userLoggedIn: User;
+    var secondLoggedInUser: User;
     var topic: Topic;
 
     it('register user ' + user.name, async () => {
@@ -24,6 +31,15 @@ describe("topic tests", () => {
     it('login user for creating topics', async () => {
         userLoggedIn = await login(user.name, user.password, user.mnemonic);
         expect(userLoggedIn.name).toBe(user.name);
+    });
+
+    it('register second user ' + user2.name, async () => {
+        await register(user2.name, user2.password, user2.mnemonic);
+    });
+
+    it('login second user', async () => {
+        secondLoggedInUser = await login(user2.name, user2.password, user2.mnemonic);
+        expect(secondLoggedInUser.name).toBe(user2.name);
     });
 
     it('create topic', async () => {
@@ -71,6 +87,16 @@ describe("topic tests", () => {
         const usersWhoRated: string[] = await getTopicStarRaters(topic.id);
         expect(usersWhoRated.length).toBe(1);
     });
+
+    it("topic subscription", async () => {
+        await subscribeToTopic(secondLoggedInUser, topic.id);
+        var subscribers: string[] = await getTopicSubscribers(topic.id);
+        expect(subscribers.length).toBe(2);
+        
+        await unsubscribeFromTopic(secondLoggedInUser, topic.id);
+        subscribers = await getTopicSubscribers(topic.id);
+        expect(subscribers.length).toBe(1);
+    })
 
     it("get topic after timestamp", async () => {
         const title: string = "It is fun to program in Rell"

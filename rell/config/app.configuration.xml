@@ -85,6 +85,16 @@
                                 <string>module/topic/rating/queries.rell</string>
                             </entry>
 
+                            <entry key="topic/subscription/index.rell">
+                                <string>module/topic/subscription/index.rell</string>
+                            </entry>
+                            <entry key="topic/subscription/operations.rell">
+                                <string>module/topic/subscription/operations.rell</string>
+                            </entry>
+                            <entry key="topic/subscription/queries.rell">
+                                <string>module/topic/subscription/queries.rell</string>
+                            </entry>
+
                             <entry key="notifications/index.rell">
                                 <string>module/notifications/index.rell</string>
                             </entry>

@@ -3,7 +3,7 @@ import { seedToKey } from "./CryptoService";
 import { GTX } from "./Postchain";
 import * as BoomerangCache from "boomerang-cache";
 import { uniqueId } from "../util/util";
-import { sendNotifications, sendNotificationWithDeterministicId, removeNotificationsForId } from "./NotificationService";
+import { sendNotificationWithDeterministicId, removeNotificationsForId } from "./NotificationService";
 
 const boomerang = BoomerangCache.create("following-bucket", { storage: "local", encrypt: true });
 
@@ -12,7 +12,7 @@ export function createFollowing(user: User, following: string) {
         .then((response: any) => {
             const id: string = createDeterministicId(user.name, following);
             const trigger: string = createFollowingNotificationTrigger(user.name);
-            
+
             sendNotificationWithDeterministicId(user, id, trigger, "", [ following ])
 
             return response;

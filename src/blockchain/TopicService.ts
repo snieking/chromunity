@@ -24,6 +24,8 @@ export function createTopic(user: User, title: string, message: string) {
                 storeTagsFromTopic(user, topicId, tags);
             }
 
+            subscribeToTopic(user, topicId);
+
             return promise;
         });
 }
@@ -45,7 +47,7 @@ export function createTopicReply(user: User, topicId: string, message: string) {
                 storeTagsFromTopic(user, topicId, tags);
             }
 
-            getTopicStarRaters(topicId)
+            getTopicSubscribers(topicId)
                 .then(users => sendNotifications(user,
                     createReplyTriggerString(user.name, topicId), message, users.filter(item => item !== user.name)));
 
@@ -78,11 +80,11 @@ export function getTopicsByTagPriorToTimestamp(tag: string, timestamp: number): 
 }
 
 export function giveTopicStarRating(user: User, topicId: string) {
-    return modifyStarRating(user, topicId, "giveTopicStarRating");
+    return modifyRatingAndSubscription(user, topicId, "giveTopicStarRating");
 }
 
 export function removeTopicStarRating(user: User, topicId: string) {
-    return modifyStarRating(user, topicId, "removeTopicStarRating");
+    return modifyRatingAndSubscription(user, topicId, "removeTopicStarRating");
 }
 
 export function getTopicStarRaters(topicId: string): Promise<string[]> {
@@ -90,14 +92,22 @@ export function getTopicStarRaters(topicId: string): Promise<string[]> {
 }
 
 export function giveReplyStarRating(user: User, replyId: string) {
-    return modifyStarRating(user, replyId, "giveReplyStarRating");
+    return modifyRatingAndSubscription(user, replyId, "giveReplyStarRating");
 }
 
 export function removeReplyStarRating(user: User, replyId: string) {
-    return modifyStarRating(user, replyId, "removeReplyStarRating");
+    return modifyRatingAndSubscription(user, replyId, "removeReplyStarRating");
 }
 
-function modifyStarRating(user: User, id: string, rellOperation: string) {
+export function subscribeToTopic(user: User, id: string) {
+    return modifyRatingAndSubscription(user, id, "subscribeToTopic");
+}
+
+export function unsubscribeFromTopic(user: User, id: string) {
+    return modifyRatingAndSubscription(user, id, "unsubscribeFromTopic");
+}
+
+function modifyRatingAndSubscription(user: User, id: string, rellOperation: string) {
     const { privKey, pubKey } = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
@@ -109,6 +119,10 @@ function modifyStarRating(user: User, id: string, rellOperation: string) {
 
 export function getReplyStarRaters(topicId: string): Promise<string[]> {
     return GTX.query("getStarRatingForReply", { id: topicId });
+}
+
+export function getTopicSubscribers(topicId: string): Promise<string[]> {
+    return GTX.query("getSubscribersForTopic", { id: topicId });
 }
 
 export function getTopicById(id: string): Promise<Topic> {

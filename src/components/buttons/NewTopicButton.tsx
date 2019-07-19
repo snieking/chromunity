@@ -94,36 +94,36 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                     <form onSubmit={this.createNewTopic}>
                         <DialogTitle>New topic</DialogTitle>
                         <DialogContent>
-                            <br/>
-                            <label>Title</label>
                         <TextField
                                 autoFocus
                                 margin="dense"
                                 id="title"
+                                label="Title"
                                 multiline
                                 fullWidth
                                 onChange={this.handleDialogTitleChange}
                                 value={this.state.topicTitle}
+                                className="text-field"
+                                variant="outlined"
                             />
-                            <br/>
-                            <br/>
-                            <br/>
-                            <label>Content</label>
                             <TextField
                                 margin="dense"
                                 id="message"
                                 multiline
+                                label="Content"
                                 type="text"
                                 fullWidth
+                                rows="3"
                                 onChange={this.handleDialogMessageChange}
                                 value={this.state.topicMessage}
+                                variant="outlined"
                             />
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={() => this.toggleNewTopicDialog()} color="primary">
+                            <Button onClick={() => this.toggleNewTopicDialog()} color="secondary" variant="outlined">
                                 Cancel
                             </Button>
-                            <Button type="submit" color="primary">
+                            <Button type="submit" color="primary" variant="outlined">
                                 Create
                             </Button>
                         </DialogActions>

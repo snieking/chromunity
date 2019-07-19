@@ -25,6 +25,7 @@ yarn-error.log*
 
 # IDE
 .idea/
+.vscode/
 
 *.pid
 package-lock.json
