@@ -172,7 +172,7 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
                         onChange={this.handlePasswordChange}
                         value={this.state.password} />
                     <input type="password" id="secondPassword" className="fadeIn third" name="register"
-                        placeholder="verify password"
+                        placeholder="repeat password"
                         onChange={this.handleSecondPasswordChange}
                         value={this.state.secondPassword} />
 

@@ -18,6 +18,18 @@ operation createNotificationsForUsers(name, id: text, trigger: text, content: te
     }
 }
 
+operation removeNotificationsForUsers(name, id: text, usernames: set<text>) {
+    val user = user@{ .name == name };
+    require(is_signer(user.pubkey));
+
+    for (username in usernames) {
+        val toUser = user@?{ .name == username };
+        if (toUser != null) {
+            delete notification@{ id, toUser!! };
+        }
+    }
+}
+
 operation markNotificationsSinceTimestampRead(name, timestamp) {
     val user = user@{ .name == name };
     require(is_signer(user.pubkey));
