@@ -4,11 +4,11 @@ import { Container, Card, TextField, Button, CardActions, IconButton, CardConten
 
 import { RouteComponentProps } from "react-router";
 import { ReplyTopicButton } from "../../buttons/ReplyTopicButton";
-import { getTopicById, removeTopicStarRating, giveTopicStarRating, getTopicStarRaters, getTopicReplies } from "../../../blockchain/TopicService";
+import { getTopicById, removeTopicStarRating, giveTopicStarRating, getTopicStarRaters, getTopicReplies, unsubscribeFromTopic, subscribeToTopic, getTopicSubscribers } from "../../../blockchain/TopicService";
 import { Topic, User, TopicReply } from "../../../types";
 import { getUser, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import { timeAgoReadable } from "../../../util/util";
-import { StarRate, SubdirectoryArrowRight } from "@material-ui/icons";
+import { StarRate, SubdirectoryArrowRight, Archive } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
 import TopicReplyCard from "../TopicReplyCard/TopicReplyCard";
 import { parseContent } from "../../../util/text-parsing";
@@ -27,6 +27,7 @@ export interface FullTopicState {
     avatar: string;
     stars: number;
     ratedByMe: boolean;
+    subscribed: boolean;
     topicReplies: TopicReply[];
     replyBoxOpen: boolean;
     replyMessage: string;
@@ -49,6 +50,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             topic: initialTopic,
             avatar: "",
             ratedByMe: false,
+            subscribed: false,
             stars: 0,
             topicReplies: [],
             replyBoxOpen: false,
@@ -56,23 +58,24 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
         };
 
         this.retrieveReplies = this.retrieveReplies.bind(this);
-
+        this.handleReplySubmit = this.handleReplySubmit.bind(this);
     }
 
     componentDidMount(): void {
         const id = this.props.match.params.id;
         getTopicById(id).then(topic => this.consumeTopicData(topic));
         this.retrieveReplies();
+        getTopicStarRaters(id).then(usersWhoStarRated => this.setState({ 
+            stars: usersWhoStarRated.length,
+            ratedByMe: usersWhoStarRated.includes(getUser().name)
+        }));
+        getTopicSubscribers(id).then(subscribers => this.setState({ subscribed: subscribers.includes(getUser().name) }));
     }
 
     consumeTopicData(topic: Topic): void {
         this.setState({ topic: topic });
         getUserSettingsCached(topic.author, 86400)
             .then(settings => this.setState({ avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, topic.author) }));
-        getTopicStarRaters(topic.id).then(usersWhoStarRated => this.setState({ 
-            stars: usersWhoStarRated.length,
-            ratedByMe: usersWhoStarRated.includes(getUser().name)
-        }));
     }
 
     retrieveReplies(): void {
@@ -93,6 +96,22 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             } else {
                 giveTopicStarRating(user, id)
                     .then(() => this.setState(prevState => ({ ratedByMe: true, stars: prevState.stars + 1 })))
+            }
+        } else {
+            window.location.replace("/user/login");
+        }
+    }
+
+    toggleSubscription() {
+        const id: string = this.state.topic.id;
+        const user: User = getUser();
+        const name: string = user.name;
+
+        if (name != null) {
+            if (this.state.subscribed) {
+                unsubscribeFromTopic(user, id).then(() => this.setState(prevState => ({ subscribed: false })));
+            } else {
+                subscribeToTopic(user, id).then(() => this.setState(prevState => ({ subscribed: true })));
             }
         } else {
             window.location.replace("/user/login");
@@ -163,6 +182,9 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                         <StarRate className={this.state.ratedByMe ? "yellow-icon" : ""} />
                     </Badge>
                 </IconButton>
+                <IconButton aria-label="Subscribe" onClick={() => this.toggleSubscription()}>
+                    <Archive className={this.state.subscribed ? "green-icon" : ""} />
+                </IconButton>
             </CardActions>
         );
     }
@@ -193,11 +215,6 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
         this.setState({ replyMessage: event.target.value });
     }
 
-    handleReplySubmit(): void {
-        this.setState({ replyMessage: "" });
-        this.toggleReplyBox();
-    }
-
     renderReplyForm() {
         return (
             <div className="reply-container">
@@ -224,9 +241,16 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
         );
     }
 
+    handleReplySubmit(): void {
+        this.retrieveReplies();
+        if (!this.state.subscribed) {
+            subscribeToTopic(getUser(), this.state.topic.id).then(() => this.setState({ subscribed: true }));
+        }
+    }
+
     renderReplyButton() {
         return (
-            <ReplyTopicButton updateFunction={this.retrieveReplies}
+            <ReplyTopicButton submitFunction={this.handleReplySubmit}
                 topicId={this.props.match.params.id}
                 topicAuthor={this.state.topic.author}
             />

@@ -7,7 +7,6 @@ import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
-import DialogTitle from "@material-ui/core/DialogTitle";
 import IconButton from "@material-ui/core/IconButton";
 import { ReplyAll } from "@material-ui/icons";
 import { createTopicReply } from "../../blockchain/TopicService";
@@ -15,7 +14,7 @@ import { getUser } from "../../util/user-util";
 
 
 export interface ReplyTopicButtonProps {
-    updateFunction: Function;
+    submitFunction: Function;
     topicId: string;
     topicAuthor: string;
 }
@@ -55,7 +54,7 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
         const topicMessage = this.state.topicMessage;
         this.setState({ topicMessage: "" });
 
-        createTopicReply(getUser(), this.props.topicId, topicMessage).then(() => this.props.updateFunction());
+        createTopicReply(getUser(), this.props.topicId, topicMessage).then(() => this.props.submitFunction());
         this.toggleReplyTopicDialog();
     }
 
@@ -78,24 +77,27 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
                 <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title"
                     fullWidth={true} maxWidth={"sm"}>
                     <form onSubmit={this.createTopicReply}>
-                        <DialogTitle id="form-dialog-title">Reply</DialogTitle>
                         <DialogContent>
+                            <br/>
                             <TextField
                                 autoFocus
                                 margin="dense"
                                 id="message"
                                 multiline
+                                label="Reply"
                                 type="text"
+                                rows="3"
+                                variant="outlined"
                                 fullWidth
                                 onChange={this.handleDialogMessageChange}
                                 value={this.state.topicMessage}
                             />
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={() => this.toggleReplyTopicDialog()} color="primary">
+                            <Button onClick={() => this.toggleReplyTopicDialog()} color="secondary" variant="outlined">
                                 Cancel
                             </Button>
-                            <Button type="submit" color="primary">
+                            <Button type="submit" color="primary" variant="outlined">
                                 Send
                             </Button>
                         </DialogActions>

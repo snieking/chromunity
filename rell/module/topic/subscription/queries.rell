@@ -1,0 +1,3 @@
+query getSubscribersForTopic(id: text) {
+    return subscription@*{ topic@{ .id == id }} ( .user.name );
+}
