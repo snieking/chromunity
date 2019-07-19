@@ -7,10 +7,29 @@ import { uniqueId } from "../util/util";
 const boomerang = BoomerangCache.create("notification-bucket", {storage: "local", encrypt: true});
 
 export function sendNotifications(fromUser: User, trigger: string, content: string, usernames: string[]) {
+    return sendNotificationsInternal(fromUser, uniqueId(), trigger, content, usernames);
+}
+
+export function sendNotificationWithDeterministicId(fromUser: User, id: string, trigger: string, content: string, usernames: string[]) {
+    return sendNotificationsInternal(fromUser, id, trigger, content, usernames);
+}
+
+export function removeNotificationsForId(fromUser: User, id: string, usernames: string[]) {
     const {privKey, pubKey} = seedToKey(fromUser.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("createNotificationsForUsers", fromUser.name, uniqueId(), trigger, content, Array.from(usernames));
+    tx.addOperation("removeNotificationsForUsers", fromUser.name, id, usernames);
+    tx.addOperation("nop", uniqueId());
+    tx.sign(privKey, pubKey);
+    return tx.postAndWaitConfirmation();
+}
+
+function sendNotificationsInternal(fromUser: User, id: string, trigger: string, content: string, usernames: string[]) {
+    const {privKey, pubKey} = seedToKey(fromUser.seed);
+
+    const tx = GTX.newTransaction([pubKey]);
+    tx.addOperation("createNotificationsForUsers", fromUser.name, id, trigger, content, usernames);
+    tx.addOperation("nop", uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
