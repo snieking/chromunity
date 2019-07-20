@@ -67,17 +67,8 @@ class TopicWall extends React.Component<Props, State> {
             topics = getTopicsAfterTimestamp(this.state.topics[0].timestamp, topicsPageSize);
         }
 
-        topics.then(retrievedTopics => {
-            if (retrievedTopics.length > 0) {
-                this.setState(prevState => ({
-                    topics: Array.from(new Set(retrievedTopics.concat(prevState.topics))),
-                    isLoading: false,
-                    couldExistOlderTopics: retrievedTopics.length >= topicsPageSize
-                }));
-            } else {
-                this.setState({ isLoading: false, couldExistOlderTopics: false });
-            }
-        })
+        topics.then(retrievedTopics => this.appendLatestTopics(retrievedTopics))
+            .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
     }
 
     retrieveLatestTopicsForUserFollowings() {
@@ -89,17 +80,8 @@ class TopicWall extends React.Component<Props, State> {
             topics = getTopicsFromFollowsAfterTimestamp(getUser(), this.state.topics[0].timestamp, topicsPageSize);
         }
 
-        topics.then(retrievedTopics => {
-            if (retrievedTopics.length > 0) {
-                this.setState(prevState => ({
-                    topics: Array.from(new Set(retrievedTopics.concat(prevState.topics))),
-                    isLoading: false,
-                    couldExistOlderTopics: retrievedTopics.length >= topicsPageSize
-                }));
-            } else {
-                this.setState({ isLoading: false, couldExistOlderTopics: false });
-            }
-        }).catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
+        topics.then(retrievedTopics => this.appendLatestTopics(retrievedTopics))
+            .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
     }
 
     retrieveLatestTopicsForTagFollowings() {
@@ -111,17 +93,20 @@ class TopicWall extends React.Component<Props, State> {
             topics = getTopicsFromFollowedTagsPriorToTimestamp(getUser(), this.state.topics[0].timestamp, topicsPageSize);
         }
 
-        topics.then(retrievedTopics => {
-            if (retrievedTopics.length > 0) {
-                this.setState(prevState => ({
-                    topics: Array.from(new Set(retrievedTopics.concat(prevState.topics))),
-                    isLoading: false,
-                    couldExistOlderTopics: retrievedTopics.length >= topicsPageSize
-                }));
-            } else {
-                this.setState({ isLoading: false, couldExistOlderTopics: false });
-            }
-        }).catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
+        topics.then(retrievedTopics => this.appendLatestTopics(retrievedTopics))
+            .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
+    }
+
+    appendLatestTopics(topics: Topic[]) {
+        if (topics.length > 0) {
+            this.setState(prevState => ({
+                topics: Array.from(new Set(topics.concat(prevState.topics))),
+                isLoading: false,
+                couldExistOlderTopics: topics.length >= topicsPageSize
+            }));
+        } else {
+            this.setState({ isLoading: false, couldExistOlderTopics: false });
+        }
     }
 
     retrieveLatestTopics() {
@@ -138,47 +123,32 @@ class TopicWall extends React.Component<Props, State> {
 
     retrieveOlderTopicsForUserFollowings(oldestTimestamp: number) {
         getTopicsFromFollowsPriorToTimestamp(getUser(), oldestTimestamp, topicsPageSize)
-            .then(retrievedTopics => {
-                if (retrievedTopics.length > 0) {
-                    this.setState(prevState => ({
-                        topics: Array.from(new Set(prevState.topics.concat(retrievedTopics))),
-                        isLoading: false,
-                        couldExistOlderTopics: retrievedTopics.length >= topicsPageSize
-                    }));
-                } else {
-                    this.setState({ isLoading: false, couldExistOlderTopics: false });
-                }
-            }).catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
+            .then(retrievedTopics => this.appendOlderTopics(retrievedTopics))
+            .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
     }
 
     retrieveOlderTopicsForTagFollowings(oldestTimestamp: number) {
         getTopicsFromFollowedTagsPriorToTimestamp(getUser(), oldestTimestamp, topicsPageSize)
-            .then(retrievedTopics => {
-                if (retrievedTopics.length > 0) {
-                    this.setState(prevState => ({
-                        topics: Array.from(new Set(prevState.topics.concat(retrievedTopics))),
-                        isLoading: false,
-                        couldExistOlderTopics: retrievedTopics.length >= topicsPageSize
-                    }));
-                } else {
-                    this.setState({ isLoading: false, couldExistOlderTopics: false });
-                }
-            }).catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
+            .then(retrievedTopics => this.appendOlderTopics(retrievedTopics))
+            .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
     }
 
     retrieveOlderTopicsForAll(oldestTimestamp: number) {
         getTopicsPriorToTimestamp(oldestTimestamp, topicsPageSize)
-                .then(retrievedTopics => {
-                    if (retrievedTopics.length > 0) {
-                        this.setState(prevState => ({
-                            topics: Array.from(new Set(prevState.topics.concat(retrievedTopics))),
-                            isLoading: false,
-                            couldExistOlderTopics: retrievedTopics.length >= topicsPageSize
-                        }));
-                    } else {
-                        this.setState({ isLoading: false, couldExistOlderTopics: false });
-                    }
-                });
+            .then(retrievedTopics => this.appendOlderTopics(retrievedTopics))
+            .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
+    }
+
+    appendOlderTopics(topics: Topic[]) {
+        if (topics.length > 0) {
+            this.setState(prevState => ({
+                topics: Array.from(new Set(prevState.topics.concat(topics))),
+                isLoading: false,
+                couldExistOlderTopics: topics.length >= topicsPageSize
+            }));
+        } else {
+            this.setState({ isLoading: false, couldExistOlderTopics: false });
+        }
     }
 
     retrieveOlderTopics() {
