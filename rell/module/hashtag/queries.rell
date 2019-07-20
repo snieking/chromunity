@@ -1,14 +1,35 @@
 query getTopicsByTagPriorToTimestamp(tag: text, timestamp, pageSize: integer) {
     return topicTag@*{ 
         .name == tag,
-        .topic.timestamp < timestamp
+        .topic.lastModified < timestamp
     } (
         id=.topic.id,
         author=.topic.author.name,
         title=.topic.title,
         message=.topic.message,
-        -sort timestamp=.topic.timestamp
+        timestamp=.topic.timestamp,
+        -sort lastModified=.topic.lastModified
     ) limit pageSize;
+}
+
+query getTopicsByFollowedTagsPriorToTimestamp(username: text, timestamp, pageSize: integer) {
+    val user = user@{ .name == username};
+    return tagFollowing@*{ 
+        user,
+        .topicTag.topic.lastModified < timestamp
+    } (
+        id=.topicTag.topic.id,
+        author=.topicTag.topic.author.name,
+        title=.topicTag.topic.title,
+        message=.topicTag.topic.message,
+        timestamp=.topicTag.topic.timestamp,
+        -sort lastModified=.topicTag.topic.lastModified
+    ) limit pageSize;
+}
+
+query getFollowedTopics(username: text) {
+    val user = user@{ .name == username};
+    return tagFollowing@*{ user } (.topicTag.name );
 }
 
 query getAllTags() {

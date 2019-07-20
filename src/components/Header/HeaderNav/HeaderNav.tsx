@@ -9,14 +9,14 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Home from '@material-ui/icons/Home';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import { ExitToApp, Gavel, LocationCity, TrendingUp, Settings, Face, HowToVote } from "@material-ui/icons";
+import { ExitToApp, Gavel, LocationCity, Face, HowToVote, Bookmarks, Settings, People } from "@material-ui/icons";
 
 import './HeaderNav.css';
 import { NotificationsButton } from "../../buttons/NotificationsButton";
 import { Button, MenuItem, Menu, ListItemIcon, Typography } from '@material-ui/core';
 
 export interface HeaderNavProps {
-    toggleSidebarFunction: Function
+    
 }
 
 export default function HeaderNav(props: HeaderNavProps) {
@@ -98,6 +98,33 @@ export default function HeaderNav(props: HeaderNavProps) {
         }
     }
 
+    function renderFavoriteWalls() {
+        if (user.name != null) {
+            return (
+                <div>
+                    <Link to="/tw">
+                        <IconButton
+                            edge="start"
+                            className={classes.menuButton}
+                            aria-label="Open drawer"
+                        >
+                            <Bookmarks className="nav-button" />
+                        </IconButton>
+                    </Link>
+                    <Link to="/fw">
+                        <IconButton
+                            edge="start"
+                            className={classes.menuButton}
+                            aria-label="Open drawer"
+                        >
+                            <People className="nav-button" />
+                        </IconButton>
+                    </Link>
+                </div>
+            )
+        }
+    }
+
     return (
         <div className={classes.grow}>
             <AppBar position="static">
@@ -111,10 +138,7 @@ export default function HeaderNav(props: HeaderNavProps) {
                             <Home className="nav-button" />
                         </IconButton>
                     </Link>
-                    <IconButton onClick={() => props.toggleSidebarFunction()}>
-                        <TrendingUp className="nav-button" />
-                    </IconButton>
-
+                    {renderFavoriteWalls()}
                     <Button aria-controls="gov-menu" aria-haspopup="true" onClick={handleGovClick}>
                         <LocationCity className="nav-button" />
                     </Button>

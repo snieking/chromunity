@@ -3,5 +3,9 @@ class topicTag {
     index timestamp;
 }
 
+class tagFollowing {
+    key user, topicTag;
+}
+
 include 'operations';
 include 'queries';
