@@ -2,6 +2,15 @@ export function parseContent(message: string): string {
     return parseUsers(parseHashtags(parseTopics(message)));
 }
 
+export function getTags(message: string): string[] {
+    if (message == null) {
+        return [];
+    }
+
+    const tags: string[] = message.match(/(#)([a-z\d-]+)/gi);
+    return tags != null ? tags : [];
+}
+
 function parseHashtags(message: string): string {
     return message.replace(
         /(#)([a-z\d-]+)/gi,

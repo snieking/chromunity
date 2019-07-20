@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from "react-router-dom";
 import { Topic } from '../../../types';
-import { Card, Typography, IconButton, Badge, CardContent, CardActionArea } from '@material-ui/core';
+import { Card, Typography, IconButton, Badge, CardContent, CardActionArea, Chip } from '@material-ui/core';
 import { timeAgoReadable } from '../../../util/util';
 import { getUser, ifEmptyAvatarThenPlaceholder } from '../../../util/user-util';
 import { StarRate, MoreHoriz } from '@material-ui/icons';
@@ -10,6 +10,7 @@ import '../Topic.css'
 import { getUserSettingsCached } from '../../../blockchain/UserService';
 import { Redirect } from 'react-router';
 import { getTopicStarRaters, removeTopicStarRating, giveTopicStarRating } from '../../../blockchain/TopicService';
+import { getTags } from '../../../util/text-parsing';
 
 interface Props {
     topic: Topic;
@@ -24,6 +25,7 @@ interface State {
     isRepresentative: boolean;
     hideThreadConfirmDialogOpen: boolean;
     avatar: string;
+    tags: string[];
 }
 
 class TopicOverviewCard extends React.Component<Props, State> {
@@ -32,6 +34,7 @@ class TopicOverviewCard extends React.Component<Props, State> {
 
         this.state = {
             stars: 0,
+            tags: [],
             ratedByMe: false,
             redirectToFullCard: false,
             replyBoxOpen: false,
@@ -57,6 +60,7 @@ class TopicOverviewCard extends React.Component<Props, State> {
     }
 
     componentDidMount() {
+        this.setState({ tags: getTags(this.props.topic.message) });
         getUserSettingsCached(this.props.topic.author, 1440)
             .then(settings => {
                 this.setState({
@@ -117,6 +121,32 @@ class TopicOverviewCard extends React.Component<Props, State> {
         );
     }
 
+    renderTagChips() {
+        if (this.state.tags != null) {
+            return (
+                <div className="tag-chips">
+                    {this.state.tags.map(tag => {
+                    return (
+                        <Link key={this.props.topic.id + ":" + tag} to={"/tag/" + tag.replace("#", "")}>
+                            <Chip 
+                                size="small" 
+                                label={tag} 
+                                style={{ 
+                                    marginLeft: "1px", 
+                                    marginRight: "1px", 
+                                    marginBottom: "3px", 
+                                    backgroundColor: "#FFAFC1", 
+                                    cursor: "pointer" 
+                                }} 
+                            />
+                        </Link>
+                    )
+                })}
+                </div>
+            )
+        }
+    }
+
     renderCardContent() {
         return (
             <CardContent>
@@ -134,9 +164,10 @@ class TopicOverviewCard extends React.Component<Props, State> {
                 {this.renderAuthor()}
                 <div className="topic-overview-details">
                     {this.renderTimeAgo(this.props.topic.lastModified)}
-                    <Typography variant="body2" className='purple-typography' component="p">
+                    <Typography variant="body2" className='purple-typography' component="span" style={{ marginRight: "10px" }}>
                         {this.props.topic.title}
                     </Typography>
+                    {this.renderTagChips()}
                 </div>
             </CardContent >
         );
@@ -144,7 +175,7 @@ class TopicOverviewCard extends React.Component<Props, State> {
 
     renderTimeAgo(timestamp: number) {
         return (
-            <Typography className='topic-timestamp' variant='inherit' component='span'>
+            <Typography className='topic-timestamp' variant='inherit' component='p'>
                 {timeAgoReadable(timestamp)}
             </Typography>
         )

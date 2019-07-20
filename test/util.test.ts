@@ -1,4 +1,5 @@
 import { timeAgoReadable, sortByFrequency, needsToBeSliced } from "../src/util/util";
+import { getTags } from "../src/util/text-parsing";
 
 jest.setTimeout(30000);
 
@@ -15,6 +16,25 @@ describe("Sorting by frequently tests", () => {
     });
 
 });
+
+describe("get tags from string", () => {
+    it("parse tags from string", async () => {
+        const s: string = "hello #world #you #should #try #chromia";
+        const tags: string[] = getTags(s);
+        expect(tags.length).toBe(5);
+        expect(tags).toContain("#world");
+        expect(tags).toContain("#you");
+        expect(tags).toContain("#should");
+        expect(tags).toContain("#try");
+        expect(tags).toContain("#chromia");
+    })
+
+    it("parse tags from string without tags", async () => {
+        const s: string = "";
+        const tags: string[] = getTags(s);
+        expect(tags.length).toBe(0);
+    })
+})
 
 describe("Sorting by frequently tests", () => {
 

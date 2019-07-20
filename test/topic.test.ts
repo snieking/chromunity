@@ -49,7 +49,7 @@ describe("topic tests", () => {
 
     it('create topic', async () => {
         await createTopic(userLoggedIn, 'First topic', 'Sweet topic you got there!');
-        await createTopic(userLoggedIn, 'Second topic', 'Not as good as the first one...');
+        await createTopic(userLoggedIn, 'Second topic', 'Not as good as the first one... #superior');
         const topics: Topic[] = await getTopicsByUserPriorToTimestamp(userLoggedIn.name, Date.now(), 10);
         expect(topics.length).toBeGreaterThanOrEqual(2);
         topic = topics[0];
@@ -105,7 +105,7 @@ describe("topic tests", () => {
 
     it("get topic after timestamp", async () => {
         const title: string = "It is fun to program in Rell"
-        const message: string = "It is fun to program in Rell. It is a great language to interact with a blockchain.";
+        const message: string = "It is fun to program in #Rell. It is a great language to interact with a #blockchain.";
         await createTopic(userLoggedIn, title, message);
         const topics: Topic[] = await getTopicsAfterTimestamp(Date.now() - 30000, 10);
         expect(topics.length).toBeGreaterThan(0);

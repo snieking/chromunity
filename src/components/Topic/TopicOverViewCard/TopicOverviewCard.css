@@ -5,6 +5,10 @@
     font-size: 11px;
 }
 
+.topic-title {
+    margin-right: 10px;
+}
+
 .author-avatar {
     float: right;
     width: 40px;
@@ -33,4 +37,8 @@
 
 .topic-overview-details {
     margin-left: 50px;
+}
+
+.tag-chips {
+    display: inline;
 }
