@@ -1,4 +1,4 @@
-query getTopicsAfterTimestamp(timestamp) {
+query getTopicsAfterTimestamp(timestamp, pageSize: integer) {
     return topic @* { 
         .lastModified > timestamp
     }(
@@ -8,10 +8,10 @@ query getTopicsAfterTimestamp(timestamp) {
         .message,
         -sort .lastModified,
         .timestamp
-    );
+    ) limit pageSize;
 }
 
-query getTopicsPriorToTimestamp(timestamp) {
+query getTopicsPriorToTimestamp(timestamp, pageSize: integer) {
     return topic @* { 
         .lastModified < timestamp
     }(
@@ -21,21 +21,34 @@ query getTopicsPriorToTimestamp(timestamp) {
         .message,
         -sort .lastModified,
         .timestamp
-    );
+    ) limit pageSize;
 }
 
-query getTopicReplies(topicId: text) {
+query getTopicRepliesPriorToTimestamp(topicId: text, timestamp, pageSize: integer) {
     return topicReply@*{
-        topic@{ .id == topicId }
+        topic@{ .id == topicId },
+        .timestamp < timestamp
     }(
         .id,
         author=.author.name,
         .message,
         -sort .timestamp
-    );
+    ) limit pageSize;
 }
 
-query getTopicsByUserIdPriorToTimestamp(name, timestamp) {
+query getTopicRepliesPriorAfterTimestamp(topicId: text, timestamp, pageSize: integer) {
+    return topicReply@*{
+        topic@{ .id == topicId },
+        .timestamp > timestamp
+    }(
+        .id,
+        author=.author.name,
+        .message,
+        -sort .timestamp
+    ) limit pageSize;
+}
+
+query getTopicsByUserIdPriorToTimestamp(name, timestamp, pageSize: integer) {
     return topic@*{
         user@{ .name == name },
         .lastModified < timestamp
@@ -46,10 +59,10 @@ query getTopicsByUserIdPriorToTimestamp(name, timestamp) {
         .message,
         -sort .lastModified,
         .timestamp
-    );
+    ) limit pageSize;
 }
 
-query getTopicsFromFollowsAfterTimestamp(name, timestamp) {
+query getTopicsFromFollowsAfterTimestamp(name, timestamp, pageSize: integer) {
     return topic@*{
         follow@{ .follower.name == name } ( .follows ),
         .lastModified > timestamp
@@ -60,10 +73,10 @@ query getTopicsFromFollowsAfterTimestamp(name, timestamp) {
         .message,
         -sort .lastModified,
         .timestamp
-    );
+    ) limit pageSize;
 }
 
-query getTopicsFromFollowsPriorToTimestamp(name, timestamp) {
+query getTopicsFromFollowsPriorToTimestamp(name, timestamp, pageSize: integer) {
     return topic@*{
         follow@{ .follower.name == name } ( .follows ),
         .lastModified < timestamp
@@ -74,7 +87,7 @@ query getTopicsFromFollowsPriorToTimestamp(name, timestamp) {
         .message,
         -sort .lastModified,
         .timestamp
-    );
+    ) limit pageSize;
 }
 
 query getTopicById(id: text) {

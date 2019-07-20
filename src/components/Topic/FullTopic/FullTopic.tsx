@@ -1,10 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Container, Card, TextField, Button, CardActions, IconButton, CardContent, Typography, Badge } from "@material-ui/core";
+import { Container, Card, TextField, Button, CardActions, IconButton, CardContent, Typography, Badge, LinearProgress } from "@material-ui/core";
 
 import { RouteComponentProps } from "react-router";
 import { ReplyTopicButton } from "../../buttons/ReplyTopicButton";
-import { getTopicById, removeTopicStarRating, giveTopicStarRating, getTopicStarRaters, getTopicReplies, unsubscribeFromTopic, subscribeToTopic, getTopicSubscribers } from "../../../blockchain/TopicService";
+import { getTopicById, removeTopicStarRating, giveTopicStarRating, getTopicStarRaters, unsubscribeFromTopic, subscribeToTopic, getTopicSubscribers, getTopicRepliesPriorToTimestamp } from "../../../blockchain/TopicService";
 import { Topic, User, TopicReply } from "../../../types";
 import { getUser, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import { timeAgoReadable } from "../../../util/util";
@@ -12,6 +12,7 @@ import { StarRate, SubdirectoryArrowRight, Archive } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
 import TopicReplyCard from "../TopicReplyCard/TopicReplyCard";
 import { parseContent } from "../../../util/text-parsing";
+import LoadMoreButton from "../../buttons/LoadMoreButton";
 
 
 interface MatchParams {
@@ -31,7 +32,11 @@ export interface FullTopicState {
     topicReplies: TopicReply[];
     replyBoxOpen: boolean;
     replyMessage: string;
+    couldExistOlderReplies: boolean;
+    isLoading: boolean;
 }
+
+const repliesPageSize: number = 25;
 
 export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
 
@@ -55,18 +60,21 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             stars: 0,
             topicReplies: [],
             replyBoxOpen: false,
-            replyMessage: ""
+            replyMessage: "",
+            couldExistOlderReplies: false,
+            isLoading: true
         };
 
-        this.retrieveReplies = this.retrieveReplies.bind(this);
+        this.retrieveLatestReplies = this.retrieveLatestReplies.bind(this);
         this.handleReplySubmit = this.handleReplySubmit.bind(this);
+        this.retrieveOlderReplies = this.retrieveOlderReplies.bind(this);
     }
 
     componentDidMount(): void {
         const id = this.props.match.params.id;
         getTopicById(id).then(topic => this.consumeTopicData(topic));
-        this.retrieveReplies();
-        getTopicStarRaters(id).then(usersWhoStarRated => this.setState({ 
+        this.retrieveLatestReplies();
+        getTopicStarRaters(id).then(usersWhoStarRated => this.setState({
             stars: usersWhoStarRated.length,
             ratedByMe: usersWhoStarRated.includes(getUser().name)
         }));
@@ -79,10 +87,48 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             .then(settings => this.setState({ avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, topic.author) }));
     }
 
-    retrieveReplies(): void {
-        getTopicReplies(this.props.match.params.id).then(replies => {
-            this.setState({ topicReplies: replies });
-        });
+    retrieveLatestReplies(): void {
+        const topicId: string = this.props.match.params.id;
+        this.setState({ isLoading: true });
+        var replies: Promise<TopicReply[]>;
+        if (this.state.topicReplies.length === 0) {
+            replies = getTopicRepliesPriorToTimestamp(topicId, Date.now(), repliesPageSize);
+        } else {
+            replies = getTopicRepliesPriorToTimestamp(topicId, this.state.topicReplies[0].timestamp, repliesPageSize);
+        }
+
+        replies.then(retrievedReplies => {
+            if (retrievedReplies.length > 0) {
+                this.setState(prevState => ({
+                    topicReplies: Array.from(new Set(retrievedReplies.concat(prevState.topicReplies))),
+                    isLoading: false,
+                    couldExistOlderReplies: retrievedReplies.length >= repliesPageSize
+                }))
+            } else {
+                this.setState({ isLoading: false });
+            }
+        })
+    }
+
+    retrieveOlderReplies() {
+        if (this.state.topicReplies.length > 0) {
+            this.setState({ isLoading: true });
+            const oldestTimestamp: number = this.state.topicReplies[this.state.topicReplies.length - 1].timestamp;
+            console.log("Oldest timestamp is: ", oldestTimestamp);
+            getTopicRepliesPriorToTimestamp(this.state.topic.id, oldestTimestamp - 1, repliesPageSize)
+                .then(retrievedReplies => {
+                    retrievedReplies.forEach(reply => console.log("Reply timestamp is: ", reply.timestamp));
+                    if (retrievedReplies.length > 0) {
+                        this.setState(prevState => ({
+                            topicReplies: Array.from(new Set(prevState.topicReplies.concat(retrievedReplies))),
+                            isLoading: false,
+                            couldExistOlderReplies: retrievedReplies.length >= repliesPageSize
+                        }));
+                    } else {
+                        this.setState({ isLoading: false, couldExistOlderReplies: false });
+                    }
+                });
+        }
     }
 
     toggleStarRate() {
@@ -243,7 +289,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
     }
 
     handleReplySubmit(): void {
-        this.retrieveReplies();
+        this.retrieveLatestReplies();
         if (!this.state.subscribed) {
             subscribeToTopic(getUser(), this.state.topic.id).then(() => this.setState({ subscribed: true }));
         }
@@ -258,15 +304,23 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
         )
     }
 
+    renderLoadMoreButton() {
+        if (this.state.couldExistOlderReplies) {
+            return (<LoadMoreButton onClick={this.retrieveOlderReplies}/>)
+        }
+    }
+
     render() {
         return (
             <Container fixed>
                 <br />
+                {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
                 {this.renderTopic()}
                 {this.state.topicReplies.length > 0
                     ? (<SubdirectoryArrowRight className="nav-button button-center" />)
                     : (<div />)}
-                {this.state.topicReplies.map(reply => <TopicReplyCard key={"reply-" + reply.id} reply={reply}/>)}
+                {this.state.topicReplies.map(reply => <TopicReplyCard key={"reply-" + reply.id} reply={reply} />)}
+                {this.renderLoadMoreButton()}
                 {this.renderReplyButton()}
             </Container>
         )

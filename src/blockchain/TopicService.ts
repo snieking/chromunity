@@ -59,20 +59,20 @@ function createReplyTriggerString(name: string, id: string): string {
     return "@" + name + " replied to /t/" + id;
 }
 
-export function getTopicReplies(topicId: string): Promise<TopicReply[]> {
-    return GTX.query("getTopicReplies", { topicId: topicId });
+export function getTopicRepliesPriorToTimestamp(topicId: string, timestamp: number, pageSize: number): Promise<TopicReply[]> {
+    return GTX.query("getTopicRepliesPriorToTimestamp", { topicId: topicId, timestamp: timestamp, pageSize: pageSize });
 }
 
-export function getTopicsByUserPriorToTimestamp(username: string, timestamp: number): Promise<Topic[]> {
-    return GTX.query("getTopicsByUserIdPriorToTimestamp", { name: username, timestamp: timestamp })
+export function getTopicsByUserPriorToTimestamp(username: string, timestamp: number, pageSize: number): Promise<Topic[]> {
+    return GTX.query("getTopicsByUserIdPriorToTimestamp", { name: username, timestamp: timestamp, pageSize: pageSize })
         .then((topics: Topic[]) => {
             topics.forEach(topic => topicsCache.set(topic.id, topic));
             return topics;
         });
 }
 
-export function getTopicsByTagPriorToTimestamp(tag: string, timestamp: number): Promise<Topic[]> {
-    return GTX.query("getTopicsByTagPriorToTimestamp", { tag: tag, timestamp: timestamp })
+export function getTopicsByTagPriorToTimestamp(tag: string, timestamp: number, pageSize: number): Promise<Topic[]> {
+    return GTX.query("getTopicsByTagPriorToTimestamp", { tag: tag, timestamp: timestamp, pageSize: pageSize })
         .then((topics: Topic[]) => {
             topics.forEach(topic => topicsCache.set(topic.id, topic));
             return topics;
@@ -139,32 +139,32 @@ export function getTopicById(id: string): Promise<Topic> {
         });
 }
 
-export function getTopicsPriorToTimestamp(timestamp: number) {
-    return getTopicsForTimestamp(timestamp, "getTopicsPriorToTimestamp")
+export function getTopicsPriorToTimestamp(timestamp: number, pageSize: number) {
+    return getTopicsForTimestamp(timestamp, pageSize, "getTopicsPriorToTimestamp")
 }
 
-export function getTopicsAfterTimestamp(timestamp: number) {
-    return getTopicsForTimestamp(timestamp, "getTopicsAfterTimestamp");
+export function getTopicsAfterTimestamp(timestamp: number, pageSize: number) {
+    return getTopicsForTimestamp(timestamp, pageSize, "getTopicsAfterTimestamp");
 }
 
-function getTopicsForTimestamp(timestamp: number, rellOperation: string) {
-    return GTX.query(rellOperation, { timestamp: timestamp })
+function getTopicsForTimestamp(timestamp: number, pageSize: number, rellOperation: string) {
+    return GTX.query(rellOperation, { timestamp: timestamp, pageSize: pageSize })
         .then((topics: Topic[]) => {
             topics.forEach(topic => topicsCache.set(topic.id, topic));
             return topics;
         });
 }
 
-export function getTopicsFromFollowsAfterTimestamp(user: User, timestamp: number): Promise<Topic[]> {
-    return getTopicsFromFollowsForTimestamp(user, timestamp, "getTopicsFromFollowsAfterTimestamp");
+export function getTopicsFromFollowsAfterTimestamp(user: User, timestamp: number, pageSize: number): Promise<Topic[]> {
+    return getTopicsFromFollowsForTimestamp(user, timestamp, pageSize, "getTopicsFromFollowsAfterTimestamp");
 }
 
-export function getTopicsFromFollowsPriorToTimestamp(user: User, timestamp: number): Promise<Topic[]> {
-    return getTopicsFromFollowsForTimestamp(user, timestamp, "getTopicsFromFollowsPriorToTimestamp");
+export function getTopicsFromFollowsPriorToTimestamp(user: User, timestamp: number, pageSize: number): Promise<Topic[]> {
+    return getTopicsFromFollowsForTimestamp(user, timestamp, pageSize, "getTopicsFromFollowsPriorToTimestamp");
 }
 
-function getTopicsFromFollowsForTimestamp(user: User, timestamp: number, rellOperation: string): Promise<Topic[]> {
-    return GTX.query(rellOperation, { name: user.name, timestamp: timestamp });
+function getTopicsFromFollowsForTimestamp(user: User, timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
+    return GTX.query(rellOperation, { name: user.name, timestamp: timestamp, pageSize: pageSize });
 }
 
 function formatMessage(message: string) {
