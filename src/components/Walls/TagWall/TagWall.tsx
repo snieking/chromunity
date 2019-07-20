@@ -1,12 +1,14 @@
 import React from 'react';
 import '../Wall.css';
-import { Container, LinearProgress } from "@material-ui/core";
+import { Container, LinearProgress, FormGroup, FormControlLabel, Switch } from "@material-ui/core";
 import { Topic } from "../../../types";
 
 import { RouteComponentProps } from "react-router";
 import { getTopicsByTagPriorToTimestamp } from '../../../blockchain/TopicService';
 import TopicOverviewCard from '../../Topic/TopicOverViewCard/TopicOverviewCard';
 import LoadMoreButton from '../../buttons/LoadMoreButton';
+import { getUser } from '../../../util/user-util';
+import { unfollowTag, followTag, getFollowedTags } from '../../../blockchain/TagService';
 
 interface MatchParams {
     tag: string
@@ -22,6 +24,7 @@ export interface TagWallState {
     timestampOnOldestTopic: number;
     isLoading: boolean;
     couldExistOlderTopics: boolean;
+    tagFollowed: boolean;
 }
 
 const topicsPageSize: number = 25;
@@ -35,7 +38,8 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
             id: "",
             timestampOnOldestTopic: Date.now(),
             isLoading: true,
-            couldExistOlderTopics: false
+            couldExistOlderTopics: false,
+            tagFollowed: false
         };
 
         this.retrieveTopics = this.retrieveTopics.bind(this);
@@ -44,6 +48,11 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
 
     componentDidMount(): void {
         this.retrieveTopics();
+
+        if (getUser().name != null) {
+            const tag = this.props.match.params.tag;
+            getFollowedTags(getUser()).then(tags => this.setState({ tagFollowed: tags.includes(tag) }));
+        }
     }
 
     retrieveTopics() {
@@ -58,6 +67,33 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
                         couldExistOlderTopics: retrievedTopics.length >= topicsPageSize
                     }));
                 });
+        }
+    }
+
+    toggleTagFollow() {
+        const tag = this.props.match.params.tag;
+        if (this.state.tagFollowed) {
+            unfollowTag(getUser(), tag).then(() => this.setState({ tagFollowed: false }));
+        } else {
+            followTag(getUser(), tag).then(() => this.setState({ tagFollowed: true }));
+        }
+    }
+
+    renderFollowSwitch() {
+        if (getUser().name != null) {
+            return (
+                <FormGroup row>
+                    <FormControlLabel className="switch-label"
+                        control={
+                            <Switch checked={this.state.tagFollowed}
+                                onChange={() => this.toggleTagFollow()}
+                                value={this.state.tagFollowed}
+                                className="switch" />
+                        }
+                        label="Follow tag"
+                    />
+                </FormGroup>
+            )
         }
     }
 
@@ -93,8 +129,9 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
                 <Container fixed maxWidth="md">
                     <div className="thread-wall-container">
                         <br />
+                        {this.renderFollowSwitch()}
                         {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
-                        {this.state.topics.map(topic => <TopicOverviewCard topic={topic} />)}
+                        {this.state.topics.map(topic => <TopicOverviewCard key={topic.id} topic={topic} />)}
                     </div>
                     {this.renderLoadMoreButton()}
                 </Container>

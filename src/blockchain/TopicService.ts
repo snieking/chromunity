@@ -139,15 +139,15 @@ export function getTopicById(id: string): Promise<Topic> {
         });
 }
 
-export function getTopicsPriorToTimestamp(timestamp: number, pageSize: number) {
+export function getTopicsPriorToTimestamp(timestamp: number, pageSize: number): Promise<Topic[]> {
     return getTopicsForTimestamp(timestamp, pageSize, "getTopicsPriorToTimestamp")
 }
 
-export function getTopicsAfterTimestamp(timestamp: number, pageSize: number) {
+export function getTopicsAfterTimestamp(timestamp: number, pageSize: number): Promise<Topic[]> {
     return getTopicsForTimestamp(timestamp, pageSize, "getTopicsAfterTimestamp");
 }
 
-function getTopicsForTimestamp(timestamp: number, pageSize: number, rellOperation: string) {
+function getTopicsForTimestamp(timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
     return GTX.query(rellOperation, { timestamp: timestamp, pageSize: pageSize })
         .then((topics: Topic[]) => {
             topics.forEach(topic => topicsCache.set(topic.id, topic));
@@ -165,6 +165,10 @@ export function getTopicsFromFollowsPriorToTimestamp(user: User, timestamp: numb
 
 function getTopicsFromFollowsForTimestamp(user: User, timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
     return GTX.query(rellOperation, { name: user.name, timestamp: timestamp, pageSize: pageSize });
+}
+
+export function getTopicsFromFollowedTagsPriorToTimestamp(user: User, timestamp: number, pageSize: number): Promise<Topic[]> {
+    return GTX.query("getTopicsByFollowedTagsPriorToTimestamp", { username: user.name, timestamp: timestamp, pageSize: pageSize });
 }
 
 function formatMessage(message: string) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Topic } from '../../../types';
-import { getTopicsPriorToTimestamp, getTopicsAfterTimestamp } from '../../../blockchain/TopicService';
+import { getTopicsFromFollowedTagsPriorToTimestamp } from '../../../blockchain/TopicService';
 import { LinearProgress, Container } from '@material-ui/core';
 import TopicOverviewCard from '../../Topic/TopicOverViewCard/TopicOverviewCard';
 import { NewTopicButton } from '../../buttons/NewTopicButton';
@@ -15,7 +15,7 @@ interface State {
 
 const topicsPageSize: number = 25;
 
-class TopicWall extends React.Component<{}, State> {
+class TagFollowingsWall extends React.Component<{}, State> {
     constructor(props: any) {
         super(props);
         this.state = {
@@ -59,13 +59,17 @@ class TopicWall extends React.Component<{}, State> {
         var topics: Promise<Topic[]>;
 
         if (this.state.topics.length === 0) {
-            topics = getTopicsPriorToTimestamp(Date.now(), topicsPageSize);
+            topics = getTopicsFromFollowedTagsPriorToTimestamp(getUser(), Date.now(), topicsPageSize);
         } else {
-            topics = getTopicsAfterTimestamp(this.state.topics[0].timestamp, topicsPageSize);
+            topics = getTopicsFromFollowedTagsPriorToTimestamp(getUser(), this.state.topics[0].timestamp, topicsPageSize);
         }
 
+        console.log("Retrieving topics!");
+
         topics.then(retrievedTopics => {
+            console.log("Topics length: ", retrievedTopics.length);
             if (retrievedTopics.length > 0) {
+                console.log("Retrieved threads!: ", retrievedTopics.length);
                 this.setState(prevState => ({
                     topics: Array.from(new Set(retrievedTopics.concat(prevState.topics))),
                     isLoading: false,
@@ -74,7 +78,7 @@ class TopicWall extends React.Component<{}, State> {
             } else {
                 this.setState({ isLoading: false, couldExistOlderTopics: false });
             }
-        })
+        }).catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
     }
 
     retrieveOlderTopics() {
@@ -82,7 +86,7 @@ class TopicWall extends React.Component<{}, State> {
             this.setState({ isLoading: true });
             const oldestTimestamp: number = this.state.topics[this.state.topics.length - 1].timestamp;
 
-            getTopicsPriorToTimestamp(oldestTimestamp, topicsPageSize)
+            getTopicsFromFollowedTagsPriorToTimestamp(getUser(), oldestTimestamp, topicsPageSize)
                 .then(retrievedTopics => {
                     if (retrievedTopics.length > 0) {
                         this.setState(prevState => ({
@@ -93,9 +97,9 @@ class TopicWall extends React.Component<{}, State> {
                     } else {
                         this.setState({ isLoading: false, couldExistOlderTopics: false });
                     }
-                });
+                }).catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
         }
     }
 }
 
-export default TopicWall;
+export default TagFollowingsWall;

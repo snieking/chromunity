@@ -7,3 +7,15 @@ operation createTopicTag(username: text, tags: set<text>, topicId: text) {
         create topicTag(name = tag, topic, op_context.last_block_time);
     }
 }
+
+operation createTagFollowing(username: text, tag: text) {
+    val user = user@{ .name == username};
+    require(is_signer(user.pubkey));
+    create tagFollowing(user, topicTag@{ .name == tag });
+}
+
+operation removeTagFollowing(username: text, tag: text) {
+    val user = user@{ .name == username};
+    require(is_signer(user.pubkey));
+    delete tagFollowing@{ user, topicTag@{ .name == tag }};
+}

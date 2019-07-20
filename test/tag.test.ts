@@ -1,9 +1,9 @@
 import * as bip39 from "bip39";
 import { register, login } from "../src/blockchain/UserService";
 import { User, Topic } from "../src/types";
-import { getTrendingTags, storeTagsFromTopic } from "../src/blockchain/TagService";
+import { getTrendingTags, storeTagsFromTopic, followTag, unfollowTag, getFollowedTags } from "../src/blockchain/TagService";
 import { getANumber, sleepUntil } from "./helper";
-import { getTopicsByUserPriorToTimestamp, getTopicsByTagPriorToTimestamp, createTopic, getTopicsAfterTimestamp } from "../src/blockchain/TopicService";
+import { getTopicsByUserPriorToTimestamp, getTopicsByTagPriorToTimestamp, createTopic, getTopicsAfterTimestamp, getTopicsFromFollowedTagsPriorToTimestamp } from "../src/blockchain/TopicService";
 import { number } from "prop-types";
 
 jest.setTimeout(60000);
@@ -38,6 +38,18 @@ describe("thread tagging tests", () => {
 
         const trendingTags: string[] = await getTrendingTags(1);
         expect(trendingTags.length).toBe(1);
+
+        await followTag(loggedInUser, "chromia");
+        var topicsWithFollowedTag: Topic[] = await getTopicsFromFollowedTagsPriorToTimestamp(loggedInUser, Date.now() + 3000, 10);
+        var followedTags: string[] = await getFollowedTags(loggedInUser);
+        expect(topicsWithFollowedTag.length).toBe(1);
+        expect(followedTags.length).toBe(1);
+        
+        await unfollowTag(loggedInUser, "chromia");
+        topicsWithFollowedTag = await getTopicsFromFollowedTagsPriorToTimestamp(loggedInUser, Date.now() + 3000, 10);
+        followedTags = await getFollowedTags(loggedInUser);
+        expect(topicsWithFollowedTag.length).toBe(0);
+        expect(followedTags.length).toBe(0);
     });
 
 });
