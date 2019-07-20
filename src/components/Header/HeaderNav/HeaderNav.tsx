@@ -102,7 +102,7 @@ export default function HeaderNav(props: HeaderNavProps) {
         if (user.name != null) {
             return (
                 <div>
-                    <Link to="/tw">
+                    <Link to="/tags">
                         <IconButton
                             edge="start"
                             className={classes.menuButton}
@@ -111,7 +111,7 @@ export default function HeaderNav(props: HeaderNavProps) {
                             <Bookmarks className="nav-button" />
                         </IconButton>
                     </Link>
-                    <Link to="/fw">
+                    <Link to="/followings">
                         <IconButton
                             edge="start"
                             className={classes.menuButton}

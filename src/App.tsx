@@ -13,18 +13,15 @@ import { TagWall } from "./components/Walls/TagWall/TagWall";
 import Settings from "./components/user/Settings/Settings";
 import TopicWall from "./components/Walls/TopicWall/TopicWall";
 import { FullTopic } from "./components/Topic/FullTopic/FullTopic";
-import UserFollowingsWall from "./components/Walls/FollowingsWalls/UserFollowingsWall";
-import TagFollowingsWall from "./components/Walls/FollowingsWalls/TagFollowingsWall";
-
 
 export class App extends React.Component {
     render() {
         return (
             <Router>
                 <Header/>
-                <Route exact path="/" component={TopicWall}/>
-                <Route path="/fw" component={UserFollowingsWall}/>
-                <Route path="/tw" component={TagFollowingsWall}/>
+                <Route exact path="/" component={() => <TopicWall type="all"/>}/>
+                <Route path="/followings" component={() => <TopicWall type="userFollowings"/>}/>
+                <Route path="/tags" component={() => <TopicWall type="tagFollowings"/>}/>
                 <Route path="/user/register" component={Register}/>
                 <Route path="/user/login" component={Login}/>
                 <Route path="/user/logout" component={Logout}/>
