@@ -9,6 +9,7 @@ export interface Topic {
     title: string;
     message: string;
     timestamp: number;
+    lastModified: number;
 }
 
 export interface TopicReply {

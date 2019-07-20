@@ -133,7 +133,7 @@ class TopicOverviewCard extends React.Component<Props, State> {
                 </div>
                 {this.renderAuthor()}
                 <div className="topic-overview-details">
-                    {this.renderTimeAgo(this.props.topic.timestamp)}
+                    {this.renderTimeAgo(this.props.topic.lastModified)}
                     <Typography variant="body2" className='purple-typography' component="p">
                         {this.props.topic.title}
                     </Typography>

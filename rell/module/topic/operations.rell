@@ -5,6 +5,7 @@ operation createTopic(id: text, username: text, title: name, message: text) {
         id = id, 
         author,
         timestamp = op_context.last_block_time,
+        lastModified = op_context.last_block_time,
         title = title,
         message = message
     );
@@ -20,4 +21,6 @@ operation createReply(topicId: text, id: text, username: text, message: text) {
         timestamp = op_context.last_block_time,
         message = message
     );
+
+    update topic@{ .id == topicId } ( lastModified = op_context.last_block_time);
 }

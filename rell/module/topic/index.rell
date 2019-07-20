@@ -2,6 +2,8 @@ class topic {
     key id: text;
     index author: user;
     index timestamp;
+    mutable lastModified: timestamp;
+    index lastModified;
     title: name;
     message: text;
 }

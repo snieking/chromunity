@@ -1,24 +1,26 @@
 query getTopicsAfterTimestamp(timestamp) {
     return topic @* { 
-        .timestamp > timestamp
+        .lastModified > timestamp
     }(
         .id,
         author=.author.name,
         .title,
         .message,
-        -sort .timestamp
+        -sort .lastModified,
+        .timestamp
     );
 }
 
 query getTopicsPriorToTimestamp(timestamp) {
     return topic @* { 
-        .timestamp < timestamp
+        .lastModified < timestamp
     }(
         .id,
         author=.author.name,
         .title,
         .message,
-        -sort .timestamp
+        -sort .lastModified,
+        .timestamp
     );
 }
 
@@ -36,39 +38,42 @@ query getTopicReplies(topicId: text) {
 query getTopicsByUserIdPriorToTimestamp(name, timestamp) {
     return topic@*{
         user@{ .name == name },
-        .timestamp < timestamp
+        .lastModified < timestamp
     }(
         .id,
         author=.author.name,
         .title,
         .message,
-        -sort .timestamp
+        -sort .lastModified,
+        .timestamp
     );
 }
 
 query getTopicsFromFollowsAfterTimestamp(name, timestamp) {
     return topic@*{
         follow@{ .follower.name == name } ( .follows ),
-        .timestamp > timestamp
+        .lastModified > timestamp
     }(
         .id,
         author=.author.name,
         .title,
         .message,
-        -sort .timestamp
+        -sort .lastModified,
+        .timestamp
     );
 }
 
 query getTopicsFromFollowsPriorToTimestamp(name, timestamp) {
     return topic@*{
         follow@{ .follower.name == name } ( .follows ),
-        .timestamp < timestamp
+        .lastModified < timestamp
     }(
         .id,
         author=.author.name,
         .title,
         .message,
-        -sort .timestamp
+        -sort .lastModified,
+        .timestamp
     );
 }
 
@@ -80,6 +85,7 @@ query getTopicById(id: text) {
         author=.author.name,
         .title,
         .message,
+        -sort .lastModified,
         .timestamp
     );
 }
