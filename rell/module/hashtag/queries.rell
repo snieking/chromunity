@@ -1,4 +1,4 @@
-query getTopicsByTagPriorToTimestamp(tag: text, timestamp) {
+query getTopicsByTagPriorToTimestamp(tag: text, timestamp, pageSize: integer) {
     return topicTag@*{ 
         .name == tag,
         .topic.timestamp < timestamp
@@ -8,7 +8,7 @@ query getTopicsByTagPriorToTimestamp(tag: text, timestamp) {
         title=.topic.title,
         message=.topic.message,
         -sort timestamp=.topic.timestamp
-    );
+    ) limit pageSize;
 }
 
 query getAllTags() {

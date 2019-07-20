@@ -28,12 +28,12 @@ describe("thread tagging tests", () => {
         const title: string = "Chromia"
         await createTopic(loggedInUser, title, "Hello chromia");
         
-        var topics: Topic[] = await getTopicsAfterTimestamp(timestamp-1000);
+        var topics: Topic[] = await getTopicsAfterTimestamp(timestamp-1000, 10);
         expect(topics.length).toBeGreaterThanOrEqual(1);
         const topic: Topic = topics[0];
         await storeTagsFromTopic(loggedInUser, topic.id, ["chromia"])
 
-        topics = await getTopicsByTagPriorToTimestamp("chromia", Date.now() + 3000);
+        topics = await getTopicsByTagPriorToTimestamp("chromia", Date.now() + 3000, 10);
         expect(topics.length).toBe(1);
 
         const trendingTags: string[] = await getTrendingTags(1);

@@ -5,13 +5,17 @@ import { LinearProgress, Container, FormGroup, FormControlLabel, Switch } from '
 import TopicOverviewCard from '../../Topic/TopicOverViewCard/TopicOverviewCard';
 import { NewTopicButton } from '../../buttons/NewTopicButton';
 import { getUser } from '../../../util/user-util';
+import LoadMoreButton from '../../buttons/LoadMoreButton';
 
 interface State {
     topics: Topic[];
     displayFollowersOnlySwitch: boolean;
     followersOnly: boolean;
     isLoading: boolean;
+    couldExistOlderTopics: boolean;
 }
+
+const topicsPageSize: number = 25;
 
 class TopicWall extends React.Component<{}, State> {
     constructor(props: any) {
@@ -20,11 +24,18 @@ class TopicWall extends React.Component<{}, State> {
             topics: [],
             displayFollowersOnlySwitch: false,
             followersOnly: false,
-            isLoading: true
+            isLoading: true,
+            couldExistOlderTopics: false
         };
 
         this.retrieveLatestTopics = this.retrieveLatestTopics.bind(this);
         this.retrieveOlderTopics = this.retrieveOlderTopics.bind(this);
+    }
+
+    renderLoadMoreButton() {
+        if (this.state.couldExistOlderTopics) {
+            return (<LoadMoreButton onClick={this.retrieveOlderTopics}/>)
+        }
     }
 
     render() {
@@ -37,6 +48,7 @@ class TopicWall extends React.Component<{}, State> {
                         {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
                         {this.state.topics.map(topic => <TopicOverviewCard key={'card-' + topic.id} topic={topic} />)}
                     </div>
+                    {this.renderLoadMoreButton()}
                 </Container>
                 {getUser() != null ? <NewTopicButton updateFunction={this.retrieveLatestTopics}/> : <div></div>}
             </div>
@@ -80,13 +92,13 @@ class TopicWall extends React.Component<{}, State> {
             if (this.state.followersOnly) {
                 // TODO
             } else {
-                topics = getTopicsPriorToTimestamp(Date.now());
+                topics = getTopicsPriorToTimestamp(Date.now(), topicsPageSize);
             }
         } else {
             if (this.state.followersOnly) {
                 // TODO
             } else {
-                topics = getTopicsAfterTimestamp(this.state.topics[0].timestamp);
+                topics = getTopicsAfterTimestamp(this.state.topics[0].timestamp, topicsPageSize);
             }
         }
 
@@ -94,10 +106,11 @@ class TopicWall extends React.Component<{}, State> {
             if (retrievedTopics.length > 0) {
                 this.setState(prevState => ({
                     topics: Array.from(new Set(retrievedTopics.concat(prevState.topics))),
-                    isLoading: false
+                    isLoading: false,
+                    couldExistOlderTopics: retrievedTopics.length >= topicsPageSize
                 }));
             } else {
-                this.setState({ isLoading: false });
+                this.setState({ isLoading: false, couldExistOlderTopics: false });
             }
         })
     }
@@ -111,15 +124,18 @@ class TopicWall extends React.Component<{}, State> {
             if (this.state.followersOnly) {
                 // TODO
             } else {
-                threads = getTopicsPriorToTimestamp(oldestTimestamp);
+                threads = getTopicsPriorToTimestamp(oldestTimestamp, topicsPageSize);
             }
 
             threads.then(retrievedTopics => {
                 if (retrievedTopics.length > 0) {
                     this.setState(prevState => ({
                         topics: Array.from(new Set(prevState.topics.concat(retrievedTopics))),
-                        isLoading: false
+                        isLoading: false,
+                        couldExistOlderTopics: retrievedTopics.length >= topicsPageSize
                     }));
+                } else {
+                    this.setState({ isLoading: false, couldExistOlderTopics: false });
                 }
             });
         }

@@ -2,7 +2,12 @@ import { getANumber } from './helper';
 import * as bip39 from 'bip39';
 import { User, Topic, TopicReply } from '../src/types';
 import { register, login } from '../src/blockchain/UserService';
-import { createTopic, getTopicsByUserPriorToTimestamp, giveTopicStarRating, getTopicStarRaters, removeTopicStarRating, getTopicsAfterTimestamp, getTopicsPriorToTimestamp, getTopicById, createTopicReply, getTopicReplies, giveReplyStarRating, getReplyStarRaters, removeReplyStarRating, subscribeToTopic, getTopicSubscribers, unsubscribeFromTopic } from '../src/blockchain/TopicService';
+import { createTopic, getTopicsByUserPriorToTimestamp, giveTopicStarRating, 
+    getTopicStarRaters, removeTopicStarRating, getTopicsAfterTimestamp, 
+    getTopicsPriorToTimestamp, getTopicById, createTopicReply, 
+    getTopicRepliesPriorToTimestamp, giveReplyStarRating, getReplyStarRaters, 
+    removeReplyStarRating, subscribeToTopic, getTopicSubscribers, unsubscribeFromTopic 
+} from '../src/blockchain/TopicService';
 
 jest.setTimeout(30000);
 
@@ -45,7 +50,7 @@ describe("topic tests", () => {
     it('create topic', async () => {
         await createTopic(userLoggedIn, 'First topic', 'Sweet topic you got there!');
         await createTopic(userLoggedIn, 'Second topic', 'Not as good as the first one...');
-        const topics: Topic[] = await getTopicsByUserPriorToTimestamp(userLoggedIn.name, Date.now());
+        const topics: Topic[] = await getTopicsByUserPriorToTimestamp(userLoggedIn.name, Date.now(), 10);
         expect(topics.length).toBeGreaterThanOrEqual(2);
         topic = topics[0];
     });
@@ -53,7 +58,7 @@ describe("topic tests", () => {
     it("reply to topic", async() => {
         await createTopicReply(userLoggedIn, topic.id, "I completely agree!");
         
-        const replies: TopicReply[] = await getTopicReplies(topic.id);
+        const replies: TopicReply[] = await getTopicRepliesPriorToTimestamp(topic.id, Date.now(), 10);
         expect(replies.length).toBe(1);
         const reply: TopicReply = replies[0];
 
@@ -102,7 +107,7 @@ describe("topic tests", () => {
         const title: string = "It is fun to program in Rell"
         const message: string = "It is fun to program in Rell. It is a great language to interact with a blockchain.";
         await createTopic(userLoggedIn, title, message);
-        const topics: Topic[] = await getTopicsAfterTimestamp(Date.now() - 30000);
+        const topics: Topic[] = await getTopicsAfterTimestamp(Date.now() - 30000, 10);
         expect(topics.length).toBeGreaterThan(0);
     });
 
@@ -110,7 +115,7 @@ describe("topic tests", () => {
         const title: string = "Blockchain has never been easier";
         const message: string = "Rell makes using a blockchain so easy";
         await createTopic(userLoggedIn, title, message);
-        const topics: Topic[] = await getTopicsPriorToTimestamp(Date.now());
+        const topics: Topic[] = await getTopicsPriorToTimestamp(Date.now(), 10);
         expect(topics.length).toBeGreaterThan(0);
     });
 
