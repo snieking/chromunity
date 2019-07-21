@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from "react-router-dom";
 import { Topic } from '../../../types';
 import { Card, Typography, IconButton, Badge, CardContent, CardActionArea, Chip } from '@material-ui/core';
-import { timeAgoReadable } from '../../../util/util';
+import { timeAgoReadable, stringToHexColor } from '../../../util/util';
 import { getUser, ifEmptyAvatarThenPlaceholder } from '../../../util/user-util';
 import { StarRate, MoreHoriz } from '@material-ui/icons';
 import './TopicOverviewCard.css';
@@ -136,7 +136,7 @@ class TopicOverviewCard extends React.Component<Props, State> {
                                     marginLeft: "1px", 
                                     marginRight: "1px", 
                                     marginBottom: "3px", 
-                                    backgroundColor: "#FFAFC1", 
+                                    backgroundColor: stringToHexColor(tag), 
                                     cursor: "pointer" 
                                 }} 
                             />

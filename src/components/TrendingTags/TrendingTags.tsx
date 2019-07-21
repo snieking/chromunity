@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import { Chip, Card, CardContent } from '@material-ui/core';
 import { getTrendingTags } from '../../blockchain/TagService';
+import { stringToHexColor } from '../../util/util';
 
 type State = {
     tags: string[];
@@ -25,7 +26,7 @@ export class TrendingTags extends React.Component<{}, State>{
                 <br />
                 <Card>
                     <CardContent>
-                        {this.state.tags.map(tag => {
+                        {this.state.tags.map((tag: string) => {
                             return (
                                 <Link key={tag} to={"/tag/" + tag}>
                                     <Chip
@@ -35,7 +36,7 @@ export class TrendingTags extends React.Component<{}, State>{
                                             marginLeft: "1px",
                                             marginRight: "1px",
                                             marginTop: "3px",
-                                            backgroundColor: "#FFAFC1",
+                                            backgroundColor: stringToHexColor("#" + tag),
                                             cursor: "pointer"
                                         }}
                                     />

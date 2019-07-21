@@ -1,4 +1,4 @@
-import { timeAgoReadable, sortByFrequency, needsToBeSliced } from "../src/util/util";
+import { timeAgoReadable, sortByFrequency, needsToBeSliced, stringToHexColor } from "../src/util/util";
 import { getTags } from "../src/util/text-parsing";
 
 jest.setTimeout(30000);
@@ -82,3 +82,16 @@ describe("message should be sliced tests", () => {
     });
 
 });
+
+describe("string to hex color", async () => {
+    
+    it("hex starts with '#'", async () => {
+        const hex: string = stringToHexColor("hello");
+        expect(hex.startsWith("#")).toBe(true);
+    })
+
+    it("hex is 7 chars", async () => {
+        const hex: string = stringToHexColor("hello");
+        expect(hex.length).toBe(7);
+    })
+})
