@@ -43,7 +43,6 @@ export function createTopicReply(user: User, topicId: string, message: string) {
             const tags = getHashTags(message);
 
             if (tags != null && tags.length > 0) {
-                console.log("Storing tags: ", tags);
                 storeTagsFromTopic(user, topicId, tags);
             }
 

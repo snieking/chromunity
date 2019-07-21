@@ -61,7 +61,7 @@ class TopicOverviewCard extends React.Component<Props, State> {
     }
 
     componentDidMount() {
-        this.setState({ tags: getTags(this.props.topic.message) });
+        this.setState({ tags: getTags(this.props.topic.message).slice(0, 3) });
         getUserSettingsCached(this.props.topic.author, 1440)
             .then(settings => {
                 this.setState({

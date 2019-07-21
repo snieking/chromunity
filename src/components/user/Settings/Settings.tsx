@@ -70,13 +70,15 @@ class Settings extends React.Component<{}, SettingsState> {
                             : <div></div>
                         }
                         <div className="description-wrapper">
-                            <label className="description-label">Description</label>
                             <TextField
                                 className="description-editor"
                                 margin="dense"
                                 id="description"
                                 multiline
+                                rows="2"
+                                label="Profile description"
                                 type="text"
+                                variant="outlined"
                                 onChange={this.handleDescriptionChange}
                                 value={this.state.description}
                             />

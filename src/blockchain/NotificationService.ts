@@ -4,7 +4,7 @@ import * as BoomerangCache from "boomerang-cache";
 import {User, UserNotification} from "../types";
 import { uniqueId } from "../util/util";
 
-const boomerang = BoomerangCache.create("notification-bucket", {storage: "local", encrypt: true});
+const boomerang = BoomerangCache.create("notification-bucket", {storage: "session", encrypt: false});
 
 export function sendNotifications(fromUser: User, trigger: string, content: string, usernames: string[]) {
     return sendNotificationsInternal(fromUser, uniqueId(), trigger, content, usernames);

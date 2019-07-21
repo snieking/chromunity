@@ -9,6 +9,7 @@
 }
 
 .avatar-preview {
+    opacity: 0.8;
     width: 84px;
     height: 84px;
     cursor: pointer;
@@ -19,16 +20,36 @@
     float: left;
 }
 
+.avatar-preview:hover {
+    opacity: 1;
+}
+
 .description-wrapper {
     margin-top: 25px;
     margin-left: 100px;
 }
 
 .description-editor {
-    width: 75%;
+    width: 78%;
 }
 
 .commit-button-wrapper {
     margin-top: 25px;
     text-align: center;
+}
+
+.edit-avatar-box {
+    position: relative;
+    display: inline-block;
+}
+
+.edit-avatar-text {
+    position: absolute;
+    z-index: 999;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    top: 40%; /* Adjust this value to move the positioned div up and down */
+    text-align: center;
+    width: 60%; /* Set the width of the positioned div */
 }

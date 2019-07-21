@@ -6,7 +6,7 @@ import {setMnemonic, setUser} from "../util/user-util";
 import * as BoomerangCache from "boomerang-cache";
 import { uniqueId } from '../util/util';
 
-const boomerang = BoomerangCache.create("avatar-bucket", { storage: "local", encrypt: false });
+const boomerang = BoomerangCache.create("avatar-bucket", { storage: "session", encrypt: false });
 
 export function register(name: string, password: string, mnemonic: string) {
     setMnemonic(mnemonic);

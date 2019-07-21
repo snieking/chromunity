@@ -2,6 +2,9 @@ import {User} from "../types";
 import {seedToKey} from "./CryptoService";
 import {GTX} from "./Postchain";
 import {sortByFrequency, uniqueId} from "../util/util";
+import * as BoomerangCache from "boomerang-cache";
+
+const tagsCache = BoomerangCache.create("tags-bucket", { storage: "session", encrypt: false });
 
 export function storeTagsFromTopic(user: User, topicId: string, tags: string[]) {
     const {privKey, pubKey} = seedToKey(user.seed);
@@ -36,10 +39,20 @@ function modifyTagFollowing(user: User, tag: string, rellOperation: string) {
 }
 
 export function getTrendingTags(sinceDaysAgo: number): Promise<string[]> {
+    var trending: string[] = tagsCache.get("trending");
+
+    if (trending != null) {
+        return new Promise<string[]>(resolve => resolve(trending));
+    } 
+
     const date: Date = new Date();
     const pastDate: number = date.getDate() - sinceDaysAgo;
     date.setDate(pastDate);
 
     return GTX.query("getTagsSince", { timestamp: date.getTime() / 1000 })
-        .then((tags: string[]) => sortByFrequency(tags).slice(0, 10));
+        .then((tags: string[]) => {
+            trending = sortByFrequency(tags).slice(0, 10);
+            tagsCache.set("trending", trending, 3600);
+            return trending;
+        });
 }
