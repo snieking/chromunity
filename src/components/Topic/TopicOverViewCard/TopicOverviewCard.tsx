@@ -28,6 +28,7 @@ interface State {
     tags: string[];
 }
 
+
 class TopicOverviewCard extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
@@ -154,7 +155,7 @@ class TopicOverviewCard extends React.Component<Props, State> {
                     <div className="overview-rating">
                         <Badge
                             className="star-badge"
-                            color="secondary"
+                            color="primary"
                             badgeContent={this.state.stars}
                         >
                             <StarRate className={this.state.ratedByMe ? "yellow-icon" : ""} />

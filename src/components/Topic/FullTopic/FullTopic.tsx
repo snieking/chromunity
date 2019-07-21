@@ -223,7 +223,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                 <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
                     <Badge
                         className="star-badge"
-                        color="secondary"
+                        color="primary"
                         badgeContent={this.state.stars}
                     >
                         <StarRate className={this.state.ratedByMe ? "yellow-icon" : ""} />

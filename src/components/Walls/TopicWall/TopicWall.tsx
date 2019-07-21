@@ -6,6 +6,7 @@ import TopicOverviewCard from '../../Topic/TopicOverViewCard/TopicOverviewCard';
 import { NewTopicButton } from '../../buttons/NewTopicButton';
 import { getUser } from '../../../util/user-util';
 import LoadMoreButton from '../../buttons/LoadMoreButton';
+import { TrendingTags } from '../../TrendingTags/TrendingTags';
 
 interface Props {
     type: string;
@@ -41,10 +42,11 @@ class TopicWall extends React.Component<Props, State> {
     render() {
         return (
             <div>
-                <Container fixed maxWidth='md'>
+                <Container fixed>
+                    {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
+                    {this.props.type === "tagFollowings" ? <TrendingTags/> : <div></div>}
                     <div className='topic-wall-container'>
                         <br />
-                        {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
                         {this.state.topics.map(topic => <TopicOverviewCard key={'card-' + topic.id} topic={topic} />)}
                     </div>
                     {this.renderLoadMoreButton()}
