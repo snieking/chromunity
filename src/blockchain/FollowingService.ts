@@ -5,7 +5,7 @@ import * as BoomerangCache from "boomerang-cache";
 import { uniqueId } from "../util/util";
 import { sendNotificationWithDeterministicId, removeNotificationsForId } from "./NotificationService";
 
-const boomerang = BoomerangCache.create("following-bucket", { storage: "local", encrypt: true });
+const boomerang = BoomerangCache.create("following-bucket", { storage: "session", encrypt: false });
 
 export function createFollowing(user: User, following: string) {
     return updateFollowing(user, following, "createFollowing")

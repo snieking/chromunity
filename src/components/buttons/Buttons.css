@@ -11,3 +11,8 @@
 .text-field {
     border: solid black 1px;
 }
+
+.input-field-badge {
+    margin-top: 2px;
+    width: 100%;
+}

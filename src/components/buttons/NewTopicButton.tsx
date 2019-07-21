@@ -2,12 +2,11 @@ import React, { FormEvent } from "react";
 
 import './Buttons.css';
 
-import { Dialog, Snackbar } from "@material-ui/core";
+import { Dialog, Snackbar, Badge } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
-import DialogTitle from "@material-ui/core/DialogTitle";
 import { getUser } from "../../util/user-util";
 import IconButton from "@material-ui/core/IconButton";
 import { Forum } from "@material-ui/icons";
@@ -27,6 +26,8 @@ export interface NewTopicButtonState {
     newTopicErrorOpen: boolean;
     newTopicStatusMessage: string;
 }
+
+const maxTitleLength: number = 40;
 
 export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopicButtonState> {
 
@@ -68,14 +69,21 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
     createNewTopic(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const topicTitle: string = this.state.topicTitle;
-        const topicMessage = this.state.topicMessage;
-        this.setState({ topicTitle: "", topicMessage: "" });
 
-        createTopic(getUser(), topicTitle || "", topicMessage || "").then(() => { 
-            this.setState({ newTopicStatusMessage: "Topic created", newTopicSuccessOpen: true});
-            this.props.updateFunction();
-        }).catch(() => this.setState({ newTopicStatusMessage: "Error while creating topic", newTopicErrorOpen: true}));
-        this.toggleNewTopicDialog();
+        if (!/^[a-zA-Z\s]+$/.test(topicTitle)) {
+            this.setState({ newTopicStatusMessage: "Title may only contain a-z, A-Z & 0-9 characters", newTopicErrorOpen: true });
+        } else if (topicTitle.length > maxTitleLength) {
+            this.setState({ newTopicStatusMessage: "Title is too long", newTopicErrorOpen: true });
+        } else {
+            const topicMessage = this.state.topicMessage;
+            this.setState({ topicTitle: "", topicMessage: "" });
+
+            createTopic(getUser(), topicTitle || "", topicMessage || "").then(() => {
+                this.setState({ newTopicStatusMessage: "Topic created", newTopicSuccessOpen: true });
+                this.props.updateFunction();
+            }).catch(() => this.setState({ newTopicStatusMessage: "Error while creating topic", newTopicErrorOpen: true }));
+            this.toggleNewTopicDialog();
+        }
     }
 
     createTopicButton() {
@@ -99,20 +107,27 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                 <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title"
                     fullWidth={true} maxWidth={"sm"}>
                     <form onSubmit={this.createNewTopic}>
-                        <DialogTitle>New topic</DialogTitle>
                         <DialogContent>
-                        <TextField
-                                autoFocus
-                                margin="dense"
-                                id="title"
-                                label="Title"
-                                multiline
-                                fullWidth
-                                onChange={this.handleDialogTitleChange}
-                                value={this.state.topicTitle}
-                                className="text-field"
-                                variant="outlined"
-                            />
+                            <br/>
+                            <Badge
+                                className="input-field-badge"
+                                color="secondary"
+                                badgeContent={maxTitleLength - this.state.topicTitle.length}
+                                showZero
+                            >
+                                <TextField
+                                    autoFocus
+                                    margin="dense"
+                                    id="title"
+                                    label="Title"
+                                    multiline
+                                    fullWidth
+                                    onChange={this.handleDialogTitleChange}
+                                    value={this.state.topicTitle}
+                                    className="text-field"
+                                    variant="outlined"
+                                />
+                            </Badge>
                             <TextField
                                 margin="dense"
                                 id="message"
@@ -131,7 +146,7 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                                 Cancel
                             </Button>
                             <Button type="submit" color="primary" variant="outlined">
-                                Create
+                                Create topic
                             </Button>
                         </DialogActions>
                     </form>
