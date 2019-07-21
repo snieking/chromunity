@@ -23,9 +23,9 @@ export interface ReplyTopicButtonProps {
 export interface ReplyTopicButtonState {
     dialogOpen: boolean;
     topicMessage: string;
-    successSnackbarOpen: boolean;
-    errorSnackbarOpen: boolean;
-    snackbarMessage: string;
+    replyStatusSuccessOpen: boolean;
+    replyStatusErrorOpen: boolean;
+    replySentStatus: string;
 }
 
 export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, ReplyTopicButtonState> {
@@ -36,9 +36,9 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
         this.state = {
             topicMessage: "",
             dialogOpen: false,
-            successSnackbarOpen: false,
-            errorSnackbarOpen: false,
-            snackbarMessage: ""
+            replyStatusSuccessOpen: false,
+            replyStatusErrorOpen: false,
+            replySentStatus: ""
         };
 
         this.toggleReplyTopicDialog = this.toggleReplyTopicDialog.bind(this);
@@ -60,12 +60,12 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
     createTopicReply(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const topicMessage = this.state.topicMessage;
-        this.setState({ topicMessage: "", successSnackbarOpen: true });
+        this.setState({ topicMessage: "", replyStatusSuccessOpen: true });
 
         createTopicReply(getUser(), this.props.topicId, topicMessage).then(() => {
-            this.setState({ snackbarMessage: "Reply sent", successSnackbarOpen: true });
+            this.setState({ replySentStatus: "Reply sent", replyStatusSuccessOpen: true });
             this.props.submitFunction();
-        }).catch(() => this.setState({ snackbarMessage: "Error while sending reply", errorSnackbarOpen: true }));
+        }).catch(() => this.setState({ replySentStatus: "Error while sending reply", replyStatusErrorOpen: true }));
         this.toggleReplyTopicDialog();
     }
 
@@ -120,13 +120,13 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
                         vertical: 'bottom',
                         horizontal: 'left',
                     }}
-                    open={this.state.successSnackbarOpen}
+                    open={this.state.replyStatusSuccessOpen}
                     autoHideDuration={3000}
                     onClose={this.handleClose}
                 >
                     <CustomSnackbarContentWrapper
                         variant="success"
-                        message={this.state.snackbarMessage}
+                        message={this.state.replySentStatus}
                     />
                 </Snackbar>
                 <Snackbar
@@ -134,13 +134,13 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
                         vertical: 'bottom',
                         horizontal: 'left',
                     }}
-                    open={this.state.errorSnackbarOpen}
+                    open={this.state.replyStatusErrorOpen}
                     autoHideDuration={3000}
                     onClose={this.handleClose}
                 >
                     <CustomSnackbarContentWrapper
                         variant="error"
-                        message={this.state.snackbarMessage}
+                        message={this.state.replySentStatus}
                     />
                 </Snackbar>
             </div>
@@ -152,7 +152,7 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
             return;
         }
 
-        this.setState({ successSnackbarOpen: false, errorSnackbarOpen: false });
+        this.setState({ replyStatusSuccessOpen: false, replyStatusErrorOpen: false });
     }
 
     render() {

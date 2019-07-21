@@ -13,9 +13,9 @@ interface SettingsState {
     editedAvatar: string;
     editAvatarOpen: boolean;
     description: string;
-    successSnackbarOpen: boolean;
-    errorSnackbarOpen: boolean;
-    snackbarMessage: string;
+    updateSuccessOpen: boolean;
+    updateErrorOpen: boolean;
+    settingsUpdateStatus: string;
 }
 
 class Settings extends React.Component<{}, SettingsState> {
@@ -27,9 +27,9 @@ class Settings extends React.Component<{}, SettingsState> {
             editedAvatar: "",
             editAvatarOpen: false,
             description: "",
-            successSnackbarOpen: false,
-            errorSnackbarOpen: false,
-            snackbarMessage: ""
+            updateSuccessOpen: false,
+            updateErrorOpen: false,
+            settingsUpdateStatus: ""
         };
 
         this.updateAvatar = this.updateAvatar.bind(this);
@@ -93,13 +93,13 @@ class Settings extends React.Component<{}, SettingsState> {
                         vertical: 'bottom',
                         horizontal: 'left',
                     }}
-                    open={this.state.successSnackbarOpen}
+                    open={this.state.updateSuccessOpen}
                     autoHideDuration={3000}
                     onClose={this.handleClose}
                 >
                     <CustomSnackbarContentWrapper
                         variant="success"
-                        message={this.state.snackbarMessage}
+                        message={this.state.settingsUpdateStatus}
                     />
                 </Snackbar>
                 <Snackbar
@@ -107,13 +107,13 @@ class Settings extends React.Component<{}, SettingsState> {
                         vertical: 'bottom',
                         horizontal: 'left',
                     }}
-                    open={this.state.errorSnackbarOpen}
+                    open={this.state.updateErrorOpen}
                     autoHideDuration={3000}
                     onClose={this.handleClose}
                 >
                     <CustomSnackbarContentWrapper
                         variant="error"
-                        message={this.state.snackbarMessage}
+                        message={this.state.settingsUpdateStatus}
                     />
                 </Snackbar>
             </div>
@@ -125,7 +125,7 @@ class Settings extends React.Component<{}, SettingsState> {
             return;
         }
 
-        this.setState({ successSnackbarOpen: false, errorSnackbarOpen: false });
+        this.setState({ updateSuccessOpen: false, updateErrorOpen: false });
     }
 
     componentDidMount() {
@@ -160,8 +160,8 @@ class Settings extends React.Component<{}, SettingsState> {
 
     saveSettings() {
         updateUserSettings(getUser(), this.state.avatar, this.state.description)
-            .then(() => this.setState({ snackbarMessage: "Settings saved", successSnackbarOpen: true }))
-            .catch(() => this.setState({ snackbarMessage: "Error updating settings", errorSnackbarOpen: true }));
+            .then(() => this.setState({ settingsUpdateStatus: "Settings saved", updateSuccessOpen: true }))
+            .catch(() => this.setState({ settingsUpdateStatus: "Error updating settings", updateErrorOpen: true }));
     }
 
 }
