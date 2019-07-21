@@ -23,7 +23,9 @@ export interface NewTopicButtonState {
     dialogOpen: boolean;
     topicTitle: string;
     topicMessage: string;
-    snackbarOpen: boolean;
+    newTopicSuccessOpen: boolean;
+    newTopicErrorOpen: boolean;
+    newTopicStatusMessage: string;
 }
 
 export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopicButtonState> {
@@ -35,7 +37,9 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
             topicTitle: "",
             topicMessage: "",
             dialogOpen: false,
-            snackbarOpen: false
+            newTopicSuccessOpen: false,
+            newTopicErrorOpen: false,
+            newTopicStatusMessage: ""
         };
 
         this.toggleNewTopicDialog = this.toggleNewTopicDialog.bind(this);
@@ -65,9 +69,12 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
         event.preventDefault();
         const topicTitle: string = this.state.topicTitle;
         const topicMessage = this.state.topicMessage;
-        this.setState({ topicTitle: "", topicMessage: "", snackbarOpen: true });
+        this.setState({ topicTitle: "", topicMessage: "" });
 
-        createTopic(getUser(), topicTitle || "", topicMessage || "").then(() => this.props.updateFunction());
+        createTopic(getUser(), topicTitle || "", topicMessage || "").then(() => { 
+            this.setState({ newTopicStatusMessage: "Topic created", newTopicSuccessOpen: true});
+            this.props.updateFunction();
+        }).catch(() => this.setState({ newTopicStatusMessage: "Error while creating topic", newTopicErrorOpen: true}));
         this.toggleNewTopicDialog();
     }
 
@@ -135,13 +142,27 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                         vertical: 'bottom',
                         horizontal: 'left',
                     }}
-                    open={this.state.snackbarOpen}
+                    open={this.state.newTopicSuccessOpen}
                     autoHideDuration={3000}
                     onClose={this.handleClose}
                 >
                     <CustomSnackbarContentWrapper
                         variant="success"
-                        message={"Topic created"}
+                        message={this.state.newTopicStatusMessage}
+                    />
+                </Snackbar>
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    open={this.state.newTopicErrorOpen}
+                    autoHideDuration={3000}
+                    onClose={this.handleClose}
+                >
+                    <CustomSnackbarContentWrapper
+                        variant="error"
+                        message={this.state.newTopicStatusMessage}
                     />
                 </Snackbar>
             </div>
@@ -153,7 +174,7 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
             return;
         }
 
-        this.setState({ snackbarOpen: false });
+        this.setState({ newTopicSuccessOpen: false, newTopicErrorOpen: false });
     }
 
     render() {

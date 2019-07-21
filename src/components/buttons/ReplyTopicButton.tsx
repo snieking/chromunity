@@ -2,7 +2,7 @@ import React, { FormEvent } from "react";
 
 import './Buttons.css';
 
-import { Dialog } from "@material-ui/core";
+import { Dialog, Snackbar } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -11,6 +11,7 @@ import IconButton from "@material-ui/core/IconButton";
 import { ReplyAll } from "@material-ui/icons";
 import { createTopicReply } from "../../blockchain/TopicService";
 import { getUser } from "../../util/user-util";
+import { CustomSnackbarContentWrapper } from "../utils/CustomSnackbar";
 
 
 export interface ReplyTopicButtonProps {
@@ -22,6 +23,9 @@ export interface ReplyTopicButtonProps {
 export interface ReplyTopicButtonState {
     dialogOpen: boolean;
     topicMessage: string;
+    replyStatusSuccessOpen: boolean;
+    replyStatusErrorOpen: boolean;
+    replySentStatus: string;
 }
 
 export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, ReplyTopicButtonState> {
@@ -31,12 +35,16 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
 
         this.state = {
             topicMessage: "",
-            dialogOpen: false
+            dialogOpen: false,
+            replyStatusSuccessOpen: false,
+            replyStatusErrorOpen: false,
+            replySentStatus: ""
         };
 
         this.toggleReplyTopicDialog = this.toggleReplyTopicDialog.bind(this);
         this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
         this.createTopicReply = this.createTopicReply.bind(this);
+        this.handleClose = this.handleClose.bind(this);
     }
 
     toggleReplyTopicDialog() {
@@ -52,9 +60,12 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
     createTopicReply(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const topicMessage = this.state.topicMessage;
-        this.setState({ topicMessage: "" });
+        this.setState({ topicMessage: "", replyStatusSuccessOpen: true });
 
-        createTopicReply(getUser(), this.props.topicId, topicMessage).then(() => this.props.submitFunction());
+        createTopicReply(getUser(), this.props.topicId, topicMessage).then(() => {
+            this.setState({ replySentStatus: "Reply sent", replyStatusSuccessOpen: true });
+            this.props.submitFunction();
+        }).catch(() => this.setState({ replySentStatus: "Error while sending reply", replyStatusErrorOpen: true }));
         this.toggleReplyTopicDialog();
     }
 
@@ -78,7 +89,7 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
                     fullWidth={true} maxWidth={"sm"}>
                     <form onSubmit={this.createTopicReply}>
                         <DialogContent>
-                            <br/>
+                            <br />
                             <TextField
                                 autoFocus
                                 margin="dense"
@@ -103,8 +114,45 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
                         </DialogActions>
                     </form>
                 </Dialog>
+
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    open={this.state.replyStatusSuccessOpen}
+                    autoHideDuration={3000}
+                    onClose={this.handleClose}
+                >
+                    <CustomSnackbarContentWrapper
+                        variant="success"
+                        message={this.state.replySentStatus}
+                    />
+                </Snackbar>
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    open={this.state.replyStatusErrorOpen}
+                    autoHideDuration={3000}
+                    onClose={this.handleClose}
+                >
+                    <CustomSnackbarContentWrapper
+                        variant="error"
+                        message={this.state.replySentStatus}
+                    />
+                </Snackbar>
             </div>
         )
+    }
+
+    private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        this.setState({ replyStatusSuccessOpen: false, replyStatusErrorOpen: false });
     }
 
     render() {
