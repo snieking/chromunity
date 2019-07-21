@@ -34,7 +34,7 @@ export class TrendingTags extends React.Component<{}, State>{
                                         style={{
                                             marginLeft: "1px",
                                             marginRight: "1px",
-                                            marginBottom: "3px",
+                                            marginTop: "3px",
                                             backgroundColor: "#FFAFC1",
                                             cursor: "pointer"
                                         }}
