@@ -322,7 +322,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                 {this.state.topicReplies.map(reply => <TopicReplyCard
                     key={"reply-" + reply.id}
                     reply={reply}
-                    indention={15}
+                    indention={0}
                     topicId={this.state.topic.id}
                 />)}
                 {this.renderLoadMoreButton()}
