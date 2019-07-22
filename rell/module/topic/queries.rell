@@ -38,7 +38,7 @@ query getTopicRepliesPriorToTimestamp(topicId: text, timestamp, pageSize: intege
     ) limit pageSize;
 }
 
-query getTopicRepliesPriorAfterTimestamp(topicId: text, timestamp, pageSize: integer) {
+query getTopicRepliesAfterTimestamp(topicId: text, timestamp, pageSize: integer) {
     return topicReply@*{
         topic@{ .id == topicId },
         .timestamp > timestamp,

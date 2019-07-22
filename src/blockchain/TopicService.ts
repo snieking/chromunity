@@ -83,7 +83,15 @@ function createReplyTriggerString(name: string, id: string): string {
 }
 
 export function getTopicRepliesPriorToTimestamp(topicId: string, timestamp: number, pageSize: number): Promise<TopicReply[]> {
-    return GTX.query("getTopicRepliesPriorToTimestamp", { topicId: topicId, timestamp: timestamp, pageSize: pageSize });
+    return getTopicRepliesForTimestamp(topicId, timestamp, pageSize, "getTopicRepliesPriorToTimestamp");
+}
+
+export function getTopicRepliesAfterTimestamp(topicId: string, timestamp: number, pageSize: number): Promise<TopicReply[]> {
+    return getTopicRepliesForTimestamp(topicId, timestamp, pageSize, "getTopicRepliesAfterTimestamp");
+}
+
+function getTopicRepliesForTimestamp(topicId: string, timestamp: number, pageSize: number, rellOperation: string) {
+    return GTX.query(rellOperation, { topicId: topicId, timestamp: timestamp, pageSize: pageSize });
 }
 
 export function getTopicSubReplies(replyId: string): Promise<TopicReply[]> {
