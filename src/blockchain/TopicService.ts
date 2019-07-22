@@ -38,20 +38,7 @@ export function createTopicReply(user: User, topicId: string, message: string) {
     tx.addOperation("createReply", topicId, replyId, user.name, formatMessage(message));
     tx.sign(privKey, pubKey);
 
-    return tx.postAndWaitConfirmation()
-        .then((promise: any) => {
-            const tags = getHashTags(message);
-
-            if (tags != null && tags.length > 0) {
-                storeTagsFromTopic(user, topicId, tags);
-            }
-
-            getTopicSubscribers(topicId)
-                .then(users => sendNotifications(user,
-                    createReplyTriggerString(user.name, topicId), message, users.filter(item => item !== user.name)));
-
-            return promise;
-        });
+    return postTopicReply(user, tx, topicId, message);
 }
 
 export function createTopicSubReply(user: User, topicId: string, replyId: string, message: string) {
@@ -61,7 +48,10 @@ export function createTopicSubReply(user: User, topicId: string, replyId: string
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("createSubReply", topicId, replyId, subReplyId, user.name, formatMessage(message));
     tx.sign(privKey, pubKey);
+    return postTopicReply(user, tx, topicId, message);
+}
 
+function postTopicReply(user: User, tx: any, topicId: string, message: string) {
     return tx.postAndWaitConfirmation()
         .then((promise: any) => {
             const tags = getHashTags(message);

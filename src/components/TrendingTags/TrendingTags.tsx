@@ -49,4 +49,4 @@ export class TrendingTags extends React.Component<{}, State>{
         )
     };
 
-};
+}
