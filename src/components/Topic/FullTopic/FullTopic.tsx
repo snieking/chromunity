@@ -186,6 +186,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                     <Link
                         className="pink-typography"
                         to={"/u/" + this.state.topic.author}
+                        style={{ marginLeft: "5px" }}
                     >
                         @{this.state.topic.author}
                     </Link>
