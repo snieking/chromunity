@@ -10,6 +10,7 @@ import { removeReplyStarRating, giveReplyStarRating, getReplyStarRaters, getTopi
 
 import './TopicReplyCard.css';
 import '../Topic.css';
+import { parseContent } from '../../../util/text-parsing';
 
 interface Props {
     topicId: string;
@@ -80,7 +81,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                 {this.state.subReplies.map(reply => <TopicReplyCard
                     key={"sub-reply" + reply.id}
                     reply={reply}
-                    indention={this.props.indention + 15}
+                    indention={this.props.indention + 10}
                     topicId={this.props.topicId}
                 />)}
             </div>
@@ -173,12 +174,15 @@ class TopicReplyCard extends React.Component<Props, State> {
                 <div className="reply-overview-details">
                     {this.renderTimeAgo(this.props.reply.timestamp)}
                     <Typography variant="body2" className='purple-typography' component="p">
-                        {this.props.reply.message}
+                        <span dangerouslySetInnerHTML={{
+                            __html: parseContent(this.props.reply.message)
+                        }}
+                            style={{ whiteSpace: "pre-line" }} />
                     </Typography>
                 </div>
                 <IconButton aria-label="Reply"
                     onClick={() => this.setState(prevState => ({ replyBoxOpen: !prevState.replyBoxOpen }))}
-                    style={{ marginBottom: "-10px" }}
+                    style={{ marginBottom: "-20px" }}
                 >
                     <Reply className={this.state.replyBoxOpen ? "pink-typography" : ""} />
                 </IconButton>
@@ -194,7 +198,7 @@ class TopicReplyCard extends React.Component<Props, State> {
             window.location.replace("/user/login");
         } else if (this.state.replyBoxOpen) {
             return (
-                <div>
+                <div style={{marginTop: "20px"}}>
                     <TextField
                         autoFocus
                         margin="dense"
