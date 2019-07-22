@@ -4,7 +4,7 @@ import { Container, Card, TextField, Button, CardActions, IconButton, CardConten
 
 import { RouteComponentProps } from "react-router";
 import { ReplyTopicButton } from "../../buttons/ReplyTopicButton";
-import { getTopicById, removeTopicStarRating, giveTopicStarRating, getTopicStarRaters, unsubscribeFromTopic, subscribeToTopic, getTopicSubscribers, getTopicRepliesPriorToTimestamp } from "../../../blockchain/TopicService";
+import { getTopicById, removeTopicStarRating, giveTopicStarRating, getTopicStarRaters, unsubscribeFromTopic, subscribeToTopic, getTopicSubscribers, getTopicRepliesPriorToTimestamp, getTopicRepliesAfterTimestamp } from "../../../blockchain/TopicService";
 import { Topic, User, TopicReply } from "../../../types";
 import { getUser, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import { timeAgoReadable } from "../../../util/util";
@@ -94,7 +94,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
         if (this.state.topicReplies.length === 0) {
             replies = getTopicRepliesPriorToTimestamp(topicId, Date.now(), repliesPageSize);
         } else {
-            replies = getTopicRepliesPriorToTimestamp(topicId, this.state.topicReplies[0].timestamp, repliesPageSize);
+            replies = getTopicRepliesAfterTimestamp(topicId, this.state.topicReplies[0].timestamp, repliesPageSize);
         }
 
         replies.then(retrievedReplies => {
@@ -107,7 +107,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             } else {
                 this.setState({ isLoading: false });
             }
-        })
+        }).catch(() => this.setState({ isLoading: false }));
     }
 
     retrieveOlderReplies() {
@@ -306,7 +306,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
 
     renderLoadMoreButton() {
         if (this.state.couldExistOlderReplies) {
-            return (<LoadMoreButton onClick={this.retrieveOlderReplies}/>)
+            return (<LoadMoreButton onClick={this.retrieveOlderReplies} />)
         }
     }
 
@@ -319,7 +319,12 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                 {this.state.topicReplies.length > 0
                     ? (<SubdirectoryArrowRight className="nav-button button-center" />)
                     : (<div />)}
-                {this.state.topicReplies.map(reply => <TopicReplyCard key={"reply-" + reply.id} reply={reply} />)}
+                {this.state.topicReplies.map(reply => <TopicReplyCard
+                    key={"reply-" + reply.id}
+                    reply={reply}
+                    indention={0}
+                    topicId={this.state.topic.id}
+                />)}
                 {this.renderLoadMoreButton()}
                 {this.renderReplyButton()}
             </Container>

@@ -83,7 +83,7 @@ describe("message should be sliced tests", () => {
 
 });
 
-describe("string to hex color", async () => {
+describe("string to hex color", () => {
     
     it("hex starts with '#'", async () => {
         const hex: string = stringToHexColor("hello");

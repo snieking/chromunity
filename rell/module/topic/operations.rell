@@ -19,7 +19,28 @@ operation createReply(topicId: text, id: text, username: text, message: text) {
         topic@{ .id == topicId },
         author,
         timestamp = op_context.last_block_time,
+        isSubReply = false,
         message = message
+    );
+
+    update topic@{ .id == topicId } ( lastModified = op_context.last_block_time);
+}
+
+operation createSubReply(topicId: text, parentReplyId: text, id: text, username: text, message: text) {
+    val author = user@{ .name == username };
+    require(is_signer(author.pubkey));
+    val topicReply = create topicReply(
+        id = id,
+        topic@{ .id == topicId },
+        author,
+        timestamp = op_context.last_block_time,
+        isSubReply = true,
+        message = message
+    );
+
+    create subReply(
+        parentReply = topicReply@{ .id == parentReplyId },
+        childReply = topicReply
     );
 
     update topic@{ .id == topicId } ( lastModified = op_context.last_block_time);
