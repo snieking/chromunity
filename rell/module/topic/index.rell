@@ -13,7 +13,12 @@ class topicReply {
     index topic;
     index author: user;
     index timestamp;
+    index isSubReply : boolean;
     message: text;
+}
+
+class subReply {
+    key parentReply: topicReply, childReply: topicReply;
 }
 
 include 'operations';

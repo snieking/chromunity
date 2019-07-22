@@ -1,18 +1,20 @@
 import React from 'react';
 import { Link } from "react-router-dom";
 import { TopicReply } from '../../../types';
-import { Card, Typography, IconButton, Badge, CardContent } from '@material-ui/core';
+import { Card, Typography, IconButton, Badge, CardContent, TextField, Button } from '@material-ui/core';
 import { timeAgoReadable } from '../../../util/util';
 import { getUser, ifEmptyAvatarThenPlaceholder } from '../../../util/user-util';
-import { StarRate } from '@material-ui/icons';
+import { StarRate, Reply } from '@material-ui/icons';
 import { getUserSettingsCached } from '../../../blockchain/UserService';
-import { removeReplyStarRating, giveReplyStarRating, getReplyStarRaters } from '../../../blockchain/TopicService';
+import { removeReplyStarRating, giveReplyStarRating, getReplyStarRaters, getTopicSubReplies, createTopicSubReply } from '../../../blockchain/TopicService';
 
 import './TopicReplyCard.css';
 import '../Topic.css';
 
 interface Props {
+    topicId: string;
     reply: TopicReply;
+    indention: number;
 }
 
 interface State {
@@ -23,6 +25,7 @@ interface State {
     isRepresentative: boolean;
     hideThreadConfirmDialogOpen: boolean;
     avatar: string;
+    subReplies: TopicReply[];
 }
 
 class TopicReplyCard extends React.Component<Props, State> {
@@ -37,8 +40,12 @@ class TopicReplyCard extends React.Component<Props, State> {
             replyMessage: "",
             isRepresentative: false,
             hideThreadConfirmDialogOpen: false,
-            avatar: ""
+            avatar: "",
+            subReplies: []
         };
+
+        this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
+        this.sendReply = this.sendReply.bind(this);
     }
 
     static parseContent(message: string): string {
@@ -61,9 +68,22 @@ class TopicReplyCard extends React.Component<Props, State> {
 
     render() {
         return (
-            <Card raised={true} key={this.props.reply.id} className='reply-card'>
-                {this.renderCardContent()}
-            </Card>
+            <div>
+                <Card
+                    raised={true}
+                    key={this.props.reply.id}
+                    className='reply-card'
+                    style={{ marginLeft: this.props.indention + "px" }}
+                >
+                    {this.renderCardContent()}
+                </Card>
+                {this.state.subReplies.map(reply => <TopicReplyCard
+                    key={"sub-reply" + reply.id}
+                    reply={reply}
+                    indention={this.props.indention + 15}
+                    topicId={this.props.topicId}
+                />)}
+            </div>
         );
     }
 
@@ -78,6 +98,7 @@ class TopicReplyCard extends React.Component<Props, State> {
             stars: usersWhoStarRated.length,
             ratedByMe: usersWhoStarRated.includes(getUser().name)
         }));
+        getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies }));
     }
 
     toggleStarRate() {
@@ -130,7 +151,6 @@ class TopicReplyCard extends React.Component<Props, State> {
                     </Typography>
                 </Link>
                 {this.state.avatar !== "" ? <img src={this.state.avatar} className="author-avatar" alt="Profile Avatar" /> : <div></div>}
-
             </div>
         );
     }
@@ -156,8 +176,67 @@ class TopicReplyCard extends React.Component<Props, State> {
                         {this.props.reply.message}
                     </Typography>
                 </div>
+                <IconButton aria-label="Reply"
+                    onClick={() => this.setState(prevState => ({ replyBoxOpen: !prevState.replyBoxOpen }))}
+                    style={{ marginBottom: "-10px" }}
+                >
+                    <Reply className={this.state.replyBoxOpen ? "pink-typography" : ""} />
+                </IconButton>
+                <div>
+                    {this.renderReplyBox()}
+                </div>
             </CardContent>
         );
+    }
+
+    renderReplyBox() {
+        if (getUser().name == null) {
+            window.location.replace("/user/login");
+        } else if (this.state.replyBoxOpen) {
+            return (
+                <div>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="message"
+                        multiline
+                        label="Reply"
+                        type="text"
+                        rows="3"
+                        variant="outlined"
+                        fullWidth
+                        onChange={this.handleReplyMessageChange}
+                        value={this.state.replyMessage}
+                    />
+                    <Button
+                        onClick={() => this.setState({ replyBoxOpen: false })}
+                        color="secondary"
+                        variant="outlined"
+                        style={{ marginRight: "5px" }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button type="submit" color="primary" variant="outlined" onClick={() => this.sendReply()}>
+                        Send
+                    </Button>
+                </div>
+            )
+        } else {
+            return (<div></div>)
+        }
+    }
+
+    handleReplyMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.setState({ replyMessage: event.target.value });
+    }
+
+    sendReply() {
+        const message: string = this.state.replyMessage;
+        this.setState({ replyBoxOpen: false, replyMessage: "" });
+        createTopicSubReply(getUser(), this.props.topicId, this.props.reply.id, message)
+            .then(() => getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies })));
     }
 
     renderTimeAgo(timestamp: number) {

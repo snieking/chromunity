@@ -54,12 +54,40 @@ export function createTopicReply(user: User, topicId: string, message: string) {
         });
 }
 
+export function createTopicSubReply(user: User, topicId: string, replyId: string, message: string) {
+    const { privKey, pubKey } = seedToKey(user.seed);
+    const subReplyId = uniqueId();
+
+    const tx = GTX.newTransaction([pubKey]);
+    tx.addOperation("createSubReply", topicId, replyId, subReplyId, user.name, formatMessage(message));
+    tx.sign(privKey, pubKey);
+
+    return tx.postAndWaitConfirmation()
+        .then((promise: any) => {
+            const tags = getHashTags(message);
+
+            if (tags != null && tags.length > 0) {
+                storeTagsFromTopic(user, topicId, tags);
+            }
+
+            getTopicSubscribers(topicId)
+                .then(users => sendNotifications(user,
+                    createReplyTriggerString(user.name, topicId), message, users.filter(item => item !== user.name)));
+
+            return promise;
+        });
+}
+
 function createReplyTriggerString(name: string, id: string): string {
     return "@" + name + " replied to /t/" + id;
 }
 
 export function getTopicRepliesPriorToTimestamp(topicId: string, timestamp: number, pageSize: number): Promise<TopicReply[]> {
     return GTX.query("getTopicRepliesPriorToTimestamp", { topicId: topicId, timestamp: timestamp, pageSize: pageSize });
+}
+
+export function getTopicSubReplies(replyId: string): Promise<TopicReply[]> {
+    return GTX.query("getSubReplies", { parentReplyId: replyId });
 }
 
 export function getTopicsByUserPriorToTimestamp(username: string, timestamp: number, pageSize: number): Promise<Topic[]> {

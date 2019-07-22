@@ -306,7 +306,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
 
     renderLoadMoreButton() {
         if (this.state.couldExistOlderReplies) {
-            return (<LoadMoreButton onClick={this.retrieveOlderReplies}/>)
+            return (<LoadMoreButton onClick={this.retrieveOlderReplies} />)
         }
     }
 
@@ -319,7 +319,12 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                 {this.state.topicReplies.length > 0
                     ? (<SubdirectoryArrowRight className="nav-button button-center" />)
                     : (<div />)}
-                {this.state.topicReplies.map(reply => <TopicReplyCard key={"reply-" + reply.id} reply={reply} />)}
+                {this.state.topicReplies.map(reply => <TopicReplyCard
+                    key={"reply-" + reply.id}
+                    reply={reply}
+                    indention={15}
+                    topicId={this.state.topic.id}
+                />)}
                 {this.renderLoadMoreButton()}
                 {this.renderReplyButton()}
             </Container>

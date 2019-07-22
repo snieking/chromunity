@@ -27,11 +27,13 @@ query getTopicsPriorToTimestamp(timestamp, pageSize: integer) {
 query getTopicRepliesPriorToTimestamp(topicId: text, timestamp, pageSize: integer) {
     return topicReply@*{
         topic@{ .id == topicId },
-        .timestamp < timestamp
+        .timestamp < timestamp,
+        .isSubReply == false
     }(
         .id,
         author=.author.name,
         .message,
+        .isSubReply,
         -sort .timestamp
     ) limit pageSize;
 }
@@ -39,13 +41,25 @@ query getTopicRepliesPriorToTimestamp(topicId: text, timestamp, pageSize: intege
 query getTopicRepliesPriorAfterTimestamp(topicId: text, timestamp, pageSize: integer) {
     return topicReply@*{
         topic@{ .id == topicId },
-        .timestamp > timestamp
+        .timestamp > timestamp,
+        .isSubReply == false
     }(
         .id,
         author=.author.name,
         .message,
+        .isSubReply,
         -sort .timestamp
     ) limit pageSize;
+}
+
+query getSubReplies(parentReplyId: text) {
+    return subReply@*{ .parentReply.id == parentReplyId } (
+        id=.childReply.id,
+        author=.childReply.author.name,
+        message=.childReply.message,
+        isSubReply=.childReply.isSubReply,
+        sort timestamp=.childReply.timestamp
+    );
 }
 
 query getTopicsByUserIdPriorToTimestamp(name, timestamp, pageSize: integer) {

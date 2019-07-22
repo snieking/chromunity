@@ -6,7 +6,7 @@ import { createTopic, getTopicsByUserPriorToTimestamp, giveTopicStarRating,
     getTopicStarRaters, removeTopicStarRating, getTopicsAfterTimestamp, 
     getTopicsPriorToTimestamp, getTopicById, createTopicReply, 
     getTopicRepliesPriorToTimestamp, giveReplyStarRating, getReplyStarRaters, 
-    removeReplyStarRating, subscribeToTopic, getTopicSubscribers, unsubscribeFromTopic 
+    removeReplyStarRating, subscribeToTopic, getTopicSubscribers, unsubscribeFromTopic, createTopicSubReply, getTopicSubReplies 
 } from '../src/blockchain/TopicService';
 
 jest.setTimeout(30000);
@@ -55,7 +55,7 @@ describe("topic tests", () => {
         topic = topics[0];
     });
 
-    it("reply to topic", async() => {
+    it("reply to topic and reply to a reply", async() => {
         await createTopicReply(userLoggedIn, topic.id, "I completely agree!");
         
         const replies: TopicReply[] = await getTopicRepliesPriorToTimestamp(topic.id, Date.now(), 10);
@@ -73,6 +73,16 @@ describe("topic tests", () => {
         await giveReplyStarRating(userLoggedIn, reply.id);
         const upvotedBy3: string[] = await getReplyStarRaters(reply.id);
         expect(upvotedBy3.length).toBe(1);
+
+        await createTopicSubReply(secondLoggedInUser, topic.id, reply.id, "Are you certain?");
+        const subReplies: TopicReply[] = await getTopicSubReplies(reply.id);
+        expect(subReplies.length).toBe(1);
+
+        const subReply: TopicReply = subReplies[0];
+        await createTopicSubReply(userLoggedIn, topic.id, subReply.id, "I am #AlwaysCertain");
+
+        const subSubReplies: TopicReply[] = await getTopicSubReplies(subReply.id);
+        expect(subSubReplies.length).toBe(1);
     });
 
     it("star rate topic", async () => {

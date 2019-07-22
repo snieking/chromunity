@@ -16,6 +16,7 @@ export interface TopicReply {
     id: string;
     author: string;
     message: string;
+    isSubReply: boolean;
     timestamp: number;
 }
 
