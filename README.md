@@ -6,5 +6,5 @@ Chrotonomy is a decentralized social media site where the data is stored in a bl
 ## Copyrighted font
 Chrotonomy uses a copyrighted font which is not included in the repository.
 
-In order to use the Chromia font, add **Battle-fin-Black.otf** to **public/fonts** directory in order to use that font. 
+In order to use the Chromia font, add **Battlefin-Black.otf** to **public/fonts** directory in order to use that font. 
 The application will work fine without it and fall back to other fonts.
