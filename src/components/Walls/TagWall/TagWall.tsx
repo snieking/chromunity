@@ -9,6 +9,7 @@ import TopicOverviewCard from '../../Topic/TopicOverViewCard/TopicOverviewCard';
 import LoadMoreButton from '../../buttons/LoadMoreButton';
 import { getUser } from '../../../util/user-util';
 import { unfollowTag, followTag, getFollowedTags } from '../../../blockchain/TagService';
+import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
 
 interface MatchParams {
     tag: string
@@ -128,7 +129,7 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
             <div>
                 <Container fixed maxWidth="md">
                     <div className="thread-wall-container">
-                        <br />
+                        <ChromiaPageHeader text="Tags"/>
                         {this.renderFollowSwitch()}
                         {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
                         {this.state.topics.map(topic => <TopicOverviewCard key={topic.id} topic={topic} />)}

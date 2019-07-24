@@ -29,3 +29,6 @@ yarn-error.log*
 
 *.pid
 package-lock.json
+
+# Exclude copyrighted fonts
+*.otf

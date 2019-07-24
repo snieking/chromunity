@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from "react-router-dom";
 import { TopicReply } from '../../../types';
-import { Card, Typography, IconButton, Badge, CardContent, TextField, Button } from '@material-ui/core';
+import { Card, Typography, IconButton, Badge, CardContent, TextField, Button, Tooltip } from '@material-ui/core';
 import { timeAgoReadable } from '../../../util/util';
 import { getUser, ifEmptyAvatarThenPlaceholder } from '../../../util/user-util';
 import { StarRate, Reply } from '@material-ui/icons';
@@ -119,26 +119,9 @@ class TopicReplyCard extends React.Component<Props, State> {
         }
     }
 
-    renderLoggedInRequiredActions() {
-        if (getUser().name != null) {
-            return (
-                <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
-                    <Badge
-                        className="star-badge"
-                        color="secondary"
-                        badgeContent={this.state.stars}
-                    >
-                        <StarRate className={this.state.ratedByMe ? "yellow-icon" : ""} />
-                    </Badge>
-                </IconButton>
-            );
-        }
-    }
-
     renderAuthor() {
         return (
             <div className="right">
-
                 <Link
                     className="pink-typography"
                     to={"/u/" + this.props.reply.author}
@@ -160,15 +143,17 @@ class TopicReplyCard extends React.Component<Props, State> {
         return (
             <CardContent>
                 <div className="left">
-                    <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
-                        <Badge
-                            className="star-badge"
-                            color="secondary"
-                            badgeContent={this.state.stars}
-                        >
-                            <StarRate className={this.state.ratedByMe ? "yellow-icon" : ""} />
-                        </Badge>
-                    </IconButton>
+                    <Tooltip title="Like">
+                        <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
+                            <Badge
+                                className="star-badge"
+                                color="primary"
+                                badgeContent={this.state.stars}
+                            >
+                                <StarRate className={this.state.ratedByMe ? "pink-color" : "purple-color"} />
+                            </Badge>
+                        </IconButton>
+                    </Tooltip>
                 </div>
                 {this.renderAuthor()}
                 <div className="reply-overview-details">
@@ -180,12 +165,14 @@ class TopicReplyCard extends React.Component<Props, State> {
                             style={{ whiteSpace: "pre-line" }} />
                     </Typography>
                 </div>
-                <IconButton aria-label="Reply"
-                    onClick={() => this.setState(prevState => ({ replyBoxOpen: !prevState.replyBoxOpen }))}
-                    style={{ marginBottom: "-20px" }}
-                >
-                    <Reply className={this.state.replyBoxOpen ? "pink-typography" : ""} />
-                </IconButton>
+                <Tooltip title="Reply">
+                    <IconButton aria-label="Reply"
+                        onClick={() => this.setState(prevState => ({ replyBoxOpen: !prevState.replyBoxOpen }))}
+                        style={{ marginBottom: "-20px" }}
+                    >
+                        <Reply className={this.state.replyBoxOpen ? "pink-color" : "purple-color"} />
+                    </IconButton>
+                </Tooltip>
                 <div>
                     {this.renderReplyBox()}
                 </div>
@@ -198,7 +185,7 @@ class TopicReplyCard extends React.Component<Props, State> {
             window.location.replace("/user/login");
         } else if (this.state.replyBoxOpen) {
             return (
-                <div style={{marginTop: "20px"}}>
+                <div style={{ marginTop: "20px" }}>
                     <TextField
                         autoFocus
                         margin="dense"
@@ -215,12 +202,12 @@ class TopicReplyCard extends React.Component<Props, State> {
                     <Button
                         onClick={() => this.setState({ replyBoxOpen: false })}
                         color="secondary"
-                        variant="outlined"
+                        variant="text"
                         style={{ marginRight: "5px" }}
                     >
                         Cancel
                     </Button>
-                    <Button type="submit" color="primary" variant="outlined" onClick={() => this.sendReply()}>
+                    <Button type="submit" color="primary" variant="text" onClick={() => this.sendReply()}>
                         Send
                     </Button>
                 </div>

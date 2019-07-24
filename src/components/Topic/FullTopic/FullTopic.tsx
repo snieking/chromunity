@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Container, Card, TextField, Button, CardActions, IconButton, CardContent, Typography, Badge, LinearProgress } from "@material-ui/core";
+import { Container, Card, TextField, Button, CardActions, IconButton, CardContent, Typography, Badge, LinearProgress, Tooltip } from "@material-ui/core";
 
 import { RouteComponentProps } from "react-router";
 import { ReplyTopicButton } from "../../buttons/ReplyTopicButton";
@@ -8,7 +8,7 @@ import { getTopicById, removeTopicStarRating, giveTopicStarRating, getTopicStarR
 import { Topic, User, TopicReply } from "../../../types";
 import { getUser, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import { timeAgoReadable } from "../../../util/util";
-import { StarRate, SubdirectoryArrowRight, Archive } from "@material-ui/icons";
+import { StarRate, SubdirectoryArrowRight, CheckCircle, CheckCircleOutline } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
 import TopicReplyCard from "../TopicReplyCard/TopicReplyCard";
 import { parseContent } from "../../../util/text-parsing";
@@ -221,18 +221,22 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
     renderCardActions(renderReadMoreButton: boolean) {
         return (
             <CardActions>
-                <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
-                    <Badge
-                        className="star-badge"
-                        color="primary"
-                        badgeContent={this.state.stars}
-                    >
-                        <StarRate className={this.state.ratedByMe ? "yellow-icon" : ""} />
-                    </Badge>
-                </IconButton>
-                <IconButton aria-label="Subscribe" onClick={() => this.toggleSubscription()}>
-                    <Archive className={this.state.subscribed ? "green-icon" : ""} />
-                </IconButton>
+                <Tooltip title="Like">
+                    <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
+                        <Badge
+                            className="star-badge"
+                            color="primary"
+                            badgeContent={this.state.stars}
+                        >
+                            <StarRate className={this.state.ratedByMe ? "pink-color" : "purple-color"} />
+                        </Badge>
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Subscribe">
+                    <IconButton aria-label="Subscribe" onClick={() => this.toggleSubscription()}>
+                        {this.state.subscribed ? <CheckCircle className="pink-color" /> : <CheckCircleOutline className="purple-color"/>}
+                    </IconButton>
+                </Tooltip>
             </CardActions>
         );
     }

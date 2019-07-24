@@ -5,6 +5,7 @@ import {Container} from "@material-ui/core";
 import {getCurrentRepresentativePeriod, getRepresentatives} from "../../../blockchain/RepresentativesService";
 import {Election} from "../../../types";
 import RepresentativeCard from './RepresentativeCard/RepresentativeCard';
+import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
 
 export interface RepresentativesState {
     mandatPeriodId: string,
@@ -35,7 +36,7 @@ export class Representatives extends React.Component<{}, RepresentativesState> {
     render() {
         return (
             <Container fixed maxWidth="md">
-                <br/>
+                <ChromiaPageHeader text="Representatives"/>
                 {this.state.representatives.map(name => <RepresentativeCard name={name}/>)}
             </Container>
         )

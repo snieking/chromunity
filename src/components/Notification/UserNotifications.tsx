@@ -6,6 +6,7 @@ import {getUserNotifications, markNotificationsRead} from "../../blockchain/Noti
 import {UserNotification} from "../../types";
 import {getUser} from "../../util/user-util";
 import NotificationCard from './NotificationCard';
+import ChromiaPageHeader from '../utils/ChromiaPageHeader';
 
 interface MatchParams {
     userId: string
@@ -41,7 +42,7 @@ export class UserNotifications extends React.Component<UserNotificationsProps, U
     render() {
         return (
             <Container fixed maxWidth="md">
-                <br/>
+                <ChromiaPageHeader text="User Notifications"/>
                 {this.state.notifications.map(notification => <NotificationCard key={notification.id} notification={notification}/>)}
             </Container>
         );

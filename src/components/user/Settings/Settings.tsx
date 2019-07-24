@@ -7,6 +7,7 @@ import AvatarChanger from './AvatarChanger/AvatarChanger';
 import './Settings.css';
 import { getUserSettings, updateUserSettings } from '../../../blockchain/UserService';
 import { CustomSnackbarContentWrapper } from '../../utils/CustomSnackbar';
+import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
 
 interface SettingsState {
     avatar: string;
@@ -44,6 +45,7 @@ class Settings extends React.Component<{}, SettingsState> {
         return (
             <div>
                 <Container fixed maxWidth="sm" className={"settings-container"}>
+                    <ChromiaPageHeader text="Edit Settings" />
                     <Card key={"user-card"} className="profile-card">
 
                         <Dialog open={this.state.editAvatarOpen} aria-labelledby="form-dialog-title"

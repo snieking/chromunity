@@ -154,11 +154,10 @@ class TopicOverviewCard extends React.Component<Props, State> {
                 <div className="left">
                     <div className="overview-rating">
                         <Badge
-                            className="star-badge"
                             color="primary"
                             badgeContent={this.state.stars}
                         >
-                            <StarRate className={this.state.ratedByMe ? "yellow-icon" : ""} />
+                            <StarRate className={this.state.ratedByMe ? "pink-color" : "purple-color"} />
                         </Badge>
                     </div>
                 </div>

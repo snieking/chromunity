@@ -13,6 +13,7 @@ import {
 } from "../../../blockchain/ElectionService";
 import {getUser, isGod} from "../../../util/user-util";
 import {DictatorActions} from "./DictatorActions/DictatorActions";
+import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
 
 export interface ElectionState {
     timestamp: number,
@@ -201,6 +202,7 @@ export class Election extends React.Component<{}, ElectionState> {
     render() {
         return (
             <Container fixed maxWidth="md">
+                <ChromiaPageHeader text="Election"/>
                 <Card raised={true} key={"next-election"} className="election-card">
                     <CardContent>
                         {this.renderElection()}

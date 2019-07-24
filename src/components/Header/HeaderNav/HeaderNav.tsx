@@ -13,10 +13,10 @@ import { ExitToApp, Gavel, LocationCity, Face, HowToVote, Bookmarks, Settings, P
 
 import './HeaderNav.css';
 import { NotificationsButton } from "../../buttons/NotificationsButton";
-import { Button, MenuItem, Menu, ListItemIcon, Typography } from '@material-ui/core';
+import { Button, MenuItem, Menu, ListItemIcon, Typography, Tooltip } from '@material-ui/core';
 
 export interface HeaderNavProps {
-    
+
 }
 
 export default function HeaderNav(props: HeaderNavProps) {
@@ -45,12 +45,16 @@ export default function HeaderNav(props: HeaderNavProps) {
         if (user.name != null) {
             return (
                 <div>
-                    <Link to={"/notifications/" + user.name}>
-                        <NotificationsButton username={user.name} />
-                    </Link>
-                    <Button aria-controls="profile-menu" aria-haspopup="true" onClick={handleProfileClick}>
-                        <AccountCircle className="nav-button" />
-                    </Button>
+                    <Tooltip title="Notifications">
+                        <Link to={"/notifications/" + user.name}>
+                            <NotificationsButton username={user.name} />
+                        </Link>
+                    </Tooltip>
+                    <Tooltip title="Profile">
+                        <Button aria-controls="profile-menu" aria-haspopup="true" onClick={handleProfileClick}>
+                            <AccountCircle className="nav-button" />
+                        </Button>
+                    </Tooltip>
                     <Menu
                         id="profile-menu"
                         anchorEl={profileAnchorEl}
@@ -89,11 +93,13 @@ export default function HeaderNav(props: HeaderNavProps) {
             )
         } else {
             return (
-                <Link to="/user/login">
-                    <IconButton>
-                        <AccountCircle className="nav-button" />
-                    </IconButton>
-                </Link>
+                <Tooltip title="account">
+                    <Link to="/user/login">
+                        <IconButton>
+                            <AccountCircle className="nav-button" />
+                        </IconButton>
+                    </Link>
+                </Tooltip>
             )
         }
     }
@@ -102,25 +108,29 @@ export default function HeaderNav(props: HeaderNavProps) {
         if (user.name != null) {
             return (
                 <div>
-                    <Link to="/tags">
-                        <IconButton
-                            edge="start"
-                            className={classes.menuButton}
-                            aria-label="Open drawer"
-                        >
-                            <Bookmarks className="nav-button" />
-                        </IconButton>
-                    </Link>
-                    <Link to="/followings">
-                        <IconButton
-                            edge="start"
-                            className={classes.menuButton}
-                            aria-label="Open drawer"
-                        >
-                            <People className="nav-button" />
-                        </IconButton>
-                    </Link>
-                </div>
+                    <Tooltip title="Tags">
+                        <Link to="/tags">
+                            <IconButton
+                                edge="start"
+                                className={classes.menuButton}
+                                aria-label="Open drawer"
+                            >
+                                <Bookmarks className="nav-button" />
+                            </IconButton>
+                        </Link>
+                    </Tooltip>
+                    <Tooltip title="Followings">
+                        <Link to="/followings">
+                            <IconButton
+                                edge="start"
+                                className={classes.menuButton}
+                                aria-label="Open drawer"
+                            >
+                                <People className="nav-button" />
+                            </IconButton>
+                        </Link>
+                    </Tooltip>
+                </div >
             )
         }
     }
@@ -129,19 +139,23 @@ export default function HeaderNav(props: HeaderNavProps) {
         <div className={classes.grow}>
             <AppBar position="static">
                 <Toolbar className="nav-toolbar">
-                    <Link to="/">
-                        <IconButton
-                            edge="start"
-                            className={classes.menuButton}
-                            aria-label="Open drawer"
-                        >
-                            <Home className="nav-button" />
-                        </IconButton>
-                    </Link>
+                    <Tooltip title="Home">
+                        <Link to="/">
+                            <IconButton
+                                edge="start"
+                                className={classes.menuButton}
+                                aria-label="Open drawer"
+                            >
+                                <Home className="nav-button" />
+                            </IconButton>
+                        </Link>
+                    </Tooltip>
                     {renderFavoriteWalls()}
-                    <Button aria-controls="gov-menu" aria-haspopup="true" onClick={handleGovClick}>
-                        <LocationCity className="nav-button" />
-                    </Button>
+                    <Tooltip title="Governing">
+                        <Button aria-controls="gov-menu" aria-haspopup="true" onClick={handleGovClick}>
+                            <LocationCity className="nav-button" />
+                        </Button>
+                    </Tooltip>
                     <Menu
                         id="gov-menu"
                         anchorEl={govAnchorEl}

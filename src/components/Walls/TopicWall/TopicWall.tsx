@@ -7,6 +7,7 @@ import { NewTopicButton } from '../../buttons/NewTopicButton';
 import { getUser } from '../../../util/user-util';
 import LoadMoreButton from '../../buttons/LoadMoreButton';
 import { TrendingTags } from '../../TrendingTags/TrendingTags';
+import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
 
 interface Props {
     type: string;
@@ -39,10 +40,21 @@ class TopicWall extends React.Component<Props, State> {
         }
     }
 
+    getHeader() {
+        if (this.props.type === "userFollowings") {
+            return "Followed Users";
+        } else if (this.props.type === "tagFollowings") {
+            return "Subscribed Tags";
+        } else {
+            return "Recent Topics"
+        }
+    }
+
     render() {
         return (
             <div>
                 <Container fixed>
+                    <ChromiaPageHeader text={this.getHeader()}/>
                     {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
                     {this.props.type === "tagFollowings" ? <TrendingTags/> : <div></div>}
                     <div className='topic-wall-container'>

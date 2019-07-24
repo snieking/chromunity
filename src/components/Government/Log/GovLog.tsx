@@ -1,8 +1,9 @@
 import React from 'react';
+import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
 
 export class GovLog extends React.Component {
 
     render() {
-        return <h1>Gov Log</h1>
+        return <ChromiaPageHeader text="Logbook"/>
     }
 }
