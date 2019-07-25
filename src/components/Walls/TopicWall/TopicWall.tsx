@@ -44,7 +44,7 @@ class TopicWall extends React.Component<Props, State> {
         if (this.props.type === "userFollowings") {
             return "Followed Users";
         } else if (this.props.type === "tagFollowings") {
-            return "Subscribed Tags";
+            return "Trending Tags";
         } else {
             return "Recent Topics"
         }
@@ -58,7 +58,7 @@ class TopicWall extends React.Component<Props, State> {
                     {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
                     {this.props.type === "tagFollowings" ? <TrendingTags/> : <div></div>}
                     <div className='topic-wall-container'>
-                        <br />
+                        {this.props.type === "tagFollowings" ? <ChromiaPageHeader text="Followed Tags"/> : <div></div>}
                         {this.state.topics.map(topic => <TopicOverviewCard key={'card-' + topic.id} topic={topic} />)}
                     </div>
                     {this.renderLoadMoreButton()}

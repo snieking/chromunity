@@ -23,7 +23,6 @@ export class TrendingTags extends React.Component<{}, State>{
     render() {
         return (
             <div>
-                <br />
                 <Card>
                     <CardContent>
                         {this.state.tags.map((tag: string) => {

@@ -3,19 +3,31 @@ operation createTopicTag(username: text, tags: set<text>, topicId: text) {
     require(is_signer(user.pubkey));
 
     val topic = topic@{ .id == topicId };
+    log("Creating topic tags for tags: ", tags);
     for(tag in tags) {
-        create topicTag(name = tag, topic, op_context.last_block_time);
+        create topicTag(id = op_context.transaction.tx_rid, name = tag, topic, op_context.last_block_time);
+    }
+}
+
+operation createTopicReplyTag(username: text, tags: set<text>, topicId: text, replyId: text) {
+    val user = user@{ .name == username};
+    require(is_signer(user.pubkey));
+
+    val topic = topic@{ .id == topicId };
+    for(tag in tags) {
+        val topicTag = create topicTag(id = op_context.transaction.tx_rid, name = tag, topic, op_context.last_block_time);
+        create replyToTopicTag(replyId, topicTag);
     }
 }
 
 operation createTagFollowing(username: text, tag: text) {
     val user = user@{ .name == username};
     require(is_signer(user.pubkey));
-    create tagFollowing(user, topicTag@{ .name == tag });
+    create tagFollowing(user, tag);
 }
 
 operation removeTagFollowing(username: text, tag: text) {
     val user = user@{ .name == username};
     require(is_signer(user.pubkey));
-    delete tagFollowing@{ user, topicTag@{ .name == tag }};
+    delete tagFollowing@{ user, tag};
 }

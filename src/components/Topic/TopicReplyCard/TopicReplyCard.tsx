@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import { TopicReply } from '../../../types';
 import { Card, Typography, IconButton, Badge, CardContent, TextField, Button, Tooltip } from '@material-ui/core';
 import { timeAgoReadable } from '../../../util/util';
-import { getUser, ifEmptyAvatarThenPlaceholder } from '../../../util/user-util';
-import { StarRate, Reply } from '@material-ui/icons';
+import { getUser, ifEmptyAvatarThenPlaceholder, isRepresentative } from '../../../util/user-util';
+import { StarRate, Reply, Delete } from '@material-ui/icons';
 import { getUserSettingsCached } from '../../../blockchain/UserService';
-import { removeReplyStarRating, giveReplyStarRating, getReplyStarRaters, getTopicSubReplies, createTopicSubReply } from '../../../blockchain/TopicService';
+import { removeTopicReply, removeReplyStarRating, giveReplyStarRating, getReplyStarRaters, getTopicSubReplies, createTopicSubReply } from '../../../blockchain/TopicService';
 
 import './TopicReplyCard.css';
 import '../Topic.css';
@@ -173,11 +173,27 @@ class TopicReplyCard extends React.Component<Props, State> {
                         <Reply className={this.state.replyBoxOpen ? "pink-color" : "purple-color"} />
                     </IconButton>
                 </Tooltip>
+                {this.renderAdminActions()}
                 <div>
                     {this.renderReplyBox()}
                 </div>
             </CardContent>
         );
+    }
+
+    renderAdminActions() {
+        if (isRepresentative() && !this.props.reply.removed) {
+            return (
+                <Tooltip title="Remove reply">
+                    <IconButton aria-label="Remove reply"
+                        onClick={() => removeTopicReply(getUser(), this.props.reply.id).then(() => window.location.reload())}
+                        style={{ marginBottom: "-20px" }}
+                    >
+                        <Delete className="red-color" />
+                    </IconButton>
+                </Tooltip>
+            )
+        }
     }
 
     renderReplyBox() {

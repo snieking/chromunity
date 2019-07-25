@@ -16,6 +16,16 @@ export function storeTagsFromTopic(user: User, topicId: string, tags: string[]) 
     return tx.postAndWaitConfirmation();
 }
 
+export function storeTagsFromTopicReply(user: User, topicId: string, tags: string[], replyId: string) {
+    const {privKey, pubKey} = seedToKey(user.seed);
+
+    const tx = GTX.newTransaction([pubKey]);
+    tx.addOperation("createTopicReplyTag", user.name, tags, topicId, replyId);
+    tx.addOperation('nop', uniqueId());
+    tx.sign(privKey, pubKey);
+    return tx.postAndWaitConfirmation();
+}
+
 export function followTag(user: User, tag: string) {
     return modifyTagFollowing(user, tag, "createTagFollowing");
 }

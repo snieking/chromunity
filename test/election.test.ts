@@ -4,9 +4,10 @@ import { getANumber, sleepUntil } from "./helper";
 
 
 import * as bip39 from "bip39";
-import { User, Election } from "../src/types";
+import { User, Election, Topic, TopicReply } from "../src/types";
 import { isRepresentative, setUser } from "../src/util/user-util";
 import { getRepresentatives, getCurrentRepresentativePeriod } from "../src/blockchain/RepresentativesService";
+import { createTopic, getTopicsByUserPriorToTimestamp, removeTopic, getTopicById, createTopicReply, getTopicRepliesPriorToTimestamp, removeTopicReply } from "../src/blockchain/TopicService";
 
 jest.setTimeout(30000);
 
@@ -15,7 +16,7 @@ describe("election test", () => {
     const admin = {
         name: "admin",
         password: "admin",
-        mnemonic: bip39.generateMnemonic(160)
+        mnemonic: "rule comfort scheme march fresh defy radio width crash family toward index"
     }
 
     var adminUser: User;
@@ -59,5 +60,25 @@ describe("election test", () => {
         expect(election.id).toBe(electionId);
         expect(representatives).toContain(adminUser.name);
     })
+
+    it("as a representative remove topic and replies", async() => {
+        const title: string = "This post should be removed";
+        const message: string = "This post should be #removed, if not the #test is broken";
+        await createTopic(adminUser, title, message);
+
+        var topics: Topic[] = await getTopicsByUserPriorToTimestamp(adminUser.name, Date.now(), 10);
+        const topicToBeRemoved: Topic = topics[0];
+
+        await removeTopic(adminUser, topicToBeRemoved.id);
+        const removedTopic: Topic = await getTopicById(topicToBeRemoved.id);
+        expect(removedTopic.title).toBe("[Removed]");
+        
+        await createTopicReply(adminUser, removedTopic.id, "This should also be removed");
+        var replies: TopicReply[] = await getTopicRepliesPriorToTimestamp(removedTopic.id, Date.now(), 10);
+
+        await removeTopicReply(adminUser, replies[0].id);
+        replies = await getTopicRepliesPriorToTimestamp(removedTopic.id, Date.now(), 10);
+        expect(replies[0].message).toBe("Removed by @admin");
+    });
 
 });

@@ -10,6 +10,7 @@ export interface Topic {
     message: string;
     timestamp: number;
     lastModified: number;
+    removed: boolean;
 }
 
 export interface TopicReply {
@@ -18,6 +19,7 @@ export interface TopicReply {
     message: string;
     isSubReply: boolean;
     timestamp: number;
+    removed: boolean;
 }
 
 export interface UserNotification {

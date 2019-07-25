@@ -3,7 +3,7 @@ import { seedToKey } from "./CryptoService";
 import { uniqueId } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 import { User, Topic, TopicReply } from "../types";
-import { storeTagsFromTopic } from "./TagService";
+import { storeTagsFromTopic, storeTagsFromTopicReply } from "./TagService";
 import { sendNotifications } from "./NotificationService";
 
 const topicsCache = BoomerangCache.create("topic-bucket", { storage: "session", encrypt: false });
@@ -20,7 +20,7 @@ export function createTopic(user: User, title: string, message: string) {
         .then((promise: any) => {
             const tags = getHashTags(message);
 
-            if (tags != null) {
+            if (tags != null && tags.length > 0) {
                 storeTagsFromTopic(user, topicId, tags);
             }
 
@@ -38,7 +38,7 @@ export function createTopicReply(user: User, topicId: string, message: string) {
     tx.addOperation("createReply", topicId, replyId, user.name, formatMessage(message));
     tx.sign(privKey, pubKey);
 
-    return postTopicReply(user, tx, topicId, message);
+    return postTopicReply(user, tx, topicId, message, replyId);
 }
 
 export function createTopicSubReply(user: User, topicId: string, replyId: string, message: string) {
@@ -48,16 +48,16 @@ export function createTopicSubReply(user: User, topicId: string, replyId: string
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("createSubReply", topicId, replyId, subReplyId, user.name, formatMessage(message));
     tx.sign(privKey, pubKey);
-    return postTopicReply(user, tx, topicId, message);
+    return postTopicReply(user, tx, topicId, message, subReplyId);
 }
 
-function postTopicReply(user: User, tx: any, topicId: string, message: string) {
+function postTopicReply(user: User, tx: any, topicId: string, message: string, replyId: string) {
     return tx.postAndWaitConfirmation()
         .then((promise: any) => {
             const tags = getHashTags(message);
 
             if (tags != null && tags.length > 0) {
-                storeTagsFromTopic(user, topicId, tags);
+                storeTagsFromTopicReply(user, topicId, tags, replyId);
             }
 
             getTopicSubscribers(topicId)
@@ -70,6 +70,25 @@ function postTopicReply(user: User, tx: any, topicId: string, message: string) {
 
 function createReplyTriggerString(name: string, id: string): string {
     return "@" + name + " replied to /t/" + id;
+}
+
+export function removeTopic(user: User, topicId: string) {
+    topicsCache.remove(topicId);
+    const {privKey, pubKey} = seedToKey(user.seed);
+
+    const tx = GTX.newTransaction([pubKey]);
+    tx.addOperation("removeTopic", user.name, topicId);
+    tx.sign(privKey, pubKey);
+    return tx.postAndWaitConfirmation();
+}
+
+export function removeTopicReply(user: User, topicReplyId: string) {
+    const {privKey, pubKey} = seedToKey(user.seed);
+
+    const tx = GTX.newTransaction([pubKey]);
+    tx.addOperation("removeTopicReply", user.name, topicReplyId);
+    tx.sign(privKey, pubKey);
+    return tx.postAndWaitConfirmation();
 }
 
 export function getTopicRepliesPriorToTimestamp(topicId: string, timestamp: number, pageSize: number): Promise<TopicReply[]> {
@@ -159,7 +178,7 @@ export function getTopicById(id: string): Promise<Topic> {
 
     return GTX.query("getTopicById", { id: id })
         .then((topic: Topic) => {
-            topicsCache.set(id, topic);
+            topicsCache.set(id, topic, 300);
             return topic;
         });
 }
@@ -193,7 +212,14 @@ function getTopicsFromFollowsForTimestamp(user: User, timestamp: number, pageSiz
 }
 
 export function getTopicsFromFollowedTagsPriorToTimestamp(user: User, timestamp: number, pageSize: number): Promise<Topic[]> {
-    return GTX.query("getTopicsByFollowedTagsPriorToTimestamp", { username: user.name, timestamp: timestamp, pageSize: pageSize });
+    return GTX.query("getTopicsByFollowedTagsPriorToTimestamp", { username: user.name, timestamp: timestamp, pageSize: pageSize })
+        .then((topics: Topic[]) => { 
+            var seen: Set<string> = new Set<string>();
+            return topics.filter(item => {
+                let k = item.id;
+                return seen.has(k) ? false : seen.add(k);
+            })
+        });
 }
 
 function formatMessage(message: string) {

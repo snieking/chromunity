@@ -1,10 +1,14 @@
 class topicTag {
-    key name, topic;
+    key id: byte_array, topic, name;
     index timestamp;
 }
 
+class replyToTopicTag {
+    key replyId: text, topicTag;
+}
+
 class tagFollowing {
-    key user, topicTag;
+    key user, tag: text;
 }
 
 include 'operations';

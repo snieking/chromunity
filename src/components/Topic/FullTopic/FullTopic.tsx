@@ -4,11 +4,11 @@ import { Container, Card, TextField, Button, CardActions, IconButton, CardConten
 
 import { RouteComponentProps } from "react-router";
 import { ReplyTopicButton } from "../../buttons/ReplyTopicButton";
-import { getTopicById, removeTopicStarRating, giveTopicStarRating, getTopicStarRaters, unsubscribeFromTopic, subscribeToTopic, getTopicSubscribers, getTopicRepliesPriorToTimestamp, getTopicRepliesAfterTimestamp } from "../../../blockchain/TopicService";
+import { removeTopic, getTopicById, removeTopicStarRating, giveTopicStarRating, getTopicStarRaters, unsubscribeFromTopic, subscribeToTopic, getTopicSubscribers, getTopicRepliesPriorToTimestamp, getTopicRepliesAfterTimestamp } from "../../../blockchain/TopicService";
 import { Topic, User, TopicReply } from "../../../types";
-import { getUser, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
+import { getUser, ifEmptyAvatarThenPlaceholder, isRepresentative } from "../../../util/user-util";
 import { timeAgoReadable } from "../../../util/util";
-import { StarRate, SubdirectoryArrowRight, CheckCircle, CheckCircleOutline } from "@material-ui/icons";
+import { StarRate, SubdirectoryArrowRight, CheckCircle, CheckCircleOutline, Delete } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
 import TopicReplyCard from "../TopicReplyCard/TopicReplyCard";
 import { parseContent } from "../../../util/text-parsing";
@@ -49,7 +49,8 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             author: "",
             message: "",
             timestamp: 0,
-            lastModified: 0
+            lastModified: 0,
+            removed: true
         };
 
         this.state = {
@@ -218,7 +219,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
         );
     }
 
-    renderCardActions(renderReadMoreButton: boolean) {
+    renderCardActions() {
         return (
             <CardActions>
                 <Tooltip title="Like">
@@ -237,8 +238,24 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                         {this.state.subscribed ? <CheckCircle className="pink-color" /> : <CheckCircleOutline className="purple-color"/>}
                     </IconButton>
                 </Tooltip>
+                {this.renderAdminActions()}
             </CardActions>
         );
+    }
+
+    renderAdminActions() {
+        if (isRepresentative() && !this.state.topic.removed) {
+            return (
+                <div>
+                    <Tooltip title="Remove topic">
+                    <IconButton aria-label="Remove topic" 
+                        onClick={() => removeTopic(getUser(), this.props.match.params.id).then(() => window.location.reload())}>
+                        <Delete className="red-color"/>
+                    </IconButton>
+                </Tooltip>
+                </div>
+            )
+        }
     }
 
     renderTopic() {
@@ -246,7 +263,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             <div>
                 <Card raised={true} key={this.state.topic.id} className="topic-card">
                     {this.renderCardContent(this.state.topic.message)}
-                    {this.renderCardActions(false)}
+                    {this.renderCardActions()}
                 </Card>
                 {this.state.replyBoxOpen ? this.renderReplyBox() : <div />}
             </div>

@@ -1,0 +1,26 @@
+operation removeTopic(username: text, topicId: text) {
+    val user = user@{ .name == username};
+    require(is_signer(user.pubkey));
+
+    val recentElection = representativeElection @{ .completed == true } ( .id, sort .timestamp );
+    val representative = representative @{ user, recentElection.id };
+
+    update topic @{ .id == topicId } ( title = "[Removed]", message = "Removed by @" + user.name, removed = true );
+    delete topicTag @* { topic @{ .id == topicId }};
+}
+
+operation removeTopicReply(username: text, topicReplyId: text) {
+    val user = user@{ .name == username};
+    require(is_signer(user.pubkey));
+
+    val recentElection = representativeElection @{ .completed == true } ( .id, sort .timestamp );
+    val representative = representative @{ user, recentElection.id };
+
+    update topicReply @{ .id == topicReplyId } ( message = "Removed by @" + user.name, removed = true );
+    
+    val replyToTopicTags = replyToTopicTag @* { topicReplyId };
+    for (replyToTopicTag in replyToTopicTags) {
+        delete replyToTopicTag;
+        delete topicTag @? { replyToTopicTag.topicTag.id };
+    }
+}

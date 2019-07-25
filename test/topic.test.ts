@@ -123,7 +123,7 @@ describe("topic tests", () => {
 
     it("get topic prior to timestamp", async () => {
         const title: string = "Blockchain has never been easier";
-        const message: string = "Rell makes using a blockchain so easy";
+        const message: string = "This is a fact.";
         await createTopic(userLoggedIn, title, message);
         const topics: Topic[] = await getTopicsPriorToTimestamp(Date.now(), 10);
         expect(topics.length).toBeGreaterThan(0);

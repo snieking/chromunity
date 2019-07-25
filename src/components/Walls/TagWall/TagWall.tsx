@@ -129,7 +129,7 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
             <div>
                 <Container fixed maxWidth="md">
                     <div className="thread-wall-container">
-                        <ChromiaPageHeader text="Tags"/>
+                        <ChromiaPageHeader text={"#" + this.props.match.params.tag}/>
                         {this.renderFollowSwitch()}
                         {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
                         {this.state.topics.map(topic => <TopicOverviewCard key={topic.id} topic={topic} />)}
