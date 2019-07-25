@@ -51,11 +51,13 @@ class TopicOverviewCard extends React.Component<Props, State> {
             return (<Redirect to={"/t/" + this.props.topic.id} />);
         } else {
             return (
-                <Card raised={true} key={this.props.topic.id} className='topic-card'>
-                    <CardActionArea onClick={() => this.setState({ redirectToFullCard: true })}>
-                        {this.renderCardContent()}
-                    </CardActionArea>
-                </Card>
+                <div className={this.props.topic.removed ? "removed" : ""}>
+                    <Card raised={true} key={this.props.topic.id} className='topic-card'>
+                        <CardActionArea onClick={() => this.setState({ redirectToFullCard: true })}>
+                            {this.renderCardContent()}
+                        </CardActionArea>
+                    </Card>
+                </div>
             );
         }
     }
@@ -127,22 +129,22 @@ class TopicOverviewCard extends React.Component<Props, State> {
             return (
                 <div className="tag-chips">
                     {this.state.tags.map(tag => {
-                    return (
-                        <Link key={this.props.topic.id + ":" + tag} to={"/tag/" + tag.replace("#", "")}>
-                            <Chip 
-                                size="small" 
-                                label={tag} 
-                                style={{ 
-                                    marginLeft: "1px", 
-                                    marginRight: "1px", 
-                                    marginBottom: "3px", 
-                                    backgroundColor: stringToHexColor(tag), 
-                                    cursor: "pointer" 
-                                }} 
-                            />
-                        </Link>
-                    )
-                })}
+                        return (
+                            <Link key={this.props.topic.id + ":" + tag} to={"/tag/" + tag.replace("#", "")}>
+                                <Chip
+                                    size="small"
+                                    label={tag}
+                                    style={{
+                                        marginLeft: "1px",
+                                        marginRight: "1px",
+                                        marginBottom: "3px",
+                                        backgroundColor: stringToHexColor(tag),
+                                        cursor: "pointer"
+                                    }}
+                                />
+                            </Link>
+                        )
+                    })}
                 </div>
             )
         }

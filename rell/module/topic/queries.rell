@@ -7,6 +7,7 @@ query getTopicsAfterTimestamp(timestamp, pageSize: integer) {
         .title,
         .message,
         -sort .lastModified,
+        .removed,
         .timestamp
     ) limit pageSize;
 }
@@ -20,6 +21,7 @@ query getTopicsPriorToTimestamp(timestamp, pageSize: integer) {
         .title,
         .message,
         -sort .lastModified,
+        .removed,
         .timestamp
     ) limit pageSize;
 }
@@ -34,6 +36,7 @@ query getTopicRepliesPriorToTimestamp(topicId: text, timestamp, pageSize: intege
         author=.author.name,
         .message,
         .isSubReply,
+        .removed,
         -sort .timestamp
     ) limit pageSize;
 }
@@ -48,6 +51,7 @@ query getTopicRepliesAfterTimestamp(topicId: text, timestamp, pageSize: integer)
         author=.author.name,
         .message,
         .isSubReply,
+        .removed,
         -sort .timestamp
     ) limit pageSize;
 }
@@ -58,6 +62,7 @@ query getSubReplies(parentReplyId: text) {
         author=.childReply.author.name,
         message=.childReply.message,
         isSubReply=.childReply.isSubReply,
+        removed = .childReply.removed,
         sort timestamp=.childReply.timestamp
     );
 }
@@ -72,6 +77,7 @@ query getTopicsByUserIdPriorToTimestamp(name, timestamp, pageSize: integer) {
         .title,
         .message,
         -sort .lastModified,
+        .removed,
         .timestamp
     ) limit pageSize;
 }
@@ -86,6 +92,7 @@ query getTopicsFromFollowsAfterTimestamp(name, timestamp, pageSize: integer) {
         .title,
         .message,
         -sort .lastModified,
+        .removed,
         .timestamp
     ) limit pageSize;
 }
@@ -99,6 +106,7 @@ query getTopicsFromFollowsPriorToTimestamp(name, timestamp, pageSize: integer) {
         author=.author.name,
         .title,
         .message,
+        .removed,
         -sort .lastModified,
         .timestamp
     ) limit pageSize;
@@ -112,6 +120,7 @@ query getTopicById(id: text) {
         author=.author.name,
         .title,
         .message,
+        .removed,
         -sort .lastModified,
         .timestamp
     );

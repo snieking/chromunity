@@ -5,3 +5,7 @@
     margin-top: 10px;
     margin-right: 15px;
 }
+
+.removed {
+    opacity: 0.3;
+}

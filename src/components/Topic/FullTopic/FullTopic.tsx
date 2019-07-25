@@ -260,7 +260,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
 
     renderTopic() {
         return (
-            <div>
+            <div className={this.state.topic.removed ? "removed" : ""}>
                 <Card raised={true} key={this.state.topic.id} className="topic-card">
                     {this.renderCardContent(this.state.topic.message)}
                     {this.renderCardActions()}

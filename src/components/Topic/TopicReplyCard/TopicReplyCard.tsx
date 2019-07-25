@@ -69,7 +69,7 @@ class TopicReplyCard extends React.Component<Props, State> {
 
     render() {
         return (
-            <div>
+            <div className={this.props.reply.removed ? "removed" : ""}>
                 <Card
                     raised={true}
                     key={this.props.reply.id}
