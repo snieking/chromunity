@@ -4,8 +4,9 @@ class topic {
     index timestamp;
     mutable lastModified: timestamp;
     index lastModified;
-    title: name;
-    message: text;
+    mutable title: name;
+    mutable message: text;
+    mutable removed: boolean;
 }
 
 class topicReply {
@@ -14,7 +15,8 @@ class topicReply {
     index author: user;
     index timestamp;
     index isSubReply : boolean;
-    message: text;
+    mutable message: text;
+    mutable removed: boolean;
 }
 
 class subReply {

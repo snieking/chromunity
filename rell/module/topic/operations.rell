@@ -7,7 +7,8 @@ operation createTopic(id: text, username: text, title: name, message: text) {
         timestamp = op_context.last_block_time,
         lastModified = op_context.last_block_time,
         title = title,
-        message = message
+        message = message,
+        removed = false
     );
 }
 
@@ -20,10 +21,15 @@ operation createReply(topicId: text, id: text, username: text, message: text) {
         author,
         timestamp = op_context.last_block_time,
         isSubReply = false,
-        message = message
+        message = message,
+        removed = false
     );
 
-    update topic@{ .id == topicId } ( lastModified = op_context.last_block_time);
+    val topic = topic@{ .id == topicId };
+
+    if (not topic.removed) {
+        update topic@{ .id == topicId } ( lastModified = op_context.last_block_time);
+    }
 }
 
 operation createSubReply(topicId: text, parentReplyId: text, id: text, username: text, message: text) {
@@ -35,7 +41,8 @@ operation createSubReply(topicId: text, parentReplyId: text, id: text, username:
         author,
         timestamp = op_context.last_block_time,
         isSubReply = true,
-        message = message
+        message = message,
+        removed = false
     );
 
     create subReply(
@@ -43,5 +50,9 @@ operation createSubReply(topicId: text, parentReplyId: text, id: text, username:
         childReply = topicReply
     );
 
-    update topic@{ .id == topicId } ( lastModified = op_context.last_block_time);
+    val topic = topic@{ .id == topicId };
+
+    if (not topic.removed) {
+        update topic@{ .id == topicId } ( lastModified = op_context.last_block_time);
+    }
 }
