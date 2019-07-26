@@ -6,15 +6,15 @@
 4. PostgreSQL 11.4 (should be from 10.5)
 
 # Setting up postgresql for Postchain
-* `sudo -u postgres -i`
 * `createdb chrotonomy`
+* `psql chrotonomy`
+* `createuser -s postgres`
 * `psql -c "create role postchain LOGIN ENCRYPTED PASSWORD 'postchain'"`
 * `psql -c "grant ALL ON DATABASE chromaforum TO postchain"`
-* `exit`
+* `\q`
 
 # Setting up demo client
 * Run `npm install`
-* Make a server configuration `src/config.js`
 * `npm start`
 
 # Blockchain tests
