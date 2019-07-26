@@ -7,13 +7,13 @@ export function triggerElection(user: User, completionTimestamp: number) {
     const { privKey, pubKey } = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("triggerElection", user.name, uniqueId(), completionTimestamp);
+    tx.addOperation("trigger_election", user.name, uniqueId(), completionTimestamp);
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
 
 export function getElectionVotes(electionId: string) {
-    return GTX.query("getElectionVotes", { electionId: electionId })
+    return GTX.query("get_election_votes", { election_id: electionId })
         .then((candidates: any[]) => sortByFrequency(candidates));
 }
 
@@ -22,7 +22,7 @@ export function completeElection(user: User, electionId: string, sortedCandidate
 
     const tx = GTX.newTransaction([pubKey]);
 
-    tx.addOperation("completeElection", user.name, electionId, sortedCandidates);
+    tx.addOperation("complete_election", user.name, electionId, sortedCandidates);
     tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
@@ -32,7 +32,7 @@ export function signUpForElection(user: User, electionId: string): Promise<any> 
     const { privKey, pubKey } = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("signUpForElection", user.name, electionId);
+    tx.addOperation("sign_up_for_election", user.name, electionId);
     tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
@@ -42,23 +42,23 @@ export function voteForCandidate(user: User, candidate: string, electionId: stri
     const { privKey, pubKey } = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("voteForCandidate", user.name, candidate, electionId);
+    tx.addOperation("vote_for_candidate", user.name, candidate, electionId);
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
 
 export function getElectionVoteForUser(name: string, electionId: string): Promise<string> {
-    return GTX.query("getUserVoteInElection", { name: name, electionId: electionId });
+    return GTX.query("get_user_vote_in_election", { name: name, election_id: electionId });
 }
 
 export function getElectionCandidates(electionId: string): Promise<string[]> {
-    return GTX.query("getElectionCandidates", { electionId: electionId });
+    return GTX.query("get_election_candidates", { election_id: electionId });
 }
 
 export function getUncompletedElection(): Promise<string> {
-    return GTX.query("getUncompletedElection", {});
+    return GTX.query("get_uncompleted_election", {});
 }
 
 export function getNextElectionTimestamp(): Promise<Election> {
-    return GTX.query("getNextElection", { timestamp: Date.now() });
+    return GTX.query("get_next_election", { timestamp: Date.now() });
 }

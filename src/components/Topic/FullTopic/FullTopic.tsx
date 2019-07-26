@@ -229,13 +229,13 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                             color="primary"
                             badgeContent={this.state.stars}
                         >
-                            <StarRate className={this.state.ratedByMe ? "pink-color" : "purple-color"} />
+                            <StarRate className={this.state.ratedByMe ? "yellow-color" : "purple-color"} />
                         </Badge>
                     </IconButton>
                 </Tooltip>
                 <Tooltip title="Subscribe">
                     <IconButton aria-label="Subscribe" onClick={() => this.toggleSubscription()}>
-                        {this.state.subscribed ? <CheckCircle className="pink-color" /> : <CheckCircleOutline className="purple-color"/>}
+                        {this.state.subscribed ? <CheckCircle className="blue-color" /> : <CheckCircleOutline className="purple-color"/>}
                     </IconButton>
                 </Tooltip>
                 {this.renderAdminActions()}
@@ -311,6 +311,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
     }
 
     handleReplySubmit(): void {
+        this.setState({ isLoading: true });
         this.retrieveLatestReplies();
         if (!this.state.subscribed) {
             subscribeToTopic(getUser(), this.state.topic.id).then(() => this.setState({ subscribed: true }));

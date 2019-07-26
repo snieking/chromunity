@@ -1,35 +1,34 @@
-query getElectionVotes(electionId: text) {
-    return representativeElectionVote@*{
-        .representativeElection == representativeElection@{
-            .id == electionId
+query get_election_votes(election_id: text) {
+    return representative_election_vote@*{
+        representative_election_candidate@{ 
+            .representative_election == representative_election@{ .id == election_id }
         }
-    } ( .candidate.name );
+    } ( .representative_election_candidate.user.name );
 }
 
-query getElectionCandidates(electionId: text) {
-    val election = representativeElection@{ .id == electionId };
-    return representativeElectionCandidate @* {
-        .representativeElection == election
+query get_election_candidates(election_id: text) {
+    return representative_election_candidate@*{
+        representative_election@{ .id == election_id }
     } ( .user.name );
 }
 
-query getNextElection(timestamp) {
-    return representativeElection@?{ .timestamp > timestamp } ( .id, -sort .timestamp ) limit 1;
+query get_next_election(timestamp) {
+    return representative_election@?{ .timestamp > timestamp } ( .id, -sort .timestamp ) limit 1;
 }
 
-query getUncompletedElection() {
-    return representativeElection@?{
+query get_uncompleted_election() {
+    return representative_election@?{
         .completed == false
     } ( .id );
 }
 
-query getUserVoteInElection(name, electionId: text) {
-    return representativeElectionVote@?{
+query get_user_vote_in_election(name, election_id: text) {
+    return representative_election_vote@?{
         .user == user@{ .name == name },
-        .representativeElection == representativeElection@{ .id == electionId }
-    } ( .candidate.name );
+        .representative_election_candidate.representative_election == representative_election@{ .id == election_id }
+    } ( .representative_election_candidate.user.name );
 }
 
-query getCurrentRepresentativePeriod(timestamp) {
-    return representativeElection @? { .timestamp <= timestamp } ( .id, -sort .timestamp ) limit 1;
+query get_current_representative_period(timestamp) {
+    return representative_election @? { .timestamp <= timestamp } ( .id, -sort .timestamp ) limit 1;
 }

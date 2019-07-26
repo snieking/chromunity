@@ -1,14 +1,12 @@
-operation registerUser(name, pubkey) {
+operation register_user(name, pubkey) {
     require(is_signer(pubkey));
 
     if (name == "admin") {
         val admin = create user(name, pubkey, op_context.transaction.block.block_height);
         create admin(admin);
-        create userSettings(admin, avatar = "" , description = "");
+        create user_settings(admin, avatar = "" , description = "");
     } else {
         val user = create user(name, pubkey, op_context.transaction.block.block_height);
-        create userSettings(user, avatar = "" , description = "");
+        create user_settings(user, avatar = "" , description = "");
     }
-
-    
 }

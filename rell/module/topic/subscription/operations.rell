@@ -1,10 +1,10 @@
-operation subscribeToTopic(username: text, id: text) {
+operation subscribe_to_topic(username: text, id: text) {
     val user = user@{ .name == username };
     require(is_signer(user.pubkey));
     create subscription(topic@{ .id == id }, user);
 }
 
-operation unsubscribeFromTopic(username: text, id: text) {
+operation unsubscribe_from_topic(username: text, id: text) {
     val user = user@{ .name == username };
     require(is_signer(user.pubkey));
     delete subscription@{ topic@{ .id == id }, user };

@@ -1,11 +1,11 @@
-operation createFollowing(follower: text, follows: text) {
+operation create_following(follower: text, follows: text) {
     require(follower != follows);
     val user = user@{ .name == follower };
     require(is_signer(user.pubkey));
     create follow(follower = user, follows = user@{ .name == follows });
 }
 
-operation removeFollowing(follower: text, follows: text) {
+operation remove_following(follower: text, follows: text) {
     require(follower != follows);
     val user = user@{ .name == follower };
     require(is_signer(user.pubkey));

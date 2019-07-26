@@ -10,7 +10,7 @@ export function storeTagsFromTopic(user: User, topicId: string, tags: string[]) 
     const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("createTopicTag", user.name, tags, topicId);
+    tx.addOperation("create_topic_tag", user.name, tags, topicId);
     tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
@@ -20,22 +20,22 @@ export function storeTagsFromTopicReply(user: User, topicId: string, tags: strin
     const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("createTopicReplyTag", user.name, tags, topicId, replyId);
+    tx.addOperation("create_topic_reply_tag", user.name, tags, topicId, replyId);
     tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
 
 export function followTag(user: User, tag: string) {
-    return modifyTagFollowing(user, tag, "createTagFollowing");
+    return modifyTagFollowing(user, tag, "create_tag_following");
 }
 
 export function unfollowTag(user: User, tag: string) {
-    return modifyTagFollowing(user, tag, "removeTagFollowing");
+    return modifyTagFollowing(user, tag, "remove_tag_following");
 }
 
 export function getFollowedTags(user: User): Promise<string[]> {
-    return GTX.query("getFollowedTopics", { username: user.name });
+    return GTX.query("get_followed_topics", { username: user.name });
 }
 
 function modifyTagFollowing(user: User, tag: string, rellOperation: string) {
@@ -59,7 +59,7 @@ export function getTrendingTags(sinceDaysAgo: number): Promise<string[]> {
     const pastDate: number = date.getDate() - sinceDaysAgo;
     date.setDate(pastDate);
 
-    return GTX.query("getTagsSince", { timestamp: date.getTime() / 1000 })
+    return GTX.query("get_tags_since", { timestamp: date.getTime() / 1000 })
         .then((tags: string[]) => {
             trending = sortByFrequency(tags).slice(0, 10);
             tagsCache.set("trending", trending, 3600);

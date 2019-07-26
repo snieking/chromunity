@@ -13,8 +13,12 @@ code {
     monospace;
 }
 
-.yellow-icon {
+.yellow-color {
   color: darkorange;
+}
+
+.blue-color {
+  color: darkblue;
 }
 
 .green-icon {

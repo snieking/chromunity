@@ -18,7 +18,7 @@ export function removeNotificationsForId(fromUser: User, id: string, usernames: 
     const {privKey, pubKey} = seedToKey(fromUser.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("removeNotificationsForUsers", fromUser.name, id, usernames);
+    tx.addOperation("remove_notifications_for_users", fromUser.name, id, usernames);
     tx.addOperation("nop", uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
@@ -28,7 +28,7 @@ function sendNotificationsInternal(fromUser: User, id: string, trigger: string, 
     const {privKey, pubKey} = seedToKey(fromUser.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("createNotificationsForUsers", fromUser.name, id, trigger, content, usernames);
+    tx.addOperation("create_notifications_for_users", fromUser.name, id, trigger, content, usernames);
     tx.addOperation("nop", uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
@@ -41,20 +41,20 @@ export function markNotificationsRead(user: User) {
 
     const tx = GTX.newTransaction([pubKey]);
     const epochSeconds = Math.round(new Date().getTime() / 1000);
-    tx.addOperation("markNotificationsSinceTimestampRead", user.name, epochSeconds);
+    tx.addOperation("mark_notifications_since_timestamp_read", user.name, epochSeconds);
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
 
 export function getUserNotifications(user: string): Promise<UserNotification[]> {
-    return GTX.query("getAllUserNotifications", { name: user });
+    return GTX.query("get_all_user_notifications", { name: user });
 }
 
 export function countUnreadUserNotifications(user: string): Promise<number> {
     const count = boomerang.get("notis-" + user);
 
     if (count == null) {
-        return GTX.query('countUnreadUserNotifications', {name: user})
+        return GTX.query('count_unread_user_notifications', {name: user})
             .then((arr: any[]) => {
                 boomerang.set("notis-" + user, arr.length, 60);
                 return arr.length;

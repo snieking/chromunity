@@ -1,11 +1,11 @@
-operation createUserSettings(name, avatar: text, description: text) {
+operation create_user_settings(name, avatar: text, description: text) {
     val user = user@{ .name == name };
     require(is_signer(user.pubkey));
-    create userSettings(user, avatar = avatar, description = description);
+    create user_settings(user, avatar = avatar, description = description);
 }
 
-operation updateUserSettings(name, avatar: text, description: text) {
+operation update_user_settings(name, avatar: text, description: text) {
     val user = user@{ .name == name };
     require(is_signer(user.pubkey));
-    update userSettings@{ .user == user }( avatar = avatar, description = description );
+    update user_settings@{ .user == user }( avatar = avatar, description = description );
 }

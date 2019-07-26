@@ -2,25 +2,25 @@ class topic {
     key id: text;
     index author: user;
     index timestamp;
-    mutable lastModified: timestamp;
-    index lastModified;
+    mutable last_modified: timestamp;
+    index last_modified;
     mutable title: name;
     mutable message: text;
     mutable removed: boolean;
 }
 
-class topicReply {
+class topic_reply {
     key id: text;
     index topic;
     index author: user;
     index timestamp;
-    index isSubReply : boolean;
+    index is_sub_reply : boolean;
     mutable message: text;
     mutable removed: boolean;
 }
 
-class subReply {
-    key parentReply: topicReply, childReply: topicReply;
+class sub_reply {
+    key parent_reply: topic_reply, child_reply: topic_reply;
 }
 
 include 'operations';

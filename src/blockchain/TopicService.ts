@@ -13,7 +13,7 @@ export function createTopic(user: User, title: string, message: string) {
     const topicId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("createTopic", topicId, user.name, title, formatMessage(message));
+    tx.addOperation("create_topic", topicId, user.name, title, formatMessage(message));
     tx.sign(privKey, pubKey);
 
     return tx.postAndWaitConfirmation()
@@ -35,7 +35,7 @@ export function createTopicReply(user: User, topicId: string, message: string) {
     const replyId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("createReply", topicId, replyId, user.name, formatMessage(message));
+    tx.addOperation("create_reply", topicId, replyId, user.name, formatMessage(message));
     tx.sign(privKey, pubKey);
 
     return postTopicReply(user, tx, topicId, message, replyId);
@@ -46,7 +46,7 @@ export function createTopicSubReply(user: User, topicId: string, replyId: string
     const subReplyId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("createSubReply", topicId, replyId, subReplyId, user.name, formatMessage(message));
+    tx.addOperation("create_sub_reply", topicId, replyId, subReplyId, user.name, formatMessage(message));
     tx.sign(privKey, pubKey);
     return postTopicReply(user, tx, topicId, message, subReplyId);
 }
@@ -77,7 +77,7 @@ export function removeTopic(user: User, topicId: string) {
     const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("removeTopic", user.name, topicId);
+    tx.addOperation("remove_topic", user.name, topicId);
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
@@ -86,29 +86,29 @@ export function removeTopicReply(user: User, topicReplyId: string) {
     const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("removeTopicReply", user.name, topicReplyId);
+    tx.addOperation("remove_topic_reply", user.name, topicReplyId);
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
 
 export function getTopicRepliesPriorToTimestamp(topicId: string, timestamp: number, pageSize: number): Promise<TopicReply[]> {
-    return getTopicRepliesForTimestamp(topicId, timestamp, pageSize, "getTopicRepliesPriorToTimestamp");
+    return getTopicRepliesForTimestamp(topicId, timestamp, pageSize, "get_topic_replies_prior_to_timestamp");
 }
 
 export function getTopicRepliesAfterTimestamp(topicId: string, timestamp: number, pageSize: number): Promise<TopicReply[]> {
-    return getTopicRepliesForTimestamp(topicId, timestamp, pageSize, "getTopicRepliesAfterTimestamp");
+    return getTopicRepliesForTimestamp(topicId, timestamp, pageSize, "get_topic_replies_after_timestamp");
 }
 
 function getTopicRepliesForTimestamp(topicId: string, timestamp: number, pageSize: number, rellOperation: string) {
-    return GTX.query(rellOperation, { topicId: topicId, timestamp: timestamp, pageSize: pageSize });
+    return GTX.query(rellOperation, { topic_id: topicId, timestamp: timestamp, page_size: pageSize });
 }
 
 export function getTopicSubReplies(replyId: string): Promise<TopicReply[]> {
-    return GTX.query("getSubReplies", { parentReplyId: replyId });
+    return GTX.query("get_sub_replies", { parent_reply_id: replyId });
 }
 
 export function getTopicsByUserPriorToTimestamp(username: string, timestamp: number, pageSize: number): Promise<Topic[]> {
-    return GTX.query("getTopicsByUserIdPriorToTimestamp", { name: username, timestamp: timestamp, pageSize: pageSize })
+    return GTX.query("get_topics_by_user_id_prior_to_timestamp", { name: username, timestamp: timestamp, page_size: pageSize })
         .then((topics: Topic[]) => {
             topics.forEach(topic => topicsCache.set(topic.id, topic));
             return topics;
@@ -116,7 +116,7 @@ export function getTopicsByUserPriorToTimestamp(username: string, timestamp: num
 }
 
 export function getTopicsByTagPriorToTimestamp(tag: string, timestamp: number, pageSize: number): Promise<Topic[]> {
-    return GTX.query("getTopicsByTagPriorToTimestamp", { tag: tag, timestamp: timestamp, pageSize: pageSize })
+    return GTX.query("get_topics_by_tag_prior_to_timestamp", { tag: tag, timestamp: timestamp, page_size: pageSize })
         .then((topics: Topic[]) => {
             topics.forEach(topic => topicsCache.set(topic.id, topic));
             return topics;
@@ -124,31 +124,31 @@ export function getTopicsByTagPriorToTimestamp(tag: string, timestamp: number, p
 }
 
 export function giveTopicStarRating(user: User, topicId: string) {
-    return modifyRatingAndSubscription(user, topicId, "giveTopicStarRating");
+    return modifyRatingAndSubscription(user, topicId, "give_topic_star_rating");
 }
 
 export function removeTopicStarRating(user: User, topicId: string) {
-    return modifyRatingAndSubscription(user, topicId, "removeTopicStarRating");
+    return modifyRatingAndSubscription(user, topicId, "remove_topic_star_rating");
 }
 
 export function getTopicStarRaters(topicId: string): Promise<string[]> {
-    return GTX.query("getStarRatingForTopic", { id: topicId });
+    return GTX.query("get_star_rating_for_topic", { id: topicId });
 }
 
 export function giveReplyStarRating(user: User, replyId: string) {
-    return modifyRatingAndSubscription(user, replyId, "giveReplyStarRating");
+    return modifyRatingAndSubscription(user, replyId, "give_reply_star_rating");
 }
 
 export function removeReplyStarRating(user: User, replyId: string) {
-    return modifyRatingAndSubscription(user, replyId, "removeReplyStarRating");
+    return modifyRatingAndSubscription(user, replyId, "remove_reply_star_rating");
 }
 
 export function subscribeToTopic(user: User, id: string) {
-    return modifyRatingAndSubscription(user, id, "subscribeToTopic");
+    return modifyRatingAndSubscription(user, id, "subscribe_to_topic");
 }
 
 export function unsubscribeFromTopic(user: User, id: string) {
-    return modifyRatingAndSubscription(user, id, "unsubscribeFromTopic");
+    return modifyRatingAndSubscription(user, id, "unsubscribe_from_topic");
 }
 
 function modifyRatingAndSubscription(user: User, id: string, rellOperation: string) {
@@ -162,11 +162,11 @@ function modifyRatingAndSubscription(user: User, id: string, rellOperation: stri
 }
 
 export function getReplyStarRaters(topicId: string): Promise<string[]> {
-    return GTX.query("getStarRatingForReply", { id: topicId });
+    return GTX.query("get_star_rating_for_reply", { id: topicId });
 }
 
 export function getTopicSubscribers(topicId: string): Promise<string[]> {
-    return GTX.query("getSubscribersForTopic", { id: topicId });
+    return GTX.query("get_subscribers_for_topic", { id: topicId });
 }
 
 export function getTopicById(id: string): Promise<Topic> {
@@ -176,7 +176,7 @@ export function getTopicById(id: string): Promise<Topic> {
         return new Promise<Topic>(resolve => resolve(cachedTopic));
     }
 
-    return GTX.query("getTopicById", { id: id })
+    return GTX.query("get_topic_by_id", { id: id })
         .then((topic: Topic) => {
             topicsCache.set(id, topic, 300);
             return topic;
@@ -184,15 +184,15 @@ export function getTopicById(id: string): Promise<Topic> {
 }
 
 export function getTopicsPriorToTimestamp(timestamp: number, pageSize: number): Promise<Topic[]> {
-    return getTopicsForTimestamp(timestamp, pageSize, "getTopicsPriorToTimestamp")
+    return getTopicsForTimestamp(timestamp, pageSize, "get_topics_prior_to_timestamp")
 }
 
 export function getTopicsAfterTimestamp(timestamp: number, pageSize: number): Promise<Topic[]> {
-    return getTopicsForTimestamp(timestamp, pageSize, "getTopicsAfterTimestamp");
+    return getTopicsForTimestamp(timestamp, pageSize, "get_topics_after_timestamp");
 }
 
 function getTopicsForTimestamp(timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
-    return GTX.query(rellOperation, { timestamp: timestamp, pageSize: pageSize })
+    return GTX.query(rellOperation, { timestamp: timestamp, page_size: pageSize })
         .then((topics: Topic[]) => {
             topics.forEach(topic => topicsCache.set(topic.id, topic));
             return topics;
@@ -200,19 +200,19 @@ function getTopicsForTimestamp(timestamp: number, pageSize: number, rellOperatio
 }
 
 export function getTopicsFromFollowsAfterTimestamp(user: User, timestamp: number, pageSize: number): Promise<Topic[]> {
-    return getTopicsFromFollowsForTimestamp(user, timestamp, pageSize, "getTopicsFromFollowsAfterTimestamp");
+    return getTopicsFromFollowsForTimestamp(user, timestamp, pageSize, "get_topics_from_follows_after_timestamp");
 }
 
 export function getTopicsFromFollowsPriorToTimestamp(user: User, timestamp: number, pageSize: number): Promise<Topic[]> {
-    return getTopicsFromFollowsForTimestamp(user, timestamp, pageSize, "getTopicsFromFollowsPriorToTimestamp");
+    return getTopicsFromFollowsForTimestamp(user, timestamp, pageSize, "get_topics_from_follows_prior_to_timestamp");
 }
 
 function getTopicsFromFollowsForTimestamp(user: User, timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
-    return GTX.query(rellOperation, { name: user.name, timestamp: timestamp, pageSize: pageSize });
+    return GTX.query(rellOperation, { name: user.name, timestamp: timestamp, page_size: pageSize });
 }
 
 export function getTopicsFromFollowedTagsPriorToTimestamp(user: User, timestamp: number, pageSize: number): Promise<Topic[]> {
-    return GTX.query("getTopicsByFollowedTagsPriorToTimestamp", { username: user.name, timestamp: timestamp, pageSize: pageSize })
+    return GTX.query("get_topics_by_followed_tags_prior_to_timestamp", { username: user.name, timestamp: timestamp, page_size: pageSize })
         .then((topics: Topic[]) => { 
             var seen: Set<string> = new Set<string>();
             return topics.filter(item => {

@@ -1,33 +1,32 @@
-operation createTopicTag(username: text, tags: set<text>, topicId: text) {
+operation create_topic_tag(username: text, tags: set<text>, topic_id: text) {
     val user = user@{ .name == username};
     require(is_signer(user.pubkey));
 
-    val topic = topic@{ .id == topicId };
-    log("Creating topic tags for tags: ", tags);
+    val topic = topic@{ .id == topic_id };
     for(tag in tags) {
-        create topicTag(id = op_context.transaction.tx_rid, name = tag, topic, op_context.last_block_time);
+        create topic_tag(id = op_context.transaction.tx_rid, name = tag, topic, op_context.last_block_time);
     }
 }
 
-operation createTopicReplyTag(username: text, tags: set<text>, topicId: text, replyId: text) {
+operation create_topic_reply_tag(username: text, tags: set<text>, topic_id: text, reply_id: text) {
     val user = user@{ .name == username};
     require(is_signer(user.pubkey));
 
-    val topic = topic@{ .id == topicId };
+    val topic = topic@{ .id == topic_id };
     for(tag in tags) {
-        val topicTag = create topicTag(id = op_context.transaction.tx_rid, name = tag, topic, op_context.last_block_time);
-        create replyToTopicTag(replyId, topicTag);
+        val topic_tag = create topic_tag(id = op_context.transaction.tx_rid, name = tag, topic, op_context.last_block_time);
+        create reply_to_topic_tag(reply_id, topic_tag);
     }
 }
 
-operation createTagFollowing(username: text, tag: text) {
+operation create_tag_following(username: text, tag: text) {
     val user = user@{ .name == username};
     require(is_signer(user.pubkey));
-    create tagFollowing(user, tag);
+    create tag_following(user, tag);
 }
 
-operation removeTagFollowing(username: text, tag: text) {
+operation remove_tag_following(username: text, tag: text) {
     val user = user@{ .name == username};
     require(is_signer(user.pubkey));
-    delete tagFollowing@{ user, tag};
+    delete tag_following@{ user, tag};
 }

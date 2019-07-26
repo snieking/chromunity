@@ -1,4 +1,4 @@
-class userSettings {
+class user_settings {
     key user;
     mutable avatar: text;
     mutable description: text;

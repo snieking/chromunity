@@ -1,26 +1,26 @@
-operation removeTopic(username: text, topicId: text) {
+operation remove_topic(username: text, topic_id: text) {
     val user = user@{ .name == username};
     require(is_signer(user.pubkey));
 
-    val recentElection = representativeElection @{ .completed == true } ( .id, sort .timestamp );
-    val representative = representative @{ user, recentElection.id };
+    val recentElection = representative_election@{ .completed == true } ( .id, sort .timestamp );
+    val representative = representative @{ user, .representative_election.id == recentElection.id };
 
-    update topic @{ .id == topicId } ( title = "[Removed]", message = "Removed by @" + user.name, removed = true );
-    delete topicTag @* { topic @{ .id == topicId }};
+    update topic @{ .id == topic_id } ( title = "[Removed]", message = "Removed by @" + user.name, removed = true );
+    delete topic_tag @* { topic @{ .id == topic_id }};
 }
 
-operation removeTopicReply(username: text, topicReplyId: text) {
+operation remove_topic_reply(username: text, topic_reply_id: text) {
     val user = user@{ .name == username};
     require(is_signer(user.pubkey));
 
-    val recentElection = representativeElection @{ .completed == true } ( .id, sort .timestamp );
-    val representative = representative @{ user, recentElection.id };
+    val recentElection = representative_election@{ .completed == true } ( .id, sort .timestamp );
+    val representative = representative @{ user, .representative_election.id == recentElection.id };
 
-    update topicReply @{ .id == topicReplyId } ( message = "Removed by @" + user.name, removed = true );
+    update topic_reply @{ .id == topic_reply_id } ( message = "Removed by @" + user.name, removed = true );
     
-    val replyToTopicTags = replyToTopicTag @* { topicReplyId };
+    val replyToTopicTags = reply_to_topic_tag @* { topic_reply_id };
     for (replyToTopicTag in replyToTopicTags) {
         delete replyToTopicTag;
-        delete topicTag @? { replyToTopicTag.topicTag.id };
+        delete topic_tag @? { replyToTopicTag.topic_tag.id };
     }
 }

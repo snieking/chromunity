@@ -1,9 +1,9 @@
-class topicStarRating {
+class topic_star_rating {
     key topic, user;
 }
 
-class replyStarRating {
-    key topicReply, user;
+class reply_star_rating {
+    key topic_reply, user;
 }
 
 include 'operations';

@@ -69,15 +69,17 @@ class TopicReplyCard extends React.Component<Props, State> {
 
     render() {
         return (
-            <div className={this.props.reply.removed ? "removed" : ""}>
-                <Card
-                    raised={true}
-                    key={this.props.reply.id}
-                    className='reply-card'
-                    style={{ marginLeft: this.props.indention + "px" }}
-                >
-                    {this.renderCardContent()}
-                </Card>
+            <div>
+                <div className={this.props.reply.removed ? "removed" : ""}>
+                    <Card
+                        raised={true}
+                        key={this.props.reply.id}
+                        className='reply-card'
+                        style={{ marginLeft: this.props.indention + "px" }}
+                    >
+                        {this.renderCardContent()}
+                    </Card>
+                </div>
                 {this.state.subReplies.map(reply => <TopicReplyCard
                     key={"sub-reply" + reply.id}
                     reply={reply}
@@ -150,7 +152,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                                 color="primary"
                                 badgeContent={this.state.stars}
                             >
-                                <StarRate className={this.state.ratedByMe ? "pink-color" : "purple-color"} />
+                                <StarRate className={this.state.ratedByMe ? "yellow-color" : "purple-color"} />
                             </Badge>
                         </IconButton>
                     </Tooltip>

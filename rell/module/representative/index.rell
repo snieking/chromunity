@@ -1,5 +1,5 @@
 class representative {
-    key user, representativePeriodId: text;
+    key user, representative_election;
 }
 
 include 'operations';

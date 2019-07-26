@@ -15,14 +15,14 @@ export function register(name: string, password: string, mnemonic: string) {
     const {privKey, pubKey} = seedToKey(seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("registerUser", name, pubKey);
+    tx.addOperation("register_user", name, pubKey);
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
 
 export function login(name: string, password: string, mnemonic: string): Promise<User> {
     setMnemonic(mnemonic);
-    return GTX.query("getUser", {name: name})
+    return GTX.query("get_user", {name: name})
         .then((blockchainUser: BlockchainUser) => {
             const seed = seedFromMnemonic(mnemonic, password);
             //const {privKey, pubKey} = seedToKey(seed);
@@ -35,13 +35,13 @@ export function login(name: string, password: string, mnemonic: string): Promise
 }
 
 export function isRegistered(name: string): Promise<boolean> {
-    return GTX.query("getUser", {name: name})
+    return GTX.query("get_user", {name: name})
         .then((any: any) => any != null)
         .catch(false);
 }
 
 export function getUserSettings(user: User): Promise<UserSettings> {
-    return GTX.query("getUserSettings", { name: user.name });
+    return GTX.query("get_user_settings", { name: user.name });
 }
 
 export function getUserSettingsCached(name: string, cacheDuration: number): Promise<UserSettings> {
@@ -51,7 +51,7 @@ export function getUserSettingsCached(name: string, cacheDuration: number): Prom
         return new Promise<UserSettings>(resolve => resolve(cachedAvatar));
     }
 
-    return GTX.query("getUserSettings", { name: name }).then((settings: UserSettings) => {
+    return GTX.query("get_user_settings", { name: name }).then((settings: UserSettings) => {
         boomerang.set(name, settings, cacheDuration);
         return settings;
     });
@@ -62,10 +62,8 @@ export function updateUserSettings(user: User, avatar: string, description: stri
 
     const {privKey, pubKey} = seedToKey(user.seed);
 
-    console.log("updateUserSettings", "for user", user.name, "with avatar", avatar);
-
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("updateUserSettings", user.name, avatar, description);
+    tx.addOperation("update_user_settings", user.name, avatar, description);
     tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();

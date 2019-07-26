@@ -1,5 +1,5 @@
 
-operation createNotificationsForUsers(name, id: text, trigger: text, content: text, usernames: set<text>) {
+operation create_notifications_for_users(name, id: text, trigger: text, content: text, usernames: set<text>) {
     val user = user@{ .name == name };
     require(is_signer(user.pubkey));
 
@@ -18,7 +18,7 @@ operation createNotificationsForUsers(name, id: text, trigger: text, content: te
     }
 }
 
-operation removeNotificationsForUsers(name, id: text, usernames: set<text>) {
+operation remove_notifications_for_users(name, id: text, usernames: set<text>) {
     val user = user@{ .name == name };
     require(is_signer(user.pubkey));
 
@@ -30,7 +30,7 @@ operation removeNotificationsForUsers(name, id: text, usernames: set<text>) {
     }
 }
 
-operation markNotificationsSinceTimestampRead(name, timestamp) {
+operation mark_notifications_since_timestamp_read(name, timestamp) {
     val user = user@{ .name == name };
     require(is_signer(user.pubkey));
     update notification@*{ .user == user, .timestamp > timestamp } ( read = true );

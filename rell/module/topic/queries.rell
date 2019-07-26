@@ -1,118 +1,118 @@
-query getTopicsAfterTimestamp(timestamp, pageSize: integer) {
+query get_topics_after_timestamp(timestamp, page_size: integer) {
     return topic @* { 
-        .lastModified > timestamp
+        .last_modified > timestamp
     }(
         .id,
         author=.author.name,
         .title,
         .message,
-        -sort .lastModified,
+        -sort .last_modified,
         .removed,
         .timestamp
-    ) limit pageSize;
+    ) limit page_size;
 }
 
-query getTopicsPriorToTimestamp(timestamp, pageSize: integer) {
+query get_topics_prior_to_timestamp(timestamp, page_size: integer) {
     return topic @* { 
-        .lastModified < timestamp
+        .last_modified < timestamp
     }(
         .id,
         author=.author.name,
         .title,
         .message,
-        -sort .lastModified,
+        -sort .last_modified,
         .removed,
         .timestamp
-    ) limit pageSize;
+    ) limit page_size;
 }
 
-query getTopicRepliesPriorToTimestamp(topicId: text, timestamp, pageSize: integer) {
-    return topicReply@*{
-        topic@{ .id == topicId },
+query get_topic_replies_prior_to_timestamp(topic_id: text, timestamp, page_size: integer) {
+    return topic_reply@*{
+        topic@{ .id == topic_id },
         .timestamp < timestamp,
-        .isSubReply == false
+        .is_sub_reply == false
     }(
         .id,
         author=.author.name,
         .message,
-        .isSubReply,
+        .is_sub_reply,
         .removed,
         -sort .timestamp
-    ) limit pageSize;
+    ) limit page_size;
 }
 
-query getTopicRepliesAfterTimestamp(topicId: text, timestamp, pageSize: integer) {
-    return topicReply@*{
-        topic@{ .id == topicId },
+query get_topic_replies_after_timestamp(topic_id: text, timestamp, page_size: integer) {
+    return topic_reply@*{
+        topic@{ .id == topic_id },
         .timestamp > timestamp,
-        .isSubReply == false
+        .is_sub_reply == false
     }(
         .id,
         author=.author.name,
         .message,
-        .isSubReply,
+        .is_sub_reply,
         .removed,
         -sort .timestamp
-    ) limit pageSize;
+    ) limit page_size;
 }
 
-query getSubReplies(parentReplyId: text) {
-    return subReply@*{ .parentReply.id == parentReplyId } (
-        id=.childReply.id,
-        author=.childReply.author.name,
-        message=.childReply.message,
-        isSubReply=.childReply.isSubReply,
-        removed = .childReply.removed,
-        sort timestamp=.childReply.timestamp
+query get_sub_replies(parent_reply_id: text) {
+    return sub_reply@*{ .parent_reply.id == parent_reply_id } (
+        id=.child_reply.id,
+        author=.child_reply.author.name,
+        message=.child_reply.message,
+        is_sub_reply=.child_reply.is_sub_reply,
+        removed = .child_reply.removed,
+        sort timestamp=.child_reply.timestamp
     );
 }
 
-query getTopicsByUserIdPriorToTimestamp(name, timestamp, pageSize: integer) {
+query get_topics_by_user_id_prior_to_timestamp(name, timestamp, page_size: integer) {
     return topic@*{
         user@{ .name == name },
-        .lastModified < timestamp
+        .last_modified < timestamp
     }(
         .id,
         author=.author.name,
         .title,
         .message,
-        -sort .lastModified,
+        -sort .last_modified,
         .removed,
         .timestamp
-    ) limit pageSize;
+    ) limit page_size;
 }
 
-query getTopicsFromFollowsAfterTimestamp(name, timestamp, pageSize: integer) {
+query get_topics_from_follows_after_timestamp(name, timestamp, page_size: integer) {
     return topic@*{
         follow@{ .follower.name == name } ( .follows ),
-        .lastModified > timestamp
+        .last_modified > timestamp
     }(
         .id,
         author=.author.name,
         .title,
         .message,
-        -sort .lastModified,
+        -sort .last_modified,
         .removed,
         .timestamp
-    ) limit pageSize;
+    ) limit page_size;
 }
 
-query getTopicsFromFollowsPriorToTimestamp(name, timestamp, pageSize: integer) {
+query get_topics_from_follows_prior_to_timestamp(name, timestamp, page_size: integer) {
     return topic@*{
         follow@{ .follower.name == name } ( .follows ),
-        .lastModified < timestamp
+        .last_modified < timestamp
     }(
         .id,
         author=.author.name,
         .title,
         .message,
         .removed,
-        -sort .lastModified,
+        -sort .last_modified,
         .timestamp
-    ) limit pageSize;
+    ) limit page_size;
 }
 
-query getTopicById(id: text) {
+query get_topic_by_id(id: text) {
     return topic@{
         .id == id
     }(
@@ -121,7 +121,7 @@ query getTopicById(id: text) {
         .title,
         .message,
         .removed,
-        -sort .lastModified,
+        -sort .last_modified,
         .timestamp
     );
 }

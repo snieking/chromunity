@@ -1,9 +1,9 @@
-query countUnreadUserNotifications(name) {
+query count_unread_user_notifications(name) {
     val user = user@{ .name == name };
     return notification@*{ .user == user, .read == false } ( .id );
 }
 
-query getAllUserNotifications(name) {
+query get_all_user_notifications(name) {
     val user = user@{ .name == name };
     return notification@*{ .user == user } (
         .id,

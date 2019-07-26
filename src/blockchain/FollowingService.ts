@@ -8,7 +8,7 @@ import { sendNotificationWithDeterministicId, removeNotificationsForId } from ".
 const boomerang = BoomerangCache.create("following-bucket", { storage: "session", encrypt: false });
 
 export function createFollowing(user: User, following: string) {
-    return updateFollowing(user, following, "createFollowing")
+    return updateFollowing(user, following, "create_following")
         .then((response: any) => {
             const id: string = createDeterministicId(user.name, following);
             const trigger: string = createFollowingNotificationTrigger(user.name);
@@ -20,7 +20,7 @@ export function createFollowing(user: User, following: string) {
 }
 
 export function removeFollowing(user: User, following: string) {
-    return updateFollowing(user, following, "removeFollowing")
+    return updateFollowing(user, following, "remove_following")
         .then((response: any) => {
             removeNotificationsForId(user, createDeterministicId(user.name, following), [ following ]);
             return response;
@@ -48,11 +48,11 @@ function updateFollowing(user: User, following: string, rellOperation: string) {
 }
 
 export function countUserFollowers(name: string): Promise<number> {
-    return GTX.query("getUserFollowers", { name: name }).then((arr: string[]) => arr.length);
+    return GTX.query("get_user_followers", { name: name }).then((arr: string[]) => arr.length);
 }
 
 export function countUserFollowings(name: string): Promise<number> {
-    return GTX.query("getUserFollows", { name: name }).then((arr: string[]) => arr.length);
+    return GTX.query("get_user_follows", { name: name }).then((arr: string[]) => arr.length);
 }
 
 export function amIAFollowerOf(user: User, name: string): Promise<boolean> {
@@ -62,7 +62,7 @@ export function amIAFollowerOf(user: User, name: string): Promise<boolean> {
         return new Promise<boolean>(resolve => resolve(userFollows.includes(name)));
     }
 
-    return GTX.query("getUserFollows", { name: user.name })
+    return GTX.query("get_user_follows", { name: user.name })
         .then((userFollows: string[]) => {
             boomerang.set("user-" + user.name, userFollows);
             return userFollows.includes(name);

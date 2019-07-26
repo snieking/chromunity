@@ -1,17 +1,16 @@
-class representativeElection {
+class representative_election {
     key id: text;
     index timestamp;
     mutable completed: boolean;
     index completed;
 }
 
-class representativeElectionCandidate {
-  key representativeElection, user;
+class representative_election_candidate {
+  key representative_election, user;
 }
 
-class representativeElectionVote {
-    key user, representativeElection;
-    index candidate: user;
+class representative_election_vote {
+    key user, representative_election_candidate;
 }
 
 include 'operations';

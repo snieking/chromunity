@@ -1,43 +1,43 @@
-query getTopicsByTagPriorToTimestamp(tag: text, timestamp, pageSize: integer) {
-    return topicTag@*{ 
+query get_topics_by_tag_prior_to_timestamp(tag: text, timestamp, page_size: integer) {
+    return topic_tag@*{ 
         .name == tag,
-        .topic.lastModified < timestamp
+        .topic.last_modified < timestamp
     } (
         id=.topic.id,
         author=.topic.author.name,
         title=.topic.title,
         message=.topic.message,
         timestamp=.topic.timestamp,
-        -sort lastModified=.topic.lastModified
-    ) limit pageSize;
+        -sort lastModified=.topic.last_modified
+    ) limit page_size;
 }
 
-query getTopicsByFollowedTagsPriorToTimestamp(username: text, timestamp, pageSize: integer) {
+query get_topics_by_followed_tags_prior_to_timestamp(username: text, timestamp, page_size: integer) {
     val user = user@{ .name == username};
-    return (topicTag, tagFollowing) @* {
-        tagFollowing.user == user,
-        tagFollowing.tag == topicTag.name,
-        topicTag.topic.lastModified < timestamp
+    return (topic_tag, tag_following) @* {
+        tag_following.user == user,
+        tag_following.tag == topic_tag.name,
+        topic_tag.topic.last_modified < timestamp
     }
     (
-        id=topicTag.topic.id,
-        author=topicTag.topic.author.name,
-        title=topicTag.topic.title,
-        message=topicTag.topic.message,
-        timestamp=topicTag.topic.timestamp,
-        -sort lastModified=topicTag.topic.lastModified
-    ) limit pageSize;
+        id=topic_tag.topic.id,
+        author=topic_tag.topic.author.name,
+        title=topic_tag.topic.title,
+        message=topic_tag.topic.message,
+        timestamp=topic_tag.topic.timestamp,
+        -sort lastModified=topic_tag.topic.last_modified
+    ) limit page_size;
 }
 
-query getFollowedTopics(username: text) {
+query get_followed_topics(username: text) {
     val user = user@{ .name == username};
-    return tagFollowing@*{ user } ( .tag );
+    return tag_following@*{ user } ( .tag );
 }
 
-query getAllTags() {
-    return topicTag@*{} ( .name );
+query get_all_tags() {
+    return topic_tag@*{} ( .name );
 }
 
-query getTagsSince(timestamp) {
-    return topicTag@*{ .timestamp > timestamp }( .name );
+query get_tags_since(timestamp) {
+    return topic_tag@*{ .timestamp > timestamp }( .name );
 }

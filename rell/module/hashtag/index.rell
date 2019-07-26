@@ -1,13 +1,13 @@
-class topicTag {
+class topic_tag {
     key id: byte_array, topic, name;
     index timestamp;
 }
 
-class replyToTopicTag {
-    key replyId: text, topicTag;
+class reply_to_topic_tag {
+    key reply_id: text, topic_tag;
 }
 
-class tagFollowing {
+class tag_following {
     key user, tag: text;
 }
 

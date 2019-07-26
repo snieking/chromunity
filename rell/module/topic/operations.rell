@@ -1,58 +1,58 @@
-operation createTopic(id: text, username: text, title: name, message: text) {
+operation create_topic(id: text, username: text, title: name, message: text) {
     val author = user@{ .name == username };
     require(is_signer(author.pubkey));
     create topic(
         id = id, 
         author,
         timestamp = op_context.last_block_time,
-        lastModified = op_context.last_block_time,
+        last_modified = op_context.last_block_time,
         title = title,
         message = message,
         removed = false
     );
 }
 
-operation createReply(topicId: text, id: text, username: text, message: text) {
+operation create_reply(topic_id: text, id: text, username: text, message: text) {
     val author = user@{ .name == username };
     require(is_signer(author.pubkey));
-    create topicReply(
+    create topic_reply(
         id = id,
-        topic@{ .id == topicId },
+        topic@{ .id == topic_id },
         author,
         timestamp = op_context.last_block_time,
-        isSubReply = false,
+        is_sub_reply = false,
         message = message,
         removed = false
     );
 
-    val topic = topic@{ .id == topicId };
+    val topic = topic@{ .id == topic_id };
 
     if (not topic.removed) {
-        update topic@{ .id == topicId } ( lastModified = op_context.last_block_time);
+        update topic@{ .id == topic_id } ( last_modified = op_context.last_block_time);
     }
 }
 
-operation createSubReply(topicId: text, parentReplyId: text, id: text, username: text, message: text) {
+operation create_sub_reply(topic_id: text, parent_reply_id: text, id: text, username: text, message: text) {
     val author = user@{ .name == username };
     require(is_signer(author.pubkey));
-    val topicReply = create topicReply(
+    val topic_reply = create topic_reply(
         id = id,
-        topic@{ .id == topicId },
+        topic@{ .id == topic_id },
         author,
         timestamp = op_context.last_block_time,
-        isSubReply = true,
+        is_sub_reply = true,
         message = message,
         removed = false
     );
 
-    create subReply(
-        parentReply = topicReply@{ .id == parentReplyId },
-        childReply = topicReply
+    create sub_reply(
+        parent_reply = topic_reply@{ .id == parent_reply_id },
+        child_reply = topic_reply
     );
 
-    val topic = topic@{ .id == topicId };
+    val topic = topic@{ .id == topic_id };
 
     if (not topic.removed) {
-        update topic@{ .id == topicId } ( lastModified = op_context.last_block_time);
+        update topic@{ .id == topic_id } ( last_modified = op_context.last_block_time);
     }
 }
