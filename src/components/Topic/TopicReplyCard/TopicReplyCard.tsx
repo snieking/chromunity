@@ -199,7 +199,7 @@ class TopicReplyCard extends React.Component<Props, State> {
     }
 
     renderReplyBox() {
-        if (getUser().name == null) {
+        if (this.state.replyBoxOpen && getUser().name == null) {
             window.location.replace("/user/login");
         } else if (this.state.replyBoxOpen) {
             return (

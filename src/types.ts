@@ -9,7 +9,7 @@ export interface Topic {
     title: string;
     message: string;
     timestamp: number;
-    lastModified: number;
+    last_modified: number;
     removed: boolean;
 }
 

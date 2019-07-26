@@ -8,3 +8,6 @@ Chrotonomy uses a copyrighted font which is not included in the repository.
 
 In order to use the Chromia font, add **Battlefin-Black.otf** to **public/fonts** directory in order to use that font. 
 The application will work fine without it and fall back to other fonts.
+
+## Rell UML diagram
+https://drive.google.com/file/d/1uCtLX1CNtUNSJTWPFot6jVVHWrElAbqq/view?usp=sharing

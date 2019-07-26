@@ -49,7 +49,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             author: "",
             message: "",
             timestamp: 0,
-            lastModified: 0,
+            last_modified: 0,
             removed: true
         };
 
