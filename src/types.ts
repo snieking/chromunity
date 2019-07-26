@@ -39,3 +39,10 @@ export interface UserSettings {
     avatar: string,
     description: string
 }
+
+export interface RepresentativeAction {
+    id: string,
+    representative: string,
+    timestamp: number,
+    action: string
+}

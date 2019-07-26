@@ -2,5 +2,12 @@ class representative {
     key user, representative_election;
 }
 
+class representative_action {
+    key id: byte_array;
+    index representative;
+    index timestamp;
+    action: text;
+}
+
 include 'operations';
 include 'queries';

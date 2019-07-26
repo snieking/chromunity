@@ -3,3 +3,14 @@ query get_representatives(representative_period_id: text) {
         .representative_election.id == representative_period_id
     } ( .user.name );
 }
+
+query get_all_representative_actions(timestamp, page_size: integer) {
+    return representative_action@*{
+        .timestamp < timestamp
+    } ( 
+        .id, 
+        representative = .representative.user.name, 
+        .timestamp, 
+        .action 
+    ) limit page_size;
+}
