@@ -10,7 +10,7 @@ query get_all_representative_actions(timestamp, page_size: integer) {
     } ( 
         .id, 
         representative = .representative.user.name, 
-        .timestamp, 
+        -sort .timestamp, 
         .action 
     ) limit page_size;
 }

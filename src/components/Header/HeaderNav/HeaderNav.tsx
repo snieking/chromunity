@@ -62,7 +62,7 @@ export default function HeaderNav(props: HeaderNavProps) {
                         open={Boolean(profileAnchorEl)}
                         onClose={handleProfileClose}
                     >
-                        <Link to={"/u/" + user.name}>
+                        <Link style={{ width: "100%"}} to={"/u/" + user.name}>
                             <MenuItem onClick={handleProfileClose}>
                                 <ListItemIcon>
                                     <AccountCircle className="menu-item-button" />
@@ -71,7 +71,7 @@ export default function HeaderNav(props: HeaderNavProps) {
                             </MenuItem>
                         </Link>
                         <br />
-                        <Link to={"/user/settings"}>
+                        <Link style={{ width: "100%"}} to={"/user/settings"}>
                             <MenuItem onClick={handleProfileClose}>
                                 <ListItemIcon>
                                     <Settings className="menu-item-button" />
@@ -80,7 +80,7 @@ export default function HeaderNav(props: HeaderNavProps) {
                             </MenuItem>
                         </Link>
                         <br />
-                        <Link to="/user/logout">
+                        <Link style={{ width: "100%"}} to="/user/logout">
                             <MenuItem onClick={handleProfileClose}>
                                 <ListItemIcon>
                                     <ExitToApp className="menu-item-button" />
@@ -163,7 +163,7 @@ export default function HeaderNav(props: HeaderNavProps) {
                         open={Boolean(govAnchorEl)}
                         onClose={handleGovClose}
                     >
-                        <Link to="/gov/representatives">
+                        <Link style={{ width: "100%"}} to="/gov/representatives">
                             <MenuItem onClick={handleGovClose}>
                                 <ListItemIcon>
                                     <Face className="menu-item-button" />
@@ -172,7 +172,7 @@ export default function HeaderNav(props: HeaderNavProps) {
                             </MenuItem>
                         </Link>
                         <br />
-                        <Link to="/gov/election">
+                        <Link style={{ width: "100%"}} to="/gov/election">
                             <MenuItem onClick={handleGovClose}>
                                 <ListItemIcon>
                                     <HowToVote className="menu-item-button" />
@@ -181,7 +181,7 @@ export default function HeaderNav(props: HeaderNavProps) {
                             </MenuItem>
                         </Link>
                         <br />
-                        <Link to="/gov/log">
+                        <Link style={{ width: "100%"}} to="/gov/log">
                             <MenuItem onClick={handleGovClose}>
                                 <ListItemIcon>
                                     <Gavel className="menu-item-button" />
