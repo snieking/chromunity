@@ -1,3 +1,4 @@
+import { RepresentativeAction } from './../src/types';
 import { register, login } from "../src/blockchain/UserService";
 import { triggerElection, signUpForElection, getUncompletedElection, completeElection, voteForCandidate, getElectionCandidates, getElectionVoteForUser, getElectionVotes } from "../src/blockchain/ElectionService";
 import { getANumber, sleepUntil } from "./helper";
@@ -6,7 +7,7 @@ import { getANumber, sleepUntil } from "./helper";
 import * as bip39 from "bip39";
 import { User, Election, Topic, TopicReply } from "../src/types";
 import { isRepresentative, setUser } from "../src/util/user-util";
-import { getRepresentatives, getCurrentRepresentativePeriod } from "../src/blockchain/RepresentativesService";
+import { getRepresentatives, getCurrentRepresentativePeriod, getAllRepresentativeActionsPriorToTimestamp } from "../src/blockchain/RepresentativesService";
 import { createTopic, getTopicsByUserPriorToTimestamp, removeTopic, getTopicById, createTopicReply, getTopicRepliesPriorToTimestamp, removeTopicReply } from "../src/blockchain/TopicService";
 
 jest.setTimeout(30000);
@@ -79,6 +80,9 @@ describe("election test", () => {
         await removeTopicReply(adminUser, replies[0].id);
         replies = await getTopicRepliesPriorToTimestamp(removedTopic.id, Date.now(), 10);
         expect(replies[0].message).toBe("Removed by @admin");
+
+        const actions: RepresentativeAction[] = await getAllRepresentativeActionsPriorToTimestamp(Date.now(), 2);
+        expect(actions.length).toBe(2);
     });
 
 });
