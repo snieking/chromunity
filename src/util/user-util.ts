@@ -1,11 +1,14 @@
+import { UserMeta } from './../types';
 import {User} from "../types";
 import * as BoomerangCache from "boomerang-cache";
 import {getCurrentRepresentativePeriod, getRepresentatives} from "../blockchain/RepresentativesService";
+import { getUserMeta } from '../blockchain/UserService';
 
 const LOCAL_CACHE = BoomerangCache.create('local-bucket', {storage: 'local', encrypt: true});
 const SESSION_CACHE = BoomerangCache.create('session-bucket', {storage: 'session', encrypt: true});
 
 const USER_KEY = "user";
+const USER_META_KEY = "user_meta";
 const MNEMONIC_KEY = "mnemonic";
 const REPRESENTATIVE_KEY = "representative";
 
@@ -19,6 +22,28 @@ export function getMnemonic(): string {
 
 export function setUser(user: User): void {
     SESSION_CACHE.set(USER_KEY, user);
+}
+
+export function setUserMeta(meta: UserMeta): void {
+    SESSION_CACHE.set(USER_META_KEY, meta, 600);
+}
+
+export function getCachedUserMeta(): Promise<UserMeta> {
+    const meta: UserMeta = SESSION_CACHE.get(USER_META_KEY);
+
+    if (meta != null) {
+        return new Promise<UserMeta>(resolve => resolve(meta));
+    }
+
+    const user: User = getUser();
+    if (user == null) {
+        return new Promise<UserMeta>(resolve =>  resolve(null));
+    }
+
+    return getUserMeta(user.name).then(meta => {
+        setUserMeta(meta);
+        return meta;
+    })
 }
 
 export function getUser(): User {

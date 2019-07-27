@@ -10,8 +10,9 @@ import TextField from "@material-ui/core/TextField";
 import IconButton from "@material-ui/core/IconButton";
 import { ReplyAll } from "@material-ui/icons";
 import { createTopicReply } from "../../blockchain/TopicService";
-import { getUser } from "../../util/user-util";
+import { getUser, getCachedUserMeta } from "../../util/user-util";
 import { CustomSnackbarContentWrapper } from "../utils/CustomSnackbar";
+import { UserMeta } from "../../types";
 
 
 export interface ReplyTopicButtonProps {
@@ -26,6 +27,7 @@ export interface ReplyTopicButtonState {
     replyStatusSuccessOpen: boolean;
     replyStatusErrorOpen: boolean;
     replySentStatus: string;
+    userMeta: UserMeta;
 }
 
 export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, ReplyTopicButtonState> {
@@ -38,13 +40,18 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
             dialogOpen: false,
             replyStatusSuccessOpen: false,
             replyStatusErrorOpen: false,
-            replySentStatus: ""
+            replySentStatus: "",
+            userMeta: { name: "", suspended_until: Date.now() + 10000, times_suspended: 0 }
         };
 
         this.toggleReplyTopicDialog = this.toggleReplyTopicDialog.bind(this);
         this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
         this.createTopicReply = this.createTopicReply.bind(this);
         this.handleClose = this.handleClose.bind(this);
+    }
+
+    componentDidMount() {
+        getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
     }
 
     toggleReplyTopicDialog() {
@@ -70,16 +77,18 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
     }
 
     createTopicButton() {
-        return (
-            <div className="bottom-right-corner rounded-pink">
-                <IconButton aria-label="Reply to topic"
-                    onClick={() => this.toggleReplyTopicDialog()}
-                    style={{ backgroundColor: "#FFAFC1", marginRight: "5px", marginBottom: "5px", height: "64px", width: "64px" }}
-                >
-                    <ReplyAll fontSize="large" className="new-topic-button" />
-                </IconButton>
-            </div>
-        )
+        if (getUser().name != null && this.state.userMeta.suspended_until < Date.now()) {
+            return (
+                <div className="bottom-right-corner rounded-pink">
+                    <IconButton aria-label="Reply to topic"
+                        onClick={() => this.toggleReplyTopicDialog()}
+                        style={{ backgroundColor: "#FFAFC1", marginRight: "5px", marginBottom: "5px", height: "64px", width: "64px" }}
+                    >
+                        <ReplyAll fontSize="large" className="new-topic-button" />
+                    </IconButton>
+                </div>
+            )
+        }
     }
 
     newTopicDialog() {

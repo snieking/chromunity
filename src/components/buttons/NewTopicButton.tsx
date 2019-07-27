@@ -7,11 +7,12 @@ import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
-import { getUser } from "../../util/user-util";
+import { getUser, getCachedUserMeta } from "../../util/user-util";
 import IconButton from "@material-ui/core/IconButton";
 import { Forum } from "@material-ui/icons";
 import { CustomSnackbarContentWrapper } from "../utils/CustomSnackbar";
 import { createTopic } from "../../blockchain/TopicService";
+import { UserMeta } from "../../types";
 
 
 export interface NewTopicButtonProps {
@@ -25,6 +26,7 @@ export interface NewTopicButtonState {
     newTopicSuccessOpen: boolean;
     newTopicErrorOpen: boolean;
     newTopicStatusMessage: string;
+    userMeta: UserMeta;
 }
 
 const maxTitleLength: number = 40;
@@ -40,7 +42,8 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
             dialogOpen: false,
             newTopicSuccessOpen: false,
             newTopicErrorOpen: false,
-            newTopicStatusMessage: ""
+            newTopicStatusMessage: "",
+            userMeta: { name: "", suspended_until: Date.now() + 10000, times_suspended: 0 }
         };
 
         this.toggleNewTopicDialog = this.toggleNewTopicDialog.bind(this);
@@ -48,6 +51,10 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
         this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
         this.createNewTopic = this.createNewTopic.bind(this);
         this.handleClose = this.handleClose.bind(this);
+    }
+
+    componentDidMount() {
+        getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
     }
 
     toggleNewTopicDialog() {
@@ -87,7 +94,7 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
     }
 
     createTopicButton() {
-        if (getUser().name != null) {
+        if (getUser().name != null && this.state.userMeta.suspended_until < Date.now()) {
             return (
                 <div className="bottom-right-corner rounded-pink">
                     <IconButton aria-label="New topic"

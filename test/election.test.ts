@@ -1,13 +1,13 @@
-import { RepresentativeAction } from './../src/types';
-import { register, login } from "../src/blockchain/UserService";
+import { RepresentativeAction, UserMeta } from './../src/types';
+import { register, login, getUserMeta } from "../src/blockchain/UserService";
 import { triggerElection, signUpForElection, getUncompletedElection, completeElection, voteForCandidate, getElectionCandidates, getElectionVoteForUser, getElectionVotes } from "../src/blockchain/ElectionService";
 import { getANumber, sleepUntil } from "./helper";
 
 
 import * as bip39 from "bip39";
 import { User, Election, Topic, TopicReply } from "../src/types";
-import { isRepresentative, setUser } from "../src/util/user-util";
-import { getRepresentatives, getCurrentRepresentativePeriod, getAllRepresentativeActionsPriorToTimestamp } from "../src/blockchain/RepresentativesService";
+import { isRepresentative, setUser, getCachedUserMeta, setUserMeta } from "../src/util/user-util";
+import { getRepresentatives, getCurrentRepresentativePeriod, getAllRepresentativeActionsPriorToTimestamp, suspendUser } from "../src/blockchain/RepresentativesService";
 import { createTopic, getTopicsByUserPriorToTimestamp, removeTopic, getTopicById, createTopicReply, getTopicRepliesPriorToTimestamp, removeTopicReply } from "../src/blockchain/TopicService";
 
 jest.setTimeout(30000);
@@ -18,6 +18,12 @@ describe("election test", () => {
         name: "admin",
         password: "admin",
         mnemonic: "rule comfort scheme march fresh defy radio width crash family toward index"
+    }
+
+    const userToBeSuspended = {
+        name: "joker",
+        password: "joker",
+        mnemonic: "rule comfort scheme march fresh defy radio width crash family toward bike"
     }
 
     var adminUser: User;
@@ -84,5 +90,19 @@ describe("election test", () => {
         const actions: RepresentativeAction[] = await getAllRepresentativeActionsPriorToTimestamp(Date.now(), 2);
         expect(actions.length).toBe(2);
     });
+
+    it("suspend user", async() => {
+        await register(userToBeSuspended.name, userToBeSuspended.password, userToBeSuspended.mnemonic);
+        const user: User = await login(userToBeSuspended.name, userToBeSuspended.password, userToBeSuspended.mnemonic);
+
+        await suspendUser(adminUser, user.name);
+
+        var meta: UserMeta = await getUserMeta(user.name);
+        expect(meta.suspended_until).toBeGreaterThan(Date.now());
+
+        setUserMeta(meta);
+        meta = await getCachedUserMeta();
+        expect(meta.suspended_until).toBeGreaterThan(Date.now());
+    })
 
 });

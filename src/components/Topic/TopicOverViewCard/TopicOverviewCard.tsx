@@ -28,7 +28,6 @@ interface State {
     tags: string[];
 }
 
-
 class TopicOverviewCard extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
@@ -166,7 +165,7 @@ class TopicOverviewCard extends React.Component<Props, State> {
                 {this.renderAuthor()}
                 <div className="topic-overview-details">
                     {this.renderTimeAgo(this.props.topic.last_modified)}
-                    <Typography variant="body2" className='purple-typography' component="span" style={{ marginRight: "10px" }}>
+                    <Typography variant="subtitle1" className='purple-typography' component="span" style={{ marginRight: "10px" }}>
                         {this.props.topic.title}
                     </Typography>
                     {this.renderTagChips()}
