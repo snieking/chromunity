@@ -1,7 +1,7 @@
 import React from 'react';
 
 import './Representatives.css';
-import { Container, Card, CardContent, TextField, Button } from "@material-ui/core";
+import { Container, Card, CardContent, TextField, Button, Grid } from "@material-ui/core";
 import { getCurrentRepresentativePeriod, getRepresentatives } from "../../../blockchain/RepresentativesService";
 import { Election } from "../../../types";
 import RepresentativeCard from './RepresentativeCard/RepresentativeCard';
@@ -43,9 +43,9 @@ export class Representatives extends React.Component<{}, RepresentativesState> {
         return (
             <Container fixed maxWidth="md">
                 <ChromiaPageHeader text="Representatives" />
-                <div style={{ display: "flex" }}>
+                <Grid container spacing={1}>
                     {this.state.representatives.map(name => <RepresentativeCard name={name} />)}
-                </div>
+                </Grid>
                 {this.renderAdminFunctions()}
             </Container>
         )

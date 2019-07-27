@@ -1,39 +1,46 @@
 operation trigger_election(admin_user: text, id: text, timestamp) {
     require(is_signer(admin@{ .user.name == admin_user}( .user.pubkey )));
-    create representative_election(id, timestamp, false);
+
+    val currentElection = representative_election @? { .completed == false };
+
+    if (currentElection == null) {
+        create representative_election(id, timestamp, false);
+    }
   }
   
-operation complete_election(admin_user: text, id: text, representatives: set<text>) {
+operation complete_election(admin_user: text, representatives: set<text>) {
     require(is_signer(admin@{ .user.name == admin_user}( .user.pubkey )));
 
-    update representative_election@{ .id == id } ( completed = true );
+    val currentElection = representative_election @ { .completed == false };
+    log("Completing election: ", currentElection.id);
+    update currentElection ( completed = true );
 
     for (representative in representatives) {
         val user = user@{ .name == representative };
-        create representative(user, representative_election@{ .id == id });
+        create representative(user, currentElection);
     }
 }
 
-operation vote_for_candidate(voter: name, candidate: name, election_id: text) {
+operation vote_for_candidate(voter: name, candidate: name) {
     val user = user@{ .name == voter };
     require(is_signer(user.pubkey));
+
+    val currentElection = representative_election @ { .completed == false };
+    log("Voting for candidate in election: ", currentElection.id);
     create representative_election_vote(
         user,
-        representative_election_candidate@{ 
-            .user.name == candidate,
-            .representative_election.id == election_id
-        }
+        representative_election_candidate@{ user@{ .name == candidate }, currentElection }
     );
 }
 
-operation update_vote_for_candidate(voter: name, candidate: name, election_id: text) {
+operation update_vote_for_candidate(voter: name, candidate: name) {
     val user = user@{ .name == voter };
     require(is_signer(user.pubkey));
 
-    val election = representative_election@{ .id == election_id };
+    val currentElection = representative_election @ { .completed == false };    
     val election_candidate = representative_election_candidate@{
-        .representative_election == election,
-        .user == user@{ .name == candidate }
+        currentElection,
+        user@{ .name == candidate }
     };
 
     delete representative_election_vote@?{
@@ -45,19 +52,17 @@ operation update_vote_for_candidate(voter: name, candidate: name, election_id: t
         user,
         representative_election_candidate@{
             .user.name == candidate,
-            election
+            currentElection
         }
     );
 }
 
-operation sign_up_for_election(name, election_id: text) {
+operation sign_up_for_election(name) {
     val user = user@{ .name == name };
     require(is_signer(user.pubkey));
 
-    val election = representative_election@{
-        .id == election_id,
-        .timestamp > op_context.last_block_time
-    };
+    val currentElection = representative_election @ { .completed == false };
+    log("Signing up for election: ", currentElection.id);
 
-    create representative_election_candidate(election, user);
+    create representative_election_candidate(currentElection, user);
 }

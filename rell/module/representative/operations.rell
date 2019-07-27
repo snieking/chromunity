@@ -76,14 +76,20 @@ operation suspend_user(username: text, user_to_be_suspended: text) {
 
 operation tmp_add_representative(admin_name: name, name) {
     require(is_signer(admin@{ .user.name == admin_name }( .user.pubkey )));
-    val currentElection = representative_election @ { .timestamp <= op_context.last_block_time, .completed == true };
+    val currentElection = representative_election @ { .timestamp <= op_context.last_block_time, .completed == true } (
+        .id,
+        -sort .timestamp
+    ) limit 1;
 
-    create representative(user@{ .name == name }, currentElection);
+    create representative(user@{ .name == name }, representative_election@{ .id == currentElection.id });
 }
 
 operation tmp_remove_representative(admin_name: name, name) {
     require(is_signer(admin@{ .user.name == admin_name }( .user.pubkey )));
-    val currentElection = representative_election @ { .timestamp <= op_context.last_block_time, .completed == true };
+    val currentElection = representative_election @ { .timestamp <= op_context.last_block_time, .completed == true } (
+        .id,
+        -sort .timestamp
+    ) limit 1;
 
-    delete representative @?{ user@{ .name == name }, currentElection};
+    delete representative @?{ user@{ .name == name }, representative_election@{ .id == currentElection.id }};
 }

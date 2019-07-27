@@ -12,47 +12,48 @@ export function triggerElection(user: User, completionTimestamp: number) {
     return tx.postAndWaitConfirmation();
 }
 
-export function getElectionVotes(electionId: string) {
-    return GTX.query("get_election_votes", { election_id: electionId })
+export function getElectionVotes() {
+    return GTX.query("get_election_votes", {})
         .then((candidates: any[]) => sortByFrequency(candidates));
 }
 
-export function completeElection(user: User, electionId: string, sortedCandidates: string[]) {
+export function completeElection(user: User, sortedCandidates: string[]) {
     const { privKey, pubKey } = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
 
-    tx.addOperation("complete_election", user.name, electionId, sortedCandidates);
+    tx.addOperation("complete_election", user.name, sortedCandidates);
     tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
 
-export function signUpForElection(user: User, electionId: string): Promise<any> {
+export function signUpForElection(user: User): Promise<any> {
     const { privKey, pubKey } = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("sign_up_for_election", user.name, electionId);
+    tx.addOperation("sign_up_for_election", user.name);
     tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
 
-export function voteForCandidate(user: User, candidate: string, electionId: string): Promise<any> {
+export function voteForCandidate(user: User, candidate: string): Promise<any> {
     const { privKey, pubKey } = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("vote_for_candidate", user.name, candidate, electionId);
+    tx.addOperation("vote_for_candidate", user.name, candidate);
+    tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
 
-export function getElectionVoteForUser(name: string, electionId: string): Promise<string> {
-    return GTX.query("get_user_vote_in_election", { name: name, election_id: electionId });
+export function getElectionVoteForUser(name: string): Promise<string> {
+    return GTX.query("get_user_vote_in_election", { name: name });
 }
 
-export function getElectionCandidates(electionId: string): Promise<string[]> {
-    return GTX.query("get_election_candidates", { election_id: electionId });
+export function getElectionCandidates(): Promise<string[]> {
+    return GTX.query("get_election_candidates", {});
 }
 
 export function getUncompletedElection(): Promise<string> {

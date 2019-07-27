@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from "react-router-dom";
-import { Card, CardMedia, CardContent, Typography } from '@material-ui/core';
+import { Card, CardMedia, CardContent, Typography, Grid } from '@material-ui/core';
 import { getUserSettingsCached } from '../../../../blockchain/UserService';
 import { ifEmptyAvatarThenPlaceholder } from '../../../../util/user-util';
 
@@ -22,20 +22,22 @@ class RepresentativeCard extends React.Component<RepresentativeCardProps, Repres
     render() {
         if (this.props.name != null) {
             return (
-                <Card key={"representative-" + this.props.name} className="representative-card">
-                    <CardMedia
-                        component="img"
-                        alt="Election candidate"
-                        height="140"
-                        src={this.state.avatar}
-                        title="Representative"
-                    />
-                    <CardContent>
-                        <Typography gutterBottom variant="subtitle1" component="p">
-                            <Link className="pink-typography" to={"/u/" + this.props.name}>@{this.props.name}</Link>
-                        </Typography>
-                    </CardContent>
-                </Card>
+                <Grid item xs={4}>
+                    <Card key={"representative-" + this.props.name} className="representative-card">
+                        <CardMedia
+                            component="img"
+                            alt="Election candidate"
+                            height="140"
+                            src={this.state.avatar}
+                            title="Representative"
+                        />
+                        <CardContent>
+                            <Typography gutterBottom variant="subtitle1" component="p">
+                                <Link className="pink-typography" to={"/u/" + this.props.name}>@{this.props.name}</Link>
+                            </Typography>
+                        </CardContent>
+                    </Card>
+                </Grid>
             );
         } else {
             return (<div></div>)

@@ -49,18 +49,18 @@ describe("election test", () => {
         const electionId: string = await getUncompletedElection();
         expect(electionId).toBeDefined();
 
-        await signUpForElection(adminUser, electionId);
-        await voteForCandidate(adminUser, adminUser.name, electionId);
+        await signUpForElection(adminUser);
+        await voteForCandidate(adminUser, adminUser.name);
 
-        const candidates: string[] = await getElectionCandidates(electionId);
+        const votedFor: string = await getElectionVoteForUser(adminUser.name);
+        expect(votedFor).toBe(adminUser.name);
+
+        const candidates: string[] = await getElectionCandidates();
         expect(candidates).toContain(adminUser.name);
 
-        const sortedCandidatesByVote: string[] = await getElectionVotes(electionId);
+        const sortedCandidatesByVote: string[] = await getElectionVotes();
         sleepUntil(electionTimestamp); // Sleep until election is over
-        await completeElection(adminUser, electionId, sortedCandidatesByVote);
-
-        const votedFor: string = await getElectionVoteForUser(adminUser.name, electionId);
-        expect(votedFor).toBe(adminUser.name);
+        await completeElection(adminUser, sortedCandidatesByVote);
 
         const representatives: string[] = await getRepresentatives(electionId);
         const election: Election = await getCurrentRepresentativePeriod();

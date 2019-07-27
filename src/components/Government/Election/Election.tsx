@@ -1,9 +1,9 @@
 import React from 'react';
 
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 import './Election.css';
-import {Button, Card, CardActions, CardContent, CardMedia, Container, Typography} from "@material-ui/core";
+import { Button, Card, CardActions, CardContent, CardMedia, Container, Typography, Grid } from "@material-ui/core";
 import Countdown from 'react-countdown-now';
 import {
     getElectionCandidates,
@@ -11,8 +11,8 @@ import {
     getNextElectionTimestamp, signUpForElection,
     voteForCandidate
 } from "../../../blockchain/ElectionService";
-import {getUser, isGod} from "../../../util/user-util";
-import {DictatorActions} from "./DictatorActions/DictatorActions";
+import { getUser, isGod } from "../../../util/user-util";
+import { DictatorActions } from "./DictatorActions/DictatorActions";
 import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
 
 export interface ElectionState {
@@ -26,7 +26,7 @@ export interface ElectionState {
 
 // Renderer callback with condition
 // @ts-ignore
-const renderer = ({days, hours, minutes, seconds, completed}) => {
+const renderer = ({ days, hours, minutes, seconds, completed }) => {
     if (completed) {
         // Render a completed state
         window.location.replace("/");
@@ -36,7 +36,7 @@ const renderer = ({days, hours, minutes, seconds, completed}) => {
         return (
             <div className="countdown-wrapper">
                 <Typography gutterBottom variant="h3" component="h3"
-                            className="typography pink-typography">
+                    className="typography pink-typography">
                     {days}:{hours}:{minutes}.{seconds}
                 </Typography>
             </div>
@@ -68,7 +68,7 @@ export class Election extends React.Component<{}, ElectionState> {
                     electionId: election.id
                 });
 
-                getElectionCandidates(election.id)
+                getElectionCandidates()
                     .then(candidates => this.setState({
                         electionCandidates: candidates,
                         isACandidate: candidates.includes(getUser().name)
@@ -77,10 +77,10 @@ export class Election extends React.Component<{}, ElectionState> {
                 const username = getUser().name;
 
                 if (username != null) {
-                    getElectionVoteForUser(username, election.id)
+                    getElectionVoteForUser(username)
                         .then(candidate => {
                             if (candidate != null) {
-                                this.setState({votedFor: candidate})
+                                this.setState({ votedFor: candidate })
                             }
                         });
                 }
@@ -93,7 +93,7 @@ export class Election extends React.Component<{}, ElectionState> {
             return (
                 <div>
                     <Typography gutterBottom variant="h5" component="h5"
-                                className="typography pink-typography">
+                        className="typography pink-typography">
                         No election currently in progress
                     </Typography>
                 </div>
@@ -128,8 +128,8 @@ export class Election extends React.Component<{}, ElectionState> {
     }
 
     registerForElection() {
-        signUpForElection(getUser(), this.state.electionId)
-            .then(() => this.setState({isACandidate: true}));
+        signUpForElection(getUser())
+            .then(() => this.setState({ isACandidate: true }));
     }
 
     renderElection() {
@@ -142,37 +142,39 @@ export class Election extends React.Component<{}, ElectionState> {
             )
         } else if (isGod()) {
             return (
-                <DictatorActions/>
+                <DictatorActions />
             )
         }
     }
 
     renderCandidateCard(name: string) {
         return (
-            <Card raised={true} key={"candidate-" + name}
-                  className={this.state.votedFor === name ? "candidate-card voted-for" : "candidate-card"}>
-                <CardMedia
-                    component="img"
-                    alt="Election candidate"
-                    height="140"
-                    image="https://i.pravatar.cc/300"
-                    title="Election candidate"
-                />
-                <CardContent>
-                    <Typography gutterBottom variant="h5" component="h5">
-                        <Link className="pink-typography" to={"/u/" + name}>@{name}</Link>
-                    </Typography>
-                </CardContent>
-                <CardActions style={{justifyContent: 'center'}}>
-                    {this.renderCandidateCardActions(name)}
-                </CardActions>
-            </Card>
+            <Grid item xs={3}>
+                <Card raised={true} key={"candidate-" + name}
+                    className={this.state.votedFor === name ? "candidate-card voted-for" : "candidate-card"}>
+                    <CardMedia
+                        component="img"
+                        alt="Election candidate"
+                        height="140"
+                        image="https://i.pravatar.cc/300"
+                        title="Election candidate"
+                    />
+                    <CardContent>
+                        <Typography gutterBottom variant="subtitle1" component="h5">
+                            <Link className="pink-typography" to={"/u/" + name}>@{name}</Link>
+                        </Typography>
+                    </CardContent>
+                    <CardActions style={{ justifyContent: 'center' }}>
+                        {this.renderCandidateCardActions(name)}
+                    </CardActions>
+                </Card>
+            </Grid>
         )
     }
 
     voteForCandidate(name: string) {
-        voteForCandidate(getUser(), name, this.state.electionId)
-            .then(() => this.setState({votedFor: name}));
+        voteForCandidate(getUser(), name)
+            .then(() => this.setState({ votedFor: name }));
     }
 
     renderCandidateCardActions(name: string) {
@@ -188,7 +190,7 @@ export class Election extends React.Component<{}, ElectionState> {
             return (
                 <div>
                     <Button fullWidth size="small" variant="contained" color="primary"
-                            onClick={() => this.voteForCandidate(name)}>
+                        onClick={() => this.voteForCandidate(name)}>
                         Vote
                     </Button>
                     <Button fullWidth size="small" variant="contained" color="secondary">
@@ -202,7 +204,7 @@ export class Election extends React.Component<{}, ElectionState> {
     render() {
         return (
             <Container fixed maxWidth="md">
-                <ChromiaPageHeader text="Election"/>
+                <ChromiaPageHeader text="Election" />
                 <Card raised={true} key={"next-election"} className="election-card">
                     <CardContent>
                         {this.renderElection()}
@@ -212,9 +214,9 @@ export class Election extends React.Component<{}, ElectionState> {
                         {this.renderParticipateButton()}
                     </CardActions>
                 </Card>
-                <div className="election-candidates">
+                <Grid container spacing={1}>
                     {this.state.electionCandidates.map(candidate => this.renderCandidateCard(candidate))}
-                </div>
+                </Grid>
             </Container>
         )
     }
