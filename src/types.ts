@@ -3,6 +3,12 @@ export interface User {
     seed: string;
 }
 
+export interface UserMeta {
+    name: string;
+    times_suspended: number;
+    suspended_until: number;
+}
+
 export interface Topic {
     id: string;
     author: string;

@@ -65,6 +65,16 @@
                                 <string>module/user/settings/queries.rell</string>
                             </entry>
 
+                            <entry key="user/meta/index.rell">
+                                <string>module/user/meta/index.rell</string>
+                            </entry>
+                            <entry key="user/meta/operations.rell">
+                                <string>module/user/meta/operations.rell</string>
+                            </entry>
+                            <entry key="user/meta/queries.rell">
+                                <string>module/user/meta/queries.rell</string>
+                            </entry>
+
                             <entry key="topic/index.rell">
                                 <string>module/topic/index.rell</string>
                             </entry>

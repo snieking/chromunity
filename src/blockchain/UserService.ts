@@ -1,8 +1,8 @@
-import { UserSettings } from './../types';
+import { UserSettings, UserMeta } from './../types';
 import {GTX} from "./Postchain";
 import {seedFromMnemonic, seedToKey} from "./CryptoService";
 import {User} from "../types";
-import {setMnemonic, setUser} from "../util/user-util";
+import {setMnemonic, setUser, setUserMeta} from "../util/user-util";
 import * as BoomerangCache from "boomerang-cache";
 import { uniqueId } from '../util/util';
 
@@ -30,6 +30,9 @@ export function login(name: string, password: string, mnemonic: string): Promise
 
             const user: User = {name: name, seed: seed};
             setUser(user);
+
+            getUserMeta(name).then(meta => setUserMeta(meta));
+
             return user;
         });
 }
@@ -38,6 +41,10 @@ export function isRegistered(name: string): Promise<boolean> {
     return GTX.query("get_user", {name: name})
         .then((any: any) => any != null)
         .catch(false);
+}
+
+export function getUserMeta(username: string): Promise<UserMeta>  {
+    return GTX.query("get_user_meta", { name: username });
 }
 
 export function getUserSettings(user: User): Promise<UserSettings> {

@@ -42,7 +42,7 @@ export class GovLog extends React.Component<{}, GovLogState> {
                     <Typography className="topic-timestamp right" variant="body2" component="span">
                         {timeAgoReadable(action.timestamp)}
                     </Typography>
-                    <Typography variant="body2" color="textSecondary" component="p">
+                    <Typography variant="subtitle1" color="textSecondary" component="p">
                         <span dangerouslySetInnerHTML={{
                             __html: parseContent(action.action)
                         }}

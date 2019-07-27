@@ -1,9 +1,9 @@
 import React from 'react';
-import { Card } from "@material-ui/core";
+import { Card, Tooltip } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 
 import './ProfileCard.css';
-import { Favorite } from "@material-ui/icons";
+import { Favorite, VoiceOverOff } from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
 import {
     amIAFollowerOf,
@@ -11,10 +11,11 @@ import {
     createFollowing,
     removeFollowing
 } from "../../../blockchain/FollowingService";
-import { getUser, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
+import { getUser, ifEmptyAvatarThenPlaceholder, isRepresentative } from "../../../util/user-util";
 import { User } from "../../../types";
 import { isRegistered, getUserSettingsCached } from "../../../blockchain/UserService";
 import { NotFound } from "../../NotFound/NotFound";
+import { suspendUser } from '../../../blockchain/RepresentativesService';
 
 export interface ProfileCardProps {
     username: string
@@ -61,7 +62,7 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
                     }
 
                     getUserSettingsCached(this.props.username, 1440)
-                        .then(settings => this.setState({ 
+                        .then(settings => this.setState({
                             avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.username),
                             description: settings.description
                         }));
@@ -92,13 +93,28 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
         }
     }
 
+    renderRepresentativeActions() {
+        if (isRepresentative()) {
+            return (
+                <Tooltip title="Suspend user">
+                    <IconButton onClick={() => suspendUser(getUser(), this.props.username)}>
+                        <VoiceOverOff fontSize="large" className="red-color" />
+                    </IconButton>
+                </Tooltip>
+            )
+        }
+    }
+
     renderFollowButton() {
         if (this.props.username !== getUser().name) {
             return (
                 <div className="float-right">
-                    <IconButton onClick={() => this.toggleFollowing()}>
-                        <Favorite fontSize="large" className={(this.state.following ? 'red-icon' : '')} />
-                    </IconButton>
+                    {this.renderRepresentativeActions()}
+                    <Tooltip title="Follow">
+                        <IconButton onClick={() => this.toggleFollowing()}>
+                            <Favorite fontSize="large" className={(this.state.following ? 'red-icon' : '')} />
+                        </IconButton>
+                    </Tooltip>
                 </div>
             )
         }

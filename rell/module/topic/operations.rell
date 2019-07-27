@@ -1,6 +1,8 @@
 operation create_topic(id: text, username: text, title: name, message: text) {
     val author = user@{ .name == username };
     require(is_signer(author.pubkey));
+    require(user_meta@{ author }.suspended_until < op_context.last_block_time);
+
     create topic(
         id = id, 
         author,
@@ -15,6 +17,8 @@ operation create_topic(id: text, username: text, title: name, message: text) {
 operation create_reply(topic_id: text, id: text, username: text, message: text) {
     val author = user@{ .name == username };
     require(is_signer(author.pubkey));
+    require(user_meta@{ author }.suspended_until < op_context.last_block_time);
+
     create topic_reply(
         id = id,
         topic@{ .id == topic_id },
@@ -35,6 +39,8 @@ operation create_reply(topic_id: text, id: text, username: text, message: text) 
 operation create_sub_reply(topic_id: text, parent_reply_id: text, id: text, username: text, message: text) {
     val author = user@{ .name == username };
     require(is_signer(author.pubkey));
+    require(user_meta@{ author }.suspended_until < op_context.last_block_time);
+
     val topic_reply = create topic_reply(
         id = id,
         topic@{ .id == topic_id },

@@ -12,7 +12,7 @@ operation remove_topic(username: text, topic_id: text) {
         id = op_context.transaction.tx_rid, 
         representative,
         op_context.last_block_time,
-        action = "Topic /t/" + topic.id + " removed by @" + user.name
+        action = "Topic /t/" + topic.id + " was removed by @" + user.name
     );
 }
 
@@ -36,6 +36,40 @@ operation remove_topic_reply(username: text, topic_reply_id: text) {
         id = op_context.transaction.tx_rid, 
         representative,
         op_context.last_block_time,
-        action = "Reply in topic /t/" + reply.topic.id + " removed by @" + user.name
+        action = "Reply in topic /t/" + reply.topic.id + " was removed by @" + user.name
+    );
+}
+
+operation suspend_user(username: text, user_to_be_suspended: text) {
+    val user = user@{ .name == username};
+    require(is_signer(user.pubkey));
+
+    val recentElection = representative_election@{ .completed == true } ( .id, sort .timestamp );
+    val representative = representative @{ user, .representative_election.id == recentElection.id };
+
+    val suspendee_meta = user_meta@{ user@{ user_to_be_suspended }};
+
+    require(suspendee_meta.suspended_until < op_context.last_block_time);
+
+    val updatedTimesSuspended = suspendee_meta.times_suspended + 1;
+    val oneDayMillis = 86400000;
+    val daysSuspended = updatedTimesSuspended * updatedTimesSuspended;
+    val suspensionTimeMillis = daysSuspended * oneDayMillis;
+
+    update suspendee_meta ( 
+        suspended_until = op_context.last_block_time + suspensionTimeMillis, 
+        times_suspended = updatedTimesSuspended
+    );
+
+    var daysString = " days ";
+    if (daysSuspended == 1) {
+        daysString = " day ";
+    }
+
+    create representative_action(
+        id = op_context.transaction.tx_rid, 
+        representative,
+        op_context.last_block_time,
+        action = "@" + user_to_be_suspended + " was suspended for " + daysSuspended + daysString +  "by @" + user.name
     );
 }

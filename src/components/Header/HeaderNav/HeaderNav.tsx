@@ -20,7 +20,7 @@ export interface HeaderNavProps {
 }
 
 export default function HeaderNav(props: HeaderNavProps) {
-    const classes = useStyles();
+    const classes = useStyles(props);
     const user = getUser();
     const [profileAnchorEl, setProfileAnchorEl] = React.useState<null | HTMLElement>(null);
     const [govAnchorEl, setGovAnchorEl] = React.useState<null | HTMLElement>(null);

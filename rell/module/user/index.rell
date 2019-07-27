@@ -11,3 +11,4 @@ class user {
 include 'operations';
 include 'queries';
 include '/user/settings/index';
+include '/user/meta/index';

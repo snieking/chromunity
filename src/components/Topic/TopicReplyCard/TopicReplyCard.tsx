@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from "react-router-dom";
-import { TopicReply } from '../../../types';
+import { TopicReply, UserMeta } from '../../../types';
 import { Card, Typography, IconButton, Badge, CardContent, TextField, Button, Tooltip } from '@material-ui/core';
 import { timeAgoReadable } from '../../../util/util';
-import { getUser, ifEmptyAvatarThenPlaceholder, isRepresentative } from '../../../util/user-util';
+import { getUser, ifEmptyAvatarThenPlaceholder, isRepresentative, getCachedUserMeta } from '../../../util/user-util';
 import { StarRate, Reply, Delete } from '@material-ui/icons';
 import { getUserSettingsCached } from '../../../blockchain/UserService';
 import { removeTopicReply, removeReplyStarRating, giveReplyStarRating, getReplyStarRaters, getTopicSubReplies, createTopicSubReply } from '../../../blockchain/TopicService';
@@ -27,6 +27,7 @@ interface State {
     hideThreadConfirmDialogOpen: boolean;
     avatar: string;
     subReplies: TopicReply[];
+    userMeta: UserMeta;
 }
 
 class TopicReplyCard extends React.Component<Props, State> {
@@ -42,7 +43,8 @@ class TopicReplyCard extends React.Component<Props, State> {
             isRepresentative: false,
             hideThreadConfirmDialogOpen: false,
             avatar: "",
-            subReplies: []
+            subReplies: [],
+            userMeta: { name: "", suspended_until: Date.now() + 10000, times_suspended: 0 }
         };
 
         this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
@@ -102,6 +104,7 @@ class TopicReplyCard extends React.Component<Props, State> {
             ratedByMe: usersWhoStarRated.includes(getUser().name)
         }));
         getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies }));
+        getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
     }
 
     toggleStarRate() {
@@ -201,6 +204,9 @@ class TopicReplyCard extends React.Component<Props, State> {
     renderReplyBox() {
         if (this.state.replyBoxOpen && getUser().name == null) {
             window.location.replace("/user/login");
+        } else if (this.state.replyBoxOpen && this.state.userMeta.suspended_until > Date.now()) {
+            this.setState({ replyBoxOpen: false });
+            window.alert("User account temporarily suspended");
         } else if (this.state.replyBoxOpen) {
             return (
                 <div style={{ marginTop: "20px" }}>
