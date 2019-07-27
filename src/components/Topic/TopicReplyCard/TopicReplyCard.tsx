@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from "react-router-dom";
 import { TopicReply, UserMeta } from '../../../types';
-import { Card, Typography, IconButton, Badge, CardContent, TextField, Button, Tooltip } from '@material-ui/core';
+import { Card, Typography, IconButton, Badge, CardContent, TextField, Button, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
 import { timeAgoReadable } from '../../../util/util';
 import { getUser, ifEmptyAvatarThenPlaceholder, isRepresentative, getCachedUserMeta } from '../../../util/user-util';
 import { StarRate, Reply, Delete } from '@material-ui/icons';
@@ -28,6 +28,7 @@ interface State {
     avatar: string;
     subReplies: TopicReply[];
     userMeta: UserMeta;
+    removeReplyDialogOpen: boolean;
 }
 
 class TopicReplyCard extends React.Component<Props, State> {
@@ -44,7 +45,8 @@ class TopicReplyCard extends React.Component<Props, State> {
             hideThreadConfirmDialogOpen: false,
             avatar: "",
             subReplies: [],
-            userMeta: { name: "", suspended_until: Date.now() + 10000, times_suspended: 0 }
+            userMeta: { name: "", suspended_until: Date.now() + 10000, times_suspended: 0 },
+            removeReplyDialogOpen: false
         };
 
         this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
@@ -189,14 +191,33 @@ class TopicReplyCard extends React.Component<Props, State> {
     renderAdminActions() {
         if (isRepresentative() && !this.props.reply.removed) {
             return (
-                <Tooltip title="Remove reply">
-                    <IconButton aria-label="Remove reply"
-                        onClick={() => removeTopicReply(getUser(), this.props.reply.id).then(() => window.location.reload())}
-                        style={{ marginBottom: "-20px" }}
-                    >
-                        <Delete className="red-color" />
-                    </IconButton>
-                </Tooltip>
+                <div style={{display: "inline-block"}}>
+                    <Tooltip title="Remove reply">
+                        <IconButton aria-label="Remove reply"
+                            onClick={() => this.setState({ removeReplyDialogOpen: true })}
+                            style={{ marginBottom: "-20px" }}
+                        >
+                            <Delete className="red-color" />
+                        </IconButton>
+                    </Tooltip>
+
+                    <Dialog open={this.state.removeReplyDialogOpen} onClose={() => this.setState({ removeReplyDialogOpen: false })} aria-labelledby="dialog-title">
+                        <DialogTitle id="dialog-title">Are you sure?</DialogTitle>
+                        <DialogContent>
+                            <DialogContentText>
+                                This action will remove the topic, which makes sure that no one will be able to read the initial message.
+                            </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={() => this.setState({ removeReplyDialogOpen: false })} color="secondary">No</Button>
+                            <Button onClick={() => this.setState({ 
+                                removeReplyDialogOpen: false
+                                }, () => removeTopicReply(getUser(), this.props.reply.id).then(() => window.location.reload()))} color="primary">
+                                Yes
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+                </div>
             )
         }
     }

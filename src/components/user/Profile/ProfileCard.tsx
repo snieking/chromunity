@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Tooltip } from "@material-ui/core";
+import { Card, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 
 import './ProfileCard.css';
@@ -27,7 +27,8 @@ export interface ProfileCardState {
     followers: number,
     userFollowings: number,
     avatar: string,
-    description: string
+    description: string,
+    suspendUserDialogOpen: boolean
 }
 
 export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardState> {
@@ -41,12 +42,15 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
             followers: 0,
             userFollowings: 0,
             avatar: "",
-            description: ""
+            description: "",
+            suspendUserDialogOpen: false
         };
 
         this.renderUserPage = this.renderUserPage.bind(this);
         this.toggleFollowing = this.toggleFollowing.bind(this);
-        this.renderFollowButton = this.renderFollowButton.bind(this);
+        this.renderActions = this.renderActions.bind(this);
+        this.suspendUser = this.suspendUser.bind(this);
+        this.handleSuspendUserClose = this.handleSuspendUserClose.bind(this);
     }
 
     componentDidMount(): void {
@@ -96,19 +100,33 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
     renderRepresentativeActions() {
         if (isRepresentative()) {
             return (
-                <Tooltip title="Suspend user">
-                    <IconButton onClick={() => suspendUser(getUser(), this.props.username)}>
-                        <VoiceOverOff fontSize="large" className="red-color" />
-                    </IconButton>
-                </Tooltip>
+                <div>
+                    <Tooltip title="Suspend user">
+                        <IconButton onClick={() => this.setState({ suspendUserDialogOpen: true })}>
+                            <VoiceOverOff fontSize="large" className="red-color" />
+                        </IconButton>
+                    </Tooltip>
+                </div>
             )
         }
     }
 
-    renderFollowButton() {
+    suspendUser() {
+        this.setState({ suspendUserDialogOpen: false });
+        suspendUser(getUser(), this.props.username);
+    }
+
+    handleSuspendUserClose() {
+        if (this.state.suspendUserDialogOpen) {
+            this.setState({ suspendUserDialogOpen: false });
+        }
+    }
+
+    renderActions() {
         if (this.props.username !== getUser().name) {
             return (
                 <div className="float-right">
+                    {this.renderUserSuspensionDialog()}
                     {this.renderRepresentativeActions()}
                     <Tooltip title="Follow">
                         <IconButton onClick={() => this.toggleFollowing()}>
@@ -120,10 +138,28 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
         }
     }
 
+    renderUserSuspensionDialog() {
+        return (
+            <Dialog open={this.state.suspendUserDialogOpen} onClose={this.handleSuspendUserClose} aria-labelledby="dialog-title">
+                <DialogTitle id="dialog-title">Are you sure?</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        This action will suspend the user, temporarily preventing them from posting anything.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={this.handleSuspendUserClose} color="secondary">No</Button>
+                    <Button onClick={this.suspendUser} color="primary">Yes</Button>
+                </DialogActions>
+            </Dialog>
+        )
+    }
+
     renderUserPage() {
         if (this.state.registered) {
             return (
                 <Card key={"user-card"} className="profile-card">
+                    {this.renderActions()}
                     {this.state.avatar !== "" ? <img src={this.state.avatar} className="avatar" alt="Profile Avatar" /> : <div></div>}
                     <Typography gutterBottom variant="h6" component="h6"
                         className="typography pink-typography profile-title">
@@ -135,7 +171,6 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
                             {this.state.description}
                         </Typography>
                     </div>
-                    {this.renderFollowButton()}
                     <div className="bottom-bar">
                         <Typography variant="body1" color="textSecondary" component="p" className="stats-bar">
                             <span className="stat"><b>{this.state.followers}</b></span> followers,

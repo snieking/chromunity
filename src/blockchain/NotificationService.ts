@@ -46,8 +46,8 @@ export function markNotificationsRead(user: User) {
     return tx.postAndWaitConfirmation();
 }
 
-export function getUserNotifications(user: string): Promise<UserNotification[]> {
-    return GTX.query("get_all_user_notifications", { name: user });
+export function getUserNotificationsPriorToTimestamp(user: string, timestamp: number, pageSize: number): Promise<UserNotification[]> {
+    return GTX.query("get_user_notifications_prior_to_timestamp", { name: user, timestamp: timestamp, page_size: pageSize });
 }
 
 export function countUnreadUserNotifications(user: string): Promise<number> {

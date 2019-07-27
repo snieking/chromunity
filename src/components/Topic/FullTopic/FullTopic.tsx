@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Container, Card, TextField, Button, CardActions, IconButton, CardContent, Typography, Badge, LinearProgress, Tooltip } from "@material-ui/core";
+import { Container, Card, TextField, Button, CardActions, IconButton, CardContent, Typography, Badge, LinearProgress, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from "@material-ui/core";
 
 import { RouteComponentProps } from "react-router";
 import { ReplyTopicButton } from "../../buttons/ReplyTopicButton";
@@ -34,6 +34,7 @@ export interface FullTopicState {
     replyMessage: string;
     couldExistOlderReplies: boolean;
     isLoading: boolean;
+    removeTopicDialogOpen: boolean;
 }
 
 const repliesPageSize: number = 25;
@@ -63,7 +64,8 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             replyBoxOpen: false,
             replyMessage: "",
             couldExistOlderReplies: false,
-            isLoading: true
+            isLoading: true,
+            removeTopicDialogOpen: false
         };
 
         this.retrieveLatestReplies = this.retrieveLatestReplies.bind(this);
@@ -115,7 +117,6 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
         if (this.state.topicReplies.length > 0) {
             this.setState({ isLoading: true });
             const oldestTimestamp: number = this.state.topicReplies[this.state.topicReplies.length - 1].timestamp;
-            console.log("Oldest timestamp is: ", oldestTimestamp);
             getTopicRepliesPriorToTimestamp(this.state.topic.id, oldestTimestamp - 1, repliesPageSize)
                 .then(retrievedReplies => {
                     retrievedReplies.forEach(reply => console.log("Reply timestamp is: ", reply.timestamp));
@@ -246,14 +247,31 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
     renderAdminActions() {
         if (isRepresentative() && !this.state.topic.removed) {
             return (
-                <div>
+                <div style={{display: "inline-block"}}>
                     <Tooltip title="Remove topic">
-                    <IconButton aria-label="Remove topic" 
-                        onClick={() => removeTopic(getUser(), this.props.match.params.id).then(() => window.location.reload())}>
-                        <Delete className="red-color"/>
-                    </IconButton>
-                </Tooltip>
-                </div>
+                        <IconButton aria-label="Remove topic" 
+                            onClick={() => this.setState({ removeTopicDialogOpen: true })}>
+                            <Delete className="red-color"/>
+                        </IconButton>
+                    </Tooltip>
+
+                    <Dialog open={this.state.removeTopicDialogOpen} onClose={() => this.setState({ removeTopicDialogOpen: false })} aria-labelledby="dialog-title">
+                        <DialogTitle id="dialog-title">Are you sure?</DialogTitle>
+                        <DialogContent>
+                            <DialogContentText>
+                                This action will remove the topic, which makes sure that no one will be able to read the initial message.
+                            </DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={() => this.setState({ removeTopicDialogOpen: false })} color="secondary">No</Button>
+                            <Button onClick={() => this.setState({ 
+                                removeTopicDialogOpen: false
+                                }, () => removeTopic(getUser(), this.props.match.params.id).then(() => window.location.reload()))} color="primary">
+                                Yes
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+            </div>
             )
         }
     }
