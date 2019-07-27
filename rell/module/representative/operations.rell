@@ -61,10 +61,15 @@ operation suspend_user(username: text, user_to_be_suspended: text) {
         times_suspended = updatedTimesSuspended
     );
 
+    var daysString = " days ";
+    if (daysSuspended == 1) {
+        daysString = " day ";
+    }
+
     create representative_action(
         id = op_context.transaction.tx_rid, 
         representative,
         op_context.last_block_time,
-        action = "@" + user_to_be_suspended + " was suspended for " + daysSuspended + daysSuspended == 1 ? " day " : " days " +  "by @" + user.name
+        action = "@" + user_to_be_suspended + " was suspended for " + daysSuspended + daysString +  "by @" + user.name
     );
 }
