@@ -169,7 +169,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
 
     renderTimeAgo() {
         return (
-            <Typography className="topic-timestamp right" variant="body2" component="span">
+            <Typography className="timestamp right" variant="body2" component="span">
                 {timeAgoReadable(this.state.topic.timestamp)}
             </Typography>
         )

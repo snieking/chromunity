@@ -108,10 +108,11 @@ class TopicOverviewCard extends React.Component<Props, State> {
                 <Link
                     className="pink-typography"
                     to={"/u/" + this.props.topic.author}
+                    style={{ marginBottom: "18px"}}
                 >
                     <Typography
                         gutterBottom
-                        variant="body2"
+                        variant="subtitle1"
                         component="span"
                         className="typography"
                     >
@@ -176,7 +177,7 @@ class TopicOverviewCard extends React.Component<Props, State> {
 
     renderTimeAgo(timestamp: number) {
         return (
-            <Typography className='topic-timestamp' variant='inherit' component='p'>
+            <Typography className='timestamp' variant='inherit' component='p'>
                 {timeAgoReadable(timestamp)}
             </Typography>
         )

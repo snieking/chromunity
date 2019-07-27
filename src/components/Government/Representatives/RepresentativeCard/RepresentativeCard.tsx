@@ -22,8 +22,7 @@ class RepresentativeCard extends React.Component<RepresentativeCardProps, Repres
     render() {
         if (this.props.name != null) {
             return (
-                <Card raised={true} key={"representative-" + this.props.name}
-                    className="representative-card">
+                <Card key={"representative-" + this.props.name} className="representative-card">
                     <CardMedia
                         component="img"
                         alt="Election candidate"
@@ -32,7 +31,7 @@ class RepresentativeCard extends React.Component<RepresentativeCardProps, Repres
                         title="Representative"
                     />
                     <CardContent>
-                        <Typography gutterBottom variant="h5" component="h5">
+                        <Typography gutterBottom variant="subtitle1" component="p">
                             <Link className="pink-typography" to={"/u/" + this.props.name}>@{this.props.name}</Link>
                         </Typography>
                     </CardContent>

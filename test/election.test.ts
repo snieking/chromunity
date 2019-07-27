@@ -1,14 +1,15 @@
 import { RepresentativeAction, UserMeta } from './../src/types';
 import { register, login, getUserMeta } from "../src/blockchain/UserService";
 import { triggerElection, signUpForElection, getUncompletedElection, completeElection, voteForCandidate, getElectionCandidates, getElectionVoteForUser, getElectionVotes } from "../src/blockchain/ElectionService";
-import { getANumber, sleepUntil } from "./helper";
+import { sleepUntil } from "./helper";
 
 
-import * as bip39 from "bip39";
 import { User, Election, Topic, TopicReply } from "../src/types";
-import { isRepresentative, setUser, getCachedUserMeta, setUserMeta } from "../src/util/user-util";
+import { getCachedUserMeta, setUserMeta } from "../src/util/user-util";
 import { getRepresentatives, getCurrentRepresentativePeriod, getAllRepresentativeActionsPriorToTimestamp, suspendUser } from "../src/blockchain/RepresentativesService";
 import { createTopic, getTopicsByUserPriorToTimestamp, removeTopic, getTopicById, createTopicReply, getTopicRepliesPriorToTimestamp, removeTopicReply } from "../src/blockchain/TopicService";
+import { adminAddRepresentative, adminRemoveRepresentative } from "../src/blockchain/AdminService";
+
 
 jest.setTimeout(30000);
 
@@ -103,6 +104,21 @@ describe("election test", () => {
         setUserMeta(meta);
         meta = await getCachedUserMeta();
         expect(meta.suspended_until).toBeGreaterThan(Date.now());
+    })
+
+    it("admin toggle representative on user", async() => {
+        const currentRepresentativePeriod: Election = await getCurrentRepresentativePeriod();
+        var representatives: string[] = await getRepresentatives(currentRepresentativePeriod.id);
+
+        expect(representatives.length).toBe(1);
+
+        await adminAddRepresentative(adminUser, userToBeSuspended.name);
+        representatives = await getRepresentatives(currentRepresentativePeriod.id);
+        expect(representatives.length).toBe(2);
+
+        await adminRemoveRepresentative(adminUser, userToBeSuspended.name);
+        representatives = await getRepresentatives(currentRepresentativePeriod.id);
+        expect(representatives.length).toBe(1);
     })
 
 });

@@ -277,7 +277,7 @@ class TopicReplyCard extends React.Component<Props, State> {
 
     renderTimeAgo(timestamp: number) {
         return (
-            <Typography className='topic-timestamp' variant='body2' component='span'>
+            <Typography className='timestamp' variant='body2' component='span'>
                 {timeAgoReadable(timestamp)}
             </Typography>
         )

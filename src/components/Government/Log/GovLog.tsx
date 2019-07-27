@@ -49,14 +49,11 @@ export class GovLog extends React.Component<{}, GovLogState> {
         return (
             <Card key={action.id} className="gov-log-card">
                 <CardContent>
-                    <Typography className="topic-timestamp right" variant="body2" component="span">
+                    <Typography className="timestamp right" variant="body2" component="span">
                         {timeAgoReadable(action.timestamp)}
                     </Typography>
                     <Typography variant="subtitle1" color="textSecondary" component="p">
-                        <span dangerouslySetInnerHTML={{
-                            __html: parseContent(action.action)
-                        }}
-                            style={{ whiteSpace: "pre-line" }} />
+                        <span dangerouslySetInnerHTML={{ __html: parseContent(action.action) }}/>
                     </Typography>
                 </CardContent>
             </Card>
