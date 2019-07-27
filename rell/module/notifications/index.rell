@@ -3,7 +3,7 @@ class notification {
     trigger: text;
     content: text;
     mutable read: boolean;
-    timestamp;
+    index timestamp;
 }
 
 include 'operations';
