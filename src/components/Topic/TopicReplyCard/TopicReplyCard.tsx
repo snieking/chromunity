@@ -1,16 +1,17 @@
 import React from 'react';
 import { Link } from "react-router-dom";
-import { TopicReply, UserMeta } from '../../../types';
+import { TopicReply, UserMeta, User } from '../../../types';
 import { Card, Typography, IconButton, Badge, CardContent, TextField, Button, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
 import { timeAgoReadable } from '../../../util/util';
 import { getUser, ifEmptyAvatarThenPlaceholder, isRepresentative, getCachedUserMeta } from '../../../util/user-util';
-import { StarRate, Reply, Delete } from '@material-ui/icons';
+import { StarRate, Reply, Delete, Report } from '@material-ui/icons';
 import { getUserSettingsCached } from '../../../blockchain/UserService';
 import { removeTopicReply, removeReplyStarRating, giveReplyStarRating, getReplyStarRaters, getTopicSubReplies, createTopicSubReply } from '../../../blockchain/TopicService';
 
 import './TopicReplyCard.css';
 import '../Topic.css';
 import { parseContent } from '../../../util/text-parsing';
+import { reportReply } from '../../../blockchain/RepresentativesService';
 
 interface Props {
     topicId: string;
@@ -85,7 +86,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                     </Card>
                 </div>
                 {this.state.subReplies.map(reply => <TopicReplyCard
-                    key={"sub-reply" + reply.id}
+                    key={"reply-" + reply.id}
                     reply={reply}
                     indention={this.props.indention + 10}
                     topicId={this.props.topicId}
@@ -135,13 +136,14 @@ class TopicReplyCard extends React.Component<Props, State> {
                 >
                     <Typography
                         gutterBottom
-                        variant="body2"
+                        variant="subtitle1"
                         component="p"
                         className="typography"
-                    ><span className="author-name">@{this.props.reply.author}</span>
+                    >
+                        <span className="topic-author-name">@{this.props.reply.author}</span>
                     </Typography>
                 </Link>
-                {this.state.avatar !== "" ? <img src={this.state.avatar} className="author-avatar" alt="Profile Avatar" /> : <div></div>}
+                {this.state.avatar !== "" ? <img src={this.state.avatar} className="topic-author-avatar" alt="Profile Avatar" /> : <div></div>}
             </div>
         );
     }
@@ -173,11 +175,21 @@ class TopicReplyCard extends React.Component<Props, State> {
                     </Typography>
                 </div>
                 <Tooltip title="Reply">
-                    <IconButton aria-label="Reply"
+                    <IconButton 
+                        aria-label="Reply"
                         onClick={() => this.setState(prevState => ({ replyBoxOpen: !prevState.replyBoxOpen }))}
-                        style={{ marginBottom: "-20px" }}
+                        style={{ marginBottom: "-22px" }}
                     >
                         <Reply className={this.state.replyBoxOpen ? "pink-color" : "purple-color"} />
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Report">
+                    <IconButton 
+                        aria-label="Report" 
+                        onClick={() => this.reportReply()}
+                        style={{ marginBottom: "-22px" }}
+                    >
+                        <Report className="purple-color"/>
                     </IconButton>
                 </Tooltip>
                 {this.renderAdminActions()}
@@ -188,6 +200,17 @@ class TopicReplyCard extends React.Component<Props, State> {
         );
     }
 
+    reportReply() {
+        const user: User = getUser();
+
+        if (user.name != null) {
+            reportReply(user, this.props.topicId, this.props.reply.id);
+            window.location.reload();
+        } else {
+            window.location.replace("/user/login");
+        }
+    }
+
     renderAdminActions() {
         if (isRepresentative() && !this.props.reply.removed) {
             return (
@@ -195,7 +218,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                     <Tooltip title="Remove reply">
                         <IconButton aria-label="Remove reply"
                             onClick={() => this.setState({ removeReplyDialogOpen: true })}
-                            style={{ marginBottom: "-20px" }}
+                            style={{ marginBottom: "-22px" }}
                         >
                             <Delete className="red-color" />
                         </IconButton>

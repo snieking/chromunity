@@ -37,18 +37,26 @@ export interface UserNotification {
 }
 
 export interface Election {
-    id: string,
-    timestamp: number
+    id: string;
+    timestamp: number;
 }
 
 export interface UserSettings {
-    avatar: string,
-    description: string
+    avatar: string;
+    description: string;
 }
 
 export interface RepresentativeAction {
-    id: string,
-    representative: string,
-    timestamp: number,
-    action: string
+    id: string;
+    representative: string;
+    timestamp: number;
+    action: string;
+}
+
+export interface RepresentativeReport {
+    id: string;
+    user: string;
+    timestamp: number;
+    handled: boolean;
+    text: string;
 }

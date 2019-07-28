@@ -155,6 +155,15 @@
                                 <string>module/representative/queries.rell</string>
                             </entry>
 
+                            <entry key="representative/report/index.rell">
+                                <string>module/representative/report/index.rell</string>
+                            </entry>
+                            <entry key="representative/report/operations.rell">
+                                <string>module/representative/report/operations.rell</string>
+                            </entry>
+                            <entry key="representative/report/queries.rell">
+                                <string>module/representative/report/queries.rell</string>
+                            </entry>
                         </dict>
                     </entry>
                 </dict>

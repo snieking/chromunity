@@ -13,7 +13,7 @@ export function getTags(message: string): string[] {
 
 function parseHashtags(message: string): string {
     return message.replace(
-        /(#)([a-z\d-]+)/gi,
+        /\s(#)([a-z\d-]+)/gi,
         "<a  class='pink-typography' href='/tag/$2'>$1$2</a>"
     );
 }
@@ -27,7 +27,7 @@ function parseUsers(message: string): string {
 
 function parseTopics(message: string): string {
     return message.replace(
-        /(\/t\/)([a-z\d-]+)/gi,
+        /(\/t\/)([a-z\d-#]+)/gi,
         "<a  class='blue-typography' href='$1$2'><b>$1$2</b></a>"
     );
 }

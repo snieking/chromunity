@@ -9,7 +9,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Home from '@material-ui/icons/Home';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import { ExitToApp, Gavel, LocationCity, Face, HowToVote, Bookmarks, Settings, People } from "@material-ui/icons";
+import { ExitToApp, Gavel, LocationCity, Face, HowToVote, Bookmarks, Settings, People, Report } from "@material-ui/icons";
 
 import './HeaderNav.css';
 import { NotificationsButton } from "../../buttons/NotificationsButton";
@@ -187,6 +187,15 @@ export default function HeaderNav(props: HeaderNavProps) {
                                     <Gavel className="menu-item-button" />
                                 </ListItemIcon>
                                 <Typography className="menu-item-text">Log</Typography>
+                            </MenuItem>
+                        </Link>
+                        <br />
+                        <Link style={{ width: "100%"}} to="/gov/reports">
+                            <MenuItem onClick={handleGovClose}>
+                                <ListItemIcon>
+                                    <Report className="menu-item-button" />
+                                </ListItemIcon>
+                                <Typography className="menu-item-text">Reports</Typography>
                             </MenuItem>
                         </Link>
                     </Menu>
