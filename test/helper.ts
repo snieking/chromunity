@@ -1,4 +1,4 @@
-const getANumber = () => Math.round(Math.random()*100000);
+const getANumber = () => Math.round(Math.random()*100);
 
 function sleepUntil(timestampToSleepToAfter: number) {
     while (true) {

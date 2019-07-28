@@ -182,20 +182,22 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                 {this.renderTimeAgo()}
                 <br/>
                 <br/>
+                {this.state.avatar !== "" ? <img src={this.state.avatar} className="topic-author-avatar" alt="Profile Avatar" /> : <div></div>}
+                <br/>
                 <Link
                     className="pink-typography"
                     to={"/u/" + this.state.topic.author}
+                    style={{ float: "right" }}
                 >
                     <Typography
                         gutterBottom
                         variant="subtitle1"
-                        component="p"
+                        component="span"
                         className="typography"
                     >
                         <span className="topic-author-name">@{this.state.topic.author}</span>
                     </Typography>
                 </Link>
-                {this.state.avatar !== "" ? <img src={this.state.avatar} className="topic-author-avatar" alt="Profile Avatar" /> : <div></div>}
             </div>
         );
     }
@@ -243,7 +245,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                 </Tooltip>
                 <Tooltip title="Report">
                     <IconButton aria-label="Report" onClick={() => this.reportTopic()}>
-                        <Report className="purple-color" />
+                        <Report className="red-color" />
                     </IconButton>
                 </Tooltip>
                 {this.renderAdminActions()}
@@ -268,7 +270,8 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                 <div style={{ display: "inline-block" }}>
                     <Tooltip title="Remove topic">
                         <IconButton aria-label="Remove topic"
-                            onClick={() => this.setState({ removeTopicDialogOpen: true })}>
+                            onClick={() => this.setState({ removeTopicDialogOpen: true })}
+                        >
                             <Delete className="red-color" />
                         </IconButton>
                     </Tooltip>

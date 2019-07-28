@@ -130,20 +130,22 @@ class TopicReplyCard extends React.Component<Props, State> {
     renderAuthor() {
         return (
             <div className="right">
+                {this.state.avatar !== "" ? <img src={this.state.avatar} className="reply-author-avatar" alt="Profile Avatar" /> : <div></div>}
+                <br/>
                 <Link
                     className="pink-typography"
                     to={"/u/" + this.props.reply.author}
+                    style={{ float: "right" }}
                 >
                     <Typography
                         gutterBottom
                         variant="subtitle1"
-                        component="p"
+                        component="span"
                         className="typography"
                     >
-                        <span className="topic-author-name">@{this.props.reply.author}</span>
+                        <span className="reply-author-name">@{this.props.reply.author}</span>
                     </Typography>
                 </Link>
-                {this.state.avatar !== "" ? <img src={this.state.avatar} className="topic-author-avatar" alt="Profile Avatar" /> : <div></div>}
             </div>
         );
     }
@@ -175,7 +177,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                     </Typography>
                 </div>
                 <Tooltip title="Reply">
-                    <IconButton 
+                    <IconButton
                         aria-label="Reply"
                         onClick={() => this.setState(prevState => ({ replyBoxOpen: !prevState.replyBoxOpen }))}
                         style={{ marginBottom: "-22px" }}
@@ -184,12 +186,12 @@ class TopicReplyCard extends React.Component<Props, State> {
                     </IconButton>
                 </Tooltip>
                 <Tooltip title="Report">
-                    <IconButton 
-                        aria-label="Report" 
+                    <IconButton
+                        aria-label="Report"
                         onClick={() => this.reportReply()}
                         style={{ marginBottom: "-22px" }}
                     >
-                        <Report className="purple-color"/>
+                        <Report className="purple-color" />
                     </IconButton>
                 </Tooltip>
                 {this.renderAdminActions()}
@@ -214,7 +216,7 @@ class TopicReplyCard extends React.Component<Props, State> {
     renderAdminActions() {
         if (isRepresentative() && !this.props.reply.removed) {
             return (
-                <div style={{display: "inline-block"}}>
+                <div style={{ display: "inline-block" }}>
                     <Tooltip title="Remove reply">
                         <IconButton aria-label="Remove reply"
                             onClick={() => this.setState({ removeReplyDialogOpen: true })}
@@ -233,9 +235,9 @@ class TopicReplyCard extends React.Component<Props, State> {
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={() => this.setState({ removeReplyDialogOpen: false })} color="secondary">No</Button>
-                            <Button onClick={() => this.setState({ 
+                            <Button onClick={() => this.setState({
                                 removeReplyDialogOpen: false
-                                }, () => removeTopicReply(getUser(), this.props.reply.id).then(() => window.location.reload()))} color="primary">
+                            }, () => removeTopicReply(getUser(), this.props.reply.id).then(() => window.location.reload()))} color="primary">
                                 Yes
                             </Button>
                         </DialogActions>

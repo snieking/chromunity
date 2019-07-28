@@ -7,10 +7,24 @@
     background-color: #1E1A22;
 }
 
+.reply-author-avatar {
+    float: right;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 1px solid black;
+    background-color: #1E1A22;
+}
+
 .topic-author-name {
     display: block;
-    margin-top: 20px;
-    margin-right: 15px;
+    text-align: right;
+    margin-top: 2px;
+}
+
+.reply-author-name {
+    display: block;
+    margin-top: 2px;
 }
 
 .removed {
