@@ -16,6 +16,7 @@ import { User } from "../../../types";
 import { isRegistered, getUserSettingsCached } from "../../../blockchain/UserService";
 import { NotFound } from "../../NotFound/NotFound";
 import { suspendUser } from '../../../blockchain/RepresentativesService';
+import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
 
 export interface ProfileCardProps {
     username: string
@@ -158,26 +159,24 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
     renderUserPage() {
         if (this.state.registered) {
             return (
-                <Card key={"user-card"} className="profile-card">
-                    {this.renderActions()}
-                    {this.state.avatar !== "" ? <img src={this.state.avatar} className="avatar" alt="Profile Avatar" /> : <div></div>}
-                    <Typography gutterBottom variant="h6" component="h6"
-                        className="typography pink-typography profile-title">
-                        @{this.props.username}
-                    </Typography>
-
-                    <div className="profile-desc">
-                        <Typography variant="body2" color="textSecondary" component="p">
-                            {this.state.description}
-                        </Typography>
-                    </div>
-                    <div className="bottom-bar">
-                        <Typography variant="body1" color="textSecondary" component="p" className="stats-bar">
-                            <span className="stat"><b>{this.state.followers}</b></span> followers,
-                            <span className="stat"> <b>{this.state.userFollowings}</b></span> following
-                        </Typography>
-                    </div>
-                </Card>
+                <div>
+                    <ChromiaPageHeader text={"@" + this.props.username}/>
+                    <Card key={"user-card"} className="profile-card">
+                        {this.renderActions()}
+                        {this.state.avatar !== "" ? <img src={this.state.avatar} className="avatar" alt="Profile Avatar" /> : <div></div>}
+                        <div className="top-bar">
+                            <Typography variant="body1" color="textSecondary" component="p" className="stats-bar">
+                                <span className="stat"><b>{this.state.followers}</b></span> followers,
+                                <span className="stat"> <b>{this.state.userFollowings}</b></span> following
+                            </Typography>
+                        </div>
+                        <div className="profile-desc">
+                            <Typography variant="body2" color="textSecondary" component="p" paragraph>
+                                {this.state.description}
+                            </Typography>
+                        </div>
+                    </Card>
+                </div>
             )
         } else {
             return (

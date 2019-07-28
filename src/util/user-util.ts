@@ -21,7 +21,7 @@ export function getMnemonic(): string {
 }
 
 export function setUser(user: User): void {
-    SESSION_CACHE.set(USER_KEY, user);
+    LOCAL_CACHE.set(USER_KEY, user, 86400);
 }
 
 export function setUserMeta(meta: UserMeta): void {
@@ -47,7 +47,7 @@ export function getCachedUserMeta(): Promise<UserMeta> {
 }
 
 export function getUser(): User {
-    return SESSION_CACHE.get(USER_KEY, {});
+    return LOCAL_CACHE.get(USER_KEY, {});
 }
 
 export function godAlias(): string {
