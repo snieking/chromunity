@@ -16,8 +16,8 @@ describe("user utilities tests", () => {
 
     it("user cached in sessionStorage encrypted", async () => {
         setUser(user);
-        expect(sessionStorage.getItem("session-bucket:user")).toBeDefined();
-        expect(sessionStorage.getItem("session-bucket:user")).not.toMatch(/snieking/);
+        expect(localStorage.getItem("local-bucket:user")).toBeDefined();
+        expect(localStorage.getItem("local-bucket:user")).not.toMatch(/snieking/);
         expect(getUser().name).toBe(user.name);
         expect(getUser().seed).toBe(user.seed);
     });
