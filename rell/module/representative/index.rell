@@ -11,3 +11,4 @@ class representative_action {
 
 include 'operations';
 include 'queries';
+include '/representative/report/index';

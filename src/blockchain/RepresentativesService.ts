@@ -1,5 +1,5 @@
 import {GTX} from "./Postchain";
-import {Election, RepresentativeAction, User} from "../types";
+import {Election, RepresentativeAction, User, RepresentativeReport} from "../types";
 import { seedToKey } from "./CryptoService";
 import { uniqueId } from "../util/util";
 
@@ -15,6 +15,16 @@ export function getAllRepresentativeActionsPriorToTimestamp(timestamp: number, p
     return GTX.query("get_all_representative_actions", { timestamp: timestamp, page_size: pageSize });
 }
 
+export function handleReport(user: User, reportId: string) {
+    const { privKey, pubKey } = seedToKey(user.seed);
+
+    const tx = GTX.newTransaction([pubKey]);
+
+    tx.addOperation("handle_representative_report", user.name, reportId);
+    tx.sign(privKey, pubKey);
+    return tx.postAndWaitConfirmation();
+}
+
 export function suspendUser(user: User, userToBeSuspended: string) {
     const { privKey, pubKey } = seedToKey(user.seed);
 
@@ -24,4 +34,26 @@ export function suspendUser(user: User, userToBeSuspended: string) {
     tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
+}
+
+export function reportTopic(user: User, topicId: string) {
+    return report(user, "Topic /t/" + topicId + " was reported by @" + user.name);
+}
+
+export function reportReply(user: User, topicId: string, replyId: string) {
+    return report(user, "Reply /t/" + topicId + "#reply-" + replyId + " was reported by @" + user.name);
+}
+
+function report(user: User, text: string) {
+    const { privKey, pubKey } = seedToKey(user.seed);
+
+    const tx = GTX.newTransaction([pubKey]);
+
+    tx.addOperation("create_representative_report", user.name, uniqueId(), text);
+    tx.sign(privKey, pubKey);
+    return tx.postAndWaitConfirmation();
+}
+
+export function getUnhandledReports(): Promise<RepresentativeReport[]> {
+    return GTX.query("get_unhandled_representative_reports", {});
 }

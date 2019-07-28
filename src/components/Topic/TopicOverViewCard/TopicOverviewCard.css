@@ -2,6 +2,12 @@
     margin-right: 10px;
 }
 
+.author-name {
+    display: block;
+    margin-top: 7px;
+    margin-right: 10px;
+}
+
 .author-avatar {
     float: right;
     width: 40px;

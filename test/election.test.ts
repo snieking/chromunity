@@ -1,4 +1,4 @@
-import { RepresentativeAction, UserMeta } from './../src/types';
+import { RepresentativeAction, UserMeta, RepresentativeReport } from './../src/types';
 import { register, login, getUserMeta } from "../src/blockchain/UserService";
 import { triggerElection, signUpForElection, getUncompletedElection, completeElection, voteForCandidate, getElectionCandidates, getElectionVoteForUser, getElectionVotes } from "../src/blockchain/ElectionService";
 import { sleepUntil } from "./helper";
@@ -6,7 +6,7 @@ import { sleepUntil } from "./helper";
 
 import { User, Election, Topic, TopicReply } from "../src/types";
 import { getCachedUserMeta, setUserMeta } from "../src/util/user-util";
-import { getRepresentatives, getCurrentRepresentativePeriod, getAllRepresentativeActionsPriorToTimestamp, suspendUser } from "../src/blockchain/RepresentativesService";
+import { getRepresentatives, getCurrentRepresentativePeriod, getAllRepresentativeActionsPriorToTimestamp, suspendUser, getUnhandledReports, reportTopic, reportReply, handleReport } from "../src/blockchain/RepresentativesService";
 import { createTopic, getTopicsByUserPriorToTimestamp, removeTopic, getTopicById, createTopicReply, getTopicRepliesPriorToTimestamp, removeTopicReply } from "../src/blockchain/TopicService";
 import { adminAddRepresentative, adminRemoveRepresentative } from "../src/blockchain/AdminService";
 
@@ -119,6 +119,31 @@ describe("election test", () => {
         await adminRemoveRepresentative(adminUser, userToBeSuspended.name);
         representatives = await getRepresentatives(currentRepresentativePeriod.id);
         expect(representatives.length).toBe(1);
+    })
+
+    it("report topic & reply and handle them as a representative", async() => {
+        var unhandledReports: RepresentativeReport[] = await getUnhandledReports();
+        expect(unhandledReports.length).toBe(0);
+
+        await createTopic(adminUser, "This topic is about to be reported", "Toxic content in here!");
+        const topics: Topic[] = await getTopicsByUserPriorToTimestamp(adminUser.name, Date.now(), 1);
+        const topic: Topic = topics[0];
+
+        await reportTopic(adminUser, topic.id);
+        unhandledReports = await getUnhandledReports();
+        expect(unhandledReports.length).toBe(1);
+
+        await createTopicReply(adminUser, topic.id, "This message is even more toxic!");
+        const topicReplies: TopicReply[] = await getTopicRepliesPriorToTimestamp(topic.id, Date.now(), 10);
+        const topicReply: TopicReply = topicReplies[0];
+
+        await reportReply(adminUser, topic.id, topicReply.id);
+        unhandledReports = await getUnhandledReports();
+        expect(unhandledReports.length).toBe(2);
+
+        await handleReport(adminUser, unhandledReports[0].id);
+        unhandledReports = await getUnhandledReports();
+        expect(unhandledReports.length).toBe(1);
     })
 
 });

@@ -8,11 +8,12 @@ import { removeTopic, getTopicById, removeTopicStarRating, giveTopicStarRating, 
 import { Topic, User, TopicReply } from "../../../types";
 import { getUser, ifEmptyAvatarThenPlaceholder, isRepresentative } from "../../../util/user-util";
 import { timeAgoReadable } from "../../../util/util";
-import { StarRate, SubdirectoryArrowRight, CheckCircle, CheckCircleOutline, Delete } from "@material-ui/icons";
+import { StarRate, SubdirectoryArrowRight, CheckCircle, CheckCircleOutline, Delete, Report } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
 import TopicReplyCard from "../TopicReplyCard/TopicReplyCard";
 import { parseContent } from "../../../util/text-parsing";
 import LoadMoreButton from "../../buttons/LoadMoreButton";
+import { reportTopic } from "../../../blockchain/RepresentativesService";
 
 
 interface MatchParams {
@@ -179,21 +180,22 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
         return (
             <div className="right">
                 {this.renderTimeAgo()}
-                <Typography
-                    gutterBottom
-                    variant="h6"
-                    component="h6"
-                    className="typography"
+                <br/>
+                <br/>
+                <Link
+                    className="pink-typography"
+                    to={"/u/" + this.state.topic.author}
                 >
-                    <Link
-                        className="pink-typography"
-                        to={"/u/" + this.state.topic.author}
-                        style={{ marginLeft: "5px" }}
+                    <Typography
+                        gutterBottom
+                        variant="subtitle1"
+                        component="p"
+                        className="typography"
                     >
-                        @{this.state.topic.author}
-                    </Link>
-                </Typography>
-                {this.state.avatar !== "" ? <img src={this.state.avatar} className="author-avatar" alt="Profile Avatar" /> : <div></div>}
+                        <span className="topic-author-name">@{this.state.topic.author}</span>
+                    </Typography>
+                </Link>
+                {this.state.avatar !== "" ? <img src={this.state.avatar} className="topic-author-avatar" alt="Profile Avatar" /> : <div></div>}
             </div>
         );
     }
@@ -236,7 +238,12 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                 </Tooltip>
                 <Tooltip title="Subscribe">
                     <IconButton aria-label="Subscribe" onClick={() => this.toggleSubscription()}>
-                        {this.state.subscribed ? <CheckCircle className="blue-color" /> : <CheckCircleOutline className="purple-color"/>}
+                        {this.state.subscribed ? <CheckCircle className="blue-color" /> : <CheckCircleOutline className="purple-color" />}
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Report">
+                    <IconButton aria-label="Report" onClick={() => this.reportTopic()}>
+                        <Report className="purple-color" />
                     </IconButton>
                 </Tooltip>
                 {this.renderAdminActions()}
@@ -244,14 +251,25 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
         );
     }
 
+    reportTopic() {
+        const user: User = getUser();
+
+        if (user.name != null) {
+            reportTopic(user, this.state.topic.id);
+            window.location.reload();
+        } else {
+            window.location.replace("/user/login");
+        }
+    }
+
     renderAdminActions() {
         if (isRepresentative() && !this.state.topic.removed) {
             return (
-                <div style={{display: "inline-block"}}>
+                <div style={{ display: "inline-block" }}>
                     <Tooltip title="Remove topic">
-                        <IconButton aria-label="Remove topic" 
+                        <IconButton aria-label="Remove topic"
                             onClick={() => this.setState({ removeTopicDialogOpen: true })}>
-                            <Delete className="red-color"/>
+                            <Delete className="red-color" />
                         </IconButton>
                     </Tooltip>
 
@@ -264,14 +282,14 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={() => this.setState({ removeTopicDialogOpen: false })} color="secondary">No</Button>
-                            <Button onClick={() => this.setState({ 
+                            <Button onClick={() => this.setState({
                                 removeTopicDialogOpen: false
-                                }, () => removeTopic(getUser(), this.props.match.params.id).then(() => window.location.reload()))} color="primary">
+                            }, () => removeTopic(getUser(), this.props.match.params.id).then(() => window.location.reload()))} color="primary">
                                 Yes
                             </Button>
                         </DialogActions>
                     </Dialog>
-            </div>
+                </div>
             )
         }
     }

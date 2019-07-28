@@ -13,6 +13,7 @@ import { TagWall } from "./components/Walls/TagWall/TagWall";
 import Settings from "./components/user/Settings/Settings";
 import TopicWall from "./components/Walls/TopicWall/TopicWall";
 import { FullTopic } from "./components/Topic/FullTopic/FullTopic";
+import { Reports } from "./components/Government/Reports/Reports";
 
 export class App extends React.Component {
     render() {
@@ -32,6 +33,7 @@ export class App extends React.Component {
                 <Route path="/gov/representatives" component={Representatives}/>
                 <Route path="/gov/election" component={Election}/>
                 <Route path="/gov/log" component={GovLog}/>
+                <Route path="/gov/reports" component={Reports}/>
                 <Route path='/t/:id' component={FullTopic}/>
             </Router>
         );
