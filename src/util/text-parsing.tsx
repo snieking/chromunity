@@ -13,8 +13,8 @@ export function getTags(message: string): string[] {
 
 function parseHashtags(message: string): string {
     return message.replace(
-        /\s(#)([a-z\d-]+)/gi,
-        "<a  class='pink-typography' href='/tag/$2'>$1$2</a>"
+        /(\s)(#)([a-z\d-]+)/gi,
+        "$1<a  class='pink-typography' href='/tag/$3'>$2$3</a>"
     );
 }
 
