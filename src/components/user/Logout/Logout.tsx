@@ -10,6 +10,7 @@ const Logout: React.FC = () => {
 
 function logout() {
     sessionStorage.clear();
+    localStorage.clear();
 }
 
 export default Logout;

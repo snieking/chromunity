@@ -117,12 +117,12 @@ class TopicReplyCard extends React.Component<Props, State> {
                 <Link
                     className={"author-link"}
                     to={"/u/" + this.props.reply.author}
-                    style={{ 
+                    style={{
                         float: "right",
                         marginTop: "-17px",
                         marginBottom: "7px",
                         marginRight: "-16px",
-                        backgroundColor: this.props.representatives.includes(this.props.reply.author) ? "darkorange" : "#FFAFC1" 
+                        backgroundColor: this.props.representatives.includes(this.props.reply.author) ? "darkorange" : "#FFAFC1"
                     }}
                 >
                     <Typography
@@ -134,7 +134,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                         <span className="reply-author-name">@{this.props.reply.author}</span>
                     </Typography>
                 </Link>
-                <br/>
+                <br />
                 {this.state.avatar !== "" ? <img src={this.state.avatar} className="reply-author-avatar" alt="Profile Avatar" /> : <div></div>}
             </div>
         );
@@ -143,19 +143,6 @@ class TopicReplyCard extends React.Component<Props, State> {
     renderCardContent() {
         return (
             <CardContent>
-                <div className="left">
-                    <Tooltip title="Like">
-                        <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
-                            <Badge
-                                className="star-badge"
-                                color="primary"
-                                badgeContent={this.state.stars}
-                            >
-                                <StarRate className={this.state.ratedByMe ? "yellow-color" : "purple-color"} />
-                            </Badge>
-                        </IconButton>
-                    </Tooltip>
-                </div>
                 {this.renderAuthor()}
                 <div className="reply-overview-details">
                     {this.renderTimeAgo(this.props.reply.timestamp)}
@@ -166,25 +153,36 @@ class TopicReplyCard extends React.Component<Props, State> {
                             style={{ whiteSpace: "pre-line" }} />
                     </Typography>
                 </div>
-                <Tooltip title="Reply">
-                    <IconButton
-                        aria-label="Reply"
-                        onClick={() => this.setState(prevState => ({ replyBoxOpen: !prevState.replyBoxOpen }))}
-                        style={{ marginBottom: "-22px" }}
-                    >
-                        <Reply className={this.state.replyBoxOpen ? "pink-color" : "purple-color"} />
-                    </IconButton>
-                </Tooltip>
-                <Tooltip title="Report">
-                    <IconButton
-                        aria-label="Report"
-                        onClick={() => this.reportReply()}
-                        style={{ marginBottom: "-22px" }}
-                    >
-                        <Report className="purple-color" />
-                    </IconButton>
-                </Tooltip>
-                {this.renderAdminActions()}
+                <div className={"bottom-bar"}>
+                <Tooltip title="Like">
+                        <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
+                            <Badge
+                                className="star-badge"
+                                color="primary"
+                                badgeContent={this.state.stars}
+                            >
+                                <StarRate className={this.state.ratedByMe ? "yellow-color" : "purple-color"} />
+                            </Badge>
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Reply">
+                        <IconButton
+                            aria-label="Reply"
+                            onClick={() => this.setState(prevState => ({ replyBoxOpen: !prevState.replyBoxOpen }))}
+                        >
+                            <Reply className={this.state.replyBoxOpen ? "pink-color" : "purple-color"} />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Report">
+                        <IconButton
+                            aria-label="Report"
+                            onClick={() => this.reportReply()}
+                        >
+                            <Report className="purple-color" />
+                        </IconButton>
+                    </Tooltip>
+                    {this.renderAdminActions()}
+                </div>
                 <div>
                     {this.renderReplyBox()}
                 </div>
@@ -210,7 +208,6 @@ class TopicReplyCard extends React.Component<Props, State> {
                     <Tooltip title="Remove reply">
                         <IconButton aria-label="Remove reply"
                             onClick={() => this.setState({ removeReplyDialogOpen: true })}
-                            style={{ marginBottom: "-22px" }}
                         >
                             <Delete className="red-color" />
                         </IconButton>

@@ -2,6 +2,7 @@ import { User } from "../types";
 import { seedToKey } from "./CryptoService";
 import { GTX } from "./Postchain";
 import { uniqueId } from "../util/util";
+import { clearRepresentativesCache } from "./RepresentativesService";
 
 export function adminAddRepresentative(user: User, username: string) {
     return toggleRepresentative(user, username, "tmp_add_representative");
@@ -12,6 +13,7 @@ export function adminRemoveRepresentative(user: User, username: string) {
 }
 
 function toggleRepresentative(user: User, username: string, rellOperation: string) {
+    clearRepresentativesCache();
     const { privKey, pubKey } = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);

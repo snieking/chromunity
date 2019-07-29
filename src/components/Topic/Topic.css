@@ -35,6 +35,11 @@
     border: solid 1px black;
 }
 
+.bottom-bar {
+    margin-bottom: -22px;
+    margin-left: -10px;
+}
+
 .removed {
     opacity: 0.6;
 }

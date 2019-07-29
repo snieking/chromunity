@@ -11,6 +11,10 @@ export function getCurrentRepresentativePeriod(): Promise<Election> {
     return GTX.query("get_current_representative_period", { timestamp: Date.now() });
 }
 
+export function clearRepresentativesCache() {
+    representativesCache.remove("current-reps");
+}
+
 export function getRepresentatives(): Promise<string[]> {
     const currentReps: string[] = representativesCache.get("current-reps");
     if (currentReps != null) {
