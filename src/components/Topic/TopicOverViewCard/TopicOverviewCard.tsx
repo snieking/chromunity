@@ -21,10 +21,7 @@ interface State {
     stars: number;
     ratedByMe: boolean;
     redirectToFullCard: boolean;
-    replyBoxOpen: boolean;
-    replyMessage: string;
     isRepresentative: boolean;
-    hideThreadConfirmDialogOpen: boolean;
     avatar: string;
     tags: string[];
 }
@@ -38,10 +35,7 @@ class TopicOverviewCard extends React.Component<Props, State> {
             tags: [],
             ratedByMe: false,
             redirectToFullCard: false,
-            replyBoxOpen: false,
-            replyMessage: "",
             isRepresentative: false,
-            hideThreadConfirmDialogOpen: false,
             avatar: ""
         };
     }

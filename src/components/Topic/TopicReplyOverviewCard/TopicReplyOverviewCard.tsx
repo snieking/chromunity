@@ -18,13 +18,9 @@ interface Props {
 interface State {
     stars: number;
     ratedByMe: boolean;
-    redirectToFullCard: boolean;
-    replyBoxOpen: boolean;
-    replyMessage: string;
+    redirectToTopic: boolean;
     isRepresentative: boolean;
-    hideThreadConfirmDialogOpen: boolean;
     avatar: string;
-    tags: string[];
 }
 
 class TopicReplyOverviewCard extends React.Component<Props, State> {
@@ -33,25 +29,21 @@ class TopicReplyOverviewCard extends React.Component<Props, State> {
 
         this.state = {
             stars: 0,
-            tags: [],
             ratedByMe: false,
-            redirectToFullCard: false,
-            replyBoxOpen: false,
-            replyMessage: "",
+            redirectToTopic: false,
             isRepresentative: false,
-            hideThreadConfirmDialogOpen: false,
             avatar: ""
         };
     }
 
     render() {
-        if (this.state.redirectToFullCard) {
+        if (this.state.redirectToTopic) {
             return (<Redirect to={"/t/" + this.props.reply.topic_id} />);
         } else {
             return (
                 <div className={this.props.reply.removed ? "removed" : ""}>
                     <Card raised={true} key={this.props.reply.id} className='topic-card'>
-                        <CardActionArea onClick={() => this.setState({ redirectToFullCard: true })}>
+                        <CardActionArea onClick={() => this.setState({ redirectToTopic: true })}>
                             {this.renderCardContent()}
                         </CardActionArea>
                     </Card>
