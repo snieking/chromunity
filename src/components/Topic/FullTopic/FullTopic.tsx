@@ -194,7 +194,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                         float: "right",
                         marginTop: "7px",
                         marginRight: "-16px",
-                        backgroundColor: this.state.representatives.includes(this.state.topic.author) ? "darkorange" : "#FFAFC1" 
+                        backgroundColor: this.state.representatives.includes(this.state.topic.author) ? "#CB8FE9" : "#FFAFC1" 
                     }}
                 >
                     <Typography

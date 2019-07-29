@@ -122,7 +122,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                         marginTop: "-17px",
                         marginBottom: "7px",
                         marginRight: "-16px",
-                        backgroundColor: this.props.representatives.includes(this.props.reply.author) ? "darkorange" : "#FFAFC1"
+                        backgroundColor: this.props.representatives.includes(this.props.reply.author) ? "#CB8FE9" : "#FFAFC1"
                     }}
                 >
                     <Typography

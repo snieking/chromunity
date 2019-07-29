@@ -20,6 +20,6 @@ operation handle_representative_report(username: text, id: text) {
         id = op_context.transaction.tx_rid, 
         representative,
         op_context.last_block_time,
-        action = "Report '" + report.text + "' was handled by @" + user.name
+        action = "Report: '" + report.text + "' was handled by @" + user.name
     );
 }
