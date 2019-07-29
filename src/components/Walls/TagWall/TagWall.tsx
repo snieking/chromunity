@@ -10,6 +10,7 @@ import LoadMoreButton from '../../buttons/LoadMoreButton';
 import { getUser } from '../../../util/user-util';
 import { unfollowTag, followTag, getFollowedTags } from '../../../blockchain/TagService';
 import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
+import { getRepresentatives } from '../../../blockchain/RepresentativesService';
 
 interface MatchParams {
     tag: string
@@ -21,6 +22,7 @@ export interface TagWallProps extends RouteComponentProps<MatchParams> {
 
 export interface TagWallState {
     topics: Topic[];
+    representatives: string[];
     id: string;
     timestampOnOldestTopic: number;
     isLoading: boolean;
@@ -36,6 +38,7 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
         super(props);
         this.state = {
             topics: [],
+            representatives: [],
             id: "",
             timestampOnOldestTopic: Date.now(),
             isLoading: true,
@@ -49,6 +52,7 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
 
     componentDidMount(): void {
         this.retrieveTopics();
+        getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
 
         if (getUser().name != null) {
             const tag = this.props.match.params.tag;
@@ -120,7 +124,7 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
 
     renderLoadMoreButton() {
         if (this.state.couldExistOlderTopics) {
-            return (<LoadMoreButton onClick={this.retrieveOlderTopics}/>)
+            return (<LoadMoreButton onClick={this.retrieveOlderTopics} />)
         }
     }
 
@@ -129,10 +133,14 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
             <div>
                 <Container fixed maxWidth="md">
                     <div className="thread-wall-container">
-                        <ChromiaPageHeader text={"#" + this.props.match.params.tag}/>
+                        <ChromiaPageHeader text={"#" + this.props.match.params.tag} />
                         {this.renderFollowSwitch()}
                         {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
-                        {this.state.topics.map(topic => <TopicOverviewCard key={topic.id} topic={topic} />)}
+                        {this.state.topics.map(topic => <TopicOverviewCard
+                            key={topic.id}
+                            topic={topic}
+                            isRepresentative={this.state.representatives.includes(topic.author)}
+                        />)}
                     </div>
                     {this.renderLoadMoreButton()}
                 </Container>

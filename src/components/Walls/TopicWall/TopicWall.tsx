@@ -8,6 +8,7 @@ import { getUser } from '../../../util/user-util';
 import LoadMoreButton from '../../buttons/LoadMoreButton';
 import { TrendingTags } from '../../TrendingTags/TrendingTags';
 import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
+import { getRepresentatives } from '../../../blockchain/RepresentativesService';
 
 interface Props {
     type: string;
@@ -15,6 +16,7 @@ interface Props {
 
 interface State {
     topics: Topic[];
+    representatives: string[];
     isLoading: boolean;
     couldExistOlderTopics: boolean;
 }
@@ -26,6 +28,7 @@ class TopicWall extends React.Component<Props, State> {
         super(props);
         this.state = {
             topics: [],
+            representatives: [],
             isLoading: true,
             couldExistOlderTopics: false
         };
@@ -54,12 +57,16 @@ class TopicWall extends React.Component<Props, State> {
         return (
             <div>
                 <Container fixed>
-                    <ChromiaPageHeader text={this.getHeader()}/>
+                    <ChromiaPageHeader text={this.getHeader()} />
                     {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
-                    {this.props.type === "tagFollowings" ? <TrendingTags/> : <div></div>}
+                    {this.props.type === "tagFollowings" ? <TrendingTags /> : <div></div>}
                     <div className='topic-wall-container'>
-                        {this.props.type === "tagFollowings" ? <ChromiaPageHeader text="Followed Tags"/> : <div></div>}
-                        {this.state.topics.map(topic => <TopicOverviewCard key={'card-' + topic.id} topic={topic} />)}
+                        {this.props.type === "tagFollowings" ? <ChromiaPageHeader text="Followed Tags" /> : <div></div>}
+                        {this.state.topics.map(topic => <TopicOverviewCard
+                            key={'card-' + topic.id}
+                            topic={topic}
+                            isRepresentative={this.state.representatives.includes(topic.author)}
+                        />)}
                     </div>
                     {this.renderLoadMoreButton()}
                 </Container>
@@ -70,6 +77,7 @@ class TopicWall extends React.Component<Props, State> {
 
     componentDidMount() {
         this.retrieveLatestTopics();
+        getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
     }
 
     retrieveLatestTopicsForAll() {

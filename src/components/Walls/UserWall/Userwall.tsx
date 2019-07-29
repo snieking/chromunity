@@ -9,6 +9,7 @@ import { getTopicsByUserPriorToTimestamp } from '../../../blockchain/TopicServic
 import TopicOverviewCard from '../../Topic/TopicOverViewCard/TopicOverviewCard';
 import { SubdirectoryArrowRight } from '@material-ui/icons';
 import LoadMoreButton from '../../buttons/LoadMoreButton';
+import { getRepresentatives } from '../../../blockchain/RepresentativesService';
 
 interface MatchParams {
     userId: string;
@@ -20,6 +21,7 @@ export interface UserWallProps extends RouteComponentProps<MatchParams> {
 
 export interface UserWallState {
     topics: Topic[];
+    representatives: string[];
     timestampOnOldestThread: number;
     isLoading: boolean;
     couldExistOlderTopics: boolean;
@@ -33,6 +35,7 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
         super(props);
         this.state = {
             topics: [],
+            representatives: [],
             timestampOnOldestThread: Date.now(),
             isLoading: true,
             couldExistOlderTopics: false
@@ -45,6 +48,7 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
 
     componentDidMount(): void {
         this.retrieveTopics();
+        getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
     }
 
     retrieveTopics() {
@@ -58,7 +62,7 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
                         isLoading: false,
                         couldExistOlderTopics: retrievedTopics.length >= topicsPageSize
                     }));
-                });
+                }).catch(() => this.setState({ isLoading: false }));
         }
     }
 
@@ -92,7 +96,7 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
 
     renderLoadMoreButton() {
         if (this.state.couldExistOlderTopics) {
-                return (<LoadMoreButton onClick={this.retrieveOlderTopics}/>)
+            return (<LoadMoreButton onClick={this.retrieveOlderTopics} />)
         }
     }
 
@@ -101,13 +105,15 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
             <div>
                 <Container fixed maxWidth="md">
                     <div className="thread-wall-container">
-                        <br />
                         {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
                         {this.renderUserPageIntro()}
                         {this.state.topics.length > 0
                             ? (<SubdirectoryArrowRight className="nav-button button-center" />)
                             : (<div />)}
-                        {this.state.topics.map(topic => <TopicOverviewCard topic={topic} />)}
+                        {this.state.topics.map(topic => <TopicOverviewCard 
+                            topic={topic}
+                            isRepresentative={this.state.representatives.includes(topic.author)}
+                        />)}
                     </div>
                     {this.renderLoadMoreButton()}
                 </Container>

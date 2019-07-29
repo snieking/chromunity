@@ -14,6 +14,7 @@ import { getTags } from '../../../util/text-parsing';
 
 interface Props {
     topic: Topic;
+    isRepresentative: boolean;
 }
 
 interface State {
@@ -106,7 +107,7 @@ class TopicOverviewCard extends React.Component<Props, State> {
         return (
             <div className="right">
                 <Link
-                    className="pink-typography"
+                    className={this.props.isRepresentative ? "rep-typography" : "pink-typography"}
                     to={"/u/" + this.props.topic.author}
                     style={{ marginBottom: "18px"}}
                 >

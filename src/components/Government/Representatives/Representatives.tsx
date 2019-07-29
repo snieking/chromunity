@@ -2,15 +2,13 @@ import React from 'react';
 
 import './Representatives.css';
 import { Container, Card, CardContent, TextField, Button, Grid } from "@material-ui/core";
-import { getCurrentRepresentativePeriod, getRepresentatives } from "../../../blockchain/RepresentativesService";
-import { Election } from "../../../types";
+import { getRepresentatives } from "../../../blockchain/RepresentativesService";
 import RepresentativeCard from './RepresentativeCard/RepresentativeCard';
 import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
 import { getUser } from '../../../util/user-util';
 import { adminAddRepresentative, adminRemoveRepresentative } from '../../../blockchain/AdminService';
 
 export interface RepresentativesState {
-    mandatPeriodId: string;
     representatives: string[];
     targetUsername: string;
 }
@@ -21,7 +19,6 @@ export class Representatives extends React.Component<{}, RepresentativesState> {
         super(props);
         this.state = {
             representatives: [],
-            mandatPeriodId: "",
             targetUsername: ""
         };
 
@@ -29,14 +26,9 @@ export class Representatives extends React.Component<{}, RepresentativesState> {
     }
 
     componentDidMount(): void {
-        getCurrentRepresentativePeriod().then((election: Election) => {
-            if (election != null) {
-                getRepresentatives(election.id).then((representatives: string[]) => this.setState({
-                    mandatPeriodId: election.id,
-                    representatives: representatives
-                }));
-            }
-        });
+        getRepresentatives().then((representatives: string[]) => this.setState({
+            representatives: representatives
+        }));
     }
 
     render() {

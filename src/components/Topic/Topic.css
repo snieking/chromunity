@@ -19,12 +19,20 @@
 .topic-author-name {
     display: block;
     text-align: right;
-    margin-top: 2px;
+    padding-top: 2px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 .reply-author-name {
     display: block;
-    margin-top: 2px;
+    padding-top: 2px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.author-link {
+    border: solid 1px black;
 }
 
 .removed {

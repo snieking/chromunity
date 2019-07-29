@@ -3,12 +3,25 @@ import {Election, RepresentativeAction, User, RepresentativeReport} from "../typ
 import { seedToKey } from "./CryptoService";
 import { uniqueId } from "../util/util";
 
+import * as BoomerangCache from "boomerang-cache";
+
+const representativesCache = BoomerangCache.create("rep-bucket", { storage: "session", encrypt: true });
+
 export function getCurrentRepresentativePeriod(): Promise<Election> {
     return GTX.query("get_current_representative_period", { timestamp: Date.now() });
 }
 
-export function getRepresentatives(representativePeriodId: string): Promise<string[]> {
-    return GTX.query("get_representatives", { representative_period_id: representativePeriodId });
+export function getRepresentatives(): Promise<string[]> {
+    const currentReps: string[] = representativesCache.get("current-reps");
+    if (currentReps != null) {
+        return new Promise<string[]>(resolve => resolve(currentReps));
+    }
+
+    return GTX.query("get_representatives", {})
+        .then((reps: string[]) => {
+            representativesCache.set("current-reps", reps, 600);
+            return reps;
+        });
 }
 
 export function getAllRepresentativeActionsPriorToTimestamp(timestamp: number, pageSize: number): Promise<RepresentativeAction[]> {

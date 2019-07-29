@@ -17,6 +17,7 @@ interface Props {
     topicId: string;
     reply: TopicReply;
     indention: number;
+    representatives: string[];
 }
 
 interface State {
@@ -54,24 +55,6 @@ class TopicReplyCard extends React.Component<Props, State> {
         this.sendReply = this.sendReply.bind(this);
     }
 
-    static parseContent(message: string): string {
-        return this.parseUsers(this.parseHashtags(message));
-    }
-
-    static parseHashtags(message: string): string {
-        return message.replace(
-            /(#)([a-z\d-]+)/gi,
-            "<a  class='pink-typography' href='/tag/$2'>$1$2</a>"
-        );
-    }
-
-    static parseUsers(message: string): string {
-        return message.replace(
-            /(@)([a-z\d-]+)/gi,
-            "<a  class='purple-typography' href='/u/$2'><b>$1$2</b></a>"
-        );
-    }
-
     render() {
         return (
             <div>
@@ -90,6 +73,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                     reply={reply}
                     indention={this.props.indention + 10}
                     topicId={this.props.topicId}
+                    representatives={this.props.representatives}
                 />)}
             </div>
         );
@@ -130,12 +114,16 @@ class TopicReplyCard extends React.Component<Props, State> {
     renderAuthor() {
         return (
             <div className="right">
-                {this.state.avatar !== "" ? <img src={this.state.avatar} className="reply-author-avatar" alt="Profile Avatar" /> : <div></div>}
-                <br/>
                 <Link
-                    className="pink-typography"
+                    className={"author-link"}
                     to={"/u/" + this.props.reply.author}
-                    style={{ float: "right" }}
+                    style={{ 
+                        float: "right",
+                        marginTop: "-17px",
+                        marginBottom: "7px",
+                        marginRight: "-16px",
+                        backgroundColor: this.props.representatives.includes(this.props.reply.author) ? "darkorange" : "#FFAFC1" 
+                    }}
                 >
                     <Typography
                         gutterBottom
@@ -146,6 +134,8 @@ class TopicReplyCard extends React.Component<Props, State> {
                         <span className="reply-author-name">@{this.props.reply.author}</span>
                     </Typography>
                 </Link>
+                <br/>
+                {this.state.avatar !== "" ? <img src={this.state.avatar} className="reply-author-avatar" alt="Profile Avatar" /> : <div></div>}
             </div>
         );
     }

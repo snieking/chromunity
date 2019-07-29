@@ -58,7 +58,6 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
         isRegistered(this.props.username)
             .then(isRegistered => {
                 this.setState({ registered: isRegistered });
-                console.log("Registered: ", isRegistered);
 
                 if (isRegistered) {
                     const user: User = getUser();

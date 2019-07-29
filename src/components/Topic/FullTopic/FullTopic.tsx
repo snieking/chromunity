@@ -13,7 +13,7 @@ import { getUserSettingsCached } from "../../../blockchain/UserService";
 import TopicReplyCard from "../TopicReplyCard/TopicReplyCard";
 import { parseContent } from "../../../util/text-parsing";
 import LoadMoreButton from "../../buttons/LoadMoreButton";
-import { reportTopic } from "../../../blockchain/RepresentativesService";
+import { reportTopic, getRepresentatives } from "../../../blockchain/RepresentativesService";
 
 
 interface MatchParams {
@@ -26,6 +26,7 @@ export interface FullTopicProps extends RouteComponentProps<MatchParams> {
 
 export interface FullTopicState {
     topic: Topic;
+    representatives: string[];
     avatar: string;
     stars: number;
     ratedByMe: boolean;
@@ -57,6 +58,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
 
         this.state = {
             topic: initialTopic,
+            representatives: [],
             avatar: "",
             ratedByMe: false,
             subscribed: false,
@@ -83,6 +85,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             ratedByMe: usersWhoStarRated.includes(getUser().name)
         }));
         getTopicSubscribers(id).then(subscribers => this.setState({ subscribed: subscribers.includes(getUser().name) }));
+        getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
     }
 
     consumeTopicData(topic: Topic): void {
@@ -185,9 +188,14 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                 {this.state.avatar !== "" ? <img src={this.state.avatar} className="topic-author-avatar" alt="Profile Avatar" /> : <div></div>}
                 <br/>
                 <Link
-                    className="pink-typography"
+                    className={"author-link"}
                     to={"/u/" + this.state.topic.author}
-                    style={{ float: "right" }}
+                    style={{ 
+                        float: "right",
+                        marginTop: "7px",
+                        marginRight: "-16px",
+                        backgroundColor: this.state.representatives.includes(this.state.topic.author) ? "darkorange" : "#FFAFC1" 
+                    }}
                 >
                     <Typography
                         gutterBottom
@@ -386,6 +394,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                     reply={reply}
                     indention={0}
                     topicId={this.state.topic.id}
+                    representatives={this.state.representatives}
                 />)}
                 {this.renderLoadMoreButton()}
                 {this.renderReplyButton()}

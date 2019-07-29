@@ -1,4 +1,4 @@
 
 query get_user(name) {
-    return user@{ .name == name } ( .name, .pubkey, .registered );
+    return user@?{ .name == name } ( .name, .pubkey, .registered );
 }

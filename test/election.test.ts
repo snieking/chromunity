@@ -62,7 +62,7 @@ describe("election test", () => {
         sleepUntil(electionTimestamp); // Sleep until election is over
         await completeElection(adminUser, sortedCandidatesByVote);
 
-        const representatives: string[] = await getRepresentatives(electionId);
+        const representatives: string[] = await getRepresentatives();
         const election: Election = await getCurrentRepresentativePeriod();
 
         expect(election.id).toBe(electionId);
@@ -107,17 +107,16 @@ describe("election test", () => {
     })
 
     it("admin toggle representative on user", async() => {
-        const currentRepresentativePeriod: Election = await getCurrentRepresentativePeriod();
-        var representatives: string[] = await getRepresentatives(currentRepresentativePeriod.id);
+        var representatives: string[] = await getRepresentatives();
 
         expect(representatives.length).toBe(1);
 
         await adminAddRepresentative(adminUser, userToBeSuspended.name);
-        representatives = await getRepresentatives(currentRepresentativePeriod.id);
+        representatives = await getRepresentatives();
         expect(representatives.length).toBe(2);
 
         await adminRemoveRepresentative(adminUser, userToBeSuspended.name);
-        representatives = await getRepresentatives(currentRepresentativePeriod.id);
+        representatives = await getRepresentatives();
         expect(representatives.length).toBe(1);
     })
 

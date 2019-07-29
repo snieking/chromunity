@@ -1,7 +1,7 @@
 import { UserMeta } from './../types';
 import {User} from "../types";
 import * as BoomerangCache from "boomerang-cache";
-import {getCurrentRepresentativePeriod, getRepresentatives} from "../blockchain/RepresentativesService";
+import {getRepresentatives} from "../blockchain/RepresentativesService";
 import { getUserMeta } from '../blockchain/UserService';
 
 const LOCAL_CACHE = BoomerangCache.create('local-bucket', {storage: 'local', encrypt: true});
@@ -72,8 +72,7 @@ export function isRepresentative(): Promise<boolean> {
         return new Promise<boolean>(resolve => resolve(isRepresentative));
     }
 
-    return getCurrentRepresentativePeriod()
-        .then(election => getRepresentatives(election.id))
+    return getRepresentatives()
         .then((representatives: string[]) => representatives.includes(getUser().name))
         .then((isRepresentative: boolean) => {
             setRepresentative(isRepresentative);
