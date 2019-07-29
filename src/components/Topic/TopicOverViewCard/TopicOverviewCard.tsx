@@ -59,11 +59,7 @@ class TopicOverviewCard extends React.Component<Props, State> {
     componentDidMount() {
         this.setState({ tags: getTags(this.props.topic.message).slice(0, 3) });
         getUserSettingsCached(this.props.topic.author, 1440)
-            .then(settings => {
-                this.setState({
-                    avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.topic.author)
-                });
-            });
+            .then(settings => this.setState({ avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.topic.author) }));
         
         const user: User = getUser();
         getTopicStarRaters(this.props.topic.id).then(usersWhoStarRated => this.setState({

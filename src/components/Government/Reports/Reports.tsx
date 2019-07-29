@@ -31,5 +31,5 @@ export class Reports extends React.Component<{}, State>{
                 {this.state.reports.map(report => <ReportCard key={report.id} report={report}/>)}
             </Container>
         );
-    };
-};
+    }
+}
