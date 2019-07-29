@@ -190,7 +190,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                 {this.state.avatar !== "" ? <img src={this.state.avatar} className="topic-author-avatar" alt="Profile Avatar" /> : <div></div>}
                 <br />
                 <Link
-                    className={"author-link"}
+                    className={"topic-author-link"}
                     to={"/u/" + this.state.topic.author}
                     style={{
                         float: "right",

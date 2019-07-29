@@ -31,8 +31,16 @@
     padding-right: 5px;
 }
 
-.author-link {
-    border: solid 1px black;
+.topic-author-link {
+    border-top: dashed 1px #1E1A22;
+    border-left: dashed 1px #1E1A22;
+    border-radius: 5px 0 0 0;
+}
+
+.reply-author-link {
+    border-bottom: dashed 1px #1E1A22;
+    border-left: dashed 1px #1E1A22;
+    border-radius: 0 0 0 5px;
 }
 
 .bottom-bar {

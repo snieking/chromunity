@@ -117,7 +117,7 @@ class TopicReplyCard extends React.Component<Props, State> {
         return (
             <div className="right">
                 <Link
-                    className={"author-link"}
+                    className={"reply-author-link"}
                     to={"/u/" + this.props.reply.author}
                     style={{
                         float: "right",
