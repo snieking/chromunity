@@ -6,7 +6,7 @@ import { createTopic, getTopicsByUserPriorToTimestamp, giveTopicStarRating,
     getTopicStarRaters, removeTopicStarRating, getTopicsAfterTimestamp, 
     getTopicsPriorToTimestamp, getTopicById, createTopicReply, 
     getTopicRepliesPriorToTimestamp, giveReplyStarRating, getReplyStarRaters, 
-    removeReplyStarRating, subscribeToTopic, getTopicSubscribers, unsubscribeFromTopic, createTopicSubReply, getTopicSubReplies 
+    removeReplyStarRating, subscribeToTopic, getTopicSubscribers, unsubscribeFromTopic, createTopicSubReply, getTopicSubReplies, getTopicRepliesByUserPriorToTimestamp 
 } from '../src/blockchain/TopicService';
 
 jest.setTimeout(30000);
@@ -133,5 +133,10 @@ describe("topic tests", () => {
         const fetchedTopic: Topic = await getTopicById(topic.id);
         expect(topic.message).toBe(fetchedTopic.message);
     });
+
+    it("get replies by user", async() => {
+        const replies: TopicReply[] = await getTopicRepliesByUserPriorToTimestamp(userLoggedIn.name, Date.now(), 10);
+        expect(replies.length).toBeGreaterThanOrEqual(1);
+    })
 
 })

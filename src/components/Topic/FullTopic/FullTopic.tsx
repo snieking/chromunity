@@ -78,14 +78,16 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
 
     componentDidMount(): void {
         const id = this.props.match.params.id;
+        const user: User = getUser();
+
         getTopicById(id).then(topic => this.consumeTopicData(topic));
         this.retrieveLatestReplies();
         getTopicStarRaters(id).then(usersWhoStarRated => this.setState({
             stars: usersWhoStarRated.length,
-            ratedByMe: usersWhoStarRated.includes(getUser().name)
+            ratedByMe: usersWhoStarRated.includes(user != null && user.name)
         }));
-        getTopicSubscribers(id).then(subscribers => this.setState({ subscribed: subscribers.includes(getUser().name) }));
         getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
+        getTopicSubscribers(id).then(subscribers => this.setState({ subscribed: user != null && subscribers.includes(user.name) }));
     }
 
     consumeTopicData(topic: Topic): void {
@@ -183,18 +185,18 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
         return (
             <div className="right">
                 {this.renderTimeAgo()}
-                <br/>
-                <br/>
+                <br />
+                <br />
                 {this.state.avatar !== "" ? <img src={this.state.avatar} className="topic-author-avatar" alt="Profile Avatar" /> : <div></div>}
-                <br/>
+                <br />
                 <Link
                     className={"author-link"}
                     to={"/u/" + this.state.topic.author}
-                    style={{ 
+                    style={{
                         float: "right",
                         marginTop: "7px",
                         marginRight: "-16px",
-                        backgroundColor: this.state.representatives.includes(this.state.topic.author) ? "#CB8FE9" : "#FFAFC1" 
+                        backgroundColor: this.state.representatives.includes(this.state.topic.author) ? "#CB8FE9" : "#FFAFC1"
                     }}
                 >
                     <Typography

@@ -80,6 +80,8 @@ class TopicReplyCard extends React.Component<Props, State> {
     }
 
     componentDidMount() {
+        const user: User = getUser();
+
         getUserSettingsCached(this.props.reply.author, 1440)
             .then(settings => {
                 this.setState({
@@ -88,7 +90,7 @@ class TopicReplyCard extends React.Component<Props, State> {
             });
         getReplyStarRaters(this.props.reply.id).then(usersWhoStarRated => this.setState({
             stars: usersWhoStarRated.length,
-            ratedByMe: usersWhoStarRated.includes(getUser().name)
+            ratedByMe: usersWhoStarRated.includes(user != null && user.name)
         }));
         getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies }));
         getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));

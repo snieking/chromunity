@@ -42,7 +42,7 @@ export default function HeaderNav(props: HeaderNavProps) {
     }
 
     function profileSpecificNavigation() {
-        if (user.name != null) {
+        if (user != null) {
             return (
                 <div>
                     <Tooltip title="Notifications">
@@ -105,7 +105,7 @@ export default function HeaderNav(props: HeaderNavProps) {
     }
 
     function renderFavoriteWalls() {
-        if (user.name != null) {
+        if (user != null) {
             return (
                 <div>
                     <Tooltip title="Tags">

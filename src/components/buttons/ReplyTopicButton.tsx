@@ -77,7 +77,7 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
     }
 
     createTopicButton() {
-        if (getUser().name != null && this.state.userMeta.suspended_until < Date.now()) {
+        if (getUser() != null && this.state.userMeta.suspended_until < Date.now()) {
             return (
                 <div className="bottom-right-corner rounded-pink">
                     <IconButton aria-label="Reply to topic"
