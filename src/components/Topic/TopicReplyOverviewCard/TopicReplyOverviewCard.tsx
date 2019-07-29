@@ -1,19 +1,17 @@
 import React from 'react';
 import { Link } from "react-router-dom";
-import { Topic, User } from '../../../types';
-import { Card, Typography, Badge, CardContent, CardActionArea, Chip } from '@material-ui/core';
-import { timeAgoReadable, stringToHexColor } from '../../../util/util';
+import { TopicReply, User } from '../../../types';
+import { Card, Typography, Badge, CardContent, CardActionArea } from '@material-ui/core';
+import { timeAgoReadable } from '../../../util/util';
 import { getUser, ifEmptyAvatarThenPlaceholder } from '../../../util/user-util';
 import { StarRate } from '@material-ui/icons';
-import './TopicOverviewCard.css';
 import '../Topic.css'
 import { getUserSettingsCached } from '../../../blockchain/UserService';
 import { Redirect } from 'react-router';
-import { getTopicStarRaters } from '../../../blockchain/TopicService';
-import { getTags } from '../../../util/text-parsing';
+import { getReplyStarRaters } from '../../../blockchain/TopicService';
 
 interface Props {
-    topic: Topic;
+    reply: TopicReply;
     isRepresentative: boolean;
 }
 
@@ -29,7 +27,7 @@ interface State {
     tags: string[];
 }
 
-class TopicOverviewCard extends React.Component<Props, State> {
+class TopicReplyOverviewCard extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
 
@@ -48,11 +46,11 @@ class TopicOverviewCard extends React.Component<Props, State> {
 
     render() {
         if (this.state.redirectToFullCard) {
-            return (<Redirect to={"/t/" + this.props.topic.id} />);
+            return (<Redirect to={"/t/" + this.props.reply.topic_id} />);
         } else {
             return (
-                <div className={this.props.topic.removed ? "removed" : ""}>
-                    <Card raised={true} key={this.props.topic.id} className='topic-card'>
+                <div className={this.props.reply.removed ? "removed" : ""}>
+                    <Card raised={true} key={this.props.reply.id} className='topic-card'>
                         <CardActionArea onClick={() => this.setState({ redirectToFullCard: true })}>
                             {this.renderCardContent()}
                         </CardActionArea>
@@ -64,14 +62,13 @@ class TopicOverviewCard extends React.Component<Props, State> {
 
     componentDidMount() {
         const user: User = getUser();
-        this.setState({ tags: getTags(this.props.topic.message).slice(0, 3) });
-        getUserSettingsCached(this.props.topic.author, 1440)
+        getUserSettingsCached(this.props.reply.author, 1440)
             .then(settings => {
                 this.setState({
-                    avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.topic.author)
+                    avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.reply.author)
                 });
             });
-        getTopicStarRaters(this.props.topic.id).then(usersWhoStarRated => this.setState({
+        getReplyStarRaters(this.props.reply.id).then(usersWhoStarRated => this.setState({
             stars: usersWhoStarRated.length,
             ratedByMe: usersWhoStarRated.includes(user != null && user.name)
         }));
@@ -82,7 +79,7 @@ class TopicOverviewCard extends React.Component<Props, State> {
             <div className="right">
                 <Link
                     className={this.props.isRepresentative ? "rep-typography" : "pink-typography"}
-                    to={"/u/" + this.props.topic.author}
+                    to={"/u/" + this.props.reply.author}
                     style={{ marginBottom: "18px"}}
                 >
                     <Typography
@@ -91,38 +88,12 @@ class TopicOverviewCard extends React.Component<Props, State> {
                         component="span"
                         className="typography"
                     >
-                        <span className="author-name">@{this.props.topic.author}</span>
+                        <span className="author-name">@{this.props.reply.author}</span>
                     </Typography>
                 </Link>
                 {this.state.avatar !== "" ? <img src={this.state.avatar} className="author-avatar" alt="Profile Avatar" /> : <div></div>}
             </div>
         );
-    }
-
-    renderTagChips() {
-        if (this.state.tags != null) {
-            return (
-                <div className="tag-chips">
-                    {this.state.tags.map(tag => {
-                        return (
-                            <Link key={this.props.topic.id + ":" + tag} to={"/tag/" + tag.replace("#", "")}>
-                                <Chip
-                                    size="small"
-                                    label={tag}
-                                    style={{
-                                        marginLeft: "1px",
-                                        marginRight: "1px",
-                                        marginBottom: "3px",
-                                        backgroundColor: stringToHexColor(tag),
-                                        cursor: "pointer"
-                                    }}
-                                />
-                            </Link>
-                        )
-                    })}
-                </div>
-            )
-        }
     }
 
     renderCardContent() {
@@ -140,11 +111,10 @@ class TopicOverviewCard extends React.Component<Props, State> {
                 </div>
                 {this.renderAuthor()}
                 <div className="topic-overview-details">
-                    {this.renderTimeAgo(this.props.topic.last_modified)}
+                    {this.renderTimeAgo(this.props.reply.timestamp)}
                     <Typography variant="subtitle1" className='purple-typography' component="span" style={{ marginRight: "10px" }}>
-                        {this.props.topic.title}
+                        {this.props.reply.message}
                     </Typography>
-                    {this.renderTagChips()}
                 </div>
             </CardContent >
         );
@@ -159,4 +129,4 @@ class TopicOverviewCard extends React.Component<Props, State> {
     }
 }
 
-export default TopicOverviewCard;
+export default TopicReplyOverviewCard;

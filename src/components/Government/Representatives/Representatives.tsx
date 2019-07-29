@@ -7,6 +7,7 @@ import RepresentativeCard from './RepresentativeCard/RepresentativeCard';
 import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
 import { getUser } from '../../../util/user-util';
 import { adminAddRepresentative, adminRemoveRepresentative } from '../../../blockchain/AdminService';
+import { User } from '../../../types';
 
 export interface RepresentativesState {
     representatives: string[];
@@ -36,7 +37,7 @@ export class Representatives extends React.Component<{}, RepresentativesState> {
             <Container fixed maxWidth="md">
                 <ChromiaPageHeader text="Representatives" />
                 <Grid container spacing={1}>
-                    {this.state.representatives.map(name => <RepresentativeCard name={name} />)}
+                    {this.state.representatives.map(name => <RepresentativeCard name={name} key={name} />)}
                 </Grid>
                 {this.renderAdminFunctions()}
             </Container>
@@ -44,7 +45,8 @@ export class Representatives extends React.Component<{}, RepresentativesState> {
     }
 
     renderAdminFunctions() {
-        if (getUser().name === "admin") {
+        const user: User = getUser();
+        if (user != null && user.name === "admin") {
             return (
                 <div>
                     <br />

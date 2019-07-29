@@ -103,6 +103,10 @@ function getTopicRepliesForTimestamp(topicId: string, timestamp: number, pageSiz
     return GTX.query(rellOperation, { topic_id: topicId, timestamp: timestamp, page_size: pageSize });
 }
 
+export function getTopicRepliesByUserPriorToTimestamp(name: string, timestamp: number, pageSize: number): Promise<TopicReply[]> {
+    return GTX.query("get_topic_replies_by_user_prior_to_timestamp", { name: name, timestamp: timestamp, page_size: pageSize });
+}
+
 export function getTopicSubReplies(replyId: string): Promise<TopicReply[]> {
     return GTX.query("get_sub_replies", { parent_reply_id: replyId });
 }

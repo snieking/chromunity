@@ -61,7 +61,7 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
 
                 if (isRegistered) {
                     const user: User = getUser();
-                    if (user.name != null) {
+                    if (user != null && user.name != null) {
                         amIAFollowerOf(getUser(), this.props.username).then(isAFollower => this.setState({ following: isAFollower }));
                     }
 
@@ -123,7 +123,8 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
     }
 
     renderActions() {
-        if (this.props.username !== getUser().name) {
+        const user: User = getUser();
+        if (user != null && this.props.username !== user.name) {
             return (
                 <div className="float-right">
                     {this.renderUserSuspensionDialog()}

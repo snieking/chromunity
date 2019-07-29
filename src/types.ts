@@ -21,6 +21,7 @@ export interface Topic {
 
 export interface TopicReply {
     id: string;
+    topic_id: string;
     author: string;
     message: string;
     isSubReply: boolean;

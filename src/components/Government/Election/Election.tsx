@@ -14,6 +14,7 @@ import {
 import { getUser, isGod } from "../../../util/user-util";
 import { DictatorActions } from "./DictatorActions/DictatorActions";
 import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
+import { User } from '../../../types';
 
 export interface ElectionState {
     timestamp: number,
@@ -118,7 +119,8 @@ export class Election extends React.Component<{}, ElectionState> {
     }
 
     renderParticipateButton() {
-        if (getUser().name != null && !this.state.isACandidate) {
+        const user: User = getUser();
+        if (user != null && user.name != null && !this.state.isACandidate) {
             return (
                 <Button fullWidth variant="contained" color="primary" onClick={() => this.registerForElection()}>
                     Participate

@@ -28,7 +28,7 @@ export class Reports extends React.Component<{}, State>{
             <Container>
                 <ChromiaPageHeader text="Reports" />
                 {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
-                {this.state.reports.map(report => <ReportCard report={report}/>)}
+                {this.state.reports.map(report => <ReportCard key={report.id} report={report}/>)}
             </Container>
         );
     };

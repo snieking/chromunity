@@ -33,6 +33,7 @@ query get_topic_replies_prior_to_timestamp(topic_id: text, timestamp, page_size:
         .is_sub_reply == false
     }(
         .id,
+        topic_id = .topic.id,
         author=.author.name,
         .message,
         .is_sub_reply,
@@ -48,6 +49,19 @@ query get_topic_replies_after_timestamp(topic_id: text, timestamp, page_size: in
         .is_sub_reply == false
     }(
         .id,
+        topic_id = .topic.id,
+        author=.author.name,
+        .message,
+        .is_sub_reply,
+        .removed,
+        -sort .timestamp
+    ) limit page_size;
+}
+
+query get_topic_replies_by_user_prior_to_timestamp(name, timestamp, page_size: integer) {
+    return topic_reply@*{ .author.name == name, .timestamp < timestamp } (
+        .id,
+        topic_id = .topic.id,
         author=.author.name,
         .message,
         .is_sub_reply,

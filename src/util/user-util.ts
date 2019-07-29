@@ -47,7 +47,7 @@ export function getCachedUserMeta(): Promise<UserMeta> {
 }
 
 export function getUser(): User {
-    return LOCAL_CACHE.get(USER_KEY, {});
+    return LOCAL_CACHE.get(USER_KEY);
 }
 
 export function godAlias(): string {
@@ -55,7 +55,8 @@ export function godAlias(): string {
 }
 
 export function isGod(): boolean {
-    return getUser().name === godAlias();
+    const user: User = getUser();
+    return user != null && user.name === godAlias();
 }
 
 export function setRepresentative(isRepresentative: boolean): void {
