@@ -1,14 +1,13 @@
 import * as bip39 from "bip39";
 import { register, login } from "../src/blockchain/UserService";
 import { User, Topic } from "../src/types";
-import { getTrendingTags, storeTagsFromTopic, followTag, unfollowTag, getFollowedTags } from "../src/blockchain/TagService";
-import { getANumber, sleepUntil } from "./helper";
-import { getTopicsByUserPriorToTimestamp, getTopicsByTagPriorToTimestamp, createTopic, getTopicsAfterTimestamp, getTopicsFromFollowedTagsPriorToTimestamp } from "../src/blockchain/TopicService";
-import { number } from "prop-types";
+import { getTrendingChannels, followChannel, unfollowChannel, getFollowedChannels, getTopicChannelBelongings } from "../src/blockchain/ChannelService";
+import { getANumber } from "./helper";
+import { getTopicsByChannelPriorToTimestamp, createTopic, getTopicsFromFollowedChannelsPriorToTimestamp, getTopicsByChannelAfterTimestamp } from "../src/blockchain/TopicService";
 
 jest.setTimeout(60000);
 
-describe("thread tagging tests", () => {
+describe("channel tests", () => {
 
     const user = {
         name: "anastasia_" + getANumber(),
@@ -23,31 +22,35 @@ describe("thread tagging tests", () => {
         loggedInUser = await login(user.name, user.password, user.mnemonic);
     });
 
-    it("create topic with tag", async () => {
-        const timestamp: number = Date.now();
-        const title: string = "Chromia"
-        await createTopic(loggedInUser, title, "Hello chromia");
-        
-        var topics: Topic[] = await getTopicsAfterTimestamp(timestamp-1000, 10);
+    it("retrieve topics by channels queries", async () => {
+        const title: string = "Chromia";
+        const channel: string = "welcome";
+
+        const timestampPriorToCreation: number = Date.now();
+        await createTopic(loggedInUser, channel, title, "Hello chromia");
+
+        var topics: Topic[] = await getTopicsByChannelAfterTimestamp(channel, timestampPriorToCreation - 10000);
         expect(topics.length).toBeGreaterThanOrEqual(1);
         const topic: Topic = topics[0];
-        await storeTagsFromTopic(loggedInUser, topic.id, ["chromia"])
 
-        topics = await getTopicsByTagPriorToTimestamp("chromia", Date.now() + 3000, 10);
+        const belongings: string[] = await getTopicChannelBelongings(topic.id);
+        expect(belongings.length).toBe(1);
+
+        topics = await getTopicsByChannelPriorToTimestamp(channel, Date.now() + 3000, 10);
         expect(topics.length).toBe(1);
 
-        const trendingTags: string[] = await getTrendingTags(1);
+        const trendingTags: string[] = await getTrendingChannels(1);
         expect(trendingTags.length).toBeGreaterThanOrEqual(1);
 
-        await followTag(loggedInUser, "chromia");
-        var topicsWithFollowedTag: Topic[] = await getTopicsFromFollowedTagsPriorToTimestamp(loggedInUser, Date.now() + 3000, 10);
-        var followedTags: string[] = await getFollowedTags(loggedInUser);
+        await followChannel(loggedInUser, channel);
+        var topicsWithFollowedTag: Topic[] = await getTopicsFromFollowedChannelsPriorToTimestamp(loggedInUser, Date.now() + 3000, 10);
+        var followedTags: string[] = await getFollowedChannels(loggedInUser);
         expect(topicsWithFollowedTag.length).toBe(1);
         expect(followedTags.length).toBe(1);
-        
-        await unfollowTag(loggedInUser, "chromia");
-        topicsWithFollowedTag = await getTopicsFromFollowedTagsPriorToTimestamp(loggedInUser, Date.now() + 3000, 10);
-        followedTags = await getFollowedTags(loggedInUser);
+
+        await unfollowChannel(loggedInUser, channel);
+        topicsWithFollowedTag = await getTopicsFromFollowedChannelsPriorToTimestamp(loggedInUser, Date.now() + 3000, 10);
+        followedTags = await getFollowedChannels(loggedInUser);
         expect(topicsWithFollowedTag.length).toBe(0);
         expect(followedTags.length).toBe(0);
     });

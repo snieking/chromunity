@@ -9,7 +9,7 @@ import {Election} from "./components/Government/Election/Election";
 import {Representatives} from "./components/Government/Representatives/Representatives";
 import {GovLog} from "./components/Government/Log/GovLog";
 import { UserWall } from "./components/Walls/UserWall/Userwall";
-import { TagWall } from "./components/Walls/TagWall/TagWall";
+import { ChannelWall } from "./components/Walls/ChannelWall/ChannelWall";
 import Settings from "./components/user/Settings/Settings";
 import TopicWall from "./components/Walls/TopicWall/TopicWall";
 import { FullTopic } from "./components/Topic/FullTopic/FullTopic";
@@ -29,7 +29,7 @@ export class App extends React.Component {
                 <Route path="/user/settings" component={Settings}/>
                 <Route path="/u/:userId" component={UserWall}/>
                 <Route path="/notifications/:userId" component={UserNotifications}/>
-                <Route path="/tag/:tag" component={TagWall}/>
+                <Route path="/c/:channel" component={ChannelWall}/>
                 <Route path="/gov/representatives" component={Representatives}/>
                 <Route path="/gov/election" component={Election}/>
                 <Route path="/gov/log" component={GovLog}/>

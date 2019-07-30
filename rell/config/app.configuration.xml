@@ -115,14 +115,14 @@
                                 <string>module/notifications/queries.rell</string>
                             </entry>
 
-                            <entry key="hashtag/index.rell">
-                                <string>module/hashtag/index.rell</string>
+                            <entry key="channel/index.rell">
+                                <string>module/channel/index.rell</string>
                             </entry>
-                            <entry key="hashtag/operations.rell">
-                                <string>module/hashtag/operations.rell</string>
+                            <entry key="channel/operations.rell">
+                                <string>module/channel/operations.rell</string>
                             </entry>
-                            <entry key="hashtag/queries.rell">
-                                <string>module/hashtag/queries.rell</string>
+                            <entry key="channel/queries.rell">
+                                <string>module/channel/queries.rell</string>
                             </entry>
 
                             <entry key="follow/index.rell">

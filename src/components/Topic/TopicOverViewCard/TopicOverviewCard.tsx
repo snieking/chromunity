@@ -10,7 +10,7 @@ import '../Topic.css'
 import { getUserSettingsCached } from '../../../blockchain/UserService';
 import { Redirect } from 'react-router';
 import { getTopicStarRaters } from '../../../blockchain/TopicService';
-import { getTags } from '../../../util/text-parsing';
+import { getTopicChannelBelongings } from '../../../blockchain/ChannelService';
 
 interface Props {
     topic: Topic;
@@ -23,7 +23,7 @@ interface State {
     redirectToFullCard: boolean;
     isRepresentative: boolean;
     avatar: string;
-    tags: string[];
+    channels: string[];
 }
 
 class TopicOverviewCard extends React.Component<Props, State> {
@@ -32,7 +32,7 @@ class TopicOverviewCard extends React.Component<Props, State> {
 
         this.state = {
             stars: 0,
-            tags: [],
+            channels: [],
             ratedByMe: false,
             redirectToFullCard: false,
             isRepresentative: false,
@@ -57,7 +57,7 @@ class TopicOverviewCard extends React.Component<Props, State> {
     }
 
     componentDidMount() {
-        this.setState({ tags: getTags(this.props.topic.message).slice(0, 3) });
+        getTopicChannelBelongings(this.props.topic.id).then(channels => this.setState({ channels: channels }));
         getUserSettingsCached(this.props.topic.author, 1440)
             .then(settings => this.setState({ avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.topic.author) }));
         
@@ -91,15 +91,15 @@ class TopicOverviewCard extends React.Component<Props, State> {
     }
 
     renderTagChips() {
-        if (this.state.tags != null) {
+        if (this.state.channels != null) {
             return (
                 <div className="tag-chips">
-                    {this.state.tags.map(tag => {
+                    {this.state.channels.map(tag => {
                         return (
-                            <Link key={this.props.topic.id + ":" + tag} to={"/tag/" + tag.replace("#", "")}>
+                            <Link key={this.props.topic.id + ":" + tag} to={"/c/" + tag.replace("#", "")}>
                                 <Chip
                                     size="small"
-                                    label={tag}
+                                    label={"#" + tag}
                                     style={{
                                         marginLeft: "1px",
                                         marginRight: "1px",

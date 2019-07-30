@@ -1,12 +1,12 @@
 import React from 'react';
 import { Topic } from '../../../types';
-import { getTopicsPriorToTimestamp, getTopicsAfterTimestamp, getTopicsFromFollowsPriorToTimestamp, getTopicsFromFollowsAfterTimestamp, getTopicsFromFollowedTagsPriorToTimestamp } from '../../../blockchain/TopicService';
+import { getTopicsPriorToTimestamp, getTopicsAfterTimestamp, getTopicsFromFollowsPriorToTimestamp, getTopicsFromFollowsAfterTimestamp, getTopicsFromFollowedChannelsPriorToTimestamp } from '../../../blockchain/TopicService';
 import { LinearProgress, Container } from '@material-ui/core';
 import TopicOverviewCard from '../../Topic/TopicOverViewCard/TopicOverviewCard';
 import { NewTopicButton } from '../../buttons/NewTopicButton';
 import { getUser } from '../../../util/user-util';
 import LoadMoreButton from '../../buttons/LoadMoreButton';
-import { TrendingTags } from '../../TrendingTags/TrendingTags';
+import { TrendingChannels } from '../../TrendingTags/TrendingTags';
 import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
 import { getRepresentatives } from '../../../blockchain/RepresentativesService';
 
@@ -47,7 +47,7 @@ class TopicWall extends React.Component<Props, State> {
         if (this.props.type === "userFollowings") {
             return "Followed Users";
         } else if (this.props.type === "tagFollowings") {
-            return "Trending Tags";
+            return "Trending Channels";
         } else {
             return "Recent Topics"
         }
@@ -59,9 +59,9 @@ class TopicWall extends React.Component<Props, State> {
                 <Container fixed>
                     <ChromiaPageHeader text={this.getHeader()} />
                     {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
-                    {this.props.type === "tagFollowings" ? <TrendingTags /> : <div></div>}
+                    {this.props.type === "tagFollowings" ? <TrendingChannels /> : <div></div>}
                     <div className='topic-wall-container'>
-                        {this.props.type === "tagFollowings" ? <ChromiaPageHeader text="Followed Tags" /> : <div></div>}
+                        {this.props.type === "tagFollowings" ? <ChromiaPageHeader text="Followed Channels" /> : <div></div>}
                         {this.state.topics.map(topic => <TopicOverviewCard
                             key={'card-' + topic.id}
                             topic={topic}
@@ -70,7 +70,7 @@ class TopicWall extends React.Component<Props, State> {
                     </div>
                     {this.renderLoadMoreButton()}
                 </Container>
-                {getUser() != null ? <NewTopicButton updateFunction={this.retrieveLatestTopics} /> : <div></div>}
+                {getUser() != null ? <NewTopicButton channel="general" updateFunction={this.retrieveLatestTopics} /> : <div></div>}
             </div>
         );
     }
@@ -110,9 +110,9 @@ class TopicWall extends React.Component<Props, State> {
         var topics: Promise<Topic[]>;
 
         if (this.state.topics.length === 0) {
-            topics = getTopicsFromFollowedTagsPriorToTimestamp(getUser(), Date.now(), topicsPageSize);
+            topics = getTopicsFromFollowedChannelsPriorToTimestamp(getUser(), Date.now(), topicsPageSize);
         } else {
-            topics = getTopicsFromFollowedTagsPriorToTimestamp(getUser(), this.state.topics[0].timestamp, topicsPageSize);
+            topics = getTopicsFromFollowedChannelsPriorToTimestamp(getUser(), this.state.topics[0].timestamp, topicsPageSize);
         }
 
         topics.then(retrievedTopics => this.appendLatestTopics(retrievedTopics))
@@ -150,7 +150,7 @@ class TopicWall extends React.Component<Props, State> {
     }
 
     retrieveOlderTopicsForTagFollowings(oldestTimestamp: number) {
-        getTopicsFromFollowedTagsPriorToTimestamp(getUser(), oldestTimestamp, topicsPageSize)
+        getTopicsFromFollowedChannelsPriorToTimestamp(getUser(), oldestTimestamp, topicsPageSize)
             .then(retrievedTopics => this.appendOlderTopics(retrievedTopics))
             .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
     }

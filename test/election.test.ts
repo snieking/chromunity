@@ -27,6 +27,8 @@ describe("election test", () => {
         mnemonic: "rule comfort scheme march fresh defy radio width crash family toward bike"
     }
 
+    const channel: string = "ElectionTests";
+
     var adminUser: User;
 
     it("register admin", async () => {
@@ -72,7 +74,7 @@ describe("election test", () => {
     it("as a representative remove topic and replies", async() => {
         const title: string = "This post should be removed";
         const message: string = "This post should be #removed, if not the #test is broken";
-        await createTopic(adminUser, title, message);
+        await createTopic(adminUser, channel, title, message);
 
         var topics: Topic[] = await getTopicsByUserPriorToTimestamp(adminUser.name, Date.now(), 10);
         const topicToBeRemoved: Topic = topics[0];
@@ -124,7 +126,7 @@ describe("election test", () => {
         var unhandledReports: RepresentativeReport[] = await getUnhandledReports();
         expect(unhandledReports.length).toBe(0);
 
-        await createTopic(adminUser, "This topic is about to be reported", "Toxic content in here!");
+        await createTopic(adminUser, channel, "This topic is about to be reported", "Toxic content in here!");
         const topics: Topic[] = await getTopicsByUserPriorToTimestamp(adminUser.name, Date.now(), 1);
         const topic: Topic = topics[0];
 

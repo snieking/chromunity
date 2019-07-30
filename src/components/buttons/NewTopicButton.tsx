@@ -17,11 +17,13 @@ import { UserMeta } from "../../types";
 
 export interface NewTopicButtonProps {
     updateFunction: Function;
+    channel: string;
 }
 
 export interface NewTopicButtonState {
     dialogOpen: boolean;
     topicTitle: string;
+    topicChannel: string;
     topicMessage: string;
     newTopicSuccessOpen: boolean;
     newTopicErrorOpen: boolean;
@@ -30,6 +32,7 @@ export interface NewTopicButtonState {
 }
 
 const maxTitleLength: number = 40;
+const maxChannelLength: number = 20;
 
 export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopicButtonState> {
 
@@ -38,6 +41,7 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
 
         this.state = {
             topicTitle: "",
+            topicChannel: this.props.channel,
             topicMessage: "",
             dialogOpen: false,
             newTopicSuccessOpen: false,
@@ -48,6 +52,7 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
 
         this.toggleNewTopicDialog = this.toggleNewTopicDialog.bind(this);
         this.handleDialogTitleChange = this.handleDialogTitleChange.bind(this);
+        this.handleChannelChange = this.handleChannelChange.bind(this);
         this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
         this.createNewTopic = this.createNewTopic.bind(this);
         this.handleClose = this.handleClose.bind(this);
@@ -67,6 +72,12 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
         this.setState({ topicMessage: event.target.value });
     }
 
+    handleChannelChange(event: React.ChangeEvent<HTMLInputElement>) {
+        event.preventDefault();
+        event.stopPropagation();
+        this.setState({ topicChannel: event.target.value });
+    }
+
     handleDialogTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
         event.stopPropagation();
@@ -76,16 +87,21 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
     createNewTopic(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const topicTitle: string = this.state.topicTitle;
+        const topicChannel: string = this.state.topicChannel;
 
-        if (!/^[a-zA-Z\s]+$/.test(topicTitle)) {
+        if (!/^[a-zA-Z0-9\s]+$/.test(topicTitle)) {
             this.setState({ newTopicStatusMessage: "Title may only contain a-z, A-Z & 0-9 characters", newTopicErrorOpen: true });
         } else if (topicTitle.length > maxTitleLength) {
             this.setState({ newTopicStatusMessage: "Title is too long", newTopicErrorOpen: true });
+        } else if (!/^[a-zA-Z0-9\s]+$/.test(topicChannel)) {
+            this.setState({ newTopicStatusMessage: "Channel may only contain a-z, A-Z & 0-9 characters", newTopicErrorOpen: true });
+        } else if (topicChannel.length > maxChannelLength) {
+            this.setState({ newTopicStatusMessage: "Channel is too long", newTopicErrorOpen: true });
         } else {
             const topicMessage = this.state.topicMessage;
             this.setState({ topicTitle: "", topicMessage: "" });
 
-            createTopic(getUser(), topicTitle || "", topicMessage || "").then(() => {
+            createTopic(getUser(), topicChannel, topicTitle, topicMessage).then(() => {
                 this.setState({ newTopicStatusMessage: "Topic created", newTopicSuccessOpen: true });
                 this.props.updateFunction();
             }).catch(() => this.setState({ newTopicStatusMessage: "Error while creating topic", newTopicErrorOpen: true }));
@@ -115,7 +131,7 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                     fullWidth={true} maxWidth={"sm"}>
                     <form onSubmit={this.createNewTopic}>
                         <DialogContent>
-                            <br/>
+                            <br />
                             <Badge
                                 className="input-field-badge"
                                 color="secondary"
@@ -132,6 +148,25 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                                     onChange={this.handleDialogTitleChange}
                                     value={this.state.topicTitle}
                                     className="text-field"
+                                    variant="outlined"
+                                />
+                            </Badge>
+                            <Badge
+                                className="input-field-badge"
+                                color="secondary"
+                                badgeContent={maxChannelLength - this.state.topicChannel.length}
+                                showZero
+                            >
+                                <TextField
+                                    margin="dense"
+                                    id="topicChannel"
+                                    multiline
+                                    label="Channel"
+                                    type="text"
+                                    fullWidth
+                                    rows="1"
+                                    onChange={this.handleChannelChange}
+                                    value={this.state.topicChannel}
                                     variant="outlined"
                                 />
                             </Badge>

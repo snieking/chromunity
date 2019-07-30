@@ -2,22 +2,22 @@ import * as React from 'react';
 import { Link } from "react-router-dom";
 
 import { Chip, Card, CardContent } from '@material-ui/core';
-import { getTrendingTags } from '../../blockchain/TagService';
+import { getTrendingChannels } from '../../blockchain/ChannelService';
 import { stringToHexColor } from '../../util/util';
 
 type State = {
-    tags: string[];
+    channels: string[];
 };
 
-export class TrendingTags extends React.Component<{}, State>{
+export class TrendingChannels extends React.Component<{}, State>{
 
     constructor(props: any) {
         super(props);
-        this.state = { tags: [] };
+        this.state = { channels: [] };
     }
 
     componentDidMount() {
-        getTrendingTags(7).then(tags => this.setState({ tags: tags }));
+        getTrendingChannels(7).then(channels => this.setState({ channels: channels }));
     }
 
     render() {
@@ -25,17 +25,17 @@ export class TrendingTags extends React.Component<{}, State>{
             <div>
                 <Card>
                     <CardContent>
-                        {this.state.tags.map((tag: string) => {
+                        {this.state.channels.map((channel: string) => {
                             return (
-                                <Link key={tag} to={"/tag/" + tag}>
+                                <Link key={channel} to={"/c/" + channel}>
                                     <Chip
                                         size="small"
-                                        label={"#" + tag}
+                                        label={"#" + channel}
                                         style={{
                                             marginLeft: "1px",
                                             marginRight: "1px",
                                             marginTop: "3px",
-                                            backgroundColor: stringToHexColor("#" + tag),
+                                            backgroundColor: stringToHexColor(channel),
                                             cursor: "pointer"
                                         }}
                                     />
@@ -46,6 +46,6 @@ export class TrendingTags extends React.Component<{}, State>{
                 </Card>
             </div>
         )
-    };
+    }
 
 }
