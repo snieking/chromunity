@@ -45,6 +45,13 @@
                             <entry key="main.rell">
                                 <string>module/main.rell</string>
                             </entry>
+                            <entry key="util/index.rell">
+                                <string>module/util/index.rell</string>
+                            </entry>
+                            <entry key="util/text-util.rell">
+                                <string>module/util/text-util.rell</string>
+                            </entry>
+                            
                             <entry key="user/index.rell">
                                 <string>module/user/index.rell</string>
                             </entry>

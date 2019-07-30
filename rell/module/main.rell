@@ -1,3 +1,4 @@
+include 'util/index';
 include 'user/index';
 include 'topic/index';
 include 'notifications/index';

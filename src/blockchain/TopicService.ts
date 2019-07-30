@@ -12,7 +12,7 @@ export function createTopic(user: User, channelName: string, title: string, mess
     const topicId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("create_topic", topicId, user.name, channelName, title, formatMessage(message));
+    tx.addOperation("create_topic", topicId, user.name, channelName.toLocaleLowerCase(), channelName, title, formatMessage(message));
     tx.sign(privKey, pubKey);
 
     return tx.postAndWaitConfirmation()

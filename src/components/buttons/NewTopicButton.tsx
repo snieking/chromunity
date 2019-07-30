@@ -90,10 +90,10 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
         const topicChannel: string = this.state.topicChannel;
 
         if (!/^[a-zA-Z0-9\s]+$/.test(topicTitle)) {
-            this.setState({ newTopicStatusMessage: "Title may only contain a-z, A-Z & 0-9 characters", newTopicErrorOpen: true });
+            this.setState({ newTopicStatusMessage: "Title may only contain a-z, A-Z & 0-9 characters and whitespaces", newTopicErrorOpen: true });
         } else if (topicTitle.length > maxTitleLength) {
             this.setState({ newTopicStatusMessage: "Title is too long", newTopicErrorOpen: true });
-        } else if (!/^[a-zA-Z0-9\s]+$/.test(topicChannel)) {
+        } else if (!/^[a-zA-Z0-9]+$/.test(topicChannel)) {
             this.setState({ newTopicStatusMessage: "Channel may only contain a-z, A-Z & 0-9 characters", newTopicErrorOpen: true });
         } else if (topicChannel.length > maxChannelLength) {
             this.setState({ newTopicStatusMessage: "Channel is too long", newTopicErrorOpen: true });
@@ -151,25 +151,19 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                                     variant="outlined"
                                 />
                             </Badge>
-                            <Badge
-                                className="input-field-badge"
-                                color="secondary"
-                                badgeContent={maxChannelLength - this.state.topicChannel.length}
-                                showZero
-                            >
-                                <TextField
-                                    margin="dense"
-                                    id="topicChannel"
-                                    multiline
-                                    label="Channel"
-                                    type="text"
-                                    fullWidth
-                                    rows="1"
-                                    onChange={this.handleChannelChange}
-                                    value={this.state.topicChannel}
-                                    variant="outlined"
-                                />
-                            </Badge>
+
+                            <TextField
+                                margin="dense"
+                                id="topicChannel"
+                                multiline
+                                label="Channel"
+                                type="text"
+                                fullWidth
+                                rows="1"
+                                onChange={this.handleChannelChange}
+                                value={this.state.topicChannel}
+                                variant="outlined"
+                            />
                             <TextField
                                 margin="dense"
                                 id="message"
@@ -184,10 +178,10 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                             />
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={() => this.toggleNewTopicDialog()} color="secondary" variant="outlined">
+                            <Button onClick={() => this.toggleNewTopicDialog()} color="secondary" variant="contained">
                                 Cancel
                             </Button>
-                            <Button type="submit" color="primary" variant="outlined">
+                            <Button type="submit" color="primary" variant="contained">
                                 Create topic
                             </Button>
                         </DialogActions>

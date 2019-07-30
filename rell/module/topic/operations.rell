@@ -1,4 +1,4 @@
-operation create_topic(id: text, username: text, channel_name: name, title: name, message: text) {
+operation create_topic(id: text, username: text, channel_key: name, channel_name: name, title: name, message: text) {
     val author = user@{ .name == username };
     require(is_signer(author.pubkey));
     require(user_meta@{ author }.suspended_until < op_context.last_block_time);
@@ -14,7 +14,7 @@ operation create_topic(id: text, username: text, channel_name: name, title: name
     );
 
     // TODO: .lower_case() on name (key)
-    create channel(name = channel_name, topic, op_context.last_block_time, display_name = channel_name);
+    create channel(name = channel_key, topic, op_context.last_block_time, display_name = channel_name);
 }
 
 operation create_reply(topic_id: text, id: text, username: text, message: text) {

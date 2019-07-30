@@ -58,7 +58,7 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
         const user: User = getUser();
         if (user != null) {
             const channel = this.props.match.params.channel;
-            getFollowedChannels(user).then(channels => this.setState({ channelFollowed: channels.includes(channel) }));
+            getFollowedChannels(user).then(channels => this.setState({ channelFollowed: channels.includes(channel.toLocaleLowerCase()) }));
         }
     }
 

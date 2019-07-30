@@ -6,32 +6,23 @@ import * as BoomerangCache from "boomerang-cache";
 
 const channelsCache = BoomerangCache.create("channels-bucket", { storage: "session", encrypt: false });
 
-export function linkTopicToChannel(user: User, topicId: string, name: string) {
-    const {privKey, pubKey} = seedToKey(user.seed);
-
-    const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("link_topic_to_channel", user.name, name, topicId);
-    tx.sign(privKey, pubKey);
-    return tx.postAndWaitConfirmation();
-}
-
 export function followChannel(user: User, name: string) {
-    return modifyTagFollowing(user, name, "follow_channel");
+    return modifyChannelollowing(user, name, "follow_channel");
 }
 
 export function unfollowChannel(user: User, name: string) {
-    return modifyTagFollowing(user, name, "unfollow_channel");
+    return modifyChannelollowing(user, name, "unfollow_channel");
 }
 
 export function getFollowedChannels(user: User): Promise<string[]> {
     return GTX.query("get_followed_channels", { username: user.name });
 }
 
-function modifyTagFollowing(user: User, tag: string, rellOperation: string) {
+function modifyChannelollowing(user: User, channel: string, rellOperation: string) {
     const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation(rellOperation, user.name, tag);
+    tx.addOperation(rellOperation, user.name, channel.toLocaleLowerCase());
     tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
