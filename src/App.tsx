@@ -22,7 +22,7 @@ export class App extends React.Component {
                 <Header/>
                 <Route exact path="/" component={() => <TopicWall type="all"/>}/>
                 <Route path="/followings" component={() => <TopicWall type="userFollowings"/>}/>
-                <Route path="/tags" component={() => <TopicWall type="tagFollowings"/>}/>
+                <Route path="/channels" component={() => <TopicWall type="tagFollowings"/>}/>
                 <Route path="/user/register" component={Register}/>
                 <Route path="/user/login" component={Login}/>
                 <Route path="/user/logout" component={Logout}/>

@@ -9,7 +9,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Home from '@material-ui/icons/Home';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import { ExitToApp, Gavel, LocationCity, Face, HowToVote, Bookmarks, Settings, People, Report } from "@material-ui/icons";
+import { ExitToApp, Gavel, LocationCity, Face, HowToVote, Settings, People, Report, RssFeed } from "@material-ui/icons";
 
 import './HeaderNav.css';
 import { NotificationsButton } from "../../buttons/NotificationsButton";
@@ -108,14 +108,14 @@ export default function HeaderNav(props: HeaderNavProps) {
         if (user != null) {
             return (
                 <div>
-                    <Tooltip title="Tags">
-                        <Link to="/tags">
+                    <Tooltip title="Channels">
+                        <Link to="/channels">
                             <IconButton
                                 edge="start"
                                 className={classes.menuButton}
                                 aria-label="Open drawer"
                             >
-                                <Bookmarks className="nav-button" />
+                                <RssFeed className="nav-button" />
                             </IconButton>
                         </Link>
                     </Tooltip>
@@ -163,7 +163,7 @@ export default function HeaderNav(props: HeaderNavProps) {
                         open={Boolean(govAnchorEl)}
                         onClose={handleGovClose}
                     >
-                        <Link style={{ width: "100%"}} to="/gov/representatives">
+                        <Link style={{ width: "100%" }} to="/gov/representatives">
                             <MenuItem onClick={handleGovClose}>
                                 <ListItemIcon>
                                     <Face className="menu-item-button" />
