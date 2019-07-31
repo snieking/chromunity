@@ -158,7 +158,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                 {this.renderAuthor()}
                 <div className="reply-overview-details">
                     {this.renderTimeAgo(this.props.reply.timestamp)}
-                    <Typography variant="body2" className='purple-typography' component="p">
+                    <Typography variant="body2" className='purple-typography' component="p" style={{ maxWidth: "100%" }}>
                         <ReactMarkdown source={this.props.reply.message} />
                     </Typography>
                 </div>
