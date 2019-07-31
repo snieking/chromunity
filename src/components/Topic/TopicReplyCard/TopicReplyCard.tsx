@@ -10,7 +10,7 @@ import { removeTopicReply, removeReplyStarRating, giveReplyStarRating, getReplyS
 
 import './TopicReplyCard.css';
 import '../Topic.css';
-import { parseContent } from '../../../util/text-parsing';
+import ReactMarkdown from 'react-markdown';
 import { reportReply } from '../../../blockchain/RepresentativesService';
 
 interface Props {
@@ -85,6 +85,8 @@ class TopicReplyCard extends React.Component<Props, State> {
     componentDidMount() {
         const user: User = getUser();
 
+        console.log(this.props.reply.message);
+
         getUserSettingsCached(this.props.reply.author, 1440)
             .then(settings => {
                 this.setState({
@@ -157,10 +159,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                 <div className="reply-overview-details">
                     {this.renderTimeAgo(this.props.reply.timestamp)}
                     <Typography variant="body2" className='purple-typography' component="p">
-                        <span dangerouslySetInnerHTML={{
-                            __html: parseContent(this.props.reply.message)
-                        }}
-                            style={{ whiteSpace: "pre-line" }} />
+                        <ReactMarkdown source={this.props.reply.message} />
                     </Typography>
                 </div>
                 <div className={"bottom-bar"}>
@@ -171,7 +170,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                                 color="primary"
                                 badgeContent={this.state.stars}
                             >
-                                {this.state.ratedByMe ? <StarRate className="yellow-color"/> : <StarBorder className="purple-color"/>}
+                                {this.state.ratedByMe ? <StarRate className="yellow-color" /> : <StarBorder className="purple-color" />}
                             </Badge>
                         </IconButton>
                     </Tooltip>

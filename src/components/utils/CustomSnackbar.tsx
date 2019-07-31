@@ -53,7 +53,7 @@ export interface Props {
 }
 
 export function CustomSnackbarContentWrapper(props: Props) {
-  const classes = useStyles1();
+  const classes = useStyles1(props);
   const { className, message, onClose, variant, ...other } = props;
   const Icon = variantIcon[variant];
 

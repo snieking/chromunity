@@ -12,7 +12,7 @@ export function createTopic(user: User, channelName: string, title: string, mess
     const topicId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("create_topic", topicId, user.name, channelName.toLocaleLowerCase(), channelName, title, formatMessage(message));
+    tx.addOperation("create_topic", topicId, user.name, channelName.toLocaleLowerCase(), channelName, title, message);
     tx.sign(privKey, pubKey);
 
     return tx.postAndWaitConfirmation()
@@ -27,7 +27,7 @@ export function createTopicReply(user: User, topicId: string, message: string) {
     const replyId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("create_reply", topicId, replyId, user.name, formatMessage(message));
+    tx.addOperation("create_reply", topicId, replyId, user.name, message);
     tx.sign(privKey, pubKey);
 
     return postTopicReply(user, tx, topicId, message, replyId);
@@ -38,7 +38,7 @@ export function createTopicSubReply(user: User, topicId: string, replyId: string
     const subReplyId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("create_sub_reply", topicId, replyId, subReplyId, user.name, formatMessage(message));
+    tx.addOperation("create_sub_reply", topicId, replyId, subReplyId, user.name, message);
     tx.sign(privKey, pubKey);
     return postTopicReply(user, tx, topicId, message, subReplyId);
 }
@@ -221,8 +221,4 @@ export function getTopicsFromFollowedChannelsPriorToTimestamp(user: User, timest
                 return seen.has(k) ? false : seen.add(k);
             })
         });
-}
-
-function formatMessage(message: string) {
-    return message.replace(/[\r\n]\s*/g, '\n\n');
 }

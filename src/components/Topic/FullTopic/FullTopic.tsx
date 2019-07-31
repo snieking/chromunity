@@ -11,7 +11,7 @@ import { timeAgoReadable } from "../../../util/util";
 import { StarRate, SubdirectoryArrowRight, Delete, Report, Favorite, FavoriteBorder, StarBorder } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
 import TopicReplyCard from "../TopicReplyCard/TopicReplyCard";
-import { parseContent } from "../../../util/text-parsing";
+import ReactMarkdown from 'react-markdown';
 import LoadMoreButton from "../../buttons/LoadMoreButton";
 import { reportTopic, getRepresentatives } from "../../../blockchain/RepresentativesService";
 
@@ -237,10 +237,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                     {this.state.topic.title}
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
-                    <span dangerouslySetInnerHTML={{
-                        __html: parseContent(content)
-                    }}
-                        style={{ whiteSpace: "pre-line" }} />
+                    <ReactMarkdown source={content} />
                 </Typography>
             </CardContent>
         );

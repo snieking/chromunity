@@ -172,6 +172,7 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                                 type="text"
                                 fullWidth
                                 rows="3"
+                                rowsMax="15"
                                 onChange={this.handleDialogMessageChange}
                                 value={this.state.topicMessage}
                                 variant="outlined"

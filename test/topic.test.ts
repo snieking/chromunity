@@ -81,7 +81,7 @@ describe("topic tests", () => {
         expect(subReplies.length).toBe(1);
 
         const subReply: TopicReply = subReplies[0];
-        await createTopicSubReply(userLoggedIn, topic.id, subReply.id, "I am #AlwaysCertain");
+        await createTopicSubReply(userLoggedIn, topic.id, subReply.id, "I am always certain");
 
         const subSubReplies: TopicReply[] = await getTopicSubReplies(subReply.id);
         expect(subSubReplies.length).toBe(1);

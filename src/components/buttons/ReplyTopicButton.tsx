@@ -107,6 +107,7 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
                                 label="Reply"
                                 type="text"
                                 rows="3"
+                                rowsMax="15"
                                 variant="outlined"
                                 fullWidth
                                 onChange={this.handleDialogMessageChange}
