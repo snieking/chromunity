@@ -105,7 +105,7 @@ export function getTopicsByUserPriorToTimestamp(username: string, timestamp: num
 }
 
 export function getTopicsByChannelPriorToTimestamp(channelName: string, timestamp: number, pageSize: number): Promise<Topic[]> {
-    return GTX.query("get_topics_by_channel_prior_to_timestamp", { name: channelName, timestamp: timestamp, page_size: pageSize })
+    return GTX.query("get_topics_by_channel_prior_to_timestamp", { name: channelName.toLocaleLowerCase(), timestamp: timestamp, page_size: pageSize })
         .then((topics: Topic[]) => {
             topics.forEach(topic => topicsCache.set(topic.id, topic));
             return topics;
@@ -113,7 +113,7 @@ export function getTopicsByChannelPriorToTimestamp(channelName: string, timestam
 }
 
 export function getTopicsByChannelAfterTimestamp(channelName: string, timestamp: number): Promise<Topic[]> {
-    return GTX.query("get_topics_by_channel_after_timestamp", { name: channelName, timestamp: timestamp })
+    return GTX.query("get_topics_by_channel_after_timestamp", { name: channelName.toLocaleLowerCase(), timestamp: timestamp })
         .then((topics: Topic[]) => {
             topics.forEach(topic => topicsCache.set(topic.id, topic));
             return topics;
