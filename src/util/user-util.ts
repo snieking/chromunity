@@ -74,10 +74,10 @@ export function isRepresentative(): Promise<boolean> {
     }
 
     return getRepresentatives()
-        .then((representatives: string[]) => representatives.includes(getUser().name))
-        .then((isRepresentative: boolean) => {
-            setRepresentative(isRepresentative);
-            return isRepresentative;
+        .then((representatives: string[]) => getUser() != null && representatives.includes(getUser().name))
+        .then((rep: boolean) => {
+            setRepresentative(rep);
+            return rep;
         }).catch(() => {
             setRepresentative(false);
             return false;

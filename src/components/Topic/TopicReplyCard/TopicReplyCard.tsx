@@ -85,8 +85,6 @@ class TopicReplyCard extends React.Component<Props, State> {
     componentDidMount() {
         const user: User = getUser();
 
-        console.log(this.props.reply.message);
-
         getUserSettingsCached(this.props.reply.author, 1440)
             .then(settings => {
                 this.setState({
@@ -99,6 +97,7 @@ class TopicReplyCard extends React.Component<Props, State> {
         }));
         getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies }));
         getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
+        isRepresentative().then(isRepresentative => this.setState({ isRepresentative: isRepresentative }));
     }
 
     toggleStarRate() {
@@ -211,7 +210,7 @@ class TopicReplyCard extends React.Component<Props, State> {
     }
 
     renderAdminActions() {
-        if (isRepresentative() && !this.props.reply.removed) {
+        if (this.state.isRepresentative && !this.props.reply.removed) {
             return (
                 <div style={{ display: "inline-block" }}>
                     <Tooltip title="Remove reply">

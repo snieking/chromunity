@@ -6,7 +6,7 @@ import { RouteComponentProps } from "react-router";
 import { ReplyTopicButton } from "../../buttons/ReplyTopicButton";
 import { removeTopic, getTopicById, removeTopicStarRating, giveTopicStarRating, getTopicStarRaters, unsubscribeFromTopic, subscribeToTopic, getTopicSubscribers, getTopicRepliesPriorToTimestamp, getTopicRepliesAfterTimestamp } from "../../../blockchain/TopicService";
 import { Topic, User, TopicReply } from "../../../types";
-import { getUser, ifEmptyAvatarThenPlaceholder, isRepresentative } from "../../../util/user-util";
+import { getUser, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import { timeAgoReadable } from "../../../util/util";
 import { StarRate, SubdirectoryArrowRight, Delete, Report, Favorite, FavoriteBorder, StarBorder } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
@@ -187,7 +187,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
 
     renderTimeAgo() {
         return (
-            <Typography className="timestamp right" variant="body2" component="span">
+            <Typography className="timestamp" variant="body2" component="span" style={{ marginBottom: "-17px" }}>
                 {timeAgoReadable(this.state.topic.timestamp)}
             </Typography>
         )
@@ -196,18 +196,14 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
     renderAuthor() {
         return (
             <div className="right">
-                {this.renderTimeAgo()}
-                <br />
-                <br />
-                {this.state.avatar !== "" ? <img src={this.state.avatar} className="topic-author-avatar" alt="Profile Avatar" /> : <div></div>}
-                <br />
                 <Link
                     className={"topic-author-link"}
                     to={"/u/" + this.state.topic.author}
                     style={{
                         float: "right",
-                        marginTop: "7px",
+                        marginTop: "-17px",
                         marginRight: "-16px",
+                        marginBottom: "7px",
                         backgroundColor: this.state.representatives.includes(this.state.topic.author) ? "#CB8FE9" : "#FFAFC1"
                     }}
                 >
@@ -220,6 +216,8 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                         <span className="topic-author-name">@{this.state.topic.author}</span>
                     </Typography>
                 </Link>
+                <br />
+                {this.state.avatar !== "" ? <img src={this.state.avatar} style={{ marginBottom: "5px" }}className="topic-author-avatar" alt="Profile Avatar" /> : <div></div>}
             </div>
         );
     }
@@ -228,6 +226,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
         return (
             <CardContent>
                 {this.renderAuthor()}
+                {this.renderTimeAgo()}
                 <Typography
                     gutterBottom
                     variant="h6"
@@ -236,7 +235,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                 >
                     {this.state.topic.title}
                 </Typography>
-                <Typography variant="body2" color="textSecondary" component="p">
+                <Typography variant="body2" className='purple-typography' component="p">
                     <ReactMarkdown source={content} />
                 </Typography>
             </CardContent>
@@ -284,7 +283,8 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
     }
 
     renderAdminActions() {
-        if (isRepresentative() && !this.state.topic.removed) {
+        const user: User = getUser();
+        if (user != null && this.state.representatives.includes(user.name) && !this.state.topic.removed) {
             return (
                 <div style={{ display: "inline-block" }}>
                     <Tooltip title="Remove topic">
