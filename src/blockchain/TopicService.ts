@@ -3,29 +3,21 @@ import { seedToKey } from "./CryptoService";
 import { uniqueId } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 import { User, Topic, TopicReply } from "../types";
-import { storeTagsFromTopic, storeTagsFromTopicReply } from "./TagService";
 import { sendNotifications } from "./NotificationService";
 
 const topicsCache = BoomerangCache.create("topic-bucket", { storage: "session", encrypt: false });
 
-export function createTopic(user: User, title: string, message: string) {
+export function createTopic(user: User, channelName: string, title: string, message: string) {
     const { privKey, pubKey } = seedToKey(user.seed);
     const topicId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("create_topic", topicId, user.name, title, formatMessage(message));
+    tx.addOperation("create_topic", topicId, user.name, channelName.toLocaleLowerCase(), channelName, title, formatMessage(message));
     tx.sign(privKey, pubKey);
 
     return tx.postAndWaitConfirmation()
         .then((promise: any) => {
-            const tags = getHashTags(message);
-
-            if (tags != null && tags.length > 0) {
-                storeTagsFromTopic(user, topicId, tags);
-            }
-
             subscribeToTopic(user, topicId);
-
             return promise;
         });
 }
@@ -54,16 +46,9 @@ export function createTopicSubReply(user: User, topicId: string, replyId: string
 function postTopicReply(user: User, tx: any, topicId: string, message: string, replyId: string) {
     return tx.postAndWaitConfirmation()
         .then((promise: any) => {
-            const tags = getHashTags(message);
-
-            if (tags != null && tags.length > 0) {
-                storeTagsFromTopicReply(user, topicId, tags, replyId);
-            }
-
             getTopicSubscribers(topicId)
                 .then(users => sendNotifications(user,
                     createReplyTriggerString(user.name, topicId), message, users.filter(item => item !== user.name)));
-
             return promise;
         });
 }
@@ -119,8 +104,16 @@ export function getTopicsByUserPriorToTimestamp(username: string, timestamp: num
         });
 }
 
-export function getTopicsByTagPriorToTimestamp(tag: string, timestamp: number, pageSize: number): Promise<Topic[]> {
-    return GTX.query("get_topics_by_tag_prior_to_timestamp", { tag: tag, timestamp: timestamp, page_size: pageSize })
+export function getTopicsByChannelPriorToTimestamp(channelName: string, timestamp: number, pageSize: number): Promise<Topic[]> {
+    return GTX.query("get_topics_by_channel_prior_to_timestamp", { name: channelName.toLocaleLowerCase(), timestamp: timestamp, page_size: pageSize })
+        .then((topics: Topic[]) => {
+            topics.forEach(topic => topicsCache.set(topic.id, topic));
+            return topics;
+        });
+}
+
+export function getTopicsByChannelAfterTimestamp(channelName: string, timestamp: number): Promise<Topic[]> {
+    return GTX.query("get_topics_by_channel_after_timestamp", { name: channelName.toLocaleLowerCase(), timestamp: timestamp })
         .then((topics: Topic[]) => {
             topics.forEach(topic => topicsCache.set(topic.id, topic));
             return topics;
@@ -215,8 +208,8 @@ function getTopicsFromFollowsForTimestamp(user: User, timestamp: number, pageSiz
     return GTX.query(rellOperation, { name: user.name, timestamp: timestamp, page_size: pageSize });
 }
 
-export function getTopicsFromFollowedTagsPriorToTimestamp(user: User, timestamp: number, pageSize: number): Promise<Topic[]> {
-    return GTX.query("get_topics_by_followed_tags_prior_to_timestamp", { username: user.name, timestamp: timestamp, page_size: pageSize })
+export function getTopicsFromFollowedChannelsPriorToTimestamp(user: User, timestamp: number, pageSize: number): Promise<Topic[]> {
+    return GTX.query("get_topics_by_followed_channels_prior_to_timestamp", { username: user.name, timestamp: timestamp, page_size: pageSize })
         .then((topics: Topic[]) => { 
             var seen: Set<string> = new Set<string>();
             return topics.filter(item => {
@@ -228,16 +221,4 @@ export function getTopicsFromFollowedTagsPriorToTimestamp(user: User, timestamp:
 
 function formatMessage(message: string) {
     return message.replace(/[\r\n]\s*/g, '\n\n');
-}
-
-function getHashTags(inputText: string): string[] {
-    const regex = /(?:^|\s)(?:#)([a-zA-Z\d]+)/gm;
-    const matches = [];
-    let match;
-
-    while ((match = regex.exec(inputText))) {
-        matches.push(match[1]);
-    }
-
-    return matches;
 }

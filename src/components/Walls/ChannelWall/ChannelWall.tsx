@@ -1,40 +1,41 @@
 import React from 'react';
 import '../Wall.css';
 import { Container, LinearProgress, FormGroup, FormControlLabel, Switch } from "@material-ui/core";
-import { Topic } from "../../../types";
+import { Topic, User } from "../../../types";
 
 import { RouteComponentProps } from "react-router";
-import { getTopicsByTagPriorToTimestamp } from '../../../blockchain/TopicService';
+import { getTopicsByChannelPriorToTimestamp, getTopicsByChannelAfterTimestamp } from '../../../blockchain/TopicService';
 import TopicOverviewCard from '../../Topic/TopicOverViewCard/TopicOverviewCard';
 import LoadMoreButton from '../../buttons/LoadMoreButton';
 import { getUser } from '../../../util/user-util';
-import { unfollowTag, followTag, getFollowedTags } from '../../../blockchain/TagService';
+import { unfollowChannel, followChannel, getFollowedChannels } from '../../../blockchain/ChannelService';
 import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
 import { getRepresentatives } from '../../../blockchain/RepresentativesService';
+import { NewTopicButton } from '../../buttons/NewTopicButton';
 
 interface MatchParams {
-    tag: string
+    channel: string
 }
 
-export interface TagWallProps extends RouteComponentProps<MatchParams> {
+export interface ChannelWallProps extends RouteComponentProps<MatchParams> {
 
 }
 
-export interface TagWallState {
+export interface ChannelWallState {
     topics: Topic[];
     representatives: string[];
     id: string;
     timestampOnOldestTopic: number;
     isLoading: boolean;
     couldExistOlderTopics: boolean;
-    tagFollowed: boolean;
+    channelFollowed: boolean;
 }
 
 const topicsPageSize: number = 25;
 
-export class TagWall extends React.Component<TagWallProps, TagWallState> {
+export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
 
-    constructor(props: TagWallProps) {
+    constructor(props: ChannelWallProps) {
         super(props);
         this.state = {
             topics: [],
@@ -43,7 +44,7 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
             timestampOnOldestTopic: Date.now(),
             isLoading: true,
             couldExistOlderTopics: false,
-            tagFollowed: false
+            channelFollowed: false
         };
 
         this.retrieveTopics = this.retrieveTopics.bind(this);
@@ -54,17 +55,19 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
         this.retrieveTopics();
         getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
 
-        if (getUser().name != null) {
-            const tag = this.props.match.params.tag;
-            getFollowedTags(getUser()).then(tags => this.setState({ tagFollowed: tags.includes(tag) }));
+        const user: User = getUser();
+        if (user != null) {
+            const channel = this.props.match.params.channel;
+            getFollowedChannels(user.name).then(channels => this.setState({ channelFollowed: channels.includes(channel.toLocaleLowerCase()) }));
         }
     }
 
     retrieveTopics() {
         this.setState({ isLoading: true });
-        const tag = this.props.match.params.tag;
-        if (tag != null) {
-            getTopicsByTagPriorToTimestamp(tag, Date.now(), topicsPageSize)
+        const channel = this.props.match.params.channel;
+
+        if (channel != null) {
+            getTopicsByChannelPriorToTimestamp(channel, Date.now(), topicsPageSize)
                 .then(retrievedTopics => {
                     this.setState(prevState => ({
                         topics: retrievedTopics.concat(prevState.topics),
@@ -75,27 +78,47 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
         }
     }
 
-    toggleTagFollow() {
-        const tag = this.props.match.params.tag;
-        if (this.state.tagFollowed) {
-            unfollowTag(getUser(), tag).then(() => this.setState({ tagFollowed: false }));
+    retrieveLatestTopics() {
+        this.setState({ isLoading: true });
+        const channel = this.props.match.params.channel;
+
+        const timestamp: number = this.state.topics.length > 0 
+            ? this.state.topics[this.state.topics.length - 1].timestamp 
+            : Date.now();
+
+        if (channel != null) {
+            getTopicsByChannelAfterTimestamp(channel, timestamp)
+            .then(retrievedTopics => {
+                this.setState(prevState => ({
+                    topics: retrievedTopics.concat(prevState.topics),
+                    isLoading: false
+                }));
+            });
+        }
+    }
+
+    toggleChannelFollow() {
+        const channel = this.props.match.params.channel;
+        if (this.state.channelFollowed) {
+            unfollowChannel(getUser(), channel).then(() => this.setState({ channelFollowed: false }));
         } else {
-            followTag(getUser(), tag).then(() => this.setState({ tagFollowed: true }));
+            followChannel(getUser(), channel).then(() => this.setState({ channelFollowed: true }));
         }
     }
 
     renderFollowSwitch() {
-        if (getUser().name != null) {
+        const user: User = getUser();
+        if (user != null) {
             return (
                 <FormGroup row>
                     <FormControlLabel className="switch-label"
                         control={
-                            <Switch checked={this.state.tagFollowed}
-                                onChange={() => this.toggleTagFollow()}
-                                value={this.state.tagFollowed}
+                            <Switch checked={this.state.channelFollowed}
+                                onChange={() => this.toggleChannelFollow()}
+                                value={this.state.channelFollowed}
                                 className="switch" />
                         }
-                        label="Follow tag"
+                        label="Follow channel"
                     />
                 </FormGroup>
             )
@@ -105,9 +128,9 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
     retrieveOlderTopics() {
         if (this.state.topics.length > 0) {
             this.setState({ isLoading: true });
-            const tag = this.props.match.params.tag;
+            const channel = this.props.match.params.channel;
             const oldestTimestamp: number = this.state.topics[this.state.topics.length - 1].timestamp;
-            getTopicsByTagPriorToTimestamp(tag, oldestTimestamp, topicsPageSize)
+            getTopicsByChannelPriorToTimestamp(channel, oldestTimestamp, topicsPageSize)
                 .then(retrievedTopics => {
                     if (retrievedTopics.length > 0) {
                         this.setState(prevState => ({
@@ -133,7 +156,7 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
             <div>
                 <Container fixed maxWidth="md">
                     <div className="thread-wall-container">
-                        <ChromiaPageHeader text={"#" + this.props.match.params.tag} />
+                        <ChromiaPageHeader text={"#" + this.props.match.params.channel} />
                         {this.renderFollowSwitch()}
                         {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
                         {this.state.topics.map(topic => <TopicOverviewCard
@@ -143,6 +166,7 @@ export class TagWall extends React.Component<TagWallProps, TagWallState> {
                         />)}
                     </div>
                     {this.renderLoadMoreButton()}
+                    {getUser() != null ? <NewTopicButton channel={this.props.match.params.channel} updateFunction={this.retrieveTopics} /> : <div></div>}
                 </Container>
             </div>
         );

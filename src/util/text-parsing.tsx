@@ -14,7 +14,7 @@ export function getTags(message: string): string[] {
 function parseHashtags(message: string): string {
     return message.replace(
         /(\s)(#)([a-z\d-]+)/gi,
-        "$1<a  class='pink-typography' href='/tag/$3'>$2$3</a>"
+        "$1<a  class='pink-typography' href='/c/$3'>$2$3</a>"
     );
 }
 

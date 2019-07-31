@@ -1,7 +1,8 @@
+include 'util/index';
 include 'user/index';
 include 'topic/index';
 include 'notifications/index';
-include 'hashtag/index';
+include 'channel/index';
 include 'follow/index';
 include 'election/index';
 include 'representative/index';

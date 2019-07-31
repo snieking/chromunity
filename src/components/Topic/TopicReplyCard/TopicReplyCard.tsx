@@ -237,7 +237,8 @@ class TopicReplyCard extends React.Component<Props, State> {
     }
 
     renderReplyBox() {
-        if (this.state.replyBoxOpen && getUser().name == null) {
+        const user: User = getUser();
+        if (this.state.replyBoxOpen && user == null) {
             window.location.replace("/user/login");
         } else if (this.state.replyBoxOpen && this.state.userMeta.suspended_until > Date.now()) {
             this.setState({ replyBoxOpen: false });

@@ -1,5 +1,5 @@
 import * as pcl from "postchain-client";
-import * as config from "../config.js";
+import config from "../config.js";
 
 const NODE_API_URL = config.nodeApiUrl;
 const BLOCKCHAIN_RID = config.blockchainRID;

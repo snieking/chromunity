@@ -7,7 +7,7 @@ operation remove_topic(username: text, topic_id: text) {
 
     val topic = topic @{ .id == topic_id };
     update topic ( title = "[Removed]", message = "Removed by @" + user.name, removed = true );
-    delete topic_tag @* { topic @{ .id == topic_id }};
+    
     create representative_action(
         id = op_context.transaction.tx_rid, 
         representative,
@@ -25,12 +25,6 @@ operation remove_topic_reply(username: text, topic_reply_id: text) {
 
     val reply = topic_reply @{ .id == topic_reply_id };
     update reply ( message = "Removed by @" + user.name, removed = true );
-    
-    val replyToTopicTags = reply_to_topic_tag @* { topic_reply_id };
-    for (replyToTopicTag in replyToTopicTags) {
-        delete replyToTopicTag;
-        delete topic_tag @? { replyToTopicTag.topic_tag.id };
-    }
 
     create representative_action(
         id = op_context.transaction.tx_rid, 

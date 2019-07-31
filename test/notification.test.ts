@@ -4,7 +4,6 @@ import { getANumber } from './helper';
 import * as bip39 from "bip39";
 import { register, login } from '../src/blockchain/UserService';
 import { sendNotifications, countUnreadUserNotifications, markNotificationsRead, getUserNotificationsPriorToTimestamp, sendNotificationWithDeterministicId, removeNotificationsForId } from '../src/blockchain/NotificationService';
-import { createTopic, getTopicsByUserPriorToTimestamp } from '../src/blockchain/TopicService';
 
 jest.setTimeout(30000);
 
