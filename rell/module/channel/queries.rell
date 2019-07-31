@@ -27,6 +27,14 @@ query get_topics_by_channel_after_timestamp(name, timestamp) {
     );
 }
 
+query count_topics_by_channel(name) {
+    return channel@*{ .name == name } ( .name ).size();
+}
+
+query count_channel_followers(name) {
+    return channel_following@*{ .name == name } ( .user.name ).size();
+}
+
 query get_topics_by_followed_channels_prior_to_timestamp(username: text, timestamp, page_size: integer) {
     val user = user@{ .name == username};
     return (channel, channel_following) @* {

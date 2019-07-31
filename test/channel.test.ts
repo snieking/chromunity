@@ -1,9 +1,9 @@
 import * as bip39 from "bip39";
 import { register, login } from "../src/blockchain/UserService";
 import { User, Topic } from "../src/types";
-import { getTrendingChannels, followChannel, unfollowChannel, getFollowedChannels, getTopicChannelBelongings } from "../src/blockchain/ChannelService";
+import { getTrendingChannels, followChannel, unfollowChannel, getFollowedChannels, getTopicChannelBelongings, countChannelFollowers } from "../src/blockchain/ChannelService";
 import { getANumber } from "./helper";
-import { getTopicsByChannelPriorToTimestamp, createTopic, getTopicsFromFollowedChannelsPriorToTimestamp, getTopicsByChannelAfterTimestamp } from "../src/blockchain/TopicService";
+import { getTopicsByChannelPriorToTimestamp, createTopic, getTopicsFromFollowedChannelsPriorToTimestamp, getTopicsByChannelAfterTimestamp, countTopicsInChannel } from "../src/blockchain/TopicService";
 
 jest.setTimeout(60000);
 
@@ -36,6 +36,9 @@ describe("channel tests", () => {
         const belongings: string[] = await getTopicChannelBelongings(topic.id);
         expect(belongings.length).toBe(1);
 
+        const countOfTopics = await countTopicsInChannel(channel);
+        expect(countOfTopics).toBe(1);
+
         topics = await getTopicsByChannelPriorToTimestamp(channel, Date.now() + 3000, 10);
         expect(topics.length).toBe(1);
 
@@ -47,6 +50,9 @@ describe("channel tests", () => {
         var followedTags: string[] = await getFollowedChannels(loggedInUser.name);
         expect(topicsWithFollowedTag.length).toBe(1);
         expect(followedTags.length).toBe(1);
+
+        const countOfFollowers = await countChannelFollowers(channel);
+        expect(countOfFollowers).toBe(1);
 
         await unfollowChannel(loggedInUser, channel);
         topicsWithFollowedTag = await getTopicsFromFollowedChannelsPriorToTimestamp(loggedInUser, Date.now() + 3000, 10);

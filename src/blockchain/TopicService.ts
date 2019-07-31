@@ -120,6 +120,10 @@ export function getTopicsByChannelAfterTimestamp(channelName: string, timestamp:
         });
 }
 
+export function countTopicsInChannel(channelName: string): Promise<number> {
+    return GTX.query("count_topics_by_channel", { name: channelName.toLocaleLowerCase() });
+}
+
 export function giveTopicStarRating(user: User, topicId: string) {
     return modifyRatingAndSubscription(user, topicId, "give_topic_star_rating");
 }

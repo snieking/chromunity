@@ -3,6 +3,7 @@ import {seedToKey} from "./CryptoService";
 import {GTX} from "./Postchain";
 import {sortByFrequency, uniqueId} from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
+import { number } from "prop-types";
 
 const channelsCache = BoomerangCache.create("channels-bucket", { storage: "session", encrypt: false });
 
@@ -19,6 +20,7 @@ export function getFollowedChannels(user: string): Promise<string[]> {
 }
 
 function modifyChannelollowing(user: User, channel: string, rellOperation: string) {
+    channelsCache.remove(channel + ":" + "followers");
     const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
@@ -58,5 +60,20 @@ export function getTrendingChannels(sinceDaysAgo: number): Promise<string[]> {
             trending = sortByFrequency(tags).slice(0, 10);
             channelsCache.set("trending", trending, 3600);
             return trending;
+        });
+}
+
+export function countChannelFollowers(channelName: string): Promise<number> {
+    const key: string = channelName + ":" + "followers";
+    const followers: number = channelsCache.get(key);
+
+    if (followers != null) {
+        return new Promise<number>(resolve => resolve(followers));
+    }
+
+    return GTX.query("count_channel_followers", { name: channelName.toLocaleLowerCase() })
+        .then((count: number) => {
+            channelsCache.set(key, count, 600);
+            return count;
         });
 }
