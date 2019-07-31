@@ -14,8 +14,8 @@ export function unfollowChannel(user: User, name: string) {
     return modifyChannelollowing(user, name, "unfollow_channel");
 }
 
-export function getFollowedChannels(user: User): Promise<string[]> {
-    return GTX.query("get_followed_channels", { username: user.name });
+export function getFollowedChannels(user: string): Promise<string[]> {
+    return GTX.query("get_followed_channels", { username: user});
 }
 
 function modifyChannelollowing(user: User, channel: string, rellOperation: string) {

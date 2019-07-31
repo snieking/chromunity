@@ -1,6 +1,7 @@
 import React from 'react';
 import '../Wall.css';
-import { Container, LinearProgress, Tabs, Tab } from "@material-ui/core";
+import { Link } from "react-router-dom";
+import { Container, LinearProgress, Tabs, Tab, Chip, Paper } from "@material-ui/core";
 import { Topic, TopicReply } from "../../../types";
 
 import { RouteComponentProps } from "react-router";
@@ -11,6 +12,8 @@ import { SubdirectoryArrowRight } from '@material-ui/icons';
 import LoadMoreButton from '../../buttons/LoadMoreButton';
 import { getRepresentatives } from '../../../blockchain/RepresentativesService';
 import TopicReplyOverviewCard from '../../Topic/TopicReplyOverviewCard/TopicReplyOverviewCard';
+import { stringToHexColor } from '../../../util/util';
+import { getFollowedChannels } from '../../../blockchain/ChannelService';
 
 interface MatchParams {
     userId: string;
@@ -29,6 +32,7 @@ export interface UserWallState {
     couldExistOlderTopics: boolean;
     couldExistOlderTopicReplies: boolean;
     activeTab: number;
+    followedChannels: string[];
 }
 
 const topicsPageSize: number = 25;
@@ -41,6 +45,7 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
             topics: [],
             topicReplies: [],
             representatives: [],
+            followedChannels: [],
             timestampOnOldestThread: Date.now(),
             isLoading: true,
             couldExistOlderTopics: false,
@@ -59,6 +64,7 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
         this.retrieveTopics();
         this.retrieveTopicReplies();
         getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
+        getFollowedChannels(this.props.match.params.userId).then(channels => this.setState({ followedChannels: channels }));
     }
 
     retrieveTopics() {
@@ -80,8 +86,8 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
         this.setState({ isLoading: true });
         const userId = this.props.match.params.userId;
 
-        const timestamp: number = this.state.topicReplies.length > 0 
-            ? this.state.topicReplies[this.state.topicReplies.length -1].timestamp
+        const timestamp: number = this.state.topicReplies.length > 0
+            ? this.state.topicReplies[this.state.topicReplies.length - 1].timestamp
             : Date.now();
 
         if (userId != null) {
@@ -153,10 +159,34 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
         } else if (this.state.activeTab === 1) {
             return (
                 this.state.topicReplies.map(reply => <TopicReplyOverviewCard
-                        key={reply.id}
-                        reply={reply}
-                        isRepresentative={this.state.representatives.includes(reply.author)}
-                    />)
+                    key={reply.id}
+                    reply={reply}
+                    isRepresentative={this.state.representatives.includes(reply.author)}
+                />)
+            )
+        } else if (this.state.activeTab === 2) {
+            return (
+                <Paper>
+                    <div style={{ padding: "15px"}}>
+                        {this.state.followedChannels.map(channel => {
+                            return (
+                                <Link key={channel} to={"/c/" + channel.replace("#", "")}>
+                                    <Chip
+                                        size="small"
+                                        label={"#" + channel}
+                                        style={{
+                                            marginLeft: "1px",
+                                            marginRight: "1px",
+                                            marginBottom: "3px",
+                                            backgroundColor: stringToHexColor(channel),
+                                            cursor: "pointer"
+                                        }}
+                                    />
+                                </Link>
+                            )
+                        })}
+                    </div>
+                </Paper>
             )
         }
     }
@@ -171,9 +201,10 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
                         {this.state.topics.length > 0
                             ? (<SubdirectoryArrowRight className="nav-button button-center" />)
                             : (<div />)}
-                        <Tabs value={this.state.activeTab} onChange={this.handleChange} aria-label="simple tabs example">
+                        <Tabs value={this.state.activeTab} onChange={this.handleChange} aria-label="User activity">
                             <Tab label="Topics" {...this.a11yProps(0)} style={styles.tab} />
                             <Tab label="Replies" {...this.a11yProps(1)} style={styles.tab} />
+                            <Tab label="Channels" {...this.a11yProps(2)} style={styles.tab} />
                         </Tabs>
                         {this.renderUserContent()}
                     </div>

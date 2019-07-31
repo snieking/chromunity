@@ -44,13 +44,13 @@ describe("channel tests", () => {
 
         await followChannel(loggedInUser, channel);
         var topicsWithFollowedTag: Topic[] = await getTopicsFromFollowedChannelsPriorToTimestamp(loggedInUser, Date.now() + 3000, 10);
-        var followedTags: string[] = await getFollowedChannels(loggedInUser);
+        var followedTags: string[] = await getFollowedChannels(loggedInUser.name);
         expect(topicsWithFollowedTag.length).toBe(1);
         expect(followedTags.length).toBe(1);
 
         await unfollowChannel(loggedInUser, channel);
         topicsWithFollowedTag = await getTopicsFromFollowedChannelsPriorToTimestamp(loggedInUser, Date.now() + 3000, 10);
-        followedTags = await getFollowedChannels(loggedInUser);
+        followedTags = await getFollowedChannels(loggedInUser.name);
         expect(topicsWithFollowedTag.length).toBe(0);
         expect(followedTags.length).toBe(0);
     });
