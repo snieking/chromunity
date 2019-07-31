@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from "react-router-dom";
 import { TopicReply, UserMeta, User } from '../../../types';
-import { Card, Typography, IconButton, Badge, CardContent, TextField, Button, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
+import { Card, Typography, IconButton, Badge, CardContent, TextField, Button, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, LinearProgress } from '@material-ui/core';
 import { timeAgoReadable } from '../../../util/util';
 import { getUser, ifEmptyAvatarThenPlaceholder, isRepresentative, getCachedUserMeta } from '../../../util/user-util';
 import { StarRate, Reply, Delete, Report } from '@material-ui/icons';
@@ -31,6 +31,7 @@ interface State {
     subReplies: TopicReply[];
     userMeta: UserMeta;
     removeReplyDialogOpen: boolean;
+    isLoading: boolean;
 }
 
 class TopicReplyCard extends React.Component<Props, State> {
@@ -48,7 +49,8 @@ class TopicReplyCard extends React.Component<Props, State> {
             avatar: "",
             subReplies: [],
             userMeta: { name: "", suspended_until: Date.now() + 10000, times_suspended: 0 },
-            removeReplyDialogOpen: false
+            removeReplyDialogOpen: false,
+            isLoading: false
         };
 
         this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
@@ -65,6 +67,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                         className='reply-card'
                         style={{ marginLeft: this.props.indention + "px" }}
                     >
+                        {this.state.isLoading ? <LinearProgress /> : <div></div>}
                         {this.renderCardContent()}
                     </Card>
                 </div>
@@ -97,19 +100,24 @@ class TopicReplyCard extends React.Component<Props, State> {
     }
 
     toggleStarRate() {
-        const id = this.props.reply.id;
-        const name = getUser().name;
+        if (!this.state.isLoading) {
+            this.setState({ isLoading: true });
+            const id = this.props.reply.id;
+            const name = getUser().name;
 
-        if (name != null) {
-            if (this.state.ratedByMe) {
-                removeReplyStarRating(getUser(), id)
-                    .then(() => this.setState(prevState => ({ ratedByMe: false, stars: prevState.stars - 1 })));
+            if (name != null) {
+                if (this.state.ratedByMe) {
+                    removeReplyStarRating(getUser(), id)
+                        .then(() => this.setState(prevState => ({ ratedByMe: false, stars: prevState.stars - 1, isLoading: false })))
+                        .catch(() => this.setState({ isLoading: false }));
+                } else {
+                    giveReplyStarRating(getUser(), id)
+                        .then(() => this.setState(prevState => ({ ratedByMe: true, stars: prevState.stars + 1, isLoading: false })))
+                        .catch(() => this.setState({ isLoading: false }));
+                }
             } else {
-                giveReplyStarRating(getUser(), id)
-                    .then(() => this.setState(prevState => ({ ratedByMe: true, stars: prevState.stars + 1 })))
+                window.location.replace("/user/login");
             }
-        } else {
-            window.location.replace("/user/login");
         }
     }
 
@@ -156,7 +164,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                     </Typography>
                 </div>
                 <div className={"bottom-bar"}>
-                <Tooltip title="Like">
+                    <Tooltip title="Like">
                         <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
                             <Badge
                                 className="star-badge"

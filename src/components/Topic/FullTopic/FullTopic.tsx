@@ -140,36 +140,48 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
     }
 
     toggleStarRate() {
-        const id: string = this.state.topic.id;
-        const user: User = getUser();
-        const name: string = user.name;
+        if (!this.state.isLoading) {
+            this.setState({ isLoading: true });
+            const id: string = this.state.topic.id;
+            const user: User = getUser();
+            const name: string = user.name;
 
-        if (name != null) {
-            if (this.state.ratedByMe) {
-                removeTopicStarRating(user, id)
-                    .then(() => this.setState(prevState => ({ ratedByMe: false, stars: prevState.stars - 1 })));
+            if (name != null) {
+                if (this.state.ratedByMe) {
+                    removeTopicStarRating(user, id)
+                        .then(() => this.setState(prevState => ({ ratedByMe: false, stars: prevState.stars - 1, isLoading: false })))
+                        .catch(() => this.setState({ isLoading: false }));
+                } else {
+                    giveTopicStarRating(user, id)
+                        .then(() => this.setState(prevState => ({ ratedByMe: true, stars: prevState.stars + 1, isLoading: false })))
+                        .catch(() => this.setState({ isLoading: false }));
+                }
             } else {
-                giveTopicStarRating(user, id)
-                    .then(() => this.setState(prevState => ({ ratedByMe: true, stars: prevState.stars + 1 })))
+                window.location.replace("/user/login");
             }
-        } else {
-            window.location.replace("/user/login");
         }
     }
 
     toggleSubscription() {
-        const id: string = this.state.topic.id;
-        const user: User = getUser();
-        const name: string = user.name;
+        if (!this.state.isLoading) {
+            this.setState({ isLoading: true });
+            const id: string = this.state.topic.id;
+            const user: User = getUser();
+            const name: string = user.name;
 
-        if (name != null) {
-            if (this.state.subscribed) {
-                unsubscribeFromTopic(user, id).then(() => this.setState(prevState => ({ subscribed: false })));
+            if (name != null) {
+                if (this.state.subscribed) {
+                    unsubscribeFromTopic(user, id)
+                        .then(() => this.setState({ subscribed: false, isLoading: false }))
+                        .catch(() => this.setState({ isLoading: false }));
+                } else {
+                    subscribeToTopic(user, id)
+                        .then(() => this.setState({ subscribed: true, isLoading: false }))
+                        .catch(() => this.setState({ isLoading: false }));
+                }
             } else {
-                subscribeToTopic(user, id).then(() => this.setState(prevState => ({ subscribed: true })));
+                window.location.replace("/user/login");
             }
-        } else {
-            window.location.replace("/user/login");
         }
     }
 

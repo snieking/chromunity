@@ -107,24 +107,26 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
     }
 
     toggleChannelFollow() {
-        const channel = this.props.match.params.channel;
-        this.setState({ isLoading: true });
-        if (this.state.channelFollowed) {
-            unfollowChannel(getUser(), channel)
-                .then(() => this.setState(prevState => ({
-                    channelFollowed: false,
-                    countOfFollowers: prevState.countOfFollowers - 1,
-                    isLoading: false
-                })))
-                .catch(() => this.setState({ isLoading: false }));
-        } else {
-            followChannel(getUser(), channel)
-                .then(() => this.setState(prevState => ({
-                    channelFollowed: true,
-                    countOfFollowers: prevState.countOfFollowers + 1,
-                    isLoading: false
-                })))
-                .catch(() => this.setState({ isLoading: false }));
+        if (!this.state.isLoading) {
+            const channel = this.props.match.params.channel;
+            this.setState({ isLoading: true });
+            if (this.state.channelFollowed) {
+                unfollowChannel(getUser(), channel)
+                    .then(() => this.setState(prevState => ({
+                        channelFollowed: false,
+                        countOfFollowers: prevState.countOfFollowers - 1,
+                        isLoading: false
+                    })))
+                    .catch(() => this.setState({ isLoading: false }));
+            } else {
+                followChannel(getUser(), channel)
+                    .then(() => this.setState(prevState => ({
+                        channelFollowed: true,
+                        countOfFollowers: prevState.countOfFollowers + 1,
+                        isLoading: false
+                    })))
+                    .catch(() => this.setState({ isLoading: false }));
+            }
         }
     }
 
