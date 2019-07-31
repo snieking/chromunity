@@ -20,7 +20,7 @@ const ReportCard: React.SFC<ReportCardProps> = (props: ReportCardProps) => {
                     {timeAgoReadable(props.report.timestamp)}
                 </Typography>
                 {isRepresentative() ?
-                    <Tooltip title="Report">
+                    <Tooltip title="Remove report">
                         <IconButton 
                             aria-label="Report" 
                             onClick={() => handleReport(getUser(), props.report.id).then(() => window.location.reload())}

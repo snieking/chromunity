@@ -8,7 +8,7 @@ import { removeTopic, getTopicById, removeTopicStarRating, giveTopicStarRating, 
 import { Topic, User, TopicReply } from "../../../types";
 import { getUser, ifEmptyAvatarThenPlaceholder, isRepresentative } from "../../../util/user-util";
 import { timeAgoReadable } from "../../../util/util";
-import { StarRate, SubdirectoryArrowRight, CheckCircle, CheckCircleOutline, Delete, Report } from "@material-ui/icons";
+import { StarRate, SubdirectoryArrowRight, Delete, Report, Favorite, FavoriteBorder, StarBorder } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
 import TopicReplyCard from "../TopicReplyCard/TopicReplyCard";
 import { parseContent } from "../../../util/text-parsing";
@@ -256,18 +256,18 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                             color="primary"
                             badgeContent={this.state.stars}
                         >
-                            <StarRate className={this.state.ratedByMe ? "yellow-color" : "purple-color"} />
+                            {this.state.ratedByMe ? <StarRate className="yellow-color"/> : <StarBorder className="purple-color"/>}
                         </Badge>
                     </IconButton>
                 </Tooltip>
                 <Tooltip title="Subscribe">
                     <IconButton aria-label="Subscribe" onClick={() => this.toggleSubscription()}>
-                        {this.state.subscribed ? <CheckCircle className="blue-color" /> : <CheckCircleOutline className="purple-color" />}
+                        {this.state.subscribed ? <Favorite className="red-color" /> : <FavoriteBorder className="purple-color" />}
                     </IconButton>
                 </Tooltip>
                 <Tooltip title="Report">
                     <IconButton aria-label="Report" onClick={() => this.reportTopic()}>
-                        <Report className="red-color" />
+                        <Report className="purple-color" />
                     </IconButton>
                 </Tooltip>
                 {this.renderAdminActions()}

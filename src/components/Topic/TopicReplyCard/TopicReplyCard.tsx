@@ -4,7 +4,7 @@ import { TopicReply, UserMeta, User } from '../../../types';
 import { Card, Typography, IconButton, Badge, CardContent, TextField, Button, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, LinearProgress } from '@material-ui/core';
 import { timeAgoReadable } from '../../../util/util';
 import { getUser, ifEmptyAvatarThenPlaceholder, isRepresentative, getCachedUserMeta } from '../../../util/user-util';
-import { StarRate, Reply, Delete, Report } from '@material-ui/icons';
+import { StarRate, Reply, Delete, Report, StarBorder } from '@material-ui/icons';
 import { getUserSettingsCached } from '../../../blockchain/UserService';
 import { removeTopicReply, removeReplyStarRating, giveReplyStarRating, getReplyStarRaters, getTopicSubReplies, createTopicSubReply } from '../../../blockchain/TopicService';
 
@@ -171,7 +171,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                                 color="primary"
                                 badgeContent={this.state.stars}
                             >
-                                <StarRate className={this.state.ratedByMe ? "yellow-color" : "purple-color"} />
+                                {this.state.ratedByMe ? <StarRate className="yellow-color"/> : <StarBorder className="purple-color"/>}
                             </Badge>
                         </IconButton>
                     </Tooltip>

@@ -4,7 +4,7 @@ import { TopicReply, User } from '../../../types';
 import { Card, Typography, Badge, CardContent, CardActionArea } from '@material-ui/core';
 import { timeAgoReadable } from '../../../util/util';
 import { getUser, ifEmptyAvatarThenPlaceholder } from '../../../util/user-util';
-import { StarRate } from '@material-ui/icons';
+import { StarRate, StarBorder } from '@material-ui/icons';
 import '../Topic.css'
 import { getUserSettingsCached } from '../../../blockchain/UserService';
 import { Redirect } from 'react-router';
@@ -97,7 +97,7 @@ class TopicReplyOverviewCard extends React.Component<Props, State> {
                             color="primary"
                             badgeContent={this.state.stars}
                         >
-                            <StarRate className={this.state.ratedByMe ? "yellow-color" : "purple-color"} />
+                            {this.state.ratedByMe ? <StarRate className="yellow-color"/> : <StarBorder className="purple-color"/>}
                         </Badge>
                     </div>
                 </div>
