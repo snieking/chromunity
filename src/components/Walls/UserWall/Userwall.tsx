@@ -194,7 +194,7 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
     render() {
         return (
             <div>
-                <Container fixed maxWidth="md">
+                <Container fixed>
                     <div className="thread-wall-container">
                         {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
                         {this.renderUserPageIntro()}

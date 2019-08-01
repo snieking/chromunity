@@ -9,6 +9,7 @@ import '../Topic.css'
 import { getUserSettingsCached } from '../../../blockchain/UserService';
 import { Redirect } from 'react-router';
 import { getReplyStarRaters } from '../../../blockchain/TopicService';
+import ReactMarkdown from 'react-markdown';
 
 interface Props {
     reply: TopicReply;
@@ -105,7 +106,7 @@ class TopicReplyOverviewCard extends React.Component<Props, State> {
                 <div className="topic-overview-details">
                     {this.renderTimeAgo(this.props.reply.timestamp)}
                     <Typography variant="subtitle1" className='purple-typography' component="span" style={{ marginRight: "10px" }}>
-                        {this.props.reply.message}
+                        <ReactMarkdown source={this.props.reply.message} />
                     </Typography>
                 </div>
             </CardContent >

@@ -54,7 +54,14 @@
     opacity: 0.6;
 }
 
+.purple-typography > p {
+    margin-top: 0px;
+    margin-bottom: -5px;
+}
+
 .purple-typography > p > img {
+    margin-top: 5px;
+    margin-bottom: 5px;
     display: block;
     height: auto;
     max-width: 80%;

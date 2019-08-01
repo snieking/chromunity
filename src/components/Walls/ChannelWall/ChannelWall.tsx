@@ -181,7 +181,7 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
     render() {
         return (
             <div>
-                <Container fixed maxWidth="md">
+                <Container>
                     <div className="thread-wall-container">
                         <ChromiaPageHeader text={"#" + this.props.match.params.channel} />
                         {this.renderStatistics()}
