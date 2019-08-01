@@ -17,6 +17,17 @@ operation create_topic(id: text, username: text, channel_key: name, channel_name
     create channel(name = channel_key, topic, op_context.last_block_time, display_name = channel_name);
 }
 
+operation modify_topic(id: text, username: text, text) {
+    val author = user@{ .name == username };
+    require(is_signer(author.pubkey));
+    require(user_meta@{ author }.suspended_until < op_context.last_block_time);
+
+    val topic = topic@{ .id == id, .author == author };
+    val fiveMinutesInMillis = 300000;
+    require(op_context.last_block_time < topic.timestamp + fiveMinutesInMillis);
+    update topic ( message = text );
+}
+
 operation create_reply(topic_id: text, id: text, username: text, message: text) {
     val author = user@{ .name == username };
     require(is_signer(author.pubkey));
@@ -37,6 +48,17 @@ operation create_reply(topic_id: text, id: text, username: text, message: text) 
     if (not topic.removed) {
         update topic@{ .id == topic_id } ( last_modified = op_context.last_block_time);
     }
+}
+
+operation modify_reply(id: text, username: text, text) {
+    val author = user@{ .name == username };
+    require(is_signer(author.pubkey));
+    require(user_meta@{ author }.suspended_until < op_context.last_block_time);
+
+    val reply = topic_reply@{ .id == id, .author == author };
+    val fiveMinutesInMillis = 300000;
+    require(op_context.last_block_time < reply.timestamp + fiveMinutesInMillis);
+    update reply ( message = text );
 }
 
 operation create_sub_reply(topic_id: text, parent_reply_id: text, id: text, username: text, message: text) {

@@ -22,6 +22,25 @@ export function createTopic(user: User, channelName: string, title: string, mess
         });
 }
 
+export function modifyTopic(user: User, topicId: string, updatedText: string) {
+    topicsCache.remove(topicId);
+    return modifyText(user, topicId, updatedText, "modify_topic");
+}
+
+export function modifyReply(user: User, replyId: string, updatedText: string) {
+    return modifyText(user, replyId, updatedText, "modify_reply");
+}
+
+function modifyText(user: User, id: string, updatedText: string, rellOperation: string) {
+    const { privKey, pubKey } = seedToKey(user.seed);
+
+    const tx = GTX.newTransaction([pubKey]);
+    tx.addOperation(rellOperation, id, user.name, updatedText);
+    tx.sign(privKey, pubKey);
+
+    return tx.postAndWaitConfirmation();
+}
+
 export function createTopicReply(user: User, topicId: string, message: string) {
     const { privKey, pubKey } = seedToKey(user.seed);
     const replyId = uniqueId();

@@ -6,8 +6,10 @@ import { createTopic, getTopicsByUserPriorToTimestamp, giveTopicStarRating,
     getTopicStarRaters, removeTopicStarRating, getTopicsAfterTimestamp, 
     getTopicsPriorToTimestamp, getTopicById, createTopicReply, 
     getTopicRepliesPriorToTimestamp, giveReplyStarRating, getReplyStarRaters, 
-    removeReplyStarRating, subscribeToTopic, getTopicSubscribers, unsubscribeFromTopic, createTopicSubReply, getTopicSubReplies, getTopicRepliesByUserPriorToTimestamp 
+    removeReplyStarRating, subscribeToTopic, getTopicSubscribers, unsubscribeFromTopic, createTopicSubReply, getTopicSubReplies, getTopicRepliesByUserPriorToTimestamp, modifyTopic, modifyReply 
 } from '../src/blockchain/TopicService';
+import { async } from 'q';
+import { number } from 'prop-types';
 
 jest.setTimeout(30000);
 
@@ -87,6 +89,15 @@ describe("topic tests", () => {
         expect(subSubReplies.length).toBe(1);
     });
 
+    it("reply to topic and update reply", async() => {
+        await createTopicReply(userLoggedIn, topic.id, "This message should be modified!");
+        const replies: TopicReply[] = await getTopicRepliesPriorToTimestamp(topic.id, Date.now(), 10);
+        expect(replies.length).toBeGreaterThanOrEqual(1);
+        const reply: TopicReply = replies[0];
+
+        await modifyReply(userLoggedIn, reply.id, "Tis post has been modified");
+    })
+
     it("star rate topic", async () => {
         await giveTopicStarRating(userLoggedIn, topic.id);
         const usersWhoRated: string[] = await getTopicStarRaters(topic.id);
@@ -139,6 +150,16 @@ describe("topic tests", () => {
     it("get replies by user", async() => {
         const replies: TopicReply[] = await getTopicRepliesByUserPriorToTimestamp(userLoggedIn.name, Date.now(), 10);
         expect(replies.length).toBeGreaterThanOrEqual(1);
-    })
+    });
+
+    it("create and mofiy topic", async() => {
+        const title: string = "Rell Assistance";
+        const message: string = "Post your rell questions here to receive help from the community.";
+        await createTopic(userLoggedIn, "rell", title, message);
+        const topics: Topic[] = await getTopicsByUserPriorToTimestamp(userLoggedIn.name, Date.now(), 10);
+        expect(topics.length).toBeGreaterThan(0);
+
+        await modifyTopic(userLoggedIn, topics[0].id, "Post your rell questions here to receive help from the awesome community.")
+    });
 
 })

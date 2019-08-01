@@ -4,7 +4,8 @@ import { Container, Card, TextField, Button, CardActions, IconButton, CardConten
 
 import { RouteComponentProps } from "react-router";
 import { ReplyTopicButton } from "../../buttons/ReplyTopicButton";
-import { removeTopic, getTopicById, removeTopicStarRating, giveTopicStarRating, getTopicStarRaters, unsubscribeFromTopic, subscribeToTopic, getTopicSubscribers, getTopicRepliesPriorToTimestamp, getTopicRepliesAfterTimestamp } from "../../../blockchain/TopicService";
+import { EditMessageButton } from "../../buttons/EditMessageButton";
+import { removeTopic, getTopicById, removeTopicStarRating, giveTopicStarRating, getTopicStarRaters, unsubscribeFromTopic, subscribeToTopic, getTopicSubscribers, getTopicRepliesPriorToTimestamp, getTopicRepliesAfterTimestamp, modifyTopic } from "../../../blockchain/TopicService";
 import { Topic, User, TopicReply } from "../../../types";
 import { getUser, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import { timeAgoReadable } from "../../../util/util";
@@ -40,6 +41,7 @@ export interface FullTopicState {
 }
 
 const repliesPageSize: number = 25;
+const allowedEditTimeMillis: number = 300000;
 
 export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
 
@@ -74,6 +76,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
         this.retrieveLatestReplies = this.retrieveLatestReplies.bind(this);
         this.handleReplySubmit = this.handleReplySubmit.bind(this);
         this.retrieveOlderReplies = this.retrieveOlderReplies.bind(this);
+        this.editTopicMessage = this.editTopicMessage.bind(this);
     }
 
     componentDidMount(): void {
@@ -236,13 +239,14 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                     {this.state.topic.title}
                 </Typography>
                 <Typography variant="body2" className='purple-typography' component="p">
-                    <ReactMarkdown source={content} />
+                    <ReactMarkdown source={content} disallowedTypes={["heading"]}/>
                 </Typography>
             </CardContent>
         );
     }
 
     renderCardActions() {
+        const user: User = getUser();
         return (
             <CardActions>
                 <Tooltip title="Like">
@@ -261,6 +265,10 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                         {this.state.subscribed ? <Favorite className="red-color" /> : <FavoriteBorder className="purple-color" />}
                     </IconButton>
                 </Tooltip>
+                {this.state.topic.timestamp + allowedEditTimeMillis > Date.now() && user != null && this.state.topic.author === user.name
+                    ? <EditMessageButton value={this.state.topic.message} submitFunction={this.editTopicMessage} />
+                    : <div />
+                }
                 <Tooltip title="Report">
                     <IconButton aria-label="Report" onClick={() => this.reportTopic()}>
                         <Report className="purple-color" />
@@ -269,6 +277,10 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                 {this.renderAdminActions()}
             </CardActions>
         );
+    }
+
+    editTopicMessage(text: string) {
+        modifyTopic(getUser(), this.state.topic.id, text).then(() => window.location.reload());
     }
 
     reportTopic() {

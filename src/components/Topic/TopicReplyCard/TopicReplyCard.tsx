@@ -6,12 +6,13 @@ import { timeAgoReadable } from '../../../util/util';
 import { getUser, ifEmptyAvatarThenPlaceholder, isRepresentative, getCachedUserMeta } from '../../../util/user-util';
 import { StarRate, Reply, Delete, Report, StarBorder } from '@material-ui/icons';
 import { getUserSettingsCached } from '../../../blockchain/UserService';
-import { removeTopicReply, removeReplyStarRating, giveReplyStarRating, getReplyStarRaters, getTopicSubReplies, createTopicSubReply } from '../../../blockchain/TopicService';
+import { removeTopicReply, removeReplyStarRating, giveReplyStarRating, getReplyStarRaters, getTopicSubReplies, createTopicSubReply, modifyReply } from '../../../blockchain/TopicService';
 
 import './TopicReplyCard.css';
 import '../Topic.css';
 import ReactMarkdown from 'react-markdown';
 import { reportReply } from '../../../blockchain/RepresentativesService';
+import { EditMessageButton } from '../../buttons/EditMessageButton';
 
 interface Props {
     topicId: string;
@@ -34,6 +35,8 @@ interface State {
     isLoading: boolean;
 }
 
+const allowedEditTimeMillis: number = 300000;
+
 class TopicReplyCard extends React.Component<Props, State> {
 
     constructor(props: Props) {
@@ -55,6 +58,7 @@ class TopicReplyCard extends React.Component<Props, State> {
 
         this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
         this.sendReply = this.sendReply.bind(this);
+        this.editReplyMessage = this.editReplyMessage.bind(this);
     }
 
     render() {
@@ -152,13 +156,14 @@ class TopicReplyCard extends React.Component<Props, State> {
     }
 
     renderCardContent() {
+        const user: User = getUser();
         return (
             <CardContent>
                 {this.renderAuthor()}
                 <div className="reply-overview-details">
                     {this.renderTimeAgo(this.props.reply.timestamp)}
                     <Typography variant="body2" className='purple-typography' component="p" style={{ maxWidth: "100%" }}>
-                        <ReactMarkdown source={this.props.reply.message} />
+                        <ReactMarkdown source={this.props.reply.message} disallowedTypes={["heading"]} />
                     </Typography>
                 </div>
                 <div className={"bottom-bar"}>
@@ -173,6 +178,10 @@ class TopicReplyCard extends React.Component<Props, State> {
                             </Badge>
                         </IconButton>
                     </Tooltip>
+                    {this.props.reply.timestamp + allowedEditTimeMillis > Date.now() && user != null && this.props.reply.author === user.name
+                        ? <EditMessageButton value={this.props.reply.message} submitFunction={this.editReplyMessage} />
+                        : null
+                    }
                     <Tooltip title="Reply">
                         <IconButton
                             aria-label="Reply"
@@ -196,6 +205,10 @@ class TopicReplyCard extends React.Component<Props, State> {
                 </div>
             </CardContent>
         );
+    }
+
+    editReplyMessage(text: string) {
+        modifyReply(getUser(), this.props.reply.id, text).then(() => window.location.reload());
     }
 
     reportReply() {

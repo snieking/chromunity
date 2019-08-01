@@ -106,7 +106,7 @@ class TopicReplyOverviewCard extends React.Component<Props, State> {
                 <div className="topic-overview-details">
                     {this.renderTimeAgo(this.props.reply.timestamp)}
                     <Typography variant="subtitle1" className='purple-typography' component="span" style={{ marginRight: "10px" }}>
-                        <ReactMarkdown source={this.props.reply.message} />
+                        <ReactMarkdown source={this.props.reply.message} disallowedTypes={["heading"]} />
                     </Typography>
                 </div>
             </CardContent >
