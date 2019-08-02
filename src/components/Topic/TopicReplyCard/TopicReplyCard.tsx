@@ -160,7 +160,7 @@ class TopicReplyCard extends React.Component<Props, State> {
         return (
             <CardContent>
                 {this.renderAuthor()}
-                <div className="reply-overview-details">
+                <div>
                     {this.renderTimeAgo(this.props.reply.timestamp)}
                     <Typography variant="body2" className='purple-typography' component="p" style={{ maxWidth: "100%" }}>
                         <ReactMarkdown source={this.props.reply.message} disallowedTypes={["heading"]} />
