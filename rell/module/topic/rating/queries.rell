@@ -5,3 +5,11 @@ query get_star_rating_for_topic(id: text) {
 query get_star_rating_for_reply(id: text) {
     return reply_star_rating@*{ topic_reply@{ .id == id }} ( .user.name );
 }
+
+query count_user_topic_star_rating(name): integer {
+    return topic_star_rating@*{ .topic.author.name == name } ( .topic, .user ).size();
+}
+
+query count_user_reply_star_rating(name): integer {
+    return reply_star_rating@*{ .topic_reply.author.name == name } ( .topic_reply, .user ).size();
+}

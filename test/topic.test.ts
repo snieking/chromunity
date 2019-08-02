@@ -6,7 +6,7 @@ import { createTopic, getTopicsByUserPriorToTimestamp, giveTopicStarRating,
     getTopicStarRaters, removeTopicStarRating, getTopicsAfterTimestamp, 
     getTopicsPriorToTimestamp, getTopicById, createTopicReply, 
     getTopicRepliesPriorToTimestamp, giveReplyStarRating, getReplyStarRaters, 
-    removeReplyStarRating, subscribeToTopic, getTopicSubscribers, unsubscribeFromTopic, createTopicSubReply, getTopicSubReplies, getTopicRepliesByUserPriorToTimestamp, modifyTopic, modifyReply, countTopicsByUser, countRepliesByUser 
+    removeReplyStarRating, subscribeToTopic, getTopicSubscribers, unsubscribeFromTopic, createTopicSubReply, getTopicSubReplies, getTopicRepliesByUserPriorToTimestamp, modifyTopic, modifyReply, countTopicsByUser, countRepliesByUser, countTopicStarRatingForUser, countReplyStarRatingForUser 
 } from '../src/blockchain/TopicService';
 import { async } from 'q';
 import { number } from 'prop-types';
@@ -174,6 +174,14 @@ describe("topic tests", () => {
 
         expect(countOfTopics).toBeGreaterThan(0);
         expect(countOfReplies).toBeGreaterThan(0);
-    })
+    });
+
+    it("count topic and reply stars", async() => {
+        const topicStars: number = await countTopicStarRatingForUser(userLoggedIn.name);
+        const replyStars: number = await countReplyStarRatingForUser(userLoggedIn.name);
+
+        expect(topicStars).toBe(1);
+        expect(replyStars).toBe(1);
+    });
 
 })

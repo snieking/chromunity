@@ -232,14 +232,22 @@ function getTopicsFromFollowsForTimestamp(user: User, timestamp: number, pageSiz
 }
 
 export function countTopicsByUser(name: string) {
-    return countPostsByUser(name, "count_topics_by_user");
+    return countByUser(name, "count_topics_by_user");
 }
 
 export function countRepliesByUser(name: string) {
-    return countPostsByUser(name, "count_replies_by_user");
+    return countByUser(name, "count_replies_by_user");
 }
 
-function countPostsByUser(name: string, rellOperation: string): Promise<number> {
+export function countTopicStarRatingForUser(name: string) {
+    return countByUser(name, "count_user_topic_star_rating");
+}
+
+export function countReplyStarRatingForUser(name: string) {
+    return countByUser(name, "count_user_reply_star_rating");
+}
+
+function countByUser(name: string, rellOperation: string): Promise<number> {
     return GTX.query(rellOperation, { name: name });
 }
 

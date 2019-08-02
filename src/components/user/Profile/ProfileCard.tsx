@@ -3,7 +3,7 @@ import { Card, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, D
 import Typography from "@material-ui/core/Typography";
 
 import './ProfileCard.css';
-import { Favorite, VoiceOverOff, SupervisedUserCircle, Inbox, ReplyAll } from "@material-ui/icons";
+import { Favorite, VoiceOverOff, SupervisedUserCircle, Inbox, ReplyAll, StarRate } from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
 import {
     amIAFollowerOf,
@@ -12,7 +12,7 @@ import {
     removeFollowing
 } from "../../../blockchain/FollowingService";
 
-import { countTopicsByUser, countRepliesByUser } from "../../../blockchain/TopicService";
+import { countTopicsByUser, countRepliesByUser, countTopicStarRatingForUser, countReplyStarRatingForUser } from "../../../blockchain/TopicService";
 
 import { getUser, ifEmptyAvatarThenPlaceholder, isRepresentative } from "../../../util/user-util";
 import { User } from "../../../types";
@@ -32,6 +32,8 @@ export interface ProfileCardState {
     userFollowings: number;
     countOfTopics: number;
     countOfReplies: number;
+    topicStars: number;
+    replyStars: number;
     avatar: string;
     description: string;
     suspendUserDialogOpen: boolean;
@@ -49,6 +51,8 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
             userFollowings: 0,
             countOfTopics: 0,
             countOfReplies: 0,
+            topicStars: 0,
+            replyStars: 0,
             avatar: "",
             description: "",
             suspendUserDialogOpen: false
@@ -81,6 +85,8 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
                     countUserFollowings(this.props.username).then(count => this.setState({ userFollowings: count }));
                     countTopicsByUser(this.props.username).then(count => this.setState({ countOfTopics: count }));
                     countRepliesByUser(this.props.username).then(count => this.setState({ countOfReplies: count }));
+                    countTopicStarRatingForUser(this.props.username).then(count => this.setState({ topicStars: count }));
+                    countReplyStarRatingForUser(this.props.username).then(count => this.setState({ replyStars: count }));
                 }
             }
             );
@@ -177,17 +183,22 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
                             {this.renderFollowButton()}
                             <Badge badgeContent={this.state.userFollowings} showZero={true} color="primary">
                                 <Tooltip title="Follows">
-                                    <SupervisedUserCircle fontSize="large" className="purple-color" />
+                                    <SupervisedUserCircle fontSize="large" className="purple-color" style={{ marginLeft: "0px" }} />
+                                </Tooltip>
+                            </Badge>
+                            <Badge badgeContent={this.state.topicStars + this.state.replyStars} showZero={true} color="primary">
+                                <Tooltip title="Stars">
+                                    <StarRate fontSize="large" className="purple-color" style={{ marginLeft: "10px" }} />
                                 </Tooltip>
                             </Badge>
                             <Badge badgeContent={this.state.countOfTopics} showZero={true} color="primary">
                                 <Tooltip title="Topics">
-                                    <Inbox fontSize="large" className="purple-color" style={{ marginLeft: "12px" }} />
+                                    <Inbox fontSize="large" className="purple-color" style={{ marginLeft: "10px" }} />
                                 </Tooltip>
                             </Badge>
                             <Badge badgeContent={this.state.countOfReplies} showZero={true} color="primary" style={{ marginRight: "15px" }}>
                                 <Tooltip title="Replies">
-                                    <ReplyAll fontSize="large" className="purple-color" style={{ marginLeft: "12px" }} />
+                                    <ReplyAll fontSize="large" className="purple-color" style={{ marginLeft: "10px" }} />
                                 </Tooltip>
                             </Badge>
                         </div>
