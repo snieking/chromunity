@@ -231,6 +231,18 @@ function getTopicsFromFollowsForTimestamp(user: User, timestamp: number, pageSiz
     return GTX.query(rellOperation, { name: user.name, timestamp: timestamp, page_size: pageSize });
 }
 
+export function countTopicsByUser(name: string) {
+    return countPostsByUser(name, "count_topics_by_user");
+}
+
+export function countRepliesByUser(name: string) {
+    return countPostsByUser(name, "count_replies_by_user");
+}
+
+function countPostsByUser(name: string, rellOperation: string): Promise<number> {
+    return GTX.query(rellOperation, { name: name });
+}
+
 export function getTopicsFromFollowedChannelsPriorToTimestamp(user: User, timestamp: number, pageSize: number): Promise<Topic[]> {
     return GTX.query("get_topics_by_followed_channels_prior_to_timestamp", { username: user.name, timestamp: timestamp, page_size: pageSize })
         .then((topics: Topic[]) => { 

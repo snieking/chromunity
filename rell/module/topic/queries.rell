@@ -70,6 +70,14 @@ query get_topic_replies_by_user_prior_to_timestamp(name, timestamp, page_size: i
     ) limit page_size;
 }
 
+query count_topics_by_user(name): integer {
+    return topic@*{ .author.name == name }( .id ).size();
+}
+
+query count_replies_by_user(name): integer {
+    return topic_reply@*{ .author.name == name }( .id ).size();
+}
+
 query get_sub_replies(parent_reply_id: text) {
     return sub_reply@*{ .parent_reply.id == parent_reply_id } (
         id=.child_reply.id,

@@ -280,6 +280,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
     }
 
     editTopicMessage(text: string) {
+        this.setState({ isLoading: true });
         modifyTopic(getUser(), this.state.topic.id, text).then(() => window.location.reload());
     }
 
@@ -381,7 +382,6 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
     }
 
     handleReplySubmit(): void {
-        this.setState({ isLoading: true });
         this.retrieveLatestReplies();
         if (!this.state.subscribed) {
             subscribeToTopic(getUser(), this.state.topic.id).then(() => this.setState({ subscribed: true }));

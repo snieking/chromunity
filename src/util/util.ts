@@ -50,7 +50,7 @@ export function stringToHexColor(str: string): string {
 function hashCode(str: string): number {
     var hash = 0;
     for (var i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        hash = str.charCodeAt(i) + ((hash << 6) - hash);
     }
     return hash;
 }
