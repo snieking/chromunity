@@ -6,7 +6,7 @@ import { createTopic, getTopicsByUserPriorToTimestamp, giveTopicStarRating,
     getTopicStarRaters, removeTopicStarRating, getTopicsAfterTimestamp, 
     getTopicsPriorToTimestamp, getTopicById, createTopicReply, 
     getTopicRepliesPriorToTimestamp, giveReplyStarRating, getReplyStarRaters, 
-    removeReplyStarRating, subscribeToTopic, getTopicSubscribers, unsubscribeFromTopic, createTopicSubReply, getTopicSubReplies, getTopicRepliesByUserPriorToTimestamp, modifyTopic, modifyReply 
+    removeReplyStarRating, subscribeToTopic, getTopicSubscribers, unsubscribeFromTopic, createTopicSubReply, getTopicSubReplies, getTopicRepliesByUserPriorToTimestamp, modifyTopic, modifyReply, countTopicsByUser, countRepliesByUser 
 } from '../src/blockchain/TopicService';
 import { async } from 'q';
 import { number } from 'prop-types';
@@ -161,5 +161,19 @@ describe("topic tests", () => {
 
         await modifyTopic(userLoggedIn, topics[0].id, "Post your rell questions here to receive help from the awesome community.")
     });
+
+    it("count posts", async() => {
+        await createTopic(userLoggedIn, "rell", "Why Rell?", "Could someone clarify for me some benefits of using Rell?");
+        const topics: Topic[] = await getTopicsByUserPriorToTimestamp(userLoggedIn.name, Date.now(), 10);
+        expect(topics.length).toBeGreaterThan(0);
+
+        await createTopicReply(secondLoggedInUser, topics[0].id, "Rell is very developer friendly as it a language which is very familiar to SQL.");
+
+        const countOfTopics: number = await countTopicsByUser(userLoggedIn.name);
+        const countOfReplies: number = await countRepliesByUser(secondLoggedInUser.name);
+
+        expect(countOfTopics).toBeGreaterThan(0);
+        expect(countOfReplies).toBeGreaterThan(0);
+    })
 
 })

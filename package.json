@@ -14,7 +14,7 @@
     "bip39": "3.0.2",
     "boomerang-cache": "1.2.0",
     "hdkey": "1.1.1",
-    "postchain-client": "bitbucket:chromawallet/postchain-client",
+    "postchain-client": "~0.7.4",
     "react": "^16.8.6",
     "react-countdown-now": "2.1.1",
     "react-dom": "^16.8.6",
