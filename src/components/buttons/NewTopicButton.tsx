@@ -153,10 +153,8 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                     <form onSubmit={this.createNewTopic}>
                         <DialogContent>
                             <br />
-                            <label>Select trending channel or enter a custom one</label>
-                            <br />
-                            <br />
                             <CreatableSelect
+                                placeholder={"Select trending channel or enter a custom one..."}
                                 isSearchable={true}
                                 options={this.state.suggestions}
                                 value={this.state.channel}

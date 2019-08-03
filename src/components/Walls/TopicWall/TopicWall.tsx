@@ -137,7 +137,7 @@ class TopicWall extends React.Component<Props, State> {
                     </div>
                     {this.renderLoadMoreButton()}
                 </Container>
-                {getUser() != null ? <NewTopicButton channel="general" updateFunction={this.retrieveLatestTopics} /> : <div></div>}
+                {getUser() != null ? <NewTopicButton channel="" updateFunction={this.retrieveLatestTopics} /> : <div></div>}
             </div>
         );
     }
