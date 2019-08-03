@@ -2,6 +2,13 @@ class topic_star_rating {
     key topic, user;
 }
 
+// To be deleted when GROUP BY and COUNT is supported, then will use topic_star_rating instead
+class tmp_topic_rating {
+    key topic;
+    mutable stars: integer;
+    index stars;
+}
+
 class reply_star_rating {
     key topic_reply, user;
 }

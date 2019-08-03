@@ -147,3 +147,63 @@ query get_topic_by_id(id: text) {
         .timestamp
     );
 }
+
+query get_all_topics_by_stars_since_timestamp(timestamp, page_size: integer) {
+    return tmp_topic_rating@*{ .topic.timestamp > timestamp } (
+        -sort .stars,
+        id = .topic.id,
+        author=.topic.author.name,
+        title=.topic.title,
+        message=.topic.message,
+        last_modified=.topic.last_modified,
+        timestamp=.topic.timestamp
+    ) limit page_size;
+}
+
+query get_topics_by_follows_and_stars_since_timestamp(name, timestamp, page_size: integer) {
+    return tmp_topic_rating@*{ 
+            .topic.author == follow@{ .follower.name == name } ( .follows ),
+            .topic.timestamp > timestamp 
+        } (
+        -sort .stars,
+        id = .topic.id,
+        author=.topic.author.name,
+        title=.topic.title,
+        message=.topic.message,
+        last_modified=.topic.last_modified,
+        timestamp=.topic.timestamp
+    ) limit page_size;
+}
+
+query get_topics_by_channel_after_timestamp_sorted_by_popularity(name, timestamp, page_size: integer) {
+    return (tmp_topic_rating, channel)@*{
+        name == channel.name,
+        tmp_topic_rating.topic == channel.topic,
+        tmp_topic_rating.topic.timestamp > timestamp
+    } (
+        -sort .stars,
+        id = channel.topic.id,
+        author=channel.topic.author.name,
+        title=channel.topic.title,
+        message=channel.topic.message,
+        last_modified=channel.topic.last_modified,
+        timestamp=channel.topic.timestamp
+    ) limit page_size;
+}
+
+query get_topics_by_followed_channels_after_timestamp_sorted_by_popularity(name, timestamp, page_size: integer) {
+    return (tmp_topic_rating, channel_following, channel)@*{
+        channel_following.user == user@{ name },
+        channel_following.name == channel.name,
+        tmp_topic_rating.topic == channel.topic,
+        tmp_topic_rating.topic.timestamp > timestamp
+    } (
+        -sort .stars,
+        id = channel.topic.id,
+        author=channel.topic.author.name,
+        title=channel.topic.title,
+        message=channel.topic.message,
+        last_modified=channel.topic.last_modified,
+        timestamp=channel.topic.timestamp
+    ) limit page_size;
+}

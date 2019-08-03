@@ -6,7 +6,11 @@ import { createTopic, getTopicsByUserPriorToTimestamp, giveTopicStarRating,
     getTopicStarRaters, removeTopicStarRating, getTopicsAfterTimestamp, 
     getTopicsPriorToTimestamp, getTopicById, createTopicReply, 
     getTopicRepliesPriorToTimestamp, giveReplyStarRating, getReplyStarRaters, 
-    removeReplyStarRating, subscribeToTopic, getTopicSubscribers, unsubscribeFromTopic, createTopicSubReply, getTopicSubReplies, getTopicRepliesByUserPriorToTimestamp, modifyTopic, modifyReply, countTopicsByUser, countRepliesByUser, countTopicStarRatingForUser, countReplyStarRatingForUser 
+    removeReplyStarRating, subscribeToTopic, getTopicSubscribers, 
+    unsubscribeFromTopic, createTopicSubReply, getTopicSubReplies, 
+    getTopicRepliesByUserPriorToTimestamp, modifyTopic, modifyReply, 
+    countTopicsByUser, countRepliesByUser, countTopicStarRatingForUser, 
+    countReplyStarRatingForUser, getAllTopicsByPopularityAfterTimestamp 
 } from '../src/blockchain/TopicService';
 import { async } from 'q';
 import { number } from 'prop-types';
@@ -182,6 +186,11 @@ describe("topic tests", () => {
 
         expect(topicStars).toBe(1);
         expect(replyStars).toBe(1);
+    });
+
+    it("get all topics by popularity", async() => {
+        const topics: Topic[] = await getAllTopicsByPopularityAfterTimestamp(0, 10);
+        expect(topics.length).toBeGreaterThanOrEqual(1);
     });
 
 })
