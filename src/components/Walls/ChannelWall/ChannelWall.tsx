@@ -72,6 +72,9 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
 
         this.retrieveTopics = this.retrieveTopics.bind(this);
         this.retrieveOlderTopics = this.retrieveOlderTopics.bind(this);
+        this.retrievePopularTopics = this.retrievePopularTopics.bind(this);
+        this.handleSelectorChange = this.handleSelectorChange.bind(this);
+        this.handlePopularChange = this.handlePopularChange.bind(this);
     }
 
     componentDidMount(): void {

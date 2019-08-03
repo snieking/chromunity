@@ -1,7 +1,8 @@
 import React, { FormEvent } from "react";
 
 import './Buttons.css';
-
+import CreatableSelect from 'react-select/creatable';
+import { ValueType } from 'react-select/src/types';
 import { Dialog, Snackbar, Badge } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -13,7 +14,12 @@ import { Forum } from "@material-ui/icons";
 import { CustomSnackbarContentWrapper } from "../utils/CustomSnackbar";
 import { createTopic } from "../../blockchain/TopicService";
 import { UserMeta } from "../../types";
+import { getTrendingChannels } from "../../blockchain/ChannelService";
 
+interface OptionType {
+    label: string;
+    value: string;
+}
 
 export interface NewTopicButtonProps {
     updateFunction: Function;
@@ -29,6 +35,8 @@ export interface NewTopicButtonState {
     newTopicErrorOpen: boolean;
     newTopicStatusMessage: string;
     userMeta: UserMeta;
+    suggestions: OptionType[];
+    channel: ValueType<OptionType>;
 }
 
 const maxTitleLength: number = 40;
@@ -42,12 +50,14 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
         this.state = {
             topicTitle: "",
             topicChannel: this.props.channel,
+            channel: this.props.channel !== "" ? { value: this.props.channel, label: this.props.channel } : null,
             topicMessage: "",
             dialogOpen: false,
             newTopicSuccessOpen: false,
             newTopicErrorOpen: false,
             newTopicStatusMessage: "",
-            userMeta: { name: "", suspended_until: Date.now() + 10000, times_suspended: 0 }
+            userMeta: { name: "", suspended_until: Date.now() + 10000, times_suspended: 0 },
+            suggestions: []
         };
 
         this.toggleNewTopicDialog = this.toggleNewTopicDialog.bind(this);
@@ -56,10 +66,15 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
         this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
         this.createNewTopic = this.createNewTopic.bind(this);
         this.handleClose = this.handleClose.bind(this);
+        this.handleChangeSingle = this.handleChangeSingle.bind(this);
     }
 
     componentDidMount() {
         getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
+        getTrendingChannels(7).then(channels => this.setState({
+            suggestions: channels.map(channel => ({ value: channel, label: channel } as OptionType))
+        })
+        );
     }
 
     toggleNewTopicDialog() {
@@ -87,7 +102,7 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
     createNewTopic(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const topicTitle: string = this.state.topicTitle;
-        const topicChannel: string = this.state.topicChannel;
+        const topicChannel: string = (this.state.channel as OptionType).value;
 
         if (!/^[a-zA-Z0-9\s]+$/.test(topicTitle)) {
             this.setState({ newTopicStatusMessage: "Title may only contain a-z, A-Z & 0-9 characters and whitespaces", newTopicErrorOpen: true });
@@ -124,6 +139,12 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
         }
     }
 
+    handleChangeSingle(value: ValueType<OptionType>) {
+        if (value != null) {
+            this.setState({ channel: value });
+        }
+    }
+
     newThreadDialog() {
         return (
             <div>
@@ -131,6 +152,16 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                     fullWidth={true} maxWidth={"sm"}>
                     <form onSubmit={this.createNewTopic}>
                         <DialogContent>
+                            <br />
+                            <label>Select trending channel or enter a custom one</label>
+                            <br />
+                            <br />
+                            <CreatableSelect
+                                isSearchable={true}
+                                options={this.state.suggestions}
+                                value={this.state.channel}
+                                onChange={this.handleChangeSingle}
+                            />
                             <br />
                             <Badge
                                 className="input-field-badge"
@@ -148,22 +179,9 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                                     onChange={this.handleDialogTitleChange}
                                     value={this.state.topicTitle}
                                     className="text-field"
-                                    variant="outlined"
                                 />
                             </Badge>
 
-                            <TextField
-                                margin="dense"
-                                id="topicChannel"
-                                multiline
-                                label="Channel"
-                                type="text"
-                                fullWidth
-                                rows="1"
-                                onChange={this.handleChannelChange}
-                                value={this.state.topicChannel}
-                                variant="outlined"
-                            />
                             <TextField
                                 margin="dense"
                                 id="message"
@@ -175,8 +193,8 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                                 rowsMax="15"
                                 onChange={this.handleDialogMessageChange}
                                 value={this.state.topicMessage}
-                                variant="outlined"
                             />
+
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={() => this.toggleNewTopicDialog()} color="secondary" variant="contained">
