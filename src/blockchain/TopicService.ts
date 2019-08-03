@@ -261,3 +261,23 @@ export function getTopicsFromFollowedChannelsPriorToTimestamp(user: User, timest
             })
         });
 }
+
+export function getAllTopicsByPopularityAfterTimestamp(timestamp: number, pageSize: number): Promise<Topic[]> {
+    return GTX.query("get_all_topics_by_stars_since_timestamp", { timestamp: timestamp, page_size: pageSize });
+}
+
+export function getTopicsByFollowsSortedByPopularityAfterTimestamp(name: string, timestamp: number, pageSize: number): Promise<Topic[]> {
+    return getTopicsByPopularityAfterTimestamp(name, timestamp, pageSize, "get_topics_by_follows_and_stars_since_timestamp");
+}
+
+export function getTopicsByFollowedChannelSortedByPopularityAfterTimestamp(name: string, timestamp: number, pageSize: number): Promise<Topic[]> {
+    return getTopicsByPopularityAfterTimestamp(name, timestamp, pageSize, "get_topics_by_followed_channels_after_timestamp_sorted_by_popularity");
+}
+
+export function getTopicsByChannelSortedByPopularityAfterTimestamp(name: string, timestamp: number, pageSize: number): Promise<Topic[]> {
+    return getTopicsByPopularityAfterTimestamp(name, timestamp, pageSize, "get_topics_by_channel_after_timestamp_sorted_by_popularity");
+}
+
+function getTopicsByPopularityAfterTimestamp(name: string, timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
+    return GTX.query(rellOperation, { name: name, timestamp: timestamp, page_size: pageSize });
+}

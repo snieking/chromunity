@@ -1,10 +1,11 @@
 import React from 'react';
+import { styled } from '@material-ui/core/styles';
 import '../Wall.css';
-import { Container, LinearProgress, Badge, Tooltip, IconButton } from "@material-ui/core";
+import { Container, LinearProgress, Badge, Tooltip, IconButton, Select, MenuItem } from "@material-ui/core";
 import { Topic, User } from "../../../types";
 
 import { RouteComponentProps } from "react-router";
-import { getTopicsByChannelPriorToTimestamp, getTopicsByChannelAfterTimestamp, countTopicsInChannel } from '../../../blockchain/TopicService';
+import { getTopicsByChannelPriorToTimestamp, getTopicsByChannelAfterTimestamp, countTopicsInChannel, getTopicsByChannelSortedByPopularityAfterTimestamp } from '../../../blockchain/TopicService';
 import TopicOverviewCard from '../../Topic/TopicOverViewCard/TopicOverviewCard';
 import LoadMoreButton from '../../buttons/LoadMoreButton';
 import { getUser } from '../../../util/user-util';
@@ -32,7 +33,22 @@ export interface ChannelWallState {
     channelFollowed: boolean;
     countOfTopics: number;
     countOfFollowers: number;
+    selector: string;
+    popularSelector: string;
 }
+
+const StyledSelect = styled(Select)({
+    color: "pink",
+    float: "left",
+    marginRight: "10px"
+});
+
+const OPTIONS = {
+    recent: "recent",
+    popular: "popular",
+    popularWeek: "popularWeek",
+    popularAllTime: "popularAllTime"
+};
 
 const topicsPageSize: number = 25;
 
@@ -49,7 +65,9 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
             couldExistOlderTopics: false,
             channelFollowed: false,
             countOfTopics: 0,
-            countOfFollowers: 0
+            countOfFollowers: 0,
+            selector: OPTIONS.recent,
+            popularSelector: OPTIONS.popularWeek
         };
 
         this.retrieveTopics = this.retrieveTopics.bind(this);
@@ -159,23 +177,59 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
     renderStatistics() {
         return (
             <div>
-                <Tooltip title={this.state.channelFollowed ? "Unfollow channel" : "Follow channel"}>
-                    <IconButton onClick={() => this.toggleChannelFollow()}>
-                        <Badge badgeContent={this.state.countOfFollowers} color="primary">
+                <IconButton onClick={() => this.toggleChannelFollow()}>
+                    <Badge badgeContent={this.state.countOfFollowers} color="primary">
+                        <Tooltip title={this.state.channelFollowed ? "Unfollow channel" : "Follow channel"}>
                             {this.state.channelFollowed
                                 ? <Favorite className="red-color" fontSize="large" />
                                 : <FavoriteBorder className="pink-color" fontSize="large" />
                             }
-                        </Badge>
-                    </IconButton>
-                </Tooltip>
-                <Tooltip title="Topics in channel">
-                    <Badge badgeContent={this.state.countOfTopics} color="primary">
-                        <Inbox className="pink-color" fontSize="large" />
+                        </Tooltip>
                     </Badge>
-                </Tooltip>
+                </IconButton>
+                <Badge badgeContent={this.state.countOfTopics} color="primary">
+                    <Tooltip title="Topics in channel">
+                        <Inbox className="pink-color" fontSize="large" />
+                    </Tooltip>
+                </Badge>
             </div>
         )
+    }
+
+    retrievePopularTopics() {
+        this.setState({ isLoading: true });
+
+        const weekInMilliseconds: number = 604800000;
+        const timestamp: number = this.state.popularSelector === OPTIONS.popularWeek
+            ? Date.now() - weekInMilliseconds
+            : 0;
+
+        getTopicsByChannelSortedByPopularityAfterTimestamp(this.props.match.params.channel, timestamp, topicsPageSize)
+            .then(topics => this.setState({ topics: topics, couldExistOlderTopics: false, isLoading: false }))
+            .catch(() => this.setState({ isLoading: false }));
+    }
+
+    handleSelectorChange(event: React.ChangeEvent<{ value: unknown }>) {
+        const selected: string = event.target.value as string;
+
+        if (this.state.selector !== selected) {
+            this.setState({ selector: selected, topics: [] });
+
+            if (selected === OPTIONS.recent) {
+                this.retrieveLatestTopics();
+            } else if (selected === OPTIONS.popular) {
+                this.retrievePopularTopics();
+            }
+        }
+    }
+
+    handlePopularChange(event: React.ChangeEvent<{ value: unknown }>) {
+        const selected: string = event.target.value as string;
+
+        if (this.state.popularSelector !== selected) {
+            this.setState({ popularSelector: selected, topics: [] });
+            this.retrievePopularTopics();
+        }
     }
 
     render() {
@@ -186,6 +240,21 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
                         <ChromiaPageHeader text={"#" + this.props.match.params.channel} />
                         {this.renderStatistics()}
                         {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
+                        <StyledSelect
+                            value={this.state.selector}
+                            onChange={this.handleSelectorChange}
+                        >
+                            <MenuItem value={OPTIONS.recent}>Recent</MenuItem>
+                            <MenuItem value={OPTIONS.popular}>Popular</MenuItem>
+                        </StyledSelect>
+                        {this.state.selector === OPTIONS.popular
+                            ? <StyledSelect value={this.state.popularSelector} onChange={this.handlePopularChange}>
+                                <MenuItem value={OPTIONS.popularWeek}>Last week</MenuItem>
+                                <MenuItem value={OPTIONS.popularAllTime}>All time</MenuItem>
+                            </StyledSelect>
+                            : <div></div>
+                        }
+                        <br /><br />
                         {this.state.topics.map(topic => <TopicOverviewCard
                             key={topic.id}
                             topic={topic}

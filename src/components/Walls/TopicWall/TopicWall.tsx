@@ -1,7 +1,17 @@
 import React from 'react';
+import { styled } from '@material-ui/core/styles';
 import { Topic } from '../../../types';
-import { getTopicsPriorToTimestamp, getTopicsAfterTimestamp, getTopicsFromFollowsPriorToTimestamp, getTopicsFromFollowsAfterTimestamp, getTopicsFromFollowedChannelsPriorToTimestamp } from '../../../blockchain/TopicService';
-import { LinearProgress, Container } from '@material-ui/core';
+import { 
+    getTopicsPriorToTimestamp, 
+    getTopicsAfterTimestamp, 
+    getTopicsFromFollowsPriorToTimestamp, 
+    getTopicsFromFollowsAfterTimestamp, 
+    getTopicsFromFollowedChannelsPriorToTimestamp, 
+    getAllTopicsByPopularityAfterTimestamp, 
+    getTopicsByFollowsSortedByPopularityAfterTimestamp,
+    getTopicsByFollowedChannelSortedByPopularityAfterTimestamp
+} from '../../../blockchain/TopicService';
+import { LinearProgress, Container, Select, MenuItem } from '@material-ui/core';
 import TopicOverviewCard from '../../Topic/TopicOverViewCard/TopicOverviewCard';
 import { NewTopicButton } from '../../buttons/NewTopicButton';
 import { getUser } from '../../../util/user-util';
@@ -19,7 +29,22 @@ interface State {
     representatives: string[];
     isLoading: boolean;
     couldExistOlderTopics: boolean;
+    selector: string;
+    popularSelector: string;
 }
+
+const StyledSelector = styled(Select)({
+    color: "pink",
+    float: "left",
+    marginRight: "10px"
+});
+
+const SELECTOR_OPTIONS = {
+    recent: "recent",
+    popular: "popular",
+    popularWeek: "popularWeek",
+    popularAllTime: "popularAllTime"
+};
 
 const topicsPageSize: number = 25;
 
@@ -30,11 +55,15 @@ class TopicWall extends React.Component<Props, State> {
             topics: [],
             representatives: [],
             isLoading: true,
-            couldExistOlderTopics: false
+            couldExistOlderTopics: false,
+            selector: SELECTOR_OPTIONS.recent,
+            popularSelector: SELECTOR_OPTIONS.popularWeek
         };
 
         this.retrieveLatestTopics = this.retrieveLatestTopics.bind(this);
         this.retrieveOlderTopics = this.retrieveOlderTopics.bind(this);
+        this.handleSelectorChange = this.handleSelectorChange.bind(this);
+        this.handlePopularChange = this.handlePopularChange.bind(this);
     }
 
     renderLoadMoreButton() {
@@ -49,7 +78,30 @@ class TopicWall extends React.Component<Props, State> {
         } else if (this.props.type === "tagFollowings") {
             return "Trending Channels";
         } else {
-            return "Recent Topics"
+            return "Topics"
+        }
+    }
+
+    handleSelectorChange(event: React.ChangeEvent<{ value: unknown }>) {
+        const selected: string = event.target.value as string;
+
+        if (this.state.selector !== selected) {
+            this.setState({ selector: selected, topics: [] });
+
+            if (selected === SELECTOR_OPTIONS.recent) {
+                this.retrieveLatestTopics();
+            } else if (selected === SELECTOR_OPTIONS.popular) {
+                this.retrievePopularTopics();
+            }
+        }
+    }
+
+    handlePopularChange(event: React.ChangeEvent<{ value: unknown }>) {
+        const selected: string = event.target.value as string;
+
+        if (this.state.popularSelector !== selected) {
+            this.setState({ popularSelector: selected, topics: [] });
+            this.retrievePopularTopics();
         }
     }
 
@@ -62,6 +114,21 @@ class TopicWall extends React.Component<Props, State> {
                     {this.props.type === "tagFollowings" ? <TrendingChannels /> : <div></div>}
                     <div className='topic-wall-container'>
                         {this.props.type === "tagFollowings" ? <ChromiaPageHeader text="Followed Channels" /> : <div></div>}
+                        <StyledSelector
+                            value={this.state.selector}
+                            onChange={this.handleSelectorChange}
+                        >
+                            <MenuItem value={SELECTOR_OPTIONS.recent}>Recent</MenuItem>
+                            <MenuItem value={SELECTOR_OPTIONS.popular}>Popular</MenuItem>
+                        </StyledSelector>
+                        {this.state.selector === SELECTOR_OPTIONS.popular
+                            ? <StyledSelector value={this.state.popularSelector} onChange={this.handlePopularChange}>
+                                <MenuItem value={SELECTOR_OPTIONS.popularWeek}>Last week</MenuItem>
+                                <MenuItem value={SELECTOR_OPTIONS.popularAllTime}>All time</MenuItem>
+                            </StyledSelector>
+                            : <div></div>
+                        }
+                        <br /><br />
                         {this.state.topics.map(topic => <TopicOverviewCard
                             key={'card-' + topic.id}
                             topic={topic}
@@ -141,6 +208,27 @@ class TopicWall extends React.Component<Props, State> {
         } else {
             this.retrieveLatestTopicsForAll();
         }
+    }
+
+    retrievePopularTopics() {
+        this.setState({ isLoading: true });
+
+        const weekInMilliseconds: number = 604800000;
+        const timestamp: number = this.state.popularSelector === SELECTOR_OPTIONS.popularWeek
+            ? Date.now() - weekInMilliseconds
+            : 0;
+
+        var topics: Promise<Topic[]>;
+        if (this.props.type === "userFollowings") {
+            topics = getTopicsByFollowsSortedByPopularityAfterTimestamp(getUser().name, timestamp, topicsPageSize);
+        } else if (this.props.type === "tagFollowings") {
+            topics = getTopicsByFollowedChannelSortedByPopularityAfterTimestamp(getUser().name, timestamp, topicsPageSize);
+        } else {
+            topics = getAllTopicsByPopularityAfterTimestamp(timestamp, topicsPageSize)
+        }
+
+        topics.then(topics => this.setState({ topics: topics, couldExistOlderTopics: false, isLoading: false }))
+            .catch(() => this.setState({ isLoading: false }));
     }
 
     retrieveOlderTopicsForUserFollowings(oldestTimestamp: number) {

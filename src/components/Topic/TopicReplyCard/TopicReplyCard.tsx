@@ -167,43 +167,44 @@ class TopicReplyCard extends React.Component<Props, State> {
                     </Typography>
                 </div>
                 <div className={"bottom-bar"}>
-                    <Tooltip title="Like">
-                        <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
-                            <Badge
-                                className="star-badge"
-                                color="primary"
-                                badgeContent={this.state.stars}
-                            >
+                    <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
+                        <Badge
+                            className="star-badge"
+                            color="primary"
+                            badgeContent={this.state.stars}
+                        >
+                            <Tooltip title="Like">
                                 {this.state.ratedByMe ? <StarRate className="yellow-color" /> : <StarBorder className="purple-color" />}
-                            </Badge>
-                        </IconButton>
-                    </Tooltip>
+                            </Tooltip>
+                        </Badge>
+                    </IconButton>
                     {this.props.reply.timestamp + allowedEditTimeMillis > Date.now() && user != null && this.props.reply.author === user.name
                         ? <EditMessageButton value={this.props.reply.message} submitFunction={this.editReplyMessage} />
                         : null
                     }
-                    <Tooltip title="Reply">
-                        <IconButton
-                            aria-label="Reply"
-                            onClick={() => this.setState(prevState => ({ replyBoxOpen: !prevState.replyBoxOpen }))}
-                        >
+                    <IconButton
+                        aria-label="Reply"
+                        onClick={() => this.setState(prevState => ({ replyBoxOpen: !prevState.replyBoxOpen }))}
+                    >
+                        <Tooltip title="Reply">
                             <Reply className={this.state.replyBoxOpen ? "pink-color" : "purple-color"} />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Report">
-                        <IconButton
-                            aria-label="Report"
-                            onClick={() => this.reportReply()}
-                        >
-                            <Report className="purple-color" />
-                        </IconButton>
-                    </Tooltip>
+                        </Tooltip>
+                    </IconButton>
+
+                    <IconButton
+                        aria-label="Report"
+                        onClick={() => this.reportReply()}
+                    >
+                        <Tooltip title="Report">
+                            <Report className="red-color" />
+                        </Tooltip>
+                    </IconButton>
                     {this.renderAdminActions()}
                 </div>
                 <div>
                     {this.renderReplyBox()}
                 </div>
-            </CardContent>
+            </CardContent >
         );
     }
 
@@ -226,13 +227,13 @@ class TopicReplyCard extends React.Component<Props, State> {
         if (this.state.isRepresentative && !this.props.reply.removed) {
             return (
                 <div style={{ display: "inline-block" }}>
-                    <Tooltip title="Remove reply">
-                        <IconButton aria-label="Remove reply"
-                            onClick={() => this.setState({ removeReplyDialogOpen: true })}
-                        >
+                    <IconButton aria-label="Remove reply"
+                        onClick={() => this.setState({ removeReplyDialogOpen: true })}
+                    >
+                        <Tooltip title="Remove reply">
                             <Delete className="red-color" />
-                        </IconButton>
-                    </Tooltip>
+                        </Tooltip>
+                    </IconButton>
 
                     <Dialog open={this.state.removeReplyDialogOpen} onClose={() => this.setState({ removeReplyDialogOpen: false })} aria-labelledby="dialog-title">
                         <DialogTitle id="dialog-title">Are you sure?</DialogTitle>

@@ -3,7 +3,7 @@ import { register, login } from "../src/blockchain/UserService";
 import { User, Topic } from "../src/types";
 import { getTrendingChannels, followChannel, unfollowChannel, getFollowedChannels, getTopicChannelBelongings, countChannelFollowers } from "../src/blockchain/ChannelService";
 import { getANumber } from "./helper";
-import { getTopicsByChannelPriorToTimestamp, createTopic, getTopicsFromFollowedChannelsPriorToTimestamp, getTopicsByChannelAfterTimestamp, countTopicsInChannel } from "../src/blockchain/TopicService";
+import { getTopicsByChannelPriorToTimestamp, createTopic, getTopicsFromFollowedChannelsPriorToTimestamp, getTopicsByChannelAfterTimestamp, countTopicsInChannel, getTopicsByChannelSortedByPopularityAfterTimestamp } from "../src/blockchain/TopicService";
 
 jest.setTimeout(60000);
 
@@ -42,23 +42,26 @@ describe("channel tests", () => {
         topics = await getTopicsByChannelPriorToTimestamp(channel, Date.now() + 3000, 10);
         expect(topics.length).toBe(1);
 
-        const trendingTags: string[] = await getTrendingChannels(1);
-        expect(trendingTags.length).toBeGreaterThanOrEqual(1);
+        const trendingChannels: string[] = await getTrendingChannels(1);
+        expect(trendingChannels.length).toBeGreaterThanOrEqual(1);
 
         await followChannel(loggedInUser, channel);
-        var topicsWithFollowedTag: Topic[] = await getTopicsFromFollowedChannelsPriorToTimestamp(loggedInUser, Date.now() + 3000, 10);
-        var followedTags: string[] = await getFollowedChannels(loggedInUser.name);
-        expect(topicsWithFollowedTag.length).toBe(1);
-        expect(followedTags.length).toBe(1);
+        var topicsWithFollowedChannel: Topic[] = await getTopicsFromFollowedChannelsPriorToTimestamp(loggedInUser, Date.now() + 3000, 10);
+        var followedChannels: string[] = await getFollowedChannels(loggedInUser.name);
+        expect(topicsWithFollowedChannel.length).toBe(1);
+        expect(followedChannels.length).toBe(1);
+
+        const topicsByChannelPopularity: Topic[] = await getTopicsByChannelSortedByPopularityAfterTimestamp(channel, 0, 10);
+        expect(topicsByChannelPopularity.length).toBe(1);
 
         const countOfFollowers = await countChannelFollowers(channel);
         expect(countOfFollowers).toBe(1);
 
         await unfollowChannel(loggedInUser, channel);
-        topicsWithFollowedTag = await getTopicsFromFollowedChannelsPriorToTimestamp(loggedInUser, Date.now() + 3000, 10);
-        followedTags = await getFollowedChannels(loggedInUser.name);
-        expect(topicsWithFollowedTag.length).toBe(0);
-        expect(followedTags.length).toBe(0);
+        topicsWithFollowedChannel = await getTopicsFromFollowedChannelsPriorToTimestamp(loggedInUser, Date.now() + 3000, 10);
+        followedChannels = await getFollowedChannels(loggedInUser.name);
+        expect(topicsWithFollowedChannel.length).toBe(0);
+        expect(followedChannels.length).toBe(0);
     });
 
 });

@@ -2,12 +2,18 @@ operation give_topic_star_rating(username: text, id: text) {
     val user = user@{ .name == username };
     require(is_signer(user.pubkey));
     create topic_star_rating(topic@{ .id == id }, user);
+
+    val topicRating = tmp_topic_rating@{ topic@{ .id == id }};
+    update topicRating ( stars = topicRating.stars + 1 );
 }
 
 operation remove_topic_star_rating(username: text, id: text) {
     val user = user@{ .name == username };
     require(is_signer(user.pubkey));
     delete topic_star_rating@{ topic@{ .id == id }, user };
+
+    val topicRating = tmp_topic_rating@{ topic@{ .id == id }};
+    update topicRating ( stars = topicRating.stars - 1 );
 }
 
 operation give_reply_star_rating(username: text, id: text) {

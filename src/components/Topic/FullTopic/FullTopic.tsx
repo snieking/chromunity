@@ -9,7 +9,7 @@ import { removeTopic, getTopicById, removeTopicStarRating, giveTopicStarRating, 
 import { Topic, User, TopicReply } from "../../../types";
 import { getUser, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import { timeAgoReadable } from "../../../util/util";
-import { StarRate, SubdirectoryArrowRight, Delete, Report, Favorite, FavoriteBorder, StarBorder } from "@material-ui/icons";
+import { StarRate, SubdirectoryArrowRight, Delete, Report, StarBorder, Notifications, NotificationsActive } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
 import TopicReplyCard from "../TopicReplyCard/TopicReplyCard";
 import ReactMarkdown from 'react-markdown';
@@ -220,7 +220,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                     </Typography>
                 </Link>
                 <br />
-                {this.state.avatar !== "" ? <img src={this.state.avatar} style={{ marginBottom: "5px" }}className="topic-author-avatar" alt="Profile Avatar" /> : <div></div>}
+                {this.state.avatar !== "" ? <img src={this.state.avatar} style={{ marginBottom: "5px" }} className="topic-author-avatar" alt="Profile Avatar" /> : <div></div>}
             </div>
         );
     }
@@ -239,7 +239,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                     {this.state.topic.title}
                 </Typography>
                 <Typography variant="body2" className='purple-typography' component="p">
-                    <ReactMarkdown source={content} disallowedTypes={["heading"]}/>
+                    <ReactMarkdown source={content} disallowedTypes={["heading"]} />
                 </Typography>
             </CardContent>
         );
@@ -249,33 +249,38 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
         const user: User = getUser();
         return (
             <CardActions>
-                <Tooltip title="Like">
-                    <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
-                        <Badge
-                            className="star-badge"
-                            color="primary"
-                            badgeContent={this.state.stars}
-                        >
-                            {this.state.ratedByMe ? <StarRate className="yellow-color"/> : <StarBorder className="purple-color"/>}
-                        </Badge>
-                    </IconButton>
-                </Tooltip>
-                <Tooltip title="Subscribe">
-                    <IconButton aria-label="Subscribe" onClick={() => this.toggleSubscription()}>
-                        {this.state.subscribed ? <Favorite className="red-color" /> : <FavoriteBorder className="purple-color" />}
-                    </IconButton>
-                </Tooltip>
-                {this.state.topic.timestamp + allowedEditTimeMillis > Date.now() && user != null && this.state.topic.author === user.name
-                    ? <EditMessageButton value={this.state.topic.message} submitFunction={this.editTopicMessage} />
-                    : <div />
+                <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
+                    <Badge
+                        className="star-badge"
+                        color="primary"
+                        badgeContent={this.state.stars}
+                    >
+                        <Tooltip title="Like">
+                            {this.state.ratedByMe ? <StarRate className="yellow-color" /> : <StarBorder className="purple-color" />}
+                        </Tooltip>
+                    </Badge>
+                </IconButton>
+                <IconButton aria-label="Subscribe" onClick={() => this.toggleSubscription()}>
+                    {this.state.subscribed
+                        ? <Tooltip title="Unsubscribe"><NotificationsActive className="pink-color" /></Tooltip>
+                        : <Tooltip title="Subscribe"><Notifications className="purple-color" /></Tooltip>
+                    }
+                </IconButton>
+
+                {
+                    this.state.topic.timestamp + allowedEditTimeMillis > Date.now() && user != null && this.state.topic.author === user.name
+                        ? <EditMessageButton value={this.state.topic.message} submitFunction={this.editTopicMessage} />
+                        : <div />
                 }
-                <Tooltip title="Report">
-                    <IconButton aria-label="Report" onClick={() => this.reportTopic()}>
-                        <Report className="purple-color" />
-                    </IconButton>
-                </Tooltip>
+
+                <IconButton aria-label="Report" onClick={() => this.reportTopic()}>
+                    <Tooltip title="Report">
+                        <Report className="red-color" />
+                    </Tooltip>
+                </IconButton>
+
                 {this.renderAdminActions()}
-            </CardActions>
+            </CardActions >
         );
     }
 
@@ -300,13 +305,14 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
         if (user != null && this.state.representatives.includes(user.name) && !this.state.topic.removed) {
             return (
                 <div style={{ display: "inline-block" }}>
-                    <Tooltip title="Remove topic">
-                        <IconButton aria-label="Remove topic"
-                            onClick={() => this.setState({ removeTopicDialogOpen: true })}
-                        >
+
+                    <IconButton aria-label="Remove topic"
+                        onClick={() => this.setState({ removeTopicDialogOpen: true })}
+                    >
+                        <Tooltip title="Remove topic">
                             <Delete className="red-color" />
-                        </IconButton>
-                    </Tooltip>
+                        </Tooltip>
+                    </IconButton>
 
                     <Dialog open={this.state.removeTopicDialogOpen} onClose={() => this.setState({ removeTopicDialogOpen: false })} aria-labelledby="dialog-title">
                         <DialogTitle id="dialog-title">Are you sure?</DialogTitle>

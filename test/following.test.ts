@@ -4,7 +4,7 @@ import * as bip39 from "bip39";
 import { register, login } from "../src/blockchain/UserService";
 import { User, Topic } from "../src/types";
 import { createFollowing, countUserFollowers, countUserFollowings, amIAFollowerOf, removeFollowing } from "../src/blockchain/FollowingService";
-import { createTopic, getTopicsFromFollowsPriorToTimestamp, getTopicsFromFollowsAfterTimestamp } from "../src/blockchain/TopicService";
+import { createTopic, getTopicsFromFollowsPriorToTimestamp, getTopicsFromFollowsAfterTimestamp, getTopicsByFollowsSortedByPopularityAfterTimestamp } from "../src/blockchain/TopicService";
 
 jest.setTimeout(30000);
 
@@ -53,6 +53,9 @@ describe("following tests", () => {
         expect(followingsTopics.length).toBe(1);
 
         const followingsTopics2: Topic[] = await getTopicsFromFollowsAfterTimestamp(loggedInUser, Date.now() - 20000, 10);
+        expect(followingsTopics2.length).toBe(1);
+
+        const followingTopics3: Topic[] = await getTopicsByFollowsSortedByPopularityAfterTimestamp(loggedInUser.name, 0, 10);
         expect(followingsTopics2.length).toBe(1);
 
         await removeFollowing(loggedInUser, loggedInUser2.name);
