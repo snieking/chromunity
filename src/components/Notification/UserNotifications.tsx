@@ -1,10 +1,10 @@
 import React from 'react';
-import { Container, LinearProgress } from "@material-ui/core";
+import {Container, LinearProgress} from "@material-ui/core";
 
-import { RouteComponentProps } from "react-router";
-import { getUserNotificationsPriorToTimestamp, markNotificationsRead } from "../../blockchain/NotificationService";
-import { UserNotification } from "../../types";
-import { getUser } from "../../util/user-util";
+import {RouteComponentProps} from "react-router";
+import {getUserNotificationsPriorToTimestamp, markNotificationsRead} from "../../blockchain/NotificationService";
+import {UserNotification} from "../../types";
+import {getUser} from "../../util/user-util";
 import NotificationCard from './NotificationCard';
 import ChromiaPageHeader from '../utils/ChromiaPageHeader';
 import LoadMoreButton from "../buttons/LoadMoreButton";
@@ -45,9 +45,10 @@ export class UserNotifications extends React.Component<UserNotificationsProps, U
     render() {
         return (
             <Container fixed maxWidth="md">
-                <ChromiaPageHeader text="User Notifications" />
-                {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
-                {this.state.notifications.map(notification => <NotificationCard key={notification.id} notification={notification} />)}
+                <ChromiaPageHeader text="User Notifications"/>
+                {this.state.isLoading ? <LinearProgress variant="query"/> : <div></div>}
+                {this.state.notifications.map(notification => <NotificationCard key={notification.id}
+                                                                                notification={notification}/>)}
                 {this.renderLoadMoreButton()}
             </Container>
         );
@@ -57,7 +58,7 @@ export class UserNotifications extends React.Component<UserNotificationsProps, U
         const userId = this.props.match.params.userId;
         const loggedInUser = getUser();
 
-        this.setState({ isLoading: true });
+        this.setState({isLoading: true});
         const timestamp: number = this.state.notifications.length !== 0
             ? this.state.notifications[this.state.notifications.length - 1].timestamp
             : Date.now();
@@ -78,7 +79,7 @@ export class UserNotifications extends React.Component<UserNotificationsProps, U
 
     renderLoadMoreButton() {
         if (this.state.couldExistOlderNotifications) {
-            return (<LoadMoreButton onClick={this.retrieveNotifications} />)
+            return (<LoadMoreButton onClick={this.retrieveNotifications}/>)
         }
     }
 

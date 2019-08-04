@@ -1,13 +1,13 @@
 import * as React from 'react';
-import { register } from '../../../blockchain/UserService';
-import { Redirect } from 'react-router-dom'
+import {register} from '../../../blockchain/UserService';
+import {Redirect} from 'react-router-dom'
 import '../../../styles/fade.css';
 import './Register.css';
 
 import AccountCircle from '@material-ui/icons/AccountCircle'
-import { Button, Chip, Typography, Snackbar } from "@material-ui/core";
-import { generateRandomMnemonic } from "../../../blockchain/CryptoService";
-import { CustomSnackbarContentWrapper } from '../../utils/CustomSnackbar';
+import {Button, Chip, Snackbar, Typography} from "@material-ui/core";
+import {generateRandomMnemonic} from "../../../blockchain/CryptoService";
+import {CustomSnackbarContentWrapper} from '../../utils/CustomSnackbar';
 
 export interface RegisterProps {
 
@@ -101,14 +101,14 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
         if (this.state.currentClickableMnemonic === mnemonic) {
             return (
                 <Chip key={"mnemonic-" + mnemonic}
-                    label={mnemonic}
-                    clickable onClick={this.handleMnemonicClicked}
-                    style={{ backgroundColor: '#FFAFC1' }}
+                      label={mnemonic}
+                      clickable onClick={this.handleMnemonicClicked}
+                      style={{backgroundColor: '#FFAFC1'}}
                 />
             )
         } else {
             return (
-                <Chip key={"mnemonic-" + mnemonic} label={mnemonic} />
+                <Chip key={"mnemonic-" + mnemonic} label={mnemonic}/>
             )
         }
     }
@@ -130,7 +130,7 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
                     <Button type="submit" color="primary" onClick={() => this.copyMnemonicToClipboard()}>
                         Copy to clipboard
                     </Button>
-                    <br />
+                    <br/>
                     <Typography variant="body2" color="textSecondary" component="p">
                         Save your mnemonic seed, you will need it later
                     </Typography>
@@ -146,7 +146,7 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
                     <Typography variant="body2" color="textSecondary" component="p">
                         Click the marked phrases
                     </Typography>
-                    <br />
+                    <br/>
                 </div>
             )
         }
@@ -154,44 +154,44 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
 
     render() {
         if (this.state.redirect === true) {
-            return <Redirect to='/user/login' />
+            return <Redirect to='/user/login'/>
         }
 
         return (
             <div className="wrapper fadeInDown">
                 <div id="formContent">
-                    <br />
+                    <br/>
                     <div className="fadeIn first">
-                        <AccountCircle fontSize="large" />
+                        <AccountCircle fontSize="large"/>
                     </div>
 
                     <input type="text" id="login" className="fadeIn second" name="register" placeholder="user"
-                        onChange={this.handleUsernameChange} />
+                           onChange={this.handleUsernameChange}/>
                     <input type="password" id="password" className="fadeIn third" name="register"
-                        placeholder="password"
-                        onChange={this.handlePasswordChange}
-                        value={this.state.password} />
+                           placeholder="password"
+                           onChange={this.handlePasswordChange}
+                           value={this.state.password}/>
                     <input type="password" id="secondPassword" className="fadeIn third" name="register"
-                        placeholder="repeat password"
-                        onChange={this.handleSecondPasswordChange}
-                        value={this.state.secondPassword} />
+                           placeholder="repeat password"
+                           onChange={this.handleSecondPasswordChange}
+                           value={this.state.secondPassword}/>
 
                     <div className="mnemonic-area">
                         {this.renderMnemonicDescription()}
                         {this.state.generatedMnemonics.map(mnemonic => this.generateMnemonicChip(mnemonic))}
-                        <br />
-                        <br />
+                        <br/>
+                        <br/>
                         <input type="text" readOnly id="mnemonic" className="fadeIn second"
-                            value={this.state.reBuiltMnemonics} />
-                        <br />
+                               value={this.state.reBuiltMnemonics}/>
+                        <br/>
                         {this.renderCopyToClipboardButton()}
-                        <br />
+                        <br/>
                     </div>
                     <input type="button"
-                        className="fadeIn fourth"
-                        value="Register"
-                        onClick={this.signUp}
-                        disabled={this.state.conditionsNotMet}
+                           className="fadeIn fourth"
+                           value="Register"
+                           onClick={this.signUp}
+                           disabled={this.state.conditionsNotMet}
                     />
                 </div>
 
@@ -210,7 +210,7 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
                     />
                 </Snackbar>
 
-            </div >
+            </div>
         );
     }
 
@@ -219,32 +219,32 @@ export class Register extends React.Component<RegisterProps, RegisterState> {
             return;
         }
 
-        this.setState({ snackbarOpen: false, snackbarText: "" });
+        this.setState({snackbarOpen: false, snackbarText: ""});
     }
 
     private handleUsernameChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
         event.stopPropagation();
-        this.setState({ username: event.target.value });
+        this.setState({username: event.target.value});
     }
 
     private handlePasswordChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
         event.stopPropagation();
-        this.setState({ password: event.target.value });
+        this.setState({password: event.target.value});
     }
 
     private handleSecondPasswordChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
         event.stopPropagation();
-        this.setState({ secondPassword: event.target.value });
+        this.setState({secondPassword: event.target.value});
     }
 
     private signUp() {
         if (this.state.password === this.state.secondPassword &&
             this.state.password.length > 5) {
             register(this.state.username, this.state.password, this.state.reBuiltMnemonics)
-                .then(() => this.setState({ redirect: true }))
+                .then(() => this.setState({redirect: true}))
                 .catch(() => this.setState({
                     snackbarOpen: true,
                     snackbarText: "Error signing up, try another username",

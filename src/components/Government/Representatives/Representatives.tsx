@@ -1,13 +1,13 @@
 import React from 'react';
 
 import './Representatives.css';
-import { Container, Card, CardContent, TextField, Button, Grid } from "@material-ui/core";
-import { getRepresentatives } from "../../../blockchain/RepresentativesService";
+import {Button, Card, CardContent, Container, Grid, TextField} from "@material-ui/core";
+import {getRepresentatives} from "../../../blockchain/RepresentativesService";
 import RepresentativeCard from './RepresentativeCard/RepresentativeCard';
 import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
-import { getUser } from '../../../util/user-util';
-import { adminAddRepresentative, adminRemoveRepresentative } from '../../../blockchain/AdminService';
-import { User } from '../../../types';
+import {getUser} from '../../../util/user-util';
+import {adminAddRepresentative, adminRemoveRepresentative} from '../../../blockchain/AdminService';
+import {User} from '../../../types';
 
 export interface RepresentativesState {
     representatives: string[];
@@ -35,9 +35,9 @@ export class Representatives extends React.Component<{}, RepresentativesState> {
     render() {
         return (
             <Container fixed maxWidth="md">
-                <ChromiaPageHeader text="Representatives" />
+                <ChromiaPageHeader text="Representatives"/>
                 <Grid container spacing={1}>
-                    {this.state.representatives.map(name => <RepresentativeCard name={name} key={name} />)}
+                    {this.state.representatives.map(name => <RepresentativeCard name={name} key={name}/>)}
                 </Grid>
                 {this.renderAdminFunctions()}
             </Container>
@@ -49,7 +49,7 @@ export class Representatives extends React.Component<{}, RepresentativesState> {
         if (user != null && user.name === "admin") {
             return (
                 <div>
-                    <br />
+                    <br/>
                     <Card>
                         <CardContent>
                             <TextField
@@ -62,7 +62,7 @@ export class Representatives extends React.Component<{}, RepresentativesState> {
                                 className="text-field"
                                 variant="outlined"
                             />
-                            <br />
+                            <br/>
                             <Button onClick={() => adminRemoveRepresentative(getUser(), this.state.targetUsername)
                                 .then(() => window.location.reload())} color="secondary" variant="outlined">
                                 Remove representative
@@ -81,6 +81,6 @@ export class Representatives extends React.Component<{}, RepresentativesState> {
     handleUsernameChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
         event.stopPropagation();
-        this.setState({ targetUsername: event.target.value });
+        this.setState({targetUsername: event.target.value});
     }
 }

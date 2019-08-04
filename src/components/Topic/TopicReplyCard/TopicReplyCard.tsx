@@ -1,18 +1,41 @@
 import React from 'react';
-import { Link } from "react-router-dom";
-import { TopicReply, UserMeta, User } from '../../../types';
-import { Card, Typography, IconButton, Badge, CardContent, TextField, Button, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, LinearProgress } from '@material-ui/core';
-import { timeAgoReadable } from '../../../util/util';
-import { getUser, ifEmptyAvatarThenPlaceholder, isRepresentative, getCachedUserMeta } from '../../../util/user-util';
-import { StarRate, Reply, Delete, Report, StarBorder } from '@material-ui/icons';
-import { getUserSettingsCached } from '../../../blockchain/UserService';
-import { removeTopicReply, removeReplyStarRating, giveReplyStarRating, getReplyStarRaters, getTopicSubReplies, createTopicSubReply, modifyReply } from '../../../blockchain/TopicService';
+import {Link} from "react-router-dom";
+import {TopicReply, User, UserMeta} from '../../../types';
+import {
+    Badge,
+    Button,
+    Card,
+    CardContent,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    IconButton,
+    LinearProgress,
+    TextField,
+    Tooltip,
+    Typography
+} from '@material-ui/core';
+import {timeAgoReadable} from '../../../util/util';
+import {getCachedUserMeta, getUser, ifEmptyAvatarThenPlaceholder, isRepresentative} from '../../../util/user-util';
+import {Delete, Reply, Report, StarBorder, StarRate} from '@material-ui/icons';
+import {getUserSettingsCached} from '../../../blockchain/UserService';
+import {
+    createTopicSubReply,
+    getReplyStarRaters,
+    getTopicSubReplies,
+    giveReplyStarRating,
+    modifyReply,
+    removeReplyStarRating,
+    removeTopicReply
+} from '../../../blockchain/TopicService';
 
 import './TopicReplyCard.css';
 import '../Topic.css';
 import ReactMarkdown from 'react-markdown';
-import { reportReply } from '../../../blockchain/RepresentativesService';
-import { EditMessageButton } from '../../buttons/EditMessageButton';
+import {reportReply} from '../../../blockchain/RepresentativesService';
+import {EditMessageButton} from '../../buttons/EditMessageButton';
 
 interface Props {
     topicId: string;
@@ -51,7 +74,7 @@ class TopicReplyCard extends React.Component<Props, State> {
             hideThreadConfirmDialogOpen: false,
             avatar: "",
             subReplies: [],
-            userMeta: { name: "", suspended_until: Date.now() + 10000, times_suspended: 0 },
+            userMeta: {name: "", suspended_until: Date.now() + 10000, times_suspended: 0},
             removeReplyDialogOpen: false,
             isLoading: false
         };
@@ -69,9 +92,9 @@ class TopicReplyCard extends React.Component<Props, State> {
                         raised={true}
                         key={this.props.reply.id}
                         className='reply-card'
-                        style={{ marginLeft: this.props.indention + "px" }}
+                        style={{marginLeft: this.props.indention + "px"}}
                     >
-                        {this.state.isLoading ? <LinearProgress /> : <div></div>}
+                        {this.state.isLoading ? <LinearProgress/> : <div></div>}
                         {this.renderCardContent()}
                     </Card>
                 </div>
@@ -99,26 +122,34 @@ class TopicReplyCard extends React.Component<Props, State> {
             stars: usersWhoStarRated.length,
             ratedByMe: usersWhoStarRated.includes(user != null && user.name)
         }));
-        getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies }));
-        getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
-        isRepresentative().then(isRepresentative => this.setState({ isRepresentative: isRepresentative }));
+        getTopicSubReplies(this.props.reply.id).then(replies => this.setState({subReplies: replies}));
+        getCachedUserMeta().then(meta => this.setState({userMeta: meta}));
+        isRepresentative().then(isRepresentative => this.setState({isRepresentative: isRepresentative}));
     }
 
     toggleStarRate() {
         if (!this.state.isLoading) {
-            this.setState({ isLoading: true });
+            this.setState({isLoading: true});
             const id = this.props.reply.id;
             const name = getUser().name;
 
             if (name != null) {
                 if (this.state.ratedByMe) {
                     removeReplyStarRating(getUser(), id)
-                        .then(() => this.setState(prevState => ({ ratedByMe: false, stars: prevState.stars - 1, isLoading: false })))
-                        .catch(() => this.setState({ isLoading: false }));
+                        .then(() => this.setState(prevState => ({
+                            ratedByMe: false,
+                            stars: prevState.stars - 1,
+                            isLoading: false
+                        })))
+                        .catch(() => this.setState({isLoading: false}));
                 } else {
                     giveReplyStarRating(getUser(), id)
-                        .then(() => this.setState(prevState => ({ ratedByMe: true, stars: prevState.stars + 1, isLoading: false })))
-                        .catch(() => this.setState({ isLoading: false }));
+                        .then(() => this.setState(prevState => ({
+                            ratedByMe: true,
+                            stars: prevState.stars + 1,
+                            isLoading: false
+                        })))
+                        .catch(() => this.setState({isLoading: false}));
                 }
             } else {
                 window.location.replace("/user/login");
@@ -149,8 +180,9 @@ class TopicReplyCard extends React.Component<Props, State> {
                         <span className="reply-author-name">@{this.props.reply.author}</span>
                     </Typography>
                 </Link>
-                <br />
-                {this.state.avatar !== "" ? <img src={this.state.avatar} className="reply-author-avatar" alt="Profile Avatar" /> : <div></div>}
+                <br/>
+                {this.state.avatar !== "" ?
+                    <img src={this.state.avatar} className="reply-author-avatar" alt="Profile Avatar"/> : <div></div>}
             </div>
         );
     }
@@ -162,8 +194,8 @@ class TopicReplyCard extends React.Component<Props, State> {
                 {this.renderAuthor()}
                 <div>
                     {this.renderTimeAgo(this.props.reply.timestamp)}
-                    <Typography variant="body2" className='purple-typography' component="p" style={{ maxWidth: "100%" }}>
-                        <ReactMarkdown source={this.props.reply.message} disallowedTypes={["heading"]} />
+                    <Typography variant="body2" className='purple-typography' component="p" style={{maxWidth: "100%"}}>
+                        <ReactMarkdown source={this.props.reply.message} disallowedTypes={["heading"]}/>
                     </Typography>
                 </div>
                 <div className={"bottom-bar"}>
@@ -174,20 +206,21 @@ class TopicReplyCard extends React.Component<Props, State> {
                             badgeContent={this.state.stars}
                         >
                             <Tooltip title="Like">
-                                {this.state.ratedByMe ? <StarRate className="yellow-color" /> : <StarBorder className="purple-color" />}
+                                {this.state.ratedByMe ? <StarRate className="yellow-color"/> :
+                                    <StarBorder className="purple-color"/>}
                             </Tooltip>
                         </Badge>
                     </IconButton>
                     {this.props.reply.timestamp + allowedEditTimeMillis > Date.now() && user != null && this.props.reply.author === user.name
-                        ? <EditMessageButton value={this.props.reply.message} submitFunction={this.editReplyMessage} />
+                        ? <EditMessageButton value={this.props.reply.message} submitFunction={this.editReplyMessage}/>
                         : null
                     }
                     <IconButton
                         aria-label="Reply"
-                        onClick={() => this.setState(prevState => ({ replyBoxOpen: !prevState.replyBoxOpen }))}
+                        onClick={() => this.setState(prevState => ({replyBoxOpen: !prevState.replyBoxOpen}))}
                     >
                         <Tooltip title="Reply">
-                            <Reply className={this.state.replyBoxOpen ? "pink-color" : "purple-color"} />
+                            <Reply className={this.state.replyBoxOpen ? "pink-color" : "purple-color"}/>
                         </Tooltip>
                     </IconButton>
 
@@ -196,7 +229,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                         onClick={() => this.reportReply()}
                     >
                         <Tooltip title="Report">
-                            <Report className="red-color" />
+                            <Report className="red-color"/>
                         </Tooltip>
                     </IconButton>
                     {this.renderAdminActions()}
@@ -204,7 +237,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                 <div>
                     {this.renderReplyBox()}
                 </div>
-            </CardContent >
+            </CardContent>
         );
     }
 
@@ -226,27 +259,32 @@ class TopicReplyCard extends React.Component<Props, State> {
     renderAdminActions() {
         if (this.state.isRepresentative && !this.props.reply.removed) {
             return (
-                <div style={{ display: "inline-block" }}>
+                <div style={{display: "inline-block"}}>
                     <IconButton aria-label="Remove reply"
-                        onClick={() => this.setState({ removeReplyDialogOpen: true })}
+                                onClick={() => this.setState({removeReplyDialogOpen: true})}
                     >
                         <Tooltip title="Remove reply">
-                            <Delete className="red-color" />
+                            <Delete className="red-color"/>
                         </Tooltip>
                     </IconButton>
 
-                    <Dialog open={this.state.removeReplyDialogOpen} onClose={() => this.setState({ removeReplyDialogOpen: false })} aria-labelledby="dialog-title">
+                    <Dialog open={this.state.removeReplyDialogOpen}
+                            onClose={() => this.setState({removeReplyDialogOpen: false})}
+                            aria-labelledby="dialog-title">
                         <DialogTitle id="dialog-title">Are you sure?</DialogTitle>
                         <DialogContent>
                             <DialogContentText>
-                                This action will remove the topic, which makes sure that no one will be able to read the initial message.
+                                This action will remove the topic, which makes sure that no one will be able to read the
+                                initial message.
                             </DialogContentText>
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={() => this.setState({ removeReplyDialogOpen: false })} color="secondary">No</Button>
+                            <Button onClick={() => this.setState({removeReplyDialogOpen: false})}
+                                    color="secondary">No</Button>
                             <Button onClick={() => this.setState({
                                 removeReplyDialogOpen: false
-                            }, () => removeTopicReply(getUser(), this.props.reply.id).then(() => window.location.reload()))} color="primary">
+                            }, () => removeTopicReply(getUser(), this.props.reply.id).then(() => window.location.reload()))}
+                                    color="primary">
                                 Yes
                             </Button>
                         </DialogActions>
@@ -261,11 +299,11 @@ class TopicReplyCard extends React.Component<Props, State> {
         if (this.state.replyBoxOpen && user == null) {
             window.location.replace("/user/login");
         } else if (this.state.replyBoxOpen && this.state.userMeta.suspended_until > Date.now()) {
-            this.setState({ replyBoxOpen: false });
+            this.setState({replyBoxOpen: false});
             window.alert("User account temporarily suspended");
         } else if (this.state.replyBoxOpen) {
             return (
-                <div style={{ marginTop: "20px" }}>
+                <div style={{marginTop: "20px"}}>
                     <TextField
                         autoFocus
                         margin="dense"
@@ -280,10 +318,10 @@ class TopicReplyCard extends React.Component<Props, State> {
                         value={this.state.replyMessage}
                     />
                     <Button
-                        onClick={() => this.setState({ replyBoxOpen: false })}
+                        onClick={() => this.setState({replyBoxOpen: false})}
                         color="secondary"
                         variant="text"
-                        style={{ marginRight: "5px" }}
+                        style={{marginRight: "5px"}}
                     >
                         Cancel
                     </Button>
@@ -300,14 +338,14 @@ class TopicReplyCard extends React.Component<Props, State> {
     handleReplyMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
         event.stopPropagation();
-        this.setState({ replyMessage: event.target.value });
+        this.setState({replyMessage: event.target.value});
     }
 
     sendReply() {
         const message: string = this.state.replyMessage;
-        this.setState({ replyBoxOpen: false, replyMessage: "" });
+        this.setState({replyBoxOpen: false, replyMessage: ""});
         createTopicSubReply(getUser(), this.props.topicId, this.props.reply.id, message)
-            .then(() => getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies })));
+            .then(() => getTopicSubReplies(this.props.reply.id).then(replies => this.setState({subReplies: replies})));
     }
 
     renderTimeAgo(timestamp: number) {

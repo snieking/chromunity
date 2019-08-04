@@ -1,11 +1,11 @@
 import React from 'react';
 
-import { completeElection, triggerElection, getElectionVotes } from "../../../../blockchain/ElectionService";
-import { getUser } from "../../../../util/user-util";
-import { Button } from "@material-ui/core";
+import {completeElection, getElectionVotes, triggerElection} from "../../../../blockchain/ElectionService";
+import {getUser} from "../../../../util/user-util";
+import {Button} from "@material-ui/core";
 
 export interface DictatorActionsState {
-    
+
 }
 
 const dayInMilliseconds: number = 10000;
@@ -14,7 +14,7 @@ export class DictatorActions extends React.Component<{}, DictatorActionsState> {
 
     constructor(props: any) {
         super(props);
-        this.state = { };
+        this.state = {};
     }
 
     completeElection() {
@@ -26,7 +26,8 @@ export class DictatorActions extends React.Component<{}, DictatorActionsState> {
     render() {
         return (
             <div>
-                <Button onClick={() => triggerElection(getUser(), Date.now() + (dayInMilliseconds * 7))} color="primary">Trigger election</Button>
+                <Button onClick={() => triggerElection(getUser(), Date.now() + (dayInMilliseconds * 7))}
+                        color="primary">Trigger election</Button>
                 <Button onClick={() => this.completeElection()} color="primary">Complete election</Button>
             </div>
         )

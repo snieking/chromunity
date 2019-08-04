@@ -1,18 +1,18 @@
-import React, { FormEvent } from "react";
+import React, {FormEvent} from "react";
 
 import './Buttons.css';
 
-import { Dialog, Snackbar } from "@material-ui/core";
+import {Dialog, Snackbar} from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
 import IconButton from "@material-ui/core/IconButton";
-import { ReplyAll } from "@material-ui/icons";
-import { createTopicReply } from "../../blockchain/TopicService";
-import { getUser, getCachedUserMeta } from "../../util/user-util";
-import { CustomSnackbarContentWrapper } from "../utils/CustomSnackbar";
-import { UserMeta } from "../../types";
+import {ReplyAll} from "@material-ui/icons";
+import {createTopicReply} from "../../blockchain/TopicService";
+import {getCachedUserMeta, getUser} from "../../util/user-util";
+import {CustomSnackbarContentWrapper} from "../utils/CustomSnackbar";
+import {UserMeta} from "../../types";
 
 
 export interface ReplyTopicButtonProps {
@@ -41,7 +41,7 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
             replyStatusSuccessOpen: false,
             replyStatusErrorOpen: false,
             replySentStatus: "",
-            userMeta: { name: "", suspended_until: Date.now() + 10000, times_suspended: 0 }
+            userMeta: {name: "", suspended_until: Date.now() + 10000, times_suspended: 0}
         };
 
         this.toggleReplyTopicDialog = this.toggleReplyTopicDialog.bind(this);
@@ -51,28 +51,28 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
     }
 
     componentDidMount() {
-        getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
+        getCachedUserMeta().then(meta => this.setState({userMeta: meta}));
     }
 
     toggleReplyTopicDialog() {
-        this.setState(prevState => ({ dialogOpen: !prevState.dialogOpen }));
+        this.setState(prevState => ({dialogOpen: !prevState.dialogOpen}));
     }
 
     handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
         event.stopPropagation();
-        this.setState({ topicMessage: event.target.value });
+        this.setState({topicMessage: event.target.value});
     }
 
     createTopicReply(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const topicMessage = this.state.topicMessage;
-        this.setState({ topicMessage: "", replyStatusSuccessOpen: true });
+        this.setState({topicMessage: "", replyStatusSuccessOpen: true});
 
         createTopicReply(getUser(), this.props.topicId, topicMessage).then(() => {
-            this.setState({ replySentStatus: "Reply sent", replyStatusSuccessOpen: true });
+            this.setState({replySentStatus: "Reply sent", replyStatusSuccessOpen: true});
             this.props.submitFunction();
-        }).catch(() => this.setState({ replySentStatus: "Error while sending reply", replyStatusErrorOpen: true }));
+        }).catch(() => this.setState({replySentStatus: "Error while sending reply", replyStatusErrorOpen: true}));
         this.toggleReplyTopicDialog();
     }
 
@@ -81,10 +81,16 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
             return (
                 <div className="bottom-right-corner rounded-pink">
                     <IconButton aria-label="Reply to topic"
-                        onClick={() => this.toggleReplyTopicDialog()}
-                        style={{ backgroundColor: "#FFAFC1", marginRight: "5px", marginBottom: "5px", height: "64px", width: "64px" }}
+                                onClick={() => this.toggleReplyTopicDialog()}
+                                style={{
+                                    backgroundColor: "#FFAFC1",
+                                    marginRight: "5px",
+                                    marginBottom: "5px",
+                                    height: "64px",
+                                    width: "64px"
+                                }}
                     >
-                        <ReplyAll fontSize="large" className="new-topic-button" />
+                        <ReplyAll fontSize="large" className="new-topic-button"/>
                     </IconButton>
                 </div>
             )
@@ -95,10 +101,10 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
         return (
             <div>
                 <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title"
-                    fullWidth={true} maxWidth={"sm"}>
+                        fullWidth={true} maxWidth={"sm"}>
                     <form onSubmit={this.createTopicReply}>
                         <DialogContent>
-                            <br />
+                            <br/>
                             <TextField
                                 autoFocus
                                 margin="dense"
@@ -157,14 +163,6 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
         )
     }
 
-    private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
-        if (reason === 'clickaway') {
-            return;
-        }
-
-        this.setState({ replyStatusSuccessOpen: false, replyStatusErrorOpen: false });
-    }
-
     render() {
         return (
             <div>
@@ -172,5 +170,13 @@ export class ReplyTopicButton extends React.Component<ReplyTopicButtonProps, Rep
                 {this.newTopicDialog()}
             </div>
         )
+    }
+
+    private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        this.setState({replyStatusSuccessOpen: false, replyStatusErrorOpen: false});
     }
 }

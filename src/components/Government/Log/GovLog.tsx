@@ -1,13 +1,13 @@
 import React from 'react';
 import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
-import { RepresentativeAction } from '../../../types';
-import { getAllRepresentativeActionsPriorToTimestamp } from '../../../blockchain/RepresentativesService';
-import { CardContent, Card, Container, Typography, LinearProgress } from '@material-ui/core';
+import {RepresentativeAction} from '../../../types';
+import {getAllRepresentativeActionsPriorToTimestamp} from '../../../blockchain/RepresentativesService';
+import {Card, CardContent, Container, LinearProgress, Typography} from '@material-ui/core';
 import LoadMoreButton from "../../buttons/LoadMoreButton";
 
 import './GovLog.css';
-import { timeAgoReadable } from '../../../util/util';
-import { parseContent } from '../../../util/text-parsing';
+import {timeAgoReadable} from '../../../util/util';
+import {parseContent} from '../../../util/text-parsing';
 
 interface GovLogState {
     actions: RepresentativeAction[];
@@ -37,8 +37,8 @@ export class GovLog extends React.Component<{}, GovLogState> {
     render() {
         return (
             <Container>
-                <ChromiaPageHeader text="Logbook" />
-                {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
+                <ChromiaPageHeader text="Logbook"/>
+                {this.state.isLoading ? <LinearProgress variant="query"/> : <div></div>}
                 {this.state.actions.map(action => this.representativeActionCard(action))}
                 {this.renderLoadMoreButton()}
             </Container>
@@ -53,7 +53,7 @@ export class GovLog extends React.Component<{}, GovLogState> {
                         {timeAgoReadable(action.timestamp)}
                     </Typography>
                     <Typography variant="subtitle1" color="textSecondary" component="p">
-                        <span dangerouslySetInnerHTML={{ __html: parseContent(action.action) }}/>
+                        <span dangerouslySetInnerHTML={{__html: parseContent(action.action)}}/>
                     </Typography>
                 </CardContent>
             </Card>
@@ -61,24 +61,24 @@ export class GovLog extends React.Component<{}, GovLogState> {
     }
 
     retrieveActions() {
-        this.setState({ isLoading: true });
-        const timestamp: number = this.state.actions.length !== 0 
-            ? this.state.actions[this.state.actions.length - 1].timestamp 
+        this.setState({isLoading: true});
+        const timestamp: number = this.state.actions.length !== 0
+            ? this.state.actions[this.state.actions.length - 1].timestamp
             : Date.now();
 
         getAllRepresentativeActionsPriorToTimestamp(timestamp, actionsPageSize)
             .then(actions => {
-                this.setState(prevState => ({ 
+                this.setState(prevState => ({
                     actions: Array.from(new Set(prevState.actions.concat(actions))),
                     isLoading: false,
                     couldExistOlderActions: actions.length >= actionsPageSize
-                    }));
-            }).catch(() => this.setState({ isLoading: false, couldExistOlderActions: false }));
+                }));
+            }).catch(() => this.setState({isLoading: false, couldExistOlderActions: false}));
     }
 
     renderLoadMoreButton() {
         if (this.state.couldExistOlderActions) {
-            return (<LoadMoreButton onClick={this.retrieveActions} />)
+            return (<LoadMoreButton onClick={this.retrieveActions}/>)
         }
     }
 

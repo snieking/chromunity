@@ -1,14 +1,40 @@
-import { RepresentativeAction, UserMeta, RepresentativeReport } from './../src/types';
-import { register, login, getUserMeta } from "../src/blockchain/UserService";
-import { triggerElection, signUpForElection, getUncompletedElection, completeElection, voteForCandidate, getElectionCandidates, getElectionVoteForUser, getElectionVotes } from "../src/blockchain/ElectionService";
-import { sleepUntil } from "./helper";
+import {RepresentativeAction, RepresentativeReport, UserMeta} from './../src/types';
+import {getUserMeta, login, register} from "../src/blockchain/UserService";
+import {
+    completeElection,
+    getElectionCandidates,
+    getElectionVoteForUser,
+    getElectionVotes,
+    getUncompletedElection,
+    signUpForElection,
+    triggerElection,
+    voteForCandidate
+} from "../src/blockchain/ElectionService";
+import {sleepUntil} from "./helper";
 
 
-import { User, Election, Topic, TopicReply } from "../src/types";
-import { getCachedUserMeta, setUserMeta } from "../src/util/user-util";
-import { getRepresentatives, getCurrentRepresentativePeriod, getAllRepresentativeActionsPriorToTimestamp, suspendUser, getUnhandledReports, reportTopic, reportReply, handleReport } from "../src/blockchain/RepresentativesService";
-import { createTopic, getTopicsByUserPriorToTimestamp, removeTopic, getTopicById, createTopicReply, getTopicRepliesPriorToTimestamp, removeTopicReply } from "../src/blockchain/TopicService";
-import { adminAddRepresentative, adminRemoveRepresentative } from "../src/blockchain/AdminService";
+import {Election, Topic, TopicReply, User} from "../src/types";
+import {getCachedUserMeta, setUserMeta} from "../src/util/user-util";
+import {
+    getAllRepresentativeActionsPriorToTimestamp,
+    getCurrentRepresentativePeriod,
+    getRepresentatives,
+    getUnhandledReports,
+    handleReport,
+    reportReply,
+    reportTopic,
+    suspendUser
+} from "../src/blockchain/RepresentativesService";
+import {
+    createTopic,
+    createTopicReply,
+    getTopicById,
+    getTopicRepliesPriorToTimestamp,
+    getTopicsByUserPriorToTimestamp,
+    removeTopic,
+    removeTopicReply
+} from "../src/blockchain/TopicService";
+import {adminAddRepresentative, adminRemoveRepresentative} from "../src/blockchain/AdminService";
 
 
 jest.setTimeout(30000);
@@ -71,7 +97,7 @@ describe("election test", () => {
         expect(representatives).toContain(adminUser.name);
     })
 
-    it("as a representative remove topic and replies", async() => {
+    it("as a representative remove topic and replies", async () => {
         const title: string = "This post should be removed";
         const message: string = "This post should be #removed, if not the #test is broken";
         await createTopic(adminUser, channel, title, message);
@@ -82,7 +108,7 @@ describe("election test", () => {
         await removeTopic(adminUser, topicToBeRemoved.id);
         const removedTopic: Topic = await getTopicById(topicToBeRemoved.id);
         expect(removedTopic.title).toBe("[Removed]");
-        
+
         await createTopicReply(adminUser, removedTopic.id, "This should also be removed");
         var replies: TopicReply[] = await getTopicRepliesPriorToTimestamp(removedTopic.id, Date.now(), 10);
 
@@ -94,7 +120,7 @@ describe("election test", () => {
         expect(actions.length).toBe(2);
     });
 
-    it("suspend user", async() => {
+    it("suspend user", async () => {
         await register(userToBeSuspended.name, userToBeSuspended.password, userToBeSuspended.mnemonic);
         const user: User = await login(userToBeSuspended.name, userToBeSuspended.password, userToBeSuspended.mnemonic);
 
@@ -108,7 +134,7 @@ describe("election test", () => {
         expect(meta.suspended_until).toBeGreaterThan(Date.now());
     })
 
-    it("admin toggle representative on user", async() => {
+    it("admin toggle representative on user", async () => {
         var representatives: string[] = await getRepresentatives();
 
         expect(representatives.length).toBe(1);
@@ -122,7 +148,7 @@ describe("election test", () => {
         expect(representatives.length).toBe(1);
     })
 
-    it("report topic & reply and handle them as a representative", async() => {
+    it("report topic & reply and handle them as a representative", async () => {
         var unhandledReports: RepresentativeReport[] = await getUnhandledReports();
         expect(unhandledReports.length).toBe(0);
 

@@ -67,7 +67,7 @@ export class Login extends React.Component<LoginProps, LoginState> {
 
     private handleMnemonicChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.persist();
-        this.setState({ mnemonic: event.target.value });
+        this.setState({mnemonic: event.target.value});
     }
 
     private handleUsernameChange(event: React.ChangeEvent<HTMLInputElement>) {

@@ -1,14 +1,14 @@
 import {GTX} from "./Postchain";
-import {Election, RepresentativeAction, User, RepresentativeReport} from "../types";
-import { seedToKey } from "./CryptoService";
-import { uniqueId } from "../util/util";
+import {Election, RepresentativeAction, RepresentativeReport, User} from "../types";
+import {seedToKey} from "./CryptoService";
+import {uniqueId} from "../util/util";
 
 import * as BoomerangCache from "boomerang-cache";
 
-const representativesCache = BoomerangCache.create("rep-bucket", { storage: "session", encrypt: true });
+const representativesCache = BoomerangCache.create("rep-bucket", {storage: "session", encrypt: true});
 
 export function getCurrentRepresentativePeriod(): Promise<Election> {
-    return GTX.query("get_current_representative_period", { timestamp: Date.now() });
+    return GTX.query("get_current_representative_period", {timestamp: Date.now()});
 }
 
 export function clearRepresentativesCache() {
@@ -29,11 +29,11 @@ export function getRepresentatives(): Promise<string[]> {
 }
 
 export function getAllRepresentativeActionsPriorToTimestamp(timestamp: number, pageSize: number): Promise<RepresentativeAction[]> {
-    return GTX.query("get_all_representative_actions", { timestamp: timestamp, page_size: pageSize });
+    return GTX.query("get_all_representative_actions", {timestamp: timestamp, page_size: pageSize});
 }
 
 export function handleReport(user: User, reportId: string) {
-    const { privKey, pubKey } = seedToKey(user.seed);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
 
@@ -43,7 +43,7 @@ export function handleReport(user: User, reportId: string) {
 }
 
 export function suspendUser(user: User, userToBeSuspended: string) {
-    const { privKey, pubKey } = seedToKey(user.seed);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
 
@@ -62,7 +62,7 @@ export function reportReply(user: User, topicId: string, replyId: string) {
 }
 
 function report(user: User, text: string) {
-    const { privKey, pubKey } = seedToKey(user.seed);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
 

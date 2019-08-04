@@ -1,8 +1,8 @@
-import { UserMeta } from './../types';
+import {UserMeta} from './../types';
 import {User} from "../types";
 import * as BoomerangCache from "boomerang-cache";
 import {getRepresentatives} from "../blockchain/RepresentativesService";
-import { getUserMeta } from '../blockchain/UserService';
+import {getUserMeta} from '../blockchain/UserService';
 
 const LOCAL_CACHE = BoomerangCache.create('local-bucket', {storage: 'local', encrypt: true});
 const SESSION_CACHE = BoomerangCache.create('session-bucket', {storage: 'session', encrypt: true});
@@ -37,7 +37,7 @@ export function getCachedUserMeta(): Promise<UserMeta> {
 
     const user: User = getUser();
     if (user == null) {
-        return new Promise<UserMeta>(resolve =>  resolve(null));
+        return new Promise<UserMeta>(resolve => resolve(null));
     }
 
     return getUserMeta(user.name).then(meta => {

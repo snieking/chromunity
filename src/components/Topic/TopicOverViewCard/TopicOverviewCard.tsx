@@ -1,16 +1,16 @@
 import React from 'react';
-import { Link } from "react-router-dom";
-import { Topic, User } from '../../../types';
-import { Card, Typography, Badge, CardContent, CardActionArea, Chip } from '@material-ui/core';
-import { timeAgoReadable, stringToHexColor } from '../../../util/util';
-import { getUser, ifEmptyAvatarThenPlaceholder } from '../../../util/user-util';
-import { StarRate, StarBorder } from '@material-ui/icons';
+import {Link} from "react-router-dom";
+import {Topic, User} from '../../../types';
+import {Badge, Card, CardActionArea, CardContent, Chip, Typography} from '@material-ui/core';
+import {stringToHexColor, timeAgoReadable} from '../../../util/util';
+import {getUser, ifEmptyAvatarThenPlaceholder} from '../../../util/user-util';
+import {StarBorder, StarRate} from '@material-ui/icons';
 import './TopicOverviewCard.css';
 import '../Topic.css'
-import { getUserSettingsCached } from '../../../blockchain/UserService';
-import { Redirect } from 'react-router';
-import { getTopicStarRaters } from '../../../blockchain/TopicService';
-import { getTopicChannelBelongings } from '../../../blockchain/ChannelService';
+import {getUserSettingsCached} from '../../../blockchain/UserService';
+import {Redirect} from 'react-router';
+import {getTopicStarRaters} from '../../../blockchain/TopicService';
+import {getTopicChannelBelongings} from '../../../blockchain/ChannelService';
 
 interface Props {
     topic: Topic;
@@ -42,12 +42,12 @@ class TopicOverviewCard extends React.Component<Props, State> {
 
     render() {
         if (this.state.redirectToFullCard) {
-            return (<Redirect to={"/t/" + this.props.topic.id} />);
+            return (<Redirect to={"/t/" + this.props.topic.id}/>);
         } else {
             return (
                 <div className={this.props.topic.removed ? "removed" : ""}>
                     <Card raised={true} key={this.props.topic.id} className='topic-card'>
-                        <CardActionArea onClick={() => this.setState({ redirectToFullCard: true })}>
+                        <CardActionArea onClick={() => this.setState({redirectToFullCard: true})}>
                             {this.renderCardContent()}
                         </CardActionArea>
                     </Card>
@@ -57,10 +57,10 @@ class TopicOverviewCard extends React.Component<Props, State> {
     }
 
     componentDidMount() {
-        getTopicChannelBelongings(this.props.topic.id).then(channels => this.setState({ channels: channels }));
+        getTopicChannelBelongings(this.props.topic.id).then(channels => this.setState({channels: channels}));
         getUserSettingsCached(this.props.topic.author, 1440)
-            .then(settings => this.setState({ avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.topic.author) }));
-        
+            .then(settings => this.setState({avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.topic.author)}));
+
         const user: User = getUser();
         getTopicStarRaters(this.props.topic.id).then(usersWhoStarRated => this.setState({
             stars: usersWhoStarRated.length,
@@ -74,7 +74,7 @@ class TopicOverviewCard extends React.Component<Props, State> {
                 <Link
                     className={this.props.isRepresentative ? "rep-typography" : "pink-typography"}
                     to={"/u/" + this.props.topic.author}
-                    style={{ marginBottom: "18px"}}
+                    style={{marginBottom: "18px"}}
                 >
                     <Typography
                         gutterBottom
@@ -85,7 +85,8 @@ class TopicOverviewCard extends React.Component<Props, State> {
                         <span className="author-name">@{this.props.topic.author}</span>
                     </Typography>
                 </Link>
-                {this.state.avatar !== "" ? <img src={this.state.avatar} className="author-avatar" alt="Profile Avatar" /> : <div></div>}
+                {this.state.avatar !== "" ?
+                    <img src={this.state.avatar} className="author-avatar" alt="Profile Avatar"/> : <div></div>}
             </div>
         );
     }
@@ -125,19 +126,21 @@ class TopicOverviewCard extends React.Component<Props, State> {
                             color="primary"
                             badgeContent={this.state.stars}
                         >
-                            {this.state.ratedByMe ? <StarRate className="yellow-color"/> : <StarBorder className="purple-color"/>}
+                            {this.state.ratedByMe ? <StarRate className="yellow-color"/> :
+                                <StarBorder className="purple-color"/>}
                         </Badge>
                     </div>
                 </div>
                 {this.renderAuthor()}
                 <div className="topic-overview-details">
                     {this.renderTimeAgo(this.props.topic.last_modified)}
-                    <Typography variant="subtitle1" className='purple-typography' component="span" style={{ marginRight: "10px" }}>
+                    <Typography variant="subtitle1" className='purple-typography' component="span"
+                                style={{marginRight: "10px"}}>
                         {this.props.topic.title}
                     </Typography>
                     {this.renderTagChips()}
                 </div>
-            </CardContent >
+            </CardContent>
         );
     }
 

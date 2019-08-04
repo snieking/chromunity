@@ -9,7 +9,7 @@
     "@types/react": "16.8.24",
     "@types/react-dom": "16.8.5",
     "@types/react-router": "^5.0.2",
-    "@types/react-autosuggest": "^3.0.0",
+    "@types/react-select": "^3.0.0",
     "bip39": "3.0.2",
     "boomerang-cache": "1.2.0",
     "hdkey": "1.1.1",
@@ -21,6 +21,7 @@
     "react-markdown": "4.1.0",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
+    "react-select": "^3.0.4",
     "scrypt-async": "^2.0.1",
     "typescript": "3.5.3",
     "yarn": "^1.16.0"

@@ -16,14 +16,14 @@ class AvatarChanger extends React.Component<AvatarChangerProps, AvatarChangerSta
 
     constructor(props: AvatarChangerProps) {
         super(props);
-        this.state = { src: "" }
+        this.state = {src: ""}
 
         this.onCrop = this.onCrop.bind(this);
         this.onBeforeFileLoad = this.onBeforeFileLoad.bind(this);
     }
 
     onCrop(preview: string) {
-        this.setState({ src: preview })
+        this.setState({src: preview})
         this.props.updateFunction(preview);
     }
 

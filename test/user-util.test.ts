@@ -1,10 +1,20 @@
-import { setMnemonic, getMnemonic, setUser, getUser, isGod, setRepresentative, isRepresentative, godAlias, ifEmptyAvatarThenPlaceholder } from "../src/util/user-util";
-import { User } from "../src/types";
+import {
+    getMnemonic,
+    getUser,
+    godAlias,
+    ifEmptyAvatarThenPlaceholder,
+    isGod,
+    isRepresentative,
+    setMnemonic,
+    setRepresentative,
+    setUser
+} from "../src/util/user-util";
+import {User} from "../src/types";
 
 describe("user utilities tests", () => {
 
-    const admin: User = { name: "admin", seed: "abc123" };
-    const user: User = { name: "snieking", seed: "abc123" };
+    const admin: User = {name: "admin", seed: "abc123"};
+    const user: User = {name: "snieking", seed: "abc123"};
 
     it("mnemonic cached in localstorage encrypted", async () => {
         const mnemonic: string = "car boat airplane";

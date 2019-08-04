@@ -1,19 +1,19 @@
 import React from 'react';
-import { Link } from 'react-router-dom'
+import {Link} from 'react-router-dom'
 
-import { getUser } from '../../../util/user-util';
+import {getUser} from '../../../util/user-util';
 
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
+import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Home from '@material-ui/icons/Home';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import { ExitToApp, Gavel, LocationCity, Face, HowToVote, Settings, People, Report, RssFeed } from "@material-ui/icons";
+import {ExitToApp, Face, Gavel, HowToVote, LocationCity, People, Report, RssFeed, Settings} from "@material-ui/icons";
 
 import './HeaderNav.css';
-import { NotificationsButton } from "../../buttons/NotificationsButton";
-import { Button, MenuItem, Menu, ListItemIcon, Typography, Tooltip } from '@material-ui/core';
+import {NotificationsButton} from "../../buttons/NotificationsButton";
+import {Button, ListItemIcon, Menu, MenuItem, Tooltip, Typography} from '@material-ui/core';
 
 export interface HeaderNavProps {
 
@@ -47,12 +47,12 @@ export default function HeaderNav(props: HeaderNavProps) {
                 <div>
                     <Tooltip title="Notifications">
                         <Link to={"/notifications/" + user.name}>
-                            <NotificationsButton username={user.name} />
+                            <NotificationsButton username={user.name}/>
                         </Link>
                     </Tooltip>
                     <Tooltip title="Profile">
                         <Button aria-controls="profile-menu" aria-haspopup="true" onClick={handleProfileClick}>
-                            <AccountCircle className="nav-button" />
+                            <AccountCircle className="nav-button"/>
                         </Button>
                     </Tooltip>
                     <Menu
@@ -62,28 +62,28 @@ export default function HeaderNav(props: HeaderNavProps) {
                         open={Boolean(profileAnchorEl)}
                         onClose={handleProfileClose}
                     >
-                        <Link style={{ width: "100%"}} to={"/u/" + user.name}>
+                        <Link style={{width: "100%"}} to={"/u/" + user.name}>
                             <MenuItem onClick={handleProfileClose}>
                                 <ListItemIcon>
-                                    <AccountCircle className="menu-item-button" />
+                                    <AccountCircle className="menu-item-button"/>
                                 </ListItemIcon>
                                 <Typography className="menu-item-text">Profile</Typography>
                             </MenuItem>
                         </Link>
-                        <br />
-                        <Link style={{ width: "100%"}} to={"/user/settings"}>
+                        <br/>
+                        <Link style={{width: "100%"}} to={"/user/settings"}>
                             <MenuItem onClick={handleProfileClose}>
                                 <ListItemIcon>
-                                    <Settings className="menu-item-button" />
+                                    <Settings className="menu-item-button"/>
                                 </ListItemIcon>
                                 <Typography className="menu-item-text">Settings</Typography>
                             </MenuItem>
                         </Link>
-                        <br />
-                        <Link style={{ width: "100%"}} to="/user/logout">
+                        <br/>
+                        <Link style={{width: "100%"}} to="/user/logout">
                             <MenuItem onClick={handleProfileClose}>
                                 <ListItemIcon>
-                                    <ExitToApp className="menu-item-button" />
+                                    <ExitToApp className="menu-item-button"/>
                                 </ListItemIcon>
                                 <Typography className="menu-item-text">Logout</Typography>
                             </MenuItem>
@@ -96,7 +96,7 @@ export default function HeaderNav(props: HeaderNavProps) {
                 <Tooltip title="account">
                     <Link to="/user/login">
                         <IconButton>
-                            <AccountCircle className="nav-button" />
+                            <AccountCircle className="nav-button"/>
                         </IconButton>
                     </Link>
                 </Tooltip>
@@ -115,7 +115,7 @@ export default function HeaderNav(props: HeaderNavProps) {
                                 className={classes.menuButton}
                                 aria-label="Open drawer"
                             >
-                                <RssFeed className="nav-button" />
+                                <RssFeed className="nav-button"/>
                             </IconButton>
                         </Link>
                     </Tooltip>
@@ -126,11 +126,11 @@ export default function HeaderNav(props: HeaderNavProps) {
                                 className={classes.menuButton}
                                 aria-label="Open drawer"
                             >
-                                <People className="nav-button" />
+                                <People className="nav-button"/>
                             </IconButton>
                         </Link>
                     </Tooltip>
-                </div >
+                </div>
             )
         }
     }
@@ -146,14 +146,14 @@ export default function HeaderNav(props: HeaderNavProps) {
                                 className={classes.menuButton}
                                 aria-label="Open drawer"
                             >
-                                <Home className="nav-button" />
+                                <Home className="nav-button"/>
                             </IconButton>
                         </Link>
                     </Tooltip>
                     {renderFavoriteWalls()}
                     <Tooltip title="Governing">
                         <Button aria-controls="gov-menu" aria-haspopup="true" onClick={handleGovClick}>
-                            <LocationCity className="nav-button" />
+                            <LocationCity className="nav-button"/>
                         </Button>
                     </Tooltip>
                     <Menu
@@ -163,43 +163,43 @@ export default function HeaderNav(props: HeaderNavProps) {
                         open={Boolean(govAnchorEl)}
                         onClose={handleGovClose}
                     >
-                        <Link style={{ width: "100%" }} to="/gov/representatives">
+                        <Link style={{width: "100%"}} to="/gov/representatives">
                             <MenuItem onClick={handleGovClose}>
                                 <ListItemIcon>
-                                    <Face className="menu-item-button" />
+                                    <Face className="menu-item-button"/>
                                 </ListItemIcon>
                                 <Typography className="menu-item-text">Representatives</Typography>
                             </MenuItem>
                         </Link>
-                        <br />
-                        <Link style={{ width: "100%"}} to="/gov/election">
+                        <br/>
+                        <Link style={{width: "100%"}} to="/gov/election">
                             <MenuItem onClick={handleGovClose}>
                                 <ListItemIcon>
-                                    <HowToVote className="menu-item-button" />
+                                    <HowToVote className="menu-item-button"/>
                                 </ListItemIcon>
                                 <Typography className="menu-item-text">Election</Typography>
                             </MenuItem>
                         </Link>
-                        <br />
-                        <Link style={{ width: "100%"}} to="/gov/log">
+                        <br/>
+                        <Link style={{width: "100%"}} to="/gov/log">
                             <MenuItem onClick={handleGovClose}>
                                 <ListItemIcon>
-                                    <Gavel className="menu-item-button" />
+                                    <Gavel className="menu-item-button"/>
                                 </ListItemIcon>
                                 <Typography className="menu-item-text">Log</Typography>
                             </MenuItem>
                         </Link>
-                        <br />
-                        <Link style={{ width: "100%"}} to="/gov/reports">
+                        <br/>
+                        <Link style={{width: "100%"}} to="/gov/reports">
                             <MenuItem onClick={handleGovClose}>
                                 <ListItemIcon>
-                                    <Report className="menu-item-button" />
+                                    <Report className="menu-item-button"/>
                                 </ListItemIcon>
                                 <Typography className="menu-item-text">Reports</Typography>
                             </MenuItem>
                         </Link>
                     </Menu>
-                    <div className={classes.grow} />
+                    <div className={classes.grow}/>
                     <div className={classes.sectionDesktop}>
                         {profileSpecificNavigation()}
                     </div>

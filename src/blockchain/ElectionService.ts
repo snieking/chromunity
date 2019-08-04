@@ -1,10 +1,10 @@
-import { Election, User } from "../types";
-import { GTX } from "./Postchain";
-import { seedToKey } from "./CryptoService";
-import { sortByFrequency, uniqueId } from "../util/util";
+import {Election, User} from "../types";
+import {GTX} from "./Postchain";
+import {seedToKey} from "./CryptoService";
+import {sortByFrequency, uniqueId} from "../util/util";
 
 export function triggerElection(user: User, completionTimestamp: number) {
-    const { privKey, pubKey } = seedToKey(user.seed);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("trigger_election", user.name, uniqueId(), completionTimestamp);
@@ -18,7 +18,7 @@ export function getElectionVotes() {
 }
 
 export function completeElection(user: User, sortedCandidates: string[]) {
-    const { privKey, pubKey } = seedToKey(user.seed);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
 
@@ -29,7 +29,7 @@ export function completeElection(user: User, sortedCandidates: string[]) {
 }
 
 export function signUpForElection(user: User): Promise<any> {
-    const { privKey, pubKey } = seedToKey(user.seed);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("sign_up_for_election", user.name);
@@ -39,7 +39,7 @@ export function signUpForElection(user: User): Promise<any> {
 }
 
 export function voteForCandidate(user: User, candidate: string): Promise<any> {
-    const { privKey, pubKey } = seedToKey(user.seed);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation("vote_for_candidate", user.name, candidate);
@@ -49,7 +49,7 @@ export function voteForCandidate(user: User, candidate: string): Promise<any> {
 }
 
 export function getElectionVoteForUser(name: string): Promise<string> {
-    return GTX.query("get_user_vote_in_election", { name: name });
+    return GTX.query("get_user_vote_in_election", {name: name});
 }
 
 export function getElectionCandidates(): Promise<string[]> {
@@ -61,5 +61,5 @@ export function getUncompletedElection(): Promise<string> {
 }
 
 export function getNextElectionTimestamp(): Promise<Election> {
-    return GTX.query("get_next_election", { timestamp: Date.now() });
+    return GTX.query("get_next_election", {timestamp: Date.now()});
 }

@@ -1,23 +1,23 @@
 import * as React from 'react';
-import { Link } from "react-router-dom";
+import {Link} from "react-router-dom";
 
-import { Chip, Card, CardContent } from '@material-ui/core';
-import { getTrendingChannels } from '../../blockchain/ChannelService';
-import { stringToHexColor } from '../../util/util';
+import {Card, CardContent, Chip} from '@material-ui/core';
+import {getTrendingChannels} from '../../blockchain/ChannelService';
+import {stringToHexColor} from '../../util/util';
 
 type State = {
     channels: string[];
 };
 
-export class TrendingChannels extends React.Component<{}, State>{
+export class TrendingChannels extends React.Component<{}, State> {
 
     constructor(props: any) {
         super(props);
-        this.state = { channels: [] };
+        this.state = {channels: []};
     }
 
     componentDidMount() {
-        getTrendingChannels(7).then(channels => this.setState({ channels: channels }));
+        getTrendingChannels(7).then(channels => this.setState({channels: channels}));
     }
 
     render() {

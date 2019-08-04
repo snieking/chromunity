@@ -1,11 +1,11 @@
 .bottom-right-corner {
     position: fixed;
-    bottom:1px;
-    right:1px;
+    bottom: 1px;
+    right: 1px;
 }
 
 .new-topic-button {
-    color: #1E1A22 ;
+    color: #1E1A22;
 }
 
 .text-field {

@@ -1,17 +1,19 @@
-export const uniqueId = function() {
+export const uniqueId = function () {
     return Math.random().toString(36).substr(2, 16);
 };
 
 export function sortByFrequency(array: string[]): string[] {
     const frequency: any = {};
 
-    array.forEach(function(value) { frequency[value] = 0; });
+    array.forEach(function (value) {
+        frequency[value] = 0;
+    });
 
-    const uniques = array.filter(function(value) {
+    const uniques = array.filter(function (value) {
         return ++frequency[value] === 1;
     });
 
-    return uniques.sort(function(a, b) {
+    return uniques.sort(function (a, b) {
         return frequency[b] - frequency[a];
     });
 }
@@ -58,10 +60,10 @@ function hashCode(str: string): number {
 // Convert an int to hexadecimal with a max length
 // of six characters.
 function intToARGB(i: number): string {
-    var hex = ((i>>24)&0xFF).toString(16) +
-            ((i>>16)&0xFF).toString(16) +
-            ((i>>8)&0xFF).toString(16) +
-            (i&0xFF).toString(16);
+    var hex = ((i >> 24) & 0xFF).toString(16) +
+        ((i >> 16) & 0xFF).toString(16) +
+        ((i >> 8) & 0xFF).toString(16) +
+        (i & 0xFF).toString(16);
     // Sometimes the string returned will be too short so we 
     // add zeros to pad it out, which later get removed if
     // the length is greater than six.

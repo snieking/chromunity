@@ -2,16 +2,16 @@ import React from "react";
 
 import './Buttons.css';
 
-import { Dialog, Snackbar, Tooltip } from "@material-ui/core";
+import {Dialog, Snackbar, Tooltip} from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
 import IconButton from "@material-ui/core/IconButton";
-import { getUser, getCachedUserMeta } from "../../util/user-util";
-import { CustomSnackbarContentWrapper } from "../utils/CustomSnackbar";
-import { UserMeta } from "../../types";
-import { Edit } from "@material-ui/icons";
+import {getCachedUserMeta, getUser} from "../../util/user-util";
+import {CustomSnackbarContentWrapper} from "../utils/CustomSnackbar";
+import {UserMeta} from "../../types";
+import {Edit} from "@material-ui/icons";
 
 
 export interface EditMessageButtonProps {
@@ -39,7 +39,7 @@ export class EditMessageButton extends React.Component<EditMessageButtonProps, E
             replyStatusSuccessOpen: false,
             replyStatusErrorOpen: false,
             replySentStatus: "",
-            userMeta: { name: "", suspended_until: Date.now() + 10000, times_suspended: 0 }
+            userMeta: {name: "", suspended_until: Date.now() + 10000, times_suspended: 0}
         };
 
         this.toggleDialog = this.toggleDialog.bind(this);
@@ -48,17 +48,17 @@ export class EditMessageButton extends React.Component<EditMessageButtonProps, E
     }
 
     componentDidMount() {
-        getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
+        getCachedUserMeta().then(meta => this.setState({userMeta: meta}));
     }
 
     toggleDialog() {
-        this.setState(prevState => ({ dialogOpen: !prevState.dialogOpen }));
+        this.setState(prevState => ({dialogOpen: !prevState.dialogOpen}));
     }
 
     handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
         event.stopPropagation();
-        this.setState({ message: event.target.value });
+        this.setState({message: event.target.value});
     }
 
     createTopicButton() {
@@ -69,10 +69,10 @@ export class EditMessageButton extends React.Component<EditMessageButtonProps, E
         return (
             <div>
                 <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title"
-                    fullWidth={true} maxWidth={"sm"}>
+                        fullWidth={true} maxWidth={"sm"}>
                     <form onSubmit={() => this.props.submitFunction(this.state.message)}>
                         <DialogContent>
-                            <br />
+                            <br/>
                             <TextField
                                 autoFocus
                                 margin="dense"
@@ -131,23 +131,15 @@ export class EditMessageButton extends React.Component<EditMessageButtonProps, E
         )
     }
 
-    private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
-        if (reason === 'clickaway') {
-            return;
-        }
-
-        this.setState({ replyStatusSuccessOpen: false, replyStatusErrorOpen: false });
-    }
-
     render() {
         if (getUser() != null && this.state.userMeta.suspended_until < Date.now()) {
             return (
-                <div style={{ display: "inline-block" }}>
+                <div style={{display: "inline-block"}}>
                     <Tooltip title="Edit">
                         <IconButton aria-label="Edit"
-                            onClick={() => this.toggleDialog()}
+                                    onClick={() => this.toggleDialog()}
                         >
-                            <Edit className="purple-color" />
+                            <Edit className="purple-color"/>
                         </IconButton>
                     </Tooltip>
                     {this.newTopicDialog()}
@@ -156,5 +148,13 @@ export class EditMessageButton extends React.Component<EditMessageButtonProps, E
         } else {
             return null;
         }
+    }
+
+    private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        this.setState({replyStatusSuccessOpen: false, replyStatusErrorOpen: false});
     }
 }

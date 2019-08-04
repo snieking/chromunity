@@ -1,12 +1,12 @@
-import { timeAgoReadable, sortByFrequency, needsToBeSliced, stringToHexColor } from "../src/util/util";
-import { getTags } from "../src/util/text-parsing";
+import {needsToBeSliced, sortByFrequency, stringToHexColor, timeAgoReadable} from "../src/util/util";
+import {getTags} from "../src/util/text-parsing";
 
 jest.setTimeout(30000);
 
 describe("Sorting by frequently tests", () => {
 
     it("list of strings", async () => {
-        const fruits: string[] = [ "apple", "orange", "orange", "banana" ];
+        const fruits: string[] = ["apple", "orange", "orange", "banana"];
         const sortedFruits: string[] = sortByFrequency(fruits);
 
         expect(sortedFruits.length).toBe(3);
@@ -84,7 +84,7 @@ describe("message should be sliced tests", () => {
 });
 
 describe("string to hex color", () => {
-    
+
     it("hex starts with '#'", async () => {
         const hex: string = stringToHexColor("hello");
         expect(hex.startsWith("#")).toBe(true);

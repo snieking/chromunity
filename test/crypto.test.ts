@@ -1,4 +1,4 @@
-import { generateRandomMnemonic } from "../src/blockchain/CryptoService";
+import {generateRandomMnemonic} from "../src/blockchain/CryptoService";
 
 describe("crypto tests", () => {
 

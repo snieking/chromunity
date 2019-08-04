@@ -1,8 +1,8 @@
 import React from 'react';
-import { Link } from "react-router-dom";
-import { Card, CardMedia, CardContent, Typography, Grid } from '@material-ui/core';
-import { getUserSettingsCached } from '../../../../blockchain/UserService';
-import { ifEmptyAvatarThenPlaceholder } from '../../../../util/user-util';
+import {Link} from "react-router-dom";
+import {Card, CardContent, CardMedia, Grid, Typography} from '@material-ui/core';
+import {getUserSettingsCached} from '../../../../blockchain/UserService';
+import {ifEmptyAvatarThenPlaceholder} from '../../../../util/user-util';
 
 export interface RepresentativeCardProps {
     name: string
@@ -16,7 +16,7 @@ class RepresentativeCard extends React.Component<RepresentativeCardProps, Repres
 
     constructor(props: RepresentativeCardProps) {
         super(props);
-        this.state = { avatar: "" };
+        this.state = {avatar: ""};
     }
 
     render() {
@@ -46,7 +46,7 @@ class RepresentativeCard extends React.Component<RepresentativeCardProps, Repres
 
     componentDidMount() {
         getUserSettingsCached(this.props.name, 1440)
-            .then(settings => this.setState({ avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.name) }));
+            .then(settings => this.setState({avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.name)}));
     }
 }
 

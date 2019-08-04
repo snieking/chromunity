@@ -1,20 +1,20 @@
-import React, { FormEvent } from "react";
+import React, {FormEvent} from "react";
 
 import './Buttons.css';
 import CreatableSelect from 'react-select/creatable';
-import { ValueType } from 'react-select/src/types';
-import { Dialog, Snackbar, Badge } from "@material-ui/core";
+import {ValueType} from 'react-select/src/types';
+import {Badge, Dialog, Snackbar} from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
-import { getUser, getCachedUserMeta } from "../../util/user-util";
+import {getCachedUserMeta, getUser} from "../../util/user-util";
 import IconButton from "@material-ui/core/IconButton";
-import { Forum } from "@material-ui/icons";
-import { CustomSnackbarContentWrapper } from "../utils/CustomSnackbar";
-import { createTopic } from "../../blockchain/TopicService";
-import { UserMeta } from "../../types";
-import { getTrendingChannels } from "../../blockchain/ChannelService";
+import {Forum} from "@material-ui/icons";
+import {CustomSnackbarContentWrapper} from "../utils/CustomSnackbar";
+import {createTopic} from "../../blockchain/TopicService";
+import {UserMeta} from "../../types";
+import {getTrendingChannels} from "../../blockchain/ChannelService";
 
 interface OptionType {
     label: string;
@@ -50,13 +50,13 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
         this.state = {
             topicTitle: "",
             topicChannel: this.props.channel,
-            channel: this.props.channel !== "" ? { value: this.props.channel, label: this.props.channel } : null,
+            channel: this.props.channel !== "" ? {value: this.props.channel, label: this.props.channel} : null,
             topicMessage: "",
             dialogOpen: false,
             newTopicSuccessOpen: false,
             newTopicErrorOpen: false,
             newTopicStatusMessage: "",
-            userMeta: { name: "", suspended_until: Date.now() + 10000, times_suspended: 0 },
+            userMeta: {name: "", suspended_until: Date.now() + 10000, times_suspended: 0},
             suggestions: []
         };
 
@@ -70,33 +70,33 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
     }
 
     componentDidMount() {
-        getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
+        getCachedUserMeta().then(meta => this.setState({userMeta: meta}));
         getTrendingChannels(7).then(channels => this.setState({
-            suggestions: channels.map(channel => ({ value: channel, label: channel } as OptionType))
-        })
+                suggestions: channels.map(channel => ({value: channel, label: channel} as OptionType))
+            })
         );
     }
 
     toggleNewTopicDialog() {
-        this.setState(prevState => ({ dialogOpen: !prevState.dialogOpen }));
+        this.setState(prevState => ({dialogOpen: !prevState.dialogOpen}));
     }
 
     handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
         event.stopPropagation();
-        this.setState({ topicMessage: event.target.value });
+        this.setState({topicMessage: event.target.value});
     }
 
     handleChannelChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
         event.stopPropagation();
-        this.setState({ topicChannel: event.target.value });
+        this.setState({topicChannel: event.target.value});
     }
 
     handleDialogTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
         event.stopPropagation();
-        this.setState({ topicTitle: event.target.value });
+        this.setState({topicTitle: event.target.value});
     }
 
     createNewTopic(event: FormEvent<HTMLFormElement>) {
@@ -105,21 +105,30 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
         const topicChannel: string = (this.state.channel as OptionType).value;
 
         if (!/^[a-zA-Z0-9\s]+$/.test(topicTitle)) {
-            this.setState({ newTopicStatusMessage: "Title may only contain a-z, A-Z & 0-9 characters and whitespaces", newTopicErrorOpen: true });
+            this.setState({
+                newTopicStatusMessage: "Title may only contain a-z, A-Z & 0-9 characters and whitespaces",
+                newTopicErrorOpen: true
+            });
         } else if (topicTitle.length > maxTitleLength) {
-            this.setState({ newTopicStatusMessage: "Title is too long", newTopicErrorOpen: true });
+            this.setState({newTopicStatusMessage: "Title is too long", newTopicErrorOpen: true});
         } else if (!/^[a-zA-Z0-9]+$/.test(topicChannel)) {
-            this.setState({ newTopicStatusMessage: "Channel may only contain a-z, A-Z & 0-9 characters", newTopicErrorOpen: true });
+            this.setState({
+                newTopicStatusMessage: "Channel may only contain a-z, A-Z & 0-9 characters",
+                newTopicErrorOpen: true
+            });
         } else if (topicChannel.length > maxChannelLength) {
-            this.setState({ newTopicStatusMessage: "Channel is too long", newTopicErrorOpen: true });
+            this.setState({newTopicStatusMessage: "Channel is too long", newTopicErrorOpen: true});
         } else {
             const topicMessage = this.state.topicMessage;
-            this.setState({ topicTitle: "", topicMessage: "" });
+            this.setState({topicTitle: "", topicMessage: ""});
 
             createTopic(getUser(), topicChannel, topicTitle, topicMessage).then(() => {
-                this.setState({ newTopicStatusMessage: "Topic created", newTopicSuccessOpen: true });
+                this.setState({newTopicStatusMessage: "Topic created", newTopicSuccessOpen: true});
                 this.props.updateFunction();
-            }).catch(() => this.setState({ newTopicStatusMessage: "Error while creating topic", newTopicErrorOpen: true }));
+            }).catch(() => this.setState({
+                newTopicStatusMessage: "Error while creating topic",
+                newTopicErrorOpen: true
+            }));
             this.toggleNewTopicDialog();
         }
     }
@@ -129,10 +138,16 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
             return (
                 <div className="bottom-right-corner rounded-pink">
                     <IconButton aria-label="New topic"
-                        onClick={() => this.toggleNewTopicDialog()}
-                        style={{ backgroundColor: "#FFAFC1", marginRight: "5px", marginBottom: "5px", height: "64px", width: "64px" }}
+                                onClick={() => this.toggleNewTopicDialog()}
+                                style={{
+                                    backgroundColor: "#FFAFC1",
+                                    marginRight: "5px",
+                                    marginBottom: "5px",
+                                    height: "64px",
+                                    width: "64px"
+                                }}
                     >
-                        <Forum fontSize="inherit" className="new-topic-button" />
+                        <Forum fontSize="inherit" className="new-topic-button"/>
                     </IconButton>
                 </div>
             )
@@ -141,7 +156,7 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
 
     handleChangeSingle(value: ValueType<OptionType>) {
         if (value != null) {
-            this.setState({ channel: value });
+            this.setState({channel: value});
         }
     }
 
@@ -149,10 +164,10 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
         return (
             <div>
                 <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title"
-                    fullWidth={true} maxWidth={"sm"}>
+                        fullWidth={true} maxWidth={"sm"}>
                     <form onSubmit={this.createNewTopic}>
                         <DialogContent>
-                            <br />
+                            <br/>
                             <CreatableSelect
                                 placeholder={"Select trending channel or enter a custom one..."}
                                 isSearchable={true}
@@ -160,7 +175,7 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                                 value={this.state.channel}
                                 onChange={this.handleChangeSingle}
                             />
-                            <br />
+                            <br/>
                             <Badge
                                 className="input-field-badge"
                                 color="secondary"
@@ -237,14 +252,6 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
         )
     }
 
-    private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
-        if (reason === 'clickaway') {
-            return;
-        }
-
-        this.setState({ newTopicSuccessOpen: false, newTopicErrorOpen: false });
-    }
-
     render() {
         return (
             <div>
@@ -252,5 +259,13 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                 {this.newThreadDialog()}
             </div>
         )
+    }
+
+    private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        this.setState({newTopicSuccessOpen: false, newTopicErrorOpen: false});
     }
 }

@@ -1,14 +1,14 @@
-import { GTX } from "./Postchain";
-import { seedToKey } from "./CryptoService";
-import { uniqueId } from "../util/util";
+import {GTX} from "./Postchain";
+import {seedToKey} from "./CryptoService";
+import {uniqueId} from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
-import { User, Topic, TopicReply } from "../types";
-import { sendNotifications } from "./NotificationService";
+import {Topic, TopicReply, User} from "../types";
+import {sendNotifications} from "./NotificationService";
 
-const topicsCache = BoomerangCache.create("topic-bucket", { storage: "session", encrypt: false });
+const topicsCache = BoomerangCache.create("topic-bucket", {storage: "session", encrypt: false});
 
 export function createTopic(user: User, channelName: string, title: string, message: string) {
-    const { privKey, pubKey } = seedToKey(user.seed);
+    const {privKey, pubKey} = seedToKey(user.seed);
     const topicId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
@@ -32,7 +32,7 @@ export function modifyReply(user: User, replyId: string, updatedText: string) {
 }
 
 function modifyText(user: User, id: string, updatedText: string, rellOperation: string) {
-    const { privKey, pubKey } = seedToKey(user.seed);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation(rellOperation, id, user.name, updatedText);
@@ -42,7 +42,7 @@ function modifyText(user: User, id: string, updatedText: string, rellOperation: 
 }
 
 export function createTopicReply(user: User, topicId: string, message: string) {
-    const { privKey, pubKey } = seedToKey(user.seed);
+    const {privKey, pubKey} = seedToKey(user.seed);
     const replyId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
@@ -53,7 +53,7 @@ export function createTopicReply(user: User, topicId: string, message: string) {
 }
 
 export function createTopicSubReply(user: User, topicId: string, replyId: string, message: string) {
-    const { privKey, pubKey } = seedToKey(user.seed);
+    const {privKey, pubKey} = seedToKey(user.seed);
     const subReplyId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
@@ -104,19 +104,27 @@ export function getTopicRepliesAfterTimestamp(topicId: string, timestamp: number
 }
 
 function getTopicRepliesForTimestamp(topicId: string, timestamp: number, pageSize: number, rellOperation: string) {
-    return GTX.query(rellOperation, { topic_id: topicId, timestamp: timestamp, page_size: pageSize });
+    return GTX.query(rellOperation, {topic_id: topicId, timestamp: timestamp, page_size: pageSize});
 }
 
 export function getTopicRepliesByUserPriorToTimestamp(name: string, timestamp: number, pageSize: number): Promise<TopicReply[]> {
-    return GTX.query("get_topic_replies_by_user_prior_to_timestamp", { name: name, timestamp: timestamp, page_size: pageSize });
+    return GTX.query("get_topic_replies_by_user_prior_to_timestamp", {
+        name: name,
+        timestamp: timestamp,
+        page_size: pageSize
+    });
 }
 
 export function getTopicSubReplies(replyId: string): Promise<TopicReply[]> {
-    return GTX.query("get_sub_replies", { parent_reply_id: replyId });
+    return GTX.query("get_sub_replies", {parent_reply_id: replyId});
 }
 
 export function getTopicsByUserPriorToTimestamp(username: string, timestamp: number, pageSize: number): Promise<Topic[]> {
-    return GTX.query("get_topics_by_user_id_prior_to_timestamp", { name: username, timestamp: timestamp, page_size: pageSize })
+    return GTX.query("get_topics_by_user_id_prior_to_timestamp", {
+        name: username,
+        timestamp: timestamp,
+        page_size: pageSize
+    })
         .then((topics: Topic[]) => {
             topics.forEach(topic => topicsCache.set(topic.id, topic));
             return topics;
@@ -124,7 +132,11 @@ export function getTopicsByUserPriorToTimestamp(username: string, timestamp: num
 }
 
 export function getTopicsByChannelPriorToTimestamp(channelName: string, timestamp: number, pageSize: number): Promise<Topic[]> {
-    return GTX.query("get_topics_by_channel_prior_to_timestamp", { name: channelName.toLocaleLowerCase(), timestamp: timestamp, page_size: pageSize })
+    return GTX.query("get_topics_by_channel_prior_to_timestamp", {
+        name: channelName.toLocaleLowerCase(),
+        timestamp: timestamp,
+        page_size: pageSize
+    })
         .then((topics: Topic[]) => {
             topics.forEach(topic => topicsCache.set(topic.id, topic));
             return topics;
@@ -132,7 +144,10 @@ export function getTopicsByChannelPriorToTimestamp(channelName: string, timestam
 }
 
 export function getTopicsByChannelAfterTimestamp(channelName: string, timestamp: number): Promise<Topic[]> {
-    return GTX.query("get_topics_by_channel_after_timestamp", { name: channelName.toLocaleLowerCase(), timestamp: timestamp })
+    return GTX.query("get_topics_by_channel_after_timestamp", {
+        name: channelName.toLocaleLowerCase(),
+        timestamp: timestamp
+    })
         .then((topics: Topic[]) => {
             topics.forEach(topic => topicsCache.set(topic.id, topic));
             return topics;
@@ -140,7 +155,7 @@ export function getTopicsByChannelAfterTimestamp(channelName: string, timestamp:
 }
 
 export function countTopicsInChannel(channelName: string): Promise<number> {
-    return GTX.query("count_topics_by_channel", { name: channelName.toLocaleLowerCase() });
+    return GTX.query("count_topics_by_channel", {name: channelName.toLocaleLowerCase()});
 }
 
 export function giveTopicStarRating(user: User, topicId: string) {
@@ -152,7 +167,7 @@ export function removeTopicStarRating(user: User, topicId: string) {
 }
 
 export function getTopicStarRaters(topicId: string): Promise<string[]> {
-    return GTX.query("get_star_rating_for_topic", { id: topicId });
+    return GTX.query("get_star_rating_for_topic", {id: topicId});
 }
 
 export function giveReplyStarRating(user: User, replyId: string) {
@@ -172,7 +187,7 @@ export function unsubscribeFromTopic(user: User, id: string) {
 }
 
 function modifyRatingAndSubscription(user: User, id: string, rellOperation: string) {
-    const { privKey, pubKey } = seedToKey(user.seed);
+    const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     tx.addOperation(rellOperation, user.name, id);
@@ -182,11 +197,11 @@ function modifyRatingAndSubscription(user: User, id: string, rellOperation: stri
 }
 
 export function getReplyStarRaters(topicId: string): Promise<string[]> {
-    return GTX.query("get_star_rating_for_reply", { id: topicId });
+    return GTX.query("get_star_rating_for_reply", {id: topicId});
 }
 
 export function getTopicSubscribers(topicId: string): Promise<string[]> {
-    return GTX.query("get_subscribers_for_topic", { id: topicId });
+    return GTX.query("get_subscribers_for_topic", {id: topicId});
 }
 
 export function getTopicById(id: string): Promise<Topic> {
@@ -196,7 +211,7 @@ export function getTopicById(id: string): Promise<Topic> {
         return new Promise<Topic>(resolve => resolve(cachedTopic));
     }
 
-    return GTX.query("get_topic_by_id", { id: id })
+    return GTX.query("get_topic_by_id", {id: id})
         .then((topic: Topic) => {
             topicsCache.set(id, topic, 300);
             return topic;
@@ -212,7 +227,7 @@ export function getTopicsAfterTimestamp(timestamp: number, pageSize: number): Pr
 }
 
 function getTopicsForTimestamp(timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
-    return GTX.query(rellOperation, { timestamp: timestamp, page_size: pageSize })
+    return GTX.query(rellOperation, {timestamp: timestamp, page_size: pageSize})
         .then((topics: Topic[]) => {
             topics.forEach(topic => topicsCache.set(topic.id, topic));
             return topics;
@@ -228,7 +243,7 @@ export function getTopicsFromFollowsPriorToTimestamp(user: User, timestamp: numb
 }
 
 function getTopicsFromFollowsForTimestamp(user: User, timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
-    return GTX.query(rellOperation, { name: user.name, timestamp: timestamp, page_size: pageSize });
+    return GTX.query(rellOperation, {name: user.name, timestamp: timestamp, page_size: pageSize});
 }
 
 export function countTopicsByUser(name: string) {
@@ -248,12 +263,16 @@ export function countReplyStarRatingForUser(name: string) {
 }
 
 function countByUser(name: string, rellOperation: string): Promise<number> {
-    return GTX.query(rellOperation, { name: name });
+    return GTX.query(rellOperation, {name: name});
 }
 
 export function getTopicsFromFollowedChannelsPriorToTimestamp(user: User, timestamp: number, pageSize: number): Promise<Topic[]> {
-    return GTX.query("get_topics_by_followed_channels_prior_to_timestamp", { username: user.name, timestamp: timestamp, page_size: pageSize })
-        .then((topics: Topic[]) => { 
+    return GTX.query("get_topics_by_followed_channels_prior_to_timestamp", {
+        username: user.name,
+        timestamp: timestamp,
+        page_size: pageSize
+    })
+        .then((topics: Topic[]) => {
             var seen: Set<string> = new Set<string>();
             return topics.filter(item => {
                 let k = item.id;
@@ -263,7 +282,7 @@ export function getTopicsFromFollowedChannelsPriorToTimestamp(user: User, timest
 }
 
 export function getAllTopicsByPopularityAfterTimestamp(timestamp: number, pageSize: number): Promise<Topic[]> {
-    return GTX.query("get_all_topics_by_stars_since_timestamp", { timestamp: timestamp, page_size: pageSize });
+    return GTX.query("get_all_topics_by_stars_since_timestamp", {timestamp: timestamp, page_size: pageSize});
 }
 
 export function getTopicsByFollowsSortedByPopularityAfterTimestamp(name: string, timestamp: number, pageSize: number): Promise<Topic[]> {
@@ -279,5 +298,5 @@ export function getTopicsByChannelSortedByPopularityAfterTimestamp(name: string,
 }
 
 function getTopicsByPopularityAfterTimestamp(name: string, timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
-    return GTX.query(rellOperation, { name: name, timestamp: timestamp, page_size: pageSize });
+    return GTX.query(rellOperation, {name: name, timestamp: timestamp, page_size: pageSize});
 }

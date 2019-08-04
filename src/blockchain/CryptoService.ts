@@ -9,9 +9,9 @@ export function seedFromMnemonic(mnemonic: string, password: string) {
     return bip39.mnemonicToSeedSync(mnemonic, password).toString("hex");
 }
 
-export function seedToKey(seed: string): {privKey: Buffer, pubKey: Buffer} {
+export function seedToKey(seed: string): { privKey: Buffer, pubKey: Buffer } {
     const node = hdkey.fromMasterSeed(toBuffer(seed));
-    return { privKey: node.privateKey, pubKey: node.publicKey };
+    return {privKey: node.privateKey, pubKey: node.publicKey};
 }
 
 function toBuffer(keyAsHex: string): Buffer {

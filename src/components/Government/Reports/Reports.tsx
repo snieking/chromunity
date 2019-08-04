@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { RepresentativeReport } from "../../../types";
-import { Container, LinearProgress } from '@material-ui/core';
-import { getUnhandledReports } from '../../../blockchain/RepresentativesService';
+import {RepresentativeReport} from "../../../types";
+import {Container, LinearProgress} from '@material-ui/core';
+import {getUnhandledReports} from '../../../blockchain/RepresentativesService';
 import ReportCard from './ReportCard';
 import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
 
@@ -10,24 +10,24 @@ type State = {
     isLoading: boolean;
 };
 
-export class Reports extends React.Component<{}, State>{
+export class Reports extends React.Component<{}, State> {
 
     constructor(props: any) {
         super(props);
-        this.state = { reports: [], isLoading: true }
+        this.state = {reports: [], isLoading: true}
     }
 
     componentDidMount() {
         getUnhandledReports()
-            .then(reports => this.setState({ reports: reports, isLoading: false }))
-            .catch(() => this.setState({ isLoading: false }));
+            .then(reports => this.setState({reports: reports, isLoading: false}))
+            .catch(() => this.setState({isLoading: false}));
     }
 
     render() {
         return (
             <Container>
-                <ChromiaPageHeader text="Reports" />
-                {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
+                <ChromiaPageHeader text="Reports"/>
+                {this.state.isLoading ? <LinearProgress variant="query"/> : <div></div>}
                 {this.state.reports.map(report => <ReportCard key={report.id} report={report}/>)}
             </Container>
         );

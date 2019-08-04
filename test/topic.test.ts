@@ -1,19 +1,35 @@
-import { getANumber } from './helper';
+import {getANumber} from './helper';
 import * as bip39 from 'bip39';
-import { User, Topic, TopicReply } from '../src/types';
-import { register, login } from '../src/blockchain/UserService';
-import { createTopic, getTopicsByUserPriorToTimestamp, giveTopicStarRating, 
-    getTopicStarRaters, removeTopicStarRating, getTopicsAfterTimestamp, 
-    getTopicsPriorToTimestamp, getTopicById, createTopicReply, 
-    getTopicRepliesPriorToTimestamp, giveReplyStarRating, getReplyStarRaters, 
-    removeReplyStarRating, subscribeToTopic, getTopicSubscribers, 
-    unsubscribeFromTopic, createTopicSubReply, getTopicSubReplies, 
-    getTopicRepliesByUserPriorToTimestamp, modifyTopic, modifyReply, 
-    countTopicsByUser, countRepliesByUser, countTopicStarRatingForUser, 
-    countReplyStarRatingForUser, getAllTopicsByPopularityAfterTimestamp 
+import {Topic, TopicReply, User} from '../src/types';
+import {login, register} from '../src/blockchain/UserService';
+import {
+    countRepliesByUser,
+    countReplyStarRatingForUser,
+    countTopicsByUser,
+    countTopicStarRatingForUser,
+    createTopic,
+    createTopicReply,
+    createTopicSubReply,
+    getAllTopicsByPopularityAfterTimestamp,
+    getReplyStarRaters,
+    getTopicById,
+    getTopicRepliesByUserPriorToTimestamp,
+    getTopicRepliesPriorToTimestamp,
+    getTopicsAfterTimestamp,
+    getTopicsByUserPriorToTimestamp,
+    getTopicsPriorToTimestamp,
+    getTopicStarRaters,
+    getTopicSubReplies,
+    getTopicSubscribers,
+    giveReplyStarRating,
+    giveTopicStarRating,
+    modifyReply,
+    modifyTopic,
+    removeReplyStarRating,
+    removeTopicStarRating,
+    subscribeToTopic,
+    unsubscribeFromTopic
 } from '../src/blockchain/TopicService';
-import { async } from 'q';
-import { number } from 'prop-types';
 
 jest.setTimeout(30000);
 
@@ -63,9 +79,9 @@ describe("topic tests", () => {
         topic = topics[0];
     });
 
-    it("reply to topic and reply to a reply", async() => {
+    it("reply to topic and reply to a reply", async () => {
         await createTopicReply(userLoggedIn, topic.id, "I completely agree!");
-        
+
         const replies: TopicReply[] = await getTopicRepliesPriorToTimestamp(topic.id, Date.now(), 10);
         expect(replies.length).toBe(1);
         const reply: TopicReply = replies[0];
@@ -93,7 +109,7 @@ describe("topic tests", () => {
         expect(subSubReplies.length).toBe(1);
     });
 
-    it("reply to topic and update reply", async() => {
+    it("reply to topic and update reply", async () => {
         await createTopicReply(userLoggedIn, topic.id, "This message should be modified!");
         const replies: TopicReply[] = await getTopicRepliesPriorToTimestamp(topic.id, Date.now(), 10);
         expect(replies.length).toBeGreaterThanOrEqual(1);
@@ -124,7 +140,7 @@ describe("topic tests", () => {
         await subscribeToTopic(secondLoggedInUser, topic.id);
         var subscribers: string[] = await getTopicSubscribers(topic.id);
         expect(subscribers.length).toBe(2);
-        
+
         await unsubscribeFromTopic(secondLoggedInUser, topic.id);
         subscribers = await getTopicSubscribers(topic.id);
         expect(subscribers.length).toBe(1);
@@ -151,12 +167,12 @@ describe("topic tests", () => {
         expect(topic.message).toBe(fetchedTopic.message);
     });
 
-    it("get replies by user", async() => {
+    it("get replies by user", async () => {
         const replies: TopicReply[] = await getTopicRepliesByUserPriorToTimestamp(userLoggedIn.name, Date.now(), 10);
         expect(replies.length).toBeGreaterThanOrEqual(1);
     });
 
-    it("create and mofiy topic", async() => {
+    it("create and mofiy topic", async () => {
         const title: string = "Rell Assistance";
         const message: string = "Post your rell questions here to receive help from the community.";
         await createTopic(userLoggedIn, "rell", title, message);
@@ -166,7 +182,7 @@ describe("topic tests", () => {
         await modifyTopic(userLoggedIn, topics[0].id, "Post your rell questions here to receive help from the awesome community.")
     });
 
-    it("count posts", async() => {
+    it("count posts", async () => {
         await createTopic(userLoggedIn, "rell", "Why Rell?", "Could someone clarify for me some benefits of using Rell?");
         const topics: Topic[] = await getTopicsByUserPriorToTimestamp(userLoggedIn.name, Date.now(), 10);
         expect(topics.length).toBeGreaterThan(0);
@@ -180,7 +196,7 @@ describe("topic tests", () => {
         expect(countOfReplies).toBeGreaterThan(0);
     });
 
-    it("count topic and reply stars", async() => {
+    it("count topic and reply stars", async () => {
         const topicStars: number = await countTopicStarRatingForUser(userLoggedIn.name);
         const replyStars: number = await countReplyStarRatingForUser(userLoggedIn.name);
 
@@ -188,7 +204,7 @@ describe("topic tests", () => {
         expect(replyStars).toBe(1);
     });
 
-    it("get all topics by popularity", async() => {
+    it("get all topics by popularity", async () => {
         const topics: Topic[] = await getAllTopicsByPopularityAfterTimestamp(0, 10);
         expect(topics.length).toBeGreaterThanOrEqual(1);
     });

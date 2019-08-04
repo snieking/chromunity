@@ -1,9 +1,23 @@
 import * as bip39 from "bip39";
-import { register, login } from "../src/blockchain/UserService";
-import { User, Topic } from "../src/types";
-import { getTrendingChannels, followChannel, unfollowChannel, getFollowedChannels, getTopicChannelBelongings, countChannelFollowers } from "../src/blockchain/ChannelService";
-import { getANumber } from "./helper";
-import { getTopicsByChannelPriorToTimestamp, createTopic, getTopicsFromFollowedChannelsPriorToTimestamp, getTopicsByChannelAfterTimestamp, countTopicsInChannel, getTopicsByChannelSortedByPopularityAfterTimestamp } from "../src/blockchain/TopicService";
+import {login, register} from "../src/blockchain/UserService";
+import {Topic, User} from "../src/types";
+import {
+    countChannelFollowers,
+    followChannel,
+    getFollowedChannels,
+    getTopicChannelBelongings,
+    getTrendingChannels,
+    unfollowChannel
+} from "../src/blockchain/ChannelService";
+import {getANumber} from "./helper";
+import {
+    countTopicsInChannel,
+    createTopic,
+    getTopicsByChannelAfterTimestamp,
+    getTopicsByChannelPriorToTimestamp,
+    getTopicsByChannelSortedByPopularityAfterTimestamp,
+    getTopicsFromFollowedChannelsPriorToTimestamp
+} from "../src/blockchain/TopicService";
 
 jest.setTimeout(60000);
 

@@ -1,10 +1,21 @@
-import { getANumber } from "./helper";
+import {getANumber} from "./helper";
 
 import * as bip39 from "bip39";
-import { register, login } from "../src/blockchain/UserService";
-import { User, Topic } from "../src/types";
-import { createFollowing, countUserFollowers, countUserFollowings, amIAFollowerOf, removeFollowing } from "../src/blockchain/FollowingService";
-import { createTopic, getTopicsFromFollowsPriorToTimestamp, getTopicsFromFollowsAfterTimestamp, getTopicsByFollowsSortedByPopularityAfterTimestamp } from "../src/blockchain/TopicService";
+import {login, register} from "../src/blockchain/UserService";
+import {Topic, User} from "../src/types";
+import {
+    amIAFollowerOf,
+    countUserFollowers,
+    countUserFollowings,
+    createFollowing,
+    removeFollowing
+} from "../src/blockchain/FollowingService";
+import {
+    createTopic,
+    getTopicsByFollowsSortedByPopularityAfterTimestamp,
+    getTopicsFromFollowsAfterTimestamp,
+    getTopicsFromFollowsPriorToTimestamp
+} from "../src/blockchain/TopicService";
 
 jest.setTimeout(30000);
 
@@ -48,7 +59,7 @@ describe("following tests", () => {
         const title: string = "Message to my followers";
         const message: string = "This message is perhaps only of interest to my followers";
         await createTopic(loggedInUser2, "FollowTests", title, message);
-        
+
         const followingsTopics: Topic[] = await getTopicsFromFollowsPriorToTimestamp(loggedInUser, Date.now(), 10);
         expect(followingsTopics.length).toBe(1);
 

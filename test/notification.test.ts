@@ -1,9 +1,16 @@
-import { User, UserNotification, Topic } from '../src/types';
-import { getANumber } from './helper';
+import {Topic, User, UserNotification} from '../src/types';
+import {getANumber} from './helper';
 
 import * as bip39 from "bip39";
-import { register, login } from '../src/blockchain/UserService';
-import { sendNotifications, countUnreadUserNotifications, markNotificationsRead, getUserNotificationsPriorToTimestamp, sendNotificationWithDeterministicId, removeNotificationsForId } from '../src/blockchain/NotificationService';
+import {login, register} from '../src/blockchain/UserService';
+import {
+    countUnreadUserNotifications,
+    getUserNotificationsPriorToTimestamp,
+    markNotificationsRead,
+    removeNotificationsForId,
+    sendNotifications,
+    sendNotificationWithDeterministicId
+} from '../src/blockchain/NotificationService';
 
 jest.setTimeout(30000);
 
@@ -60,7 +67,7 @@ describe("notification tests", () => {
         expect(notifications.length).toBe(1);
     });
 
-    it("create & remove deterministic id notification", async() => {
+    it("create & remove deterministic id notification", async () => {
         const id: string = "1kj103k12";
         await sendNotificationWithDeterministicId(loggedInUser, id, "Test", "", [secondLoggedInUser.name]);
 

@@ -1,10 +1,17 @@
-import { UserSettings } from './../src/types';
-import { register, login, getUserSettings, updateUserSettings, isRegistered, getUserSettingsCached } from "../src/blockchain/UserService";
-import { getANumber } from "./helper";
+import {UserSettings} from './../src/types';
+import {
+    getUserSettings,
+    getUserSettingsCached,
+    isRegistered,
+    login,
+    register,
+    updateUserSettings
+} from "../src/blockchain/UserService";
+import {getANumber} from "./helper";
 
 
 import * as bip39 from "bip39";
-import { User } from "../src/types";
+import {User} from "../src/types";
 
 jest.setTimeout(30000);
 
@@ -37,7 +44,7 @@ describe('User tests', () => {
     it("user settings test", async () => {
         var userSettings: UserSettings = await getUserSettings(loggedInUser);
         expect(userSettings).toBeDefined();
-        
+
         userSettings = await getUserSettings(loggedInUser);
         expect(userSettings.avatar).toBe("");
         expect(userSettings.description).toBe("");

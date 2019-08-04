@@ -1,24 +1,24 @@
 import React from 'react';
-import { styled } from '@material-ui/core/styles';
-import { Topic } from '../../../types';
-import { 
-    getTopicsPriorToTimestamp, 
-    getTopicsAfterTimestamp, 
-    getTopicsFromFollowsPriorToTimestamp, 
-    getTopicsFromFollowsAfterTimestamp, 
-    getTopicsFromFollowedChannelsPriorToTimestamp, 
-    getAllTopicsByPopularityAfterTimestamp, 
+import {styled} from '@material-ui/core/styles';
+import {Topic} from '../../../types';
+import {
+    getAllTopicsByPopularityAfterTimestamp,
+    getTopicsAfterTimestamp,
+    getTopicsByFollowedChannelSortedByPopularityAfterTimestamp,
     getTopicsByFollowsSortedByPopularityAfterTimestamp,
-    getTopicsByFollowedChannelSortedByPopularityAfterTimestamp
+    getTopicsFromFollowedChannelsPriorToTimestamp,
+    getTopicsFromFollowsAfterTimestamp,
+    getTopicsFromFollowsPriorToTimestamp,
+    getTopicsPriorToTimestamp
 } from '../../../blockchain/TopicService';
-import { LinearProgress, Container, Select, MenuItem } from '@material-ui/core';
+import {Container, LinearProgress, MenuItem, Select} from '@material-ui/core';
 import TopicOverviewCard from '../../Topic/TopicOverViewCard/TopicOverviewCard';
-import { NewTopicButton } from '../../buttons/NewTopicButton';
-import { getUser } from '../../../util/user-util';
+import {NewTopicButton} from '../../buttons/NewTopicButton';
+import {getUser} from '../../../util/user-util';
 import LoadMoreButton from '../../buttons/LoadMoreButton';
-import { TrendingChannels } from '../../TrendingTags/TrendingTags';
+import {TrendingChannels} from '../../TrendingTags/TrendingTags';
 import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
-import { getRepresentatives } from '../../../blockchain/RepresentativesService';
+import {getRepresentatives} from '../../../blockchain/RepresentativesService';
 
 interface Props {
     type: string;
@@ -70,7 +70,7 @@ class TopicWall extends React.Component<Props, State> {
 
     renderLoadMoreButton() {
         if (this.state.couldExistOlderTopics) {
-            return (<LoadMoreButton onClick={this.retrieveOlderTopics} />)
+            return (<LoadMoreButton onClick={this.retrieveOlderTopics}/>)
         }
     }
 
@@ -88,7 +88,7 @@ class TopicWall extends React.Component<Props, State> {
         const selected: string = event.target.value as string;
 
         if (this.state.selector !== selected) {
-            this.setState({ selector: selected, topics: [] });
+            this.setState({selector: selected, topics: []});
 
             if (selected === SELECTOR_OPTIONS.recent) {
                 this.retrieveLatestTopics();
@@ -102,7 +102,7 @@ class TopicWall extends React.Component<Props, State> {
         const selected: string = event.target.value as string;
 
         if (this.state.popularSelector !== selected) {
-            this.setState({ popularSelector: selected, topics: [] });
+            this.setState({popularSelector: selected, topics: []});
             this.retrievePopularTopics();
         }
     }
@@ -111,11 +111,12 @@ class TopicWall extends React.Component<Props, State> {
         return (
             <div>
                 <Container fixed>
-                    <ChromiaPageHeader text={this.getHeader()} />
-                    {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
-                    {this.props.type === "tagFollowings" ? <TrendingChannels /> : <div></div>}
+                    <ChromiaPageHeader text={this.getHeader()}/>
+                    {this.state.isLoading ? <LinearProgress variant="query"/> : <div/>}
+                    {this.props.type === "tagFollowings" ? <TrendingChannels/> : <div/>}
                     <div className='topic-wall-container'>
-                        {this.props.type === "tagFollowings" ? <ChromiaPageHeader text="Followed Channels" /> : <div></div>}
+                        {this.props.type === "tagFollowings" ? <ChromiaPageHeader text="Followed Channels"/> :
+                            <div/>}
                         <StyledSelector
                             value={this.state.selector}
                             onChange={this.handleSelectorChange}
@@ -130,9 +131,9 @@ class TopicWall extends React.Component<Props, State> {
                                 <MenuItem value={SELECTOR_OPTIONS.popularMonth}>Last month</MenuItem>
                                 <MenuItem value={SELECTOR_OPTIONS.popularAllTime}>All time</MenuItem>
                             </StyledSelector>
-                            : <div></div>
+                            : <div/>
                         }
-                        <br /><br />
+                        <br/><br/>
                         {this.state.topics.map(topic => <TopicOverviewCard
                             key={'card-' + topic.id}
                             topic={topic}
@@ -141,18 +142,19 @@ class TopicWall extends React.Component<Props, State> {
                     </div>
                     {this.renderLoadMoreButton()}
                 </Container>
-                {getUser() != null ? <NewTopicButton channel="" updateFunction={this.retrieveLatestTopics} /> : <div></div>}
+                {getUser() != null ? <NewTopicButton channel="" updateFunction={this.retrieveLatestTopics}/> :
+                    <div/>}
             </div>
         );
     }
 
     componentDidMount() {
         this.retrieveLatestTopics();
-        getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
+        getRepresentatives().then(representatives => this.setState({representatives: representatives}));
     }
 
     retrieveLatestTopicsForAll() {
-        var topics: Promise<Topic[]>;
+        let topics: Promise<Topic[]>;
 
         if (this.state.topics.length === 0) {
             topics = getTopicsPriorToTimestamp(Date.now(), topicsPageSize);
@@ -161,11 +163,11 @@ class TopicWall extends React.Component<Props, State> {
         }
 
         topics.then(retrievedTopics => this.appendLatestTopics(retrievedTopics))
-            .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
+            .catch(() => this.setState({isLoading: false, couldExistOlderTopics: false}));
     }
 
     retrieveLatestTopicsForUserFollowings() {
-        var topics: Promise<Topic[]>;
+        let topics: Promise<Topic[]>;
 
         if (this.state.topics.length === 0) {
             topics = getTopicsFromFollowsPriorToTimestamp(getUser(), Date.now(), topicsPageSize);
@@ -174,11 +176,11 @@ class TopicWall extends React.Component<Props, State> {
         }
 
         topics.then(retrievedTopics => this.appendLatestTopics(retrievedTopics))
-            .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
+            .catch(() => this.setState({isLoading: false, couldExistOlderTopics: false}));
     }
 
     retrieveLatestTopicsForTagFollowings() {
-        var topics: Promise<Topic[]>;
+        let topics: Promise<Topic[]>;
 
         if (this.state.topics.length === 0) {
             topics = getTopicsFromFollowedChannelsPriorToTimestamp(getUser(), Date.now(), topicsPageSize);
@@ -187,7 +189,7 @@ class TopicWall extends React.Component<Props, State> {
         }
 
         topics.then(retrievedTopics => this.appendLatestTopics(retrievedTopics))
-            .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
+            .catch(() => this.setState({isLoading: false, couldExistOlderTopics: false}));
     }
 
     appendLatestTopics(topics: Topic[]) {
@@ -198,12 +200,12 @@ class TopicWall extends React.Component<Props, State> {
                 couldExistOlderTopics: topics.length >= topicsPageSize
             }));
         } else {
-            this.setState({ isLoading: false, couldExistOlderTopics: false });
+            this.setState({isLoading: false, couldExistOlderTopics: false});
         }
     }
 
     retrieveLatestTopics() {
-        this.setState({ isLoading: true });
+        this.setState({isLoading: true});
 
         if (this.props.type === "userFollowings") {
             this.retrieveLatestTopicsForUserFollowings();
@@ -215,12 +217,12 @@ class TopicWall extends React.Component<Props, State> {
     }
 
     retrievePopularTopics() {
-        this.setState({ isLoading: true });
+        this.setState({isLoading: true});
 
         const dayInMilliSeconds: number = 86400000;
-        var timestamp: number;
-        
-        switch(this.state.popularSelector) {
+        let timestamp: number;
+
+        switch (this.state.popularSelector) {
             case SELECTOR_OPTIONS.popularDay:
                 timestamp = Date.now() - dayInMilliSeconds;
                 break;
@@ -234,7 +236,7 @@ class TopicWall extends React.Component<Props, State> {
                 timestamp = 0;
         }
 
-        var topics: Promise<Topic[]>;
+        let topics: Promise<Topic[]>;
         if (this.props.type === "userFollowings") {
             topics = getTopicsByFollowsSortedByPopularityAfterTimestamp(getUser().name, timestamp, topicsPageSize);
         } else if (this.props.type === "tagFollowings") {
@@ -243,26 +245,26 @@ class TopicWall extends React.Component<Props, State> {
             topics = getAllTopicsByPopularityAfterTimestamp(timestamp, topicsPageSize)
         }
 
-        topics.then(topics => this.setState({ topics: topics, couldExistOlderTopics: false, isLoading: false }))
-            .catch(() => this.setState({ isLoading: false }));
+        topics.then(topics => this.setState({topics: topics, couldExistOlderTopics: false, isLoading: false}))
+            .catch(() => this.setState({isLoading: false}));
     }
 
     retrieveOlderTopicsForUserFollowings(oldestTimestamp: number) {
         getTopicsFromFollowsPriorToTimestamp(getUser(), oldestTimestamp, topicsPageSize)
             .then(retrievedTopics => this.appendOlderTopics(retrievedTopics))
-            .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
+            .catch(() => this.setState({isLoading: false, couldExistOlderTopics: false}));
     }
 
     retrieveOlderTopicsForTagFollowings(oldestTimestamp: number) {
         getTopicsFromFollowedChannelsPriorToTimestamp(getUser(), oldestTimestamp, topicsPageSize)
             .then(retrievedTopics => this.appendOlderTopics(retrievedTopics))
-            .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
+            .catch(() => this.setState({isLoading: false, couldExistOlderTopics: false}));
     }
 
     retrieveOlderTopicsForAll(oldestTimestamp: number) {
         getTopicsPriorToTimestamp(oldestTimestamp, topicsPageSize)
             .then(retrievedTopics => this.appendOlderTopics(retrievedTopics))
-            .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
+            .catch(() => this.setState({isLoading: false, couldExistOlderTopics: false}));
     }
 
     appendOlderTopics(topics: Topic[]) {
@@ -273,13 +275,13 @@ class TopicWall extends React.Component<Props, State> {
                 couldExistOlderTopics: topics.length >= topicsPageSize
             }));
         } else {
-            this.setState({ isLoading: false, couldExistOlderTopics: false });
+            this.setState({isLoading: false, couldExistOlderTopics: false});
         }
     }
 
     retrieveOlderTopics() {
         if (this.state.topics.length > 0) {
-            this.setState({ isLoading: true });
+            this.setState({isLoading: true});
             const oldestTimestamp: number = this.state.topics[this.state.topics.length - 1].timestamp;
 
             if (this.props.type === "userFollowings") {

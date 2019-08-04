@@ -2,7 +2,7 @@ import {GTX} from "./Postchain";
 import {seedToKey} from "./CryptoService";
 import * as BoomerangCache from "boomerang-cache";
 import {User, UserNotification} from "../types";
-import { uniqueId } from "../util/util";
+import {uniqueId} from "../util/util";
 
 const boomerang = BoomerangCache.create("notification-bucket", {storage: "session", encrypt: false});
 
@@ -47,7 +47,11 @@ export function markNotificationsRead(user: User) {
 }
 
 export function getUserNotificationsPriorToTimestamp(user: string, timestamp: number, pageSize: number): Promise<UserNotification[]> {
-    return GTX.query("get_user_notifications_prior_to_timestamp", { name: user, timestamp: timestamp, page_size: pageSize });
+    return GTX.query("get_user_notifications_prior_to_timestamp", {
+        name: user,
+        timestamp: timestamp,
+        page_size: pageSize
+    });
 }
 
 export function countUnreadUserNotifications(user: string): Promise<number> {

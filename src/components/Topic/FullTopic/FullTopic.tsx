@@ -1,20 +1,57 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import { Container, Card, TextField, Button, CardActions, IconButton, CardContent, Typography, Badge, LinearProgress, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from "@material-ui/core";
+import {Link} from "react-router-dom";
+import {
+    Badge,
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    Container,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    IconButton,
+    LinearProgress,
+    TextField,
+    Tooltip,
+    Typography
+} from "@material-ui/core";
 
-import { RouteComponentProps } from "react-router";
-import { ReplyTopicButton } from "../../buttons/ReplyTopicButton";
-import { EditMessageButton } from "../../buttons/EditMessageButton";
-import { removeTopic, getTopicById, removeTopicStarRating, giveTopicStarRating, getTopicStarRaters, unsubscribeFromTopic, subscribeToTopic, getTopicSubscribers, getTopicRepliesPriorToTimestamp, getTopicRepliesAfterTimestamp, modifyTopic } from "../../../blockchain/TopicService";
-import { Topic, User, TopicReply } from "../../../types";
-import { getUser, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
-import { timeAgoReadable } from "../../../util/util";
-import { StarRate, SubdirectoryArrowRight, Delete, Report, StarBorder, Notifications, NotificationsActive } from "@material-ui/icons";
-import { getUserSettingsCached } from "../../../blockchain/UserService";
+import {RouteComponentProps} from "react-router";
+import {ReplyTopicButton} from "../../buttons/ReplyTopicButton";
+import {EditMessageButton} from "../../buttons/EditMessageButton";
+import {
+    getTopicById,
+    getTopicRepliesAfterTimestamp,
+    getTopicRepliesPriorToTimestamp,
+    getTopicStarRaters,
+    getTopicSubscribers,
+    giveTopicStarRating,
+    modifyTopic,
+    removeTopic,
+    removeTopicStarRating,
+    subscribeToTopic,
+    unsubscribeFromTopic
+} from "../../../blockchain/TopicService";
+import {Topic, TopicReply, User} from "../../../types";
+import {getUser, ifEmptyAvatarThenPlaceholder} from "../../../util/user-util";
+import {timeAgoReadable} from "../../../util/util";
+import {
+    Delete,
+    Notifications,
+    NotificationsActive,
+    Report,
+    StarBorder,
+    StarRate,
+    SubdirectoryArrowRight
+} from "@material-ui/icons";
+import {getUserSettingsCached} from "../../../blockchain/UserService";
 import TopicReplyCard from "../TopicReplyCard/TopicReplyCard";
 import ReactMarkdown from 'react-markdown';
 import LoadMoreButton from "../../buttons/LoadMoreButton";
-import { reportTopic, getRepresentatives } from "../../../blockchain/RepresentativesService";
+import {getRepresentatives, reportTopic} from "../../../blockchain/RepresentativesService";
 
 
 interface MatchParams {
@@ -89,19 +126,19 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             stars: usersWhoStarRated.length,
             ratedByMe: usersWhoStarRated.includes(user != null && user.name)
         }));
-        getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
-        getTopicSubscribers(id).then(subscribers => this.setState({ subscribed: user != null && subscribers.includes(user.name) }));
+        getRepresentatives().then(representatives => this.setState({representatives: representatives}));
+        getTopicSubscribers(id).then(subscribers => this.setState({subscribed: user != null && subscribers.includes(user.name)}));
     }
 
     consumeTopicData(topic: Topic): void {
-        this.setState({ topic: topic });
+        this.setState({topic: topic});
         getUserSettingsCached(topic.author, 86400)
-            .then(settings => this.setState({ avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, topic.author) }));
+            .then(settings => this.setState({avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, topic.author)}));
     }
 
     retrieveLatestReplies(): void {
         const topicId: string = this.props.match.params.id;
-        this.setState({ isLoading: true });
+        this.setState({isLoading: true});
         var replies: Promise<TopicReply[]>;
         if (this.state.topicReplies.length === 0) {
             replies = getTopicRepliesPriorToTimestamp(topicId, Date.now(), repliesPageSize);
@@ -117,14 +154,14 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                     couldExistOlderReplies: retrievedReplies.length >= repliesPageSize
                 }))
             } else {
-                this.setState({ isLoading: false });
+                this.setState({isLoading: false});
             }
-        }).catch(() => this.setState({ isLoading: false }));
+        }).catch(() => this.setState({isLoading: false}));
     }
 
     retrieveOlderReplies() {
         if (this.state.topicReplies.length > 0) {
-            this.setState({ isLoading: true });
+            this.setState({isLoading: true});
             const oldestTimestamp: number = this.state.topicReplies[this.state.topicReplies.length - 1].timestamp;
             getTopicRepliesPriorToTimestamp(this.state.topic.id, oldestTimestamp - 1, repliesPageSize)
                 .then(retrievedReplies => {
@@ -136,7 +173,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                             couldExistOlderReplies: retrievedReplies.length >= repliesPageSize
                         }));
                     } else {
-                        this.setState({ isLoading: false, couldExistOlderReplies: false });
+                        this.setState({isLoading: false, couldExistOlderReplies: false});
                     }
                 });
         }
@@ -144,7 +181,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
 
     toggleStarRate() {
         if (!this.state.isLoading) {
-            this.setState({ isLoading: true });
+            this.setState({isLoading: true});
             const id: string = this.state.topic.id;
             const user: User = getUser();
             const name: string = user.name;
@@ -152,12 +189,20 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             if (name != null) {
                 if (this.state.ratedByMe) {
                     removeTopicStarRating(user, id)
-                        .then(() => this.setState(prevState => ({ ratedByMe: false, stars: prevState.stars - 1, isLoading: false })))
-                        .catch(() => this.setState({ isLoading: false }));
+                        .then(() => this.setState(prevState => ({
+                            ratedByMe: false,
+                            stars: prevState.stars - 1,
+                            isLoading: false
+                        })))
+                        .catch(() => this.setState({isLoading: false}));
                 } else {
                     giveTopicStarRating(user, id)
-                        .then(() => this.setState(prevState => ({ ratedByMe: true, stars: prevState.stars + 1, isLoading: false })))
-                        .catch(() => this.setState({ isLoading: false }));
+                        .then(() => this.setState(prevState => ({
+                            ratedByMe: true,
+                            stars: prevState.stars + 1,
+                            isLoading: false
+                        })))
+                        .catch(() => this.setState({isLoading: false}));
                 }
             } else {
                 window.location.replace("/user/login");
@@ -167,7 +212,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
 
     toggleSubscription() {
         if (!this.state.isLoading) {
-            this.setState({ isLoading: true });
+            this.setState({isLoading: true});
             const id: string = this.state.topic.id;
             const user: User = getUser();
             const name: string = user.name;
@@ -175,12 +220,12 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             if (name != null) {
                 if (this.state.subscribed) {
                     unsubscribeFromTopic(user, id)
-                        .then(() => this.setState({ subscribed: false, isLoading: false }))
-                        .catch(() => this.setState({ isLoading: false }));
+                        .then(() => this.setState({subscribed: false, isLoading: false}))
+                        .catch(() => this.setState({isLoading: false}));
                 } else {
                     subscribeToTopic(user, id)
-                        .then(() => this.setState({ subscribed: true, isLoading: false }))
-                        .catch(() => this.setState({ isLoading: false }));
+                        .then(() => this.setState({subscribed: true, isLoading: false}))
+                        .catch(() => this.setState({isLoading: false}));
                 }
             } else {
                 window.location.replace("/user/login");
@@ -190,7 +235,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
 
     renderTimeAgo() {
         return (
-            <Typography className="timestamp" variant="body2" component="span" style={{ marginBottom: "-17px" }}>
+            <Typography className="timestamp" variant="body2" component="span" style={{marginBottom: "-17px"}}>
                 {timeAgoReadable(this.state.topic.timestamp)}
             </Typography>
         )
@@ -219,8 +264,10 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                         <span className="topic-author-name">@{this.state.topic.author}</span>
                     </Typography>
                 </Link>
-                <br />
-                {this.state.avatar !== "" ? <img src={this.state.avatar} style={{ marginBottom: "5px" }} className="topic-author-avatar" alt="Profile Avatar" /> : <div></div>}
+                <br/>
+                {this.state.avatar !== "" ?
+                    <img src={this.state.avatar} style={{marginBottom: "5px"}} className="topic-author-avatar"
+                         alt="Profile Avatar"/> : <div></div>}
             </div>
         );
     }
@@ -239,7 +286,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                     {this.state.topic.title}
                 </Typography>
                 <Typography variant="body2" className='purple-typography' component="p">
-                    <ReactMarkdown source={content} disallowedTypes={["heading"]} />
+                    <ReactMarkdown source={content} disallowedTypes={["heading"]}/>
                 </Typography>
             </CardContent>
         );
@@ -256,36 +303,37 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                         badgeContent={this.state.stars}
                     >
                         <Tooltip title="Like">
-                            {this.state.ratedByMe ? <StarRate className="yellow-color" /> : <StarBorder className="purple-color" />}
+                            {this.state.ratedByMe ? <StarRate className="yellow-color"/> :
+                                <StarBorder className="purple-color"/>}
                         </Tooltip>
                     </Badge>
                 </IconButton>
                 <IconButton aria-label="Subscribe" onClick={() => this.toggleSubscription()}>
                     {this.state.subscribed
-                        ? <Tooltip title="Unsubscribe"><NotificationsActive className="pink-color" /></Tooltip>
-                        : <Tooltip title="Subscribe"><Notifications className="purple-color" /></Tooltip>
+                        ? <Tooltip title="Unsubscribe"><NotificationsActive className="pink-color"/></Tooltip>
+                        : <Tooltip title="Subscribe"><Notifications className="purple-color"/></Tooltip>
                     }
                 </IconButton>
 
                 {
                     this.state.topic.timestamp + allowedEditTimeMillis > Date.now() && user != null && this.state.topic.author === user.name
-                        ? <EditMessageButton value={this.state.topic.message} submitFunction={this.editTopicMessage} />
-                        : <div />
+                        ? <EditMessageButton value={this.state.topic.message} submitFunction={this.editTopicMessage}/>
+                        : <div/>
                 }
 
                 <IconButton aria-label="Report" onClick={() => this.reportTopic()}>
                     <Tooltip title="Report">
-                        <Report className="red-color" />
+                        <Report className="red-color"/>
                     </Tooltip>
                 </IconButton>
 
                 {this.renderAdminActions()}
-            </CardActions >
+            </CardActions>
         );
     }
 
     editTopicMessage(text: string) {
-        this.setState({ isLoading: true });
+        this.setState({isLoading: true});
         modifyTopic(getUser(), this.state.topic.id, text).then(() => window.location.reload());
     }
 
@@ -304,28 +352,33 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
         const user: User = getUser();
         if (user != null && this.state.representatives.includes(user.name) && !this.state.topic.removed) {
             return (
-                <div style={{ display: "inline-block" }}>
+                <div style={{display: "inline-block"}}>
 
                     <IconButton aria-label="Remove topic"
-                        onClick={() => this.setState({ removeTopicDialogOpen: true })}
+                                onClick={() => this.setState({removeTopicDialogOpen: true})}
                     >
                         <Tooltip title="Remove topic">
-                            <Delete className="red-color" />
+                            <Delete className="red-color"/>
                         </Tooltip>
                     </IconButton>
 
-                    <Dialog open={this.state.removeTopicDialogOpen} onClose={() => this.setState({ removeTopicDialogOpen: false })} aria-labelledby="dialog-title">
+                    <Dialog open={this.state.removeTopicDialogOpen}
+                            onClose={() => this.setState({removeTopicDialogOpen: false})}
+                            aria-labelledby="dialog-title">
                         <DialogTitle id="dialog-title">Are you sure?</DialogTitle>
                         <DialogContent>
                             <DialogContentText>
-                                This action will remove the topic, which makes sure that no one will be able to read the initial message.
+                                This action will remove the topic, which makes sure that no one will be able to read the
+                                initial message.
                             </DialogContentText>
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={() => this.setState({ removeTopicDialogOpen: false })} color="secondary">No</Button>
+                            <Button onClick={() => this.setState({removeTopicDialogOpen: false})}
+                                    color="secondary">No</Button>
                             <Button onClick={() => this.setState({
                                 removeTopicDialogOpen: false
-                            }, () => removeTopic(getUser(), this.props.match.params.id).then(() => window.location.reload()))} color="primary">
+                            }, () => removeTopic(getUser(), this.props.match.params.id).then(() => window.location.reload()))}
+                                    color="primary">
                                 Yes
                             </Button>
                         </DialogActions>
@@ -342,7 +395,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                     {this.renderCardContent(this.state.topic.message)}
                     {this.renderCardActions()}
                 </Card>
-                {this.state.replyBoxOpen ? this.renderReplyBox() : <div />}
+                {this.state.replyBoxOpen ? this.renderReplyBox() : <div/>}
             </div>
         );
     }
@@ -354,11 +407,11 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
     }
 
     toggleReplyBox(): void {
-        this.setState(prevState => ({ replyBoxOpen: !prevState.replyBoxOpen }));
+        this.setState(prevState => ({replyBoxOpen: !prevState.replyBoxOpen}));
     }
 
     handleReplyMessageChange(event: React.ChangeEvent<HTMLInputElement>): void {
-        this.setState({ replyMessage: event.target.value });
+        this.setState({replyMessage: event.target.value});
     }
 
     renderReplyForm() {
@@ -380,8 +433,8 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                     <Button type="submit" onClick={() => this.handleReplySubmit()}>
                         Reply
                     </Button>
-                    <br />
-                    <br />
+                    <br/>
+                    <br/>
                 </Container>
             </div>
         );
@@ -390,34 +443,34 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
     handleReplySubmit(): void {
         this.retrieveLatestReplies();
         if (!this.state.subscribed) {
-            subscribeToTopic(getUser(), this.state.topic.id).then(() => this.setState({ subscribed: true }));
+            subscribeToTopic(getUser(), this.state.topic.id).then(() => this.setState({subscribed: true}));
         }
     }
 
     renderReplyButton() {
         return (
             <ReplyTopicButton submitFunction={this.handleReplySubmit}
-                topicId={this.props.match.params.id}
-                topicAuthor={this.state.topic.author}
+                              topicId={this.props.match.params.id}
+                              topicAuthor={this.state.topic.author}
             />
         )
     }
 
     renderLoadMoreButton() {
         if (this.state.couldExistOlderReplies) {
-            return (<LoadMoreButton onClick={this.retrieveOlderReplies} />)
+            return (<LoadMoreButton onClick={this.retrieveOlderReplies}/>)
         }
     }
 
     render() {
         return (
             <Container fixed>
-                <br />
-                {this.state.isLoading ? <LinearProgress variant="query" /> : <div></div>}
+                <br/>
+                {this.state.isLoading ? <LinearProgress variant="query"/> : <div></div>}
                 {this.renderTopic()}
                 {this.state.topicReplies.length > 0
-                    ? (<SubdirectoryArrowRight className="nav-button button-center" />)
-                    : (<div />)}
+                    ? (<SubdirectoryArrowRight className="nav-button button-center"/>)
+                    : (<div/>)}
                 {this.state.topicReplies.map(reply => <TopicReplyCard
                     key={"reply-" + reply.id}
                     reply={reply}

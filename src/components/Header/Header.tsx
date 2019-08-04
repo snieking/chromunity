@@ -10,7 +10,7 @@ export class Header extends React.Component<{}, HeaderState> {
     constructor(props: any) {
         super(props);
 
-        this.state = { sidebarOpen: false };
+        this.state = {sidebarOpen: false};
     }
 
     render() {

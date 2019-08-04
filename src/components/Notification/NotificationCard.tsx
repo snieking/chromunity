@@ -1,16 +1,15 @@
 import React from 'react';
 
-import { Card, CardContent, Typography } from "@material-ui/core";
-import { UserNotification } from "../../types";
-import { parseContent } from '../../util/text-parsing';
-import { timeAgoReadable } from '../../util/util';
+import {Card, CardContent, Typography} from "@material-ui/core";
+import {UserNotification} from "../../types";
+import {parseContent} from '../../util/text-parsing';
+import {timeAgoReadable} from '../../util/util';
 
 import './NotificationCard.css';
 
 export interface NotificationCardProps {
     notification: UserNotification;
 }
-
 
 
 const NotificationCard: React.FunctionComponent<NotificationCardProps> = (props) => {

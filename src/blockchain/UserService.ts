@@ -1,12 +1,12 @@
-import { UserSettings, UserMeta } from './../types';
+import {UserMeta, UserSettings} from './../types';
 import {GTX} from "./Postchain";
 import {seedFromMnemonic, seedToKey} from "./CryptoService";
 import {User} from "../types";
 import {setMnemonic, setUser, setUserMeta} from "../util/user-util";
 import * as BoomerangCache from "boomerang-cache";
-import { uniqueId } from '../util/util';
+import {uniqueId} from '../util/util';
 
-const boomerang = BoomerangCache.create("avatar-bucket", { storage: "session", encrypt: false });
+const boomerang = BoomerangCache.create("avatar-bucket", {storage: "session", encrypt: false});
 
 export function register(name: string, password: string, mnemonic: string) {
     setMnemonic(mnemonic);
@@ -43,12 +43,12 @@ export function isRegistered(name: string): Promise<boolean> {
         .catch(false);
 }
 
-export function getUserMeta(username: string): Promise<UserMeta>  {
-    return GTX.query("get_user_meta", { name: username });
+export function getUserMeta(username: string): Promise<UserMeta> {
+    return GTX.query("get_user_meta", {name: username});
 }
 
 export function getUserSettings(user: User): Promise<UserSettings> {
-    return GTX.query("get_user_settings", { name: user.name });
+    return GTX.query("get_user_settings", {name: user.name});
 }
 
 export function getUserSettingsCached(name: string, cacheDuration: number): Promise<UserSettings> {
@@ -58,7 +58,7 @@ export function getUserSettingsCached(name: string, cacheDuration: number): Prom
         return new Promise<UserSettings>(resolve => resolve(cachedAvatar));
     }
 
-    return GTX.query("get_user_settings", { name: name }).then((settings: UserSettings) => {
+    return GTX.query("get_user_settings", {name: name}).then((settings: UserSettings) => {
         boomerang.set(name, settings, cacheDuration);
         return settings;
     });
