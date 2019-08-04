@@ -1,7 +1,6 @@
 
 operation create_notifications_for_users(name, id: text, trigger: text, content: text, usernames: set<text>) {
-    val user = user@{ .name == name };
-    require(is_signer(user.pubkey));
+    val user = get_verified_user(name);
 
     for (username in usernames) {
         val toUser = user@?{ .name == username };
@@ -19,8 +18,7 @@ operation create_notifications_for_users(name, id: text, trigger: text, content:
 }
 
 operation remove_notifications_for_users(name, id: text, usernames: set<text>) {
-    val user = user@{ .name == name };
-    require(is_signer(user.pubkey));
+    val user = get_verified_user(name);
 
     for (username in usernames) {
         val toUser = user@?{ .name == username };
@@ -31,7 +29,6 @@ operation remove_notifications_for_users(name, id: text, usernames: set<text>) {
 }
 
 operation mark_notifications_since_timestamp_read(name, timestamp) {
-    val user = user@{ .name == name };
-    require(is_signer(user.pubkey));
+    val user = get_verified_user(name);
     update notification@*{ .user == user, .timestamp > timestamp } ( read = true );
 }

@@ -22,8 +22,7 @@ operation complete_election(admin_user: text, representatives: set<text>) {
 }
 
 operation vote_for_candidate(voter: name, candidate: name) {
-    val user = user@{ .name == voter };
-    require(is_signer(user.pubkey));
+    val user = get_verified_user(voter);
 
     val currentElection = representative_election @ { .completed == false };
     log("Voting for candidate in election: ", currentElection.id);
@@ -34,8 +33,7 @@ operation vote_for_candidate(voter: name, candidate: name) {
 }
 
 operation update_vote_for_candidate(voter: name, candidate: name) {
-    val user = user@{ .name == voter };
-    require(is_signer(user.pubkey));
+    val user = get_verified_user(voter);
 
     val currentElection = representative_election @ { .completed == false };    
     val election_candidate = representative_election_candidate@{
@@ -58,11 +56,9 @@ operation update_vote_for_candidate(voter: name, candidate: name) {
 }
 
 operation sign_up_for_election(name) {
-    val user = user@{ .name == name };
-    require(is_signer(user.pubkey));
+    val user = get_verified_user(name);
 
     val currentElection = representative_election @ { .completed == false };
-    log("Signing up for election: ", currentElection.id);
 
     create representative_election_candidate(currentElection, user);
 }

@@ -1,7 +1,5 @@
 operation create_topic(id: text, username: text, channel_key: name, channel_name: name, title: name, message: text) {
-    val author = user@{ .name == username };
-    require(is_signer(author.pubkey));
-    require(user_meta@{ author }.suspended_until < op_context.last_block_time);
+    val author = get_verified_user(username);
 
     val topic = create topic(
         id = id, 
@@ -19,9 +17,7 @@ operation create_topic(id: text, username: text, channel_key: name, channel_name
 }
 
 operation modify_topic(id: text, username: text, text) {
-    val author = user@{ .name == username };
-    require(is_signer(author.pubkey));
-    require(user_meta@{ author }.suspended_until < op_context.last_block_time);
+    val author = get_verified_user(username);
 
     val topic = topic@{ .id == id, .author == author };
     val fiveMinutesInMillis = 300000;
@@ -30,13 +26,12 @@ operation modify_topic(id: text, username: text, text) {
 }
 
 operation create_reply(topic_id: text, id: text, username: text, message: text) {
-    val author = user@{ .name == username };
-    require(is_signer(author.pubkey));
-    require(user_meta@{ author }.suspended_until < op_context.last_block_time);
+    val author = get_verified_user(username);
+    val topic = find_topic_by_id(topic_id);
 
     create topic_reply(
         id = id,
-        topic@{ .id == topic_id },
+        topic,
         author,
         timestamp = op_context.last_block_time,
         is_sub_reply = false,
@@ -44,17 +39,13 @@ operation create_reply(topic_id: text, id: text, username: text, message: text) 
         removed = false
     );
 
-    val topic = topic@{ .id == topic_id };
-
     if (not topic.removed) {
-        update topic@{ .id == topic_id } ( last_modified = op_context.last_block_time);
+        update topic ( last_modified = op_context.last_block_time);
     }
 }
 
 operation modify_reply(id: text, username: text, text) {
-    val author = user@{ .name == username };
-    require(is_signer(author.pubkey));
-    require(user_meta@{ author }.suspended_until < op_context.last_block_time);
+    val author = get_verified_user(username);
 
     val reply = topic_reply@{ .id == id, .author == author };
     val fiveMinutesInMillis = 300000;
@@ -63,13 +54,12 @@ operation modify_reply(id: text, username: text, text) {
 }
 
 operation create_sub_reply(topic_id: text, parent_reply_id: text, id: text, username: text, message: text) {
-    val author = user@{ .name == username };
-    require(is_signer(author.pubkey));
-    require(user_meta@{ author }.suspended_until < op_context.last_block_time);
+    val author = get_verified_user(username);
+    val topic = find_topic_by_id(topic_id);
 
     val topic_reply = create topic_reply(
         id = id,
-        topic@{ .id == topic_id },
+        topic,
         author,
         timestamp = op_context.last_block_time,
         is_sub_reply = true,
@@ -82,9 +72,7 @@ operation create_sub_reply(topic_id: text, parent_reply_id: text, id: text, user
         child_reply = topic_reply
     );
 
-    val topic = topic@{ .id == topic_id };
-
     if (not topic.removed) {
-        update topic@{ .id == topic_id } ( last_modified = op_context.last_block_time);
+        update topic ( last_modified = op_context.last_block_time);
     }
 }

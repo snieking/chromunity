@@ -1,11 +1,9 @@
 operation subscribe_to_topic(username: text, id: text) {
-    val user = user@{ .name == username };
-    require(is_signer(user.pubkey));
+    val user = get_verified_user(username);
     create subscription(topic@{ .id == id }, user);
 }
 
 operation unsubscribe_from_topic(username: text, id: text) {
-    val user = user@{ .name == username };
-    require(is_signer(user.pubkey));
+    val user = get_verified_user(username);
     delete subscription@{ topic@{ .id == id }, user };
 }

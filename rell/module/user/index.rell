@@ -8,6 +8,7 @@ class user {
     registered: integer;
 }
 
+include 'functions';
 include 'operations';
 include 'queries';
 include '/user/settings/index';

@@ -1,6 +1,5 @@
 operation give_topic_star_rating(username: text, id: text) {
-    val user = user@{ .name == username };
-    require(is_signer(user.pubkey));
+    val user = get_verified_user(username);
     create topic_star_rating(topic@{ .id == id }, user);
 
     val topicRating = tmp_topic_rating@{ topic@{ .id == id }};
@@ -8,8 +7,7 @@ operation give_topic_star_rating(username: text, id: text) {
 }
 
 operation remove_topic_star_rating(username: text, id: text) {
-    val user = user@{ .name == username };
-    require(is_signer(user.pubkey));
+    val user = get_verified_user(username);
     delete topic_star_rating@{ topic@{ .id == id }, user };
 
     val topicRating = tmp_topic_rating@{ topic@{ .id == id }};
@@ -17,13 +15,11 @@ operation remove_topic_star_rating(username: text, id: text) {
 }
 
 operation give_reply_star_rating(username: text, id: text) {
-    val user = user@{ .name == username };
-    require(is_signer(user.pubkey));
+    val user = get_verified_user(username);
     create reply_star_rating(topic_reply@{ .id == id }, user);
 }
 
 operation remove_reply_star_rating(username: text, id: text) {
-    val user = user@{ .name == username };
-    require(is_signer(user.pubkey));
+    val user = get_verified_user(username);
     delete reply_star_rating@{ topic_reply@{ .id == id }, user };
 }

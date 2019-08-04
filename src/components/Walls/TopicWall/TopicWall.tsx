@@ -236,7 +236,7 @@ class TopicWall extends React.Component<Props, State> {
                 timestamp = 0;
                 break;
         }
-        
+
         let topics: Promise<Topic[]>;
         if (this.props.type === "userFollowings") {
             topics = getTopicsByFollowsSortedByPopularityAfterTimestamp(getUser().name, timestamp, topicsPageSize);

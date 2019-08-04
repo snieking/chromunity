@@ -1,6 +1,5 @@
 operation remove_topic(username: text, topic_id: text) {
-    val user = user@{ .name == username};
-    require(is_signer(user.pubkey));
+    val user = get_verified_user(username);
 
     val recentElection = representative_election@{ .completed == true } ( .id, sort .timestamp );
     val representative = representative @{ user, .representative_election.id == recentElection.id };
@@ -17,8 +16,7 @@ operation remove_topic(username: text, topic_id: text) {
 }
 
 operation remove_topic_reply(username: text, topic_reply_id: text) {
-    val user = user@{ .name == username};
-    require(is_signer(user.pubkey));
+    val user = get_verified_user(username);
 
     val recentElection = representative_election@{ .completed == true } ( .id, sort .timestamp );
     val representative = representative @{ user, .representative_election.id == recentElection.id };
@@ -35,8 +33,7 @@ operation remove_topic_reply(username: text, topic_reply_id: text) {
 }
 
 operation suspend_user(username: text, user_to_be_suspended: text) {
-    val user = user@{ .name == username};
-    require(is_signer(user.pubkey));
+    val user = get_verified_user(username);
 
     val recentElection = representative_election@{ .completed == true } ( .id, sort .timestamp );
     val representative = representative @{ user, .representative_election.id == recentElection.id };

@@ -55,6 +55,9 @@
                             <entry key="user/index.rell">
                                 <string>module/user/index.rell</string>
                             </entry>
+                            <entry key="user/functions.rell">
+                                <string>module/user/functions.rell</string>
+                            </entry>
                             <entry key="user/operations.rell">
                                 <string>module/user/operations.rell</string>
                             </entry>
@@ -84,6 +87,9 @@
 
                             <entry key="topic/index.rell">
                                 <string>module/topic/index.rell</string>
+                            </entry>
+                            <entry key="topic/functions.rell">
+                                <string>module/topic/functions.rell</string>
                             </entry>
                             <entry key="topic/operations.rell">
                                 <string>module/topic/operations.rell</string>
