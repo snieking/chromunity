@@ -134,7 +134,7 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
     }
 
     createTopicButton() {
-        if (getUser().name != null && this.state.userMeta.suspended_until < Date.now()) {
+        if (getUser() != null && this.state.userMeta.suspended_until < Date.now()) {
             return (
                 <div className="bottom-right-corner rounded-pink">
                     <IconButton aria-label="New topic"

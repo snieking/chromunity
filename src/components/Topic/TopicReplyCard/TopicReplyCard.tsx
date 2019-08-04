@@ -94,7 +94,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                         className='reply-card'
                         style={{marginLeft: this.props.indention + "px"}}
                     >
-                        {this.state.isLoading ? <LinearProgress/> : <div></div>}
+                        {this.state.isLoading ? <LinearProgress/> : <div/>}
                         {this.renderCardContent()}
                     </Card>
                 </div>
@@ -131,9 +131,9 @@ class TopicReplyCard extends React.Component<Props, State> {
         if (!this.state.isLoading) {
             this.setState({isLoading: true});
             const id = this.props.reply.id;
-            const name = getUser().name;
+            const user = getUser();
 
-            if (name != null) {
+            if (user != null) {
                 if (this.state.ratedByMe) {
                     removeReplyStarRating(getUser(), id)
                         .then(() => this.setState(prevState => ({
@@ -182,7 +182,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                 </Link>
                 <br/>
                 {this.state.avatar !== "" ?
-                    <img src={this.state.avatar} className="reply-author-avatar" alt="Profile Avatar"/> : <div></div>}
+                    <img src={this.state.avatar} className="reply-author-avatar" alt="Profile Avatar"/> : <div/>}
             </div>
         );
     }
@@ -248,7 +248,7 @@ class TopicReplyCard extends React.Component<Props, State> {
     reportReply() {
         const user: User = getUser();
 
-        if (user.name != null) {
+        if (user != null) {
             reportReply(user, this.props.topicId, this.props.reply.id);
             window.location.reload();
         } else {
@@ -330,8 +330,6 @@ class TopicReplyCard extends React.Component<Props, State> {
                     </Button>
                 </div>
             )
-        } else {
-            return (<div></div>)
         }
     }
 

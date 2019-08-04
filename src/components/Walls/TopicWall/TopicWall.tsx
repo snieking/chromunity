@@ -93,7 +93,7 @@ class TopicWall extends React.Component<Props, State> {
             if (selected === SELECTOR_OPTIONS.recent) {
                 this.retrieveLatestTopics();
             } else if (selected === SELECTOR_OPTIONS.popular) {
-                this.retrievePopularTopics();
+                this.retrievePopularTopics(selected);
             }
         }
     }
@@ -103,7 +103,7 @@ class TopicWall extends React.Component<Props, State> {
 
         if (this.state.popularSelector !== selected) {
             this.setState({popularSelector: selected, topics: []});
-            this.retrievePopularTopics();
+            this.retrievePopularTopics(selected);
         }
     }
 
@@ -216,13 +216,13 @@ class TopicWall extends React.Component<Props, State> {
         }
     }
 
-    retrievePopularTopics() {
+    retrievePopularTopics(selected: string) {
         this.setState({isLoading: true});
 
         const dayInMilliSeconds: number = 86400000;
         let timestamp: number;
 
-        switch (this.state.popularSelector) {
+        switch (selected) {
             case SELECTOR_OPTIONS.popularDay:
                 timestamp = Date.now() - dayInMilliSeconds;
                 break;
@@ -234,8 +234,9 @@ class TopicWall extends React.Component<Props, State> {
                 break;
             default:
                 timestamp = 0;
+                break;
         }
-
+        
         let topics: Promise<Topic[]>;
         if (this.props.type === "userFollowings") {
             topics = getTopicsByFollowsSortedByPopularityAfterTimestamp(getUser().name, timestamp, topicsPageSize);

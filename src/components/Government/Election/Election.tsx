@@ -32,7 +32,7 @@ const renderer = ({days, hours, minutes, seconds, completed}) => {
     if (completed) {
         // Render a completed state
         window.location.replace("/");
-        return <div></div>;
+        return <div/>;
     } else {
         // Render a countdown
         return (
@@ -64,6 +64,8 @@ export class Election extends React.Component<{}, ElectionState> {
     componentDidMount(): void {
         getNextElectionTimestamp().then(election => {
             if (election != null) {
+                const user = getUser();
+
                 this.setState({
                     timestamp: election.timestamp,
                     activeElection: true,
@@ -73,13 +75,11 @@ export class Election extends React.Component<{}, ElectionState> {
                 getElectionCandidates()
                     .then(candidates => this.setState({
                         electionCandidates: candidates,
-                        isACandidate: candidates.includes(getUser().name)
+                        isACandidate: user != null && candidates.includes(user.name)
                     }));
 
-                const username = getUser().name;
-
-                if (username != null) {
-                    getElectionVoteForUser(username)
+                if (user != null) {
+                    getElectionVoteForUser(user.name)
                         .then(candidate => {
                             if (candidate != null) {
                                 this.setState({votedFor: candidate})

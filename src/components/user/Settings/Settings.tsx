@@ -79,7 +79,7 @@ class Settings extends React.Component<{}, SettingsState> {
                                    alt="preview"
                                    onClick={() => this.toggleEditAvatarDialog()}
                             />
-                            : <div></div>
+                            : <div/>
                         }
                         <div className="description-wrapper">
                             <TextField
@@ -88,6 +88,7 @@ class Settings extends React.Component<{}, SettingsState> {
                                 id="description"
                                 multiline
                                 rows="2"
+                                rowsMax={3}
                                 label="Profile description"
                                 type="text"
                                 variant="outlined"

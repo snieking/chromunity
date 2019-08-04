@@ -26,7 +26,7 @@ export class NotificationsButton extends React.Component<NotificationsButtonProp
     }
 
     render() {
-        if (getUser().name != null) {
+        if (getUser() != null) {
             return (
                 <IconButton aria-label="Notifications" onClick={() => this.setState({counter: 0})}>
                     <Badge className="star-badge" color="primary" badgeContent={this.state.counter}>

@@ -139,7 +139,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
     retrieveLatestReplies(): void {
         const topicId: string = this.props.match.params.id;
         this.setState({isLoading: true});
-        var replies: Promise<TopicReply[]>;
+        let replies: Promise<TopicReply[]>;
         if (this.state.topicReplies.length === 0) {
             replies = getTopicRepliesPriorToTimestamp(topicId, Date.now(), repliesPageSize);
         } else {
@@ -184,9 +184,8 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             this.setState({isLoading: true});
             const id: string = this.state.topic.id;
             const user: User = getUser();
-            const name: string = user.name;
 
-            if (name != null) {
+            if (user != null) {
                 if (this.state.ratedByMe) {
                     removeTopicStarRating(user, id)
                         .then(() => this.setState(prevState => ({
@@ -215,9 +214,8 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             this.setState({isLoading: true});
             const id: string = this.state.topic.id;
             const user: User = getUser();
-            const name: string = user.name;
 
-            if (name != null) {
+            if (user != null) {
                 if (this.state.subscribed) {
                     unsubscribeFromTopic(user, id)
                         .then(() => this.setState({subscribed: false, isLoading: false}))
@@ -267,7 +265,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                 <br/>
                 {this.state.avatar !== "" ?
                     <img src={this.state.avatar} style={{marginBottom: "5px"}} className="topic-author-avatar"
-                         alt="Profile Avatar"/> : <div></div>}
+                         alt="Profile Avatar"/> : <div/>}
             </div>
         );
     }
@@ -340,7 +338,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
     reportTopic() {
         const user: User = getUser();
 
-        if (user.name != null) {
+        if (user != null) {
             reportTopic(user, this.state.topic.id);
             window.location.reload();
         } else {
