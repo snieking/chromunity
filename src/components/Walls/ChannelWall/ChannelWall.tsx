@@ -46,7 +46,9 @@ const StyledSelect = styled(Select)({
 const OPTIONS = {
     recent: "recent",
     popular: "popular",
+    popularDay: "popularDay",
     popularWeek: "popularWeek",
+    popularMonth: "popularMonth",
     popularAllTime: "popularAllTime"
 };
 
@@ -202,10 +204,22 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
     retrievePopularTopics() {
         this.setState({ isLoading: true });
 
-        const weekInMilliseconds: number = 604800000;
-        const timestamp: number = this.state.popularSelector === OPTIONS.popularWeek
-            ? Date.now() - weekInMilliseconds
-            : 0;
+        const dayInMilliSeconds: number = 86400000;
+        var timestamp: number;
+
+        switch(this.state.popularSelector) {
+            case OPTIONS.popularDay:
+                timestamp = Date.now() - dayInMilliSeconds;
+                break;
+            case OPTIONS.popularWeek:
+                timestamp = Date.now() - (dayInMilliSeconds * 7);
+                break;
+            case OPTIONS.popularMonth:
+                timestamp = Date.now() - (dayInMilliSeconds * 30);
+                break;
+            default:
+                timestamp = 0;
+        }
 
         getTopicsByChannelSortedByPopularityAfterTimestamp(this.props.match.params.channel, timestamp, topicsPageSize)
             .then(topics => this.setState({ topics: topics, couldExistOlderTopics: false, isLoading: false }))
@@ -252,7 +266,9 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
                         </StyledSelect>
                         {this.state.selector === OPTIONS.popular
                             ? <StyledSelect value={this.state.popularSelector} onChange={this.handlePopularChange}>
+                                <MenuItem value={OPTIONS.popularDay}>Last day</MenuItem>
                                 <MenuItem value={OPTIONS.popularWeek}>Last week</MenuItem>
+                                <MenuItem value={OPTIONS.popularMonth}>Last month</MenuItem>
                                 <MenuItem value={OPTIONS.popularAllTime}>All time</MenuItem>
                             </StyledSelect>
                             : <div></div>

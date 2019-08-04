@@ -42,7 +42,9 @@ const StyledSelector = styled(Select)({
 const SELECTOR_OPTIONS = {
     recent: "recent",
     popular: "popular",
+    popularDay: "popularDay",
     popularWeek: "popularWeek",
+    popularMonth: "popularMonth",
     popularAllTime: "popularAllTime"
 };
 
@@ -123,7 +125,9 @@ class TopicWall extends React.Component<Props, State> {
                         </StyledSelector>
                         {this.state.selector === SELECTOR_OPTIONS.popular
                             ? <StyledSelector value={this.state.popularSelector} onChange={this.handlePopularChange}>
+                                <MenuItem value={SELECTOR_OPTIONS.popularDay}>Last day</MenuItem>
                                 <MenuItem value={SELECTOR_OPTIONS.popularWeek}>Last week</MenuItem>
+                                <MenuItem value={SELECTOR_OPTIONS.popularMonth}>Last month</MenuItem>
                                 <MenuItem value={SELECTOR_OPTIONS.popularAllTime}>All time</MenuItem>
                             </StyledSelector>
                             : <div></div>
@@ -213,10 +217,22 @@ class TopicWall extends React.Component<Props, State> {
     retrievePopularTopics() {
         this.setState({ isLoading: true });
 
-        const weekInMilliseconds: number = 604800000;
-        const timestamp: number = this.state.popularSelector === SELECTOR_OPTIONS.popularWeek
-            ? Date.now() - weekInMilliseconds
-            : 0;
+        const dayInMilliSeconds: number = 86400000;
+        var timestamp: number;
+        
+        switch(this.state.popularSelector) {
+            case SELECTOR_OPTIONS.popularDay:
+                timestamp = Date.now() - dayInMilliSeconds;
+                break;
+            case SELECTOR_OPTIONS.popularWeek:
+                timestamp = Date.now() - (dayInMilliSeconds * 7);
+                break;
+            case SELECTOR_OPTIONS.popularMonth:
+                timestamp = Date.now() - (dayInMilliSeconds * 30);
+                break;
+            default:
+                timestamp = 0;
+        }
 
         var topics: Promise<Topic[]>;
         if (this.props.type === "userFollowings") {
