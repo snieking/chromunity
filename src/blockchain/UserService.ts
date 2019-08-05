@@ -6,7 +6,7 @@ import {setMnemonic, setUser, setUserMeta} from "../util/user-util";
 import * as BoomerangCache from "boomerang-cache";
 import {uniqueId} from '../util/util';
 
-const boomerang = BoomerangCache.create("avatar-bucket", {storage: "session", encrypt: false});
+const boomerang = BoomerangCache.create("avatar-bucket", {storage: "local", encrypt: false});
 
 export function register(name: string, password: string, mnemonic: string) {
     setMnemonic(mnemonic);
@@ -74,6 +74,31 @@ export function updateUserSettings(user: User, avatar: string, description: stri
     tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
+}
+
+export function toggleUserMute(user: User, name: string, muted: boolean) {
+    boomerang.remove("muted-users");
+    const {privKey, pubKey} = seedToKey(user.seed);
+
+    const tx = GTX.newTransaction([pubKey]);
+    tx.addOperation("toggle_mute", user.name, name, muted ? 1 : 0);
+    tx.addOperation('nop', uniqueId());
+    tx.sign(privKey, pubKey);
+    return tx.postAndWaitConfirmation();
+}
+
+export function getMutedUsers(user: User): Promise<string[]> {
+    const mutedUsers: string[] = boomerang.get("muted-users");
+
+    if (mutedUsers != null) {
+        return new Promise<string[]>(resolve => resolve(mutedUsers));
+    }
+
+    return GTX.query("get_muted_users", { username: user.name })
+        .then((users: string[]) => {
+            boomerang.set("muted-users", users, 86000);
+            return users;
+        });
 }
 
 interface BlockchainUser {

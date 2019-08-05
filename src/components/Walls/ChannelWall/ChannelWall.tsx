@@ -24,6 +24,7 @@ import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
 import {getRepresentatives} from '../../../blockchain/RepresentativesService';
 import {NewTopicButton} from '../../buttons/NewTopicButton';
 import {Favorite, FavoriteBorder, Inbox} from '@material-ui/icons';
+import {getMutedUsers} from "../../../blockchain/UserService";
 
 interface MatchParams {
     channel: string
@@ -45,6 +46,7 @@ export interface ChannelWallState {
     countOfFollowers: number;
     selector: string;
     popularSelector: string;
+    mutedUsers: string[];
 }
 
 const StyledSelect = styled(Select)({
@@ -79,7 +81,8 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
             countOfTopics: 0,
             countOfFollowers: 0,
             selector: OPTIONS.recent,
-            popularSelector: OPTIONS.popularWeek
+            popularSelector: OPTIONS.popularWeek,
+            mutedUsers: []
         };
 
         this.retrieveTopics = this.retrieveTopics.bind(this);
@@ -97,6 +100,7 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
         const user: User = getUser();
         if (user != null) {
             getFollowedChannels(user.name).then(channels => this.setState({channelFollowed: channels.includes(channel.toLocaleLowerCase())}));
+            getMutedUsers(user).then(users => this.setState({mutedUsers: users}));
         }
 
         countChannelFollowers(channel).then(count => this.setState({countOfFollowers: count}));
@@ -284,11 +288,17 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
                             : <div/>
                         }
                         <br/><br/>
-                        {this.state.topics.map(topic => <TopicOverviewCard
-                            key={topic.id}
-                            topic={topic}
-                            isRepresentative={this.state.representatives.includes(topic.author)}
-                        />)}
+                        {this.state.topics.map(topic => {
+                            if (!this.state.mutedUsers.includes(topic.author)) {
+                                return (<TopicOverviewCard
+                                    key={topic.id}
+                                    topic={topic}
+                                    isRepresentative={this.state.representatives.includes(topic.author)}
+                                />);
+                            } else {
+                                return (<div/>);
+                            }
+                        })}
                     </div>
                     {this.renderLoadMoreButton()}
                     {getUser() != null ? <NewTopicButton channel={this.props.match.params.channel}

@@ -1,6 +1,6 @@
 import React from 'react';
 import {styled} from '@material-ui/core/styles';
-import {Topic} from '../../../types';
+import {Topic, User} from '../../../types';
 import {
     getAllTopicsByPopularityAfterTimestamp,
     getTopicsAfterTimestamp,
@@ -19,6 +19,7 @@ import LoadMoreButton from '../../buttons/LoadMoreButton';
 import {TrendingChannels} from '../../TrendingTags/TrendingTags';
 import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
 import {getRepresentatives} from '../../../blockchain/RepresentativesService';
+import {getMutedUsers} from "../../../blockchain/UserService";
 
 interface Props {
     type: string;
@@ -31,6 +32,7 @@ interface State {
     couldExistOlderTopics: boolean;
     selector: string;
     popularSelector: string;
+    mutedUsers: string[];
 }
 
 const StyledSelector = styled(Select)({
@@ -59,7 +61,8 @@ class TopicWall extends React.Component<Props, State> {
             isLoading: true,
             couldExistOlderTopics: false,
             selector: SELECTOR_OPTIONS.recent,
-            popularSelector: SELECTOR_OPTIONS.popularWeek
+            popularSelector: SELECTOR_OPTIONS.popularWeek,
+            mutedUsers: []
         };
 
         this.retrieveLatestTopics = this.retrieveLatestTopics.bind(this);
@@ -134,11 +137,17 @@ class TopicWall extends React.Component<Props, State> {
                             : <div/>
                         }
                         <br/><br/>
-                        {this.state.topics.map(topic => <TopicOverviewCard
-                            key={'card-' + topic.id}
-                            topic={topic}
-                            isRepresentative={this.state.representatives.includes(topic.author)}
-                        />)}
+                        {this.state.topics.map(topic => {
+                            if (!this.state.mutedUsers.includes(topic.author)) {
+                                return (<TopicOverviewCard
+                                    key={'card-' + topic.id}
+                                    topic={topic}
+                                    isRepresentative={this.state.representatives.includes(topic.author)}
+                                />);
+                            } else {
+                                return (<div/>);
+                            }
+                        })}
                     </div>
                     {this.renderLoadMoreButton()}
                 </Container>
@@ -149,6 +158,10 @@ class TopicWall extends React.Component<Props, State> {
     }
 
     componentDidMount() {
+        const user: User = getUser();
+        if (user != null) {
+            getMutedUsers(user).then(users => this.setState({mutedUsers: users}));
+        }
         this.retrieveLatestTopics();
         getRepresentatives().then(representatives => this.setState({representatives: representatives}));
     }

@@ -13,7 +13,16 @@ import {
 import Typography from "@material-ui/core/Typography";
 
 import './ProfileCard.css';
-import {Favorite, Inbox, ReplyAll, StarRate, SupervisedUserCircle, VoiceOverOff} from "@material-ui/icons";
+import {
+    Favorite,
+    Inbox,
+    ReplyAll,
+    StarRate,
+    SupervisedUserCircle,
+    VoiceOverOff,
+    VolumeOff,
+    VolumeUp
+} from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
 import {
     amIAFollowerOf,
@@ -32,7 +41,7 @@ import {
 
 import {getUser, ifEmptyAvatarThenPlaceholder, isRepresentative} from "../../../util/user-util";
 import {User} from "../../../types";
-import {getUserSettingsCached, isRegistered} from "../../../blockchain/UserService";
+import {getMutedUsers, getUserSettingsCached, isRegistered, toggleUserMute} from "../../../blockchain/UserService";
 import {NotFound} from "../../NotFound/NotFound";
 import {suspendUser} from '../../../blockchain/RepresentativesService';
 import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
@@ -53,6 +62,7 @@ export interface ProfileCardState {
     avatar: string;
     description: string;
     suspendUserDialogOpen: boolean;
+    muted: boolean;
 }
 
 export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardState> {
@@ -71,7 +81,8 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
             replyStars: 0,
             avatar: "",
             description: "",
-            suspendUserDialogOpen: false
+            suspendUserDialogOpen: false,
+            muted: false
         };
 
         this.renderUserPage = this.renderUserPage.bind(this);
@@ -90,6 +101,7 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
                         const user: User = getUser();
                         if (user != null && user.name != null) {
                             amIAFollowerOf(getUser(), this.props.username).then(isAFollower => this.setState({following: isAFollower}));
+                            getMutedUsers(user).then(users => this.setState({muted: users.includes(this.props.username)}));
                         }
 
                         getUserSettingsCached(this.props.username, 1440)
@@ -131,12 +143,12 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
     renderRepresentativeActions() {
         if (isRepresentative()) {
             return (
-                <div>
-                    <Tooltip title="Suspend user">
-                        <IconButton onClick={() => this.setState({suspendUserDialogOpen: true})}>
+                <div style={{display: "inline"}}>
+                    <IconButton onClick={() => this.setState({suspendUserDialogOpen: true})}>
+                        <Tooltip title="Suspend user">
                             <VoiceOverOff fontSize="large" className="red-color"/>
-                        </IconButton>
-                    </Tooltip>
+                        </Tooltip>
+                    </IconButton>
                 </div>
             )
         }
@@ -153,11 +165,26 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
         }
     }
 
+    toggleMuteUser() {
+        const muted: boolean = !this.state.muted;
+        this.setState({muted: muted}, () => toggleUserMute(getUser(), this.props.username, muted));
+    }
+
     renderActions() {
         const user: User = getUser();
         if (user != null && this.props.username !== user.name) {
             return (
                 <div className="float-right">
+                    <IconButton onClick={() => this.toggleMuteUser()}>
+                        {this.state.muted
+                            ? <Tooltip title={"Unmute user"}>
+                                <VolumeUp fontSize={"large"} className={"green-icon"}/>
+                            </Tooltip>
+                            : <Tooltip title="Mute user">
+                                <VolumeOff fontSize={"large"} className={"red-color"}/>
+                            </Tooltip>
+                        }
+                    </IconButton>
                     {this.renderUserSuspensionDialog()}
                     {this.renderRepresentativeActions()}
                 </div>
@@ -191,7 +218,7 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
                     <Card key={"user-card"} className="profile-card">
                         {this.renderActions()}
                         {this.state.avatar !== "" ?
-                            <img src={this.state.avatar} className="avatar" alt="Profile Avatar"/> : <div></div>}
+                            <img src={this.state.avatar} className="avatar" alt="Profile Avatar"/> : <div/>}
                         <div className="profile-desc">
                             <Typography variant="subtitle1" color="textSecondary" component="p" paragraph>
                                 {this.state.description !== "" ? this.state.description : "I haven't written any description yet..."}
