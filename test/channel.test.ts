@@ -1,5 +1,3 @@
-import * as bip39 from "bip39";
-import {login, register} from "../src/blockchain/UserService";
 import {Topic, User} from "../src/types";
 import {
     countChannelFollowers,
@@ -9,7 +7,6 @@ import {
     getTrendingChannels,
     unfollowChannel
 } from "../src/blockchain/ChannelService";
-import {getANumber} from "./helper";
 import {
     countTopicsInChannel,
     createTopic,
@@ -18,23 +15,18 @@ import {
     getTopicsByChannelSortedByPopularityAfterTimestamp,
     getTopicsFromFollowedChannelsPriorToTimestamp
 } from "../src/blockchain/TopicService";
+import {CREATE_LOGGED_IN_USER} from "./users";
 
 jest.setTimeout(60000);
 
 describe("channel tests", () => {
 
-    const user = {
-        name: "anastasia_" + getANumber(),
-        password: "nastya",
-        mnemonic: bip39.generateMnemonic(160)
-    }
+    let loggedInUser: User;
 
-    var loggedInUser: User;
-
-    it("register and login user to use", async () => {
-        await register(user.name, user.password, user.mnemonic);
-        loggedInUser = await login(user.name, user.password, user.mnemonic);
+    beforeAll(async () => {
+        loggedInUser = await CREATE_LOGGED_IN_USER();
     });
+
 
     it("retrieve topics by channels queries", async () => {
         const title: string = "Chromia";

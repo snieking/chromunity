@@ -43,7 +43,7 @@ describe("user utilities tests", () => {
         expect(isGod()).toBe(false);
 
         expect(godAlias()).toBe("admin");
-        setUser(admin)
+        setUser(admin);
         expect(isGod()).toBe(true);
     });
 

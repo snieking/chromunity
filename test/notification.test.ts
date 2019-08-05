@@ -1,8 +1,4 @@
-import {Topic, User, UserNotification} from '../src/types';
-import {getANumber} from './helper';
-
-import * as bip39 from "bip39";
-import {login, register} from '../src/blockchain/UserService';
+import {User, UserNotification} from '../src/types';
 import {
     countUnreadUserNotifications,
     getUserNotificationsPriorToTimestamp,
@@ -11,43 +7,18 @@ import {
     sendNotifications,
     sendNotificationWithDeterministicId
 } from '../src/blockchain/NotificationService';
+import {CREATE_LOGGED_IN_USER} from "./users";
 
 jest.setTimeout(30000);
 
 describe("notification tests", () => {
 
-    const user = {
-        name: "snieking_" + getANumber(),
-        password: "userPSW1",
-        mnemonic: bip39.generateMnemonic(160)
-    };
+    let loggedInUser: User;
+    let secondLoggedInUser: User;
 
-    const user2 = {
-        name: "snieking_" + getANumber(),
-        password: "userPSW1",
-        mnemonic: bip39.generateMnemonic(160)
-    };
-
-    var loggedInUser: User;
-    var secondLoggedInUser: User;
-    var topic: Topic;
-
-    it("register first user to use for notifications", async () => {
-        await register(user.name, user.password, user.mnemonic);
-    });
-
-    it("register second user to use for notifications", async () => {
-        await register(user2.name, user2.password, user2.mnemonic);
-    });
-
-    it("login first user to use for notifications", async () => {
-        loggedInUser = await login(user.name, user.password, user.mnemonic);
-        expect(loggedInUser.name).toBe(user.name);
-    });
-
-    it("login second user to use for notifications", async () => {
-        secondLoggedInUser = await login(user2.name, user2.password, user2.mnemonic);
-        expect(secondLoggedInUser.name).toBe(user2.name);
+    beforeAll(async () => {
+        loggedInUser = await CREATE_LOGGED_IN_USER();
+        secondLoggedInUser = await CREATE_LOGGED_IN_USER();
     });
 
     it("send notification, expect unread to be 1", async () => {

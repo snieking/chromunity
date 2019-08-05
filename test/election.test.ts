@@ -1,4 +1,4 @@
-import {RepresentativeAction, RepresentativeReport, UserMeta} from './../src/types';
+import {RepresentativeAction, RepresentativeReport, UserMeta} from '../src/types';
 import {getUserMeta, login, register} from "../src/blockchain/UserService";
 import {
     completeElection,
@@ -35,36 +35,26 @@ import {
     removeTopicReply
 } from "../src/blockchain/TopicService";
 import {adminAddRepresentative, adminRemoveRepresentative} from "../src/blockchain/AdminService";
+import {ADMIN_USER, JOKER_USER} from "./users";
 
 
 jest.setTimeout(30000);
 
 describe("election test", () => {
 
-    const admin = {
-        name: "admin",
-        password: "admin",
-        mnemonic: "rule comfort scheme march fresh defy radio width crash family toward index"
-    }
-
-    const userToBeSuspended = {
-        name: "joker",
-        password: "joker",
-        mnemonic: "rule comfort scheme march fresh defy radio width crash family toward bike"
-    }
-
     const channel: string = "ElectionTests";
 
-    var adminUser: User;
+    let adminUser: User;
 
     it("register admin", async () => {
+        const admin = ADMIN_USER;
         await expect(register(admin.name, admin.password, admin.mnemonic)).resolves.toBe(null);
         console.log("Registered", admin.name, " with mnemonic", admin.mnemonic);
     });
 
     it("login admin", async () => {
+        const admin = ADMIN_USER;
         adminUser = await login(admin.name, admin.password, admin.mnemonic);
-        console.log("Logged in", adminUser);
 
         expect(adminUser).toBeDefined();
         expect(adminUser.name).toBe(admin.name);
@@ -95,7 +85,7 @@ describe("election test", () => {
 
         expect(election.id).toBe(electionId);
         expect(representatives).toContain(adminUser.name);
-    })
+    });
 
     it("as a representative remove topic and replies", async () => {
         const title: string = "This post should be removed";
@@ -121,6 +111,7 @@ describe("election test", () => {
     });
 
     it("suspend user", async () => {
+        const userToBeSuspended = JOKER_USER;
         await register(userToBeSuspended.name, userToBeSuspended.password, userToBeSuspended.mnemonic);
         const user: User = await login(userToBeSuspended.name, userToBeSuspended.password, userToBeSuspended.mnemonic);
 
@@ -132,9 +123,10 @@ describe("election test", () => {
         setUserMeta(meta);
         meta = await getCachedUserMeta();
         expect(meta.suspended_until).toBeGreaterThan(Date.now());
-    })
+    });
 
     it("admin toggle representative on user", async () => {
+        const userToBeSuspended = JOKER_USER;
         var representatives: string[] = await getRepresentatives();
 
         expect(representatives.length).toBe(1);
@@ -146,7 +138,7 @@ describe("election test", () => {
         await adminRemoveRepresentative(adminUser, userToBeSuspended.name);
         representatives = await getRepresentatives();
         expect(representatives.length).toBe(1);
-    })
+    });
 
     it("report topic & reply and handle them as a representative", async () => {
         var unhandledReports: RepresentativeReport[] = await getUnhandledReports();
@@ -171,6 +163,6 @@ describe("election test", () => {
         await handleReport(adminUser, unhandledReports[0].id);
         unhandledReports = await getUnhandledReports();
         expect(unhandledReports.length).toBe(1);
-    })
+    });
 
 });

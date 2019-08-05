@@ -1,7 +1,3 @@
-import {getANumber} from "./helper";
-
-import * as bip39 from "bip39";
-import {login, register} from "../src/blockchain/UserService";
 import {Topic, User} from "../src/types";
 import {
     amIAFollowerOf,
@@ -16,34 +12,18 @@ import {
     getTopicsFromFollowsAfterTimestamp,
     getTopicsFromFollowsPriorToTimestamp
 } from "../src/blockchain/TopicService";
+import {CREATE_LOGGED_IN_USER} from "./users";
 
 jest.setTimeout(30000);
 
 describe("following tests", () => {
 
-    const user1 = {
-        name: "riccardo_" + getANumber(),
-        password: "nastya",
-        mnemonic: bip39.generateMnemonic(160)
-    }
+    let loggedInUser: User;
+    let loggedInUser2: User;
 
-    const user2 = {
-        name: "henrik_" + getANumber(),
-        password: "nastya",
-        mnemonic: bip39.generateMnemonic(160)
-    }
-
-    var loggedInUser: User;
-    var loggedInUser2: User;
-
-    it("register and login user to use", async () => {
-        await register(user1.name, user1.password, user1.mnemonic);
-        loggedInUser = await login(user1.name, user1.password, user1.mnemonic);
-    });
-
-    it("register and login second user to use", async () => {
-        await register(user2.name, user2.password, user2.mnemonic);
-        loggedInUser2 = await login(user2.name, user2.password, user2.mnemonic);
+    beforeAll(async () => {
+        loggedInUser = await CREATE_LOGGED_IN_USER();
+        loggedInUser2 = await CREATE_LOGGED_IN_USER();
     });
 
     it("user follow another user", async () => {
