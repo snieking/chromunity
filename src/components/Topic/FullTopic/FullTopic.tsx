@@ -47,7 +47,7 @@ import {
     StarRate,
     SubdirectoryArrowRight
 } from "@material-ui/icons";
-import {getUserSettingsCached} from "../../../blockchain/UserService";
+import {getMutedUsers, getUserSettingsCached} from "../../../blockchain/UserService";
 import TopicReplyCard from "../TopicReplyCard/TopicReplyCard";
 import ReactMarkdown from 'react-markdown';
 import LoadMoreButton from "../../buttons/LoadMoreButton";
@@ -75,6 +75,7 @@ export interface FullTopicState {
     couldExistOlderReplies: boolean;
     isLoading: boolean;
     removeTopicDialogOpen: boolean;
+    mutedUsers: string[];
 }
 
 const repliesPageSize: number = 25;
@@ -107,7 +108,8 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
             replyMessage: "",
             couldExistOlderReplies: false,
             isLoading: true,
-            removeTopicDialogOpen: false
+            removeTopicDialogOpen: false,
+            mutedUsers: []
         };
 
         this.retrieveLatestReplies = this.retrieveLatestReplies.bind(this);
@@ -119,6 +121,10 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
     componentDidMount(): void {
         const id = this.props.match.params.id;
         const user: User = getUser();
+
+        if (user != null) {
+            getMutedUsers(user).then(users => this.setState({mutedUsers: users}));
+        }
 
         getTopicById(id).then(topic => this.consumeTopicData(topic));
         this.retrieveLatestReplies();
@@ -461,24 +467,29 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
     }
 
     render() {
-        return (
-            <Container fixed>
-                <br/>
-                {this.state.isLoading ? <LinearProgress variant="query"/> : <div></div>}
-                {this.renderTopic()}
-                {this.state.topicReplies.length > 0
-                    ? (<SubdirectoryArrowRight className="nav-button button-center"/>)
-                    : (<div/>)}
-                {this.state.topicReplies.map(reply => <TopicReplyCard
-                    key={"reply-" + reply.id}
-                    reply={reply}
-                    indention={0}
-                    topicId={this.state.topic.id}
-                    representatives={this.state.representatives}
-                />)}
-                {this.renderLoadMoreButton()}
-                {this.renderReplyButton()}
-            </Container>
-        )
+        if (!this.state.mutedUsers.includes(this.state.topic.author)) {
+            return (
+                <Container fixed>
+                    <br/>
+                    {this.state.isLoading ? <LinearProgress variant="query"/> : <div/>}
+                    {this.renderTopic()}
+                    {this.state.topicReplies.length > 0
+                        ? (<SubdirectoryArrowRight className="nav-button button-center"/>)
+                        : (<div/>)}
+                    {this.state.topicReplies.map(reply => <TopicReplyCard
+                        key={"reply-" + reply.id}
+                        reply={reply}
+                        indention={0}
+                        topicId={this.state.topic.id}
+                        representatives={this.state.representatives}
+                        mutedUsers={this.state.mutedUsers}
+                    />)}
+                    {this.renderLoadMoreButton()}
+                    {this.renderReplyButton()}
+                </Container>
+            );
+        } else {
+            return (<div/>);
+        }
     }
 }

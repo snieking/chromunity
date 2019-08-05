@@ -42,6 +42,7 @@ interface Props {
     reply: TopicReply;
     indention: number;
     representatives: string[];
+    mutedUsers: string[];
 }
 
 interface State {
@@ -76,7 +77,7 @@ class TopicReplyCard extends React.Component<Props, State> {
             subReplies: [],
             userMeta: {name: "", suspended_until: Date.now() + 10000, times_suspended: 0},
             removeReplyDialogOpen: false,
-            isLoading: false
+            isLoading: false,
         };
 
         this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
@@ -85,28 +86,33 @@ class TopicReplyCard extends React.Component<Props, State> {
     }
 
     render() {
-        return (
-            <div>
-                <div className={this.props.reply.removed ? "removed" : ""}>
-                    <Card
-                        raised={true}
-                        key={this.props.reply.id}
-                        className='reply-card'
-                        style={{marginLeft: this.props.indention + "px"}}
-                    >
-                        {this.state.isLoading ? <LinearProgress/> : <div/>}
-                        {this.renderCardContent()}
-                    </Card>
+        if (!this.props.mutedUsers.includes(this.props.reply.author)) {
+            return (
+                <div>
+                    <div className={this.props.reply.removed ? "removed" : ""}>
+                        <Card
+                            raised={true}
+                            key={this.props.reply.id}
+                            className='reply-card'
+                            style={{marginLeft: this.props.indention + "px"}}
+                        >
+                            {this.state.isLoading ? <LinearProgress/> : <div/>}
+                            {this.renderCardContent()}
+                        </Card>
+                    </div>
+                    {this.state.subReplies.map(reply => <TopicReplyCard
+                        key={"reply-" + reply.id}
+                        reply={reply}
+                        indention={this.props.indention + 10}
+                        topicId={this.props.topicId}
+                        representatives={this.props.representatives}
+                        mutedUsers={this.props.mutedUsers}
+                    />)}
                 </div>
-                {this.state.subReplies.map(reply => <TopicReplyCard
-                    key={"reply-" + reply.id}
-                    reply={reply}
-                    indention={this.props.indention + 10}
-                    topicId={this.props.topicId}
-                    representatives={this.props.representatives}
-                />)}
-            </div>
-        );
+            );
+        } else {
+            return (<div/>);
+        }
     }
 
     componentDidMount() {

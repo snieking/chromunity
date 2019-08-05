@@ -85,6 +85,16 @@
                                 <string>module/user/meta/queries.rell</string>
                             </entry>
 
+                            <entry key="user/mute/index.rell">
+                                <string>module/user/mute/index.rell</string>
+                            </entry>
+                            <entry key="user/mute/operations.rell">
+                                <string>module/user/mute/operations.rell</string>
+                            </entry>
+                            <entry key="user/mute/queries.rell">
+                                <string>module/user/mute/queries.rell</string>
+                            </entry>
+
                             <entry key="topic/index.rell">
                                 <string>module/topic/index.rell</string>
                             </entry>
