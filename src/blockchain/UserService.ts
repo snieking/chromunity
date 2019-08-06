@@ -15,14 +15,14 @@ export function register(name: string, password: string, mnemonic: string) {
     const {privKey, pubKey} = seedToKey(seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("register_user", name, pubKey);
+    tx.addOperation("register_user", name.toLocaleLowerCase(), name, pubKey);
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
 
 export function login(name: string, password: string, mnemonic: string): Promise<User> {
     setMnemonic(mnemonic);
-    return GTX.query("get_user", {name: name})
+    return GTX.query("get_user", {name: name.toLocaleLowerCase()})
         .then((blockchainUser: BlockchainUser) => {
             const seed = seedFromMnemonic(mnemonic, password);
             //const {privKey, pubKey} = seedToKey(seed);
@@ -38,39 +38,41 @@ export function login(name: string, password: string, mnemonic: string): Promise
 }
 
 export function isRegistered(name: string): Promise<boolean> {
-    return GTX.query("get_user", {name: name})
+    return GTX.query("get_user", {name: name.toLocaleLowerCase()})
         .then((any: any) => any != null)
         .catch(false);
 }
 
 export function getUserMeta(username: string): Promise<UserMeta> {
-    return GTX.query("get_user_meta", {name: username});
+    return GTX.query("get_user_meta", {name: username.toLocaleLowerCase()});
 }
 
 export function getUserSettings(user: User): Promise<UserSettings> {
-    return GTX.query("get_user_settings", {name: user.name});
+    return GTX.query("get_user_settings", {name: user.name.toLocaleLowerCase()});
 }
 
 export function getUserSettingsCached(name: string, cacheDuration: number): Promise<UserSettings> {
-    const cachedAvatar: UserSettings = boomerang.get(name);
+    const userLC: string = name.toLocaleLowerCase();
+    const cachedAvatar: UserSettings = boomerang.get(userLC);
 
     if (cachedAvatar != null) {
         return new Promise<UserSettings>(resolve => resolve(cachedAvatar));
     }
 
-    return GTX.query("get_user_settings", {name: name}).then((settings: UserSettings) => {
-        boomerang.set(name, settings, cacheDuration);
+    return GTX.query("get_user_settings", {name: userLC}).then((settings: UserSettings) => {
+        boomerang.set(userLC, settings, cacheDuration);
         return settings;
     });
 }
 
 export function updateUserSettings(user: User, avatar: string, description: string) {
-    boomerang.remove(user.name);
+    const userLC: string = user.name.toLocaleLowerCase();
+    boomerang.remove(userLC);
 
     const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("update_user_settings", user.name, avatar, description);
+    tx.addOperation("update_user_settings", userLC, avatar, description);
     tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
@@ -81,7 +83,7 @@ export function toggleUserMute(user: User, name: string, muted: boolean) {
     const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("toggle_mute", user.name, name, muted ? 1 : 0);
+    tx.addOperation("toggle_mute", user.name.toLocaleLowerCase(), name.toLocaleLowerCase(), muted ? 1 : 0);
     tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
@@ -94,7 +96,7 @@ export function getMutedUsers(user: User): Promise<string[]> {
         return new Promise<string[]>(resolve => resolve(mutedUsers));
     }
 
-    return GTX.query("get_muted_users", { username: user.name })
+    return GTX.query("get_muted_users", { username: user.name.toLocaleLowerCase() })
         .then((users: string[]) => {
             boomerang.set("muted-users", users, 86000);
             return users;

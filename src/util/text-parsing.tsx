@@ -20,7 +20,7 @@ function parseHashtags(message: string): string {
 
 function parseUsers(message: string): string {
     return message.replace(
-        /(@)([a-z\d-]+)/gi,
+        /(@)([a-zA-Z\d-_]+)/gi,
         "<a  class='purple-typography' href='/u/$2'><b>$1$2</b></a>"
     );
 }

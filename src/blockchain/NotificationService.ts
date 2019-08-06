@@ -18,7 +18,7 @@ export function removeNotificationsForId(fromUser: User, id: string, usernames: 
     const {privKey, pubKey} = seedToKey(fromUser.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("remove_notifications_for_users", fromUser.name, id, usernames);
+    tx.addOperation("remove_notifications_for_users", fromUser.name.toLocaleLowerCase(), id, usernames.map(name => name.toLocaleLowerCase()));
     tx.addOperation("nop", uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
@@ -28,37 +28,37 @@ function sendNotificationsInternal(fromUser: User, id: string, trigger: string, 
     const {privKey, pubKey} = seedToKey(fromUser.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("create_notifications_for_users", fromUser.name, id, trigger, content, usernames);
+    tx.addOperation("create_notifications_for_users", fromUser.name.toLocaleLowerCase(), id, trigger, content, usernames.map(name => name.toLocaleLowerCase()));
     tx.addOperation("nop", uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
 
 export function markNotificationsRead(user: User) {
-    boomerang.remove("notis-" + user.name);
+    boomerang.remove("notis-" + user.name.toLocaleLowerCase());
 
     const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
     const epochSeconds = Math.round(new Date().getTime() / 1000);
-    tx.addOperation("mark_notifications_since_timestamp_read", user.name, epochSeconds);
+    tx.addOperation("mark_notifications_since_timestamp_read", user.name.toLocaleLowerCase(), epochSeconds);
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
 
 export function getUserNotificationsPriorToTimestamp(user: string, timestamp: number, pageSize: number): Promise<UserNotification[]> {
     return GTX.query("get_user_notifications_prior_to_timestamp", {
-        name: user,
+        name: user.toLocaleLowerCase(),
         timestamp: timestamp,
         page_size: pageSize
     });
 }
 
 export function countUnreadUserNotifications(user: string): Promise<number> {
-    const count = boomerang.get("notis-" + user);
+    const count = boomerang.get("notis-" + user.toLocaleLowerCase());
 
     if (count == null) {
-        return GTX.query('count_unread_user_notifications', {name: user})
+        return GTX.query('count_unread_user_notifications', {name: user.toLocaleLowerCase()})
             .then((arr: any[]) => {
                 boomerang.set("notis-" + user, arr.length, 60);
                 return arr.length;

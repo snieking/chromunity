@@ -1,4 +1,5 @@
 operation create_topic(id: text, username: text, channel_key: name, channel_name: name, title: name, message: text) {
+    log("Username: ", username);
     val author = get_verified_user(username);
 
     val topic = create topic(

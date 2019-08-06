@@ -5,7 +5,7 @@ query get_topics_by_channel_prior_to_timestamp(name, timestamp, page_size: integ
         .topic.last_modified < timestamp
     } (
         id=.topic.id,
-        author=.topic.author.name,
+        author=.topic.author.display_name,
         title=.topic.title,
         message=.topic.message,
         timestamp=.topic.timestamp,
@@ -19,7 +19,7 @@ query get_topics_by_channel_after_timestamp(name, timestamp) {
         .topic.last_modified > timestamp
     } (
         id=.topic.id,
-        author=.topic.author.name,
+        author=.topic.author.display_name,
         title=.topic.title,
         message=.topic.message,
         timestamp=.topic.timestamp,
@@ -44,7 +44,7 @@ query get_topics_by_followed_channels_prior_to_timestamp(username: text, timesta
     }
     (
         id=channel.topic.id,
-        author=channel.topic.author.name,
+        author=channel.topic.author.display_name,
         title=channel.topic.title,
         message=channel.topic.message,
         timestamp=channel.topic.timestamp,

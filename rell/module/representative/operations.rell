@@ -38,7 +38,8 @@ operation suspend_user(username: text, user_to_be_suspended: text) {
     val recentElection = representative_election@{ .completed == true } ( .id, sort .timestamp );
     val representative = representative @{ user, .representative_election.id == recentElection.id };
 
-    val suspendee_meta = user_meta@{ user@{ user_to_be_suspended }};
+    val suspendee = user@{ .name == user_to_be_suspended };
+    val suspendee_meta = user_meta@{ suspendee };
 
     require(suspendee_meta.suspended_until < op_context.last_block_time);
 
@@ -61,7 +62,7 @@ operation suspend_user(username: text, user_to_be_suspended: text) {
         id = op_context.transaction.tx_rid, 
         representative,
         op_context.last_block_time,
-        action = "@" + user_to_be_suspended + " was suspended for " + daysSuspended + daysString +  "by @" + user.name
+        action = "@" + suspendee.display_name + " was suspended for " + daysSuspended + daysString +  "by @" + user.display_name
     );
 }
 

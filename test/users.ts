@@ -2,7 +2,7 @@ import {getANumber} from "./helper";
 import * as bip39 from "bip39";
 import {login, register} from "../src/blockchain/UserService";
 
-const names: string[] = ["anastasia", "viktor", "alex", "riccardo", "henrik", "gus", "irene", "amy", "todd", "olle", "alisa", "or"];
+const names: string[] = ["Anastasia", "Viktor", "Alex", "Riccardo", "Henrik", "Gus", "Irene", "Amy", "Todd", "Olle", "Alisa", "Or"];
 
 const ADMIN_USER = {
     name: "admin",

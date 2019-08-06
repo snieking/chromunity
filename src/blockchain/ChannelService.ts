@@ -15,7 +15,7 @@ export function unfollowChannel(user: User, name: string) {
 }
 
 export function getFollowedChannels(user: string): Promise<string[]> {
-    return GTX.query("get_followed_channels", {username: user});
+    return GTX.query("get_followed_channels", {username: user.toLocaleLowerCase()});
 }
 
 function modifyChannelollowing(user: User, channel: string, rellOperation: string) {
@@ -23,7 +23,7 @@ function modifyChannelollowing(user: User, channel: string, rellOperation: strin
     const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation(rellOperation, user.name, channel.toLocaleLowerCase());
+    tx.addOperation(rellOperation, user.name.toLocaleLowerCase(), channel.toLocaleLowerCase());
     tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();

@@ -4,6 +4,7 @@ class admin {
 
 class user {
     key name;
+    display_name: name;
     pubkey;
     registered: integer;
 }

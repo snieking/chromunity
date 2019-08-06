@@ -12,7 +12,7 @@ export function createTopic(user: User, channelName: string, title: string, mess
     const topicId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("create_topic", topicId, user.name, channelName.toLocaleLowerCase(), channelName, title, message);
+    tx.addOperation("create_topic", topicId, user.name.toLocaleLowerCase(), channelName.toLocaleLowerCase(), channelName, title, message);
     tx.sign(privKey, pubKey);
 
     return tx.postAndWaitConfirmation()
@@ -35,7 +35,7 @@ function modifyText(user: User, id: string, updatedText: string, rellOperation: 
     const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation(rellOperation, id, user.name, updatedText);
+    tx.addOperation(rellOperation, id, user.name.toLocaleLowerCase(), updatedText);
     tx.sign(privKey, pubKey);
 
     return tx.postAndWaitConfirmation();
@@ -46,7 +46,7 @@ export function createTopicReply(user: User, topicId: string, message: string) {
     const replyId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("create_reply", topicId, replyId, user.name, message);
+    tx.addOperation("create_reply", topicId, replyId, user.name.toLocaleLowerCase(), message);
     tx.sign(privKey, pubKey);
 
     return postTopicReply(user, tx, topicId, message, replyId);
@@ -57,7 +57,7 @@ export function createTopicSubReply(user: User, topicId: string, replyId: string
     const subReplyId = uniqueId();
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("create_sub_reply", topicId, replyId, subReplyId, user.name, message);
+    tx.addOperation("create_sub_reply", topicId, replyId, subReplyId, user.name.toLocaleLowerCase(), message);
     tx.sign(privKey, pubKey);
     return postTopicReply(user, tx, topicId, message, subReplyId);
 }
@@ -66,8 +66,9 @@ function postTopicReply(user: User, tx: any, topicId: string, message: string, r
     return tx.postAndWaitConfirmation()
         .then((promise: any) => {
             getTopicSubscribers(topicId)
-                .then(users => sendNotifications(user,
-                    createReplyTriggerString(user.name, topicId), message, users.filter(item => item !== user.name)));
+                .then(users => sendNotifications(user, createReplyTriggerString(user.name, topicId), message,
+                    users.map(name => name.toLocaleLowerCase())
+                        .filter(item => item !== user.name)));
             return promise;
         });
 }
@@ -81,7 +82,7 @@ export function removeTopic(user: User, topicId: string) {
     const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("remove_topic", user.name, topicId);
+    tx.addOperation("remove_topic", user.name.toLocaleLowerCase(), topicId);
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
@@ -90,7 +91,7 @@ export function removeTopicReply(user: User, topicReplyId: string) {
     const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("remove_topic_reply", user.name, topicReplyId);
+    tx.addOperation("remove_topic_reply", user.name.toLocaleLowerCase(), topicReplyId);
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
@@ -109,7 +110,7 @@ function getTopicRepliesForTimestamp(topicId: string, timestamp: number, pageSiz
 
 export function getTopicRepliesByUserPriorToTimestamp(name: string, timestamp: number, pageSize: number): Promise<TopicReply[]> {
     return GTX.query("get_topic_replies_by_user_prior_to_timestamp", {
-        name: name,
+        name: name.toLocaleLowerCase(),
         timestamp: timestamp,
         page_size: pageSize
     });
@@ -121,14 +122,13 @@ export function getTopicSubReplies(replyId: string): Promise<TopicReply[]> {
 
 export function getTopicsByUserPriorToTimestamp(username: string, timestamp: number, pageSize: number): Promise<Topic[]> {
     return GTX.query("get_topics_by_user_id_prior_to_timestamp", {
-        name: username,
+        name: username.toLocaleLowerCase(),
         timestamp: timestamp,
         page_size: pageSize
-    })
-        .then((topics: Topic[]) => {
-            topics.forEach(topic => topicsCache.set(topic.id, topic));
-            return topics;
-        });
+    }).then((topics: Topic[]) => {
+        topics.forEach(topic => topicsCache.set(topic.id, topic));
+        return topics;
+    });
 }
 
 export function getTopicsByChannelPriorToTimestamp(channelName: string, timestamp: number, pageSize: number): Promise<Topic[]> {
@@ -136,8 +136,7 @@ export function getTopicsByChannelPriorToTimestamp(channelName: string, timestam
         name: channelName.toLocaleLowerCase(),
         timestamp: timestamp,
         page_size: pageSize
-    })
-        .then((topics: Topic[]) => {
+    }).then((topics: Topic[]) => {
             topics.forEach(topic => topicsCache.set(topic.id, topic));
             return topics;
         });
@@ -147,8 +146,7 @@ export function getTopicsByChannelAfterTimestamp(channelName: string, timestamp:
     return GTX.query("get_topics_by_channel_after_timestamp", {
         name: channelName.toLocaleLowerCase(),
         timestamp: timestamp
-    })
-        .then((topics: Topic[]) => {
+    }).then((topics: Topic[]) => {
             topics.forEach(topic => topicsCache.set(topic.id, topic));
             return topics;
         });
@@ -190,7 +188,7 @@ function modifyRatingAndSubscription(user: User, id: string, rellOperation: stri
     const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation(rellOperation, user.name, id);
+    tx.addOperation(rellOperation, user.name.toLocaleLowerCase(), id);
     tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
@@ -243,7 +241,7 @@ export function getTopicsFromFollowsPriorToTimestamp(user: User, timestamp: numb
 }
 
 function getTopicsFromFollowsForTimestamp(user: User, timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
-    return GTX.query(rellOperation, {name: user.name, timestamp: timestamp, page_size: pageSize});
+    return GTX.query(rellOperation, {name: user.name.toLocaleLowerCase(), timestamp: timestamp, page_size: pageSize});
 }
 
 export function countTopicsByUser(name: string) {
@@ -263,12 +261,12 @@ export function countReplyStarRatingForUser(name: string) {
 }
 
 function countByUser(name: string, rellOperation: string): Promise<number> {
-    return GTX.query(rellOperation, {name: name});
+    return GTX.query(rellOperation, {name: name.toLocaleLowerCase()});
 }
 
 export function getTopicsFromFollowedChannelsPriorToTimestamp(user: User, timestamp: number, pageSize: number): Promise<Topic[]> {
     return GTX.query("get_topics_by_followed_channels_prior_to_timestamp", {
-        username: user.name,
+        username: user.name.toLocaleLowerCase(),
         timestamp: timestamp,
         page_size: pageSize
     }).then((topics: Topic[]) => {
@@ -297,5 +295,5 @@ export function getTopicsByChannelSortedByPopularityAfterTimestamp(name: string,
 }
 
 function getTopicsByPopularityAfterTimestamp(name: string, timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
-    return GTX.query(rellOperation, {name: name, timestamp: timestamp, page_size: pageSize});
+    return GTX.query(rellOperation, {name: name.toLocaleLowerCase(), timestamp: timestamp, page_size: pageSize});
 }

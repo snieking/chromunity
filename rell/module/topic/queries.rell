@@ -3,7 +3,7 @@ query get_topics_after_timestamp(timestamp, page_size: integer) {
         .last_modified > timestamp
     }(
         .id,
-        author=.author.name,
+        author=.author.display_name,
         .title,
         .message,
         -sort .last_modified,
@@ -17,7 +17,7 @@ query get_topics_prior_to_timestamp(timestamp, page_size: integer) {
         .last_modified < timestamp
     }(
         .id,
-        author=.author.name,
+        author=.author.display_name,
         .title,
         .message,
         -sort .last_modified,
@@ -34,7 +34,7 @@ query get_topic_replies_prior_to_timestamp(topic_id: text, timestamp, page_size:
     }(
         .id,
         topic_id = .topic.id,
-        author=.author.name,
+        author=.author.display_name,
         .message,
         .is_sub_reply,
         .removed,
@@ -50,7 +50,7 @@ query get_topic_replies_after_timestamp(topic_id: text, timestamp, page_size: in
     }(
         .id,
         topic_id = .topic.id,
-        author=.author.name,
+        author=.author.display_name,
         .message,
         .is_sub_reply,
         .removed,
@@ -62,7 +62,7 @@ query get_topic_replies_by_user_prior_to_timestamp(name, timestamp, page_size: i
     return topic_reply@*{ .author.name == name, .timestamp < timestamp } (
         .id,
         topic_id = .topic.id,
-        author=.author.name,
+        author=.author.display_name,
         .message,
         .is_sub_reply,
         .removed,
@@ -81,7 +81,7 @@ query count_replies_by_user(name): integer {
 query get_sub_replies(parent_reply_id: text) {
     return sub_reply@*{ .parent_reply.id == parent_reply_id } (
         id=.child_reply.id,
-        author=.child_reply.author.name,
+        author=.child_reply.author.display_name,
         message=.child_reply.message,
         is_sub_reply=.child_reply.is_sub_reply,
         removed = .child_reply.removed,
@@ -95,7 +95,7 @@ query get_topics_by_user_id_prior_to_timestamp(name, timestamp, page_size: integ
         .last_modified < timestamp
     }(
         .id,
-        author=.author.name,
+        author=.author.display_name,
         .title,
         .message,
         -sort .last_modified,
@@ -110,7 +110,7 @@ query get_topics_from_follows_after_timestamp(name, timestamp, page_size: intege
         .last_modified > timestamp
     }(
         .id,
-        author=.author.name,
+        author=.author.display_name,
         .title,
         .message,
         -sort .last_modified,
@@ -125,7 +125,7 @@ query get_topics_from_follows_prior_to_timestamp(name, timestamp, page_size: int
         .last_modified < timestamp
     }(
         .id,
-        author=.author.name,
+        author=.author.display_name,
         .title,
         .message,
         .removed,
@@ -139,7 +139,7 @@ query get_topic_by_id(id: text) {
         .id == id
     }(
         .id,
-        author=.author.name,
+        author=.author.display_name,
         .title,
         .message,
         .removed,
@@ -152,7 +152,7 @@ query get_all_topics_by_stars_since_timestamp(timestamp, page_size: integer) {
     return tmp_topic_rating@*{ .topic.timestamp > timestamp } (
         -sort .stars,
         id = .topic.id,
-        author=.topic.author.name,
+        author=.topic.author.display_name,
         title=.topic.title,
         message=.topic.message,
         last_modified=.topic.last_modified,
@@ -167,7 +167,7 @@ query get_topics_by_follows_and_stars_since_timestamp(name, timestamp, page_size
         } (
         -sort .stars,
         id = .topic.id,
-        author=.topic.author.name,
+        author=.topic.author.display_name,
         title=.topic.title,
         message=.topic.message,
         last_modified=.topic.last_modified,
@@ -183,7 +183,7 @@ query get_topics_by_channel_after_timestamp_sorted_by_popularity(name, timestamp
     } (
         -sort .stars,
         id = channel.topic.id,
-        author=channel.topic.author.name,
+        author=channel.topic.author.display_name,
         title=channel.topic.title,
         message=channel.topic.message,
         last_modified=channel.topic.last_modified,
@@ -200,7 +200,7 @@ query get_topics_by_followed_channels_after_timestamp_sorted_by_popularity(name,
     } (
         -sort .stars,
         id = channel.topic.id,
-        author=channel.topic.author.name,
+        author=channel.topic.author.display_name,
         title=channel.topic.title,
         message=channel.topic.message,
         last_modified=channel.topic.last_modified,

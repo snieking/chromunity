@@ -13,7 +13,7 @@ export function createFollowing(user: User, following: string) {
             const id: string = createDeterministicId(user.name, following);
             const trigger: string = createFollowingNotificationTrigger(user.name);
 
-            sendNotificationWithDeterministicId(user, id, trigger, "", [following])
+            sendNotificationWithDeterministicId(user, id, trigger, "", [following.toLocaleLowerCase()])
 
             return response;
         });
@@ -22,7 +22,7 @@ export function createFollowing(user: User, following: string) {
 export function removeFollowing(user: User, following: string) {
     return updateFollowing(user, following, "remove_following")
         .then((response: any) => {
-            removeNotificationsForId(user, createDeterministicId(user.name, following), [following]);
+            removeNotificationsForId(user, createDeterministicId(user.name, following), [following.toLocaleLowerCase()]);
             return response;
         });
 }
@@ -32,39 +32,39 @@ function createFollowingNotificationTrigger(username: string): string {
 }
 
 function createDeterministicId(follower: string, following: string) {
-    return follower + ":" + following;
+    return follower.toLocaleLowerCase() + ":" + following.toLocaleLowerCase();
 }
 
 function updateFollowing(user: User, following: string, rellOperation: string) {
-    boomerang.remove("user-" + user.name);
+    boomerang.remove("user-" + user.name.toLocaleLowerCase());
 
     const {privKey, pubKey} = seedToKey(user.seed);
 
     const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation(rellOperation, user.name, following);
+    tx.addOperation(rellOperation, user.name.toLocaleLowerCase(), following.toLocaleLowerCase());
     tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
 
 export function countUserFollowers(name: string): Promise<number> {
-    return GTX.query("get_user_followers", {name: name}).then((arr: string[]) => arr.length);
+    return GTX.query("get_user_followers", {name: name.toLocaleLowerCase()}).then((arr: string[]) => arr.length);
 }
 
 export function countUserFollowings(name: string): Promise<number> {
-    return GTX.query("get_user_follows", {name: name}).then((arr: string[]) => arr.length);
+    return GTX.query("get_user_follows", {name: name.toLocaleLowerCase()}).then((arr: string[]) => arr.length);
 }
 
 export function amIAFollowerOf(user: User, name: string): Promise<boolean> {
-    const userFollows: string[] = boomerang.get("user-" + user.name);
+    const userFollows: string[] = boomerang.get("user-" + user.name.toLocaleLowerCase());
 
     if (userFollows != null) {
-        return new Promise<boolean>(resolve => resolve(userFollows.includes(name)));
+        return new Promise<boolean>(resolve => resolve(userFollows.includes(name.toLocaleLowerCase())));
     }
 
-    return GTX.query("get_user_follows", {name: user.name})
+    return GTX.query("get_user_follows", {name: user.name.toLocaleLowerCase()})
         .then((userFollows: string[]) => {
-            boomerang.set("user-" + user.name, userFollows);
-            return userFollows.includes(name);
+            boomerang.set("user-" + user.name.toLocaleLowerCase(), userFollows.map(name => name.toLocaleLowerCase()));
+            return userFollows.includes(name.toLocaleLowerCase());
         });
 }

@@ -37,7 +37,7 @@ export function handleReport(user: User, reportId: string) {
 
     const tx = GTX.newTransaction([pubKey]);
 
-    tx.addOperation("handle_representative_report", user.name, reportId);
+    tx.addOperation("handle_representative_report", user.name.toLocaleLowerCase(), reportId);
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
@@ -47,7 +47,7 @@ export function suspendUser(user: User, userToBeSuspended: string) {
 
     const tx = GTX.newTransaction([pubKey]);
 
-    tx.addOperation("suspend_user", user.name, userToBeSuspended);
+    tx.addOperation("suspend_user", user.name.toLocaleLowerCase(), userToBeSuspended.toLocaleLowerCase());
     tx.addOperation('nop', uniqueId());
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
@@ -66,7 +66,7 @@ function report(user: User, text: string) {
 
     const tx = GTX.newTransaction([pubKey]);
 
-    tx.addOperation("create_representative_report", user.name, uniqueId(), text);
+    tx.addOperation("create_representative_report", user.name.toLocaleLowerCase(), uniqueId(), text);
     tx.sign(privKey, pubKey);
     return tx.postAndWaitConfirmation();
 }
