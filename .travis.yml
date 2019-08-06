@@ -2,6 +2,7 @@
 language: generic
 jdk: "openjdk8"
 node_js: "9.8"
+python: "3.5"
 
 dist: trusty
 
@@ -16,6 +17,7 @@ addons:
       secure: "VKnB387z+RQctdyt7FjWPXwwkCmxbLstyey72k5mauMkmWLMkFJFSM/VaiGnJKqik3DfGpV0W/wqTktLYQ+SawP17nK+IqzIB9z5ZzfRo9o8nyea0Nkb/6pIxkABnNJGAQLRIG3w8cNvPvf1FHHmZXOi613Rbq4EvYynPaMVndJU0Vrzas+StfHNWilhZ0hApB0ZTa62w3o36FMCY4hzqueip7B+qDUHRbddWe580TzPExqaKUwa26OWENtMsS/MrsvzIOsw41mkTvEnV3P7Lp8Dg+x7WwcGBfYPZ0H1VD91hEgdy+wJOoEyKWoA7lSTR7k7wx+SGXtiQBJarGCgh1UQenUr5rMtDrajVgQpJJcHc/k8MDNk1N7DLiruoW6CCy3vlZYaiC52Yu2U8z8SS0uIlE3tTiHHXG2tVoH2jJOgB7X8IAa9XruWomeHvS55KRVjta4CIebLZGVbavL4cPEVND44uHePfgdE8KbN3d2FOe/ikuq46PzijUmgfGp3lxWPYg/RjsRoPxXbbt3sCNq3TxEkCANdfDrbAqBqN0EyIMDmDYPVVI9AW5K1eRLIZfHBwrXA9Bv76QYnV0GJXWMuuXej0Q45pbVpOLrcC6WCfdEOTzmjTsgAfQSyyMgtzowDa4CS1+ZaXyQs2TxzE7Z+px2E9YQ9Bprfk5QHQ08="
 
 before_script:
+  - pip install awscli
   - npm i yarn
   - bash rell/install-postgres-10.sh
   - psql -c "create database chrotonomy;" -U postgres
@@ -23,6 +25,7 @@ before_script:
   - psql -c "grant ALL ON DATABASE chrotonomy TO postchain;" -U postgres
 
 cache:
+  pip: true
   directories:
     - node_modules
 
@@ -34,3 +37,15 @@ script:
   - npm install
   - npm run coveralls
   - sonar-scanner
+  - npm run build
+
+deploy:
+  on:
+    branch: master
+  provider: s3
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  bucket: chrotonomy-test.com
+  skip_cleanup: true
+  local_dir: build
+  cache_control: "max-age=21600"

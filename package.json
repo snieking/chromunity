@@ -28,7 +28,8 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "cp ./src/config.js ./src/config.bak.js && cp ./src/config-prod.js ./src/config.js && react-scripts build && mv ./src/config.bak.js ./src/config.js",
+    "deploy": "aws s3 cp --recursive ./build s3://chrotonomy.com",
     "test": "react-scripts test",
     "test-bc": "jest",
     "eject": "react-scripts eject",
