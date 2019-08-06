@@ -10,12 +10,6 @@ const ADMIN_USER = {
     mnemonic: "rule comfort scheme march fresh defy radio width crash family toward index"
 };
 
-const JOKER_USER = {
-    name: "joker",
-    password: "joker",
-    mnemonic: "rule comfort scheme march fresh defy radio width crash family toward bike"
-};
-
 const CREATE_RANDOM_USER = () => {
     const randomNumber = Math.floor(Math.random() * names.length);
 
@@ -32,8 +26,12 @@ const CREATE_LOGGED_IN_USER = async () => {
     return login(user.name, user.password, user.mnemonic);
 };
 
+const GET_LOGGED_IN_ADMIN_USER = async () => {
+    await register(ADMIN_USER.name, ADMIN_USER.password, ADMIN_USER.mnemonic);
+    return login(ADMIN_USER.name, ADMIN_USER.password, ADMIN_USER.mnemonic);
+};
+
 export {
-    ADMIN_USER,
-    JOKER_USER,
+    GET_LOGGED_IN_ADMIN_USER,
     CREATE_LOGGED_IN_USER
 }

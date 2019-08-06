@@ -28,6 +28,7 @@ import {
     unsubscribeFromTopic
 } from '../src/blockchain/TopicService';
 import {CREATE_LOGGED_IN_USER} from "./users";
+import {CREATE_RANDOM_TOPIC} from "./topics";
 
 jest.setTimeout(30000);
 
@@ -54,6 +55,13 @@ describe("topic tests", () => {
         const topics: Topic[] = await getTopicsByUserPriorToTimestamp(userLoggedIn.name, Date.now(), 10);
         expect(topics.length).toBeGreaterThanOrEqual(2);
         topic = topics[0];
+    });
+
+    it('create many topics', async() => {
+        Array.from({ length: 50 }).forEach(async () => {
+            const user = await CREATE_LOGGED_IN_USER();
+            CREATE_RANDOM_TOPIC(user, "general");
+        });
     });
 
     it("reply to topic and reply to a reply", async () => {
