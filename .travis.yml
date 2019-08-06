@@ -27,6 +27,9 @@ cache:
   directories:
     - node_modules
 
+install:
+  - sudo pip install awscli
+
 script:
   - cd rell
   - ./init-node.sh
@@ -37,13 +40,21 @@ script:
   - sonar-scanner
   - npm run build
 
+# Deploy using awscli to enable pruning of removed files
 deploy:
-  on:
-    branch: master
   provider: s3
   access_key_id: $AWS_ACCESS_KEY_ID
   secret_access_key: $AWS_SECRET_ACCESS_KEY
-  bucket: chrotonomy-test.com
+  bucket: test-chrotonomy.com
   skip_cleanup: true
   local_dir: build
+  acl: public_read
+  on:
+    branch: master
+  region: eu-west-1
   cache_control: "max-age=21600"
+after_deploy:
+  # Allow `awscli` to make requests to CloudFront.
+  - aws configure set preview.cloudfront true
+  # Invalidate every object in the targeted distribution.
+  - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
