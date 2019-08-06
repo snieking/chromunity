@@ -20,7 +20,7 @@ import {
 } from "@material-ui/core";
 
 import {RouteComponentProps} from "react-router";
-import {ReplyTopicButton} from "../../buttons/ReplyTopicButton";
+import ReplyTopicButton from "../../buttons/ReplyTopicButton";
 import {EditMessageButton} from "../../buttons/EditMessageButton";
 import {
     getTopicById,

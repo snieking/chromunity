@@ -12,14 +12,42 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import {ExitToApp, Face, Gavel, HowToVote, LocationCity, People, Report, RssFeed, Settings} from "@material-ui/icons";
 
 import './HeaderNav.css';
-import {NotificationsButton} from "../../buttons/NotificationsButton";
+import NotificationsButton from "../../buttons/NotificationsButton";
 import {Button, ListItemIcon, Menu, MenuItem, Tooltip, Typography} from '@material-ui/core';
 
-export interface HeaderNavProps {
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        grow: {
+            flexGrow: 1
+        },
+        menuButton: {
+            marginRight: theme.spacing(2),
+        },
+        title: {
+            display: 'none',
+            [theme.breakpoints.up('sm')]: {
+                display: 'block',
+            },
+            color: "#000000"
+        },
+        inputRoot: {
+            color: 'inherit',
+        },
+        inputInput: {
+            padding: theme.spacing(1, 1, 1, 7),
+            transition: theme.transitions.create('width'),
+            width: '100%',
+            [theme.breakpoints.up('md')]: {
+                width: 200,
+            },
+        },
+        sectionDesktop: {
+            display: 'flex'
+        }
+    }),
+);
 
-}
-
-export default function HeaderNav(props: HeaderNavProps) {
+const HeaderNav: React.FunctionComponent = (props: any) => {
     const classes = useStyles(props);
     const user = getUser();
     const [profileAnchorEl, setProfileAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -207,36 +235,6 @@ export default function HeaderNav(props: HeaderNavProps) {
             </AppBar>
         </div>
     )
-}
+};
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        grow: {
-            flexGrow: 1
-        },
-        menuButton: {
-            marginRight: theme.spacing(2),
-        },
-        title: {
-            display: 'none',
-            [theme.breakpoints.up('sm')]: {
-                display: 'block',
-            },
-            color: "#000000"
-        },
-        inputRoot: {
-            color: 'inherit',
-        },
-        inputInput: {
-            padding: theme.spacing(1, 1, 1, 7),
-            transition: theme.transitions.create('width'),
-            width: '100%',
-            [theme.breakpoints.up('md')]: {
-                width: 200,
-            },
-        },
-        sectionDesktop: {
-            display: 'flex'
-        }
-    }),
-);
+export default HeaderNav;

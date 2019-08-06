@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 
 import {Badge} from "@material-ui/core";
 import {Notifications, NotificationsActive} from "@material-ui/icons";
@@ -10,32 +10,33 @@ export interface NotificationsButtonProps {
     username: string
 }
 
-export interface NotificationsButtonState {
-    counter: number;
-}
+const NotificationsButton: React.FunctionComponent<NotificationsButtonProps> = (props) => {
 
-export class NotificationsButton extends React.Component<NotificationsButtonProps, NotificationsButtonState> {
+    const [counter, setCounter] = useState<number>(0);
 
-    constructor(props: NotificationsButtonProps) {
-        super(props);
-        this.state = {counter: 0};
-    }
+    useEffect(() => {
+        countUnreadUserNotifications(props.username).then(count => setCounter(count));
+        // eslint-disable-next-line
+    }, []);
 
-    componentDidMount(): void {
-        countUnreadUserNotifications(this.props.username).then(count => this.setState({counter: count}));
-    }
-
-    render() {
+    function render() {
         if (getUser() != null) {
             return (
-                <IconButton aria-label="Notifications" onClick={() => this.setState({counter: 0})}>
-                    <Badge className="star-badge" color="primary" badgeContent={this.state.counter}>
-                        {this.state.counter > 0 ? <NotificationsActive className="nav-button"/> :
-                            <Notifications className="nav-button"/>}
+                <IconButton aria-label="Notifications" onClick={() => setCounter(0)}>
+                    <Badge className="star-badge" color="primary" badgeContent={counter}>
+                        {counter > 0
+                            ? <NotificationsActive className="nav-button"/>
+                            : <Notifications className="nav-button"/>
+                        }
                     </Badge>
                 </IconButton>
             )
+        } else {
+            return <div/>
         }
     }
 
-}
+    return render();
+};
+
+export default NotificationsButton;

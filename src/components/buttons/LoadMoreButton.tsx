@@ -1,25 +1,20 @@
 import React from 'react';
-import {Button, createMuiTheme} from '@material-ui/core';
-import {MuiThemeProvider} from '@material-ui/core/styles';
+import {Button} from '@material-ui/core';
 
 export interface LoadMoreButtonProps {
     onClick: Function
 }
 
-const theme = createMuiTheme({palette: {primary: {main: "#FFAFC1"}}});
-
-const LoadMoreButton: React.SFC<LoadMoreButtonProps> = (props: LoadMoreButtonProps) => {
+const LoadMoreButton: React.FunctionComponent<LoadMoreButtonProps> = (props) => {
     return (
-        <MuiThemeProvider theme={theme}>
-            <Button type="submit" fullWidth color="primary"
-                    onClick={() => props.onClick()}
-                    variant="contained"
-                    style={{marginTop: "5px"}}
-            >
-                Load more
-            </Button>
-        </MuiThemeProvider>
+        <Button type="submit" fullWidth color="primary"
+                onClick={() => props.onClick()}
+                variant="contained"
+                style={{marginTop: "5px"}}
+        >
+            Load more
+        </Button>
     );
-}
+};
 
 export default LoadMoreButton;

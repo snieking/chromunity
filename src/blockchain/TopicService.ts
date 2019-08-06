@@ -271,14 +271,13 @@ export function getTopicsFromFollowedChannelsPriorToTimestamp(user: User, timest
         username: user.name,
         timestamp: timestamp,
         page_size: pageSize
-    })
-        .then((topics: Topic[]) => {
-            var seen: Set<string> = new Set<string>();
-            return topics.filter(item => {
-                let k = item.id;
-                return seen.has(k) ? false : seen.add(k);
-            })
-        });
+    }).then((topics: Topic[]) => {
+        var seen: Set<string> = new Set<string>();
+        return topics.filter(item => {
+            let k = item.id;
+            return seen.has(k) ? false : seen.add(k);
+        })
+    });
 }
 
 export function getAllTopicsByPopularityAfterTimestamp(timestamp: number, pageSize: number): Promise<Topic[]> {
@@ -294,7 +293,7 @@ export function getTopicsByFollowedChannelSortedByPopularityAfterTimestamp(name:
 }
 
 export function getTopicsByChannelSortedByPopularityAfterTimestamp(name: string, timestamp: number, pageSize: number): Promise<Topic[]> {
-    return getTopicsByPopularityAfterTimestamp(name, timestamp, pageSize, "get_topics_by_channel_after_timestamp_sorted_by_popularity");
+    return getTopicsByPopularityAfterTimestamp(name.toLocaleLowerCase(), timestamp, pageSize, "get_topics_by_channel_after_timestamp_sorted_by_popularity");
 }
 
 function getTopicsByPopularityAfterTimestamp(name: string, timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {

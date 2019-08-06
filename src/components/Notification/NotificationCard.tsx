@@ -16,7 +16,7 @@ const NotificationCard: React.FunctionComponent<NotificationCardProps> = (props)
 
     function renderTimeAgo() {
         return (
-            <Typography className="topic-timestamp right" variant="body2" component="span">
+            <Typography className="timestamp right" variant="body2" component="span">
                 {timeAgoReadable(props.notification.timestamp)}
             </Typography>
         )

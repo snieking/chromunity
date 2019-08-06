@@ -163,7 +163,7 @@ query get_all_topics_by_stars_since_timestamp(timestamp, page_size: integer) {
 query get_topics_by_follows_and_stars_since_timestamp(name, timestamp, page_size: integer) {
     return tmp_topic_rating@*{ 
             .topic.author == follow@{ .follower.name == name } ( .follows ),
-            .topic.timestamp > timestamp 
+            .topic.timestamp > timestamp
         } (
         -sort .stars,
         id = .topic.id,
