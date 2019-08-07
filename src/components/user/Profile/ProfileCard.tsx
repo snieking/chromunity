@@ -175,18 +175,19 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
         if (user != null && this.props.username !== user.name) {
             return (
                 <div className="float-right">
+                    {this.renderUserSuspensionDialog()}
+                    {this.renderRepresentativeActions()}
                     <IconButton onClick={() => this.toggleMuteUser()}>
                         {this.state.muted
                             ? <Tooltip title={"Unmute user"}>
                                 <VolumeUp fontSize={"large"} className={"green-icon"}/>
                             </Tooltip>
                             : <Tooltip title="Mute user">
-                                <VolumeOff fontSize={"large"} className={"red-color"}/>
+                                <VolumeOff fontSize={"large"} className={"purple-color"}/>
                             </Tooltip>
                         }
                     </IconButton>
-                    {this.renderUserSuspensionDialog()}
-                    {this.renderRepresentativeActions()}
+                    {this.renderFollowButton()}
                 </div>
             )
         }
@@ -224,29 +225,27 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
                                 {this.state.description !== "" ? this.state.description : "I haven't written any description yet..."}
                             </Typography>
                         </div>
-                        <div style={{float: "right", marginBottom: "5px"}}>
-                            {this.renderFollowButton()}
+                        <div style={{float: "right", marginTop: "20px"}}>
                             <Badge badgeContent={this.state.userFollowings} showZero={true} color="primary">
-                                <Tooltip title="Follows">
-                                    <SupervisedUserCircle fontSize="large" className="purple-color"
-                                                          style={{marginLeft: "0px"}}/>
+                                <Tooltip title="Following users">
+                                    <SupervisedUserCircle className="purple-color" style={{marginLeft: "0px"}}/>
                                 </Tooltip>
                             </Badge>
                             <Badge badgeContent={this.state.topicStars + this.state.replyStars} showZero={true}
                                    color="primary">
                                 <Tooltip title="Stars">
-                                    <StarRate fontSize="large" className="purple-color" style={{marginLeft: "10px"}}/>
+                                    <StarRate className="purple-color" style={{marginLeft: "10px"}}/>
                                 </Tooltip>
                             </Badge>
                             <Badge badgeContent={this.state.countOfTopics} showZero={true} color="primary">
                                 <Tooltip title="Topics">
-                                    <Inbox fontSize="large" className="purple-color" style={{marginLeft: "10px"}}/>
+                                    <Inbox className="purple-color" style={{marginLeft: "10px"}}/>
                                 </Tooltip>
                             </Badge>
                             <Badge badgeContent={this.state.countOfReplies} showZero={true} color="primary"
                                    style={{marginRight: "15px"}}>
                                 <Tooltip title="Replies">
-                                    <ReplyAll fontSize="large" className="purple-color" style={{marginLeft: "10px"}}/>
+                                    <ReplyAll className="purple-color" style={{marginLeft: "10px"}}/>
                                 </Tooltip>
                             </Badge>
                         </div>
@@ -264,9 +263,8 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
         const user: User = getUser();
         if (user != null && user.name === this.props.username) {
             return (
-                <Badge badgeContent={this.state.followers} showZero={true} color="primary"
-                       style={{marginRight: "10px"}}>
-                    <Tooltip title="Followers">
+                <Badge badgeContent={this.state.followers} showZero={true} color="primary">
+                    <Tooltip title="Follow">
                         <Favorite fontSize="large" className='purple-color'/>
                     </Tooltip>
                 </Badge>
@@ -275,7 +273,7 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
             return (
                 <IconButton onClick={() => this.toggleFollowing()}>
                     <Badge badgeContent={this.state.followers} showZero={true} color="primary">
-                        <Tooltip title="Followers">
+                        <Tooltip title="Unfollow">
                             <Favorite fontSize="large"
                                       className={(this.state.following ? 'red-icon' : 'purple-color')}/>
                         </Tooltip>

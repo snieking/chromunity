@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme: Theme) =>
             flexGrow: 1
         },
         menuButton: {
-            marginRight: theme.spacing(2),
+            marginRight: theme.spacing(1),
         },
         title: {
             display: 'none',
@@ -73,16 +73,16 @@ const HeaderNav: React.FunctionComponent = (props: any) => {
         if (user != null) {
             return (
                 <div>
-                    <Tooltip title="Notifications">
-                        <Link to={"/notifications/" + user.name}>
-                            <NotificationsButton username={user.name}/>
-                        </Link>
-                    </Tooltip>
-                    <Tooltip title="Profile">
-                        <Button aria-controls="profile-menu" aria-haspopup="true" onClick={handleProfileClick}>
+                    <Link to={"/notifications/" + user.name}>
+                        <NotificationsButton username={user.name}/>
+                    </Link>
+
+                    <Button aria-controls="profile-menu" aria-haspopup="true" onClick={handleProfileClick}>
+                        <Tooltip title="Profile">
                             <AccountCircle className="nav-button"/>
-                        </Button>
-                    </Tooltip>
+                        </Tooltip>
+                    </Button>
+
                     <Menu
                         id="profile-menu"
                         anchorEl={profileAnchorEl}
@@ -136,28 +136,29 @@ const HeaderNav: React.FunctionComponent = (props: any) => {
         if (user != null) {
             return (
                 <div>
-                    <Tooltip title="Channels">
-                        <Link to="/channels">
-                            <IconButton
-                                edge="start"
-                                className={classes.menuButton}
-                                aria-label="Open drawer"
-                            >
+                    <Link to="/channels">
+                        <IconButton
+                            edge="start"
+                            className={classes.menuButton}
+                            aria-label="Open drawer"
+                        >
+                            <Tooltip title="Channels">
                                 <RssFeed className="nav-button"/>
-                            </IconButton>
-                        </Link>
-                    </Tooltip>
-                    <Tooltip title="Followings">
-                        <Link to="/followings">
-                            <IconButton
-                                edge="start"
-                                className={classes.menuButton}
-                                aria-label="Open drawer"
-                            >
+                            </Tooltip>
+                        </IconButton>
+                    </Link>
+
+                    <Link to="/followings">
+                        <IconButton
+                            edge="start"
+                            className={classes.menuButton}
+                            aria-label="Open drawer"
+                        >
+                            <Tooltip title="Users">
                                 <People className="nav-button"/>
-                            </IconButton>
-                        </Link>
-                    </Tooltip>
+                            </Tooltip>
+                        </IconButton>
+                    </Link>
                 </div>
             )
         }
@@ -167,23 +168,30 @@ const HeaderNav: React.FunctionComponent = (props: any) => {
         <div className={classes.grow}>
             <AppBar position="static">
                 <Toolbar className="nav-toolbar">
-                    <Tooltip title="Home">
-                        <Link to="/">
-                            <IconButton
-                                edge="start"
-                                className={classes.menuButton}
-                                aria-label="Open drawer"
-                            >
+                    <Link to="/">
+                        <IconButton
+                            edge="start"
+                            className={classes.menuButton}
+                            aria-label="Open drawer"
+                        >
+                            <Tooltip title="Home">
                                 <Home className="nav-button"/>
-                            </IconButton>
-                        </Link>
-                    </Tooltip>
+                            </Tooltip>
+                        </IconButton>
+                    </Link>
                     {renderFavoriteWalls()}
-                    <Tooltip title="Governing">
-                        <Button aria-controls="gov-menu" aria-haspopup="true" onClick={handleGovClick}>
+
+                    <IconButton
+                        className={classes.menuButton}
+                        onClick={handleGovClick}
+                        aria-controls="gov-menu"
+                        aria-haspopup="true"
+                    >
+                        <Tooltip title="Governing">
                             <LocationCity className="nav-button"/>
-                        </Button>
-                    </Tooltip>
+                        </Tooltip>
+                    </IconButton>
+
                     <Menu
                         id="gov-menu"
                         anchorEl={govAnchorEl}

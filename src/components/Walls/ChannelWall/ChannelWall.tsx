@@ -1,7 +1,7 @@
 import React from 'react';
 import {styled} from '@material-ui/core/styles';
 import '../Wall.css';
-import {Badge, Container, IconButton, LinearProgress, MenuItem, Select, Tooltip} from "@material-ui/core";
+import {Badge, Container, IconButton, LinearProgress, MenuItem, Select, Tooltip, Typography} from "@material-ui/core";
 import {Topic, User} from "../../../types";
 
 import {RouteComponentProps} from "react-router";
@@ -193,28 +193,6 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
         }
     }
 
-    renderStatistics() {
-        return (
-            <div>
-                <IconButton onClick={() => this.toggleChannelFollow()}>
-                    <Badge badgeContent={this.state.countOfFollowers} color="primary">
-                        <Tooltip title={this.state.channelFollowed ? "Unfollow channel" : "Follow channel"}>
-                            {this.state.channelFollowed
-                                ? <Favorite className="red-color" fontSize="large"/>
-                                : <FavoriteBorder className="pink-color" fontSize="large"/>
-                            }
-                        </Tooltip>
-                    </Badge>
-                </IconButton>
-                <Badge badgeContent={this.state.countOfTopics} color="primary">
-                    <Tooltip title="Topics in channel">
-                        <Inbox className="pink-color" fontSize="large"/>
-                    </Tooltip>
-                </Badge>
-            </div>
-        )
-    }
-
     retrievePopularTopics() {
         this.setState({isLoading: true});
 
@@ -268,8 +246,23 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
             <div>
                 <Container>
                     <div className="thread-wall-container">
-                        <ChromiaPageHeader text={"#" + this.props.match.params.channel}/>
-                        {this.renderStatistics()}
+                        <div style={{textAlign: "center"}}>
+                            <ChromiaPageHeader text={"#" + this.props.match.params.channel}/>
+                            <Typography component="span" variant="subtitle1" className="pink-typography"
+                                        style={{display: "inline"}}>Topics: {this.state.countOfTopics}</Typography>
+                        </div>
+
+                        <IconButton onClick={() => this.toggleChannelFollow()}>
+                            <Badge badgeContent={this.state.countOfFollowers} color="primary">
+                                <Tooltip title={this.state.channelFollowed ? "Unfollow channel" : "Follow channel"}>
+                                    {this.state.channelFollowed
+                                        ? <Favorite className="red-color" fontSize="large"/>
+                                        : <FavoriteBorder className="pink-color" fontSize="large"/>
+                                    }
+                                </Tooltip>
+                            </Badge>
+                        </IconButton>
+
                         {this.state.isLoading ? <LinearProgress variant="query"/> : <div/>}
                         <StyledSelect
                             value={this.state.selector}

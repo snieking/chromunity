@@ -235,7 +235,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                         onClick={() => this.reportReply()}
                     >
                         <Tooltip title="Report">
-                            <Report className="red-color"/>
+                            <Report className="purple-color"/>
                         </Tooltip>
                     </IconButton>
                     {this.renderAdminActions()}

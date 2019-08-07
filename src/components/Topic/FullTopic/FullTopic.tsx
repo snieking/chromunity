@@ -327,7 +327,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
 
                 <IconButton aria-label="Report" onClick={() => this.reportTopic()}>
                     <Tooltip title="Report">
-                        <Report className="red-color"/>
+                        <Report className="purple-color"/>
                     </Tooltip>
                 </IconButton>
 
