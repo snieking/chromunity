@@ -23,7 +23,7 @@ import {
 import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
 import {getRepresentatives} from '../../../blockchain/RepresentativesService';
 import {NewTopicButton} from '../../buttons/NewTopicButton';
-import {Favorite, FavoriteBorder, Inbox} from '@material-ui/icons';
+import {Favorite, FavoriteBorder} from '@material-ui/icons';
 import {getMutedUsers} from "../../../blockchain/UserService";
 
 interface MatchParams {
