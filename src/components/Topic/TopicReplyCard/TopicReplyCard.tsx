@@ -200,9 +200,7 @@ class TopicReplyCard extends React.Component<Props, State> {
                 {this.renderAuthor()}
                 <div>
                     {this.renderTimeAgo(this.props.reply.timestamp)}
-                    <Typography variant="body2" className='purple-typography' component="p" style={{maxWidth: "100%"}}>
-                        <ReactMarkdown source={this.props.reply.message} disallowedTypes={["heading"]}/>
-                    </Typography>
+                    <ReactMarkdown source={this.props.reply.message} disallowedTypes={["heading"]}/>
                 </div>
                 <div className={"bottom-bar"}>
                     <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>

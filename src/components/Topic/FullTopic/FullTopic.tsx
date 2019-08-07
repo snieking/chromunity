@@ -270,8 +270,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                 </Link>
                 <br/>
                 {this.state.avatar !== "" ?
-                    <img src={this.state.avatar} style={{marginBottom: "5px"}} className="topic-author-avatar"
-                         alt="Profile Avatar"/> : <div/>}
+                    <img src={this.state.avatar} className="topic-author-avatar" alt="Profile Avatar"/> : <div/>}
             </div>
         );
     }
@@ -289,9 +288,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                 >
                     {this.state.topic.title}
                 </Typography>
-                <Typography variant="body2" className='purple-typography' component="p">
-                    <ReactMarkdown source={content} disallowedTypes={["heading"]}/>
-                </Typography>
+                <ReactMarkdown source={content} disallowedTypes={["heading"]}/>
             </CardContent>
         );
     }
@@ -299,7 +296,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
     renderCardActions() {
         const user: User = getUser();
         return (
-            <CardActions>
+            <CardActions style={{ marginTop: "-20px" }}>
                 <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
                     <Badge
                         className="star-badge"
