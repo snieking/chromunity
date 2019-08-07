@@ -38,7 +38,8 @@ script:
   - npm install
   - npm run coveralls
   - sonar-scanner
-  - npm run build
+  - if [ "$TRAVIS_BRANCH" = "dev" AND "$TRAVIS_PULL_REQUEST" = "false" ]; then npm run build-dev; fi
+  - if [ "$TRAVIS_BRANCH" = "master" AND "$TRAVIS_PULL_REQUEST" = "false" ]; then npm run build; fi
 
 # Deploy using awscli to enable pruning of removed files
 deploy:
