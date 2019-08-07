@@ -38,21 +38,38 @@ script:
   - npm install
   - npm run coveralls
   - sonar-scanner
-  - npm run build
+  - |
+    if [ $TRAVIS_BRANCH == "master" && $TRAVIS_PULL_REQUEST == "false" ]; then
+      npm run build
+    fi
+  - |
+    if [ $TRAVIS_BRANCH == "dev" && $TRAVIS_PULL_REQUEST == "false" ]; then
+      npm run build-dev
+    fi
 
 # Deploy using awscli to enable pruning of removed files
 deploy:
-  provider: s3
-  access_key_id: $AWS_ACCESS_KEY_ID
-  secret_access_key: $AWS_SECRET_ACCESS_KEY
-  bucket: chrotonomy.com
-  skip_cleanup: true
-  local_dir: build
-  acl: public_read
-  on:
-    branch: master
-  region: eu-west-1
-  cache_control: "max-age=21600"
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    bucket: chrotonomy.com
+    skip_cleanup: true
+    local_dir: build
+    on:
+      branch: master
+    region: eu-west-1
+    cache_control: "max-age=21600"
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    bucket: dev.chrotonomy.com
+    skip_cleanup: true
+    local_dir: build
+    on:
+      branch: dev
+    region: eu-west-1
+    cache_control: "max-age=21600"
+
 after_deploy:
   # Allow `awscli` to make requests to CloudFront.
   - aws configure set preview.cloudfront true
