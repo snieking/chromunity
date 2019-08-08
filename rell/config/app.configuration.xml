@@ -35,7 +35,7 @@
             <entry key="rell">
                 <dict>
                     <entry key="moduleName">
-                        <string>chrotonomy</string>
+                        <string>chromunity</string>
                     </entry>
                     <entry key="mainFile">
                         <string>main.rell</string>
