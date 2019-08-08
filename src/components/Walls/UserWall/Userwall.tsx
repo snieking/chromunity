@@ -164,7 +164,7 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
                     isRepresentative={this.state.representatives.includes(reply.author)}
                 />)
             )
-        } else if (this.state.activeTab === 2) {
+        } else if (this.state.activeTab === 2 && this.state.followedChannels.length > 0) {
             return (
                 <Paper>
                     <div style={{padding: "15px"}}>
@@ -188,6 +188,8 @@ export class UserWall extends React.Component<UserWallProps, UserWallState> {
                     </div>
                 </Paper>
             )
+        } else {
+            return (<div/>)
         }
     }
 
