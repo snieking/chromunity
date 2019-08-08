@@ -5,7 +5,7 @@ import {getRepresentatives} from "../blockchain/RepresentativesService";
 import {getUserMeta} from '../blockchain/UserService';
 
 const LOCAL_CACHE = BoomerangCache.create('local-bucket', {storage: 'local', encrypt: true});
-const SESSION_CACHE = BoomerangCache.create('session-bucket', {storage: 'session', encrypt: false});
+const SESSION_CACHE = BoomerangCache.create('session-bucket', {storage: 'session', encrypt: true});
 
 const USER_KEY = "user";
 const USER_META_KEY = "user_meta";
