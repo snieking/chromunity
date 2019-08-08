@@ -288,7 +288,7 @@ export class FullTopic extends React.Component<FullTopicProps, FullTopicState> {
                 >
                     {this.state.topic.title}
                 </Typography>
-                <ReactMarkdown source={content} disallowedTypes={["heading"]}/>
+                <ReactMarkdown source={content} />
             </CardContent>
         );
     }

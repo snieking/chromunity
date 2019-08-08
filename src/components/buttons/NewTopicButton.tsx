@@ -102,34 +102,39 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
     createNewTopic(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const topicTitle: string = this.state.topicTitle;
-        const topicChannel: string = (this.state.channel as OptionType).value;
 
-        if (!/^[a-zA-Z0-9\s]+$/.test(topicTitle)) {
-            this.setState({
-                newTopicStatusMessage: "Title may only contain a-z, A-Z & 0-9 characters and whitespaces",
-                newTopicErrorOpen: true
-            });
-        } else if (topicTitle.length > maxTitleLength) {
-            this.setState({newTopicStatusMessage: "Title is too long", newTopicErrorOpen: true});
-        } else if (!/^[a-zA-Z0-9]+$/.test(topicChannel)) {
-            this.setState({
-                newTopicStatusMessage: "Channel may only contain a-z, A-Z & 0-9 characters",
-                newTopicErrorOpen: true
-            });
-        } else if (topicChannel.length > maxChannelLength) {
-            this.setState({newTopicStatusMessage: "Channel is too long", newTopicErrorOpen: true});
+        if (this.state.channel == null) {
+            this.setState({newTopicStatusMessage: "A channel must be supplied", newTopicErrorOpen: true});
         } else {
-            const topicMessage = this.state.topicMessage;
-            this.setState({topicTitle: "", topicMessage: ""});
+            const topicChannel: string = (this.state.channel as OptionType).value;
 
-            createTopic(getUser(), topicChannel, topicTitle, topicMessage).then(() => {
-                this.setState({newTopicStatusMessage: "Topic created", newTopicSuccessOpen: true});
-                this.props.updateFunction();
-            }).catch(() => this.setState({
-                newTopicStatusMessage: "Error while creating topic",
-                newTopicErrorOpen: true
-            }));
-            this.toggleNewTopicDialog();
+            if (!/^[a-zA-Z0-9\s]+$/.test(topicTitle)) {
+                this.setState({
+                    newTopicStatusMessage: "Title may only contain a-z, A-Z & 0-9 characters and whitespaces",
+                    newTopicErrorOpen: true
+                });
+            } else if (topicTitle.length > maxTitleLength) {
+                this.setState({newTopicStatusMessage: "Title is too long", newTopicErrorOpen: true});
+            } else if (!/^[a-zA-Z0-9]+$/.test(topicChannel)) {
+                this.setState({
+                    newTopicStatusMessage: "Channel may only contain a-z, A-Z & 0-9 characters",
+                    newTopicErrorOpen: true
+                });
+            } else if (topicChannel.length > maxChannelLength) {
+                this.setState({newTopicStatusMessage: "Channel is too long", newTopicErrorOpen: true});
+            } else {
+                const topicMessage = this.state.topicMessage;
+                this.setState({topicTitle: "", topicMessage: ""});
+
+                createTopic(getUser(), topicChannel, topicTitle, topicMessage).then(() => {
+                    this.setState({newTopicStatusMessage: "Topic created", newTopicSuccessOpen: true});
+                    this.props.updateFunction();
+                }).catch(() => this.setState({
+                    newTopicStatusMessage: "Error while creating topic",
+                    newTopicErrorOpen: true
+                }));
+                this.toggleNewTopicDialog();
+            }
         }
     }
 
@@ -161,6 +166,7 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
     }
 
     newThreadDialog() {
+        const selectStyles = { menu: (styles: any) => ({ ...styles, zIndex: 999 }) }
         return (
             <div>
                 <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title"
@@ -169,11 +175,12 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                         <DialogContent>
                             <br/>
                             <CreatableSelect
-                                placeholder={"Select trending channel or enter a custom one..."}
+                                placeholder={"Select or create channel..."}
                                 isSearchable={true}
                                 options={this.state.suggestions}
                                 value={this.state.channel}
                                 onChange={this.handleChangeSingle}
+                                styles={selectStyles}
                             />
                             <br/>
                             <Badge
@@ -192,6 +199,7 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                                     onChange={this.handleDialogTitleChange}
                                     value={this.state.topicTitle}
                                     className="text-field"
+                                    variant="outlined"
                                 />
                             </Badge>
 
@@ -202,10 +210,11 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
                                 label="Content"
                                 type="text"
                                 fullWidth
-                                rows="3"
+                                rows="5"
                                 rowsMax="15"
                                 onChange={this.handleDialogMessageChange}
                                 value={this.state.topicMessage}
+                                variant="outlined"
                             />
 
                         </DialogContent>
