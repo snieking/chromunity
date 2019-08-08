@@ -22,7 +22,7 @@ const Footer: React.FunctionComponent = (props) => {
         <footer className={classes.footer}>
             <Typography className="pink-color" style={{fontSize: "12px"}}>
                 Powered by <a className={classes.link} href="https://chromia.com"><b>Chromia</b></a> - Source code at <a
-                className={classes.link} href="https://github.com/snieking/chrotonomy"><b>GitHub</b></a>
+                className={classes.link} href="https://github.com/snieking/chromunity"><b>GitHub</b></a>
             </Typography>
         </footer>
     );

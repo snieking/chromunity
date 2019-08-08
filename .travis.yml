@@ -8,20 +8,13 @@ dist: trusty
 services:
   - postgresql
 
-addons:
-  postgresql: "9.6"
-  sonarcloud:
-    organization: "snieking"
-    token:
-      secure: "VKnB387z+RQctdyt7FjWPXwwkCmxbLstyey72k5mauMkmWLMkFJFSM/VaiGnJKqik3DfGpV0W/wqTktLYQ+SawP17nK+IqzIB9z5ZzfRo9o8nyea0Nkb/6pIxkABnNJGAQLRIG3w8cNvPvf1FHHmZXOi613Rbq4EvYynPaMVndJU0Vrzas+StfHNWilhZ0hApB0ZTa62w3o36FMCY4hzqueip7B+qDUHRbddWe580TzPExqaKUwa26OWENtMsS/MrsvzIOsw41mkTvEnV3P7Lp8Dg+x7WwcGBfYPZ0H1VD91hEgdy+wJOoEyKWoA7lSTR7k7wx+SGXtiQBJarGCgh1UQenUr5rMtDrajVgQpJJcHc/k8MDNk1N7DLiruoW6CCy3vlZYaiC52Yu2U8z8SS0uIlE3tTiHHXG2tVoH2jJOgB7X8IAa9XruWomeHvS55KRVjta4CIebLZGVbavL4cPEVND44uHePfgdE8KbN3d2FOe/ikuq46PzijUmgfGp3lxWPYg/RjsRoPxXbbt3sCNq3TxEkCANdfDrbAqBqN0EyIMDmDYPVVI9AW5K1eRLIZfHBwrXA9Bv76QYnV0GJXWMuuXej0Q45pbVpOLrcC6WCfdEOTzmjTsgAfQSyyMgtzowDa4CS1+ZaXyQs2TxzE7Z+px2E9YQ9Bprfk5QHQ08="
-
 before_script:
   - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 762E3157
   - npm i yarn
   - bash rell/install-postgres-10.sh
-  - psql -c "create database chrotonomy;" -U postgres
+  - psql -c "create database chromunity;" -U postgres
   - psql -c "create role postchain LOGIN ENCRYPTED PASSWORD 'postchain';" -U postgres
-  - psql -c "grant ALL ON DATABASE chrotonomy TO postchain;" -U postgres
+  - psql -c "grant ALL ON DATABASE chromunity TO postchain;" -U postgres
 
 cache:
   pip: true
@@ -38,7 +31,6 @@ script:
   - cd ..
   - npm install
   - npm run coveralls
-  - sonar-scanner
   - if [ "$TRAVIS_BRANCH" == "dev" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then npm run build-dev; fi
   - if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then npm run build; fi
 
