@@ -2,9 +2,6 @@
 
 set -ex
 
-echo "adding pubkey required for apt-get update"
-sudo apt-key adv —keyserver keyserver.ubuntu.com —recv-keys 762E3157
-
 echo "Installing Postgres 10"
 sudo service postgresql stop
 sudo apt-get remove -q 'postgresql-*'
