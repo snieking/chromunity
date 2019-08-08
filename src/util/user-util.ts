@@ -60,7 +60,6 @@ export function isGod(): boolean {
 }
 
 export function setRepresentative(isRepresentative: boolean): void {
-    console.log("%%%%%% SETTING REPRESENTATIVE: ", isRepresentative);
     SESSION_CACHE.set(REPRESENTATIVE_KEY, isRepresentative, 600);
 }
 

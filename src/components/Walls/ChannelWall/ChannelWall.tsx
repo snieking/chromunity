@@ -25,6 +25,7 @@ import {getRepresentatives} from '../../../blockchain/RepresentativesService';
 import {NewTopicButton} from '../../buttons/NewTopicButton';
 import {Favorite, FavoriteBorder} from '@material-ui/icons';
 import {getMutedUsers} from "../../../blockchain/UserService";
+import {TOPIC_VIEW_SELECTOR_OPTION} from "../TopicCommon";
 
 interface MatchParams {
     channel: string
@@ -44,8 +45,8 @@ export interface ChannelWallState {
     channelFollowed: boolean;
     countOfTopics: number;
     countOfFollowers: number;
-    selector: string;
-    popularSelector: string;
+    selector: TOPIC_VIEW_SELECTOR_OPTION;
+    popularSelector: TOPIC_VIEW_SELECTOR_OPTION;
     mutedUsers: string[];
 }
 
@@ -54,15 +55,6 @@ const StyledSelect = styled(Select)({
     float: "left",
     marginRight: "10px"
 });
-
-const OPTIONS = {
-    recent: "recent",
-    popular: "popular",
-    popularDay: "popularDay",
-    popularWeek: "popularWeek",
-    popularMonth: "popularMonth",
-    popularAllTime: "popularAllTime"
-};
 
 const topicsPageSize: number = 25;
 
@@ -80,8 +72,8 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
             channelFollowed: false,
             countOfTopics: 0,
             countOfFollowers: 0,
-            selector: OPTIONS.recent,
-            popularSelector: OPTIONS.popularWeek,
+            selector: TOPIC_VIEW_SELECTOR_OPTION.RECENT,
+            popularSelector: TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK,
             mutedUsers: []
         };
 
@@ -193,20 +185,21 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
         }
     }
 
-    retrievePopularTopics() {
+    retrievePopularTopics(selected: TOPIC_VIEW_SELECTOR_OPTION) {
         this.setState({isLoading: true});
 
         const dayInMilliSeconds: number = 86400000;
         let timestamp: number;
 
-        switch (this.state.popularSelector) {
-            case OPTIONS.popularDay:
+        switch (selected) {
+            case TOPIC_VIEW_SELECTOR_OPTION.POPULAR_DAY:
                 timestamp = Date.now() - dayInMilliSeconds;
                 break;
-            case OPTIONS.popularWeek:
+            case TOPIC_VIEW_SELECTOR_OPTION.POPULAR:
+            case TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK:
                 timestamp = Date.now() - (dayInMilliSeconds * 7);
                 break;
-            case OPTIONS.popularMonth:
+            case TOPIC_VIEW_SELECTOR_OPTION.POPULAR_MONTH:
                 timestamp = Date.now() - (dayInMilliSeconds * 30);
                 break;
             default:
@@ -219,25 +212,25 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
     }
 
     handleSelectorChange(event: React.ChangeEvent<{ value: unknown }>) {
-        const selected: string = event.target.value as string;
+        const selected = event.target.value as TOPIC_VIEW_SELECTOR_OPTION;
 
         if (this.state.selector !== selected) {
             this.setState({selector: selected, topics: []});
 
-            if (selected === OPTIONS.recent) {
+            if (selected === TOPIC_VIEW_SELECTOR_OPTION.RECENT) {
                 this.retrieveLatestTopics();
-            } else if (selected === OPTIONS.popular) {
-                this.retrievePopularTopics();
+            } else if (selected === TOPIC_VIEW_SELECTOR_OPTION.POPULAR) {
+                this.retrievePopularTopics(selected);
             }
         }
     }
 
     handlePopularChange(event: React.ChangeEvent<{ value: unknown }>) {
-        const selected: string = event.target.value as string;
+        const selected = event.target.value as TOPIC_VIEW_SELECTOR_OPTION;
 
         if (this.state.popularSelector !== selected) {
             this.setState({popularSelector: selected, topics: []});
-            this.retrievePopularTopics();
+            this.retrievePopularTopics(selected);
         }
     }
 
@@ -268,15 +261,15 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
                             value={this.state.selector}
                             onChange={this.handleSelectorChange}
                         >
-                            <MenuItem value={OPTIONS.recent}>Recent</MenuItem>
-                            <MenuItem value={OPTIONS.popular}>Popular</MenuItem>
+                            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.RECENT}>Recent</MenuItem>
+                            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR}>Popular</MenuItem>
                         </StyledSelect>
-                        {this.state.selector === OPTIONS.popular
+                        {this.state.selector === TOPIC_VIEW_SELECTOR_OPTION.POPULAR
                             ? <StyledSelect value={this.state.popularSelector} onChange={this.handlePopularChange}>
-                                <MenuItem value={OPTIONS.popularDay}>Last day</MenuItem>
-                                <MenuItem value={OPTIONS.popularWeek}>Last week</MenuItem>
-                                <MenuItem value={OPTIONS.popularMonth}>Last month</MenuItem>
-                                <MenuItem value={OPTIONS.popularAllTime}>All time</MenuItem>
+                                <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_DAY}>Last day</MenuItem>
+                                <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK}>Last week</MenuItem>
+                                <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_MONTH}>Last month</MenuItem>
+                                <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_ALL_TIME}>All time</MenuItem>
                             </StyledSelect>
                             : <div/>
                         }
