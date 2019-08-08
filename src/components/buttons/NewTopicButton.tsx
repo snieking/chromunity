@@ -219,10 +219,10 @@ export class NewTopicButton extends React.Component<NewTopicButtonProps, NewTopi
 
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={() => this.toggleNewTopicDialog()} color="secondary" variant="contained">
+                            <Button onClick={() => this.toggleNewTopicDialog()} color="secondary" variant="outlined">
                                 Cancel
                             </Button>
-                            <Button type="submit" color="primary" variant="contained">
+                            <Button type="submit" color="primary" variant="outlined">
                                 Create topic
                             </Button>
                         </DialogActions>
