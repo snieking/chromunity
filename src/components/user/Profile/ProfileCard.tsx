@@ -103,7 +103,9 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
                         const user: User = getUser();
                         if (user != null && user.name != null) {
                             amIAFollowerOf(getUser(), this.props.username).then(isAFollower => this.setState({following: isAFollower}));
-                            getMutedUsers(user).then(users => this.setState({muted: users.includes(this.props.username)}));
+                            getMutedUsers(user).then(users => this.setState({
+                                muted: users.includes(this.props.username.toLocaleLowerCase())
+                            }));
                         }
 
                         getUserSettingsCached(this.props.username, 1440)
@@ -267,7 +269,7 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
         if (user != null && user.name === this.props.username) {
             return (
                 <Badge badgeContent={this.state.followers} showZero={true} color="primary">
-                    <Tooltip title="Follow">
+                    <Tooltip title="Followers">
                         <Favorite fontSize="large" className='purple-color'/>
                     </Tooltip>
                 </Badge>
@@ -276,7 +278,7 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
             return (
                 <IconButton onClick={() => this.toggleFollowing()}>
                     <Badge badgeContent={this.state.followers} showZero={true} color="primary">
-                        <Tooltip title="Unfollow">
+                        <Tooltip title={this.state.following ? "Unfollow" : "Follow"}>
                             <Favorite fontSize="large"
                                       className={(this.state.following ? 'red-icon' : 'purple-color')}/>
                         </Tooltip>
