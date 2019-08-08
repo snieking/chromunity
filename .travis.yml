@@ -63,7 +63,7 @@ deploy:
     on:
       branch: dev
     region: eu-west-1
-    cache_control: "max-age=21600"
+    cache_control: "max-age=3600"
 
 after_deploy:
   # Allow `awscli` to make requests to CloudFront.
