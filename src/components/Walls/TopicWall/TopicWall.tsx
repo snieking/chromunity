@@ -20,6 +20,7 @@ import {TrendingChannels} from '../../TrendingTags/TrendingTags';
 import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
 import {getRepresentatives} from '../../../blockchain/RepresentativesService';
 import {getMutedUsers} from "../../../blockchain/UserService";
+import {TOPIC_VIEW_SELECTOR_OPTION} from "../TopicCommon";
 
 interface Props {
     type: string;
@@ -30,8 +31,8 @@ interface State {
     representatives: string[];
     isLoading: boolean;
     couldExistOlderTopics: boolean;
-    selector: string;
-    popularSelector: string;
+    selector: TOPIC_VIEW_SELECTOR_OPTION;
+    popularSelector: TOPIC_VIEW_SELECTOR_OPTION;
     mutedUsers: string[];
 }
 
@@ -40,15 +41,6 @@ const StyledSelector = styled(Select)({
     float: "left",
     marginRight: "10px"
 });
-
-const SELECTOR_OPTIONS = {
-    recent: "recent",
-    popular: "popular",
-    popularDay: "popularDay",
-    popularWeek: "popularWeek",
-    popularMonth: "popularMonth",
-    popularAllTime: "popularAllTime"
-};
 
 const topicsPageSize: number = 25;
 
@@ -60,8 +52,8 @@ class TopicWall extends React.Component<Props, State> {
             representatives: [],
             isLoading: true,
             couldExistOlderTopics: false,
-            selector: SELECTOR_OPTIONS.recent,
-            popularSelector: SELECTOR_OPTIONS.popularWeek,
+            selector: TOPIC_VIEW_SELECTOR_OPTION.RECENT,
+            popularSelector: TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK,
             mutedUsers: []
         };
 
@@ -88,21 +80,21 @@ class TopicWall extends React.Component<Props, State> {
     }
 
     handleSelectorChange(event: React.ChangeEvent<{ value: unknown }>) {
-        const selected: string = event.target.value as string;
+        const selected = event.target.value as TOPIC_VIEW_SELECTOR_OPTION;
 
         if (this.state.selector !== selected) {
             this.setState({selector: selected, topics: []});
 
-            if (selected === SELECTOR_OPTIONS.recent) {
+            if (selected === TOPIC_VIEW_SELECTOR_OPTION.RECENT) {
                 this.retrieveLatestTopics();
-            } else if (selected === SELECTOR_OPTIONS.popular) {
+            } else if (selected === TOPIC_VIEW_SELECTOR_OPTION.POPULAR) {
                 this.retrievePopularTopics(selected);
             }
         }
     }
 
     handlePopularChange(event: React.ChangeEvent<{ value: unknown }>) {
-        const selected: string = event.target.value as string;
+        const selected = event.target.value as TOPIC_VIEW_SELECTOR_OPTION;
 
         if (this.state.popularSelector !== selected) {
             this.setState({popularSelector: selected, topics: []});
@@ -124,15 +116,15 @@ class TopicWall extends React.Component<Props, State> {
                             value={this.state.selector}
                             onChange={this.handleSelectorChange}
                         >
-                            <MenuItem value={SELECTOR_OPTIONS.recent}>Recent</MenuItem>
-                            <MenuItem value={SELECTOR_OPTIONS.popular}>Popular</MenuItem>
+                            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.RECENT}>Recent</MenuItem>
+                            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR}>Popular</MenuItem>
                         </StyledSelector>
-                        {this.state.selector === SELECTOR_OPTIONS.popular
+                        {this.state.selector === TOPIC_VIEW_SELECTOR_OPTION.POPULAR
                             ? <StyledSelector value={this.state.popularSelector} onChange={this.handlePopularChange}>
-                                <MenuItem value={SELECTOR_OPTIONS.popularDay}>Last day</MenuItem>
-                                <MenuItem value={SELECTOR_OPTIONS.popularWeek}>Last week</MenuItem>
-                                <MenuItem value={SELECTOR_OPTIONS.popularMonth}>Last month</MenuItem>
-                                <MenuItem value={SELECTOR_OPTIONS.popularAllTime}>All time</MenuItem>
+                                <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_DAY}>Last day</MenuItem>
+                                <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK}>Last week</MenuItem>
+                                <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_MONTH}>Last month</MenuItem>
+                                <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_ALL_TIME}>All time</MenuItem>
                             </StyledSelector>
                             : <div/>
                         }
@@ -229,20 +221,21 @@ class TopicWall extends React.Component<Props, State> {
         }
     }
 
-    retrievePopularTopics(selected: string) {
+    retrievePopularTopics(selected: TOPIC_VIEW_SELECTOR_OPTION) {
         this.setState({isLoading: true});
 
         const dayInMilliSeconds: number = 86400000;
         let timestamp: number;
 
         switch (selected) {
-            case SELECTOR_OPTIONS.popularDay:
+            case TOPIC_VIEW_SELECTOR_OPTION.POPULAR_DAY:
                 timestamp = Date.now() - dayInMilliSeconds;
                 break;
-            case SELECTOR_OPTIONS.popularWeek:
+            case TOPIC_VIEW_SELECTOR_OPTION.POPULAR:
+            case TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK:
                 timestamp = Date.now() - (dayInMilliSeconds * 7);
                 break;
-            case SELECTOR_OPTIONS.popularMonth:
+            case TOPIC_VIEW_SELECTOR_OPTION.POPULAR_MONTH:
                 timestamp = Date.now() - (dayInMilliSeconds * 30);
                 break;
             default:
