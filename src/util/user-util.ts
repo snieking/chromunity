@@ -5,7 +5,7 @@ import {getRepresentatives} from "../blockchain/RepresentativesService";
 import {getUserMeta} from '../blockchain/UserService';
 
 const LOCAL_CACHE = BoomerangCache.create('local-bucket', {storage: 'local', encrypt: true});
-const SESSION_CACHE = BoomerangCache.create('session-bucket', {storage: 'session', encrypt: true});
+const SESSION_CACHE = BoomerangCache.create('session-bucket', {storage: 'session', encrypt: false});
 
 const USER_KEY = "user";
 const USER_META_KEY = "user_meta";
@@ -60,6 +60,7 @@ export function isGod(): boolean {
 }
 
 export function setRepresentative(isRepresentative: boolean): void {
+    console.log("%%%%%% SETTING REPRESENTATIVE: ", isRepresentative);
     SESSION_CACHE.set(REPRESENTATIVE_KEY, isRepresentative, 600);
 }
 

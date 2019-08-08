@@ -63,6 +63,7 @@ export interface ProfileCardState {
     description: string;
     suspendUserDialogOpen: boolean;
     muted: boolean;
+    isRepresentative: boolean;
 }
 
 export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardState> {
@@ -82,7 +83,8 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
             avatar: "",
             description: "",
             suspendUserDialogOpen: false,
-            muted: false
+            muted: false,
+            isRepresentative: false
         };
 
         this.renderUserPage = this.renderUserPage.bind(this);
@@ -115,6 +117,7 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
                         countRepliesByUser(this.props.username).then(count => this.setState({countOfReplies: count}));
                         countTopicStarRatingForUser(this.props.username).then(count => this.setState({topicStars: count}));
                         countReplyStarRatingForUser(this.props.username).then(count => this.setState({replyStars: count}));
+                        isRepresentative().then(representative => this.setState({isRepresentative: representative}));
                     }
                 }
             );
@@ -141,7 +144,7 @@ export class ProfileCard extends React.Component<ProfileCardProps, ProfileCardSt
     }
 
     renderRepresentativeActions() {
-        if (isRepresentative()) {
+        if (this.state.isRepresentative) {
             return (
                 <div style={{display: "inline"}}>
                     <IconButton onClick={() => this.setState({suspendUserDialogOpen: true})}>
