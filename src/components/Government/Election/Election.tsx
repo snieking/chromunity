@@ -14,7 +14,7 @@ import {
 } from "../../../blockchain/ElectionService";
 import {getUser, isGod} from "../../../util/user-util";
 import {DictatorActions} from "./DictatorActions/DictatorActions";
-import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
+import ChromiaPageHeader from '../../common/ChromiaPageHeader';
 import {User} from '../../../types';
 
 export interface ElectionState {

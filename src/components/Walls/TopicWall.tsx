@@ -1,6 +1,6 @@
 import React from 'react';
 import {styled} from '@material-ui/core/styles';
-import {Topic, User} from '../../../types';
+import {Topic, User} from '../../types';
 import {
     getAllTopicsByPopularityAfterTimestamp,
     getTopicsAfterTimestamp,
@@ -10,17 +10,17 @@ import {
     getTopicsFromFollowsAfterTimestamp,
     getTopicsFromFollowsPriorToTimestamp,
     getTopicsPriorToTimestamp
-} from '../../../blockchain/TopicService';
+} from '../../blockchain/TopicService';
 import {Container, LinearProgress, MenuItem, Select} from '@material-ui/core';
-import TopicOverviewCard from '../../Topic/TopicOverViewCard/TopicOverviewCard';
-import {NewTopicButton} from '../../buttons/NewTopicButton';
-import {getUser} from '../../../util/user-util';
-import LoadMoreButton from '../../buttons/LoadMoreButton';
-import {TrendingChannels} from '../../TrendingTags/TrendingTags';
-import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
-import {getRepresentatives} from '../../../blockchain/RepresentativesService';
-import {getMutedUsers} from "../../../blockchain/UserService";
-import {TOPIC_VIEW_SELECTOR_OPTION} from "../TopicCommon";
+import TopicOverviewCard from '../Topic/TopicOverViewCard/TopicOverviewCard';
+import NewTopicButton from '../buttons/NewTopicButton';
+import {getUser} from '../../util/user-util';
+import LoadMoreButton from '../buttons/LoadMoreButton';
+import {TrendingChannels} from '../tags/TrendingTags';
+import ChromiaPageHeader from '../common/ChromiaPageHeader';
+import {getRepresentatives} from '../../blockchain/RepresentativesService';
+import {getMutedUsers} from "../../blockchain/UserService";
+import {TOPIC_VIEW_SELECTOR_OPTION} from "./TopicCommon";
 
 interface Props {
     type: string;
@@ -109,42 +109,42 @@ class TopicWall extends React.Component<Props, State> {
                     <ChromiaPageHeader text={this.getHeader()}/>
                     {this.state.isLoading ? <LinearProgress variant="query"/> : <div/>}
                     {this.props.type === "tagFollowings" ? <TrendingChannels/> : <div/>}
-                    <div className='topic-wall-container'>
-                        {this.props.type === "tagFollowings" ? <ChromiaPageHeader text="Followed Channels"/> :
-                            <div/>}
-                        <StyledSelector
-                            value={this.state.selector}
-                            onChange={this.handleSelectorChange}
-                        >
-                            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.RECENT}>Recent</MenuItem>
-                            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR}>Popular</MenuItem>
+                    {this.props.type === "tagFollowings" ? <ChromiaPageHeader text="Followed Channels"/> :
+                        <div/>}
+                    <StyledSelector
+                        value={this.state.selector}
+                        onChange={this.handleSelectorChange}
+                    >
+                        <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.RECENT}>Recent</MenuItem>
+                        <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR}>Popular</MenuItem>
+                    </StyledSelector>
+                    {this.state.selector === TOPIC_VIEW_SELECTOR_OPTION.POPULAR
+                        ? <StyledSelector value={this.state.popularSelector} onChange={this.handlePopularChange}>
+                            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_DAY}>Last day</MenuItem>
+                            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK}>Last week</MenuItem>
+                            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_MONTH}>Last month</MenuItem>
+                            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_ALL_TIME}>All time</MenuItem>
                         </StyledSelector>
-                        {this.state.selector === TOPIC_VIEW_SELECTOR_OPTION.POPULAR
-                            ? <StyledSelector value={this.state.popularSelector} onChange={this.handlePopularChange}>
-                                <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_DAY}>Last day</MenuItem>
-                                <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK}>Last week</MenuItem>
-                                <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_MONTH}>Last month</MenuItem>
-                                <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_ALL_TIME}>All time</MenuItem>
-                            </StyledSelector>
-                            : <div/>
+                        : <div/>
+                    }
+                    <br/><br/>
+                    {this.state.topics.map(topic => {
+                        if (!this.state.mutedUsers.includes(topic.author)) {
+                            return (<TopicOverviewCard
+                                key={'card-' + topic.id}
+                                topic={topic}
+                                isRepresentative={this.state.representatives.includes(topic.author)}
+                            />);
+                        } else {
+                            return (<div/>);
                         }
-                        <br/><br/>
-                        {this.state.topics.map(topic => {
-                            if (!this.state.mutedUsers.includes(topic.author)) {
-                                return (<TopicOverviewCard
-                                    key={'card-' + topic.id}
-                                    topic={topic}
-                                    isRepresentative={this.state.representatives.includes(topic.author)}
-                                />);
-                            } else {
-                                return (<div/>);
-                            }
-                        })}
-                    </div>
+                    })}
                     {this.renderLoadMoreButton()}
                 </Container>
-                {getUser() != null ? <NewTopicButton channel="" updateFunction={this.retrieveLatestTopics}/> :
-                    <div/>}
+                {getUser() != null
+                    ? <NewTopicButton channel="" updateFunction={this.retrieveLatestTopics}/>
+                    : <div/>
+                }
             </div>
         );
     }

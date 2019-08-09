@@ -4,7 +4,7 @@ import './Representatives.css';
 import {Button, Card, CardContent, Container, Grid, TextField} from "@material-ui/core";
 import {getRepresentatives} from "../../../blockchain/RepresentativesService";
 import RepresentativeCard from './RepresentativeCard/RepresentativeCard';
-import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
+import ChromiaPageHeader from '../../common/ChromiaPageHeader';
 import {getUser} from '../../../util/user-util';
 import {adminAddRepresentative, adminRemoveRepresentative} from '../../../blockchain/AdminService';
 import {User} from '../../../types';

@@ -1,8 +1,7 @@
 import React from 'react';
 import {styled} from '@material-ui/core/styles';
-import '../Wall.css';
 import {Badge, Container, IconButton, LinearProgress, MenuItem, Select, Tooltip, Typography} from "@material-ui/core";
-import {Topic, User} from "../../../types";
+import {Topic, User} from "../../types";
 
 import {RouteComponentProps} from "react-router";
 import {
@@ -10,22 +9,22 @@ import {
     getTopicsByChannelAfterTimestamp,
     getTopicsByChannelPriorToTimestamp,
     getTopicsByChannelSortedByPopularityAfterTimestamp
-} from '../../../blockchain/TopicService';
-import TopicOverviewCard from '../../Topic/TopicOverViewCard/TopicOverviewCard';
-import LoadMoreButton from '../../buttons/LoadMoreButton';
-import {getUser} from '../../../util/user-util';
+} from '../../blockchain/TopicService';
+import TopicOverviewCard from '../Topic/TopicOverViewCard/TopicOverviewCard';
+import LoadMoreButton from '../buttons/LoadMoreButton';
+import {getUser} from '../../util/user-util';
 import {
     countChannelFollowers,
     followChannel,
     getFollowedChannels,
     unfollowChannel
-} from '../../../blockchain/ChannelService';
-import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
-import {getRepresentatives} from '../../../blockchain/RepresentativesService';
-import {NewTopicButton} from '../../buttons/NewTopicButton';
+} from '../../blockchain/ChannelService';
+import ChromiaPageHeader from '../common/ChromiaPageHeader';
+import {getRepresentatives} from '../../blockchain/RepresentativesService';
+import NewTopicButton from '../buttons/NewTopicButton';
 import {Favorite, FavoriteBorder} from '@material-ui/icons';
-import {getMutedUsers} from "../../../blockchain/UserService";
-import {TOPIC_VIEW_SELECTOR_OPTION} from "../TopicCommon";
+import {getMutedUsers} from "../../blockchain/UserService";
+import {TOPIC_VIEW_SELECTOR_OPTION} from "./TopicCommon";
 
 interface MatchParams {
     channel: string
@@ -238,57 +237,58 @@ export class ChannelWall extends React.Component<ChannelWallProps, ChannelWallSt
         return (
             <div>
                 <Container>
-                    <div className="thread-wall-container">
-                        <div style={{textAlign: "center"}}>
-                            <ChromiaPageHeader text={"#" + this.props.match.params.channel}/>
-                            <Typography component="span" variant="subtitle1" className="pink-typography"
-                                        style={{display: "inline"}}>Topics: {this.state.countOfTopics}</Typography>
-                        </div>
-
-                        <IconButton onClick={() => this.toggleChannelFollow()}>
-                            <Badge badgeContent={this.state.countOfFollowers} color="primary">
-                                <Tooltip title={this.state.channelFollowed ? "Unfollow channel" : "Follow channel"}>
-                                    {this.state.channelFollowed
-                                        ? <Favorite className="red-color" fontSize="large"/>
-                                        : <FavoriteBorder className="pink-color" fontSize="large"/>
-                                    }
-                                </Tooltip>
-                            </Badge>
-                        </IconButton>
-
-                        {this.state.isLoading ? <LinearProgress variant="query"/> : <div/>}
-                        <StyledSelect
-                            value={this.state.selector}
-                            onChange={this.handleSelectorChange}
-                        >
-                            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.RECENT}>Recent</MenuItem>
-                            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR}>Popular</MenuItem>
-                        </StyledSelect>
-                        {this.state.selector === TOPIC_VIEW_SELECTOR_OPTION.POPULAR
-                            ? <StyledSelect value={this.state.popularSelector} onChange={this.handlePopularChange}>
-                                <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_DAY}>Last day</MenuItem>
-                                <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK}>Last week</MenuItem>
-                                <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_MONTH}>Last month</MenuItem>
-                                <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_ALL_TIME}>All time</MenuItem>
-                            </StyledSelect>
-                            : <div/>
-                        }
-                        <br/><br/>
-                        {this.state.topics.map(topic => {
-                            if (!this.state.mutedUsers.includes(topic.author)) {
-                                return (<TopicOverviewCard
-                                    key={topic.id}
-                                    topic={topic}
-                                    isRepresentative={this.state.representatives.includes(topic.author)}
-                                />);
-                            } else {
-                                return (<div/>);
-                            }
-                        })}
+                    <div style={{textAlign: "center"}}>
+                        <ChromiaPageHeader text={"#" + this.props.match.params.channel}/>
+                        <Typography component="span" variant="subtitle1" className="pink-typography"
+                                    style={{display: "inline"}}>Topics: {this.state.countOfTopics}</Typography>
                     </div>
+
+                    <IconButton onClick={() => this.toggleChannelFollow()}>
+                        <Badge badgeContent={this.state.countOfFollowers} color="primary">
+                            <Tooltip title={this.state.channelFollowed ? "Unfollow channel" : "Follow channel"}>
+                                {this.state.channelFollowed
+                                    ? <Favorite className="red-color" fontSize="large"/>
+                                    : <FavoriteBorder className="pink-color" fontSize="large"/>
+                                }
+                            </Tooltip>
+                        </Badge>
+                    </IconButton>
+
+                    {this.state.isLoading ? <LinearProgress variant="query"/> : <div/>}
+                    <StyledSelect
+                        value={this.state.selector}
+                        onChange={this.handleSelectorChange}
+                    >
+                        <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.RECENT}>Recent</MenuItem>
+                        <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR}>Popular</MenuItem>
+                    </StyledSelect>
+                    {this.state.selector === TOPIC_VIEW_SELECTOR_OPTION.POPULAR
+                        ? <StyledSelect value={this.state.popularSelector} onChange={this.handlePopularChange}>
+                            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_DAY}>Last day</MenuItem>
+                            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK}>Last week</MenuItem>
+                            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_MONTH}>Last month</MenuItem>
+                            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_ALL_TIME}>All time</MenuItem>
+                        </StyledSelect>
+                        : <div/>
+                    }
+                    <br/><br/>
+                    {this.state.topics.map(topic => {
+                        if (!this.state.mutedUsers.includes(topic.author)) {
+                            return (<TopicOverviewCard
+                                key={topic.id}
+                                topic={topic}
+                                isRepresentative={this.state.representatives.includes(topic.author)}
+                            />);
+                        } else {
+                            return (<div/>);
+                        }
+                    })}
                     {this.renderLoadMoreButton()}
-                    {getUser() != null ? <NewTopicButton channel={this.props.match.params.channel}
-                                                         updateFunction={this.retrieveTopics}/> : <div/>}
+                    {getUser() != null
+                        ? <NewTopicButton channel={this.props.match.params.channel}
+                                          updateFunction={this.retrieveTopics}/>
+                        : <div/>
+                    }
                 </Container>
             </div>
         );

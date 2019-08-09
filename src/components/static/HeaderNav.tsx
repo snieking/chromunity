@@ -1,7 +1,7 @@
 import React from 'react';
 import {Link} from 'react-router-dom'
 
-import {getUser} from '../../../util/user-util';
+import {getUser} from '../../util/user-util';
 
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -11,12 +11,18 @@ import Home from '@material-ui/icons/Home';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import {ExitToApp, Face, Gavel, HowToVote, LocationCity, People, Report, RssFeed, Settings} from "@material-ui/icons";
 
-import './HeaderNav.css';
-import NotificationsButton from "../../buttons/NotificationsButton";
+import NotificationsButton from "../buttons/NotificationsButton";
 import {Button, ListItemIcon, Menu, MenuItem, Tooltip, Typography} from '@material-ui/core';
+import {COLOR_SOFT_PINK} from "../../theme";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
+        navToolbar: {
+            backgroundColor: "#100d14"
+        },
+        navIcon: {
+            color: COLOR_SOFT_PINK
+        },
         grow: {
             flexGrow: 1
         },
@@ -79,7 +85,7 @@ const HeaderNav: React.FunctionComponent = (props: any) => {
 
                     <Button aria-controls="profile-menu" aria-haspopup="true" onClick={handleProfileClick}>
                         <Tooltip title="Profile">
-                            <AccountCircle className="nav-button"/>
+                            <AccountCircle className={classes.navIcon}/>
                         </Tooltip>
                     </Button>
 
@@ -93,27 +99,27 @@ const HeaderNav: React.FunctionComponent = (props: any) => {
                         <Link style={{width: "100%"}} to={"/u/" + user.name}>
                             <MenuItem onClick={handleProfileClose}>
                                 <ListItemIcon>
-                                    <AccountCircle className="menu-item-button"/>
+                                    <AccountCircle/>
                                 </ListItemIcon>
-                                <Typography className="menu-item-text">Profile</Typography>
+                                <Typography>Profile</Typography>
                             </MenuItem>
                         </Link>
                         <br/>
                         <Link style={{width: "100%"}} to={"/user/settings"}>
                             <MenuItem onClick={handleProfileClose}>
                                 <ListItemIcon>
-                                    <Settings className="menu-item-button"/>
+                                    <Settings/>
                                 </ListItemIcon>
-                                <Typography className="menu-item-text">Settings</Typography>
+                                <Typography>Settings</Typography>
                             </MenuItem>
                         </Link>
                         <br/>
                         <Link style={{width: "100%"}} to="/user/logout">
                             <MenuItem onClick={handleProfileClose}>
                                 <ListItemIcon>
-                                    <ExitToApp className="menu-item-button"/>
+                                    <ExitToApp/>
                                 </ListItemIcon>
-                                <Typography className="menu-item-text">Logout</Typography>
+                                <Typography>Logout</Typography>
                             </MenuItem>
                         </Link>
                     </Menu>
@@ -124,7 +130,7 @@ const HeaderNav: React.FunctionComponent = (props: any) => {
                 <Tooltip title="account">
                     <Link to="/user/login">
                         <IconButton>
-                            <AccountCircle className="nav-button"/>
+                            <AccountCircle/>
                         </IconButton>
                     </Link>
                 </Tooltip>
@@ -143,7 +149,7 @@ const HeaderNav: React.FunctionComponent = (props: any) => {
                             aria-label="Open drawer"
                         >
                             <Tooltip title="Channels">
-                                <RssFeed className="nav-button"/>
+                                <RssFeed className={classes.navIcon}/>
                             </Tooltip>
                         </IconButton>
                     </Link>
@@ -155,7 +161,7 @@ const HeaderNav: React.FunctionComponent = (props: any) => {
                             aria-label="Open drawer"
                         >
                             <Tooltip title="Users">
-                                <People className="nav-button"/>
+                                <People className={classes.navIcon}/>
                             </Tooltip>
                         </IconButton>
                     </Link>
@@ -167,7 +173,7 @@ const HeaderNav: React.FunctionComponent = (props: any) => {
     return (
         <div className={classes.grow}>
             <AppBar position="static">
-                <Toolbar className="nav-toolbar">
+                <Toolbar className={classes.navToolbar}>
                     <Link to="/">
                         <IconButton
                             edge="start"
@@ -175,7 +181,7 @@ const HeaderNav: React.FunctionComponent = (props: any) => {
                             aria-label="Open drawer"
                         >
                             <Tooltip title="Home">
-                                <Home className="nav-button"/>
+                                <Home className={classes.navIcon}/>
                             </Tooltip>
                         </IconButton>
                     </Link>
@@ -188,7 +194,7 @@ const HeaderNav: React.FunctionComponent = (props: any) => {
                         aria-haspopup="true"
                     >
                         <Tooltip title="Governing">
-                            <LocationCity className="nav-button"/>
+                            <LocationCity className={classes.navIcon}/>
                         </Tooltip>
                     </IconButton>
 

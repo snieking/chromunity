@@ -1,5 +1,5 @@
 import React from 'react';
-import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
+import ChromiaPageHeader from '../../common/ChromiaPageHeader';
 import {RepresentativeAction} from '../../../types';
 import {getAllRepresentativeActionsPriorToTimestamp} from '../../../blockchain/RepresentativesService';
 import {Card, CardContent, Container, LinearProgress, Typography} from '@material-ui/core';

@@ -6,7 +6,7 @@ import {getUserNotificationsPriorToTimestamp, markNotificationsRead} from "../..
 import {UserNotification} from "../../types";
 import {getUser} from "../../util/user-util";
 import NotificationCard from './NotificationCard';
-import ChromiaPageHeader from '../utils/ChromiaPageHeader';
+import ChromiaPageHeader from '../common/ChromiaPageHeader';
 import LoadMoreButton from "../buttons/LoadMoreButton";
 
 interface MatchParams {

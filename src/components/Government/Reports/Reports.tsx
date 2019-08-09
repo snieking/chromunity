@@ -3,7 +3,7 @@ import {RepresentativeReport} from "../../../types";
 import {Container, LinearProgress} from '@material-ui/core';
 import {getUnhandledReports} from '../../../blockchain/RepresentativesService';
 import ReportCard from './ReportCard';
-import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
+import ChromiaPageHeader from '../../common/ChromiaPageHeader';
 
 type State = {
     reports: RepresentativeReport[];

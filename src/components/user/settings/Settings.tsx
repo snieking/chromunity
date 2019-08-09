@@ -12,12 +12,12 @@ import {
     Snackbar,
     TextField
 } from '@material-ui/core';
-import AvatarChanger from './AvatarChanger/AvatarChanger';
+import AvatarChanger from './AvatarChanger';
 
 import './Settings.css';
 import {getUserSettings, updateUserSettings} from '../../../blockchain/UserService';
-import {CustomSnackbarContentWrapper} from '../../utils/CustomSnackbar';
-import ChromiaPageHeader from '../../utils/ChromiaPageHeader';
+import {CustomSnackbarContentWrapper} from '../../common/CustomSnackbar';
+import ChromiaPageHeader from '../../common/ChromiaPageHeader';
 
 interface SettingsState {
     avatar: string;
@@ -167,7 +167,7 @@ class Settings extends React.Component<{}, SettingsState> {
 
     saveSettings() {
         updateUserSettings(getUser(), this.state.avatar, this.state.description)
-            .then(() => this.setState({settingsUpdateStatus: "Settings saved", updateSuccessOpen: true}))
+            .then(() => this.setState({settingsUpdateStatus: "settings saved", updateSuccessOpen: true}))
             .catch(() => this.setState({settingsUpdateStatus: "Error updating settings", updateErrorOpen: true}));
     }
 

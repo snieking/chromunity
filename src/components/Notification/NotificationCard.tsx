@@ -1,11 +1,16 @@
 import React from 'react';
 
-import {Card, CardContent, Typography} from "@material-ui/core";
+import {Card, CardContent, createStyles, makeStyles, Typography} from "@material-ui/core";
 import {UserNotification} from "../../types";
 import {parseContent} from '../../util/text-parsing';
-import {timeAgoReadable} from '../../util/util';
 
-import './NotificationCard.css';
+import Timestamp from "../common/Timestamp";
+
+const useStyles = makeStyles(createStyles({
+    notificationRead: {
+        opacity: 0.5
+    }
+}));
 
 export interface NotificationCardProps {
     notification: UserNotification;
@@ -13,24 +18,18 @@ export interface NotificationCardProps {
 
 
 const NotificationCard: React.FunctionComponent<NotificationCardProps> = (props) => {
+    const classes = useStyles(props);
 
     function renderTimeAgo() {
         return (
-            <Typography className="timestamp right" variant="body2" component="span">
-                {timeAgoReadable(props.notification.timestamp)}
-            </Typography>
+            <Timestamp milliseconds={props.notification.timestamp}/>
         )
     }
 
     function renderTrigger() {
         if (props.notification.trigger !== "") {
             return (
-                <Typography
-                    gutterBottom
-                    variant="h6"
-                    component="h6"
-                    className="purple-typography"
-                >
+                <Typography gutterBottom variant="h6" component="h6">
                     <span dangerouslySetInnerHTML={{
                         __html: parseContent(props.notification.trigger)
                     }}/>
@@ -42,12 +41,7 @@ const NotificationCard: React.FunctionComponent<NotificationCardProps> = (props)
     function renderContent() {
         if (props.notification.content !== "") {
             return (
-                <Typography
-                    gutterBottom
-                    variant="body2"
-                    component="p"
-                    className="purple-typography"
-                >
+                <Typography gutterBottom variant="body2" component="p">
                     <span dangerouslySetInnerHTML={{
                         __html: parseContent(props.notification.content)
                     }}/>
@@ -57,7 +51,7 @@ const NotificationCard: React.FunctionComponent<NotificationCardProps> = (props)
     }
 
     return (
-        <Card raised={!props.notification.read} className="notification">
+        <Card className={props.notification.read ? classes.notificationRead : ''}>
             <CardContent>
                 {renderTimeAgo()}
                 {renderTrigger()}
@@ -65,6 +59,6 @@ const NotificationCard: React.FunctionComponent<NotificationCardProps> = (props)
             </CardContent>
         </Card>
     );
-}
+};
 
 export default NotificationCard;

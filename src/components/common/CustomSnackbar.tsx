@@ -18,7 +18,7 @@ const variantIcon = {
     info: InfoIcon,
 };
 
-const useStyles1 = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
     success: {
         backgroundColor: green[600],
     },
@@ -53,7 +53,7 @@ export interface Props {
 }
 
 export function CustomSnackbarContentWrapper(props: Props) {
-    const classes = useStyles1(props);
+    const classes = useStyles(props);
     const {className, message, onClose, variant, ...other} = props;
     const Icon = variantIcon[variant];
 
