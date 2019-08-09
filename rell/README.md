@@ -6,8 +6,8 @@
 4. PostgreSQL 11.4 (should be from 10.5)
 
 # Setting up postgresql for Postchain
-* `createdb chrotonomy`
-* `psql chrotonomy`
+* `createdb chromunity`
+* `psql chromunity`
 * `createuser -s postgres`
 * `psql -c "create role postchain LOGIN ENCRYPTED PASSWORD 'postchain'"`
 * `psql -c "grant ALL ON DATABASE chromaforum TO postchain"`

@@ -1,0 +1,5 @@
+operation dev_register_xc_asset (name, issuing_chain_rid: byte_array, origin_chain_rid: byte_array) {
+    require_dev();
+    val asset = register_asset(name, issuing_chain_rid);
+    create asset_origin (asset, origin_chain_rid);
+}

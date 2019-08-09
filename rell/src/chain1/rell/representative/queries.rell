@@ -1,0 +1,18 @@
+query get_representatives() {
+    val election = representative_election@{ .completed == true } ( .id, -sort .timestamp );
+
+    return representative@*{
+        .representative_election.id == election.id
+    } ( .user.name );
+}
+
+query get_all_representative_actions(timestamp, page_size: integer) {
+    return representative_action@*{
+        .timestamp < timestamp
+    } ( 
+        .id, 
+        representative = .representative.user.name, 
+        -sort .timestamp, 
+        .action 
+    ) limit page_size;
+}

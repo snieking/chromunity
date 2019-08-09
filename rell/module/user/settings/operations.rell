@@ -1,9 +1,0 @@
-operation create_user_settings(name, avatar: text, description: text) {
-    val user = get_verified_user(name);
-    create user_settings(user, avatar = avatar, description = description);
-}
-
-operation update_user_settings(name, avatar: text, description: text) {
-    val user = get_verified_user(name);
-    update user_settings@{ .user == user }( avatar = avatar, description = description );
-}

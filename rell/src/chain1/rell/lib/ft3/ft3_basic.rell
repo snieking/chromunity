@@ -1,0 +1,6 @@
+namespace ft3 {
+
+include "account/auth_basic";
+include "core";
+
+}

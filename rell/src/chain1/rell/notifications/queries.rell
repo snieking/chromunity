@@ -1,0 +1,15 @@
+query count_unread_user_notifications(name) {
+    val user = user@{ .name == name };
+    return notification@*{ .user == user, .read == false } ( .id );
+}
+
+query get_user_notifications_prior_to_timestamp(name, timestamp, page_size: integer) {
+    val user = user@{ .name == name };
+    return notification@*{ .user == user, .timestamp < timestamp } (
+        .id,
+        .trigger,
+        .content,
+        .read,
+        -sort .timestamp
+    ) limit page_size;
+}

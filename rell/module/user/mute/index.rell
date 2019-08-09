@@ -1,6 +1,0 @@
-class user_mute {
-    key user, muted_user: user;
-}
-
-include 'operations';
-include 'queries';

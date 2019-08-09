@@ -1,0 +1,16 @@
+//namespace ft3  {
+
+  class payment_history_entry (log) {
+    index account, asset;
+    delta: integer;
+    
+    // helps to locate exact position of payment entry in transaction
+    op_index: integer;
+    is_input: boolean;
+    entry_index: integer;
+    
+  }
+
+  
+
+//}

@@ -1,0 +1,37 @@
+//namespace ft3 {
+  class asset {
+    id: byte_array;
+    key id;
+    name;
+    issuing_chain_rid: byte_array;
+    key name, issuing_chain_rid;
+  }
+
+  class balance {
+    key account, asset;
+    mutable amount: integer = 0;
+  }
+
+  function ensure_balance(account, asset): balance {
+    val balance = balance @? {asset, account};
+    if (balance != null) {
+       return balance;
+    }
+    else return create balance(account, asset, amount = 0);
+  }
+
+  function register_asset (name, issuing_chain_rid: byte_array): asset {
+  print("HELLO");
+    print(11111, name.hash());
+    print(22222, issuing_chain_rid.hash());
+   val id = (name, issuing_chain_rid).hash();
+   return create asset (id, name, issuing_chain_rid);
+  }
+
+
+   query get_asset_by_name_and_chain(name, issuing_chain_rid: text) {
+        return asset@{name, .issuing_chain_rid ==byte_array(issuing_chain_rid)}.id;
+   }
+
+// }
+

@@ -1,0 +1,10 @@
+class notification {
+    key id: text, user;
+    trigger: text;
+    content: text;
+    mutable read: boolean;
+    index timestamp;
+}
+
+include 'operations';
+include 'queries';

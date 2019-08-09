@@ -1,0 +1,16 @@
+operation register_user(name, display_name: text, pubkey) {
+    require(is_signer(pubkey));
+
+    log("Name: ", name, " - Display Name: ", display_name);
+
+    if (name == "admin") {
+        val admin = create user(name, display_name, pubkey, op_context.transaction.block.block_height);
+        create admin(admin);
+        create user_settings(admin, avatar = "" , description = "");
+        create user_meta(admin, times_suspended = 0, suspended_until = 0);
+    } else {
+        val user = create user(name, display_name, pubkey, op_context.transaction.block.block_height);
+        create user_settings(user, avatar = "" , description = "");
+        create user_meta(user, times_suspended = 0, suspended_until = 0);
+    }
+}

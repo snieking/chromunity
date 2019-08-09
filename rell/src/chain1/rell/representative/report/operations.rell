@@ -1,0 +1,25 @@
+operation create_representative_report(username: text, id: text, text) {
+    val user = user@{ .name == username };
+    require(is_signer(user.pubkey));
+    require(user_meta@{ user }.suspended_until < op_context.last_block_time);
+
+    create representative_report(id= id, user, op_context.last_block_time, false, text = text);
+}
+
+operation handle_representative_report(username: text, id: text) {
+    val user = user@{ .name == username };
+    require(is_signer(user.pubkey));
+
+    val recentElection = representative_election@{ .completed == true } ( .id, sort .timestamp );
+    val representative = representative @{ user, .representative_election.id == recentElection.id };
+
+    val report = representative_report@{ .id == id };
+    update report ( handled = true );
+
+    create representative_action(
+        id = op_context.transaction.tx_rid, 
+        representative,
+        op_context.last_block_time,
+        action = "Report: '" + report.text + "' was handled by @" + user.name
+    );
+}

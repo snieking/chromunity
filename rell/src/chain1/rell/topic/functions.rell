@@ -1,0 +1,3 @@
+function find_topic_by_id(id: text): topic {
+    return topic@{ .id == id };
+}
