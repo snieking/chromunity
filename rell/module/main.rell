@@ -1,8 +1,0 @@
-include 'util/index';
-include 'user/index';
-include 'topic/index';
-include 'notifications/index';
-include 'channel/index';
-include 'follow/index';
-include 'election/index';
-include 'representative/index';

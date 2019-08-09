@@ -1,0 +1,79 @@
+operation create_topic(id: text, username: text, channel_key: name, channel_name: name, title: name, message: text) {
+    log("Username: ", username);
+    val author = get_verified_user(username);
+
+    val topic = create topic(
+        id = id, 
+        author,
+        timestamp = op_context.last_block_time,
+        last_modified = op_context.last_block_time,
+        title = title,
+        message = message,
+        removed = false
+    );
+
+    // TODO: .lower_case() on name (key)
+    create channel(name = channel_key, topic, op_context.last_block_time, display_name = channel_name);
+    create tmp_topic_rating (topic, 0);
+}
+
+operation modify_topic(id: text, username: text, text) {
+    val author = get_verified_user(username);
+
+    val topic = topic@{ .id == id, .author == author };
+    val fiveMinutesInMillis = 300000;
+    require(op_context.last_block_time < topic.timestamp + fiveMinutesInMillis);
+    update topic ( message = text );
+}
+
+operation create_reply(topic_id: text, id: text, username: text, message: text) {
+    val author = get_verified_user(username);
+    val topic = find_topic_by_id(topic_id);
+
+    create topic_reply(
+        id = id,
+        topic,
+        author,
+        timestamp = op_context.last_block_time,
+        is_sub_reply = false,
+        message = message,
+        removed = false
+    );
+
+    if (not topic.removed) {
+        update topic ( last_modified = op_context.last_block_time);
+    }
+}
+
+operation modify_reply(id: text, username: text, text) {
+    val author = get_verified_user(username);
+
+    val reply = topic_reply@{ .id == id, .author == author };
+    val fiveMinutesInMillis = 300000;
+    require(op_context.last_block_time < reply.timestamp + fiveMinutesInMillis);
+    update reply ( message = text );
+}
+
+operation create_sub_reply(topic_id: text, parent_reply_id: text, id: text, username: text, message: text) {
+    val author = get_verified_user(username);
+    val topic = find_topic_by_id(topic_id);
+
+    val topic_reply = create topic_reply(
+        id = id,
+        topic,
+        author,
+        timestamp = op_context.last_block_time,
+        is_sub_reply = true,
+        message = message,
+        removed = false
+    );
+
+    create sub_reply(
+        parent_reply = topic_reply@{ .id == parent_reply_id },
+        child_reply = topic_reply
+    );
+
+    if (not topic.removed) {
+        update topic ( last_modified = op_context.last_block_time);
+    }
+}

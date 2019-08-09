@@ -1,0 +1,64 @@
+//namespace ft3 {
+
+// Auth type:
+
+// "S" - single-sig
+// "M" - multi-sig
+
+record single_sig_args {
+       flags: set<text>;
+       pubkey;
+}
+
+record multi_sig_args {
+       flags: set<text>;
+       signatures_required: integer;
+       pubkeys: list<pubkey>;
+}
+
+function check_single_sig_auth(args: byte_array, required_flags: list<text>): boolean {
+    val ss_args = single_sig_args.from_bytes(args);
+    return
+          ss_args.flags.contains_all(required_flags)
+            and 
+          is_signer(ss_args.pubkey); 
+}
+
+function check_multi_sig_auth(args: byte_array, required_flags: list<text>): boolean {
+   val multi_sign_args = multi_sig_args.from_bytes(args);
+   if (not (multi_sign_args.flags.contains_all(required_flags))) return false;
+   var num_sign = multi_sign_args.signatures_required;
+   for(s in multi_sign_args.pubkeys) {
+      if(is_signer(s)) {
+          num_sign -= 1;
+          if(num_sign < 1) {return true;}
+      }
+   }
+   return false;
+}
+
+function check_auth_args (a_t: text, args: byte_array, required_flags: list<text>): boolean {
+    return when (a_t) {
+        "S" -> check_single_sig_auth(args, required_flags);
+        "M" -> check_multi_sig_auth(args, required_flags);
+        else -> false;
+    };
+}
+
+
+function require_auth (account, descriptor_id: byte_array, required_flags: list<text>) {
+   val account_auth_descriptor = account_auth_descriptor @ {
+     account,
+     .descriptor_id == descriptor_id
+   };
+   require(
+      check_auth_args(
+       account_auth_descriptor.auth_type,
+       account_auth_descriptor.args,
+       required_flags
+       )
+   );  
+}
+
+
+//}

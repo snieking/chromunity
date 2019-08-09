@@ -1,0 +1,59 @@
+// namespace ft3 {
+
+record auth_descriptor {
+    auth_type: text;
+    args: list<gtv>;
+}
+
+class account {
+    key id: byte_array;      
+}
+
+class account_meta {
+    meta_key: text;
+    value: byte_array;
+    index account, meta_key;
+    index meta_key, value;
+}
+
+class account_auth_descriptor {
+     descriptor_id: byte_array;
+     key account, descriptor_id;
+     index descriptor_id;
+     auth_type: text;
+     args: byte_array;
+}
+
+function _add_auth_descriptor (account, auth_descriptor) {
+     val descriptor_id = auth_descriptor.hash();
+     create account_auth_descriptor (
+        account, descriptor_id,
+        auth_descriptor.auth_type,
+        args = auth_descriptor.args.to_gtv().to_bytes()
+     );
+}
+
+function create_account_with_auth (auth_descriptor): byte_array {
+     val id = auth_descriptor.hash();
+     val acc = create account (id);
+     _add_auth_descriptor(
+        acc, auth_descriptor
+     );
+     return id;
+}
+
+operation delete_auth_descriptor (account_id: byte_array, auth_descriptor_id: byte_array, delete_descriptor_id: byte_array) {
+      val account = account @ { .id == account_id };
+      require_auth(account, auth_descriptor_id, ["A"]);
+      delete account_auth_descriptor @ {
+         .account == account,
+         .descriptor_id == delete_descriptor_id
+      };
+}
+
+operation add_auth_descriptor (account_id: byte_array, auth_id: byte_array, new_desc: auth_descriptor) {
+      val account = account @ { .id == account_id };
+      require_auth(account, auth_id, ["A"]);
+      _add_auth_descriptor(account, new_desc);
+}
+

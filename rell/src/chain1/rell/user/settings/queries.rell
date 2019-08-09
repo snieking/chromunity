@@ -1,0 +1,3 @@
+query get_user_settings(name) {
+    return user_settings@?{ user@{ .name == name }} ( .avatar, .description );
+}

@@ -13,7 +13,7 @@
     "bip39": "3.0.2",
     "boomerang-cache": "1.2.0",
     "hdkey": "1.1.1",
-    "postchain-client": "~0.7.4",
+    "postchain-client": "0.9.1",
     "react": "^16.8.6",
     "react-avatar-edit": "0.8.3",
     "react-countdown-now": "2.1.1",
