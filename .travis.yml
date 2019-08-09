@@ -39,7 +39,7 @@ deploy:
   - provider: s3
     access_key_id: $AWS_ACCESS_KEY_ID
     secret_access_key: $AWS_SECRET_ACCESS_KEY
-    bucket: chrotonomy.com
+    bucket: chromunity.com
     skip_cleanup: true
     local_dir: build
     on:
@@ -49,7 +49,7 @@ deploy:
   - provider: s3
     access_key_id: $AWS_ACCESS_KEY_ID
     secret_access_key: $AWS_SECRET_ACCESS_KEY
-    bucket: dev.chrotonomy.com
+    bucket: dev.chromunity.com
     skip_cleanup: true
     local_dir: build
     on:
