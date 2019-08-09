@@ -1,4 +1,3 @@
-#!/bin/sh
+#!/bin/bash
 
-. ./vars.sh
-./postchain.sh run-node -cid 0 -nc config/node-config.properties
+exec postchain-node/postchain.sh run-node -cid 1 -nc config/node-config.properties

@@ -1,8 +1,0 @@
-function get_verified_user(name): user {
-    val user = user@{ .name == name };
-
-    require(is_signer(user.pubkey));
-    require(user_meta@{ user }.suspended_until < op_context.last_block_time);
-
-    return user;
-}

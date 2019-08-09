@@ -1,0 +1,11 @@
+class representative_report {
+    key id: text;
+    index user;
+    index timestamp;
+    mutable handled: boolean;
+    index handled;
+    text;
+}
+
+include 'operations';
+include 'queries';

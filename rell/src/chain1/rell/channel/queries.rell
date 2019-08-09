@@ -1,0 +1,70 @@
+query get_topics_by_channel_prior_to_timestamp(name, timestamp, page_size: integer) {
+    // TODO: .lower_case() in Rell 0.9
+    return channel@*{ 
+        .name == name,
+        .topic.last_modified < timestamp
+    } (
+        id=.topic.id,
+        author=.topic.author.display_name,
+        title=.topic.title,
+        message=.topic.message,
+        timestamp=.topic.timestamp,
+        -sort last_modified=.topic.last_modified
+    ) limit page_size;
+}
+
+query get_topics_by_channel_after_timestamp(name, timestamp) {
+    return channel@*{ 
+        .name == name,
+        .topic.last_modified > timestamp
+    } (
+        id=.topic.id,
+        author=.topic.author.display_name,
+        title=.topic.title,
+        message=.topic.message,
+        timestamp=.topic.timestamp,
+        -sort last_modified=.topic.last_modified
+    );
+}
+
+query count_topics_by_channel(name) {
+    return channel@*{ .name == name } ( .name ).size();
+}
+
+query count_channel_followers(name) {
+    return channel_following@*{ .name == name } ( .user.name ).size();
+}
+
+query get_topics_by_followed_channels_prior_to_timestamp(username: text, timestamp, page_size: integer) {
+    val user = user@{ .name == username};
+    return (channel, channel_following) @* {
+        channel_following.user == user,
+        channel_following.name == channel.name,
+        channel.topic.last_modified < timestamp
+    }
+    (
+        id=channel.topic.id,
+        author=channel.topic.author.display_name,
+        title=channel.topic.title,
+        message=channel.topic.message,
+        timestamp=channel.topic.timestamp,
+        -sort last_modified=channel.topic.last_modified
+    ) limit page_size;
+}
+
+query get_followed_channels(username: text) {
+    val user = user@{ .name == username};
+    return channel_following@*{ user } ( .name );
+}
+
+query get_all_channels() {
+    return channel@*{} ( .display_name );
+}
+
+query get_channels_since(timestamp) {
+    return channel@*{ .timestamp > timestamp }( .display_name );
+}
+
+query get_topic_channels_belongings(topic_id: text) {
+    return channel@*{ topic@{ .id == topic_id }} ( .display_name );
+}

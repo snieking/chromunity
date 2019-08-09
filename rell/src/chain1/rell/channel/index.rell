@@ -1,0 +1,12 @@
+class channel {
+    key name, topic;
+    index timestamp;
+    display_name: name;
+}
+
+class channel_following {
+    key user, name;
+}
+
+include 'operations';
+include 'queries';

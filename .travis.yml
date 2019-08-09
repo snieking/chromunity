@@ -26,8 +26,8 @@ install:
 
 script:
   - cd rell
-  - ./init-node.sh
-  - ./run-node.sh &
+  - ./build.sh
+  - ./run-dev-node.sh &
   - cd ..
   - npm install
   - npm run coveralls

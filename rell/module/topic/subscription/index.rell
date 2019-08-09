@@ -1,6 +1,0 @@
-class subscription {
-    key topic, user;
-}
-
-include 'operations';
-include 'queries';
