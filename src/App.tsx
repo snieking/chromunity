@@ -18,6 +18,7 @@ import {Reports} from "./components/governing/reports/Reports";
 import {ThemeProvider} from "@material-ui/styles";
 import theme from "./theme";
 import {CssBaseline} from "@material-ui/core";
+import WalletLogin from "./components/user/authentication/WalletLogin";
 
 export class App extends React.Component {
     render() {
@@ -34,6 +35,7 @@ export class App extends React.Component {
                         <Route path="/user/login" component={Login}/>
                         <Route path="/user/logout" component={Logout}/>
                         <Route path="/user/settings" component={Settings}/>
+                        <Route path="/wallet/login" component={WalletLogin}/>
                         <Route path="/u/:userId" component={UserWall}/>
                         <Route path="/notifications/:userId" component={UserNotifications}/>
                         <Route path="/c/:channel" component={ChannelWall}/>

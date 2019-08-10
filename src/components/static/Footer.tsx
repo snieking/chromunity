@@ -28,7 +28,8 @@ const useStyles = makeStyles({
     },
     text: {
         fontSize: "12px",
-        color: COLOR_SOFT_PINK
+        color: COLOR_SOFT_PINK,
+        fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif'
     }
 });
 

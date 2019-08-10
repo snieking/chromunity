@@ -20,7 +20,7 @@ import {
     COLOR_CHROMIA_DARK_LIGHTER,
     COLOR_OFF_WHITE,
     COLOR_PURPLE,
-    COLOR_SOFT_PINK
+    COLOR_SOFT_PINK, COLOR_STEEL_BLUE
 } from "../../theme";
 
 interface OptionType {
@@ -184,14 +184,14 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                     ...provided,
                     background: COLOR_CHROMIA_DARK,
                     color: COLOR_SOFT_PINK,
-                    borderColor: COLOR_SOFT_PINK,
-                    '&:hover': {borderColor: COLOR_PURPLE},
+                    borderColor: COLOR_STEEL_BLUE,
+                    '&:hover': {borderColor: COLOR_OFF_WHITE},
                     boxShadow: 'none'
                 }),
                 singleValue: (provided: any, state: any) => {
                     const opacity = state.isDisabled ? 1 : 1;
                     const transition = 'opacity 300ms';
-                    const color = COLOR_OFF_WHITE;
+                    const color = COLOR_SOFT_PINK;
                     return {...provided, color, opacity, transition};
                 },
                 input: (provided: any, state: any) => {

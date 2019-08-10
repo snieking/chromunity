@@ -29,3 +29,8 @@ code {
 .pink-typography {
     color: #FFB0C2;
 }
+
+a {
+    display: inline-block;
+    text-decoration: none;
+}

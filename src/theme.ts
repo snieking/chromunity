@@ -36,22 +36,23 @@ const theme = createMuiTheme({
         MuiTextField: {
             root: {
                 '& label.Mui-focused': {
-                    color: 'white',
+                    color: COLOR_SOFT_PINK
                 },
                 '& .MuiOutlinedInput-root': {
                     '& fieldset': {
-                        borderColor: COLOR_SOFT_PINK,
+                        borderColor: COLOR_STEEL_BLUE,
                     },
                     '&:hover fieldset': {
-                        borderColor: COLOR_SOFT_PINK,
+                        borderColor: COLOR_OFF_WHITE,
                     },
                     '&.Mui-focused fieldset': {
-                        borderColor: COLOR_PURPLE,
+                        borderColor: COLOR_SOFT_PINK,
                     },
                     color: COLOR_OFF_WHITE
                 },
                 '& label': {
-                    color: COLOR_OFF_WHITE
+                    color: COLOR_OFF_WHITE,
+                    opacity: 0.5
                 }
             }
         },
@@ -118,7 +119,7 @@ const theme = createMuiTheme({
         },
         MuiPaper: {
             root: {
-                color: COLOR_CHROMIA_DARK_LIGHTER
+                backgroundColor: COLOR_CHROMIA_DARK_LIGHTER
             }
         },
         MuiCard: {

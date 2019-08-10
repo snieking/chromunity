@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {register} from '../../../blockchain/UserService';
 import {Redirect} from 'react-router-dom'
-import '../../../styles/fade.css';
 
 import AccountCircle from '@material-ui/icons/AccountCircle'
 import {Button, Chip, createStyles, Snackbar, Typography, withStyles, WithStyles} from "@material-ui/core";
