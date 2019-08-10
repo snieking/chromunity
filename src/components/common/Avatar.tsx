@@ -11,6 +11,7 @@ export enum AVATAR_SIZE {
 interface Props {
     src: string;
     size: AVATAR_SIZE;
+    onClick?: Function;
 }
 
 const Avatar: React.FunctionComponent<Props> = (props) => {
@@ -25,6 +26,7 @@ const Avatar: React.FunctionComponent<Props> = (props) => {
                 ${props.size === AVATAR_SIZE.LARGE ? classes.large : ''}
             `}
             alt="Profile Avatar"
+            onClick={() => props.onClick()}
         />
     );
 };

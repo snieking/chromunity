@@ -5,19 +5,48 @@ import {
     Button,
     Card,
     Container,
+    createStyles,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
     Snackbar,
-    TextField
+    TextField,
+    withStyles,
+    WithStyles
 } from '@material-ui/core';
 import AvatarChanger from './AvatarChanger';
 
-import './Settings.css';
 import {getUserSettings, updateUserSettings} from '../../../blockchain/UserService';
 import {CustomSnackbarContentWrapper} from '../../common/CustomSnackbar';
 import ChromiaPageHeader from '../../common/ChromiaPageHeader';
+import Avatar, {AVATAR_SIZE} from "../../common/Avatar";
+
+const styles = createStyles({
+    avatarWrapper: {
+        float: "left",
+        marginTop: "10px",
+        marginLeft: "10px",
+        opacity: 0.8,
+        '&:hover': {
+            cursor: "pointer",
+            opacity: 1
+        }
+    },
+    description: {
+        marginTop: "15px",
+        marginLeft: "10px",
+        width: "80%"
+    },
+    commitBtnWrapper: {
+        textAlign: "center",
+        marginTop: "5px"
+    }
+});
+
+interface Props extends WithStyles<typeof styles> {
+
+}
 
 interface SettingsState {
     avatar: string;
@@ -29,61 +58,59 @@ interface SettingsState {
     settingsUpdateStatus: string;
 }
 
-class Settings extends React.Component<{}, SettingsState> {
+const Settings = withStyles(styles)(
+    class extends React.Component<Props, SettingsState> {
 
-    constructor(props: any) {
-        super(props);
-        this.state = {
-            avatar: "",
-            editedAvatar: "",
-            editAvatarOpen: false,
-            description: "",
-            updateSuccessOpen: false,
-            updateErrorOpen: false,
-            settingsUpdateStatus: ""
-        };
+        constructor(props: any) {
+            super(props);
+            this.state = {
+                avatar: "",
+                editedAvatar: "",
+                editAvatarOpen: false,
+                description: "",
+                updateSuccessOpen: false,
+                updateErrorOpen: false,
+                settingsUpdateStatus: ""
+            };
 
-        this.updateAvatar = this.updateAvatar.bind(this);
-        this.commitAvatar = this.commitAvatar.bind(this);
-        this.saveSettings = this.saveSettings.bind(this);
-        this.toggleEditAvatarDialog = this.toggleEditAvatarDialog.bind(this);
-        this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
-        this.handleClose = this.handleClose.bind(this);
-    }
+            this.updateAvatar = this.updateAvatar.bind(this);
+            this.commitAvatar = this.commitAvatar.bind(this);
+            this.saveSettings = this.saveSettings.bind(this);
+            this.toggleEditAvatarDialog = this.toggleEditAvatarDialog.bind(this);
+            this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
+            this.handleClose = this.handleClose.bind(this);
+        }
 
-    render() {
-        return (
-            <div>
-                <Container fixed maxWidth="sm" className={"settings-container"}>
-                    <ChromiaPageHeader text="Edit Settings"/>
-                    <Card key={"user-card"} className="profile-card">
+        render() {
+            return (
+                <div>
+                    <Container fixed maxWidth="sm">
+                        <ChromiaPageHeader text="Edit Settings"/>
+                        <Card key={"user-card"}>
 
-                        <Dialog open={this.state.editAvatarOpen} aria-labelledby="form-dialog-title"
+                            <Dialog
+                                open={this.state.editAvatarOpen}
+                                aria-labelledby="form-dialog-title"
                                 fullWidth={true} maxWidth={"sm"}>
-                            <DialogTitle>Edit your avatar</DialogTitle>
-                            <DialogContent>
-                                <AvatarChanger updateFunction={this.updateAvatar} previousPicture={this.state.avatar}/>
-                            </DialogContent>
-                            <DialogActions>
-                                <Button onClick={() => this.toggleEditAvatarDialog()} color="primary">
-                                    Cancel
-                                </Button>
-                                <Button onClick={() => this.commitAvatar()} color="primary">
-                                    Send
-                                </Button>
-                            </DialogActions>
-                        </Dialog>
-                        {this.state.avatar !== ""
-                            ? <img src={this.state.avatar}
-                                   className="avatar-preview"
-                                   alt="preview"
-                                   onClick={() => this.toggleEditAvatarDialog()}
-                            />
-                            : <div/>
-                        }
-                        <div className="description-wrapper">
+                                <DialogTitle>Edit your avatar</DialogTitle>
+                                <DialogContent>
+                                    <AvatarChanger updateFunction={this.updateAvatar}
+                                                   previousPicture={this.state.avatar}/>
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button onClick={() => this.toggleEditAvatarDialog()} variant="outlined" color="secondary">
+                                        Cancel
+                                    </Button>
+                                    <Button onClick={() => this.commitAvatar()} variant="outlined" color="primary">
+                                        Send
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
+                            <div className={this.props.classes.avatarWrapper}>
+                                <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} onClick={() => this.toggleEditAvatarDialog()}/>
+                            </div>
                             <TextField
-                                className="description-editor"
+                                className={this.props.classes.description}
                                 margin="dense"
                                 id="description"
                                 multiline
@@ -95,90 +122,76 @@ class Settings extends React.Component<{}, SettingsState> {
                                 onChange={this.handleDescriptionChange}
                                 value={this.state.description}
                             />
+                        </Card>
+                        <div className={this.props.classes.commitBtnWrapper}>
+                            <Button size="large" variant="contained" color="primary" onClick={() => this.saveSettings()}>
+                                Save
+                            </Button>
                         </div>
-                    </Card>
-                    <div className="commit-button-wrapper">
-                        <Button size="large" variant="contained" color="primary" onClick={() => this.saveSettings()}>
-                            Save
-                        </Button>
-                    </div>
-                </Container>
-                <Snackbar
-                    anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left',
-                    }}
-                    open={this.state.updateSuccessOpen}
-                    autoHideDuration={3000}
-                    onClose={this.handleClose}
-                >
-                    <CustomSnackbarContentWrapper
-                        variant="success"
-                        message={this.state.settingsUpdateStatus}
-                    />
-                </Snackbar>
-                <Snackbar
-                    anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left',
-                    }}
-                    open={this.state.updateErrorOpen}
-                    autoHideDuration={3000}
-                    onClose={this.handleClose}
-                >
-                    <CustomSnackbarContentWrapper
-                        variant="error"
-                        message={this.state.settingsUpdateStatus}
-                    />
-                </Snackbar>
-            </div>
-        )
-    }
+                    </Container>
+                    <Snackbar
+                        anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
+                        open={this.state.updateSuccessOpen}
+                        autoHideDuration={3000}
+                        onClose={this.handleClose}>
+                        <CustomSnackbarContentWrapper variant="success" message={this.state.settingsUpdateStatus}/>
+                    </Snackbar>
+                    <Snackbar
+                        anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
+                        open={this.state.updateErrorOpen}
+                        autoHideDuration={3000}
+                        onClose={this.handleClose}>
+                        <CustomSnackbarContentWrapper variant="error" message={this.state.settingsUpdateStatus}/>
+                    </Snackbar>
+                </div>
+            )
+        }
 
-    componentDidMount() {
-        const user: User = getUser();
-        if (user == null) {
-            window.location.replace("/login");
-        } else {
-            getUserSettings(user).then((settings: UserSettings) => {
-                this.setState({
-                    avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, user.name),
-                    description: settings.description
+        componentDidMount() {
+            const user: User = getUser();
+            if (user == null) {
+                window.location.replace("/login");
+            } else {
+                getUserSettings(user).then((settings: UserSettings) => {
+                    this.setState({
+                        avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, user.name),
+                        description: settings.description
+                    });
                 });
-            });
-        }
-    }
-
-    handleDescriptionChange(event: React.ChangeEvent<HTMLInputElement>) {
-        this.setState({description: event.target.value});
-    }
-
-    toggleEditAvatarDialog() {
-        this.setState(prevState => ({editAvatarOpen: !prevState.editAvatarOpen}));
-    }
-
-    updateAvatar(updatedAvatar: string) {
-        this.setState({editedAvatar: updatedAvatar});
-    }
-
-    commitAvatar() {
-        this.setState(prevState => ({avatar: prevState.editedAvatar, editAvatarOpen: false}));
-    }
-
-    saveSettings() {
-        updateUserSettings(getUser(), this.state.avatar, this.state.description)
-            .then(() => this.setState({settingsUpdateStatus: "settings saved", updateSuccessOpen: true}))
-            .catch(() => this.setState({settingsUpdateStatus: "Error updating settings", updateErrorOpen: true}));
-    }
-
-    private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
-        if (reason === 'clickaway') {
-            return;
+            }
         }
 
-        this.setState({updateSuccessOpen: false, updateErrorOpen: false});
-    }
+        handleDescriptionChange(event: React.ChangeEvent<HTMLInputElement>) {
+            this.setState({description: event.target.value});
+        }
 
-}
+        toggleEditAvatarDialog() {
+            this.setState(prevState => ({editAvatarOpen: !prevState.editAvatarOpen}));
+        }
+
+        updateAvatar(updatedAvatar: string) {
+            this.setState({editedAvatar: updatedAvatar});
+        }
+
+        commitAvatar() {
+            this.setState(prevState => ({avatar: prevState.editedAvatar, editAvatarOpen: false}));
+        }
+
+        saveSettings() {
+            updateUserSettings(getUser(), this.state.avatar, this.state.description)
+                .then(() => this.setState({settingsUpdateStatus: "Settings saved", updateSuccessOpen: true}))
+                .catch(() => this.setState({settingsUpdateStatus: "Error updating settings", updateErrorOpen: true}));
+        }
+
+        private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
+            if (reason === 'clickaway') {
+                return;
+            }
+
+            this.setState({updateSuccessOpen: false, updateErrorOpen: false});
+        }
+
+    }
+);
 
 export default Settings;

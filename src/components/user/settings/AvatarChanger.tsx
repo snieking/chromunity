@@ -1,9 +1,17 @@
 import React from 'react';
 
-import './AvatarChanger.css';
 import Avatar from 'react-avatar-edit';
+import {createStyles, WithStyles, withStyles} from "@material-ui/core";
 
-export interface AvatarChangerProps {
+const styles = createStyles({
+   avatarChanger: {
+       margin: "0 auto",
+       border: "none",
+       width: "100%"
+   }
+});
+
+export interface AvatarChangerProps extends WithStyles<typeof styles> {
     updateFunction: Function,
     previousPicture: string
 }
@@ -12,17 +20,17 @@ export interface AvatarChangerState {
     src: string
 }
 
-class AvatarChanger extends React.Component<AvatarChangerProps, AvatarChangerState> {
+const AvatarChanger = withStyles(styles)(
+    class extends React.Component<AvatarChangerProps, AvatarChangerState> {
 
     constructor(props: AvatarChangerProps) {
         super(props);
         this.state = {src: ""};
 
         this.onCrop = this.onCrop.bind(this);
-        this.onBeforeFileLoad = this.onBeforeFileLoad.bind(this);
     }
 
-    compressImage(base64: string) {
+    compressImage(base64: string): Promise<string> {
         const canvas = document.createElement('canvas');
         const img = document.createElement('img');
 
@@ -50,7 +58,7 @@ class AvatarChanger extends React.Component<AvatarChangerProps, AvatarChangerSta
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
 
-                resolve(canvas.toDataURL('image/jpeg', 0.8))
+                resolve(canvas.toDataURL('image/jpeg', 0.9))
             };
             img.onerror = function (err) {
                 reject(err);
@@ -62,13 +70,9 @@ class AvatarChanger extends React.Component<AvatarChangerProps, AvatarChangerSta
 
     onCrop(preview: string) {
         this.compressImage(preview).then(img => {
-            this.setState({src: preview});
-            this.props.updateFunction(preview);
+            this.setState({src: img});
+            this.props.updateFunction(img);
         });
-    }
-
-    onBeforeFileLoad(elem: { target: { files: { size: number; }[]; value: string; }; }) {
-
     }
 
     render() {
@@ -77,12 +81,12 @@ class AvatarChanger extends React.Component<AvatarChangerProps, AvatarChangerSta
                 width={"99%"}
                 height={128}
                 onCrop={this.onCrop}
-                onBeforeFileLoad={this.onBeforeFileLoad}
                 src={this.state.src}
-                className="avatar-changer"
+                className={this.props.classes.avatarChanger}
             />
         );
     }
 }
+);
 
 export default AvatarChanger;
