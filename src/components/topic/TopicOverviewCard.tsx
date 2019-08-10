@@ -19,7 +19,7 @@ import {getUserSettingsCached} from '../../blockchain/UserService';
 import {Redirect} from 'react-router';
 import {getTopicStarRaters} from '../../blockchain/TopicService';
 import {getTopicChannelBelongings} from '../../blockchain/ChannelService';
-import {COLOR_CHROMIA_DARK, COLOR_ORANGE, COLOR_YELLOW} from "../../theme";
+import {COLOR_ORANGE, COLOR_YELLOW} from "../../theme";
 import {getRepresentatives} from "../../blockchain/RepresentativesService";
 import Avatar, {AVATAR_SIZE} from "../common/Avatar";
 import Timestamp from "../common/Timestamp";
@@ -38,9 +38,6 @@ const styles = createStyles({
     },
     overviewDetails: {
         marginLeft: "42px"
-    },
-    icon: {
-        color: COLOR_CHROMIA_DARK
     },
     iconYellow: {
         color: COLOR_YELLOW
@@ -169,7 +166,7 @@ const TopicOverviewCard = withStyles(styles)(class extends React.Component<Props
                                 badgeContent={this.state.stars}
                             >
                                 {this.state.ratedByMe ? <StarRate className={this.props.classes.iconYellow}/> :
-                                    <StarBorder className={this.props.classes.icon}/>}
+                                    <StarBorder/>}
                             </Badge>
                         </div>
                     </div>

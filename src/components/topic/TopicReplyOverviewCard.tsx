@@ -19,7 +19,7 @@ import {Redirect} from 'react-router';
 import {getReplyStarRaters} from '../../blockchain/TopicService';
 import Avatar, {AVATAR_SIZE} from "../common/Avatar";
 import Timestamp from "../common/Timestamp";
-import {COLOR_CHROMIA_DARK, COLOR_ORANGE, COLOR_YELLOW} from "../../theme";
+import {COLOR_ORANGE, COLOR_YELLOW} from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 
 const styles = createStyles({
@@ -40,9 +40,6 @@ const styles = createStyles({
     },
     message: {
         marginTop: "-15px"
-    },
-    icon: {
-        color: COLOR_CHROMIA_DARK
     },
     iconYellow: {
         color: COLOR_YELLOW

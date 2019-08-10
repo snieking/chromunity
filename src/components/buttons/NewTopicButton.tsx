@@ -15,6 +15,13 @@ import {createTopic} from "../../blockchain/TopicService";
 import {UserMeta} from "../../types";
 import {getTrendingChannels} from "../../blockchain/ChannelService";
 import {largeButtonStyles} from "./ButtonStyles";
+import {
+    COLOR_CHROMIA_DARK,
+    COLOR_CHROMIA_DARK_LIGHTER,
+    COLOR_OFF_WHITE,
+    COLOR_PURPLE,
+    COLOR_SOFT_PINK
+} from "../../theme";
 
 interface OptionType {
     label: string;
@@ -146,7 +153,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                         <IconButton aria-label="New topic"
                                     onClick={() => this.toggleNewTopicDialog()}
                                     className={this.props.classes.button}>
-                            <Forum fontSize="inherit"/>
+                            <Forum fontSize="inherit" className={this.props.classes.icon}/>
                         </IconButton>
                     </div>
                 )
@@ -160,7 +167,42 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         }
 
         newThreadDialog() {
-            const selectStyles = {menu: (styles: any) => ({...styles, zIndex: 999})}
+            const customStyles = {
+                option: (provided: any, state: any) => ({
+                    ...provided,
+                    color: state.isSelected ? COLOR_SOFT_PINK : COLOR_OFF_WHITE,
+                    background: COLOR_CHROMIA_DARK_LIGHTER,
+                    borderBottom: "2px solid",
+                    borderBottomColor: COLOR_CHROMIA_DARK
+                }),
+                menu: (styles: any) => ({
+                    ...styles,
+                    zIndex: 999,
+                    background: COLOR_CHROMIA_DARK
+                }),
+                control: (provided: any) => ({
+                    ...provided,
+                    background: COLOR_CHROMIA_DARK,
+                    color: COLOR_SOFT_PINK,
+                    borderColor: COLOR_SOFT_PINK,
+                    '&:hover': {borderColor: COLOR_PURPLE},
+                    boxShadow: 'none'
+                }),
+                singleValue: (provided: any, state: any) => {
+                    const opacity = state.isDisabled ? 1 : 1;
+                    const transition = 'opacity 300ms';
+                    const color = COLOR_OFF_WHITE;
+                    return {...provided, color, opacity, transition};
+                },
+                input: (provided: any, state: any) => {
+                    const color = COLOR_OFF_WHITE;
+                    return {...provided, color};
+                },
+                noOptionsMessage: (provided: any, state: any) => {
+                    const color = COLOR_SOFT_PINK;
+                    return {color};
+                }
+            };
             return (
                 <div>
                     <Dialog open={this.state.dialogOpen}
@@ -176,7 +218,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                                     options={this.state.suggestions}
                                     value={this.state.channel}
                                     onChange={this.handleChangeSingle}
-                                    styles={selectStyles}
+                                    styles={customStyles}
                                 />
                                 <br/>
                                 <Badge

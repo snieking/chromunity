@@ -1,6 +1,8 @@
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 
+export const COLOR_CHROMIA_DARK_LIGHTER = '#29262d';
 export const COLOR_CHROMIA_DARK = '#1F1A23';
+export const COLOR_CHROMIA_DARKER = '#02020f';
 export const COLOR_RED = '#FF405E';
 export const COLOR_ORANGE = '#FF702B';
 export const COLOR_STEEL_BLUE = '#4D617D';
@@ -13,7 +15,7 @@ const theme = createMuiTheme({
     palette: {
         type: 'light',
         primary: {
-            main: COLOR_STEEL_BLUE
+            main: COLOR_PURPLE
         },
         secondary: {
             main: COLOR_ORANGE
@@ -24,9 +26,43 @@ const theme = createMuiTheme({
         fontFamily: '"International", "Roboto", "Helvetica", "Arial", sans-serif',
     },
     overrides: {
+        MuiDialog: {
+            paper: {
+                background: COLOR_CHROMIA_DARK,
+                border: "solid 1px",
+                borderColor: COLOR_STEEL_BLUE
+            }
+        },
+        MuiTextField: {
+            root: {
+                '& label.Mui-focused': {
+                    color: 'white',
+                },
+                '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                        borderColor: COLOR_SOFT_PINK,
+                    },
+                    '&:hover fieldset': {
+                        borderColor: COLOR_SOFT_PINK,
+                    },
+                    '&.Mui-focused fieldset': {
+                        borderColor: COLOR_PURPLE,
+                    },
+                    color: COLOR_OFF_WHITE
+                },
+                '& label': {
+                    color: COLOR_OFF_WHITE
+                }
+            }
+        },
+        MuiToolbar: {
+            root: {
+                background: COLOR_CHROMIA_DARKER
+            }
+        },
         MuiTypography: {
             subtitle1: {
-                color: COLOR_CHROMIA_DARK
+                color: COLOR_OFF_WHITE
             },
             subtitle2: {
                 color: COLOR_PURPLE
@@ -39,17 +75,17 @@ const theme = createMuiTheme({
                 fontFamily: '"Battlefin", "International", "Roboto", "Helvetica", "Arial", "sans-serif"'
             },
             h6: {
-                color: COLOR_STEEL_BLUE,
+                color: COLOR_SOFT_PINK,
                 fontFamily: '"Battlefin", "International", "Roboto", "Helvetica", "Arial", "sans-serif"'
             },
             body1: {
-                color: COLOR_CHROMIA_DARK
+                color: COLOR_OFF_WHITE
             },
             body2: {
-                color: COLOR_CHROMIA_DARK
+                color: COLOR_OFF_WHITE
             },
             colorTextSecondary: {
-                color: COLOR_CHROMIA_DARK,
+                color: COLOR_OFF_WHITE,
                 opacity: 0.4
             },
             gutterBottom: {
@@ -59,35 +95,41 @@ const theme = createMuiTheme({
                 color: 'none'
             }
         },
+        MuiMenu: {
+            paper: {
+                background: COLOR_CHROMIA_DARK
+            }
+        },
         MuiMenuItem: {
             gutters: {
-                color: COLOR_CHROMIA_DARK,
+                color: COLOR_SOFT_PINK,
+                background: COLOR_CHROMIA_DARK
             }
         },
         MuiListItemIcon: {
             root: {
-                color: COLOR_CHROMIA_DARK,
+                color: COLOR_SOFT_PINK
             }
         },
         MuiIconButton: {
             colorInherit: {
-                color: COLOR_CHROMIA_DARK
+                color: COLOR_SOFT_PINK
             }
         },
         MuiPaper: {
             root: {
-                color: COLOR_OFF_WHITE
+                color: COLOR_CHROMIA_DARK_LIGHTER
             }
         },
         MuiCard: {
             root: {
-                background: COLOR_OFF_WHITE,
-                marginBottom: "2px"
+                background: COLOR_CHROMIA_DARK_LIGHTER,
+                marginBottom: "3px"
             }
         },
         MuiSvgIcon: {
             root: {
-                color: COLOR_CHROMIA_DARK
+                color: COLOR_SOFT_PINK
             }
         },
         MuiLink: {

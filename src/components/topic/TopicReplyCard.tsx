@@ -37,7 +37,7 @@ import {reportReply} from '../../blockchain/RepresentativesService';
 import {EditMessageButton} from '../buttons/EditMessageButton';
 import Avatar, {AVATAR_SIZE} from "../common/Avatar";
 import Timestamp from "../common/Timestamp";
-import {COLOR_CHROMIA_DARK, COLOR_ORANGE, COLOR_PURPLE, COLOR_RED, COLOR_SOFT_PINK, COLOR_YELLOW} from "../../theme";
+import {COLOR_ORANGE, COLOR_PURPLE, COLOR_RED, COLOR_YELLOW} from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 
 const styles = createStyles({
@@ -52,9 +52,6 @@ const styles = createStyles({
     },
     authorLink: {
         float: "right",
-        borderColor: COLOR_CHROMIA_DARK,
-        borderBottom: "dashed 1px",
-        borderLeft: "dashed 1px",
         borderRadius: "0 0 0 5px",
         marginTop: "-18px",
         marginBottom: "7px",
@@ -65,14 +62,11 @@ const styles = createStyles({
         marginBottom: "-22px",
         marginLeft: "-10px"
     },
-    icon: {
-        color: COLOR_CHROMIA_DARK
-    },
     iconYellow: {
         color: COLOR_YELLOW
     },
-    iconSoftPink: {
-        color: COLOR_SOFT_PINK
+    iconOrange: {
+        color: COLOR_ORANGE
     },
     iconRed: {
         color: COLOR_RED
@@ -246,7 +240,7 @@ const TopicReplyCard = withStyles(styles)(
                             >
                                 <Tooltip title="Like">
                                     {this.state.ratedByMe ? <StarRate className={this.props.classes.iconYellow}/> :
-                                        <StarBorder className={this.props.classes.icon}/>}
+                                        <StarBorder/>}
                                 </Tooltip>
                             </Badge>
                         </IconButton>
@@ -261,7 +255,7 @@ const TopicReplyCard = withStyles(styles)(
                         >
                             <Tooltip title="Reply">
                                 <Reply
-                                    className={this.state.replyBoxOpen ? this.props.classes.iconSoftPink : this.props.classes.icon}/>
+                                    className={this.state.replyBoxOpen ? this.props.classes.iconOrange : ''}/>
                             </Tooltip>
                         </IconButton>
 
@@ -270,7 +264,7 @@ const TopicReplyCard = withStyles(styles)(
                             onClick={() => this.reportReply()}
                         >
                             <Tooltip title="Report">
-                                <Report className={this.props.classes.icon}/>
+                                <Report/>
                             </Tooltip>
                         </IconButton>
                         {this.renderAdminActions()}

@@ -55,7 +55,7 @@ import LoadMoreButton from "../buttons/LoadMoreButton";
 import {getRepresentatives, reportTopic} from "../../blockchain/RepresentativesService";
 import Timestamp from "../common/Timestamp";
 import Avatar, {AVATAR_SIZE} from "../common/Avatar";
-import {COLOR_CHROMIA_DARK, COLOR_ORANGE, COLOR_PURPLE, COLOR_RED, COLOR_SOFT_PINK, COLOR_YELLOW} from "../../theme";
+import {COLOR_ORANGE, COLOR_PURPLE, COLOR_RED, COLOR_YELLOW} from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 
 const styles = createStyles({
@@ -67,22 +67,16 @@ const styles = createStyles({
     },
     authorLink: {
         float: "right",
-        borderColor: COLOR_CHROMIA_DARK,
-        borderBottom: "dashed 1px",
-        borderLeft: "dashed 1px",
         borderRadius: "0 0 0 5px",
         marginTop: "-18px",
         marginBottom: "7px",
         marginRight: "-16px",
     },
-    icon: {
-        color: COLOR_CHROMIA_DARK
-    },
     iconYellow: {
         color: COLOR_YELLOW
     },
-    iconSoftPink: {
-        color: COLOR_SOFT_PINK
+    iconOrange: {
+        color: COLOR_ORANGE
     },
     iconRed: {
         color: COLOR_RED
@@ -320,21 +314,19 @@ const FullTopic = withStyles(styles)(
             return (
                 <CardActions style={{marginTop: "-20px"}}>
                     <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
-                        <Badge
-                            color="primary"
-                            badgeContent={this.state.stars}
-                        >
+                        <Badge color="primary" badgeContent={this.state.stars}>
                             <Tooltip title="Like">
                                 {this.state.ratedByMe ? <StarRate className={this.props.classes.iconYellow}/> :
-                                    <StarBorder className={this.props.classes.icon}/>}
+                                    <StarBorder/>}
                             </Tooltip>
                         </Badge>
                     </IconButton>
                     <IconButton aria-label="Subscribe" onClick={() => this.toggleSubscription()}>
                         {this.state.subscribed
-                            ? <Tooltip title="Unsubscribe"><NotificationsActive
-                                className={this.props.classes.iconSoftPink}/></Tooltip>
-                            : <Tooltip title="Subscribe"><Notifications className={this.props.classes.icon}/></Tooltip>
+                            ? <Tooltip title="Unsubscribe">
+                                <NotificationsActive className={this.props.classes.iconOrange}/>
+                            </Tooltip>
+                            : <Tooltip title="Subscribe"><Notifications/></Tooltip>
                         }
                     </IconButton>
 
@@ -347,7 +339,7 @@ const FullTopic = withStyles(styles)(
 
                     <IconButton aria-label="Report" onClick={() => this.reportTopic()}>
                         <Tooltip title="Report">
-                            <Report className={this.props.classes.icon}/>
+                            <Report/>
                         </Tooltip>
                     </IconButton>
 
@@ -495,7 +487,7 @@ const FullTopic = withStyles(styles)(
                         {this.state.isLoading ? <LinearProgress variant="query"/> : <div/>}
                         {this.renderTopic()}
                         {this.state.topicReplies.length > 0
-                            ? (<SubdirectoryArrowRight className={this.props.classes.iconSoftPink}/>)
+                            ? (<SubdirectoryArrowRight/>)
                             : (<div/>)}
                         {this.state.topicReplies.map(reply => <TopicReplyCard
                             key={"reply-" + reply.id}

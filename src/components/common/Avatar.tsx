@@ -1,6 +1,6 @@
 import React from 'react';
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import {COLOR_CHROMIA_DARK, COLOR_STEEL_BLUE} from "../../theme";
+import {COLOR_CHROMIA_DARK} from "../../theme";
 
 export enum AVATAR_SIZE {
     SMALL,
@@ -35,7 +35,7 @@ const useStyles = makeStyles({
     avatar: {
         borderRadius: "50%",
         border: "1px solid",
-        borderColor: COLOR_STEEL_BLUE,
+        borderColor: COLOR_CHROMIA_DARK,
         backgroundColor: COLOR_CHROMIA_DARK
     },
     small: {

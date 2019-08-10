@@ -17,9 +17,6 @@ import {COLOR_SOFT_PINK} from "../../theme";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
-        navToolbar: {
-            backgroundColor: "#100d14"
-        },
         navIcon: {
             color: COLOR_SOFT_PINK
         },
@@ -173,7 +170,7 @@ const HeaderNav: React.FunctionComponent = (props: any) => {
     return (
         <div className={classes.grow}>
             <AppBar position="static">
-                <Toolbar className={classes.navToolbar}>
+                <Toolbar>
                     <Link to="/">
                         <IconButton
                             edge="start"

@@ -68,7 +68,7 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = (props)
                     <IconButton aria-label="Reply to topic"
                                 onClick={() => setDialogOpen(!dialogOpen)}
                                 className={classes.button}>
-                        <ReplyAll fontSize="large"/>
+                        <ReplyAll fontSize="large" className={classes.icon}/>
                     </IconButton>
                 </div>
             )

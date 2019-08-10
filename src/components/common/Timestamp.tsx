@@ -2,7 +2,7 @@ import {timeAgoReadable} from "../../util/util";
 import {Typography} from "@material-ui/core";
 import React from "react";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import {COLOR_STEEL_BLUE} from "../../theme";
+import {COLOR_SOFT_PINK} from "../../theme";
 
 
 interface Props {
@@ -20,7 +20,7 @@ const Timestamp: React.FunctionComponent<Props> = (props) => {
 
 const useStyles = makeStyles({
     timestamp: {
-        color: COLOR_STEEL_BLUE,
+        color: COLOR_SOFT_PINK,
         fontSize: "12px"
     }
 });
