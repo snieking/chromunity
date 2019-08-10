@@ -1,17 +1,24 @@
 import React, {useEffect, useState} from "react";
 
-import {Badge, Tooltip} from "@material-ui/core";
+import {Badge, createStyles, makeStyles, Tooltip} from "@material-ui/core";
 import {Notifications, NotificationsActive} from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
 import {countUnreadUserNotifications} from "../../blockchain/NotificationService";
 import {getUser} from "../../util/user-util";
+import {COLOR_SOFT_PINK} from "../../theme";
 
 export interface NotificationsButtonProps {
     username: string
 }
 
-const NotificationsButton: React.FunctionComponent<NotificationsButtonProps> = (props) => {
+const useStyles = makeStyles(createStyles({
+    navIcon: {
+        color: COLOR_SOFT_PINK
+    }
+}));
 
+const NotificationsButton: React.FunctionComponent<NotificationsButtonProps> = (props) => {
+    const classes = useStyles(props);
     const [counter, setCounter] = useState<number>(0);
 
     useEffect(() => {
@@ -23,11 +30,11 @@ const NotificationsButton: React.FunctionComponent<NotificationsButtonProps> = (
         if (getUser() != null) {
             return (
                 <IconButton aria-label="Notifications" onClick={() => setCounter(0)}>
-                    <Badge className="star-badge" color="primary" badgeContent={counter}>
+                    <Badge color="primary" badgeContent={counter}>
                         <Tooltip title="Notifications">
                             {counter > 0
-                                ? <NotificationsActive className="nav-button"/>
-                                : <Notifications className="nav-button"/>
+                                ? <NotificationsActive className={classes.navIcon}/>
+                                : <Notifications className={classes.navIcon}/>
                             }
                         </Tooltip>
                     </Badge>

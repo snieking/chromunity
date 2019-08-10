@@ -1,6 +1,13 @@
 @font-face {
-    font-family: 'ChromiaFont';
+    font-family: 'Battlefin';
     font-weight: normal;
     font-style: normal;
     src: url('Battlefin-Black.otf');
+}
+
+@font-face {
+    font-family: 'International';
+    font-weight: normal;
+    font-style: normal;
+    src: url('International.ttf');
 }

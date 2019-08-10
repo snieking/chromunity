@@ -7,7 +7,9 @@ export interface LoadMoreButtonProps {
 
 const LoadMoreButton: React.FunctionComponent<LoadMoreButtonProps> = (props) => {
     return (
-        <Button type="submit" fullWidth color="primary"
+        <Button type="submit"
+                fullWidth
+                color="primary"
                 onClick={() => props.onClick()}
                 variant="contained"
                 style={{marginTop: "5px"}}
