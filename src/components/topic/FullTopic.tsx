@@ -23,8 +23,8 @@ import {
 } from "@material-ui/core";
 
 import {RouteComponentProps} from "react-router";
-import ReplyTopicButton from "../../buttons/ReplyTopicButton";
-import {EditMessageButton} from "../../buttons/EditMessageButton";
+import ReplyTopicButton from "../buttons/ReplyTopicButton";
+import {EditMessageButton} from "../buttons/EditMessageButton";
 import {
     getTopicById,
     getTopicRepliesAfterTimestamp,
@@ -37,9 +37,9 @@ import {
     removeTopicStarRating,
     subscribeToTopic,
     unsubscribeFromTopic
-} from "../../../blockchain/TopicService";
-import {Topic, TopicReply, User} from "../../../types";
-import {getUser, ifEmptyAvatarThenPlaceholder} from "../../../util/user-util";
+} from "../../blockchain/TopicService";
+import {Topic, TopicReply, User} from "../../types";
+import {getUser, ifEmptyAvatarThenPlaceholder} from "../../util/user-util";
 import {
     Delete,
     Notifications,
@@ -49,14 +49,14 @@ import {
     StarRate,
     SubdirectoryArrowRight
 } from "@material-ui/icons";
-import {getMutedUsers, getUserSettingsCached} from "../../../blockchain/UserService";
-import TopicReplyCard from "../TopicReplyCard/TopicReplyCard";
-import LoadMoreButton from "../../buttons/LoadMoreButton";
-import {getRepresentatives, reportTopic} from "../../../blockchain/RepresentativesService";
-import Timestamp from "../../common/Timestamp";
-import Avatar, {AVATAR_SIZE} from "../../common/Avatar";
-import {COLOR_CHROMIA_DARK, COLOR_ORANGE, COLOR_PURPLE, COLOR_RED, COLOR_SOFT_PINK, COLOR_YELLOW} from "../../../theme";
-import MarkdownRenderer from "../../common/MarkdownRenderer";
+import {getMutedUsers, getUserSettingsCached} from "../../blockchain/UserService";
+import TopicReplyCard from "./TopicReplyCard";
+import LoadMoreButton from "../buttons/LoadMoreButton";
+import {getRepresentatives, reportTopic} from "../../blockchain/RepresentativesService";
+import Timestamp from "../common/Timestamp";
+import Avatar, {AVATAR_SIZE} from "../common/Avatar";
+import {COLOR_CHROMIA_DARK, COLOR_ORANGE, COLOR_PURPLE, COLOR_RED, COLOR_SOFT_PINK, COLOR_YELLOW} from "../../theme";
+import MarkdownRenderer from "../common/MarkdownRenderer";
 
 const styles = createStyles({
     authorName: {

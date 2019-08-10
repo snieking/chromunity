@@ -130,7 +130,7 @@ const HeaderNav: React.FunctionComponent = (props: any) => {
                 <Tooltip title="account">
                     <Link to="/user/login">
                         <IconButton>
-                            <AccountCircle/>
+                            <AccountCircle className={classes.navIcon}/>
                         </IconButton>
                     </Link>
                 </Tooltip>

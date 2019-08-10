@@ -1,6 +1,6 @@
 import React from 'react';
 import {Link} from "react-router-dom";
-import {TopicReply, User} from '../../../types';
+import {TopicReply, User} from '../../types';
 import {
     Badge,
     Card,
@@ -11,16 +11,16 @@ import {
     withStyles,
     WithStyles
 } from '@material-ui/core';
-import {timeAgoReadable} from '../../../util/util';
-import {getUser, ifEmptyAvatarThenPlaceholder} from '../../../util/user-util';
+import {timeAgoReadable} from '../../util/util';
+import {getUser, ifEmptyAvatarThenPlaceholder} from '../../util/user-util';
 import {StarBorder, StarRate} from '@material-ui/icons';
-import {getUserSettingsCached} from '../../../blockchain/UserService';
+import {getUserSettingsCached} from '../../blockchain/UserService';
 import {Redirect} from 'react-router';
-import {getReplyStarRaters} from '../../../blockchain/TopicService';
-import Avatar, {AVATAR_SIZE} from "../../common/Avatar";
-import Timestamp from "../../common/Timestamp";
-import {COLOR_CHROMIA_DARK, COLOR_ORANGE, COLOR_YELLOW} from "../../../theme";
-import MarkdownRenderer from "../../common/MarkdownRenderer";
+import {getReplyStarRaters} from '../../blockchain/TopicService';
+import Avatar, {AVATAR_SIZE} from "../common/Avatar";
+import Timestamp from "../common/Timestamp";
+import {COLOR_CHROMIA_DARK, COLOR_ORANGE, COLOR_YELLOW} from "../../theme";
+import MarkdownRenderer from "../common/MarkdownRenderer";
 
 const styles = createStyles({
     authorName: {

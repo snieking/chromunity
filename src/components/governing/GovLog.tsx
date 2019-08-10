@@ -1,13 +1,11 @@
 import React from 'react';
-import ChromiaPageHeader from '../../common/ChromiaPageHeader';
-import {RepresentativeAction} from '../../../types';
-import {getAllRepresentativeActionsPriorToTimestamp} from '../../../blockchain/RepresentativesService';
+import ChromiaPageHeader from '../common/ChromiaPageHeader';
+import {RepresentativeAction} from '../../types';
+import {getAllRepresentativeActionsPriorToTimestamp} from '../../blockchain/RepresentativesService';
 import {Card, CardContent, Container, LinearProgress, Typography} from '@material-ui/core';
-import LoadMoreButton from "../../buttons/LoadMoreButton";
-
-import './GovLog.css';
-import {timeAgoReadable} from '../../../util/util';
-import {parseContent} from '../../../util/text-parsing';
+import LoadMoreButton from "../buttons/LoadMoreButton";
+import {parseContent} from '../../util/text-parsing';
+import Timestamp from "../common/Timestamp";
 
 interface GovLogState {
     actions: RepresentativeAction[];
@@ -25,7 +23,7 @@ export class GovLog extends React.Component<{}, GovLogState> {
             actions: [],
             isLoading: true,
             couldExistOlderActions: false
-        }
+        };
 
         this.retrieveActions = this.retrieveActions.bind(this);
     }
@@ -38,7 +36,7 @@ export class GovLog extends React.Component<{}, GovLogState> {
         return (
             <Container>
                 <ChromiaPageHeader text="Logbook"/>
-                {this.state.isLoading ? <LinearProgress variant="query"/> : <div></div>}
+                {this.state.isLoading ? <LinearProgress variant="query"/> : <div/>}
                 {this.state.actions.map(action => this.representativeActionCard(action))}
                 {this.renderLoadMoreButton()}
             </Container>
@@ -47,12 +45,10 @@ export class GovLog extends React.Component<{}, GovLogState> {
 
     representativeActionCard(action: RepresentativeAction) {
         return (
-            <Card key={action.id} className="gov-log-card">
+            <Card key={action.id}>
                 <CardContent>
-                    <Typography className="timestamp right" variant="body2" component="span">
-                        {timeAgoReadable(action.timestamp)}
-                    </Typography>
-                    <Typography variant="subtitle1" color="textSecondary" component="p">
+                    <Timestamp milliseconds={action.timestamp}/>
+                    <Typography variant="subtitle1" component="p">
                         <span dangerouslySetInnerHTML={{__html: parseContent(action.action)}}/>
                     </Typography>
                 </CardContent>

@@ -17,3 +17,15 @@ code {
     display: block;
     height: 30px;
 }
+
+.blue-typography {
+    color: #4D617D;
+}
+
+.purple-typography {
+    color: #CC91F0;
+}
+
+.pink-typography {
+    color: #FFB0C2;
+}

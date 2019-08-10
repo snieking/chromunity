@@ -48,7 +48,7 @@ import {suspendUser} from '../../blockchain/RepresentativesService';
 import ChromiaPageHeader from '../common/ChromiaPageHeader';
 import {COLOR_RED, COLOR_STEEL_BLUE} from "../../theme";
 import Avatar, {AVATAR_SIZE} from "../common/Avatar";
-import {NotFound} from "../NotFound/NotFound";
+import {NotFound} from "../static/NotFound";
 
 const styles = createStyles({
     iconRed: {

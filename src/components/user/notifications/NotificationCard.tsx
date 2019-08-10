@@ -1,10 +1,10 @@
 import React from 'react';
 
 import {Card, CardContent, createStyles, makeStyles, Typography} from "@material-ui/core";
-import {UserNotification} from "../../types";
-import {parseContent} from '../../util/text-parsing';
+import {UserNotification} from "../../../types";
+import {parseContent} from '../../../util/text-parsing';
 
-import Timestamp from "../common/Timestamp";
+import Timestamp from "../../common/Timestamp";
 
 const useStyles = makeStyles(createStyles({
     notificationRead: {

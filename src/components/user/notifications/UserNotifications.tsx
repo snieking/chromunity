@@ -2,12 +2,12 @@ import React, {useEffect, useState} from 'react';
 import {Container, LinearProgress} from "@material-ui/core";
 
 import {RouteComponentProps} from "react-router";
-import {getUserNotificationsPriorToTimestamp, markNotificationsRead} from "../../blockchain/NotificationService";
-import {UserNotification} from "../../types";
-import {getUser} from "../../util/user-util";
+import {getUserNotificationsPriorToTimestamp, markNotificationsRead} from "../../../blockchain/NotificationService";
+import {UserNotification} from "../../../types";
+import {getUser} from "../../../util/user-util";
 import NotificationCard from './NotificationCard';
-import ChromiaPageHeader from '../common/ChromiaPageHeader';
-import LoadMoreButton from "../buttons/LoadMoreButton";
+import ChromiaPageHeader from '../../common/ChromiaPageHeader';
+import LoadMoreButton from "../../buttons/LoadMoreButton";
 
 interface MatchParams {
     userId: string

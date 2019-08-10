@@ -12,7 +12,7 @@ import {
     getTopicsPriorToTimestamp
 } from '../../blockchain/TopicService';
 import {Container, LinearProgress, MenuItem, Select} from '@material-ui/core';
-import TopicOverviewCard from '../Topic/TopicOverViewCard/TopicOverviewCard';
+import TopicOverviewCard from '../topic/TopicOverviewCard';
 import NewTopicButton from '../buttons/NewTopicButton';
 import {getUser} from '../../util/user-util';
 import LoadMoreButton from '../buttons/LoadMoreButton';
@@ -20,7 +20,7 @@ import {TrendingChannels} from '../tags/TrendingTags';
 import ChromiaPageHeader from '../common/ChromiaPageHeader';
 import {getRepresentatives} from '../../blockchain/RepresentativesService';
 import {getMutedUsers} from "../../blockchain/UserService";
-import {TOPIC_VIEW_SELECTOR_OPTION} from "./TopicCommon";
+import {TOPIC_VIEW_SELECTOR_OPTION} from "./WallCommon";
 
 interface Props {
     type: string;

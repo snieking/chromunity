@@ -1,6 +1,6 @@
 import React from 'react';
 import {Link} from "react-router-dom";
-import {Topic, User} from '../../../types';
+import {Topic, User} from '../../types';
 import {
     Badge,
     Card,
@@ -12,17 +12,17 @@ import {
     withStyles,
     WithStyles
 } from '@material-ui/core';
-import {stringToHexColor} from '../../../util/util';
-import {getUser, ifEmptyAvatarThenPlaceholder} from '../../../util/user-util';
+import {stringToHexColor} from '../../util/util';
+import {getUser, ifEmptyAvatarThenPlaceholder} from '../../util/user-util';
 import {StarBorder, StarRate} from '@material-ui/icons';
-import {getUserSettingsCached} from '../../../blockchain/UserService';
+import {getUserSettingsCached} from '../../blockchain/UserService';
 import {Redirect} from 'react-router';
-import {getTopicStarRaters} from '../../../blockchain/TopicService';
-import {getTopicChannelBelongings} from '../../../blockchain/ChannelService';
-import {COLOR_CHROMIA_DARK, COLOR_ORANGE, COLOR_YELLOW} from "../../../theme";
-import {getRepresentatives} from "../../../blockchain/RepresentativesService";
-import Avatar, {AVATAR_SIZE} from "../../common/Avatar";
-import Timestamp from "../../common/Timestamp";
+import {getTopicStarRaters} from '../../blockchain/TopicService';
+import {getTopicChannelBelongings} from '../../blockchain/ChannelService';
+import {COLOR_CHROMIA_DARK, COLOR_ORANGE, COLOR_YELLOW} from "../../theme";
+import {getRepresentatives} from "../../blockchain/RepresentativesService";
+import Avatar, {AVATAR_SIZE} from "../common/Avatar";
+import Timestamp from "../common/Timestamp";
 
 const styles = createStyles({
     representativeColor: {

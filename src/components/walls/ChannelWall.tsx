@@ -10,7 +10,7 @@ import {
     getTopicsByChannelPriorToTimestamp,
     getTopicsByChannelSortedByPopularityAfterTimestamp
 } from '../../blockchain/TopicService';
-import TopicOverviewCard from '../Topic/TopicOverViewCard/TopicOverviewCard';
+import TopicOverviewCard from '../topic/TopicOverviewCard';
 import LoadMoreButton from '../buttons/LoadMoreButton';
 import {getUser} from '../../util/user-util';
 import {
@@ -24,7 +24,7 @@ import {getRepresentatives} from '../../blockchain/RepresentativesService';
 import NewTopicButton from '../buttons/NewTopicButton';
 import {Favorite, FavoriteBorder} from '@material-ui/icons';
 import {getMutedUsers} from "../../blockchain/UserService";
-import {TOPIC_VIEW_SELECTOR_OPTION} from "./TopicCommon";
+import {TOPIC_VIEW_SELECTOR_OPTION} from "./WallCommon";
 
 interface MatchParams {
     channel: string

@@ -89,6 +89,11 @@ const theme = createMuiTheme({
             root: {
                 color: COLOR_CHROMIA_DARK
             }
+        },
+        MuiLink: {
+            root: {
+                color: COLOR_PURPLE
+            }
         }
     }
 });

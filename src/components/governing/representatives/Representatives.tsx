@@ -1,9 +1,8 @@
 import React from 'react';
 
-import './Representatives.css';
 import {Button, Card, CardContent, Container, Grid, TextField} from "@material-ui/core";
 import {getRepresentatives} from "../../../blockchain/RepresentativesService";
-import RepresentativeCard from './RepresentativeCard/RepresentativeCard';
+import RepresentativeCard from './RepresentativeCard';
 import ChromiaPageHeader from '../../common/ChromiaPageHeader';
 import {getUser} from '../../../util/user-util';
 import {adminAddRepresentative, adminRemoveRepresentative} from '../../../blockchain/AdminService';
@@ -34,7 +33,7 @@ export class Representatives extends React.Component<{}, RepresentativesState> {
 
     render() {
         return (
-            <Container fixed maxWidth="md">
+            <Container fixed>
                 <ChromiaPageHeader text="Representatives"/>
                 <Grid container spacing={1}>
                     {this.state.representatives.map(name => <RepresentativeCard name={name} key={name}/>)}
@@ -59,16 +58,15 @@ export class Representatives extends React.Component<{}, RepresentativesState> {
                                 label="Username"
                                 onChange={this.handleUsernameChange}
                                 value={this.state.targetUsername}
-                                className="text-field"
                                 variant="outlined"
                             />
                             <br/>
                             <Button onClick={() => adminRemoveRepresentative(getUser(), this.state.targetUsername)
-                                .then(() => window.location.reload())} color="secondary" variant="outlined">
+                                .then(() => window.location.reload())} variant="outlined">
                                 Remove representative
                             </Button>
                             <Button onClick={() => adminAddRepresentative(getUser(), this.state.targetUsername)
-                                .then(() => window.location.reload())} color="primary" variant="outlined">
+                                .then(() => window.location.reload())} variant="outlined">
                                 Add representative
                             </Button>
                         </CardContent>
