@@ -19,8 +19,8 @@ import {
     COLOR_CHROMIA_DARK,
     COLOR_CHROMIA_DARK_LIGHTER,
     COLOR_OFF_WHITE,
-    COLOR_PURPLE,
-    COLOR_SOFT_PINK, COLOR_STEEL_BLUE
+    COLOR_SOFT_PINK,
+    COLOR_STEEL_BLUE
 } from "../../theme";
 
 interface OptionType {

@@ -2,7 +2,6 @@ import * as React from "react";
 import {login} from "../../../blockchain/UserService";
 import {AccountCircle} from "@material-ui/icons";
 import {getMnemonic} from "../../../util/user-util";
-import {Container} from "@material-ui/core";
 
 export interface LoginProps {
     login: Function

@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import {createStyles, makeStyles} from "@material-ui/core";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import Typography from "@material-ui/core/Typography";
-import Paper from "@material-ui/core/Paper";
 import Container from "@material-ui/core/Container";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
@@ -16,8 +15,7 @@ const useStyles = makeStyles(createStyles({
         padding: "20px",
         display: "block"
     },
-    knownAccountsLabel: {
-    },
+    knownAccountsLabel: {},
     passwordField: {
         width: "80%",
         marginTop: "20px",
@@ -59,17 +57,13 @@ const WalletLogin: React.FunctionComponent = (props: any) => {
                         OR
                     </Typography>
                     <br/>
-                    <Button color="secondary" variant="outlined" className={classes.button}>Import existing account</Button>
+                    <Button color="secondary" variant="outlined" className={classes.button}>Import existing
+                        account</Button>
                 </div>
             </Card>
         </Container>
     )
-
-    function handlePasswordChange(event: React.ChangeEvent<HTMLInputElement>) {
-        event.preventDefault();
-        event.stopPropagation();
-        setPassword(event.target.value);
-    }
+    
 };
 
 export default WalletLogin;
