@@ -1,7 +1,5 @@
 import React from "react";
 
-import './Buttons.css';
-
 import {Dialog, Snackbar, Tooltip} from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -9,7 +7,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
 import IconButton from "@material-ui/core/IconButton";
 import {getCachedUserMeta, getUser} from "../../util/user-util";
-import {CustomSnackbarContentWrapper} from "../utils/CustomSnackbar";
+import {CustomSnackbarContentWrapper} from "../common/CustomSnackbar";
 import {UserMeta} from "../../types";
 import {Edit} from "@material-ui/icons";
 
@@ -136,10 +134,8 @@ export class EditMessageButton extends React.Component<EditMessageButtonProps, E
             return (
                 <div style={{display: "inline-block"}}>
                     <Tooltip title="Edit">
-                        <IconButton aria-label="Edit"
-                                    onClick={() => this.toggleDialog()}
-                        >
-                            <Edit className="purple-color"/>
+                        <IconButton aria-label="Edit" onClick={() => this.toggleDialog()}>
+                            <Edit/>
                         </IconButton>
                     </Tooltip>
                     {this.newTopicDialog()}

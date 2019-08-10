@@ -54,7 +54,7 @@ export function suspendUser(user: User, userToBeSuspended: string) {
 }
 
 export function reportTopic(user: User, topicId: string) {
-    return report(user, "Topic /t/" + topicId + " was reported by @" + user.name);
+    return report(user, "topic /t/" + topicId + " was reported by @" + user.name);
 }
 
 export function reportReply(user: User, topicId: string, replyId: string) {

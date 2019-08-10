@@ -1,8 +1,7 @@
 import React, {FormEvent, useEffect, useState} from "react";
 
-import './Buttons.css';
 
-import {Dialog, Snackbar} from "@material-ui/core";
+import {Dialog, makeStyles, Snackbar} from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -11,9 +10,9 @@ import IconButton from "@material-ui/core/IconButton";
 import {ReplyAll} from "@material-ui/icons";
 import {createTopicReply} from "../../blockchain/TopicService";
 import {getCachedUserMeta, getUser} from "../../util/user-util";
-import {CustomSnackbarContentWrapper} from "../utils/CustomSnackbar";
+import {CustomSnackbarContentWrapper} from "../common/CustomSnackbar";
 import {UserMeta} from "../../types";
-
+import {largeButtonStyles} from "./ButtonStyles";
 
 export interface ReplyTopicButtonProps {
     submitFunction: Function;
@@ -21,16 +20,11 @@ export interface ReplyTopicButtonProps {
     topicAuthor: string;
 }
 
-export interface ReplyTopicButtonState {
-    dialogOpen: boolean;
-    topicMessage: string;
-    replyStatusSuccessOpen: boolean;
-    replyStatusErrorOpen: boolean;
-    replySentStatus: string;
-    userMeta: UserMeta;
-}
+const useStyle = makeStyles(largeButtonStyles);
 
 const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = (props) => {
+
+    const classes = useStyle(props);
 
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const [message, setMessage] = useState<string>("");
@@ -70,18 +64,11 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = (props)
     function createTopicButton() {
         if (getUser() != null && userMeta != null && userMeta.suspended_until < Date.now()) {
             return (
-                <div className="bottom-right-corner rounded-pink">
+                <div className={classes.buttonWrapper}>
                     <IconButton aria-label="Reply to topic"
                                 onClick={() => setDialogOpen(!dialogOpen)}
-                                style={{
-                                    backgroundColor: "#FFAFC1",
-                                    marginRight: "5px",
-                                    marginBottom: "5px",
-                                    height: "64px",
-                                    width: "64px"
-                                }}
-                    >
-                        <ReplyAll fontSize="large" className="new-topic-button"/>
+                                className={classes.button}>
+                        <ReplyAll fontSize="large"/>
                     </IconButton>
                 </div>
             )
@@ -91,8 +78,10 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = (props)
     function newTopicDialog() {
         return (
             <div>
-                <Dialog open={dialogOpen} aria-labelledby="form-dialog-title"
-                        fullWidth={true} maxWidth={"sm"}>
+                <Dialog open={dialogOpen}
+                        aria-labelledby="form-dialog-title"
+                        fullWidth={true}
+                        maxWidth={"sm"}>
                     <form onSubmit={createReply}>
                         <DialogContent>
                             <br/>
@@ -123,32 +112,20 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = (props)
                 </Dialog>
 
                 <Snackbar
-                    anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left',
-                    }}
+                    anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
                     open={newReplySuccessStatusOpen}
                     autoHideDuration={3000}
-                    onClose={handleClose}
-                >
+                    onClose={handleClose}>
                     <CustomSnackbarContentWrapper
                         variant="success"
-                        message={newReplyStatusMessage}
-                    />
+                        message={newReplyStatusMessage}/>
                 </Snackbar>
                 <Snackbar
-                    anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left',
-                    }}
+                    anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
                     open={newReplyErrorStatusOpen}
                     autoHideDuration={3000}
-                    onClose={handleClose}
-                >
-                    <CustomSnackbarContentWrapper
-                        variant="error"
-                        message={newReplyStatusMessage}
-                    />
+                    onClose={handleClose}>
+                    <CustomSnackbarContentWrapper variant="error" message={newReplyStatusMessage}/>
                 </Snackbar>
             </div>
         )
@@ -159,7 +136,7 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = (props)
             {createTopicButton()}
             {newTopicDialog()}
         </div>
-    )
+    );
 
     function handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
         if (reason === 'clickaway') {
