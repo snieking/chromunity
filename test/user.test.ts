@@ -13,6 +13,7 @@ import {getANumber} from "./helper";
 
 import * as bip39 from "bip39";
 import {User} from "../src/types";
+import {seedFromMnemonic} from "../src/blockchain/CryptoService";
 
 jest.setTimeout(30000);
 
@@ -45,14 +46,14 @@ describe('User tests', () => {
     });
 
     it("login users", async () => {
-        const user: User = await login(user01.name, user01.password, user01.mnemonic);
+        const user: User = await login(user01.name, user01.password, seedFromMnemonic(user01.mnemonic, user01.password));
         loggedInUser = user;
 
         expect(user).toBeDefined();
         expect(user.name).toBe(user01.name);
         expect(user.seed).toBeDefined();
 
-        secondUser = await login(user02.name, user02.password, user02.mnemonic);
+        secondUser = await login(user02.name, user02.password, seedFromMnemonic(user02.mnemonic, user02.password));
         expect(secondUser).toBeDefined();
     });
 
