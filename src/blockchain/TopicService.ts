@@ -157,6 +157,7 @@ export function countTopicsInChannel(channelName: string): Promise<number> {
 }
 
 export function giveTopicStarRating(user: User, topicId: string) {
+    console.log("User: ", user);
     return modifyRatingAndSubscription(user, topicId, "give_topic_star_rating");
 }
 

@@ -92,8 +92,6 @@ export interface LoginAccountState {
 
 export interface ImportAccountState {
   loading: boolean;
-  name: string;
-  password: string;
   seed: string;
   success: boolean;
   failure: boolean;

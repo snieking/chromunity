@@ -18,7 +18,7 @@ export function register(name: string, password: string, mnemonic: string) {
     return tx.postAndWaitConfirmation();
 }
 
-export function login(name: string, password: string, seed: string): Promise<User> {
+export function login(name: string, seed: string): Promise<User> {
     return GTX.query("get_user", {name: name.toLocaleLowerCase()})
         .then((blockchainUser: BlockchainUser) => {
             const user: User = {name: name, seed: seed};

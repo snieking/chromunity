@@ -14,14 +14,6 @@ describe("user utilities tests", () => {
     const admin: User = {name: "admin", seed: "abc123"};
     const user: User = {name: "snieking", seed: "abc123"};
 
-    it("user cached in sessionStorage encrypted", async () => {
-        setUser(user);
-        expect(localStorage.getItem("local-bucket:user")).toBeDefined();
-        expect(localStorage.getItem("local-bucket:user")).not.toMatch(/snieking/);
-        expect(getUser().name).toBe(user.name);
-        expect(getUser().seed).toBe(user.seed);
-    });
-
     it("representative status cached in sessionStorage encrypted", async () => {
         const representative: boolean = await isRepresentative();
         expect(representative).toBe(false);

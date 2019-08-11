@@ -24,12 +24,12 @@ const CREATE_RANDOM_USER = () => {
 const CREATE_LOGGED_IN_USER = async () => {
     const user = CREATE_RANDOM_USER();
     await register(user.name, user.password, user.mnemonic);
-    return login(user.name, user.password, seedFromMnemonic(user.mnemonic, user.password));
+    return login(user.name, seedFromMnemonic(user.mnemonic, user.password));
 };
 
 const GET_LOGGED_IN_ADMIN_USER = async () => {
     await register(ADMIN_USER.name, ADMIN_USER.password, ADMIN_USER.mnemonic);
-    return login(ADMIN_USER.name, ADMIN_USER.password, seedFromMnemonic(ADMIN_USER.mnemonic, ADMIN_USER.password));
+    return login(ADMIN_USER.name, seedFromMnemonic(ADMIN_USER.mnemonic, ADMIN_USER.password));
 };
 
 export {

@@ -106,8 +106,6 @@ export const loginAccountReducer: Reducer<
 
 const initialImportAccountState: ImportAccountState = {
   loading: false,
-  name: "",
-  password: "",
   seed: "",
   success: false,
   failure: false,

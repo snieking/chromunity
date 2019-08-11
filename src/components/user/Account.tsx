@@ -40,8 +40,8 @@ const Account: React.FunctionComponent<Props> = props => {
             <WalletIcon />
         </ListItemAvatar>
         <ListItemText
-          primary={props.user.name}
-          secondary={props.user.seed}
+          primary={props.user.name || ""}
+          secondary={props.user.seed || ""}
           className={classes.text}
         />
       </ListItem>
