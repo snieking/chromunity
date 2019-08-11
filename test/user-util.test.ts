@@ -1,11 +1,9 @@
 import {
-    getMnemonic,
     getUser,
     godAlias,
     ifEmptyAvatarThenPlaceholder,
     isGod,
     isRepresentative,
-    setMnemonic,
     setRepresentative,
     setUser
 } from "../src/util/user-util";
@@ -15,14 +13,6 @@ describe("user utilities tests", () => {
 
     const admin: User = {name: "admin", seed: "abc123"};
     const user: User = {name: "snieking", seed: "abc123"};
-
-    it("mnemonic cached in localstorage encrypted", async () => {
-        const mnemonic: string = "car boat airplane";
-        setMnemonic(mnemonic);
-        expect(localStorage.getItem("local-bucket:mnemonic")).toBeDefined();
-        expect(localStorage.getItem("local-bucket:mnemonic")).not.toBe(mnemonic);
-        expect(getMnemonic()).toBe(mnemonic);
-    });
 
     it("user cached in sessionStorage encrypted", async () => {
         setUser(user);
