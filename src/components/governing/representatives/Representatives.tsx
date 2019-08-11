@@ -15,7 +15,7 @@ export interface RepresentativesState {
 
 export class Representatives extends React.Component<{}, RepresentativesState> {
 
-    constructor(props: any) {
+    constructor(props: unknown) {
         super(props);
         this.state = {
             representatives: [],

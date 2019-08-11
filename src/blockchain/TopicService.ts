@@ -16,7 +16,7 @@ export function createTopic(user: User, channelName: string, title: string, mess
     tx.sign(privKey, pubKey);
 
     return tx.postAndWaitConfirmation()
-        .then((promise: any) => {
+        .then((promise: unknown) => {
             subscribeToTopic(user, topicId);
             return promise;
         });
@@ -64,7 +64,7 @@ export function createTopicSubReply(user: User, topicId: string, replyId: string
 
 function postTopicReply(user: User, tx: any, topicId: string, message: string, replyId: string) {
     return tx.postAndWaitConfirmation()
-        .then((promise: any) => {
+        .then((promise: unknown) => {
             getTopicSubscribers(topicId)
                 .then(users => sendNotifications(user, createReplyTriggerString(user.name, topicId), message,
                     users.map(name => name.toLocaleLowerCase())

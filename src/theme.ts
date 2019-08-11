@@ -137,6 +137,18 @@ const theme = createMuiTheme({
             root: {
                 color: COLOR_PURPLE
             }
+        },
+        MuiListItem: {
+            "root": {
+                "&$selected": {
+                    "backgroundColor": COLOR_CHROMIA_DARK
+                }
+            }
+        },
+        MuiAvatar: {
+            root: {
+                color: COLOR_CHROMIA_DARKER
+            }
         }
     }
 });

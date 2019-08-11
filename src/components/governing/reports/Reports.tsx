@@ -12,7 +12,7 @@ type State = {
 
 export class Reports extends React.Component<{}, State> {
 
-    constructor(props: any) {
+    constructor(props: unknown) {
         super(props);
         this.state = {reports: [], isLoading: true}
     }

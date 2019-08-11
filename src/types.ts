@@ -32,7 +32,7 @@ export interface TopicReply {
 export interface UserNotification {
     id: string;
     trigger: string;
-    content: any;
+    content: string;
     read: boolean;
     timestamp: number;
 }

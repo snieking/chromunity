@@ -45,7 +45,7 @@ const StyledSelector = styled(Select)({
 const topicsPageSize: number = 25;
 
 class TopicWall extends React.Component<Props, State> {
-    constructor(props: any) {
+    constructor(props: Props) {
         super(props);
         this.state = {
             topics: [],

@@ -8,19 +8,31 @@ const LOCAL_CACHE = BoomerangCache.create('local-bucket', {storage: 'local', enc
 const SESSION_CACHE = BoomerangCache.create('session-bucket', {storage: 'session', encrypt: true});
 
 const USER_KEY = "user";
+const ACCOUNTS_KEY = "accounts";
 const USER_META_KEY = "user_meta";
-const MNEMONIC_KEY = "mnemonic";
 const REPRESENTATIVE_KEY = "representative";
 
-export function setMnemonic(mnemonic: string): void {
-    LOCAL_CACHE.set(MNEMONIC_KEY, mnemonic);
+export function clearSession(): void {
+    LOCAL_CACHE.remove(USER_KEY);
+    SESSION_CACHE.remove(USER_META_KEY);
+    SESSION_CACHE.remove(REPRESENTATIVE_KEY);
 }
 
-export function getMnemonic(): string {
-    return LOCAL_CACHE.get(MNEMONIC_KEY, "");
+export function getAccounts(): User[] {
+    const accounts: User[] = LOCAL_CACHE.get(ACCOUNTS_KEY);
+    return accounts != null ? accounts : [];
 }
 
 export function setUser(user: User): void {
+    const accounts: User[] = LOCAL_CACHE.get(ACCOUNTS_KEY);
+
+    if (accounts == null) {
+        LOCAL_CACHE.set(ACCOUNTS_KEY, [user]);
+    } else {
+        let filteredAccounts = accounts.filter(e => e.name !== user.name);
+        LOCAL_CACHE.set(ACCOUNTS_KEY, [user].concat(filteredAccounts));
+    }
+
     LOCAL_CACHE.set(USER_KEY, user, 86400);
 }
 

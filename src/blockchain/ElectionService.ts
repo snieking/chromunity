@@ -14,7 +14,7 @@ export function triggerElection(user: User, completionTimestamp: number) {
 
 export function getElectionVotes() {
     return GTX.query("get_election_votes", {})
-        .then((candidates: any[]) => sortByFrequency(candidates));
+        .then((candidates: string[]) => sortByFrequency(candidates));
 }
 
 export function completeElection(user: User, sortedCandidates: string[]) {

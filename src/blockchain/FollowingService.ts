@@ -9,7 +9,7 @@ const boomerang = BoomerangCache.create("following-bucket", {storage: "session",
 
 export function createFollowing(user: User, following: string) {
     return updateFollowing(user, following, "create_following")
-        .then((response: any) => {
+        .then((response: unknown) => {
             const id: string = createDeterministicId(user.name, following);
             const trigger: string = createFollowingNotificationTrigger(user.name);
 
@@ -21,7 +21,7 @@ export function createFollowing(user: User, following: string) {
 
 export function removeFollowing(user: User, following: string) {
     return updateFollowing(user, following, "remove_following")
-        .then((response: any) => {
+        .then((response: unknown) => {
             removeNotificationsForId(user, createDeterministicId(user.name, following), [following.toLocaleLowerCase()]);
             return response;
         });

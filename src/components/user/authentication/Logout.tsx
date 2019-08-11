@@ -1,4 +1,5 @@
 import React from "react";
+import {clearSession} from "../../../util/user-util";
 
 const Logout: React.FC = () => {
     logout();
@@ -9,8 +10,7 @@ const Logout: React.FC = () => {
 };
 
 function logout() {
-    sessionStorage.clear();
-    localStorage.clear();
+    clearSession();
 }
 
 export default Logout;

@@ -2,15 +2,13 @@ import {UserMeta, UserSettings} from './../types';
 import {GTX} from "./Postchain";
 import {seedFromMnemonic, seedToKey} from "./CryptoService";
 import {User} from "../types";
-import {setMnemonic, setUser, setUserMeta} from "../util/user-util";
+import {setUser, setUserMeta} from "../util/user-util";
 import * as BoomerangCache from "boomerang-cache";
 import {uniqueId} from '../util/util';
 
 const boomerang = BoomerangCache.create("avatar-bucket", {storage: "local", encrypt: false});
 
 export function register(name: string, password: string, mnemonic: string) {
-    setMnemonic(mnemonic);
-
     const seed = seedFromMnemonic(mnemonic, password);
     const {privKey, pubKey} = seedToKey(seed);
 
@@ -21,7 +19,6 @@ export function register(name: string, password: string, mnemonic: string) {
 }
 
 export function login(name: string, password: string, mnemonic: string): Promise<User> {
-    setMnemonic(mnemonic);
     return GTX.query("get_user", {name: name.toLocaleLowerCase()})
         .then((blockchainUser: BlockchainUser) => {
             const seed = seedFromMnemonic(mnemonic, password);
@@ -39,7 +36,7 @@ export function login(name: string, password: string, mnemonic: string): Promise
 
 export function isRegistered(name: string): Promise<boolean> {
     return GTX.query("get_user", {name: name.toLocaleLowerCase()})
-        .then((any: any) => any != null)
+        .then((any: unknown) => any != null)
         .catch(false);
 }
 

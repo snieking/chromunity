@@ -11,7 +11,7 @@ type State = {
 
 export class TrendingChannels extends React.Component<{}, State> {
 
-    constructor(props: any) {
+    constructor(props: unknown) {
         super(props);
         this.state = {channels: []};
     }

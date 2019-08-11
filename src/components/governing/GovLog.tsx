@@ -17,7 +17,7 @@ const actionsPageSize = 25;
 
 export class GovLog extends React.Component<{}, GovLogState> {
 
-    constructor(props: any) {
+    constructor(props: unknown) {
         super(props);
         this.state = {
             actions: [],

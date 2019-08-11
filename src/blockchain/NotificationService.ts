@@ -59,7 +59,7 @@ export function countUnreadUserNotifications(user: string): Promise<number> {
 
     if (count == null) {
         return GTX.query('count_unread_user_notifications', {name: user.toLocaleLowerCase()})
-            .then((arr: any[]) => {
+            .then((arr: unknown[]) => {
                 boomerang.set("notis-" + user, arr.length, 60);
                 return arr.length;
             });

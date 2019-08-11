@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-const HeaderNav: React.FunctionComponent = (props: any) => {
+const HeaderNav: React.FunctionComponent = (props: unknown) => {
     const classes = useStyles(props);
     const user = getUser();
     const [profileAnchorEl, setProfileAnchorEl] = React.useState<null | HTMLElement>(null);

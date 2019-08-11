@@ -12,7 +12,7 @@ const dayInMilliseconds: number = 10000;
 
 export class DictatorActions extends React.Component<{}, DictatorActionsState> {
 
-    constructor(props: any) {
+    constructor(props: unknown) {
         super(props);
         this.state = {};
     }

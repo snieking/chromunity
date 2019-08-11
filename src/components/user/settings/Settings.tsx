@@ -61,7 +61,7 @@ interface SettingsState {
 const Settings = withStyles(styles)(
     class extends React.Component<Props, SettingsState> {
 
-        constructor(props: any) {
+        constructor(props: Props) {
             super(props);
             this.state = {
                 avatar: "",
