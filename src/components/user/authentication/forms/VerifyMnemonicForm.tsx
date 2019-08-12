@@ -25,17 +25,17 @@ const useStyles = makeStyles(
 );
 
 interface Props {
-  seed: string;
+  mnemonic: string;
   onContinue: Function;
 }
 
-const VerifySeedForm: React.FunctionComponent<Props> = props => {
+const VerifyMnemonicForm: React.FunctionComponent<Props> = props => {
   const classes = useStyles(props);
   const [seed, setSeed] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [errorOpen, setErrorOpen] = useState(false);
 
-  const shuffledSeed = shuffle(props.seed.split(" "));
+  const shuffledSeed = shuffle(props.mnemonic.split(" "));
 
   const isSelected = (word: string) => seed.includes(word);
 
@@ -66,9 +66,9 @@ const VerifySeedForm: React.FunctionComponent<Props> = props => {
     }
   };
 
-  const verifySeed = () => {
+  const verifyMnemonic = () => {
     const validations = [
-      [seed.join(" "), [equalValues(props.seed, "Words do not match")]]
+      [seed.join(" "), [equalValues(props.mnemonic, "Words do not match")]]
     ];
 
     if (!validate(validations, setError)) {
@@ -104,9 +104,9 @@ const VerifySeedForm: React.FunctionComponent<Props> = props => {
         type="submit"
         color="primary"
         variant="contained"
-        onClick={verifySeed}
+        onClick={verifyMnemonic}
         className={classes.input}
-        disabled={seed.length !== props.seed.split(" ").length}
+        disabled={seed.length !== props.mnemonic.split(" ").length}
       >
         Confirm
       </Button>
@@ -123,4 +123,4 @@ const VerifySeedForm: React.FunctionComponent<Props> = props => {
   );
 };
 
-export default VerifySeedForm;
+export default VerifyMnemonicForm;

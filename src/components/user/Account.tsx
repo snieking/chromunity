@@ -1,7 +1,7 @@
 import React from "react";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import { createStyles } from "@material-ui/core";
-import { User } from "../../types";
+import {EncryptedAccount} from "../../types";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import WalletIcon from '@material-ui/icons/AccountBalanceWallet'
@@ -16,8 +16,8 @@ const useStyles = makeStyles(createStyles({
 }));
 
 interface Props {
-  user: User;
-  selectedAccount: User;
+  account: EncryptedAccount;
+  selectedAccount: EncryptedAccount;
   setSelectedAccount: Function;
 }
 
@@ -25,7 +25,7 @@ const Account: React.FunctionComponent<Props> = props => {
   const classes = useStyles(props);
 
   const handleClick = () => {
-    props.setSelectedAccount(props.user);
+    props.setSelectedAccount(props.account);
   };
 
   return (
@@ -33,15 +33,15 @@ const Account: React.FunctionComponent<Props> = props => {
       <ListItem
         button
         divider
-        selected={props.user === props.selectedAccount}
+        selected={props.account === props.selectedAccount}
         onClick={handleClick}
       >
         <ListItemAvatar>
             <WalletIcon />
         </ListItemAvatar>
         <ListItemText
-          primary={props.user.name || ""}
-          secondary={props.user.seed || ""}
+          primary={props.account.name || ""}
+          secondary={props.account.encryptedSeed || ""}
           className={classes.text}
         />
       </ListItem>

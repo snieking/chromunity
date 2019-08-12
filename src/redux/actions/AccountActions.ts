@@ -9,7 +9,7 @@ import {
   AccountLoginSuccessAction,
   AccountLoginFailureAction,
   AccountLoginSubmitAction,
-  AccountImportSeedAction, AccountImportLoginAction
+  AccountImportMnemonicAction, AccountImportLoginAction
 } from "../AccountTypes";
 
 export const createCredentials: ActionCreator<
@@ -44,11 +44,11 @@ export const loginFailure: ActionCreator<AccountLoginFailureAction> = () => ({
   type: AccountActionTypes.LOGIN_FAILURE
 });
 
-export const submitLogin: ActionCreator<AccountLoginSubmitAction> = (name: string, password: string, seed: string) => ({
+export const submitLogin: ActionCreator<AccountLoginSubmitAction> = (name: string, password: string, encryptedSeed: string) => ({
   type: AccountActionTypes.SUBMIT_LOGIN,
   name: name,
   password: password,
-  seed: seed
+  encryptedSeed: encryptedSeed
 });
 
 export const importLogin: ActionCreator<AccountImportLoginAction> = (name: string, password: string) => ({
@@ -57,7 +57,7 @@ export const importLogin: ActionCreator<AccountImportLoginAction> = (name: strin
   password: password
 });
 
-export const importSeed: ActionCreator<AccountImportSeedAction> = (seed: string) => ({
-  type: AccountActionTypes.IMPORT_SEED,
-  seed: seed
+export const importSeed: ActionCreator<AccountImportMnemonicAction> = (seed: string) => ({
+  type: AccountActionTypes.IMPORT_MNEMONIC,
+  mnemonic: seed
 });

@@ -12,6 +12,7 @@
     "@types/react-select": "^3.0.2",
     "bip39": "3.0.2",
     "boomerang-cache": "1.2.0",
+    "crypto-js": "^3.1.9-1",
     "hdkey": "1.1.1",
     "postchain-client": "0.9.1",
     "react": "^16.8.6",
@@ -57,6 +58,7 @@
     "@types/jest": "^24.0.16",
     "@types/react-redux": "^7.1.1",
     "@types/scrypt-async": "^1.3.0",
+    "@types/crypto-js": "^3.1.43",
     "coveralls": "^3.0.6",
     "prettier": "^1.18.2",
     "ts-jest": "^24.0.2"

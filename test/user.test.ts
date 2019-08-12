@@ -46,14 +46,14 @@ describe('User tests', () => {
     });
 
     it("login users", async () => {
-        const user: User = await login(user01.name, seedFromMnemonic(user01.mnemonic, user01.password));
+        const user: User = await login(user01.name, user01.password, seedFromMnemonic(user01.mnemonic, user01.password));
         loggedInUser = user;
 
         expect(user).toBeDefined();
         expect(user.name).toBe(user01.name);
         expect(user.seed).toBeDefined();
 
-        secondUser = await login(user02.name, seedFromMnemonic(user02.mnemonic, user02.password));
+        secondUser = await login(user02.name, user02.password, seedFromMnemonic(user02.mnemonic, user02.password));
         expect(secondUser).toBeDefined();
     });
 
@@ -80,7 +80,7 @@ describe('User tests', () => {
         expect(mutedUsers.length).toBe(0);
 
         await toggleUserMute(loggedInUser, secondUser.name, true);
-        mutedUsers = await getMutedUsers(loggedInUser)
+        mutedUsers = await getMutedUsers(loggedInUser);
         expect(mutedUsers.length).toBe(1);
 
         await toggleUserMute(loggedInUser, secondUser.name, false);

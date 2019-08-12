@@ -16,19 +16,19 @@ const useStyles = makeStyles(createStyles({
 }));
 
 interface Props {
-  seed: string;
+  mnemonic: string;
   onContinue: Function;
 }
 
-const ViewSeedForm: React.FunctionComponent<Props> = props => {
+const ViewMnemonicForm: React.FunctionComponent<Props> = props => {
   const classes = useStyles(props);
 
   return (
     <div className={classes.content}>
       <Typography component="p" variant="subtitle1">
-        Please carefully write down these {props.seed.split(" ").length} words and store them safely
+        Please carefully write down these {props.mnemonic.split(" ").length} words and store them safely
       </Typography>
-      <TextField rows="2" fullWidth multiline value={props.seed} variant="outlined" className={classes.row}/>
+      <TextField rows="2" fullWidth multiline value={props.mnemonic} variant="outlined" className={classes.row}/>
       <Button
         fullWidth
         type="submit"
@@ -43,4 +43,4 @@ const ViewSeedForm: React.FunctionComponent<Props> = props => {
   );
 };
 
-export default ViewSeedForm;
+export default ViewMnemonicForm;

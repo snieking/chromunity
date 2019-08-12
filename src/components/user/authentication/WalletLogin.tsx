@@ -9,7 +9,7 @@ import Card from "@material-ui/core/Card";
 import { Link } from "react-router-dom";
 import { COLOR_SOFT_PINK } from "../../../theme";
 import CardContent from "@material-ui/core/CardContent";
-import { User } from "../../../types";
+import {EncryptedAccount} from "../../../types";
 import { getAccounts } from "../../../util/user-util";
 import Account from "../Account";
 import List from "@material-ui/core/List";
@@ -57,7 +57,7 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
   const classes = useStyles(props);
 
   const [step, setStep] = useState(Step.INIT);
-  const [selectedAccount, setSelectedAccount] = useState<User>(accounts[0]);
+  const [selectedAccount, setSelectedAccount] = useState<EncryptedAccount>(accounts[0]);
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState("");
   const [errorOpen, setErrorOpen] = useState(false);
@@ -74,7 +74,7 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
     }
 
     setStep(Step.LOGIN_IN_PROGRESS);
-    props.login(selectedAccount.name, password, selectedAccount.seed);
+    props.login(selectedAccount.name, password, selectedAccount.encryptedSeed);
   };
 
   return (
@@ -98,7 +98,7 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
                 {accounts.map(account => (
                   <Account
                     key={account.name}
-                    user={account}
+                    account={account}
                     selectedAccount={selectedAccount || accounts[0]}
                     setSelectedAccount={setSelectedAccount}
                   />

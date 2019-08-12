@@ -14,7 +14,7 @@ const initialCreateAccountState: CreateAccountState = {
   loading: false,
   name: "",
   password: "",
-  seed: "",
+  mnemonic: "",
   failure: false,
   success: false,
   error: ""
@@ -31,7 +31,7 @@ export const createAccountReducer: Reducer<
         loading: false,
         name: action.name,
         password: action.password,
-        seed: bip39.generateMnemonic(160)
+        mnemonic: bip39.generateMnemonic(160)
       };
     }
     case AccountActionTypes.REGISTER: {
@@ -106,7 +106,7 @@ export const loginAccountReducer: Reducer<
 
 const initialImportAccountState: ImportAccountState = {
   loading: false,
-  seed: "",
+  mnemonic: "",
   success: false,
   failure: false,
   error: ""
@@ -117,10 +117,10 @@ export const importAccountReducer: Reducer<
   ImportAccountActions
 > = (state = initialImportAccountState, action) => {
   switch (action.type) {
-    case AccountActionTypes.IMPORT_SEED: {
+    case AccountActionTypes.IMPORT_MNEMONIC: {
       return {
         ...state,
-        seed: action.seed
+        mnemonic: action.mnemonic
       }
     }
     case AccountActionTypes.IMPORT_LOGIN: {

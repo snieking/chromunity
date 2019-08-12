@@ -8,7 +8,7 @@ import {
 import { takeLatest, select, put } from "redux-saga/effects";
 import { ApplicationState } from "../Store";
 import {loginFailure, loginSuccess, registerFailure, registerSuccess} from "../actions/AccountActions";
-import {seedFromMnemonic} from "../../blockchain/CryptoService";
+import {decrypt, seedFromMnemonic} from "../../blockchain/CryptoService";
 
 export function* accountWatcher() {
   yield takeLatest(AccountActionTypes.REGISTER, registerAccount);
@@ -23,7 +23,7 @@ function* registerAccount() {
   );
 
   try {
-    yield register(state.name, state.password, state.seed);
+    yield register(state.name, state.password, state.mnemonic);
     yield put(registerSuccess());
   } catch (error) {
     yield put(registerFailure());
@@ -36,7 +36,7 @@ function* registerAccountSuccess() {
   );
 
   try {
-    yield login(state.name, seedFromMnemonic(state.seed, state.password));
+    yield login(state.name, state.password, seedFromMnemonic(state.mnemonic, state.password));
     yield put(loginSuccess());
   } catch (error) {
     yield put(loginFailure());
@@ -45,7 +45,7 @@ function* registerAccountSuccess() {
 
 function* loginAccount(action: AccountLoginSubmitAction) {
   try {
-    yield login(action.name, action.seed);
+    yield login(action.name, action.password, decrypt(action.encryptedSeed, action.password));
     yield put(loginSuccess());
   } catch (error) {
     yield put(loginFailure());
@@ -58,7 +58,7 @@ function* importLogin(action: AccountImportLoginAction) {
   );
 
   try {
-    yield login(action.name, seedFromMnemonic(state.seed, action.password));
+    yield login(action.name, action.password, seedFromMnemonic(state.mnemonic, action.password));
     yield put(loginSuccess());
   } catch (error) {
     yield put(loginFailure());

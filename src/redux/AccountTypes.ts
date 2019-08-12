@@ -6,7 +6,7 @@ export enum AccountActionTypes {
   SUBMIT_LOGIN = "ACCOUNT/LOGIN/SUBMIT",
   LOGIN_SUCCESS = "ACCOUNT/LOGIN/SUCCESS",
   LOGIN_FAILURE = "ACCOUNT/LOGIN/FAILURE",
-  IMPORT_SEED = "ACCOUNT/IMPORT_SEED",
+  IMPORT_MNEMONIC = "ACCOUNT/IMPORT_SEED",
   IMPORT_LOGIN = "ACCOUNT/IMPORT_LOGIN"
 }
 
@@ -40,12 +40,12 @@ export interface AccountLoginSubmitAction {
   type: AccountActionTypes.SUBMIT_LOGIN;
   name: string;
   password: string;
-  seed: string;
+  encryptedSeed: string;
 }
 
-export interface AccountImportSeedAction {
-  type: AccountActionTypes.IMPORT_SEED;
-  seed: string;
+export interface AccountImportMnemonicAction {
+  type: AccountActionTypes.IMPORT_MNEMONIC;
+  mnemonic: string;
 }
 
 export interface AccountImportLoginAction {
@@ -68,7 +68,7 @@ export type LoginAccountActions =
   | AccountLoginFailureAction;
 
 export type ImportAccountActions =
-  | AccountImportSeedAction
+  | AccountImportMnemonicAction
   | AccountImportLoginAction
   | AccountLoginSuccessAction
   | AccountLoginFailureAction;
@@ -77,7 +77,7 @@ export interface CreateAccountState {
   loading: boolean;
   name: string;
   password: string;
-  seed: string;
+  mnemonic: string;
   success: boolean;
   failure: boolean;
   error: string;
@@ -92,7 +92,7 @@ export interface LoginAccountState {
 
 export interface ImportAccountState {
   loading: boolean;
-  seed: string;
+  mnemonic: string;
   success: boolean;
   failure: boolean;
   error: string;

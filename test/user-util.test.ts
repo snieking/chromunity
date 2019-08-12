@@ -21,11 +21,11 @@ describe("user utilities tests", () => {
     });
 
     it("god alias is admin", async () => {
-        setUser(user);
+        setUser(user, "FOOBAR");
         expect(isGod()).toBe(false);
 
         expect(godAlias()).toBe("admin");
-        setUser(admin);
+        setUser(admin, "FOOBAR");
         expect(isGod()).toBe(true);
     });
 

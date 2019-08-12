@@ -11,14 +11,14 @@ import Card from "@material-ui/core/Card";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import CardContent from "@material-ui/core/CardContent";
 import AccountCredentialsForm from "./forms/AccountCredentialsForm";
-import ViewSeedForm from "./forms/ViewSeedForm";
-import VerifySeedForm from "./forms/VerifySeedForm";
+import ViewMnemonicForm from "./forms/ViewMnemonicForm";
+import VerifyMnemonicForm from "./forms/VerifyMnemonicForm";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
 enum Step {
   CREATE_CREDENTIALS,
-  VIEW_SEED,
-  VERIFY_SEED,
+  VIEW_MNEMONIC,
+  VERIFY_MNEMONIC,
   REGISTER_ASYNC
 }
 
@@ -37,7 +37,7 @@ interface Props {
   register: typeof register;
   name: string;
   password: string;
-  seed: string;
+  mnemonic: string;
   success: boolean;
   failure: boolean;
 }
@@ -51,11 +51,11 @@ const CreateAccount: React.FunctionComponent<Props> = props => {
     password: string
   ) => {
     props.createCredentials(name, password);
-    setStep(Step.VIEW_SEED);
+    setStep(Step.VIEW_MNEMONIC);
   };
 
   const handleViewSeedFormContinue = () => {
-    setStep(Step.VERIFY_SEED);
+    setStep(Step.VERIFY_MNEMONIC);
   };
 
   const handleVerifySeedFormContinue = () => {
@@ -74,15 +74,15 @@ const CreateAccount: React.FunctionComponent<Props> = props => {
               onContinue={handleAccountCredentialsFormContinue}
             />
           )}
-          {step === Step.VIEW_SEED && (
-            <ViewSeedForm
-              seed={props.seed}
+          {step === Step.VIEW_MNEMONIC && (
+            <ViewMnemonicForm
+              mnemonic={props.mnemonic}
               onContinue={handleViewSeedFormContinue}
             />
           )}
-          {step === Step.VERIFY_SEED && (
-            <VerifySeedForm
-              seed={props.seed}
+          {step === Step.VERIFY_MNEMONIC && (
+            <VerifyMnemonicForm
+              mnemonic={props.mnemonic}
               onContinue={handleVerifySeedFormContinue}
             />
           )}
@@ -108,7 +108,7 @@ const mapStateToProps = (store: ApplicationState) => {
     loading: store.createAccount.loading,
     name: store.createAccount.name,
     password: store.createAccount.password,
-    seed: store.createAccount.seed,
+    mnemonic: store.createAccount.mnemonic,
     success: store.createAccount.success,
     failure: store.createAccount.failure
   };
