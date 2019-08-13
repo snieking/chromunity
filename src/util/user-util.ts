@@ -34,6 +34,12 @@ export function getAccounts(): EncryptedAccount[] {
   return accounts != null ? accounts : [];
 }
 
+export function deleteAccount(account: EncryptedAccount): void {
+  const accounts: EncryptedAccount[] = LOCAL_CACHE.get(ACCOUNTS_KEY);
+  let filteredAccounts = accounts.filter(e => e.name !== account.name);
+  LOCAL_CACHE.set(ACCOUNTS_KEY, filteredAccounts);
+}
+
 export function setUser(user: User, encryptionKey: string): void {
   const accounts: EncryptedAccount[] = LOCAL_CACHE.get(ACCOUNTS_KEY);
 
