@@ -149,6 +149,11 @@ const theme = createMuiTheme({
             root: {
                 color: COLOR_CHROMIA_DARKER
             }
+        },
+        MuiSelect: {
+            icon: {
+                color: COLOR_SOFT_PINK
+            }
         }
     }
 });

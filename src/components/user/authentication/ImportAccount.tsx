@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {Container, createStyles, Snackbar} from "@material-ui/core";
+import { Container, createStyles, Snackbar } from "@material-ui/core";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
@@ -10,7 +10,7 @@ import AccountCredentialsForm from "./forms/AccountCredentialsForm";
 import { connect } from "react-redux";
 import { ApplicationState } from "../../../redux/Store";
 import { importLogin, importSeed } from "../../../redux/actions/AccountActions";
-import {CustomSnackbarContentWrapper} from "../../common/CustomSnackbar";
+import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
 
 enum Step {
   ENTER_SEED,
@@ -70,13 +70,19 @@ const ImportAccount: React.FunctionComponent<Props> = props => {
           {step === Step.LOGIN_ASYNC &&
             props.success &&
             window.location.replace("/")}
+          {step === Step.LOGIN_ASYNC &&
+            props.failure &&
+            setStep(Step.ENTER_SEED)}
           <Snackbar
             anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
             open={props.failure}
             autoHideDuration={6000}
             onClose={() => setStep(Step.ENTER_SEED)}
           >
-            <CustomSnackbarContentWrapper variant="error" message={props.error} />
+            <CustomSnackbarContentWrapper
+              variant="error"
+              message={props.error}
+            />
           </Snackbar>
         </CardContent>
       </Card>

@@ -50,7 +50,6 @@ export interface ChannelWallState {
 }
 
 const StyledSelect = styled(Select)({
-    color: "pink",
     float: "left",
     marginRight: "10px"
 });

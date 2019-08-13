@@ -89,6 +89,9 @@ const CreateAccount: React.FunctionComponent<Props> = props => {
           {step === Step.REGISTER_ASYNC &&
             props.success &&
             window.location.replace("/")}
+          {step === Step.REGISTER_ASYNC &&
+            props.failure &&
+            setStep(Step.CREATE_CREDENTIALS)}
         </CardContent>
       </Card>
     </Container>

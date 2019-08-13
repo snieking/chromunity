@@ -87,6 +87,7 @@ const VerifyMnemonicForm: React.FunctionComponent<Props> = props => {
       </Typography>
       <TextField
         rows="2"
+        rowsMax="3"
         fullWidth
         multiline
         value={seed.join(" ")}

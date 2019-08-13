@@ -10,7 +10,7 @@ interface Props {
 const MarkdownRenderer: React.FunctionComponent<Props> = (props) => {
     const classes = useStyles(props);
     return (
-        <ReactMarkdown className={classes.text} source={props.text} disallowedTypes={["heading"]}/>
+        <ReactMarkdown className={classes.text} source={props.text} disallowedTypes={["heading", "image", "imageReference"]}/>
     )
 };
 
