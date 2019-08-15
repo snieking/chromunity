@@ -298,7 +298,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                 >
                   <Tab
                     label={
-                      <Typography component="span" variant="subtitle1">
+                      <Typography component="span" variant="body2">
                         Edit
                       </Typography>
                     }
@@ -306,7 +306,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                   />
                   <Tab
                     label={
-                      <Typography component="span" variant="subtitle1">
+                      <Typography component="span" variant="body2">
                         Preview
                       </Typography>
                     }
@@ -377,12 +377,17 @@ const NewTopicButton = withStyles(largeButtonStyles)(
           onChange={this.handleDialogMessageChange}
           value={this.state.topicMessage}
           variant="outlined"
+          className={this.props.classes.content}
         />
       );
     }
 
     renderPreview() {
-      return <MarkdownRenderer text={this.state.topicMessage} />;
+      return (
+        <div className={this.props.classes.content}>
+          <MarkdownRenderer text={this.state.topicMessage} />
+        </div>
+      );
     }
 
     a11yProps(index: number) {

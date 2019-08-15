@@ -118,7 +118,7 @@ const ReplyTopicButton: React.FunctionComponent<
               >
                 <Tab
                   label={
-                    <Typography component="span" variant="subtitle1">
+                    <Typography component="span" variant="body2">
                       Edit
                     </Typography>
                   }
@@ -126,7 +126,7 @@ const ReplyTopicButton: React.FunctionComponent<
                 />
                 <Tab
                   label={
-                    <Typography component="span" variant="subtitle1">
+                    <Typography component="span" variant="body2">
                       Preview
                     </Typography>
                   }
@@ -192,12 +192,17 @@ const ReplyTopicButton: React.FunctionComponent<
         fullWidth
         onChange={handleDialogMessageChange}
         value={message}
+        className={classes.content}
       />
     );
   }
 
   function renderPreview() {
-    return <MarkdownRenderer text={message} />;
+    return (
+      <div className={classes.content}>
+        <MarkdownRenderer text={message} />
+      </div>
+    );
   }
 
   function a11yProps(index: number) {

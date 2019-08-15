@@ -2,7 +2,7 @@ import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 
 export const COLOR_CHROMIA_DARK_LIGHTER = '#333037';
 export const COLOR_CHROMIA_DARK = '#1F1A23';
-export const COLOR_CHROMIA_DARKER = '#02020f';
+export const COLOR_CHROMIA_DARKER = '#151119';
 export const COLOR_RED = '#FF405E';
 export const COLOR_ORANGE = '#FF702B';
 export const COLOR_STEEL_BLUE = '#4D617D';

@@ -19,5 +19,8 @@ export const largeButtonStyles = createStyles({
     },
     icon: {
         color: COLOR_CHROMIA_DARK
+    },
+    content: {
+        marginTop: "15px"
     }
 });
