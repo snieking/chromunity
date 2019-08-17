@@ -1,15 +1,15 @@
 import { applyMiddleware, combineReducers, createStore, Store } from "redux";
-import { walletLoginReducer } from "./reducers/AccountReducers";
-import { WalletLoginState } from "./AccountTypes";
+import { loginReducer } from "./reducers/AccountReducers";
+import { LoginState } from "./AccountTypes";
 import createSagaMiddleware from "redux-saga";
 import rootSaga from "./sagas/index";
 
 export interface ApplicationState {
-  walletLogin: WalletLoginState;
+  login: LoginState;
 }
 
 const rootReducer = combineReducers<ApplicationState>({
-  walletLogin: walletLoginReducer
+  login: loginReducer
 });
 
 const sagaMiddleware = createSagaMiddleware();

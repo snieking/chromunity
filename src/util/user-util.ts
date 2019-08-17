@@ -4,6 +4,7 @@ import * as BoomerangCache from "boomerang-cache";
 import { getRepresentatives } from "../blockchain/RepresentativesService";
 import { encrypt } from "../blockchain/CryptoService";
 import { getUserMeta } from "../blockchain/UserService";
+import { KeyPair } from "ft3-lib";
 
 const LOCAL_CACHE = BoomerangCache.create("local-bucket", {
   storage: "local",
@@ -29,11 +30,11 @@ export function clearSession(): void {
   SESSION_CACHE.remove(REPRESENTATIVE_KEY);
 }
 
-export function storeKeyPair(keyPair: any): void {
+export function storeKeyPair(keyPair: KeyPair): void {
   LOCAL_CACHE.set("keyPair", keyPair);
 }
 
-export function getKeyPair(): any {
+export function getKeyPair(): KeyPair {
   return LOCAL_CACHE.get("keyPair");
 }
 

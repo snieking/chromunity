@@ -3,20 +3,15 @@ import { createStyles, makeStyles, Snackbar } from "@material-ui/core";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import Container from "@material-ui/core/Container";
 import Button from "@material-ui/core/Button";
-import Card from "@material-ui/core/Card";
-import { Link } from "react-router-dom";
-import CardContent from "@material-ui/core/CardContent";
-import {getAccounts, getKeyPair, getUsername, storeKeyPair} from "../../../util/user-util";
+import { getKeyPair, getUsername, storeKeyPair } from "../../../util/user-util";
 import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
-import { initWalletLogin } from "../../../redux/actions/AccountActions";
+import { accountRegisteredCheck } from "../../../redux/actions/AccountActions";
 import { ApplicationState } from "../../../redux/Store";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { connect } from "react-redux";
-import { uniqueId } from "../../../util/util";
 import Typography from "@material-ui/core/Typography";
-import config from "../../../config.js";
 import TextField from "@material-ui/core/TextField";
-import {makeKeyPair} from "../../../blockchain/CryptoService";
+import { makeKeyPair } from "../../../blockchain/CryptoService";
 import { KeyPair } from "ft3-lib";
 
 enum Step {
@@ -40,10 +35,8 @@ interface Props {
   loading: boolean;
   success: boolean;
   failure: boolean;
-  initWalletLogin: typeof initWalletLogin;
+  accountRegisteredCheck: typeof accountRegisteredCheck;
 }
-
-const accounts = getAccounts();
 
 const WalletLogin: React.FunctionComponent<Props> = props => {
   const classes = useStyles(props);
@@ -54,18 +47,8 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
   const [errorOpen, setErrorOpen] = useState(false);
 
   const walletLogin = () => {
-    let keyPair = getKeyPair();
-    if (!keyPair) {
-      keyPair = makeKeyPair();
-      storeKeyPair(keyPair);
-    }
-
     setStep(Step.LOGIN_IN_PROGRESS);
-    props.initWalletLogin(new KeyPair(keyPair.privKey), name);
-  };
-
-  const openVault = () => {
-
+    props.accountRegisteredCheck(name);
   };
 
   return (
@@ -78,13 +61,15 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
             User authentication is handled by the Chromia Vault.
           </Typography>
           <TextField
-          label="Account name"
-          name="name"
-          type="text"
-          fullWidth
-          variant="outlined"
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) => setName(event.target.value)}
-          className={classes.input}
+            label="Account name"
+            name="name"
+            type="text"
+            fullWidth
+            variant="outlined"
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+              setName(event.target.value)
+            }
+            className={classes.input}
           />
           <Button
             color="primary"
@@ -113,15 +98,15 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
-    initWalletLogin: (keyPair: any, accountId: string) =>
-      dispatch(initWalletLogin(keyPair, accountId))
+    accountRegisteredCheck: (username: string) =>
+      dispatch(accountRegisteredCheck(username))
   };
 };
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    loading: store.walletLogin.loading,
-    success: store.walletLogin.success
+    loading: store.login.loading,
+    success: store.login.success
   };
 };
 

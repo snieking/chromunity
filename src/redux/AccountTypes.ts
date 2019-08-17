@@ -1,18 +1,38 @@
 import { KeyPair } from "ft3-lib";
 
 export enum AccountActionTypes {
-  WALLET_LOGIN_INIT = "WALLET/LOGIN/INIT"
+  ACCOUNT_REGISTER_CHECK = "ACCOUNT/REGISTER/CHECK",
+  ACCOUNT_ADD_ACCOUNT_ID = "ACCOUNT/ADD/ACCOUNT_ID",
+  ACCOUNT_REGISTER = "ACCOUNT/REGISTER"
 }
 
-export interface AccountWalletLoginInitAction {
-  type: AccountActionTypes.WALLET_LOGIN_INIT;
-  keyPair: KeyPair
+export interface AccountRegisteredCheckAction {
+  type: AccountActionTypes.ACCOUNT_REGISTER_CHECK;
+  username: string;
+}
+
+export interface AccountAddAccountIdAction {
+  type: AccountActionTypes.ACCOUNT_ADD_ACCOUNT_ID;
   accountId: string;
 }
 
-export type WalletLoginActions = AccountWalletLoginInitAction;
+export interface AccountRegisterAction {
+  type: AccountActionTypes.ACCOUNT_REGISTER;
+  accountId: string;
+  username: string;
+  vaultPubKey: string;
+}
 
-export interface WalletLoginState {
+export type LoginActions =
+  | AccountRegisteredCheckAction
+  | AccountAddAccountIdAction
+  | AccountRegisterAction;
+
+export interface LoginState {
   loading: boolean;
   success: boolean;
+  accountId: string;
+  keyPair: KeyPair;
+  username: string;
+  vaultPubKey: string;
 }

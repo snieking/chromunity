@@ -1647,11 +1647,10 @@ include 'queries';</string>
 }</string>
                             </entry>
                             <entry key="user/operations.rell">
-                                <string>operation register_user(name, auth_descriptor: ft3.auth_descriptor) {
-    //require(is_signer(pubkey));
-
+                                <string>operation register_user(name, auth_descriptor: ft3.auth_descriptor, vault_auth_descriptor: ft3.auth_descriptor) {
     val account_id = ft3.create_account_with_auth(auth_descriptor);
     val account = ft3.account @ { account_id };
+    ft3._add_auth_descriptor(account, vault_auth_descriptor);
 
     if (name == "admin") {
         val admin = create user(name = name.lower_case(), display_name = name, account);
@@ -1667,7 +1666,11 @@ include 'queries';</string>
                             </entry>
                             <entry key="user/queries.rell">
                                 <string>query get_user(name) {
-    return user@?{ .name == name } ( name = .display_name );
+    return user@?{ .name == name.lower_case() } ( name = .display_name );
+}
+
+query get_account_id(name) {
+    return user@?{ .name == name.lower_case() } ( .account.id );
 }</string>
                             </entry>
                             <entry key="user/settings/index.rell">
