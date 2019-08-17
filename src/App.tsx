@@ -20,8 +20,6 @@ import { ThemeProvider } from "@material-ui/styles";
 import theme from "./theme";
 import { CssBaseline } from "@material-ui/core";
 import WalletLogin from "./components/user/authentication/WalletLogin";
-import CreateAccount from "./components/user/authentication/CreateAccount";
-import ImportAccount from "./components/user/authentication/ImportAccount";
 
 interface Props {
   store: Store<ApplicationState>;
@@ -44,13 +42,9 @@ const App: React.FunctionComponent<Props> = props => {
               path="/channels"
               component={() => <TopicWall type="tagFollowings" />}
             />
-            <Route path="/user/register" component={CreateAccount} />
             <Route path="/user/login" component={WalletLogin} />
             <Route path="/user/logout" component={Logout} />
             <Route path="/user/settings" component={Settings} />
-            <Route path="/wallet/login" component={WalletLogin} />
-            <Route path="/wallet/sign-up" component={CreateAccount} />
-            <Route path="/wallet/import-account" component={ImportAccount}/>
             <Route path="/u/:userId" component={UserWall} />
             <Route
               path="/notifications/:userId"

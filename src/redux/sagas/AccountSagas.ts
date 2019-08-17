@@ -1,67 +1,52 @@
-import {login, register} from "../../blockchain/UserService";
 import {
-  AccountActionTypes,
-  AccountImportLoginAction,
-  AccountLoginSubmitAction,
-  CreateAccountState, ImportAccountState
+  AccountActionTypes, AccountWalletLoginInitAction
 } from "../AccountTypes";
-import { takeLatest, select, put } from "redux-saga/effects";
-import { ApplicationState } from "../Store";
-import {loginFailure, loginSuccess, registerFailure, registerSuccess} from "../actions/AccountActions";
-import {decrypt, seedFromMnemonic} from "../../blockchain/CryptoService";
+import { takeLatest } from "redux-saga/effects";
+import { SingleSignatureAuthDescriptor, FlagsType, User } from "ft3-lib";
+import { Blockchain } from "ft3-lib";
+import DirectoryService from "../../blockchain/DirectoryService";
+import config from "../../config.js";
+import {login} from "../../blockchain/UserService";
+
+const chainId = Buffer.from(config.blockchainRID, "hex");
 
 export function* accountWatcher() {
-  yield takeLatest(AccountActionTypes.REGISTER, registerAccount);
-  yield takeLatest(AccountActionTypes.REGISTER_SUCCESS, registerAccountSuccess);
-  yield takeLatest(AccountActionTypes.SUBMIT_LOGIN, loginAccount);
-  yield takeLatest(AccountActionTypes.IMPORT_LOGIN, importLogin);
+  yield takeLatest(AccountActionTypes.WALLET_LOGIN_INIT, walletLogin);
 }
 
-function* registerAccount() {
-  const state: CreateAccountState = yield select(
-    (state: ApplicationState) => state.createAccount
+function* walletLogin(action: AccountWalletLoginInitAction) {
+  const blockchain = yield Blockchain.initialize(
+    chainId,
+    new DirectoryService()
   );
 
-  try {
-    yield register(state.name, state.password, state.mnemonic);
-    yield put(registerSuccess());
-  } catch (error) {
-    yield put(registerFailure());
-  }
+  const authDescriptor = new SingleSignatureAuthDescriptor(action.keyPair.pubKey, [
+    FlagsType.Account,
+    FlagsType.Transfer
+  ]);
+
+  const user = new User(action.keyPair, authDescriptor);
+
+  checkIfAuthDescriptorAdded(blockchain, user, action.accountId)
 }
 
-function* registerAccountSuccess() {
-  const state: CreateAccountState = yield select(
-    (state: ApplicationState) => state.createAccount
+function* checkIfAuthDescriptorAdded(blockchain: any, user: User, accountId: string) {
+  console.log("Checking if auth descriptor has been added");
+  const accounts = yield blockchain.getAccountsByParticipantId(
+    user.keyPair.pubKey,
+    user
   );
 
-  try {
-    yield login(state.name, state.password, seedFromMnemonic(state.mnemonic, state.password));
-    yield put(loginSuccess());
-  } catch (error) {
-    yield put(loginFailure());
+  const isAdded = accounts.some(( id: any ) => (
+    id.toString('hex').toUpperCase() === accountId.toUpperCase()
+  ));
+
+  if (isAdded) {
+    console.log("Auth descriptor was added!");
+    console.log(accounts[0]);
+    //DO DAPP SPECIFIC LOGIN WITH NEW KEY PAIR
+  } else {
+    console.log("Auth descriptor was not added, checking again in 3 seconds");
+    setTimeout(checkIfAuthDescriptorAdded, 3000);
   }
 }
-
-function* loginAccount(action: AccountLoginSubmitAction) {
-  try {
-    yield login(action.name, action.password, decrypt(action.encryptedSeed, action.password));
-    yield put(loginSuccess());
-  } catch (error) {
-    yield put(loginFailure());
-  }
-}
-
-function* importLogin(action: AccountImportLoginAction) {
-  const state: ImportAccountState = yield select(
-    (state: ApplicationState) => state.importAccount
-  );
-
-  try {
-    yield login(action.name, action.password, seedFromMnemonic(state.mnemonic, action.password));
-    yield put(loginSuccess());
-  } catch (error) {
-    yield put(loginFailure());
-  }
-}
-

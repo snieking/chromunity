@@ -1,15 +1,16 @@
-operation register_user(name, display_name: text, pubkey) {
-    require(is_signer(pubkey));
+operation register_user(name, auth_descriptor: ft3.auth_descriptor) {
+    //require(is_signer(pubkey));
 
-    log("Name: ", name, " - Display Name: ", display_name);
+    val account_id = ft3.create_account_with_auth(auth_descriptor);
+    val account = ft3.account @ { account_id };
 
     if (name == "admin") {
-        val admin = create user(name, display_name, pubkey, op_context.transaction.block.block_height);
+        val admin = create user(name = name.lower_case(), display_name = name, account);
         create admin(admin);
         create user_settings(admin, avatar = "" , description = "");
         create user_meta(admin, times_suspended = 0, suspended_until = 0);
     } else {
-        val user = create user(name, display_name, pubkey, op_context.transaction.block.block_height);
+        val user = create user(name = name.lower_case(), display_name = name, account);
         create user_settings(user, avatar = "" , description = "");
         create user_meta(user, times_suspended = 0, suspended_until = 0);
     }

@@ -1,5 +1,5 @@
 operation trigger_election(admin_user: text, id: text, timestamp) {
-    require(is_signer(admin@{ .user.name == admin_user}( .user.pubkey )));
+    //require(is_signer(admin@{ .user.name == admin_user}( .user.pubkey )));
 
     val currentElection = representative_election @? { .completed == false };
 
@@ -9,7 +9,7 @@ operation trigger_election(admin_user: text, id: text, timestamp) {
 }
   
 operation complete_election(admin_user: text, representatives: set<text>) {
-    require(is_signer(admin@{ .user.name == admin_user}( .user.pubkey )));
+    //require(is_signer(admin@{ .user.name == admin_user}( .user.pubkey )));
 
     val currentElection = representative_election @ { .completed == false };
     log("Completing election: ", currentElection.id);

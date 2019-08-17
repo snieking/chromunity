@@ -67,7 +67,7 @@ operation suspend_user(username: text, user_to_be_suspended: text) {
 }
 
 operation tmp_add_representative(admin_name: name, name) {
-    require(is_signer(admin@{ .user.name == admin_name }( .user.pubkey )));
+    //require(is_signer(admin@{ .user.name == admin_name }( .user.pubkey )));
     val currentElection = representative_election @ { .timestamp <= op_context.last_block_time, .completed == true } (
         .id,
         -sort .timestamp
@@ -77,7 +77,7 @@ operation tmp_add_representative(admin_name: name, name) {
 }
 
 operation tmp_remove_representative(admin_name: name, name) {
-    require(is_signer(admin@{ .user.name == admin_name }( .user.pubkey )));
+    //require(is_signer(admin@{ .user.name == admin_name }( .user.pubkey )));
     val currentElection = representative_election @ { .timestamp <= op_context.last_block_time, .completed == true } (
         .id,
         -sort .timestamp

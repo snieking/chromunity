@@ -155,7 +155,7 @@ include 'queries';</string>
                             </entry>
                             <entry key="election/operations.rell">
                                 <string>operation trigger_election(admin_user: text, id: text, timestamp) {
-    require(is_signer(admin@{ .user.name == admin_user}( .user.pubkey )));
+    //require(is_signer(admin@{ .user.name == admin_user}( .user.pubkey )));
 
     val currentElection = representative_election @? { .completed == false };
 
@@ -165,7 +165,7 @@ include 'queries';</string>
 }
   
 operation complete_election(admin_user: text, representatives: set&lt;text&gt;) {
-    require(is_signer(admin@{ .user.name == admin_user}( .user.pubkey )));
+    //require(is_signer(admin@{ .user.name == admin_user}( .user.pubkey )));
 
     val currentElection = representative_election @ { .completed == false };
     log("Completing election: ", currentElection.id);
@@ -286,6 +286,14 @@ query get_user_followers(name) {
 
 query get_user_follows(name) {
     return follow@*{ .follower == user@{ .name == name } } ( .follows.name );
+}
+</string>
+                            </entry>
+                            <entry key="ft3_config.rell">
+                                <string>object ft3_config {
+  blockchain_name: text = "Chromunity";
+  blockchain_website: text = "chromunity.com";
+  blockchain_description: text = "Decentralized Reddit";
 }
 </string>
                             </entry>
@@ -464,11 +472,213 @@ include "asset";
 include "history";
 include "transfer";</string>
                             </entry>
-                            <entry key="lib/ft3/ft3_basic.rell">
+                            <entry key="lib/ft3/crosschain/blockchain.rell">
+                                <string>class asset_origin {
+    key asset;
+    origin_chain_rid: byte_array;
+}
+
+function blockchain_account_id (blockchain_rid: byte_array): byte_array {
+   return ("B", blockchain_rid).hash();
+}
+
+function ensure_blockchain_account (blockchain_rid: byte_array): account {
+   val acc = account @? { .id == blockchain_account_id(blockchain_rid) };
+   return if (acc??)  acc
+   else create account (id = blockchain_rid);
+}
+
+function get_blockchain_account (blockchain_rid: byte_array): account {
+   return account @ { .id == blockchain_account_id(blockchain_rid) };
+}
+
+</string>
+                            </entry>
+                            <entry key="lib/ft3/crosschain/dev.rell">
+                                <string>operation dev_register_xc_asset (name, issuing_chain_rid: byte_array, origin_chain_rid: byte_array) {
+    require_dev();
+    val asset = register_asset(name, issuing_chain_rid);
+    create asset_origin (asset, origin_chain_rid);
+}</string>
+                            </entry>
+                            <entry key="lib/ft3/crosschain/structures.rell">
+                                <string>record operation_rec {
+   name;
+   args: list&lt;gtv&gt;;
+}
+
+record transaction_body_rec {
+    blockchain_rid: byte_array;
+    operations: list&lt;operation_rec&gt;;
+    signers: list&lt;gtv&gt;;
+}
+
+record transaction_rec {
+   body: transaction_body_rec;
+   signatures: list&lt;gtv&gt;;
+}
+
+record transaction_proof {
+     tx: virtual&lt;transaction_rec&gt;;
+     // block_header: byte_array;
+     // merkle_path: virtual&lt;list&lt;byte_array&gt;&gt;;
+     // tx_index: integer;
+     block_rid: byte_array;
+     block_signers: list&lt;byte_array&gt;;
+     signatures: list&lt;byte_array&gt;;     
+}
+
+function verify_transaction_proof( p: transaction_proof ) {
+   // TODO
+}</string>
+                            </entry>
+                            <entry key="lib/ft3/crosschain/transfer.rell">
+                                <string>record xc_target {
+    account_id: byte_array;
+    extra: map&lt;text, gtv&gt;;
+}
+
+function add_to_blockchain_balance (blockchain_rid: byte_array, asset, amount: integer) {
+    require( chain_context.blockchain_rid != blockchain_rid ); // cannot add to own account
+
+    val origin_chain_rid = asset_origin @? { asset } .origin_chain_rid;
+
+    if (exists(origin_chain_rid) and (blockchain_rid == origin_chain_rid)) {
+       // do nothing. in future we might track origin
+    } else {
+         val bc_acc = ensure_blockchain_account(blockchain_rid);
+         ensure_balance(bc_acc, asset).amount += amount;
+    }
+}
+
+operation init_xfer (source: xfer_input, target: xc_target, hops: list&lt;byte_array&gt;) {
+     consume_input(source, 0, map&lt;asset, integer&gt;());
+     val asset = asset @ { .id == source.asset_id };
+     add_to_blockchain_balance( hops[0], asset, source.amount );
+}
+
+record init_xfer_args {
+          source: xfer_input;
+          target: xc_target;
+          hops: list&lt;byte_array&gt;;
+}
+
+class applied_transfers { key tx_rid: byte_array; }
+
+operation apply_xfer (
+       init_tx_rid: byte_array,
+       init_tx: transaction_proof,
+       prev_hop: transaction_proof?,
+       hop_index: integer
+) {
+      require(init_tx.tx.hash() == init_tx_rid);
+      verify_transaction_proof( init_tx );
+      create applied_transfers (init_tx_rid);
+
+      require(init_tx.tx.body.operations[0].name == "ft3.xc.init_xfer");
+      val init_args = init_xfer_args.from_gtv(
+         init_tx.tx.body.operations[0].args.to_full().to_gtv()
+      );
+      val my_blockchain_rid = chain_context.blockchain_rid;
+      val source = init_args.source;
+
+      require(init_args.hops.size() &gt; hop_index);
+      require(init_args.hops[hop_index] == my_blockchain_rid);
+
+      val from_chain_rid: byte_array;
+
+      if (hop_index &gt; 0) {
+         from_chain_rid = init_args.hops[hop_index - 1];
+         
+         require(prev_hop);
+         verify_transaction_proof(prev_hop);
+         require(prev_hop.tx.body.blockchain_rid == from_chain_rid);
+         require(prev_hop.tx.body.operations[0].name == "ft3.xc.apply_xfer");
+         require(byte_array.from_gtv(prev_hop.tx.body.operations[0].args[0])
+              == init_tx_rid);
+      } else {
+         from_chain_rid = init_tx.tx.body.blockchain_rid;
+      }
+
+      val asset = asset @ { .id == source.asset_id };
+      val origin_chain_rid = asset_origin @ { asset } .origin_chain_rid;
+
+      // process "from" side
+      if (from_chain_rid == origin_chain_rid) {
+         // asset comes from origin -- do nothing
+      } else {
+         deduct_balance(
+             get_blockchain_account( from_chain_rid ),
+             asset, source.amount
+         );
+      }
+
+      // process "to" side
+      if (init_args.hops.size() &gt; hop_index + 1) {
+         // this hop is not last
+         val next_hop = init_args.hops[hop_index + 1];
+         add_to_blockchain_balance(next_hop, asset, source.amount);
+      } else {
+         // final hop -- send money to recipient account
+         val available_assets = map&lt;asset, integer&gt;();
+         available_assets[asset] = source.amount;
+         val target = init_args.target;
+         process_transfer_output(
+                xfer_output(
+                  account_id = target.account_id,
+                  asset_id = source.asset_id,
+                  amount = source.amount,
+                  extra = target.extra
+                ),
+                0,
+                available_assets
+         );
+      }
+}</string>
+                            </entry>
+                            <entry key="lib/ft3/dev_op.rell">
+                                <string>// namespace ft3 {
+
+object dev_state {
+   mutable allow_dev_ops: boolean = true;   
+}
+
+function require_dev() {
+    require(dev_state.allow_dev_ops);
+}
+
+
+operation dev_register_asset (name, issuing_chain_rid: byte_array) {
+    require_dev();
+    register_asset(name, issuing_chain_rid);
+}
+
+operation dev_give_balance (asset_id: byte_array, account_id: byte_array, amount: integer) {
+    require_dev();
+    require(amount &gt;= 0);
+    ensure_balance( account @ { account_id }, asset @ { .id == asset_id } ).amount += amount;
+}
+
+operation dev_register_account (auth_descriptor) {
+    require_dev();
+    create_account_with_auth( auth_descriptor );
+}
+</string>
+                            </entry>
+                            <entry key="lib/ft3/ft3_xc_basic_dev.rell">
                                 <string>namespace ft3 {
 
 include "account/auth_basic";
 include "core";
+include "dev_op";
+
+ namespace xc {
+    include "crosschain/structures";
+    include "crosschain/blockchain";
+    include "crosschain/transfer";
+    include "crosschain/dev";
+ }
+
 
 }</string>
                             </entry>
@@ -578,7 +788,11 @@ operation transfer (inputs: list&lt;xfer_input&gt;, outputs: list&lt;xfer_output
 //}</string>
                             </entry>
                             <entry key="main.rell">
-                                <string>include 'util/index';
+                                <string>// INCLUDE OF FT3 LIBRARY
+include 'ft3_config';
+include 'lib/ft3/ft3_xc_basic_dev';
+
+include 'util/index';
 include 'user/index';
 include 'topic/index';
 include 'notifications/index';
@@ -586,9 +800,6 @@ include 'channel/index';
 include 'follow/index';
 include 'election/index';
 include 'representative/index';
-
-// INCLUDE OF FT# LIBRARY
-include 'lib/ft3/ft3_basic';
 </string>
                             </entry>
                             <entry key="notifications/index.rell">
@@ -743,7 +954,7 @@ operation suspend_user(username: text, user_to_be_suspended: text) {
 }
 
 operation tmp_add_representative(admin_name: name, name) {
-    require(is_signer(admin@{ .user.name == admin_name }( .user.pubkey )));
+    //require(is_signer(admin@{ .user.name == admin_name }( .user.pubkey )));
     val currentElection = representative_election @ { .timestamp &lt;= op_context.last_block_time, .completed == true } (
         .id,
         -sort .timestamp
@@ -753,7 +964,7 @@ operation tmp_add_representative(admin_name: name, name) {
 }
 
 operation tmp_remove_representative(admin_name: name, name) {
-    require(is_signer(admin@{ .user.name == admin_name }( .user.pubkey )));
+    //require(is_signer(admin@{ .user.name == admin_name }( .user.pubkey )));
     val currentElection = representative_election @ { .timestamp &lt;= op_context.last_block_time, .completed == true } (
         .id,
         -sort .timestamp
@@ -798,7 +1009,7 @@ include 'queries';</string>
                             <entry key="representative/report/operations.rell">
                                 <string>operation create_representative_report(username: text, id: text, text) {
     val user = user@{ .name == username };
-    require(is_signer(user.pubkey));
+    //require(is_signer(user.pubkey));
     require(user_meta@{ user }.suspended_until &lt; op_context.last_block_time);
 
     create representative_report(id= id, user, op_context.last_block_time, false, text = text);
@@ -806,7 +1017,7 @@ include 'queries';</string>
 
 operation handle_representative_report(username: text, id: text) {
     val user = user@{ .name == username };
-    require(is_signer(user.pubkey));
+    //require(is_signer(user.pubkey));
 
     val recentElection = representative_election@{ .completed == true } ( .id, sort .timestamp );
     val representative = representative @{ user, .representative_election.id == recentElection.id };
@@ -1247,7 +1458,7 @@ operation unsubscribe_from_topic(username: text, id: text) {
                                 <string>function get_verified_user(name): user {
     val user = user@{ .name == name };
 
-    require(is_signer(user.pubkey));
+    //require(is_signer(user.pubkey));
     require(user_meta@{ user }.suspended_until &lt; op_context.last_block_time);
 
     return user;
@@ -1259,10 +1470,8 @@ operation unsubscribe_from_topic(username: text, id: text) {
 }
 
 class user {
-    key name;
+    key account: ft3.account, name;
     display_name: name;
-    pubkey;
-    registered: integer;
 }
 
 include 'functions';
@@ -1319,18 +1528,19 @@ include 'queries';</string>
 }</string>
                             </entry>
                             <entry key="user/operations.rell">
-                                <string>operation register_user(name, display_name: text, pubkey) {
-    require(is_signer(pubkey));
+                                <string>operation register_user(name, auth_descriptor: ft3.auth_descriptor) {
+    //require(is_signer(pubkey));
 
-    log("Name: ", name, " - Display Name: ", display_name);
+    val account_id = ft3.create_account_with_auth(auth_descriptor);
+    val account = ft3.account @ { account_id };
 
     if (name == "admin") {
-        val admin = create user(name, display_name, pubkey, op_context.transaction.block.block_height);
+        val admin = create user(name = name.lower_case(), display_name = name, account);
         create admin(admin);
         create user_settings(admin, avatar = "" , description = "");
         create user_meta(admin, times_suspended = 0, suspended_until = 0);
     } else {
-        val user = create user(name, display_name, pubkey, op_context.transaction.block.block_height);
+        val user = create user(name = name.lower_case(), display_name = name, account);
         create user_settings(user, avatar = "" , description = "");
         create user_meta(user, times_suspended = 0, suspended_until = 0);
     }
@@ -1340,7 +1550,7 @@ include 'queries';</string>
                             <entry key="user/queries.rell">
                                 <string>
 query get_user(name) {
-    return user@?{ .name == name } ( name = .display_name, .pubkey, .registered );
+    return user@?{ .name == name } ( name = .display_name );
 }
 </string>
                             </entry>
