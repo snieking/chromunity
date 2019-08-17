@@ -33,10 +33,7 @@ function* walletLogin(action: AccountWalletLoginInitAction) {
 
   checkIfAuthDescriptorAdded(blockchain, user, action.accountId, action.keyPair);
 
-  const href = `http://localhost:3001/?route=/authorize
-    &dappId=${config.blockchainRID}
-    &accountId=${action.accountId}
-    &pubKey=${action.keyPair.pubKey}`;
+  const href = `http://localhost:3001/?route=/authorize&dappId=${config.blockchainRID}&accountId=${action.accountId}&pubkey=${action.keyPair.pubKey.toString("hex")}`;
 
   let newWindow = window.open(
     href,
