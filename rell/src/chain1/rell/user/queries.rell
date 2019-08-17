@@ -1,4 +1,3 @@
-
 query get_user(name) {
     return user@?{ .name == name } ( name = .display_name );
 }

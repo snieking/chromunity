@@ -8,9 +8,10 @@ function blockchain_account_id (blockchain_rid: byte_array): byte_array {
 }
 
 function ensure_blockchain_account (blockchain_rid: byte_array): account {
-   val acc = account @? { .id == blockchain_account_id(blockchain_rid) };
+   val blockchain_account_id = blockchain_account_id(blockchain_rid);
+   val acc = account @? { .id == blockchain_account_id };
    return if (acc??)  acc
-   else create account (id = blockchain_rid);
+   else create account (id = blockchain_account_id);
 }
 
 function get_blockchain_account (blockchain_rid: byte_array): account {

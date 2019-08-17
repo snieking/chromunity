@@ -1,6 +1,8 @@
 import * as bip39 from "bip39";
 import * as hdkey from "hdkey";
 import * as cryptoJS from 'crypto-js';
+import * as crypto from 'crypto'
+import * as secp256k1 from 'secp256k1'
 
 export function generateRandomMnemonic(): string {
     return bip39.generateMnemonic();
@@ -25,4 +27,13 @@ export function encrypt(data: string, key: string): string {
 
 export function decrypt(data: string, key: string): string {
     return cryptoJS.AES.decrypt(data, key).toString(cryptoJS.enc.Utf8);
+}
+
+export function makeKeyPair() {
+    let privKey
+    do {
+        privKey = crypto.randomBytes(32)
+    } while (!secp256k1.privateKeyVerify(privKey))
+    const pubKey = secp256k1.publicKeyCreate(privKey)
+    return { pubKey, privKey }
 }

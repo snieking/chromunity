@@ -29,6 +29,22 @@ export function clearSession(): void {
   SESSION_CACHE.remove(REPRESENTATIVE_KEY);
 }
 
+export function storeKeyPair(keyPair: any): void {
+  LOCAL_CACHE.set("keyPair", keyPair);
+}
+
+export function getKeyPair(): any {
+  return LOCAL_CACHE.get("keyPair");
+}
+
+export function storeUsername(username: string): void {
+  LOCAL_CACHE.set("username", username);
+}
+
+export function getUsername(): string {
+  return LOCAL_CACHE.get("username");
+}
+
 export function getAccounts(): EncryptedAccount[] {
   const accounts: EncryptedAccount[] = LOCAL_CACHE.get(ACCOUNTS_KEY);
   return accounts != null ? accounts : [];

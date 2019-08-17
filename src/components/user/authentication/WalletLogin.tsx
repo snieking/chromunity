@@ -6,15 +6,18 @@ import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
 import { Link } from "react-router-dom";
 import CardContent from "@material-ui/core/CardContent";
-import { getAccounts } from "../../../util/user-util";
+import {getAccounts, getKeyPair, getUsername, storeKeyPair} from "../../../util/user-util";
 import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
 import { initWalletLogin } from "../../../redux/actions/AccountActions";
 import { ApplicationState } from "../../../redux/Store";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { connect } from "react-redux";
-import { makeKeyPair } from "../../../blockchain/Postchain";
 import { uniqueId } from "../../../util/util";
 import Typography from "@material-ui/core/Typography";
+import config from "../../../config.js";
+import TextField from "@material-ui/core/TextField";
+import {makeKeyPair} from "../../../blockchain/CryptoService";
+import { KeyPair } from "ft3-lib";
 
 enum Step {
   INIT,
@@ -45,29 +48,24 @@ const accounts = getAccounts();
 const WalletLogin: React.FunctionComponent<Props> = props => {
   const classes = useStyles(props);
 
+  const [name, setName] = useState(getUsername() || "");
   const [step, setStep] = useState(Step.INIT);
   const [error, setError] = useState("");
   const [errorOpen, setErrorOpen] = useState(false);
 
   const walletLogin = () => {
-    const dappId = "chromunity";
-    const accountId = uniqueId();
-    const keyPair = makeKeyPair();
+    let keyPair = getKeyPair();
+    if (!keyPair) {
+      keyPair = makeKeyPair();
+      storeKeyPair(keyPair);
+    }
 
     setStep(Step.LOGIN_IN_PROGRESS);
-    props.initWalletLogin(accountId, keyPair);
+    props.initWalletLogin(new KeyPair(keyPair.privKey), name);
+  };
 
-    const href = `https://wallet-v2.chromia.dev/?route=/authorize&dappId=${dappId}&accountId=${accountId}&pubKey=${keyPair.pubKey}`;
+  const openVault = () => {
 
-    var newWindow = window.open(
-      href,
-      "vault",
-      `toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes`
-    );
-
-    if (!newWindow.focus) {
-      newWindow.focus();
-    }
   };
 
   return (
@@ -79,6 +77,15 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
           <Typography variant="subtitle1" component="p">
             User authentication is handled by the Chromia Vault.
           </Typography>
+          <TextField
+          label="Account name"
+          name="name"
+          type="text"
+          fullWidth
+          variant="outlined"
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => setName(event.target.value)}
+          className={classes.input}
+          />
           <Button
             color="primary"
             variant="contained"
@@ -106,8 +113,8 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
-    initWalletLogin: (accountId: string, keyPair: any) =>
-      dispatch(initWalletLogin(accountId, keyPair))
+    initWalletLogin: (keyPair: any, accountId: string) =>
+      dispatch(initWalletLogin(keyPair, accountId))
   };
 };
 

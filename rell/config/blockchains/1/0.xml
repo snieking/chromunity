@@ -316,19 +316,20 @@ record multi_sig_args {
        pubkeys: list&lt;pubkey&gt;;
 }
 
-function check_single_sig_auth(args: byte_array, required_flags: list&lt;text&gt;): boolean {
+function check_single_sig_auth(args: byte_array, participants: list&lt;byte_array&gt;, required_flags: list&lt;text&gt;): boolean {
+    require(participants.size() == 1);
     val ss_args = single_sig_args.from_bytes(args);
     return
           ss_args.flags.contains_all(required_flags)
             and 
-          is_signer(ss_args.pubkey); 
+          is_signer(participants[0]);
 }
 
-function check_multi_sig_auth(args: byte_array, required_flags: list&lt;text&gt;): boolean {
+function check_multi_sig_auth(args: byte_array, participants: list&lt;byte_array&gt;, required_flags: list&lt;text&gt;): boolean {
    val multi_sign_args = multi_sig_args.from_bytes(args);
    if (not (multi_sign_args.flags.contains_all(required_flags))) return false;
    var num_sign = multi_sign_args.signatures_required;
-   for(s in multi_sign_args.pubkeys) {
+   for(s in participants) {
       if(is_signer(s)) {
           num_sign -= 1;
           if(num_sign &lt; 1) {return true;}
@@ -337,10 +338,10 @@ function check_multi_sig_auth(args: byte_array, required_flags: list&lt;text&gt;
    return false;
 }
 
-function check_auth_args (a_t: text, args: byte_array, required_flags: list&lt;text&gt;): boolean {
+function check_auth_args (a_t: text, args: byte_array, participants: list&lt;byte_array&gt;, required_flags: list&lt;text&gt;): boolean {
     return when (a_t) {
-        "S" -&gt; check_single_sig_auth(args, required_flags);
-        "M" -&gt; check_multi_sig_auth(args, required_flags);
+        "S" -&gt; check_single_sig_auth(args, participants, required_flags);
+        "M" -&gt; check_multi_sig_auth(args, participants, required_flags);
         else -&gt; false;
     };
 }
@@ -355,6 +356,7 @@ function require_auth (account, descriptor_id: byte_array, required_flags: list&
       check_auth_args(
        account_auth_descriptor.auth_type,
        account_auth_descriptor.args,
+       auth_descriptor_participant @* { account_auth_descriptor } ( .id ),
        required_flags
        )
    );  
@@ -368,6 +370,7 @@ function require_auth (account, descriptor_id: byte_array, required_flags: list&
 
 record auth_descriptor {
     auth_type: text;
+    participants: list&lt;byte_array&gt;;
     args: list&lt;gtv&gt;;
 }
 
@@ -390,16 +393,24 @@ class account_auth_descriptor {
      args: byte_array;
 }
 
+class auth_descriptor_participant {
+    key account_auth_descriptor, id: byte_array;
+}
+
 function _add_auth_descriptor (account, auth_descriptor) {
      val descriptor_id = auth_descriptor.hash();
-     create account_auth_descriptor (
+     val account_auth_descriptor = create account_auth_descriptor (
         account, descriptor_id,
         auth_descriptor.auth_type,
         args = auth_descriptor.args.to_gtv().to_bytes()
      );
+     for (participant in auth_descriptor.participants) {
+        create auth_descriptor_participant(account_auth_descriptor, id = participant);
+     }
 }
 
 function create_account_with_auth (auth_descriptor): byte_array {
+    print(auth_descriptor);
      val id = auth_descriptor.hash();
      val acc = create account (id);
      _add_auth_descriptor(
@@ -417,22 +428,59 @@ operation delete_auth_descriptor (account_id: byte_array, auth_descriptor_id: by
       };
 }
 
+operation delete_all_auth_descriptors_exclude(account_id: byte_array, auth_descriptor_id: byte_array) {
+    val account = account @ { .id == account_id };
+    require_auth(account, auth_descriptor_id, ["A"]);
+
+    delete (adp: auth_descriptor_participant, ad: account_auth_descriptor) @* {
+        ad.account == account and ad.descriptor_id != auth_descriptor_id and adp.account_auth_descriptor == ad
+    };
+
+    delete account_auth_descriptor @* {
+       .account == account,
+       .descriptor_id != auth_descriptor_id
+    };
+}
+
 operation add_auth_descriptor (account_id: byte_array, auth_id: byte_array, new_desc: auth_descriptor) {
       val account = account @ { .id == account_id };
       require_auth(account, auth_id, ["A"]);
       _add_auth_descriptor(account, new_desc);
 }
 
-</string>
+query get_account_auth_descriptors(id: byte_array) {
+    return account_auth_descriptor @* {
+        .account.id == id
+    } (
+        id = .descriptor_id,
+        type = .auth_type,
+        args = .args
+    );
+}
+
+query get_account_by_id(id: byte_array) {
+    return account @? { id } ( .id );
+}
+
+query get_account_by_auth_descriptor(auth_descriptor) {
+    return account @? { .id == auth_descriptor.hash() } ( .id );
+}
+
+query get_accounts_by_participant_id(id: byte_array) {
+    return auth_descriptor_participant @* { id } ( .account_auth_descriptor.account.id );
+}
+
+query get_accounts_by_auth_descriptor_id(descriptor_id: byte_array) {
+    return account_auth_descriptor @* { descriptor_id } ( .account.id );
+}</string>
                             </entry>
                             <entry key="lib/ft3/asset.rell">
                                 <string>//namespace ft3 {
   class asset {
     id: byte_array;
     key id;
-    name;
+    key name;
     issuing_chain_rid: byte_array;
-    key name, issuing_chain_rid;
   }
 
   class balance {
@@ -449,21 +497,78 @@ operation add_auth_descriptor (account_id: byte_array, auth_id: byte_array, new_
   }
 
   function register_asset (name, issuing_chain_rid: byte_array): asset {
-  print("HELLO");
-    print(11111, name.hash());
-    print(22222, issuing_chain_rid.hash());
    val id = (name, issuing_chain_rid).hash();
    return create asset (id, name, issuing_chain_rid);
   }
 
+  query get_asset_balances(account_id: byte_array) {
+    return balance @* { .account.id == account_id } (
+        id = .asset.id,
+        name = .asset.name,
+        amount = .amount,
+        chain_id = .asset.issuing_chain_rid
+    );
+  }
 
-   query get_asset_by_name_and_chain(name, issuing_chain_rid: text) {
-        return asset@{name, .issuing_chain_rid ==byte_array(issuing_chain_rid)}.id;
-   }
+  query get_asset_balance(account_id: byte_array, asset_id: byte_array) {
+    return balance @? {
+        .account.id == account_id,
+        .asset.id == asset_id
+    } (
+        id = .asset.id,
+        name = .asset.name,
+        amount = .amount,
+        chain_id = .asset.issuing_chain_rid
+    );
+  }
 
+  query get_asset_by_name(name) {
+    return asset @* { name } (
+        .id,
+        .name,
+        .issuing_chain_rid
+    );
+  }
 // }
 
 </string>
+                            </entry>
+                            <entry key="lib/ft3/blockchain.rell">
+                                <string>object blockchain {
+    mutable name: text = ft3_config.blockchain_name;
+    mutable website: text = ft3_config.blockchain_website;
+    mutable description: text = ft3_config.blockchain_description;
+}
+
+class linked_chain {
+    key chain_rid: byte_array;
+}
+
+operation update_blockchain(name, website: text, description: text) {
+    blockchain.name = name;
+    blockchain.website = website;
+    blockchain.description = description;
+}
+
+query get_blockchain_info() {
+    return (
+        name = blockchain.name,
+        website = blockchain.website,
+        description = blockchain.description
+    );
+}
+
+operation link_chain(chain_rid: byte_array) {
+    create linked_chain(chain_rid);
+}
+
+query get_linked_chains() {
+    return linked_chain @* {} ( .chain_rid );
+}
+
+query is_linked_with_chain(chain_rid: byte_array) {
+    return linked_chain @? { chain_rid } != null;
+}</string>
                             </entry>
                             <entry key="lib/ft3/core.rell">
                                 <string>include "account/main";
@@ -483,9 +588,10 @@ function blockchain_account_id (blockchain_rid: byte_array): byte_array {
 }
 
 function ensure_blockchain_account (blockchain_rid: byte_array): account {
-   val acc = account @? { .id == blockchain_account_id(blockchain_rid) };
+   val blockchain_account_id = blockchain_account_id(blockchain_rid);
+   val acc = account @? { .id == blockchain_account_id };
    return if (acc??)  acc
-   else create account (id = blockchain_rid);
+   else create account (id = blockchain_account_id);
 }
 
 function get_blockchain_account (blockchain_rid: byte_array): account {
@@ -648,7 +754,7 @@ function require_dev() {
 }
 
 
-operation dev_register_asset (name, issuing_chain_rid: byte_array) {
+operation dev_register_asset (name, issuing_chain_rid: byte_array, origin_chain_rid: byte_array) {
     require_dev();
     register_asset(name, issuing_chain_rid);
 }
@@ -671,6 +777,7 @@ operation dev_register_account (auth_descriptor) {
 include "account/auth_basic";
 include "core";
 include "dev_op";
+include "blockchain";
 
  namespace xc {
     include "crosschain/structures";
@@ -693,11 +800,23 @@ include "dev_op";
     op_index: integer;
     is_input: boolean;
     entry_index: integer;
-    
   }
 
-  
-
+  query get_payment_history(account_id: byte_array, after_block: integer) {
+    return payment_history_entry @* {
+        account @ { account_id },
+        .transaction.block.block_height &gt; after_block
+    } (
+        delta = .delta,
+        asset = .asset.name,
+        asset_id = .asset.id,
+        is_input = .is_input,
+        timestamp = .transaction.block.timestamp,
+        block_height = .transaction.block.block_height,
+        tx_rid = .transaction.tx_rid,
+        tx_data = .transaction.tx_data
+    );
+  }
 //}</string>
                             </entry>
                             <entry key="lib/ft3/transfer.rell">
@@ -1544,15 +1663,12 @@ include 'queries';</string>
         create user_settings(user, avatar = "" , description = "");
         create user_meta(user, times_suspended = 0, suspended_until = 0);
     }
-}
-</string>
+}</string>
                             </entry>
                             <entry key="user/queries.rell">
-                                <string>
-query get_user(name) {
+                                <string>query get_user(name) {
     return user@?{ .name == name } ( name = .display_name );
-}
-</string>
+}</string>
                             </entry>
                             <entry key="user/settings/index.rell">
                                 <string>class user_settings {

@@ -6,10 +6,10 @@ import {
 } from "../AccountTypes";
 
 export const initWalletLogin: ActionCreator<AccountWalletLoginInitAction> = (
-  accountId: string,
-  keyPair: any
+  keyPair: any,
+  accountId: string
 ) => ({
   type: AccountActionTypes.WALLET_LOGIN_INIT,
-  accountId: accountId,
-  keyPair: keyPair
+  keyPair: keyPair,
+  accountId: accountId
 });

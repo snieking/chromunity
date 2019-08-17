@@ -1,12 +1,12 @@
 import {
-  AccountActionTypes, AccountWalletLoginInitAction
+  AccountActionTypes,
+  AccountWalletLoginInitAction
 } from "../AccountTypes";
 import { takeLatest } from "redux-saga/effects";
 import { SingleSignatureAuthDescriptor, FlagsType, User } from "ft3-lib";
-import { Blockchain } from "ft3-lib";
+import { Blockchain, KeyPair } from "ft3-lib";
 import DirectoryService from "../../blockchain/DirectoryService";
 import config from "../../config.js";
-import {login} from "../../blockchain/UserService";
 
 const chainId = Buffer.from(config.blockchainRID, "hex");
 
@@ -15,31 +15,63 @@ export function* accountWatcher() {
 }
 
 function* walletLogin(action: AccountWalletLoginInitAction) {
+  console.log("About to perform wallet login");
   const blockchain = yield Blockchain.initialize(
     chainId,
     new DirectoryService()
   );
 
-  const authDescriptor = new SingleSignatureAuthDescriptor(action.keyPair.pubKey, [
-    FlagsType.Account,
-    FlagsType.Transfer
-  ]);
+  console.log("Initialized blockchain", blockchain);
 
+  const authDescriptor = new SingleSignatureAuthDescriptor(
+    action.keyPair.pubKey,
+    [FlagsType.Account, FlagsType.Transfer]
+  );
+
+  console.log("Created auth descriptor", authDescriptor);
   const user = new User(action.keyPair, authDescriptor);
 
-  checkIfAuthDescriptorAdded(blockchain, user, action.accountId)
+  checkIfAuthDescriptorAdded(blockchain, user, action.accountId, action.keyPair);
+
+  const href = `http://localhost:3001/?route=/authorize
+    &dappId=${config.blockchainRID}
+    &accountId=${action.accountId}
+    &pubKey=${action.keyPair.pubKey}`;
+
+  let newWindow = window.open(
+    href,
+    "vault",
+    `toolbar=no,
+  location=no,
+  status=no,
+  menubar=no,
+  scrollbars=yes,
+  resizable=yes`
+  );
+
+  if (!newWindow.focus) {
+    newWindow.focus();
+  }
 }
 
-function* checkIfAuthDescriptorAdded(blockchain: any, user: User, accountId: string) {
+async function checkIfAuthDescriptorAdded(
+  blockchain: any,
+  user: User,
+  accountId: string,
+  keyPair: KeyPair
+) {
   console.log("Checking if auth descriptor has been added");
-  const accounts = yield blockchain.getAccountsByParticipantId(
-    user.keyPair.pubKey,
+  const accounts = await blockchain.getAccountsByParticipantId(
+    keyPair.pubKey,
     user
   );
 
-  const isAdded = accounts.some(( id: any ) => (
-    id.toString('hex').toUpperCase() === accountId.toUpperCase()
-  ));
+  const isAdded = accounts.some(
+    (id: any) => {
+      console.log("id", id);
+      return id.toString("hex").toUpperCase() === accountId.toUpperCase();
+    }
+  );
 
   if (isAdded) {
     console.log("Auth descriptor was added!");
@@ -47,6 +79,6 @@ function* checkIfAuthDescriptorAdded(blockchain: any, user: User, accountId: str
     //DO DAPP SPECIFIC LOGIN WITH NEW KEY PAIR
   } else {
     console.log("Auth descriptor was not added, checking again in 3 seconds");
-    setTimeout(checkIfAuthDescriptorAdded, 3000);
+    setTimeout(() => checkIfAuthDescriptorAdded(blockchain, user, accountId, keyPair), 3000);
   }
 }
