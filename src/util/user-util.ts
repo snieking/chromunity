@@ -19,8 +19,6 @@ const SESSION_CACHE = BoomerangCache.create("session-bucket", {
 });
 
 const USER_KEY = "user";
-const CHROMUNITY_USER_KEY = "chromunity-user";
-const ACCOUNTS_KEY = "accounts";
 const USER_META_KEY = "user_meta";
 const REPRESENTATIVE_KEY = "representative";
 
@@ -39,7 +37,9 @@ export function setAuthorizedUser(user: ChromunityUser): void {
 }
 
 export function getAuthorizedUser(): ChromunityUser {
-  return ENCRYPTED_LOCAL_CACHE.get(USER_KEY);
+  const user: ChromunityUser = ENCRYPTED_LOCAL_CACHE.get(USER_KEY);
+  console.log("Authorized user: ", user);
+  return user;
 }
 
 export function getKeyPair(): KeyPair {

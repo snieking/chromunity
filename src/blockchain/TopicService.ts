@@ -10,14 +10,10 @@ const topicsCache = BoomerangCache.create("topic-bucket", {
   encrypt: false
 });
 
-export function createTopic(
-  user: ChromunityUser,
-  channelName: string,
-  title: string,
-  message: string
-) {
+export function createTopic(user: ChromunityUser, channelName: string, title: string, message: string) {
   const topicId = uniqueId();
 
+  console.log("User session: ", user.bcSession);
   return user.bcSession
     .call(
       "create_topic",
@@ -34,70 +30,30 @@ export function createTopic(
     });
 }
 
-export function modifyTopic(
-  user: ChromunityUser,
-  topicId: string,
-  updatedText: string
-) {
+export function modifyTopic(user: ChromunityUser, topicId: string, updatedText: string) {
   topicsCache.remove(topicId);
   return modifyText(user, topicId, updatedText, "modify_topic");
 }
 
-export function modifyReply(
-  user: ChromunityUser,
-  replyId: string,
-  updatedText: string
-) {
+export function modifyReply(user: ChromunityUser, replyId: string, updatedText: string) {
   return modifyText(user, replyId, updatedText, "modify_reply");
 }
 
-function modifyText(
-  user: ChromunityUser,
-  id: string,
-  updatedText: string,
-  rellOperation: string
-) {
-  return user.bcSession.call(
-    rellOperation,
-    id,
-    user.name.toLocaleLowerCase(),
-    updatedText
-  );
+function modifyText(user: ChromunityUser, id: string, updatedText: string, rellOperation: string) {
+  return user.bcSession.call(rellOperation, id, user.name.toLocaleLowerCase(), updatedText);
 }
 
-export function createTopicReply(
-  user: ChromunityUser,
-  topicId: string,
-  message: string
-) {
+export function createTopicReply(user: ChromunityUser, topicId: string, message: string) {
   const replyId = uniqueId();
   const tx: TransactionBuilder = user.bcSession.blockchain.transactionBuilder();
-  tx.addOperation(
-    "create_reply",
-    topicId,
-    replyId,
-    user.name.toLocaleLowerCase(),
-    message
-  );
+  tx.addOperation("create_reply", topicId, replyId, user.name.toLocaleLowerCase(), message);
   return postTopicReply(user, tx, topicId, message, replyId);
 }
 
-export function createTopicSubReply(
-  user: ChromunityUser,
-  topicId: string,
-  replyId: string,
-  message: string
-) {
+export function createTopicSubReply(user: ChromunityUser, topicId: string, replyId: string, message: string) {
   const subReplyId = uniqueId();
   const tx: TransactionBuilder = user.bcSession.blockchain.transactionBuilder();
-  tx.addOperation(
-    "create_sub_reply",
-    topicId,
-    replyId,
-    subReplyId,
-    user.name.toLocaleLowerCase(),
-    message
-  );
+  tx.addOperation("create_sub_reply", topicId, replyId, subReplyId, user.name.toLocaleLowerCase(), message);
 
   return postTopicReply(user, tx, topicId, message, replyId);
 }
@@ -119,9 +75,7 @@ function postTopicReply(
           user,
           createReplyTriggerString(user.name, topicId),
           message,
-          users
-            .map(name => name.toLocaleLowerCase())
-            .filter(item => item !== user.name)
+          users.map(name => name.toLocaleLowerCase()).filter(item => item !== user.name)
         )
       );
       return promise;
@@ -134,19 +88,11 @@ function createReplyTriggerString(name: string, id: string): string {
 
 export function removeTopic(user: ChromunityUser, topicId: string) {
   topicsCache.remove(topicId);
-  return user.bcSession.call(
-    "remove_topic",
-    user.name.toLocaleLowerCase(),
-    topicId
-  );
+  return user.bcSession.call("remove_topic", user.name.toLocaleLowerCase(), topicId);
 }
 
 export function removeTopicReply(user: ChromunityUser, topicReplyId: string) {
-  return user.bcSession.call(
-    "remove_topic_reply",
-    user.name.toLocaleLowerCase(),
-    topicReplyId
-  );
+  return user.bcSession.call("remove_topic_reply", user.name.toLocaleLowerCase(), topicReplyId);
 }
 
 export function getTopicRepliesPriorToTimestamp(
@@ -154,12 +100,7 @@ export function getTopicRepliesPriorToTimestamp(
   timestamp: number,
   pageSize: number
 ): Promise<TopicReply[]> {
-  return getTopicRepliesForTimestamp(
-    topicId,
-    timestamp,
-    pageSize,
-    "get_topic_replies_prior_to_timestamp"
-  );
+  return getTopicRepliesForTimestamp(topicId, timestamp, pageSize, "get_topic_replies_prior_to_timestamp");
 }
 
 export function getTopicRepliesAfterTimestamp(
@@ -167,20 +108,10 @@ export function getTopicRepliesAfterTimestamp(
   timestamp: number,
   pageSize: number
 ): Promise<TopicReply[]> {
-  return getTopicRepliesForTimestamp(
-    topicId,
-    timestamp,
-    pageSize,
-    "get_topic_replies_after_timestamp"
-  );
+  return getTopicRepliesForTimestamp(topicId, timestamp, pageSize, "get_topic_replies_after_timestamp");
 }
 
-function getTopicRepliesForTimestamp(
-  topicId: string,
-  timestamp: number,
-  pageSize: number,
-  rellOperation: string
-) {
+function getTopicRepliesForTimestamp(topicId: string, timestamp: number, pageSize: number, rellOperation: string) {
   return BLOCKCHAIN.then(bc =>
     bc.query(rellOperation, {
       topic_id: topicId,
@@ -236,10 +167,7 @@ export function getTopicsByChannelPriorToTimestamp(
   });
 }
 
-export function getTopicsByChannelAfterTimestamp(
-  channelName: string,
-  timestamp: number
-): Promise<Topic[]> {
+export function getTopicsByChannelAfterTimestamp(channelName: string, timestamp: number): Promise<Topic[]> {
   return GTX.query("get_topics_by_channel_after_timestamp", {
     name: channelName.toLocaleLowerCase(),
     timestamp: timestamp
@@ -284,11 +212,7 @@ export function unsubscribeFromTopic(user: ChromunityUser, id: string) {
   return modifyRatingAndSubscription(user, id, "unsubscribe_from_topic");
 }
 
-function modifyRatingAndSubscription(
-  user: ChromunityUser,
-  id: string,
-  rellOperation: string
-) {
+function modifyRatingAndSubscription(user: ChromunityUser, id: string, rellOperation: string) {
   return user.bcSession.call(rellOperation, user.name.toLocaleLowerCase(), id);
 }
 
@@ -313,33 +237,15 @@ export function getTopicById(id: string): Promise<Topic> {
   });
 }
 
-export function getTopicsPriorToTimestamp(
-  timestamp: number,
-  pageSize: number
-): Promise<Topic[]> {
-  return getTopicsForTimestamp(
-    timestamp,
-    pageSize,
-    "get_topics_prior_to_timestamp"
-  );
+export function getTopicsPriorToTimestamp(timestamp: number, pageSize: number): Promise<Topic[]> {
+  return getTopicsForTimestamp(timestamp, pageSize, "get_topics_prior_to_timestamp");
 }
 
-export function getTopicsAfterTimestamp(
-  timestamp: number,
-  pageSize: number
-): Promise<Topic[]> {
-  return getTopicsForTimestamp(
-    timestamp,
-    pageSize,
-    "get_topics_after_timestamp"
-  );
+export function getTopicsAfterTimestamp(timestamp: number, pageSize: number): Promise<Topic[]> {
+  return getTopicsForTimestamp(timestamp, pageSize, "get_topics_after_timestamp");
 }
 
-function getTopicsForTimestamp(
-  timestamp: number,
-  pageSize: number,
-  rellOperation: string
-): Promise<Topic[]> {
+function getTopicsForTimestamp(timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
   return GTX.query(rellOperation, {
     timestamp: timestamp,
     page_size: pageSize
@@ -354,12 +260,7 @@ export function getTopicsFromFollowsAfterTimestamp(
   timestamp: number,
   pageSize: number
 ): Promise<Topic[]> {
-  return getTopicsFromFollowsForTimestamp(
-    user,
-    timestamp,
-    pageSize,
-    "get_topics_from_follows_after_timestamp"
-  );
+  return getTopicsFromFollowsForTimestamp(user, timestamp, pageSize, "get_topics_from_follows_after_timestamp");
 }
 
 export function getTopicsFromFollowsPriorToTimestamp(
@@ -367,12 +268,7 @@ export function getTopicsFromFollowsPriorToTimestamp(
   timestamp: number,
   pageSize: number
 ): Promise<Topic[]> {
-  return getTopicsFromFollowsForTimestamp(
-    user,
-    timestamp,
-    pageSize,
-    "get_topics_from_follows_prior_to_timestamp"
-  );
+  return getTopicsFromFollowsForTimestamp(user, timestamp, pageSize, "get_topics_from_follows_prior_to_timestamp");
 }
 
 function getTopicsFromFollowsForTimestamp(
@@ -426,10 +322,7 @@ export function getTopicsFromFollowedChannelsPriorToTimestamp(
   });
 }
 
-export function getAllTopicsByPopularityAfterTimestamp(
-  timestamp: number,
-  pageSize: number
-): Promise<Topic[]> {
+export function getAllTopicsByPopularityAfterTimestamp(timestamp: number, pageSize: number): Promise<Topic[]> {
   return GTX.query("get_all_topics_by_stars_since_timestamp", {
     timestamp: timestamp,
     page_size: pageSize
