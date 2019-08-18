@@ -38,8 +38,11 @@ import {
   subscribeToTopic,
   unsubscribeFromTopic
 } from "../../blockchain/TopicService";
-import { Topic, TopicReply, User } from "../../types";
-import { getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
+import { Topic, TopicReply, ChromunityUser } from "../../types";
+import {
+  getAuthorizedUser,
+  ifEmptyAvatarThenPlaceholder
+} from "../../util/user-util";
 import {
   Delete,
   Notifications,
@@ -162,7 +165,7 @@ const FullTopic = withStyles(styles)(
 
     componentDidMount(): void {
       const id = this.props.match.params.id;
-      const user: User = getUser();
+      const user: ChromunityUser = getAuthorizedUser();
 
       if (user != null) {
         getMutedUsers(user).then(users => this.setState({ mutedUsers: users }));
@@ -263,7 +266,7 @@ const FullTopic = withStyles(styles)(
       if (!this.state.isLoading) {
         this.setState({ isLoading: true });
         const id: string = this.state.topic.id;
-        const user: User = getUser();
+        const user: ChromunityUser = getAuthorizedUser();
 
         if (user != null) {
           if (this.state.ratedByMe) {
@@ -297,7 +300,7 @@ const FullTopic = withStyles(styles)(
       if (!this.state.isLoading) {
         this.setState({ isLoading: true });
         const id: string = this.state.topic.id;
-        const user: User = getUser();
+        const user: ChromunityUser = getAuthorizedUser();
 
         if (user != null) {
           if (this.state.subscribed) {
@@ -358,13 +361,13 @@ const FullTopic = withStyles(styles)(
           <Typography gutterBottom variant="h6" component="h6">
             {this.state.topic.title}
           </Typography>
-            <MarkdownRenderer text={content} />
+          <MarkdownRenderer text={content} />
         </CardContent>
       );
     }
 
     renderCardActions() {
-      const user: User = getUser();
+      const user: ChromunityUser = getAuthorizedUser();
       return (
         <CardActions style={{ marginTop: "-20px" }}>
           <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
@@ -419,13 +422,13 @@ const FullTopic = withStyles(styles)(
 
     editTopicMessage(text: string) {
       this.setState({ isLoading: true });
-      modifyTopic(getUser(), this.state.topic.id, text).then(() =>
+      modifyTopic(getAuthorizedUser(), this.state.topic.id, text).then(() =>
         window.location.reload()
       );
     }
 
     reportTopic() {
-      const user: User = getUser();
+      const user: ChromunityUser = getAuthorizedUser();
 
       if (user != null) {
         reportTopic(user, this.state.topic.id);
@@ -436,7 +439,7 @@ const FullTopic = withStyles(styles)(
     }
 
     renderAdminActions() {
-      const user: User = getUser();
+      const user: ChromunityUser = getAuthorizedUser();
       if (
         user != null &&
         this.state.representatives.includes(user.name) &&
@@ -481,9 +484,10 @@ const FullTopic = withStyles(styles)(
                         removeTopicDialogOpen: false
                       },
                       () =>
-                        removeTopic(getUser(), this.props.match.params.id).then(
-                          () => window.location.reload()
-                        )
+                        removeTopic(
+                          getAuthorizedUser(),
+                          this.props.match.params.id
+                        ).then(() => window.location.reload())
                     )
                   }
                   color="primary"
@@ -552,7 +556,7 @@ const FullTopic = withStyles(styles)(
     handleReplySubmit(): void {
       this.retrieveLatestReplies();
       if (!this.state.subscribed) {
-        subscribeToTopic(getUser(), this.state.topic.id).then(() =>
+        subscribeToTopic(getAuthorizedUser(), this.state.topic.id).then(() =>
           this.setState({ subscribed: true })
         );
       }

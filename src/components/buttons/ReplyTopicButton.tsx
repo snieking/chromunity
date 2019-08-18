@@ -15,7 +15,7 @@ import TextField from "@material-ui/core/TextField";
 import IconButton from "@material-ui/core/IconButton";
 import { ReplyAll } from "@material-ui/icons";
 import { createTopicReply } from "../../blockchain/TopicService";
-import { getCachedUserMeta, getUser } from "../../util/user-util";
+import { getCachedUserMeta, getAuthorizedUser } from "../../util/user-util";
 import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import { UserMeta } from "../../types";
 import { largeButtonStyles } from "./ButtonStyles";
@@ -64,7 +64,7 @@ const ReplyTopicButton: React.FunctionComponent<
   function createReply(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    createTopicReply(getUser(), props.topicId, message)
+    createTopicReply(getAuthorizedUser(), props.topicId, message)
       .then(() => {
         setNewReplyStatusMessage("Reply sent");
         setNewReplySuccessStatusOpen(true);
@@ -82,7 +82,7 @@ const ReplyTopicButton: React.FunctionComponent<
 
   function createTopicButton() {
     if (
-      getUser() != null &&
+      getAuthorizedUser() != null &&
       userMeta != null &&
       userMeta.suspended_until < Date.now()
     ) {

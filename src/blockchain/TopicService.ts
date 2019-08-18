@@ -1,9 +1,9 @@
 import { BLOCKCHAIN, GTX } from "./Postchain";
-import { seedToKey } from "./CryptoService";
 import { uniqueId } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
-import { Topic, TopicReply, User } from "../types";
+import { Topic, TopicReply, ChromunityUser } from "../types";
 import { sendNotifications } from "./NotificationService";
+import TransactionBuilder from "ft3-lib/dist/lib/ft3/transaction-builder";
 
 const topicsCache = BoomerangCache.create("topic-bucket", {
   storage: "session",
@@ -11,66 +11,67 @@ const topicsCache = BoomerangCache.create("topic-bucket", {
 });
 
 export function createTopic(
-  user: User,
+  user: ChromunityUser,
   channelName: string,
   title: string,
   message: string
 ) {
-  const { privKey, pubKey } = seedToKey(user.seed);
   const topicId = uniqueId();
 
-  const tx = GTX.newTransaction([pubKey]);
-  tx.addOperation(
-    "create_topic",
-    topicId,
-    user.name.toLocaleLowerCase(),
-    channelName.toLocaleLowerCase(),
-    channelName,
-    title,
-    message
-  );
-  tx.sign(privKey, pubKey);
-
-  return tx.postAndWaitConfirmation().then((promise: unknown) => {
-    subscribeToTopic(user, topicId);
-    return promise;
-  });
+  return user.bcSession
+    .call(
+      "create_topic",
+      topicId,
+      user.name.toLocaleLowerCase(),
+      channelName.toLocaleLowerCase(),
+      channelName,
+      title,
+      message
+    )
+    .then((promise: unknown) => {
+      subscribeToTopic(user, topicId);
+      return promise;
+    });
 }
 
-export function modifyTopic(user: User, topicId: string, updatedText: string) {
+export function modifyTopic(
+  user: ChromunityUser,
+  topicId: string,
+  updatedText: string
+) {
   topicsCache.remove(topicId);
   return modifyText(user, topicId, updatedText, "modify_topic");
 }
 
-export function modifyReply(user: User, replyId: string, updatedText: string) {
+export function modifyReply(
+  user: ChromunityUser,
+  replyId: string,
+  updatedText: string
+) {
   return modifyText(user, replyId, updatedText, "modify_reply");
 }
 
 function modifyText(
-  user: User,
+  user: ChromunityUser,
   id: string,
   updatedText: string,
   rellOperation: string
 ) {
-  const { privKey, pubKey } = seedToKey(user.seed);
-
-  const tx = GTX.newTransaction([pubKey]);
-  tx.addOperation(
+  return user.bcSession.call(
     rellOperation,
     id,
     user.name.toLocaleLowerCase(),
     updatedText
   );
-  tx.sign(privKey, pubKey);
-
-  return tx.postAndWaitConfirmation();
 }
 
-export function createTopicReply(user: User, topicId: string, message: string) {
-  const { privKey, pubKey } = seedToKey(user.seed);
+export function createTopicReply(
+  user: ChromunityUser,
+  topicId: string,
+  message: string
+) {
   const replyId = uniqueId();
-
-  const tx = GTX.newTransaction([pubKey]);
+  const tx: TransactionBuilder = user.bcSession.blockchain.transactionBuilder();
   tx.addOperation(
     "create_reply",
     topicId,
@@ -78,21 +79,17 @@ export function createTopicReply(user: User, topicId: string, message: string) {
     user.name.toLocaleLowerCase(),
     message
   );
-  tx.sign(privKey, pubKey);
-
   return postTopicReply(user, tx, topicId, message, replyId);
 }
 
 export function createTopicSubReply(
-  user: User,
+  user: ChromunityUser,
   topicId: string,
   replyId: string,
   message: string
 ) {
-  const { privKey, pubKey } = seedToKey(user.seed);
   const subReplyId = uniqueId();
-
-  const tx = GTX.newTransaction([pubKey]);
+  const tx: TransactionBuilder = user.bcSession.blockchain.transactionBuilder();
   tx.addOperation(
     "create_sub_reply",
     topicId,
@@ -101,57 +98,55 @@ export function createTopicSubReply(
     user.name.toLocaleLowerCase(),
     message
   );
-  tx.sign(privKey, pubKey);
-  return postTopicReply(user, tx, topicId, message, subReplyId);
+
+  return postTopicReply(user, tx, topicId, message, replyId);
 }
 
 function postTopicReply(
-  user: User,
-  tx: any,
+  user: ChromunityUser,
+  tx: TransactionBuilder,
   topicId: string,
   message: string,
   replyId: string
 ) {
-  return tx.postAndWaitConfirmation().then((promise: unknown) => {
-    getTopicSubscribers(topicId).then(users =>
-      sendNotifications(
-        user,
-        createReplyTriggerString(user.name, topicId),
-        message,
-        users
-          .map(name => name.toLocaleLowerCase())
-          .filter(item => item !== user.name)
-      )
-    );
-    return promise;
-  });
+  return tx
+    .build(user.bcSession.user.authDescriptor.signers)
+    .sign(user.bcSession.user.keyPair)
+    .post()
+    .then((promise: unknown) => {
+      getTopicSubscribers(topicId).then(users =>
+        sendNotifications(
+          user,
+          createReplyTriggerString(user.name, topicId),
+          message,
+          users
+            .map(name => name.toLocaleLowerCase())
+            .filter(item => item !== user.name)
+        )
+      );
+      return promise;
+    });
 }
 
 function createReplyTriggerString(name: string, id: string): string {
   return "@" + name + " replied to /t/" + id;
 }
 
-export function removeTopic(user: User, topicId: string) {
+export function removeTopic(user: ChromunityUser, topicId: string) {
   topicsCache.remove(topicId);
-  const { privKey, pubKey } = seedToKey(user.seed);
-
-  const tx = GTX.newTransaction([pubKey]);
-  tx.addOperation("remove_topic", user.name.toLocaleLowerCase(), topicId);
-  tx.sign(privKey, pubKey);
-  return tx.postAndWaitConfirmation();
+  return user.bcSession.call(
+    "remove_topic",
+    user.name.toLocaleLowerCase(),
+    topicId
+  );
 }
 
-export function removeTopicReply(user: User, topicReplyId: string) {
-  const { privKey, pubKey } = seedToKey(user.seed);
-
-  const tx = GTX.newTransaction([pubKey]);
-  tx.addOperation(
+export function removeTopicReply(user: ChromunityUser, topicReplyId: string) {
+  return user.bcSession.call(
     "remove_topic_reply",
     user.name.toLocaleLowerCase(),
     topicReplyId
   );
-  tx.sign(privKey, pubKey);
-  return tx.postAndWaitConfirmation();
 }
 
 export function getTopicRepliesPriorToTimestamp(
@@ -260,12 +255,12 @@ export function countTopicsInChannel(channelName: string): Promise<number> {
   });
 }
 
-export function giveTopicStarRating(user: User, topicId: string) {
+export function giveTopicStarRating(user: ChromunityUser, topicId: string) {
   console.log("User: ", user);
   return modifyRatingAndSubscription(user, topicId, "give_topic_star_rating");
 }
 
-export function removeTopicStarRating(user: User, topicId: string) {
+export function removeTopicStarRating(user: ChromunityUser, topicId: string) {
   return modifyRatingAndSubscription(user, topicId, "remove_topic_star_rating");
 }
 
@@ -273,34 +268,28 @@ export function getTopicStarRaters(topicId: string): Promise<string[]> {
   return GTX.query("get_star_rating_for_topic", { id: topicId });
 }
 
-export function giveReplyStarRating(user: User, replyId: string) {
+export function giveReplyStarRating(user: ChromunityUser, replyId: string) {
   return modifyRatingAndSubscription(user, replyId, "give_reply_star_rating");
 }
 
-export function removeReplyStarRating(user: User, replyId: string) {
+export function removeReplyStarRating(user: ChromunityUser, replyId: string) {
   return modifyRatingAndSubscription(user, replyId, "remove_reply_star_rating");
 }
 
-export function subscribeToTopic(user: User, id: string) {
+export function subscribeToTopic(user: ChromunityUser, id: string) {
   return modifyRatingAndSubscription(user, id, "subscribe_to_topic");
 }
 
-export function unsubscribeFromTopic(user: User, id: string) {
+export function unsubscribeFromTopic(user: ChromunityUser, id: string) {
   return modifyRatingAndSubscription(user, id, "unsubscribe_from_topic");
 }
 
 function modifyRatingAndSubscription(
-  user: User,
+  user: ChromunityUser,
   id: string,
   rellOperation: string
 ) {
-  const { privKey, pubKey } = seedToKey(user.seed);
-
-  const tx = GTX.newTransaction([pubKey]);
-  tx.addOperation(rellOperation, user.name.toLocaleLowerCase(), id);
-  tx.addOperation("nop", uniqueId());
-  tx.sign(privKey, pubKey);
-  return tx.postAndWaitConfirmation();
+  return user.bcSession.call(rellOperation, user.name.toLocaleLowerCase(), id);
 }
 
 export function getReplyStarRaters(topicId: string): Promise<string[]> {
@@ -361,7 +350,7 @@ function getTopicsForTimestamp(
 }
 
 export function getTopicsFromFollowsAfterTimestamp(
-  user: User,
+  user: ChromunityUser,
   timestamp: number,
   pageSize: number
 ): Promise<Topic[]> {
@@ -374,7 +363,7 @@ export function getTopicsFromFollowsAfterTimestamp(
 }
 
 export function getTopicsFromFollowsPriorToTimestamp(
-  user: User,
+  user: ChromunityUser,
   timestamp: number,
   pageSize: number
 ): Promise<Topic[]> {
@@ -387,7 +376,7 @@ export function getTopicsFromFollowsPriorToTimestamp(
 }
 
 function getTopicsFromFollowsForTimestamp(
-  user: User,
+  user: ChromunityUser,
   timestamp: number,
   pageSize: number,
   rellOperation: string
@@ -420,7 +409,7 @@ function countByUser(name: string, rellOperation: string): Promise<number> {
 }
 
 export function getTopicsFromFollowedChannelsPriorToTimestamp(
-  user: User,
+  user: ChromunityUser,
   timestamp: number,
   pageSize: number
 ): Promise<Topic[]> {

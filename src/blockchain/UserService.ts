@@ -1,11 +1,8 @@
 import { UserMeta, UserSettings } from "./../types";
 import { BLOCKCHAIN, GTX } from "./Postchain";
 import { seedFromMnemonic, seedToKey } from "./CryptoService";
-import { User } from "../types";
-import { setUser, setUserMeta } from "../util/user-util";
+import { ChromunityUser } from "../types";
 import * as BoomerangCache from "boomerang-cache";
-import { uniqueId } from "../util/util";
-import { SingleSignatureAuthDescriptor } from "ft3-lib";
 
 const boomerang = BoomerangCache.create("avatar-bucket", {
   storage: "local",
@@ -22,31 +19,6 @@ export function register(name: string, password: string, mnemonic: string) {
   return tx.postAndWaitConfirmation();
 }
 
-export function walletRegister(
-  name: string,
-  walletAuthDescriptor: SingleSignatureAuthDescriptor,
-  authDescriptor: SingleSignatureAuthDescriptor
-) {
-
-}
-
-export function login(
-  name: string,
-  password: string,
-  seed: string
-): Promise<User> {
-  return GTX.query("get_user", { name: name.toLocaleLowerCase() }).then(
-    (blockchainUser: BlockchainUser) => {
-      const user: User = { name: name, seed: seed };
-      setUser(user, password);
-
-      getUserMeta(name).then(meta => setUserMeta(meta));
-
-      return user;
-    }
-  );
-}
-
 export function isRegistered(name: string): Promise<boolean> {
   return GTX.query("get_user", { name: name.toLocaleLowerCase() })
     .then((any: unknown) => any != null)
@@ -61,7 +33,7 @@ export function getUserMeta(username: string): Promise<UserMeta> {
   return GTX.query("get_user_meta", { name: username.toLocaleLowerCase() });
 }
 
-export function getUserSettings(user: User): Promise<UserSettings> {
+export function getUserSettings(user: ChromunityUser): Promise<UserSettings> {
   return GTX.query("get_user_settings", {
     name: user.name.toLocaleLowerCase()
   });
@@ -87,39 +59,36 @@ export function getUserSettingsCached(
 }
 
 export function updateUserSettings(
-  user: User,
+  user: ChromunityUser,
   avatar: string,
   description: string
 ) {
   const userLC: string = user.name.toLocaleLowerCase();
   boomerang.remove(userLC);
 
-  const { privKey, pubKey } = seedToKey(user.seed);
-
-  const tx = GTX.newTransaction([pubKey]);
-  tx.addOperation("update_user_settings", userLC, avatar, description);
-  tx.addOperation("nop", uniqueId());
-  tx.sign(privKey, pubKey);
-  return tx.postAndWaitConfirmation();
+  return user.bcSession.call(
+    "update_user_settings",
+    userLC,
+    avatar,
+    description
+  );
 }
 
-export function toggleUserMute(user: User, name: string, muted: boolean) {
+export function toggleUserMute(
+  user: ChromunityUser,
+  name: string,
+  muted: boolean
+) {
   boomerang.remove("muted-users");
-  const { privKey, pubKey } = seedToKey(user.seed);
-
-  const tx = GTX.newTransaction([pubKey]);
-  tx.addOperation(
+  return user.bcSession.call(
     "toggle_mute",
     user.name.toLocaleLowerCase(),
     name.toLocaleLowerCase(),
     muted ? 1 : 0
   );
-  tx.addOperation("nop", uniqueId());
-  tx.sign(privKey, pubKey);
-  return tx.postAndWaitConfirmation();
 }
 
-export function getMutedUsers(user: User): Promise<string[]> {
+export function getMutedUsers(user: ChromunityUser): Promise<string[]> {
   const mutedUsers: string[] = boomerang.get("muted-users");
 
   if (mutedUsers != null) {
@@ -132,10 +101,4 @@ export function getMutedUsers(user: User): Promise<string[]> {
     boomerang.set("muted-users", users, 86000);
     return users;
   });
-}
-
-interface BlockchainUser {
-  name: string;
-  pubkey: string;
-  registered: number;
 }

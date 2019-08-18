@@ -1,10 +1,9 @@
-import { EncryptedAccount, UserMeta } from "./../types";
-import { User } from "../types";
+import {ChromunityUser, EncryptedAccount, UserMeta} from "./../types";
 import * as BoomerangCache from "boomerang-cache";
 import { getRepresentatives } from "../blockchain/RepresentativesService";
 import { encrypt } from "../blockchain/CryptoService";
 import { getUserMeta } from "../blockchain/UserService";
-import { KeyPair } from "ft3-lib";
+import { KeyPair, User } from "ft3-lib";
 
 const LOCAL_CACHE = BoomerangCache.create("local-bucket", {
   storage: "local",
@@ -20,6 +19,7 @@ const SESSION_CACHE = BoomerangCache.create("session-bucket", {
 });
 
 const USER_KEY = "user";
+const CHROMUNITY_USER_KEY = "chromunity-user";
 const ACCOUNTS_KEY = "accounts";
 const USER_META_KEY = "user_meta";
 const REPRESENTATIVE_KEY = "representative";
@@ -31,52 +31,20 @@ export function clearSession(): void {
 }
 
 export function storeKeyPair(keyPair: KeyPair): void {
-  LOCAL_CACHE.set("keyPair", {
-    privKey: keyPair.privKey.toString('hex'),
-    pubKey: keyPair.pubKey.toString('hex')
-  });
+  LOCAL_CACHE.set("keyPair", keyPair);
+}
+
+export function setAuthorizedUser(user: ChromunityUser): void {
+  ENCRYPTED_LOCAL_CACHE.set(USER_KEY, user)
+}
+
+export function getAuthorizedUser(): ChromunityUser {
+  return ENCRYPTED_LOCAL_CACHE.get(USER_KEY);
 }
 
 export function getKeyPair(): KeyPair {
   const keyPair = LOCAL_CACHE.get("keyPair");
   return new KeyPair(keyPair.privKey)
-}
-
-export function storeUsername(username: string): void {
-  LOCAL_CACHE.set("username", username);
-}
-
-export function getUsername(): string {
-  return LOCAL_CACHE.get("username");
-}
-
-export function getAccounts(): EncryptedAccount[] {
-  const accounts: EncryptedAccount[] = LOCAL_CACHE.get(ACCOUNTS_KEY);
-  return accounts != null ? accounts : [];
-}
-
-export function deleteAccount(account: EncryptedAccount): void {
-  const accounts: EncryptedAccount[] = LOCAL_CACHE.get(ACCOUNTS_KEY);
-  let filteredAccounts = accounts.filter(e => e.name !== account.name);
-  LOCAL_CACHE.set(ACCOUNTS_KEY, filteredAccounts);
-}
-
-export function setUser(user: User, encryptionKey: string): void {
-  const accounts: EncryptedAccount[] = LOCAL_CACHE.get(ACCOUNTS_KEY);
-
-  const account: EncryptedAccount = {
-    name: user.name,
-    encryptedSeed: encrypt(user.seed, encryptionKey)
-  };
-
-  if (accounts == null) {
-    LOCAL_CACHE.set(ACCOUNTS_KEY, [account]);
-  } else {
-    let filteredAccounts = accounts.filter(e => e.name !== user.name);
-    LOCAL_CACHE.set(ACCOUNTS_KEY, [account].concat(filteredAccounts));
-  }
-
-    ENCRYPTED_LOCAL_CACHE.set(USER_KEY, user, 86400);
 }
 
 export function setUserMeta(meta: UserMeta): void {
@@ -90,7 +58,7 @@ export function getCachedUserMeta(): Promise<UserMeta> {
     return new Promise<UserMeta>(resolve => resolve(meta));
   }
 
-  const user: User = getUser();
+  const user: ChromunityUser = getAuthorizedUser();
   if (user == null) {
     return new Promise<UserMeta>(resolve => resolve(null));
   }
@@ -101,16 +69,12 @@ export function getCachedUserMeta(): Promise<UserMeta> {
   });
 }
 
-export function getUser(): User {
-  return ENCRYPTED_LOCAL_CACHE.get(USER_KEY);
-}
-
 export function godAlias(): string {
   return "admin";
 }
 
 export function isGod(): boolean {
-  const user: User = getUser();
+  const user: ChromunityUser = getAuthorizedUser();
   return user != null && user.name === godAlias();
 }
 
@@ -128,10 +92,12 @@ export function isRepresentative(): Promise<boolean> {
     return new Promise<boolean>(resolve => resolve(isRepresentative));
   }
 
+  const user: ChromunityUser = getAuthorizedUser();
+
   return getRepresentatives()
     .then(
       (representatives: string[]) =>
-        getUser() != null && representatives.includes(getUser().name)
+        user != null && representatives.includes(user.name)
     )
     .then((rep: boolean) => {
       setRepresentative(rep);

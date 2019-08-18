@@ -1,6 +1,8 @@
-export interface User {
+import {User, BlockchainSession} from "ft3-lib";
+
+export interface ChromunityUser {
     name: string;
-    seed: string;
+    bcSession: BlockchainSession;
 }
 
 export interface EncryptedAccount {

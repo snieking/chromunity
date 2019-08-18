@@ -1,6 +1,5 @@
 import {GTX} from "./Postchain";
-import {Election, RepresentativeAction, RepresentativeReport, User} from "../types";
-import {seedToKey} from "./CryptoService";
+import {Election, RepresentativeAction, RepresentativeReport, ChromunityUser} from "../types";
 import {uniqueId} from "../util/util";
 
 import * as BoomerangCache from "boomerang-cache";
@@ -32,43 +31,24 @@ export function getAllRepresentativeActionsPriorToTimestamp(timestamp: number, p
     return GTX.query("get_all_representative_actions", {timestamp: timestamp, page_size: pageSize});
 }
 
-export function handleReport(user: User, reportId: string) {
-    const {privKey, pubKey} = seedToKey(user.seed);
-
-    const tx = GTX.newTransaction([pubKey]);
-
-    tx.addOperation("handle_representative_report", user.name.toLocaleLowerCase(), reportId);
-    tx.sign(privKey, pubKey);
-    return tx.postAndWaitConfirmation();
+export function handleReport(user: ChromunityUser, reportId: string) {
+    return user.bcSession.call("handle_representative_report", user.name.toLocaleLowerCase(), reportId);
 }
 
-export function suspendUser(user: User, userToBeSuspended: string) {
-    const {privKey, pubKey} = seedToKey(user.seed);
-
-    const tx = GTX.newTransaction([pubKey]);
-
-    tx.addOperation("suspend_user", user.name.toLocaleLowerCase(), userToBeSuspended.toLocaleLowerCase());
-    tx.addOperation('nop', uniqueId());
-    tx.sign(privKey, pubKey);
-    return tx.postAndWaitConfirmation();
+export function suspendUser(user: ChromunityUser, userToBeSuspended: string) {
+    return user.bcSession.call("suspend_user", user.name.toLocaleLowerCase(), userToBeSuspended.toLocaleLowerCase());
 }
 
-export function reportTopic(user: User, topicId: string) {
+export function reportTopic(user: ChromunityUser, topicId: string) {
     return report(user, "topic /t/" + topicId + " was reported by @" + user.name);
 }
 
-export function reportReply(user: User, topicId: string, replyId: string) {
+export function reportReply(user: ChromunityUser, topicId: string, replyId: string) {
     return report(user, "Reply /t/" + topicId + "#reply-" + replyId + " was reported by @" + user.name);
 }
 
-function report(user: User, text: string) {
-    const {privKey, pubKey} = seedToKey(user.seed);
-
-    const tx = GTX.newTransaction([pubKey]);
-
-    tx.addOperation("create_representative_report", user.name.toLocaleLowerCase(), uniqueId(), text);
-    tx.sign(privKey, pubKey);
-    return tx.postAndWaitConfirmation();
+function report(user: ChromunityUser, text: string) {
+    return user.bcSession.call("create_representative_report", user.name.toLocaleLowerCase(), uniqueId(), text);
 }
 
 export function getUnhandledReports(): Promise<RepresentativeReport[]> {

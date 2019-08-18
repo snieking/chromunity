@@ -1,21 +1,34 @@
 import {
-  AccountActionTypes, AccountRegisterAction, AccountRegisteredCheckAction
+  AccountActionTypes,
+  AccountRegisterAction,
+  AccountRegisteredCheckAction
 } from "../AccountTypes";
 import { takeLatest } from "redux-saga/effects";
-import { SingleSignatureAuthDescriptor, FlagsType, User, Account } from "ft3-lib";
-import { Blockchain, KeyPair } from "ft3-lib";
-import DirectoryService from "../../blockchain/DirectoryService";
+import {
+  SingleSignatureAuthDescriptor,
+  FlagsType,
+  User,
+  Account,
+  BlockchainSession
+} from "ft3-lib";
+import { KeyPair } from "ft3-lib";
 import config from "../../config.js";
-import {getAccountId, walletRegister} from "../../blockchain/UserService";
-import {BLOCKCHAIN} from "../../blockchain/Postchain";
-import {accountAddAccountId} from "../actions/AccountActions";
-import {getKeyPair, storeKeyPair} from "../../util/user-util";
-import {makeKeyPair} from "../../blockchain/CryptoService";
-
-const chainId = Buffer.from(config.blockchainRID, "hex");
+import { getAccountId } from "../../blockchain/UserService";
+import { BLOCKCHAIN } from "../../blockchain/Postchain";
+import { accountAddAccountId } from "../actions/AccountActions";
+import {
+  getKeyPair,
+  setAuthorizedUser,
+  storeKeyPair
+} from "../../util/user-util";
+import { makeKeyPair } from "../../blockchain/CryptoService";
+import { ChromunityUser } from "../../types";
 
 export function* accountWatcher() {
-  yield takeLatest(AccountActionTypes.ACCOUNT_REGISTER_CHECK, checkIfRegistered);
+  yield takeLatest(
+    AccountActionTypes.ACCOUNT_REGISTER_CHECK,
+    checkIfRegistered
+  );
   yield takeLatest(AccountActionTypes.ACCOUNT_REGISTER, registerAccount);
 }
 
@@ -24,8 +37,12 @@ function* checkIfRegistered(action: AccountRegisteredCheckAction) {
 
   const accountId = yield getAccountId(action.username);
   if (!accountId) {
-    const returnUrl = encodeURIComponent(`http://localhost:3000/user/register/${action.username}`);
-    window.location.replace(`http://localhost:3001/?route=/link-account&returnUrl=${returnUrl}`);
+    const returnUrl = encodeURIComponent(
+      `http://localhost:3000/user/register/${action.username}`
+    );
+    window.location.replace(
+      `http://localhost:3001/?route=/link-account&returnUrl=${returnUrl}`
+    );
   } else {
     accountAddAccountId(accountId);
     yield loginAccount(action.username);
@@ -41,40 +58,46 @@ function* registerAccount(action: AccountRegisterAction) {
 
   const keyPair = retrieveKeyPair();
 
-  const authDescriptor = new SingleSignatureAuthDescriptor(
-    keyPair.pubKey,
-    [FlagsType.Account, FlagsType.Transfer]
-  );
+  const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [
+    FlagsType.Account,
+    FlagsType.Transfer
+  ]);
 
   const user = new User(keyPair, authDescriptor);
   const bc = yield BLOCKCHAIN;
   console.log("Created blockchain", bc);
-  console.log("Registered account");
-  yield bc.call(user, "register_user", action.username, authDescriptor.toGTV(), walletAuthDescriptor.toGTV());
+  yield bc.call(
+    user,
+    "register_user",
+    action.username,
+    authDescriptor.toGTV(),
+    walletAuthDescriptor.toGTV()
+  );
   console.log("Registered user");
+  authorizeUser(action.username, bc.newSession(user));
 }
 
 function* loginAccount(username: string) {
   console.log("About to perform wallet login");
-  const blockchain = yield BLOCKCHAIN;
 
-  console.log("Initialized blockchain", blockchain);
+  let keyPair: KeyPair = new KeyPair(makeKeyPair().privKey.toString("hex"));
 
-  let keyPair: KeyPair = new KeyPair(makeKeyPair().privKey.toString('hex'));
-
-  const authDescriptor = new SingleSignatureAuthDescriptor(
-    keyPair.pubKey,
-    [FlagsType.Account, FlagsType.Transfer]
-  );
+  const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [
+    FlagsType.Account,
+    FlagsType.Transfer
+  ]);
 
   console.log("Created auth descriptor", authDescriptor);
   const user = new User(keyPair, authDescriptor);
 
   let accountId = yield getAccountId(username);
 
-  checkIfAuthDescriptorAdded(blockchain, user, accountId, keyPair);
+  const blockchain = yield BLOCKCHAIN;
+  checkIfAuthDescriptorAdded(blockchain, user, accountId, username);
 
-  const href = `http://localhost:3001/?route=/authorize&dappId=${config.blockchainRID}&accountId=${accountId}&pubkey=${keyPair.pubKey.toString("hex")}`;
+  const href = `http://localhost:3001/?route=/authorize&dappId=${
+    config.blockchainRID
+  }&accountId=${accountId}&pubkey=${keyPair.pubKey.toString("hex")}`;
 
   let newWindow = window.open(
     href,
@@ -96,7 +119,7 @@ async function checkIfAuthDescriptorAdded(
   blockchain: any,
   user: User,
   accountId: string,
-  keyPair: KeyPair
+  username: string
 ) {
   console.log("Checking if auth descriptor has been added");
   const accounts = await blockchain.getAccountsByAuthDescriptorId(
@@ -104,20 +127,23 @@ async function checkIfAuthDescriptorAdded(
     user
   );
 
-  const isAdded = accounts.some(
-    (account: Account) => {
-      console.log("id", account.id_.toString('hex'));
-      return account.id_.toString("hex").toUpperCase() === accountId.toUpperCase();
-    }
-  );
+  const isAdded = accounts.some((account: Account) => {
+    console.log("id", account.id_.toString("hex"));
+    return (
+      account.id_.toString("hex").toUpperCase() === accountId.toUpperCase()
+    );
+  });
 
   if (isAdded) {
     console.log("Auth descriptor was added!");
     console.log(accounts[0]);
-    storeKeyPair(keyPair);
+    authorizeUser(username, blockchain.newSession(user));
   } else {
     console.log("Auth descriptor was not added, checking again in 3 seconds");
-    setTimeout(() => checkIfAuthDescriptorAdded(blockchain, user, accountId, keyPair), 3000);
+    setTimeout(
+      () => checkIfAuthDescriptorAdded(blockchain, user, accountId, username),
+      3000
+    );
   }
 }
 
@@ -130,4 +156,10 @@ function retrieveKeyPair(): KeyPair {
   }
 
   return keyPair;
+}
+
+function authorizeUser(username: string, session: BlockchainSession): void {
+  const chromunityUser: ChromunityUser = { name: username, bcSession: session };
+  setAuthorizedUser(chromunityUser);
+  window.location.replace("/");
 }

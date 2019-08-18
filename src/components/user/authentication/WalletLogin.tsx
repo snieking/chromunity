@@ -3,7 +3,6 @@ import { createStyles, makeStyles, Snackbar } from "@material-ui/core";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import Container from "@material-ui/core/Container";
 import Button from "@material-ui/core/Button";
-import { getKeyPair, getUsername, storeKeyPair } from "../../../util/user-util";
 import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
 import { accountRegisteredCheck } from "../../../redux/actions/AccountActions";
 import { ApplicationState } from "../../../redux/Store";
@@ -11,8 +10,6 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import { connect } from "react-redux";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
-import { makeKeyPair } from "../../../blockchain/CryptoService";
-import { KeyPair } from "ft3-lib";
 
 enum Step {
   INIT,
@@ -41,7 +38,7 @@ interface Props {
 const WalletLogin: React.FunctionComponent<Props> = props => {
   const classes = useStyles(props);
 
-  const [name, setName] = useState(getUsername() || "");
+  const [name, setName] = useState("");
   const [step, setStep] = useState(Step.INIT);
   const [error, setError] = useState("");
   const [errorOpen, setErrorOpen] = useState(false);

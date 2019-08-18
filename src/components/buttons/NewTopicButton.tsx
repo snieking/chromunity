@@ -16,7 +16,7 @@ import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
-import { getCachedUserMeta, getUser } from "../../util/user-util";
+import { getCachedUserMeta, getAuthorizedUser } from "../../util/user-util";
 import IconButton from "@material-ui/core/IconButton";
 import { Forum } from "@material-ui/icons";
 import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
@@ -170,7 +170,12 @@ const NewTopicButton = withStyles(largeButtonStyles)(
           const topicMessage = this.state.topicMessage;
           this.setState({ topicTitle: "", topicMessage: "" });
 
-          createTopic(getUser(), topicChannel, topicTitle, topicMessage)
+          createTopic(
+            getAuthorizedUser(),
+            topicChannel,
+            topicTitle,
+            topicMessage
+          )
             .then(() => {
               this.setState({
                 newTopicStatusMessage: "topic created",
@@ -191,7 +196,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
 
     createTopicButton() {
       if (
-        getUser() != null &&
+        getAuthorizedUser() != null &&
         this.state.userMeta.suspended_until < Date.now()
       ) {
         return (
