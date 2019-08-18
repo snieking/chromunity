@@ -31,11 +31,15 @@ export function clearSession(): void {
 }
 
 export function storeKeyPair(keyPair: KeyPair): void {
-  LOCAL_CACHE.set("keyPair", keyPair);
+  LOCAL_CACHE.set("keyPair", {
+    privKey: keyPair.privKey.toString('hex'),
+    pubKey: keyPair.pubKey.toString('hex')
+  });
 }
 
 export function getKeyPair(): KeyPair {
-  return LOCAL_CACHE.get("keyPair");
+  const keyPair = LOCAL_CACHE.get("keyPair");
+  return new KeyPair(keyPair.privKey)
 }
 
 export function storeUsername(username: string): void {
