@@ -1,34 +1,26 @@
 import React from "react";
 
-import {
-  Button,
-  Card,
-  CardContent,
-  Container,
-  Grid,
-  TextField
-} from "@material-ui/core";
+import { Button, Card, CardContent, Container, Grid, TextField } from "@material-ui/core";
 import { getRepresentatives } from "../../../blockchain/RepresentativesService";
 import RepresentativeCard from "./RepresentativeCard";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
-import { getAuthorizedUser } from "../../../util/user-util";
-import {
-  adminAddRepresentative,
-  adminRemoveRepresentative
-} from "../../../blockchain/AdminService";
+import { adminAddRepresentative, adminRemoveRepresentative } from "../../../blockchain/AdminService";
 import { ChromunityUser } from "../../../types";
+import { getUser } from "../../../util/user-util";
 
 export interface RepresentativesState {
   representatives: string[];
   targetUsername: string;
+  user: ChromunityUser;
 }
 
-export class Representatives extends React.Component<{}, RepresentativesState> {
-  constructor(props: unknown) {
+class Representatives extends React.Component<{}, RepresentativesState> {
+  constructor(props: any) {
     super(props);
     this.state = {
       representatives: [],
-      targetUsername: ""
+      targetUsername: "",
+      user: getUser()
     };
 
     this.handleUsernameChange = this.handleUsernameChange.bind(this);
@@ -57,7 +49,7 @@ export class Representatives extends React.Component<{}, RepresentativesState> {
   }
 
   renderAdminFunctions() {
-    const user: ChromunityUser = getAuthorizedUser();
+    const user: ChromunityUser = this.state.user;
     if (user != null && user.name === "admin") {
       return (
         <div>
@@ -76,10 +68,7 @@ export class Representatives extends React.Component<{}, RepresentativesState> {
               <br />
               <Button
                 onClick={() =>
-                  adminRemoveRepresentative(
-                    getAuthorizedUser(),
-                    this.state.targetUsername
-                  ).then(() => window.location.reload())
+                  adminRemoveRepresentative(user, this.state.targetUsername).then(() => window.location.reload())
                 }
                 variant="outlined"
               >
@@ -87,10 +76,7 @@ export class Representatives extends React.Component<{}, RepresentativesState> {
               </Button>
               <Button
                 onClick={() =>
-                  adminAddRepresentative(
-                    getAuthorizedUser(),
-                    this.state.targetUsername
-                  ).then(() => window.location.reload())
+                  adminAddRepresentative(user, this.state.targetUsername).then(() => window.location.reload())
                 }
                 variant="outlined"
               >
@@ -109,3 +95,5 @@ export class Representatives extends React.Component<{}, RepresentativesState> {
     this.setState({ targetUsername: event.target.value });
   }
 }
+
+export default Representatives;

@@ -1,38 +1,75 @@
-import {getANumber} from "./helper";
-import * as bip39 from "bip39";
-import {login, register} from "../src/blockchain/UserService";
-import {seedFromMnemonic} from "../src/blockchain/CryptoService";
+import { getANumber } from "./helper";
+import { makeKeyPair } from "../src/blockchain/CryptoService";
+import { FlagsType, KeyPair, SingleSignatureAuthDescriptor, User } from "ft3-lib";
+import { BLOCKCHAIN } from "../src/blockchain/Postchain";
+import { ChromunityUser } from "../src/types";
 
-const names: string[] = ["Anastasia", "Viktor", "Alex", "Riccardo", "Henrik", "Gus", "Irene", "Amy", "Todd", "Olle", "Alisa", "Or"];
+interface TestUser {
+  name: string;
+  keyPair: KeyPair;
+}
 
-const ADMIN_USER = {
-    name: "admin",
-    password: "admin",
-    mnemonic: "rule comfort scheme march fresh defy radio width crash family toward index"
-};
+const names: string[] = [
+  "Anastasia",
+  "Viktor",
+  "Alex",
+  "Riccardo",
+  "Henrik",
+  "Gus",
+  "Irene",
+  "Amy",
+  "Todd",
+  "Olle",
+  "Alisa",
+  "Or"
+];
 
-const CREATE_RANDOM_USER = () => {
-    const randomNumber = Math.floor(Math.random() * names.length);
+let adminUser: ChromunityUser;
 
-    return {
-        name: names[randomNumber] + "_" + getANumber(),
-        password: "password",
-        mnemonic: bip39.generateMnemonic(160)
-    };
+const CREATE_RANDOM_USER = (): TestUser => {
+  const randomNumber = Math.floor(Math.random() * names.length);
+  const keyPair = makeKeyPair();
+  return {
+    name: names[randomNumber] + "_" + getANumber(),
+    keyPair: new KeyPair(keyPair.privKey.toString("hex"))
+  };
 };
 
 const CREATE_LOGGED_IN_USER = async () => {
-    const user = CREATE_RANDOM_USER();
-    await register(user.name, user.password, user.mnemonic);
-    return login(user.name, user.password, seedFromMnemonic(user.mnemonic, user.password));
+  const user = CREATE_RANDOM_USER();
+  return loginUser(user);
 };
 
-const GET_LOGGED_IN_ADMIN_USER = async () => {
-    await register(ADMIN_USER.name, ADMIN_USER.password, ADMIN_USER.mnemonic);
-    return login(ADMIN_USER.name, ADMIN_USER.password, seedFromMnemonic(ADMIN_USER.mnemonic, ADMIN_USER.password));
+const GET_LOGGED_IN_ADMIN_USER = async (): Promise<ChromunityUser> => {
+  if (adminUser == null) {
+    adminUser = await loginUser({
+      name: "admin",
+      keyPair: new KeyPair("3132333435363738393031323334353637383930313233343536373839303131")
+    });
+  }
+  return new Promise<ChromunityUser>(resolve => resolve(adminUser));
 };
 
-export {
-    GET_LOGGED_IN_ADMIN_USER,
-    CREATE_LOGGED_IN_USER
-}
+const loginUser = async (user: TestUser): Promise<ChromunityUser> => {
+  const walletKeyPair = new KeyPair(makeKeyPair().privKey.toString("hex"));
+  const walletAuthDescriptor = new SingleSignatureAuthDescriptor(walletKeyPair.pubKey, [
+    FlagsType.Account,
+    FlagsType.Transfer
+  ]);
+  const walletUser = new User(walletKeyPair, walletAuthDescriptor);
+
+  const authDescriptor = new SingleSignatureAuthDescriptor(user.keyPair.pubKey, [
+    FlagsType.Account,
+    FlagsType.Transfer
+  ]);
+  const ft3User = new User(user.keyPair, authDescriptor);
+
+  const bc = await BLOCKCHAIN;
+  const account = await bc.registerAccount(walletAuthDescriptor, walletUser);
+  await bc.call(ft3User, "register_user", user.name, authDescriptor.toGTV(), walletAuthDescriptor.toGTV());
+
+  console.log("User:", user.name, " registered account:", account);
+  return new Promise<ChromunityUser>(resolve => resolve({ name: user.name, ft3User: ft3User }));
+};
+
+export { GET_LOGGED_IN_ADMIN_USER, CREATE_LOGGED_IN_USER };

@@ -1,7 +1,6 @@
 import { ChromunityUser } from "../types";
-import { seedToKey } from "./CryptoService";
-import { GTX } from "./Postchain";
-import { sortByFrequency, uniqueId } from "../util/util";
+import { BLOCKCHAIN, GTX } from "./Postchain";
+import { sortByFrequency } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 
 const channelsCache = BoomerangCache.create("channels-bucket", {
@@ -23,16 +22,10 @@ export function getFollowedChannels(user: string): Promise<string[]> {
   });
 }
 
-function modifyChannelollowing(
-  user: ChromunityUser,
-  channel: string,
-  rellOperation: string
-) {
+function modifyChannelollowing(user: ChromunityUser, channel: string, rellOperation: string) {
   channelsCache.remove(channel + ":followers");
-  return user.bcSession.call(
-    rellOperation,
-    user.name.toLocaleLowerCase(),
-    channel.toLocaleLowerCase()
+  return BLOCKCHAIN.then(bc =>
+    bc.call(user.ft3User, rellOperation, user.name.toLocaleLowerCase(), channel.toLocaleLowerCase())
   );
 }
 
@@ -43,12 +36,10 @@ export function getTopicChannelBelongings(topicId: string): Promise<string[]> {
     return new Promise<string[]>(resolve => resolve(channelBelongings));
   }
 
-  return GTX.query("get_topic_channels_belongings", { topic_id: topicId }).then(
-    (belongings: string[]) => {
-      channelsCache.set(topicId, belongings, 3600);
-      return belongings;
-    }
-  );
+  return GTX.query("get_topic_channels_belongings", { topic_id: topicId }).then((belongings: string[]) => {
+    channelsCache.set(topicId, belongings, 3600);
+    return belongings;
+  });
 }
 
 export function getTrendingChannels(sinceDaysAgo: number): Promise<string[]> {

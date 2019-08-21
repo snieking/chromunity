@@ -1,4 +1,4 @@
-import {Topic, TopicReply, User} from '../src/types';
+import { ChromunityUser, Topic, TopicReply } from "../src/types";
 import {
     countRepliesByUser,
     countReplyStarRatingForUser,
@@ -36,8 +36,8 @@ describe("topic tests", () => {
 
     const channel: string = "TopicTesting";
 
-    let userLoggedIn: User;
-    let secondLoggedInUser: User;
+    let userLoggedIn: ChromunityUser;
+    let secondLoggedInUser: ChromunityUser;
     let topic: Topic;
 
     beforeAll(async () => {

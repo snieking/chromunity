@@ -1,4 +1,12 @@
-import {Election, RepresentativeAction, RepresentativeReport, Topic, TopicReply, User, UserMeta} from '../src/types';
+import {
+    ChromunityUser,
+    Election,
+    RepresentativeAction,
+    RepresentativeReport,
+    Topic,
+    TopicReply,
+    UserMeta
+} from "../src/types";
 import {getUserMeta} from "../src/blockchain/UserService";
 import {
     completeElection,
@@ -41,8 +49,8 @@ describe("election test", () => {
 
     const channel: string = "ElectionTests";
 
-    let adminUser: User;
-    let secondUser: User;
+    let adminUser: ChromunityUser;
+    let secondUser: ChromunityUser;
 
     beforeAll(async () => {
         adminUser = await GET_LOGGED_IN_ADMIN_USER();
@@ -105,7 +113,7 @@ describe("election test", () => {
         expect(meta.suspended_until).toBeGreaterThan(Date.now());
 
         setUserMeta(meta);
-        meta = await getCachedUserMeta();
+        meta = await getCachedUserMeta(secondUser.name);
         expect(meta.suspended_until).toBeGreaterThan(Date.now());
     });
 

@@ -2,26 +2,17 @@ import React, { FormEvent } from "react";
 
 import CreatableSelect from "react-select/creatable";
 import { ValueType } from "react-select/src/types";
-import {
-  Badge,
-  Dialog,
-  Snackbar,
-  Tab,
-  Tabs,
-  withStyles,
-  WithStyles,
-  Typography
-} from "@material-ui/core";
+import { Badge, Dialog, Snackbar, Tab, Tabs, withStyles, WithStyles, Typography } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
-import { getCachedUserMeta, getAuthorizedUser } from "../../util/user-util";
+import { getCachedUserMeta, getUser } from "../../util/user-util";
 import IconButton from "@material-ui/core/IconButton";
 import { Forum } from "@material-ui/icons";
 import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import { createTopic } from "../../blockchain/TopicService";
-import { UserMeta } from "../../types";
+import { ChromunityUser, UserMeta } from "../../types";
 import { getTrendingChannels } from "../../blockchain/ChannelService";
 import { largeButtonStyles } from "./ButtonStyles";
 import {
@@ -38,8 +29,7 @@ interface OptionType {
   value: string;
 }
 
-export interface NewTopicButtonProps
-  extends WithStyles<typeof largeButtonStyles> {
+export interface NewTopicButtonProps extends WithStyles<typeof largeButtonStyles> {
   updateFunction: Function;
   channel: string;
 }
@@ -56,6 +46,7 @@ export interface NewTopicButtonState {
   suggestions: OptionType[];
   channel: ValueType<OptionType>;
   activeTab: number;
+  user: ChromunityUser;
 }
 
 const maxTitleLength: number = 40;
@@ -69,10 +60,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       this.state = {
         topicTitle: "",
         topicChannel: this.props.channel,
-        channel:
-          this.props.channel !== ""
-            ? { value: this.props.channel, label: this.props.channel }
-            : null,
+        channel: this.props.channel !== "" ? { value: this.props.channel, label: this.props.channel } : null,
         topicMessage: "",
         dialogOpen: false,
         newTopicSuccessOpen: false,
@@ -84,15 +72,14 @@ const NewTopicButton = withStyles(largeButtonStyles)(
           times_suspended: 0
         },
         suggestions: [],
-        activeTab: 0
+        activeTab: 0,
+        user: getUser()
       };
 
       this.toggleNewTopicDialog = this.toggleNewTopicDialog.bind(this);
       this.handleDialogTitleChange = this.handleDialogTitleChange.bind(this);
       this.handleChannelChange = this.handleChannelChange.bind(this);
-      this.handleDialogMessageChange = this.handleDialogMessageChange.bind(
-        this
-      );
+      this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
       this.createNewTopic = this.createNewTopic.bind(this);
       this.handleClose = this.handleClose.bind(this);
       this.handleChangeSingle = this.handleChangeSingle.bind(this);
@@ -103,9 +90,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
       getTrendingChannels(7).then(channels =>
         this.setState({
-          suggestions: channels.map(
-            channel => ({ value: channel, label: channel } as OptionType)
-          )
+          suggestions: channels.map(channel => ({ value: channel, label: channel } as OptionType))
         })
       );
     }
@@ -146,8 +131,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
 
         if (!/^[a-zA-Z0-9\s]+$/.test(topicTitle)) {
           this.setState({
-            newTopicStatusMessage:
-              "Title may only contain a-z, A-Z & 0-9 characters and whitespaces",
+            newTopicStatusMessage: "Title may only contain a-z, A-Z & 0-9 characters and whitespaces",
             newTopicErrorOpen: true
           });
         } else if (topicTitle.length > maxTitleLength) {
@@ -157,8 +141,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
           });
         } else if (!/^[a-zA-Z0-9]+$/.test(topicChannel)) {
           this.setState({
-            newTopicStatusMessage:
-              "Channel may only contain a-z, A-Z & 0-9 characters",
+            newTopicStatusMessage: "Channel may only contain a-z, A-Z & 0-9 characters",
             newTopicErrorOpen: true
           });
         } else if (topicChannel.length > maxChannelLength) {
@@ -170,12 +153,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
           const topicMessage = this.state.topicMessage;
           this.setState({ topicTitle: "", topicMessage: "" });
 
-          createTopic(
-            getAuthorizedUser(),
-            topicChannel,
-            topicTitle,
-            topicMessage
-          )
+          createTopic(this.state.user, topicChannel, topicTitle, topicMessage)
             .then(() => {
               this.setState({
                 newTopicStatusMessage: "topic created",
@@ -195,10 +173,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
     }
 
     createTopicButton() {
-      if (
-        getAuthorizedUser() != null &&
-        this.state.userMeta.suspended_until < Date.now()
-      ) {
+      if (this.state.user != null && this.state.userMeta.suspended_until < Date.now()) {
         return (
           <div className={this.props.classes.buttonWrapper}>
             <IconButton
@@ -258,12 +233,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       };
       return (
         <div>
-          <Dialog
-            open={this.state.dialogOpen}
-            aria-labelledby="form-dialog-title"
-            fullWidth={true}
-            maxWidth={"sm"}
-          >
+          <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"sm"}>
             <form onSubmit={this.createNewTopic}>
               <DialogContent>
                 <br />
@@ -296,11 +266,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                   />
                 </Badge>
 
-                <Tabs
-                  value={this.state.activeTab}
-                  onChange={this.handleTabChange}
-                  aria-label="New topic"
-                >
+                <Tabs value={this.state.activeTab} onChange={this.handleTabChange} aria-label="New topic">
                   <Tab
                     label={
                       <Typography component="span" variant="body2">
@@ -322,11 +288,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                 {this.state.activeTab === 1 && this.renderPreview()}
               </DialogContent>
               <DialogActions>
-                <Button
-                  onClick={() => this.toggleNewTopicDialog()}
-                  color="secondary"
-                  variant="outlined"
-                >
+                <Button onClick={() => this.toggleNewTopicDialog()} color="secondary" variant="outlined">
                   Cancel
                 </Button>
                 <Button type="submit" color="primary" variant="outlined">
@@ -345,10 +307,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
             autoHideDuration={3000}
             onClose={this.handleClose}
           >
-            <CustomSnackbarContentWrapper
-              variant="success"
-              message={this.state.newTopicStatusMessage}
-            />
+            <CustomSnackbarContentWrapper variant="success" message={this.state.newTopicStatusMessage} />
           </Snackbar>
           <Snackbar
             anchorOrigin={{
@@ -359,10 +318,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
             autoHideDuration={3000}
             onClose={this.handleClose}
           >
-            <CustomSnackbarContentWrapper
-              variant="error"
-              message={this.state.newTopicStatusMessage}
-            />
+            <CustomSnackbarContentWrapper variant="error" message={this.state.newTopicStatusMessage} />
           </Snackbar>
         </div>
       );
@@ -415,10 +371,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       );
     }
 
-    private handleClose(
-      event: React.SyntheticEvent | React.MouseEvent,
-      reason?: string
-    ) {
+    private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
       if (reason === "clickaway") {
         return;
       }

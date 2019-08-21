@@ -1,4 +1,4 @@
-import {User, UserNotification} from '../src/types';
+import { ChromunityUser, UserNotification } from "../src/types";
 import {
     countUnreadUserNotifications,
     getUserNotificationsPriorToTimestamp,
@@ -13,8 +13,8 @@ jest.setTimeout(30000);
 
 describe("notification tests", () => {
 
-    let loggedInUser: User;
-    let secondLoggedInUser: User;
+    let loggedInUser: ChromunityUser;
+    let secondLoggedInUser: ChromunityUser;
 
     beforeAll(async () => {
         loggedInUser = await CREATE_LOGGED_IN_USER();

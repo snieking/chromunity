@@ -1,9 +1,9 @@
-operation subscribe_to_topic(username: text, id: text) {
+operation subscribe_to_topic(username: text, id: text, unique_id: text) {
     val user = get_verified_user(username);
     create subscription(topic@{ .id == id }, user);
 }
 
-operation unsubscribe_from_topic(username: text, id: text) {
+operation unsubscribe_from_topic(username: text, id: text, unique_id: text) {
     val user = get_verified_user(username);
     delete subscription@{ topic@{ .id == id }, user };
 }

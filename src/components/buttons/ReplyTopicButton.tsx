@@ -1,13 +1,6 @@
 import React, { FormEvent, useEffect, useState } from "react";
 
-import {
-  Dialog,
-  makeStyles,
-  Snackbar,
-  Tab,
-  Tabs,
-  Typography
-} from "@material-ui/core";
+import { Dialog, makeStyles, Snackbar, Tab, Tabs, Typography } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -15,7 +8,7 @@ import TextField from "@material-ui/core/TextField";
 import IconButton from "@material-ui/core/IconButton";
 import { ReplyAll } from "@material-ui/icons";
 import { createTopicReply } from "../../blockchain/TopicService";
-import { getCachedUserMeta, getAuthorizedUser } from "../../util/user-util";
+import { getCachedUserMeta, getUser } from "../../util/user-util";
 import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import { UserMeta } from "../../types";
 import { largeButtonStyles } from "./ButtonStyles";
@@ -29,33 +22,25 @@ export interface ReplyTopicButtonProps {
 
 const useStyle = makeStyles(largeButtonStyles);
 
-const ReplyTopicButton: React.FunctionComponent<
-  ReplyTopicButtonProps
-> = props => {
+const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props => {
   const classes = useStyle(props);
 
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
-  const [newReplySuccessStatusOpen, setNewReplySuccessStatusOpen] = useState<
-    boolean
-  >(false);
-  const [newReplyErrorStatusOpen, setNewReplyErrorStatusOpen] = useState<
-    boolean
-  >(false);
-  const [newReplyStatusMessage, setNewReplyStatusMessage] = useState<string>(
-    ""
-  );
+  const [newReplySuccessStatusOpen, setNewReplySuccessStatusOpen] = useState<boolean>(false);
+  const [newReplyErrorStatusOpen, setNewReplyErrorStatusOpen] = useState<boolean>(false);
+  const [newReplyStatusMessage, setNewReplyStatusMessage] = useState<string>("");
   const [userMeta, setUserMeta] = useState<UserMeta>(null);
   const [activeTab, setActiveTab] = useState<number>(0);
+
+  const user = getUser();
 
   useEffect(() => {
     getCachedUserMeta().then(meta => setUserMeta(meta));
     // eslint-disable-next-line
   }, []);
 
-  function handleDialogMessageChange(
-    event: React.ChangeEvent<HTMLInputElement>
-  ) {
+  function handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
     event.preventDefault();
     event.stopPropagation();
     setMessage(event.target.value);
@@ -64,7 +49,7 @@ const ReplyTopicButton: React.FunctionComponent<
   function createReply(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    createTopicReply(getAuthorizedUser(), props.topicId, message)
+    createTopicReply(user, props.topicId, message)
       .then(() => {
         setNewReplyStatusMessage("Reply sent");
         setNewReplySuccessStatusOpen(true);
@@ -81,18 +66,10 @@ const ReplyTopicButton: React.FunctionComponent<
   }
 
   function createTopicButton() {
-    if (
-      getAuthorizedUser() != null &&
-      userMeta != null &&
-      userMeta.suspended_until < Date.now()
-    ) {
+    if (user != null && userMeta != null && userMeta.suspended_until < Date.now()) {
       return (
         <div className={classes.buttonWrapper}>
-          <IconButton
-            aria-label="Reply to topic"
-            onClick={() => setDialogOpen(!dialogOpen)}
-            className={classes.button}
-          >
+          <IconButton aria-label="Reply to topic" onClick={() => setDialogOpen(!dialogOpen)} className={classes.button}>
             <ReplyAll fontSize="large" className={classes.icon} />
           </IconButton>
         </div>
@@ -103,19 +80,10 @@ const ReplyTopicButton: React.FunctionComponent<
   function newTopicDialog() {
     return (
       <div>
-        <Dialog
-          open={dialogOpen}
-          aria-labelledby="form-dialog-title"
-          fullWidth={true}
-          maxWidth={"sm"}
-        >
+        <Dialog open={dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"sm"}>
           <form onSubmit={createReply}>
             <DialogContent>
-              <Tabs
-                value={activeTab}
-                onChange={handleTabChange}
-                aria-label="New reply"
-              >
+              <Tabs value={activeTab} onChange={handleTabChange} aria-label="New reply">
                 <Tab
                   label={
                     <Typography component="span" variant="body2">
@@ -137,11 +105,7 @@ const ReplyTopicButton: React.FunctionComponent<
               {activeTab === 1 && renderPreview()}
             </DialogContent>
             <DialogActions>
-              <Button
-                onClick={() => setDialogOpen(false)}
-                color="secondary"
-                variant="outlined"
-              >
+              <Button onClick={() => setDialogOpen(false)} color="secondary" variant="outlined">
                 Cancel
               </Button>
               <Button type="submit" color="primary" variant="outlined">
@@ -157,10 +121,7 @@ const ReplyTopicButton: React.FunctionComponent<
           autoHideDuration={3000}
           onClose={handleClose}
         >
-          <CustomSnackbarContentWrapper
-            variant="success"
-            message={newReplyStatusMessage}
-          />
+          <CustomSnackbarContentWrapper variant="success" message={newReplyStatusMessage} />
         </Snackbar>
         <Snackbar
           anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
@@ -168,10 +129,7 @@ const ReplyTopicButton: React.FunctionComponent<
           autoHideDuration={3000}
           onClose={handleClose}
         >
-          <CustomSnackbarContentWrapper
-            variant="error"
-            message={newReplyStatusMessage}
-          />
+          <CustomSnackbarContentWrapper variant="error" message={newReplyStatusMessage} />
         </Snackbar>
       </div>
     );
@@ -223,10 +181,7 @@ const ReplyTopicButton: React.FunctionComponent<
     </div>
   );
 
-  function handleClose(
-    event: React.SyntheticEvent | React.MouseEvent,
-    reason?: string
-  ) {
+  function handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
     if (reason === "clickaway") {
       return;
     }

@@ -7,16 +7,12 @@ import {
   AccountRegisteredCheckAction
 } from "../AccountTypes";
 
-export const accountRegisteredCheck: ActionCreator<
-  AccountRegisteredCheckAction
-> = (username: string) => ({
+export const accountRegisteredCheck: ActionCreator<AccountRegisteredCheckAction> = (username: string) => ({
   type: AccountActionTypes.ACCOUNT_REGISTER_CHECK,
   username: username
 });
 
-export const accountAddAccountId: ActionCreator<AccountAddAccountIdAction> = (
-  accountId: string
-) => ({
+export const accountAddAccountId: ActionCreator<AccountAddAccountIdAction> = (accountId: string) => ({
   type: AccountActionTypes.ACCOUNT_ADD_ACCOUNT_ID,
   accountId: accountId
 });

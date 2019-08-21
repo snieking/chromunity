@@ -1,4 +1,4 @@
-import { GTX } from "./Postchain";
+import { BLOCKCHAIN, GTX } from "./Postchain";
 import * as BoomerangCache from "boomerang-cache";
 import { ChromunityUser, UserNotification } from "../types";
 import { uniqueId } from "../util/util";
@@ -8,19 +8,8 @@ const boomerang = BoomerangCache.create("notification-bucket", {
   encrypt: false
 });
 
-export function sendNotifications(
-  fromUser: ChromunityUser,
-  trigger: string,
-  content: string,
-  usernames: string[]
-) {
-  return sendNotificationsInternal(
-    fromUser,
-    uniqueId(),
-    trigger,
-    content,
-    usernames
-  );
+export function sendNotifications(fromUser: ChromunityUser, trigger: string, content: string, usernames: string[]) {
+  return sendNotificationsInternal(fromUser, uniqueId(), trigger, content, usernames);
 }
 
 export function sendNotificationWithDeterministicId(
@@ -33,16 +22,15 @@ export function sendNotificationWithDeterministicId(
   return sendNotificationsInternal(fromUser, id, trigger, content, usernames);
 }
 
-export function removeNotificationsForId(
-  fromUser: ChromunityUser,
-  id: string,
-  usernames: string[]
-) {
-  return fromUser.bcSession.call(
-    "remove_notifications_for_users",
-    fromUser.name.toLocaleLowerCase(),
-    id,
-    usernames.map(name => name.toLocaleLowerCase())
+export function removeNotificationsForId(fromUser: ChromunityUser, id: string, usernames: string[]) {
+  return BLOCKCHAIN.then(bc =>
+    bc.call(
+      fromUser.ft3User,
+      "remove_notifications_for_users",
+      fromUser.name.toLocaleLowerCase(),
+      id,
+      usernames.map(name => name.toLocaleLowerCase())
+    )
   );
 }
 
@@ -53,13 +41,16 @@ function sendNotificationsInternal(
   content: string,
   usernames: string[]
 ) {
-  return fromUser.bcSession.call(
-    "create_notifications_for_users",
-    fromUser.name.toLocaleLowerCase(),
-    id,
-    trigger,
-    content,
-    usernames.map(name => name.toLocaleLowerCase())
+  return BLOCKCHAIN.then(bc =>
+    bc.call(
+      fromUser.ft3User,
+      "create_notifications_for_users",
+      fromUser.name.toLocaleLowerCase(),
+      id,
+      trigger,
+      content,
+      usernames.map(name => name.toLocaleLowerCase())
+    )
   );
 }
 
@@ -67,10 +58,8 @@ export function markNotificationsRead(user: ChromunityUser) {
   boomerang.remove("notis-" + user.name.toLocaleLowerCase());
   const epochSeconds = Math.round(new Date().getTime() / 1000);
 
-  return user.bcSession.call(
-    "mark_notifications_since_timestamp_read",
-    user.name.toLocaleLowerCase(),
-    epochSeconds
+  return BLOCKCHAIN.then(bc =>
+    bc.call(user.ft3User, "mark_notifications_since_timestamp_read", user.name.toLocaleLowerCase(), epochSeconds)
   );
 }
 

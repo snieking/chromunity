@@ -1,17 +1,16 @@
-import {ChromunityUser, EncryptedAccount, UserMeta} from "./../types";
+import { ChromunityUser, UserMeta } from "../types";
 import * as BoomerangCache from "boomerang-cache";
 import { getRepresentatives } from "../blockchain/RepresentativesService";
-import { encrypt } from "../blockchain/CryptoService";
 import { getUserMeta } from "../blockchain/UserService";
-import { KeyPair, User } from "ft3-lib";
+import { FlagsType, KeyPair, SingleSignatureAuthDescriptor, User } from "ft3-lib";
 
 const LOCAL_CACHE = BoomerangCache.create("local-bucket", {
   storage: "local",
   encrypt: false
 });
 const ENCRYPTED_LOCAL_CACHE = BoomerangCache.create("encrypted-local-bucket", {
-    storage: "local",
-    encrypt: true
+  storage: "local",
+  encrypt: true
 });
 const SESSION_CACHE = BoomerangCache.create("session-bucket", {
   storage: "session",
@@ -24,6 +23,7 @@ const REPRESENTATIVE_KEY = "representative";
 
 export function clearSession(): void {
   ENCRYPTED_LOCAL_CACHE.clear();
+  LOCAL_CACHE.remove(USER_KEY);
   SESSION_CACHE.remove(USER_META_KEY);
   SESSION_CACHE.remove(REPRESENTATIVE_KEY);
 }
@@ -32,19 +32,32 @@ export function storeKeyPair(keyPair: KeyPair): void {
   LOCAL_CACHE.set("keyPair", keyPair);
 }
 
-export function setAuthorizedUser(user: ChromunityUser): void {
-  ENCRYPTED_LOCAL_CACHE.set(USER_KEY, user)
-}
-
-export function getAuthorizedUser(): ChromunityUser {
-  const user: ChromunityUser = ENCRYPTED_LOCAL_CACHE.get(USER_KEY);
-  console.log("Authorized user: ", user);
-  return user;
-}
-
 export function getKeyPair(): KeyPair {
   const keyPair = LOCAL_CACHE.get("keyPair");
-  return new KeyPair(keyPair.privKey)
+  return new KeyPair(keyPair.privKey);
+}
+
+export function getUsername(): string {
+  return LOCAL_CACHE.get(USER_KEY);
+}
+
+export function setUsername(username: string): void {
+  LOCAL_CACHE.set(USER_KEY, username);
+}
+
+export function getUser(): ChromunityUser {
+  const keyPair = getKeyPair();
+  const username: string = getUsername();
+
+  console.log("keyPair", keyPair, "username", username);
+
+  if (keyPair == null) return null;
+  if (username == null) return null;
+
+  const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
+  const ft3User = new User(keyPair, authDescriptor);
+
+  return { name: username, ft3User: ft3User };
 }
 
 export function setUserMeta(meta: UserMeta): void {
@@ -58,12 +71,7 @@ export function getCachedUserMeta(): Promise<UserMeta> {
     return new Promise<UserMeta>(resolve => resolve(meta));
   }
 
-  const user: ChromunityUser = getAuthorizedUser();
-  if (user == null) {
-    return new Promise<UserMeta>(resolve => resolve(null));
-  }
-
-  return getUserMeta(user.name).then(meta => {
+  return getUserMeta(getUsername()).then(meta => {
     setUserMeta(meta);
     return meta;
   });
@@ -74,8 +82,8 @@ export function godAlias(): string {
 }
 
 export function isGod(): boolean {
-  const user: ChromunityUser = getAuthorizedUser();
-  return user != null && user.name === godAlias();
+  const username = getUsername();
+  return username != null && username === godAlias();
 }
 
 export function setRepresentative(isRepresentative: boolean): void {
@@ -92,13 +100,10 @@ export function isRepresentative(): Promise<boolean> {
     return new Promise<boolean>(resolve => resolve(isRepresentative));
   }
 
-  const user: ChromunityUser = getAuthorizedUser();
+  const username = getUsername();
 
   return getRepresentatives()
-    .then(
-      (representatives: string[]) =>
-        user != null && representatives.includes(user.name)
-    )
+    .then((representatives: string[]) => username != null && representatives.includes(username))
     .then((rep: boolean) => {
       setRepresentative(rep);
       return rep;
@@ -110,7 +115,5 @@ export function isRepresentative(): Promise<boolean> {
 }
 
 export function ifEmptyAvatarThenPlaceholder(avatar: string, seed: string) {
-  return avatar !== "" && avatar != null
-    ? avatar
-    : "https://avatars.dicebear.com/v2/gridy/" + seed + ".svg";
+  return avatar !== "" && avatar != null ? avatar : "https://avatars.dicebear.com/v2/gridy/" + seed + ".svg";
 }

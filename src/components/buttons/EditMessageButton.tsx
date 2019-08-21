@@ -6,9 +6,9 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
 import IconButton from "@material-ui/core/IconButton";
-import { getCachedUserMeta, getAuthorizedUser } from "../../util/user-util";
+import { getCachedUserMeta, getUser } from "../../util/user-util";
 import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
-import { UserMeta } from "../../types";
+import { ChromunityUser, UserMeta } from "../../types";
 import { Edit } from "@material-ui/icons";
 
 export interface EditMessageButtonProps {
@@ -23,12 +23,10 @@ export interface EditMessageButtonState {
   replyStatusErrorOpen: boolean;
   replySentStatus: string;
   userMeta: UserMeta;
+  user: ChromunityUser;
 }
 
-export class EditMessageButton extends React.Component<
-  EditMessageButtonProps,
-  EditMessageButtonState
-> {
+class EditMessageButton extends React.Component<EditMessageButtonProps, EditMessageButtonState> {
   constructor(props: EditMessageButtonProps) {
     super(props);
 
@@ -42,7 +40,8 @@ export class EditMessageButton extends React.Component<
         name: "",
         suspended_until: Date.now() + 10000,
         times_suspended: 0
-      }
+      },
+      user: getUser()
     };
 
     this.toggleDialog = this.toggleDialog.bind(this);
@@ -69,12 +68,7 @@ export class EditMessageButton extends React.Component<
   newTopicDialog() {
     return (
       <div>
-        <Dialog
-          open={this.state.dialogOpen}
-          aria-labelledby="form-dialog-title"
-          fullWidth={true}
-          maxWidth={"sm"}
-        >
+        <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"sm"}>
           <form onSubmit={() => this.props.submitFunction(this.state.message)}>
             <DialogContent>
               <br />
@@ -94,11 +88,7 @@ export class EditMessageButton extends React.Component<
               />
             </DialogContent>
             <DialogActions>
-              <Button
-                onClick={() => this.toggleDialog()}
-                color="secondary"
-                variant="outlined"
-              >
+              <Button onClick={() => this.toggleDialog()} color="secondary" variant="outlined">
                 Cancel
               </Button>
               <Button type="submit" color="primary" variant="outlined">
@@ -117,10 +107,7 @@ export class EditMessageButton extends React.Component<
           autoHideDuration={3000}
           onClose={this.handleClose}
         >
-          <CustomSnackbarContentWrapper
-            variant="success"
-            message={this.state.replySentStatus}
-          />
+          <CustomSnackbarContentWrapper variant="success" message={this.state.replySentStatus} />
         </Snackbar>
         <Snackbar
           anchorOrigin={{
@@ -131,20 +118,14 @@ export class EditMessageButton extends React.Component<
           autoHideDuration={3000}
           onClose={this.handleClose}
         >
-          <CustomSnackbarContentWrapper
-            variant="error"
-            message={this.state.replySentStatus}
-          />
+          <CustomSnackbarContentWrapper variant="error" message={this.state.replySentStatus} />
         </Snackbar>
       </div>
     );
   }
 
   render() {
-    if (
-      getAuthorizedUser() != null &&
-      this.state.userMeta.suspended_until < Date.now()
-    ) {
+    if (this.state.user != null && this.state.userMeta.suspended_until < Date.now()) {
       return (
         <div style={{ display: "inline-block" }}>
           <Tooltip title="Edit">
@@ -160,10 +141,7 @@ export class EditMessageButton extends React.Component<
     }
   }
 
-  private handleClose(
-    event: React.SyntheticEvent | React.MouseEvent,
-    reason?: string
-  ) {
+  private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
     if (reason === "clickaway") {
       return;
     }
@@ -174,3 +152,5 @@ export class EditMessageButton extends React.Component<
     });
   }
 }
+
+export default (EditMessageButton);

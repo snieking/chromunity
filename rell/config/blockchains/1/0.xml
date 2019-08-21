@@ -1506,7 +1506,7 @@ include 'operations';
 include 'queries';</string>
                             </entry>
                             <entry key="topic/rating/operations.rell">
-                                <string>operation give_topic_star_rating(username: text, id: text) {
+                                <string>operation give_topic_star_rating(username: text, id: text, unique_id: text) {
     val user = get_verified_user(username);
     create topic_star_rating(topic@{ .id == id }, user);
 
@@ -1514,7 +1514,7 @@ include 'queries';</string>
     update topicRating ( stars = topicRating.stars + 1 );
 }
 
-operation remove_topic_star_rating(username: text, id: text) {
+operation remove_topic_star_rating(username: text, id: text, unique_id: text) {
     val user = get_verified_user(username);
     delete topic_star_rating@{ topic@{ .id == id }, user };
 
@@ -1522,12 +1522,12 @@ operation remove_topic_star_rating(username: text, id: text) {
     update topicRating ( stars = topicRating.stars - 1 );
 }
 
-operation give_reply_star_rating(username: text, id: text) {
+operation give_reply_star_rating(username: text, id: text, unique_id: text) {
     val user = get_verified_user(username);
     create reply_star_rating(topic_reply@{ .id == id }, user);
 }
 
-operation remove_reply_star_rating(username: text, id: text) {
+operation remove_reply_star_rating(username: text, id: text, unique_id: text) {
     val user = get_verified_user(username);
     delete reply_star_rating@{ topic_reply@{ .id == id }, user };
 }</string>
@@ -1558,12 +1558,12 @@ include 'operations';
 include 'queries';</string>
                             </entry>
                             <entry key="topic/subscription/operations.rell">
-                                <string>operation subscribe_to_topic(username: text, id: text) {
+                                <string>operation subscribe_to_topic(username: text, id: text, unique_id: text) {
     val user = get_verified_user(username);
     create subscription(topic@{ .id == id }, user);
 }
 
-operation unsubscribe_from_topic(username: text, id: text) {
+operation unsubscribe_from_topic(username: text, id: text, unique_id: text) {
     val user = get_verified_user(username);
     delete subscription@{ topic@{ .id == id }, user };
 }</string>

@@ -1,8 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-import { getAuthorizedUser } from "../../util/user-util";
-
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -31,6 +29,7 @@ import {
   Typography
 } from "@material-ui/core";
 import { COLOR_SOFT_PINK } from "../../theme";
+import { getUser } from "../../util/user-util";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -69,7 +68,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const HeaderNav: React.FunctionComponent = (props: unknown) => {
   const classes = useStyles(props);
-  const user = getAuthorizedUser();
+  const user = getUser();
   const [
     profileAnchorEl,
     setProfileAnchorEl
@@ -276,4 +275,5 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
   );
 };
 
-export default HeaderNav;
+
+export default (HeaderNav);

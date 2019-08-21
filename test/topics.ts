@@ -1,8 +1,8 @@
 import {createTopic} from "../src/blockchain/TopicService";
-import {User} from "../src/types";
 import * as bip39 from "bip39";
+import { ChromunityUser } from "../src/types";
 
-const CREATE_RANDOM_TOPIC = (user: User, channel: string) => {
+const CREATE_RANDOM_TOPIC = (user: ChromunityUser, channel: string) => {
     return createTopic(user, channel, upperCaseFirst(bip39.generateMnemonic(128)), upperCaseFirst(bip39.generateMnemonic(256)));
 };
 

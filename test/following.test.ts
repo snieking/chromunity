@@ -1,4 +1,4 @@
-import {Topic, User} from "../src/types";
+import { ChromunityUser, Topic } from "../src/types";
 import {
     amIAFollowerOf,
     countUserFollowers,
@@ -18,8 +18,8 @@ jest.setTimeout(30000);
 
 describe("following tests", () => {
 
-    let loggedInUser: User;
-    let loggedInUser2: User;
+    let loggedInUser: ChromunityUser;
+    let loggedInUser2: ChromunityUser;
 
     beforeAll(async () => {
         loggedInUser = await CREATE_LOGGED_IN_USER();

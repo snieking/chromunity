@@ -1,19 +1,18 @@
-import {Reducer} from "redux";
-import {AccountActionTypes, LoginActions, LoginState} from "../AccountTypes";
+import { Reducer } from "redux";
+import { AccountActionTypes, AccountState, AccountActions } from "../AccountTypes";
 
-const initialLoginState: LoginState = {
+const initialAccountState: AccountState = {
   loading: false,
   success: false,
+  failure: false,
+  error: "",
   accountId: "",
   username: "",
   keyPair: null,
   vaultPubKey: null
 };
 
-export const loginReducer: Reducer<LoginState, LoginActions> = (
-  state = initialLoginState,
-  action
-) => {
+export const loginReducer: Reducer<AccountState, AccountActions> = (state = initialAccountState, action) => {
   switch (action.type) {
     case AccountActionTypes.ACCOUNT_REGISTER_CHECK: {
       return {
@@ -35,7 +34,7 @@ export const loginReducer: Reducer<LoginState, LoginActions> = (
         username: action.username,
         vaultPubKey: action.vaultPubKey,
         accountId: action.accountId
-      }
+      };
     }
   }
 

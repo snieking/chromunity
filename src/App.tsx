@@ -8,10 +8,10 @@ import UserNotifications from "./components/user/notifications/UserNotifications
 import HeaderNav from "./components/static/HeaderNav";
 import Footer from "./components/static/Footer";
 import Election from "./components/governing/election/Election";
-import { Representatives } from "./components/governing/representatives/Representatives";
+import Representatives from "./components/governing/representatives/Representatives";
 import { GovLog } from "./components/governing/GovLog";
 import UserWall from "./components/walls/Userwall";
-import { ChannelWall } from "./components/walls/ChannelWall";
+import ChannelWall from "./components/walls/ChannelWall";
 import Settings from "./components/user/settings/Settings";
 import TopicWall from "./components/walls/TopicWall";
 import FullTopic from "./components/topic/FullTopic";

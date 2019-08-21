@@ -13,10 +13,7 @@ import {
   WithStyles
 } from "@material-ui/core";
 import { stringToHexColor } from "../../util/util";
-import {
-  getAuthorizedUser,
-  ifEmptyAvatarThenPlaceholder
-} from "../../util/user-util";
+import { getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { StarBorder, StarRate } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import { Redirect } from "react-router";
@@ -65,6 +62,7 @@ interface State {
   isRepresentative: boolean;
   avatar: string;
   channels: string[];
+  user: ChromunityUser;
 }
 
 const TopicOverviewCard = withStyles(styles)(
@@ -78,7 +76,8 @@ const TopicOverviewCard = withStyles(styles)(
         ratedByMe: false,
         redirectToFullCard: false,
         isRepresentative: false,
-        avatar: ""
+        avatar: "",
+        user: getUser()
       };
     }
 
@@ -87,15 +86,9 @@ const TopicOverviewCard = withStyles(styles)(
         return <Redirect to={"/t/" + this.props.topic.id} />;
       } else {
         return (
-          <div
-            className={
-              this.props.topic.removed ? this.props.classes.removed : ""
-            }
-          >
+          <div className={this.props.topic.removed ? this.props.classes.removed : ""}>
             <Card raised={true} key={this.props.topic.id}>
-              <CardActionArea
-                onClick={() => this.setState({ redirectToFullCard: true })}
-              >
+              <CardActionArea onClick={() => this.setState({ redirectToFullCard: true })}>
                 {this.renderCardContent()}
               </CardActionArea>
             </Card>
@@ -105,27 +98,20 @@ const TopicOverviewCard = withStyles(styles)(
     }
 
     componentDidMount() {
-      getTopicChannelBelongings(this.props.topic.id).then(channels =>
-        this.setState({ channels: channels })
-      );
+      getTopicChannelBelongings(this.props.topic.id).then(channels => this.setState({ channels: channels }));
       getUserSettingsCached(this.props.topic.author, 1440).then(settings =>
         this.setState({
-          avatar: ifEmptyAvatarThenPlaceholder(
-            settings.avatar,
-            this.props.topic.author
-          )
+          avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.topic.author)
         })
       );
 
       getRepresentatives().then(representatives =>
         this.setState({
-          isRepresentative: representatives.includes(
-            this.props.topic.author.toLocaleLowerCase()
-          )
+          isRepresentative: representatives.includes(this.props.topic.author.toLocaleLowerCase())
         })
       );
 
-      const user: ChromunityUser = getAuthorizedUser();
+      const user: ChromunityUser = this.state.user;
       getTopicStarRaters(this.props.topic.id).then(usersWhoStarRated =>
         this.setState({
           stars: usersWhoStarRated.length,
@@ -142,15 +128,9 @@ const TopicOverviewCard = withStyles(styles)(
               gutterBottom
               variant="subtitle2"
               component="span"
-              className={
-                this.state.isRepresentative
-                  ? this.props.classes.representativeColor
-                  : ""
-              }
+              className={this.state.isRepresentative ? this.props.classes.representativeColor : ""}
             >
-              <span className={this.props.classes.authorName}>
-                @{this.props.topic.author}
-              </span>
+              <span className={this.props.classes.authorName}>@{this.props.topic.author}</span>
             </Typography>
           </Link>
           <div style={{ float: "right" }}>
@@ -166,10 +146,7 @@ const TopicOverviewCard = withStyles(styles)(
           <div className={this.props.classes.tagChips}>
             {this.state.channels.map(tag => {
               return (
-                <Link
-                  key={this.props.topic.id + ":" + tag}
-                  to={"/c/" + tag.replace("#", "")}
-                >
+                <Link key={this.props.topic.id + ":" + tag} to={"/c/" + tag.replace("#", "")}>
                   <Chip
                     size="small"
                     label={"#" + tag}
@@ -195,22 +172,14 @@ const TopicOverviewCard = withStyles(styles)(
           <div style={{ float: "left" }}>
             <div className={this.props.classes.rating}>
               <Badge color="primary" badgeContent={this.state.stars}>
-                {this.state.ratedByMe ? (
-                  <StarRate className={this.props.classes.iconYellow} />
-                ) : (
-                  <StarBorder />
-                )}
+                {this.state.ratedByMe ? <StarRate className={this.props.classes.iconYellow} /> : <StarBorder />}
               </Badge>
             </div>
           </div>
           {this.renderAuthor()}
           <div className={this.props.classes.overviewDetails}>
             <Timestamp milliseconds={this.props.topic.last_modified} />
-            <Typography
-              variant="subtitle1"
-              component="span"
-              style={{ marginRight: "10px" }}
-            >
+            <Typography variant="subtitle1" component="span" style={{ marginRight: "10px" }}>
               {this.props.topic.title}
             </Typography>
             {this.renderTagChips()}

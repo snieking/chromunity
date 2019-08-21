@@ -1,15 +1,15 @@
 import { applyMiddleware, combineReducers, createStore, Store } from "redux";
 import { loginReducer } from "./reducers/AccountReducers";
-import { LoginState } from "./AccountTypes";
+import { AccountState } from "./AccountTypes";
 import createSagaMiddleware from "redux-saga";
 import rootSaga from "./sagas/index";
 
 export interface ApplicationState {
-  login: LoginState;
+  account: AccountState;
 }
 
 const rootReducer = combineReducers<ApplicationState>({
-  login: loginReducer
+  account: loginReducer
 });
 
 const sagaMiddleware = createSagaMiddleware();

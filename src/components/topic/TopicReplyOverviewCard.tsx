@@ -12,10 +12,7 @@ import {
   WithStyles
 } from "@material-ui/core";
 import { timeAgoReadable } from "../../util/util";
-import {
-  getAuthorizedUser,
-  ifEmptyAvatarThenPlaceholder
-} from "../../util/user-util";
+import { getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { StarBorder, StarRate } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import { Redirect } from "react-router";
@@ -63,6 +60,7 @@ interface State {
   redirectToTopic: boolean;
   isRepresentative: boolean;
   avatar: string;
+  user: ChromunityUser;
 }
 
 const TopicReplyOverviewCard = withStyles(styles)(
@@ -75,7 +73,8 @@ const TopicReplyOverviewCard = withStyles(styles)(
         ratedByMe: false,
         redirectToTopic: false,
         isRepresentative: false,
-        avatar: ""
+        avatar: "",
+        user: getUser()
       };
     }
 
@@ -86,9 +85,7 @@ const TopicReplyOverviewCard = withStyles(styles)(
         return (
           <div className={this.props.reply.removed ? "removed" : ""}>
             <Card key={this.props.reply.id}>
-              <CardActionArea
-                onClick={() => this.setState({ redirectToTopic: true })}
-              >
+              <CardActionArea onClick={() => this.setState({ redirectToTopic: true })}>
                 {this.renderCardContent()}
               </CardActionArea>
             </Card>
@@ -98,13 +95,10 @@ const TopicReplyOverviewCard = withStyles(styles)(
     }
 
     componentDidMount() {
-      const user: ChromunityUser = getAuthorizedUser();
+      const user: ChromunityUser = this.state.user;
       getUserSettingsCached(this.props.reply.author, 1440).then(settings => {
         this.setState({
-          avatar: ifEmptyAvatarThenPlaceholder(
-            settings.avatar,
-            this.props.reply.author
-          )
+          avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.reply.author)
         });
       });
       getReplyStarRaters(this.props.reply.id).then(usersWhoStarRated =>
@@ -123,15 +117,9 @@ const TopicReplyOverviewCard = withStyles(styles)(
               gutterBottom
               variant="subtitle2"
               component="span"
-              className={
-                this.state.isRepresentative
-                  ? this.props.classes.representativeColor
-                  : ""
-              }
+              className={this.state.isRepresentative ? this.props.classes.representativeColor : ""}
             >
-              <span className={this.props.classes.authorName}>
-                @{this.props.reply.author}
-              </span>
+              <span className={this.props.classes.authorName}>@{this.props.reply.author}</span>
             </Typography>
           </Link>
           <div style={{ float: "right" }}>
@@ -147,11 +135,7 @@ const TopicReplyOverviewCard = withStyles(styles)(
           <div style={{ float: "left" }}>
             <div className={this.props.classes.rating}>
               <Badge color="primary" badgeContent={this.state.stars}>
-                {this.state.ratedByMe ? (
-                  <StarRate className="yellow-color" />
-                ) : (
-                  <StarBorder className="purple-color" />
-                )}
+                {this.state.ratedByMe ? <StarRate className="yellow-color" /> : <StarBorder className="purple-color" />}
               </Badge>
             </div>
           </div>

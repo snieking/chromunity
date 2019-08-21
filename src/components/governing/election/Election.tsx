@@ -23,8 +23,8 @@ import {
   signUpForElection,
   voteForCandidate
 } from "../../../blockchain/ElectionService";
-import { getAuthorizedUser, isGod } from "../../../util/user-util";
-import { DictatorActions } from "./dictator/DictatorActions";
+import { getUser, isGod } from "../../../util/user-util";
+import DictatorActions from "./dictator/DictatorActions";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import { ChromunityUser } from "../../../types";
 import { COLOR_PURPLE } from "../../../theme";
@@ -52,6 +52,7 @@ export interface ElectionState {
   votedFor: string;
   isACandidate: boolean;
   electionCandidates: string[];
+  user: ChromunityUser;
 }
 
 // Renderer callback with condition
@@ -83,7 +84,8 @@ const Election = withStyles(styles)(
         timestamp: Date.now(),
         votedFor: "",
         isACandidate: true,
-        electionCandidates: []
+        electionCandidates: [],
+        user: getUser()
       };
       this.renderElection = this.renderElection.bind(this);
     }
@@ -91,8 +93,6 @@ const Election = withStyles(styles)(
     componentDidMount(): void {
       getNextElectionTimestamp().then(election => {
         if (election != null) {
-          const user = getAuthorizedUser();
-
           this.setState({
             timestamp: election.timestamp,
             activeElection: true,
@@ -102,12 +102,12 @@ const Election = withStyles(styles)(
           getElectionCandidates().then(candidates =>
             this.setState({
               electionCandidates: candidates,
-              isACandidate: user != null && candidates.includes(user.name)
+              isACandidate: this.state.user != null && candidates.includes(this.state.user.name)
             })
           );
 
-          if (user != null) {
-            getElectionVoteForUser(user.name).then(candidate => {
+          if (this.state.user != null) {
+            getElectionVoteForUser(this.state.user.name).then(candidate => {
               if (candidate != null) {
                 this.setState({ votedFor: candidate });
               }
@@ -146,15 +146,9 @@ const Election = withStyles(styles)(
     }
 
     renderParticipateButton() {
-      const user: ChromunityUser = getAuthorizedUser();
-      if (user != null && user.name != null && !this.state.isACandidate) {
+      if (this.state.user != null && this.state.user.name != null && !this.state.isACandidate) {
         return (
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            onClick={() => this.registerForElection()}
-          >
+          <Button fullWidth variant="contained" color="primary" onClick={() => this.registerForElection()}>
             Participate
           </Button>
         );
@@ -162,9 +156,7 @@ const Election = withStyles(styles)(
     }
 
     registerForElection() {
-      signUpForElection(getAuthorizedUser()).then(() =>
-        this.setState({ isACandidate: true })
-      );
+      signUpForElection(this.state.user).then(() => this.setState({ isACandidate: true }));
     }
 
     renderElection() {
@@ -181,9 +173,7 @@ const Election = withStyles(styles)(
           <Card
             raised={true}
             key={"candidate-" + name}
-            className={`${this.props.classes.candidateCard} ${
-              this.state.votedFor ? this.props.classes.votedFor : ""
-            }`}
+            className={`${this.props.classes.candidateCard} ${this.state.votedFor ? this.props.classes.votedFor : ""}`}
           >
             <CardMedia
               component="img"
@@ -197,18 +187,14 @@ const Election = withStyles(styles)(
                 <Link to={"/u/" + name}>@{name}</Link>
               </Typography>
             </CardContent>
-            <CardActions style={{ justifyContent: "center" }}>
-              {this.renderCandidateCardActions(name)}
-            </CardActions>
+            <CardActions style={{ justifyContent: "center" }}>{this.renderCandidateCardActions(name)}</CardActions>
           </Card>
         </Grid>
       );
     }
 
     voteForCandidate(name: string) {
-      voteForCandidate(getAuthorizedUser(), name).then(() =>
-        this.setState({ votedFor: name })
-      );
+      voteForCandidate(this.state.user, name).then(() => this.setState({ votedFor: name }));
     }
 
     renderCandidateCardActions(name: string) {
@@ -244,11 +230,7 @@ const Election = withStyles(styles)(
       return (
         <Container fixed maxWidth="md">
           <ChromiaPageHeader text="Election" />
-          <Card
-            raised={true}
-            key={"next-election"}
-            className={this.props.classes.electionCard}
-          >
+          <Card raised={true} key={"next-election"} className={this.props.classes.electionCard}>
             <CardContent>
               {this.renderElection()}
               {this.renderElectionVoteStatus()}
@@ -256,9 +238,7 @@ const Election = withStyles(styles)(
             <CardActions>{this.renderParticipateButton()}</CardActions>
           </Card>
           <Grid container spacing={1}>
-            {this.state.electionCandidates.map(candidate =>
-              this.renderCandidateCard(candidate)
-            )}
+            {this.state.electionCandidates.map(candidate => this.renderCandidateCard(candidate))}
           </Grid>
         </Container>
       );

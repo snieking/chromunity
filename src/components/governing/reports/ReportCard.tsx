@@ -1,19 +1,11 @@
 import * as React from "react";
 
 import { RepresentativeReport } from "../../../types";
-import {
-  Card,
-  CardContent,
-  createStyles,
-  IconButton,
-  makeStyles,
-  Tooltip,
-  Typography
-} from "@material-ui/core";
+import { Card, CardContent, createStyles, IconButton, makeStyles, Tooltip, Typography } from "@material-ui/core";
 import { parseContent } from "../../../util/text-parsing";
 import { ReportOff } from "@material-ui/icons";
 import { handleReport } from "../../../blockchain/RepresentativesService";
-import { getAuthorizedUser, isRepresentative } from "../../../util/user-util";
+import { getUser, isRepresentative } from "../../../util/user-util";
 import Timestamp from "../../common/Timestamp";
 import { COLOR_RED } from "../../../theme";
 
@@ -27,23 +19,18 @@ const useStyles = makeStyles(
   })
 );
 
-const ReportCard: React.FunctionComponent<ReportCardProps> = (
-  props: ReportCardProps
-) => {
+const ReportCard: React.FunctionComponent<ReportCardProps> = (props: ReportCardProps) => {
   const classes = useStyles(props);
+  const user = getUser();
 
   return (
     <Card key={props.report.id}>
       <CardContent>
         <Timestamp milliseconds={props.report.timestamp} />
-        {isRepresentative() ? (
+        {user != null && isRepresentative() ? (
           <IconButton
             aria-label="Report"
-            onClick={() =>
-              handleReport(getAuthorizedUser(), props.report.id).then(() =>
-                window.location.reload()
-              )
-            }
+            onClick={() => handleReport(user, props.report.id).then(() => window.location.reload())}
           >
             <Tooltip title="Remove report">
               <ReportOff className={classes.iconRed} />

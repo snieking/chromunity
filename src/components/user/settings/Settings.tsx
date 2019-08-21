@@ -1,8 +1,5 @@
 import React from "react";
-import {
-  getAuthorizedUser,
-  ifEmptyAvatarThenPlaceholder
-} from "../../../util/user-util";
+import { getUser, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import { ChromunityUser, UserSettings } from "../../../types";
 import {
   Button,
@@ -20,10 +17,7 @@ import {
 } from "@material-ui/core";
 import AvatarChanger from "./AvatarChanger";
 
-import {
-  getUserSettings,
-  updateUserSettings
-} from "../../../blockchain/UserService";
+import { getUserSettings, updateUserSettings } from "../../../blockchain/UserService";
 import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import Avatar, { AVATAR_SIZE } from "../../common/Avatar";
@@ -60,6 +54,7 @@ interface SettingsState {
   updateSuccessOpen: boolean;
   updateErrorOpen: boolean;
   settingsUpdateStatus: string;
+  user: ChromunityUser;
 }
 
 const Settings = withStyles(styles)(
@@ -73,7 +68,8 @@ const Settings = withStyles(styles)(
         description: "",
         updateSuccessOpen: false,
         updateErrorOpen: false,
-        settingsUpdateStatus: ""
+        settingsUpdateStatus: "",
+        user: getUser()
       };
 
       this.updateAvatar = this.updateAvatar.bind(this);
@@ -98,24 +94,13 @@ const Settings = withStyles(styles)(
               >
                 <DialogTitle>Edit your avatar</DialogTitle>
                 <DialogContent>
-                  <AvatarChanger
-                    updateFunction={this.updateAvatar}
-                    previousPicture={this.state.avatar}
-                  />
+                  <AvatarChanger updateFunction={this.updateAvatar} previousPicture={this.state.avatar} />
                 </DialogContent>
                 <DialogActions>
-                  <Button
-                    onClick={() => this.toggleEditAvatarDialog()}
-                    variant="outlined"
-                    color="secondary"
-                  >
+                  <Button onClick={() => this.toggleEditAvatarDialog()} variant="outlined" color="secondary">
                     Cancel
                   </Button>
-                  <Button
-                    onClick={() => this.commitAvatar()}
-                    variant="outlined"
-                    color="primary"
-                  >
+                  <Button onClick={() => this.commitAvatar()} variant="outlined" color="primary">
                     Send
                   </Button>
                 </DialogActions>
@@ -142,12 +127,7 @@ const Settings = withStyles(styles)(
               />
             </Card>
             <div className={this.props.classes.commitBtnWrapper}>
-              <Button
-                size="large"
-                variant="contained"
-                color="primary"
-                onClick={() => this.saveSettings()}
-              >
+              <Button size="large" variant="contained" color="primary" onClick={() => this.saveSettings()}>
                 Save
               </Button>
             </div>
@@ -158,10 +138,7 @@ const Settings = withStyles(styles)(
             autoHideDuration={3000}
             onClose={this.handleClose}
           >
-            <CustomSnackbarContentWrapper
-              variant="success"
-              message={this.state.settingsUpdateStatus}
-            />
+            <CustomSnackbarContentWrapper variant="success" message={this.state.settingsUpdateStatus} />
           </Snackbar>
           <Snackbar
             anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
@@ -169,19 +146,16 @@ const Settings = withStyles(styles)(
             autoHideDuration={3000}
             onClose={this.handleClose}
           >
-            <CustomSnackbarContentWrapper
-              variant="error"
-              message={this.state.settingsUpdateStatus}
-            />
+            <CustomSnackbarContentWrapper variant="error" message={this.state.settingsUpdateStatus} />
           </Snackbar>
         </div>
       );
     }
 
     componentDidMount() {
-      const user: ChromunityUser = getAuthorizedUser();
+      const user: ChromunityUser = this.state.user;
       if (user == null) {
-        window.location.replace("/login");
+        window.location.replace("/account");
       } else {
         getUserSettings(user).then((settings: UserSettings) => {
           this.setState({
@@ -214,11 +188,7 @@ const Settings = withStyles(styles)(
     }
 
     saveSettings() {
-      updateUserSettings(
-        getAuthorizedUser(),
-        this.state.avatar,
-        this.state.description
-      )
+      updateUserSettings(this.state.user, this.state.avatar, this.state.description)
         .then(() =>
           this.setState({
             settingsUpdateStatus: "Settings saved",
@@ -233,10 +203,7 @@ const Settings = withStyles(styles)(
         );
     }
 
-    private handleClose(
-      event: React.SyntheticEvent | React.MouseEvent,
-      reason?: string
-    ) {
+    private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
       if (reason === "clickaway") {
         return;
       }

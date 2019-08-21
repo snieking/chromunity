@@ -20,19 +20,8 @@ import {
   withStyles,
   WithStyles
 } from "@material-ui/core";
-import {
-  getCachedUserMeta,
-  getAuthorizedUser,
-  ifEmptyAvatarThenPlaceholder,
-  isRepresentative
-} from "../../util/user-util";
-import {
-  Delete,
-  Reply,
-  Report,
-  StarBorder,
-  StarRate
-} from "@material-ui/icons";
+import { getCachedUserMeta, getUser, ifEmptyAvatarThenPlaceholder, isRepresentative } from "../../util/user-util";
+import { Delete, Reply, Report, StarBorder, StarRate } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import {
   createTopicSubReply,
@@ -45,15 +34,10 @@ import {
 } from "../../blockchain/TopicService";
 
 import { reportReply } from "../../blockchain/RepresentativesService";
-import { EditMessageButton } from "../buttons/EditMessageButton";
+import EditMessageButton from "../buttons/EditMessageButton";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import Timestamp from "../common/Timestamp";
-import {
-  COLOR_ORANGE,
-  COLOR_PURPLE,
-  COLOR_RED,
-  COLOR_YELLOW
-} from "../../theme";
+import { COLOR_ORANGE, COLOR_PURPLE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 
 const styles = createStyles({
@@ -109,6 +93,7 @@ interface State {
   userMeta: UserMeta;
   removeReplyDialogOpen: boolean;
   isLoading: boolean;
+  user: ChromunityUser;
 }
 
 const allowedEditTimeMillis: number = 300000;
@@ -133,7 +118,8 @@ const TopicReplyCard = withStyles(styles)(
           times_suspended: 0
         },
         removeReplyDialogOpen: false,
-        isLoading: false
+        isLoading: false,
+        user: getUser()
       };
 
       this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
@@ -145,15 +131,8 @@ const TopicReplyCard = withStyles(styles)(
       if (!this.props.mutedUsers.includes(this.props.reply.author)) {
         return (
           <div>
-            <div
-              className={
-                this.props.reply.removed ? this.props.classes.removed : ""
-              }
-            >
-              <Card
-                key={this.props.reply.id}
-                style={{ marginLeft: this.props.indention + "px" }}
-              >
+            <div className={this.props.reply.removed ? this.props.classes.removed : ""}>
+              <Card key={this.props.reply.id} style={{ marginLeft: this.props.indention + "px" }}>
                 {this.state.isLoading ? <LinearProgress /> : <div />}
                 {this.renderCardContent()}
               </Card>
@@ -176,14 +155,11 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     componentDidMount() {
-      const user: ChromunityUser = getAuthorizedUser();
+      const user: ChromunityUser = this.state.user;
 
       getUserSettingsCached(this.props.reply.author, 1440).then(settings => {
         this.setState({
-          avatar: ifEmptyAvatarThenPlaceholder(
-            settings.avatar,
-            this.props.reply.author
-          )
+          avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.reply.author)
         });
       });
       getReplyStarRaters(this.props.reply.id).then(usersWhoStarRated =>
@@ -192,24 +168,23 @@ const TopicReplyCard = withStyles(styles)(
           ratedByMe: usersWhoStarRated.includes(user != null && user.name)
         })
       );
-      getTopicSubReplies(this.props.reply.id).then(replies =>
-        this.setState({ subReplies: replies })
-      );
+      getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies }));
       getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
-      isRepresentative().then(isRepresentative =>
-        this.setState({ isRepresentative: isRepresentative })
-      );
+
+      if (this.state.user != null) {
+        isRepresentative().then(isRepresentative => this.setState({ isRepresentative: isRepresentative }));
+      }
     }
 
     toggleStarRate() {
       if (!this.state.isLoading) {
         this.setState({ isLoading: true });
         const id = this.props.reply.id;
-        const user = getAuthorizedUser();
+        const user = this.state.user;
 
         if (user != null) {
           if (this.state.ratedByMe) {
-            removeReplyStarRating(getAuthorizedUser(), id)
+            removeReplyStarRating(this.state.user, id)
               .then(() =>
                 this.setState(prevState => ({
                   ratedByMe: false,
@@ -219,7 +194,7 @@ const TopicReplyCard = withStyles(styles)(
               )
               .catch(() => this.setState({ isLoading: false }));
           } else {
-            giveReplyStarRating(getAuthorizedUser(), id)
+            giveReplyStarRating(this.state.user, id)
               .then(() =>
                 this.setState(prevState => ({
                   ratedByMe: true,
@@ -230,7 +205,7 @@ const TopicReplyCard = withStyles(styles)(
               .catch(() => this.setState({ isLoading: false }));
           }
         } else {
-          window.location.replace("/user/login");
+          window.location.replace("/user/account");
         }
       }
     }
@@ -242,17 +217,13 @@ const TopicReplyCard = withStyles(styles)(
             className={this.props.classes.authorLink}
             to={"/u/" + this.props.reply.author}
             style={{
-              backgroundColor: this.props.representatives.includes(
-                this.props.reply.author
-              )
+              backgroundColor: this.props.representatives.includes(this.props.reply.author)
                 ? COLOR_ORANGE
                 : COLOR_PURPLE
             }}
           >
             <Typography gutterBottom variant="subtitle1" component="span">
-              <span className={this.props.classes.authorName}>
-                @{this.props.reply.author}
-              </span>
+              <span className={this.props.classes.authorName}>@{this.props.reply.author}</span>
             </Typography>
           </Link>
           <br />
@@ -264,7 +235,7 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     renderCardContent() {
-      const user: ChromunityUser = getAuthorizedUser();
+      const user: ChromunityUser = this.state.user;
       return (
         <CardContent>
           {this.renderAuthor()}
@@ -274,27 +245,16 @@ const TopicReplyCard = withStyles(styles)(
           </div>
           <div className={this.props.classes.bottomBar}>
             <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
-              <Badge
-                className="star-badge"
-                color="primary"
-                badgeContent={this.state.stars}
-              >
+              <Badge className="star-badge" color="primary" badgeContent={this.state.stars}>
                 <Tooltip title="Like">
-                  {this.state.ratedByMe ? (
-                    <StarRate className={this.props.classes.iconYellow} />
-                  ) : (
-                    <StarBorder />
-                  )}
+                  {this.state.ratedByMe ? <StarRate className={this.props.classes.iconYellow} /> : <StarBorder />}
                 </Tooltip>
               </Badge>
             </IconButton>
             {this.props.reply.timestamp + allowedEditTimeMillis > Date.now() &&
             user != null &&
             this.props.reply.author === user.name ? (
-              <EditMessageButton
-                value={this.props.reply.message}
-                submitFunction={this.editReplyMessage}
-              />
+              <EditMessageButton value={this.props.reply.message} submitFunction={this.editReplyMessage} />
             ) : null}
             <IconButton
               aria-label="Reply"
@@ -305,11 +265,7 @@ const TopicReplyCard = withStyles(styles)(
               }
             >
               <Tooltip title="Reply">
-                <Reply
-                  className={
-                    this.state.replyBoxOpen ? this.props.classes.iconOrange : ""
-                  }
-                />
+                <Reply className={this.state.replyBoxOpen ? this.props.classes.iconOrange : ""} />
               </Tooltip>
             </IconButton>
 
@@ -326,19 +282,17 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     editReplyMessage(text: string) {
-      modifyReply(getAuthorizedUser(), this.props.reply.id, text).then(() =>
-        window.location.reload()
-      );
+      modifyReply(this.state.user, this.props.reply.id, text).then(() => window.location.reload());
     }
 
     reportReply() {
-      const user: ChromunityUser = getAuthorizedUser();
+      const user: ChromunityUser = this.state.user;
 
       if (user != null) {
         reportReply(user, this.props.topicId, this.props.reply.id);
         window.location.reload();
       } else {
-        window.location.replace("/user/login");
+        window.location.replace("/user/account");
       }
     }
 
@@ -346,10 +300,7 @@ const TopicReplyCard = withStyles(styles)(
       if (this.state.isRepresentative && !this.props.reply.removed) {
         return (
           <div style={{ display: "inline-block" }}>
-            <IconButton
-              aria-label="Remove reply"
-              onClick={() => this.setState({ removeReplyDialogOpen: true })}
-            >
+            <IconButton aria-label="Remove reply" onClick={() => this.setState({ removeReplyDialogOpen: true })}>
               <Tooltip title="Remove reply">
                 <Delete className={this.props.classes.iconRed} />
               </Tooltip>
@@ -363,17 +314,12 @@ const TopicReplyCard = withStyles(styles)(
               <DialogTitle id="dialog-title">Are you sure?</DialogTitle>
               <DialogContent>
                 <DialogContentText>
-                  This action will remove the topic, which makes sure that no
-                  one will be able to read the initial message.
+                  This action will remove the topic, which makes sure that no one will be able to read the initial
+                  message.
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Button
-                  onClick={() =>
-                    this.setState({ removeReplyDialogOpen: false })
-                  }
-                  color="secondary"
-                >
+                <Button onClick={() => this.setState({ removeReplyDialogOpen: false })} color="secondary">
                   No
                 </Button>
                 <Button
@@ -382,11 +328,7 @@ const TopicReplyCard = withStyles(styles)(
                       {
                         removeReplyDialogOpen: false
                       },
-                      () =>
-                        removeTopicReply(
-                          getAuthorizedUser(),
-                          this.props.reply.id
-                        ).then(() => window.location.reload())
+                      () => removeTopicReply(this.state.user, this.props.reply.id).then(() => window.location.reload())
                     )
                   }
                   color="primary"
@@ -401,13 +343,10 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     renderReplyBox() {
-      const user: ChromunityUser = getAuthorizedUser();
+      const user: ChromunityUser = this.state.user;
       if (this.state.replyBoxOpen && user == null) {
-        window.location.replace("/user/login");
-      } else if (
-        this.state.replyBoxOpen &&
-        this.state.userMeta.suspended_until > Date.now()
-      ) {
+        window.location.replace("/user/account");
+      } else if (this.state.replyBoxOpen && this.state.userMeta.suspended_until > Date.now()) {
         this.setState({ replyBoxOpen: false });
         window.alert("User account temporarily suspended");
       } else if (this.state.replyBoxOpen) {
@@ -434,12 +373,7 @@ const TopicReplyCard = withStyles(styles)(
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              color="primary"
-              variant="text"
-              onClick={() => this.sendReply()}
-            >
+            <Button type="submit" color="primary" variant="text" onClick={() => this.sendReply()}>
               Send
             </Button>
           </div>
@@ -456,15 +390,8 @@ const TopicReplyCard = withStyles(styles)(
     sendReply() {
       const message: string = this.state.replyMessage;
       this.setState({ replyBoxOpen: false, replyMessage: "" });
-      createTopicSubReply(
-        getAuthorizedUser(),
-        this.props.topicId,
-        this.props.reply.id,
-        message
-      ).then(() =>
-        getTopicSubReplies(this.props.reply.id).then(replies =>
-          this.setState({ subReplies: replies })
-        )
+      createTopicSubReply(this.state.user, this.props.topicId, this.props.reply.id, message).then(() =>
+        getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies }))
       );
     }
   }

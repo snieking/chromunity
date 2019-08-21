@@ -32,6 +32,7 @@ interface Props {
   loading: boolean;
   success: boolean;
   failure: boolean;
+  error: string;
   accountRegisteredCheck: typeof accountRegisteredCheck;
 }
 
@@ -40,8 +41,7 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
 
   const [name, setName] = useState("");
   const [step, setStep] = useState(Step.INIT);
-  const [error, setError] = useState("");
-  const [errorOpen, setErrorOpen] = useState(false);
+  const [errorOpen, setErrorOpen] = useState(props.failure);
 
   const walletLogin = () => {
     setStep(Step.LOGIN_IN_PROGRESS);
@@ -87,7 +87,7 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
         autoHideDuration={6000}
         onClose={() => setErrorOpen(false)}
       >
-        <CustomSnackbarContentWrapper variant="error" message={error} />
+        <CustomSnackbarContentWrapper variant="error" message={props.error} />
       </Snackbar>
     </Container>
   );
@@ -102,8 +102,10 @@ const mapDispatchToProps = (dispatch: any) => {
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    loading: store.login.loading,
-    success: store.login.success
+    loading: store.account.loading,
+    success: store.account.success,
+    error: store.account.error,
+    failure: store.account.failure
   };
 };
 

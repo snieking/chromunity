@@ -24,7 +24,7 @@ import {
 
 import { RouteComponentProps } from "react-router";
 import ReplyTopicButton from "../buttons/ReplyTopicButton";
-import { EditMessageButton } from "../buttons/EditMessageButton";
+import EditMessageButton from "../buttons/EditMessageButton";
 import {
   getTopicById,
   getTopicRepliesAfterTimestamp,
@@ -39,10 +39,7 @@ import {
   unsubscribeFromTopic
 } from "../../blockchain/TopicService";
 import { Topic, TopicReply, ChromunityUser } from "../../types";
-import {
-  getAuthorizedUser,
-  ifEmptyAvatarThenPlaceholder
-} from "../../util/user-util";
+import { getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import {
   Delete,
   Notifications,
@@ -52,24 +49,13 @@ import {
   StarRate,
   SubdirectoryArrowRight
 } from "@material-ui/icons";
-import {
-  getMutedUsers,
-  getUserSettingsCached
-} from "../../blockchain/UserService";
+import { getMutedUsers, getUserSettingsCached } from "../../blockchain/UserService";
 import TopicReplyCard from "./TopicReplyCard";
 import LoadMoreButton from "../buttons/LoadMoreButton";
-import {
-  getRepresentatives,
-  reportTopic
-} from "../../blockchain/RepresentativesService";
+import { getRepresentatives, reportTopic } from "../../blockchain/RepresentativesService";
 import Timestamp from "../common/Timestamp";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
-import {
-  COLOR_ORANGE,
-  COLOR_PURPLE,
-  COLOR_RED,
-  COLOR_YELLOW
-} from "../../theme";
+import { COLOR_ORANGE, COLOR_PURPLE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 
 const styles = createStyles({
@@ -101,9 +87,7 @@ interface MatchParams {
   id: string;
 }
 
-export interface FullTopicProps
-  extends RouteComponentProps<MatchParams>,
-    WithStyles<typeof styles> {
+export interface FullTopicProps extends RouteComponentProps<MatchParams>, WithStyles<typeof styles> {
   pathName: string;
 }
 
@@ -121,6 +105,7 @@ export interface FullTopicState {
   isLoading: boolean;
   removeTopicDialogOpen: boolean;
   mutedUsers: string[];
+  user: ChromunityUser;
 }
 
 const repliesPageSize: number = 25;
@@ -154,7 +139,8 @@ const FullTopic = withStyles(styles)(
         couldExistOlderReplies: false,
         isLoading: true,
         removeTopicDialogOpen: false,
-        mutedUsers: []
+        mutedUsers: [],
+        user: getUser()
       };
 
       this.retrieveLatestReplies = this.retrieveLatestReplies.bind(this);
@@ -165,7 +151,7 @@ const FullTopic = withStyles(styles)(
 
     componentDidMount(): void {
       const id = this.props.match.params.id;
-      const user: ChromunityUser = getAuthorizedUser();
+      const user: ChromunityUser = this.state.user;
 
       if (user != null) {
         getMutedUsers(user).then(users => this.setState({ mutedUsers: users }));
@@ -179,9 +165,7 @@ const FullTopic = withStyles(styles)(
           ratedByMe: usersWhoStarRated.includes(user != null && user.name)
         })
       );
-      getRepresentatives().then(representatives =>
-        this.setState({ representatives: representatives })
-      );
+      getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
       getTopicSubscribers(id).then(subscribers =>
         this.setState({
           subscribed: user != null && subscribers.includes(user.name)
@@ -203,26 +187,16 @@ const FullTopic = withStyles(styles)(
       this.setState({ isLoading: true });
       let replies: Promise<TopicReply[]>;
       if (this.state.topicReplies.length === 0) {
-        replies = getTopicRepliesPriorToTimestamp(
-          topicId,
-          Date.now(),
-          repliesPageSize
-        );
+        replies = getTopicRepliesPriorToTimestamp(topicId, Date.now(), repliesPageSize);
       } else {
-        replies = getTopicRepliesAfterTimestamp(
-          topicId,
-          this.state.topicReplies[0].timestamp,
-          repliesPageSize
-        );
+        replies = getTopicRepliesAfterTimestamp(topicId, this.state.topicReplies[0].timestamp, repliesPageSize);
       }
 
       replies
         .then(retrievedReplies => {
           if (retrievedReplies.length > 0) {
             this.setState(prevState => ({
-              topicReplies: Array.from(
-                new Set(retrievedReplies.concat(prevState.topicReplies))
-              ),
+              topicReplies: Array.from(new Set(retrievedReplies.concat(prevState.topicReplies))),
               isLoading: false,
               couldExistOlderReplies: retrievedReplies.length >= repliesPageSize
             }));
@@ -236,29 +210,21 @@ const FullTopic = withStyles(styles)(
     retrieveOlderReplies() {
       if (this.state.topicReplies.length > 0) {
         this.setState({ isLoading: true });
-        const oldestTimestamp: number = this.state.topicReplies[
-          this.state.topicReplies.length - 1
-        ].timestamp;
-        getTopicRepliesPriorToTimestamp(
-          this.state.topic.id,
-          oldestTimestamp - 1,
-          repliesPageSize
-        ).then(retrievedReplies => {
-          retrievedReplies.forEach(reply =>
-            console.log("Reply timestamp is: ", reply.timestamp)
-          );
-          if (retrievedReplies.length > 0) {
-            this.setState(prevState => ({
-              topicReplies: Array.from(
-                new Set(prevState.topicReplies.concat(retrievedReplies))
-              ),
-              isLoading: false,
-              couldExistOlderReplies: retrievedReplies.length >= repliesPageSize
-            }));
-          } else {
-            this.setState({ isLoading: false, couldExistOlderReplies: false });
+        const oldestTimestamp: number = this.state.topicReplies[this.state.topicReplies.length - 1].timestamp;
+        getTopicRepliesPriorToTimestamp(this.state.topic.id, oldestTimestamp - 1, repliesPageSize).then(
+          retrievedReplies => {
+            retrievedReplies.forEach(reply => console.log("Reply timestamp is: ", reply.timestamp));
+            if (retrievedReplies.length > 0) {
+              this.setState(prevState => ({
+                topicReplies: Array.from(new Set(prevState.topicReplies.concat(retrievedReplies))),
+                isLoading: false,
+                couldExistOlderReplies: retrievedReplies.length >= repliesPageSize
+              }));
+            } else {
+              this.setState({ isLoading: false, couldExistOlderReplies: false });
+            }
           }
-        });
+        );
       }
     }
 
@@ -266,7 +232,7 @@ const FullTopic = withStyles(styles)(
       if (!this.state.isLoading) {
         this.setState({ isLoading: true });
         const id: string = this.state.topic.id;
-        const user: ChromunityUser = getAuthorizedUser();
+        const user: ChromunityUser = this.state.user;
 
         if (user != null) {
           if (this.state.ratedByMe) {
@@ -291,7 +257,7 @@ const FullTopic = withStyles(styles)(
               .catch(() => this.setState({ isLoading: false }));
           }
         } else {
-          window.location.replace("/user/login");
+          window.location.replace("/user/account");
         }
       }
     }
@@ -300,14 +266,12 @@ const FullTopic = withStyles(styles)(
       if (!this.state.isLoading) {
         this.setState({ isLoading: true });
         const id: string = this.state.topic.id;
-        const user: ChromunityUser = getAuthorizedUser();
+        const user: ChromunityUser = this.state.user;
 
         if (user != null) {
           if (this.state.subscribed) {
             unsubscribeFromTopic(user, id)
-              .then(() =>
-                this.setState({ subscribed: false, isLoading: false })
-              )
+              .then(() => this.setState({ subscribed: false, isLoading: false }))
               .catch(() => this.setState({ isLoading: false }));
           } else {
             subscribeToTopic(user, id)
@@ -315,7 +279,7 @@ const FullTopic = withStyles(styles)(
               .catch(() => this.setState({ isLoading: false }));
           }
         } else {
-          window.location.replace("/user/login");
+          window.location.replace("/user/account");
         }
       }
     }
@@ -327,22 +291,13 @@ const FullTopic = withStyles(styles)(
             className={this.props.classes.authorLink}
             to={"/u/" + this.state.topic.author}
             style={{
-              backgroundColor: this.state.representatives.includes(
-                this.state.topic.author
-              )
+              backgroundColor: this.state.representatives.includes(this.state.topic.author)
                 ? COLOR_ORANGE
                 : COLOR_PURPLE
             }}
           >
-            <Typography
-              gutterBottom
-              variant="subtitle1"
-              component="span"
-              className="typography"
-            >
-              <span className={this.props.classes.authorName}>
-                @{this.state.topic.author}
-              </span>
+            <Typography gutterBottom variant="subtitle1" component="span" className="typography">
+              <span className={this.props.classes.authorName}>@{this.state.topic.author}</span>
             </Typography>
           </Link>
           <br />
@@ -367,29 +322,20 @@ const FullTopic = withStyles(styles)(
     }
 
     renderCardActions() {
-      const user: ChromunityUser = getAuthorizedUser();
+      const user: ChromunityUser = this.state.user;
       return (
         <CardActions style={{ marginTop: "-20px" }}>
           <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
             <Badge color="primary" badgeContent={this.state.stars}>
               <Tooltip title="Like">
-                {this.state.ratedByMe ? (
-                  <StarRate className={this.props.classes.iconYellow} />
-                ) : (
-                  <StarBorder />
-                )}
+                {this.state.ratedByMe ? <StarRate className={this.props.classes.iconYellow} /> : <StarBorder />}
               </Tooltip>
             </Badge>
           </IconButton>
-          <IconButton
-            aria-label="Subscribe"
-            onClick={() => this.toggleSubscription()}
-          >
+          <IconButton aria-label="Subscribe" onClick={() => this.toggleSubscription()}>
             {this.state.subscribed ? (
               <Tooltip title="Unsubscribe">
-                <NotificationsActive
-                  className={this.props.classes.iconOrange}
-                />
+                <NotificationsActive className={this.props.classes.iconOrange} />
               </Tooltip>
             ) : (
               <Tooltip title="Subscribe">
@@ -401,10 +347,7 @@ const FullTopic = withStyles(styles)(
           {this.state.topic.timestamp + allowedEditTimeMillis > Date.now() &&
           user != null &&
           this.state.topic.author === user.name ? (
-            <EditMessageButton
-              value={this.state.topic.message}
-              submitFunction={this.editTopicMessage}
-            />
+            <EditMessageButton value={this.state.topic.message} submitFunction={this.editTopicMessage} />
           ) : (
             <div />
           )}
@@ -422,35 +365,26 @@ const FullTopic = withStyles(styles)(
 
     editTopicMessage(text: string) {
       this.setState({ isLoading: true });
-      modifyTopic(getAuthorizedUser(), this.state.topic.id, text).then(() =>
-        window.location.reload()
-      );
+      modifyTopic(this.state.user, this.state.topic.id, text).then(() => window.location.reload());
     }
 
     reportTopic() {
-      const user: ChromunityUser = getAuthorizedUser();
+      const user: ChromunityUser = this.state.user;
 
       if (user != null) {
         reportTopic(user, this.state.topic.id);
         window.location.reload();
       } else {
-        window.location.replace("/user/login");
+        window.location.replace("/user/account");
       }
     }
 
     renderAdminActions() {
-      const user: ChromunityUser = getAuthorizedUser();
-      if (
-        user != null &&
-        this.state.representatives.includes(user.name) &&
-        !this.state.topic.removed
-      ) {
+      const user: ChromunityUser = this.state.user;
+      if (user != null && this.state.representatives.includes(user.name) && !this.state.topic.removed) {
         return (
           <div style={{ display: "inline-block" }}>
-            <IconButton
-              aria-label="Remove topic"
-              onClick={() => this.setState({ removeTopicDialogOpen: true })}
-            >
+            <IconButton aria-label="Remove topic" onClick={() => this.setState({ removeTopicDialogOpen: true })}>
               <Tooltip title="Remove topic">
                 <Delete className={this.props.classes.iconRed} />
               </Tooltip>
@@ -464,17 +398,12 @@ const FullTopic = withStyles(styles)(
               <DialogTitle id="dialog-title">Are you sure?</DialogTitle>
               <DialogContent>
                 <DialogContentText>
-                  This action will remove the topic, which makes sure that no
-                  one will be able to read the initial message.
+                  This action will remove the topic, which makes sure that no one will be able to read the initial
+                  message.
                 </DialogContentText>
               </DialogContent>
               <DialogActions>
-                <Button
-                  onClick={() =>
-                    this.setState({ removeTopicDialogOpen: false })
-                  }
-                  color="secondary"
-                >
+                <Button onClick={() => this.setState({ removeTopicDialogOpen: false })} color="secondary">
                   No
                 </Button>
                 <Button
@@ -484,10 +413,7 @@ const FullTopic = withStyles(styles)(
                         removeTopicDialogOpen: false
                       },
                       () =>
-                        removeTopic(
-                          getAuthorizedUser(),
-                          this.props.match.params.id
-                        ).then(() => window.location.reload())
+                        removeTopic(this.state.user, this.props.match.params.id).then(() => window.location.reload())
                     )
                   }
                   color="primary"
@@ -556,9 +482,7 @@ const FullTopic = withStyles(styles)(
     handleReplySubmit(): void {
       this.retrieveLatestReplies();
       if (!this.state.subscribed) {
-        subscribeToTopic(getAuthorizedUser(), this.state.topic.id).then(() =>
-          this.setState({ subscribed: true })
-        );
+        subscribeToTopic(this.state.user, this.state.topic.id).then(() => this.setState({ subscribed: true }));
       }
     }
 
@@ -583,17 +507,9 @@ const FullTopic = withStyles(styles)(
         return (
           <Container fixed>
             <br />
-            {this.state.isLoading ? (
-              <LinearProgress variant="query" />
-            ) : (
-              <div />
-            )}
+            {this.state.isLoading ? <LinearProgress variant="query" /> : <div />}
             {this.renderTopic()}
-            {this.state.topicReplies.length > 0 ? (
-              <SubdirectoryArrowRight />
-            ) : (
-              <div />
-            )}
+            {this.state.topicReplies.length > 0 ? <SubdirectoryArrowRight /> : <div />}
             {this.state.topicReplies.map(reply => (
               <TopicReplyCard
                 key={"reply-" + reply.id}
