@@ -75,15 +75,12 @@ async function checkIfAuthDescriptorAdded(blockchain: any, user: User, accountId
   const accounts = await blockchain.getAccountsByAuthDescriptorId(user.authDescriptor.hash(), user);
 
   const isAdded = accounts.some((account: Account) => {
-    console.log("id", account.id_.toString("hex"));
     return account.id_.toString("hex").toUpperCase() === accountId.toUpperCase();
   });
 
   if (isAdded) {
-    console.log(accounts[0]);
     authorizeUser(username, keyPair);
   } else {
-    console.log("Auth descriptor not yet added, checking again in 3 seconds");
     setTimeout(() => checkIfAuthDescriptorAdded(blockchain, user, accountId, username, keyPair), 3000);
   }
 }

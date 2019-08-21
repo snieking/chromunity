@@ -66,7 +66,8 @@ const theme = createMuiTheme({
                 color: COLOR_OFF_WHITE
             },
             subtitle2: {
-                color: COLOR_PURPLE
+                color: COLOR_OFF_WHITE,
+                opacity: 0.5
             },
             caption: {
                 color: COLOR_YELLOW

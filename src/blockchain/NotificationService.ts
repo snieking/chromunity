@@ -28,6 +28,7 @@ export function removeNotificationsForId(fromUser: ChromunityUser, id: string, u
       fromUser.ft3User,
       "remove_notifications_for_users",
       fromUser.name.toLocaleLowerCase(),
+      fromUser.ft3User.authDescriptor.hash().toString("hex"),
       id,
       usernames.map(name => name.toLocaleLowerCase())
     )
@@ -46,6 +47,7 @@ function sendNotificationsInternal(
       fromUser.ft3User,
       "create_notifications_for_users",
       fromUser.name.toLocaleLowerCase(),
+      fromUser.ft3User.authDescriptor.hash().toString("hex"),
       id,
       trigger,
       content,
@@ -59,7 +61,13 @@ export function markNotificationsRead(user: ChromunityUser) {
   const epochSeconds = Math.round(new Date().getTime() / 1000);
 
   return BLOCKCHAIN.then(bc =>
-    bc.call(user.ft3User, "mark_notifications_since_timestamp_read", user.name.toLocaleLowerCase(), epochSeconds)
+    bc.call(
+      user.ft3User,
+      "mark_notifications_since_timestamp_read",
+      user.name.toLocaleLowerCase(),
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      epochSeconds
+    )
   );
 }
 

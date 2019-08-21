@@ -35,13 +35,19 @@ export function getAllRepresentativeActionsPriorToTimestamp(
 
 export function handleReport(user: ChromunityUser, reportId: string) {
   return BLOCKCHAIN.then(bc =>
-    bc.call(user.ft3User, "handle_representative_report", user.name.toLocaleLowerCase(), reportId)
+    bc.call(user.ft3User, "handle_representative_report", user.name.toLocaleLowerCase(), user.ft3User.authDescriptor.hash().toString("hex"), reportId)
   );
 }
 
 export function suspendUser(user: ChromunityUser, userToBeSuspended: string) {
   return BLOCKCHAIN.then(bc =>
-    bc.call(user.ft3User, "suspend_user", user.name.toLocaleLowerCase(), userToBeSuspended.toLocaleLowerCase())
+    bc.call(
+      user.ft3User,
+      "suspend_user",
+      user.name.toLocaleLowerCase(),
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      userToBeSuspended.toLocaleLowerCase()
+    )
   );
 }
 
@@ -55,7 +61,14 @@ export function reportReply(user: ChromunityUser, topicId: string, replyId: stri
 
 function report(user: ChromunityUser, text: string) {
   return BLOCKCHAIN.then(bc =>
-    bc.call(user.ft3User, "create_representative_report", user.name.toLocaleLowerCase(), uniqueId(), text)
+    bc.call(
+      user.ft3User,
+      "create_representative_report",
+      user.name.toLocaleLowerCase(),
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      uniqueId(),
+      text
+    )
   );
 }
 

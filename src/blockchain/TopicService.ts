@@ -17,6 +17,7 @@ export function createTopic(user: ChromunityUser, channelName: string, title: st
       user.ft3User,
       "create_topic",
       topicId,
+      user.ft3User.authDescriptor.hash().toString("hex"),
       user.name.toLocaleLowerCase(),
       channelName.toLocaleLowerCase(),
       channelName,
@@ -39,14 +40,31 @@ export function modifyReply(user: ChromunityUser, replyId: string, updatedText: 
 }
 
 function modifyText(user: ChromunityUser, id: string, updatedText: string, rellOperation: string) {
-  return BLOCKCHAIN.then(bc => bc.call(user.ft3User, rellOperation, id, user.name.toLocaleLowerCase(), updatedText));
+  return BLOCKCHAIN.then(bc =>
+    bc.call(
+      user.ft3User,
+      rellOperation,
+      id,
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      user.name.toLocaleLowerCase(),
+      updatedText
+    )
+  );
 }
 
 export function createTopicReply(user: ChromunityUser, topicId: string, message: string) {
   const replyId = uniqueId();
 
   return BLOCKCHAIN.then(bc =>
-    bc.call(user.ft3User, "create_reply", topicId, replyId, user.name.toLocaleLowerCase(), message)
+    bc.call(
+      user.ft3User,
+      "create_reply",
+      topicId,
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      replyId,
+      user.name.toLocaleLowerCase(),
+      message
+    )
   ).then((promise: unknown) => {
     getTopicSubscribers(topicId).then(users =>
       sendNotifications(
@@ -64,7 +82,16 @@ export function createTopicSubReply(user: ChromunityUser, topicId: string, reply
   const subReplyId = uniqueId();
 
   return BLOCKCHAIN.then(bc =>
-    bc.call(user.ft3User, "create_sub_reply", topicId, replyId, subReplyId, user.name.toLocaleLowerCase(), message)
+    bc.call(
+      user.ft3User,
+      "create_sub_reply",
+      topicId,
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      replyId,
+      subReplyId,
+      user.name.toLocaleLowerCase(),
+      message
+    )
   ).then((promise: unknown) => {
     getTopicSubscribers(topicId).then(users =>
       sendNotifications(
@@ -84,12 +111,26 @@ function createReplyTriggerString(name: string, id: string): string {
 
 export function removeTopic(user: ChromunityUser, topicId: string) {
   topicsCache.remove(topicId);
-  return BLOCKCHAIN.then(bc => bc.call(user.ft3User, "remove_topic", user.name.toLocaleLowerCase(), topicId));
+  return BLOCKCHAIN.then(bc =>
+    bc.call(
+      user.ft3User,
+      "remove_topic",
+      user.name.toLocaleLowerCase(),
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      topicId
+    )
+  );
 }
 
 export function removeTopicReply(user: ChromunityUser, topicReplyId: string) {
   return BLOCKCHAIN.then(bc =>
-    bc.call(user.ft3User, "remove_topic_reply", user.name.toLocaleLowerCase(), topicReplyId)
+    bc.call(
+      user.ft3User,
+      "remove_topic_reply",
+      user.name.toLocaleLowerCase(),
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      topicReplyId
+    )
   );
 }
 
@@ -210,7 +251,16 @@ export function unsubscribeFromTopic(user: ChromunityUser, id: string) {
 }
 
 function modifyRatingAndSubscription(user: ChromunityUser, id: string, rellOperation: string) {
-  return BLOCKCHAIN.then(bc => bc.call(user.ft3User, rellOperation, user.name.toLocaleLowerCase(), id, uniqueId()));
+  return BLOCKCHAIN.then(bc =>
+    bc.call(
+      user.ft3User,
+      rellOperation,
+      user.name.toLocaleLowerCase(),
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      id,
+      uniqueId()
+    )
+  );
 }
 
 export function getReplyStarRaters(topicId: string): Promise<string[]> {

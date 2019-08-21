@@ -25,7 +25,13 @@ export function getFollowedChannels(user: string): Promise<string[]> {
 function modifyChannelollowing(user: ChromunityUser, channel: string, rellOperation: string) {
   channelsCache.remove(channel + ":followers");
   return BLOCKCHAIN.then(bc =>
-    bc.call(user.ft3User, rellOperation, user.name.toLocaleLowerCase(), channel.toLocaleLowerCase())
+    bc.call(
+      user.ft3User,
+      rellOperation,
+      user.name.toLocaleLowerCase(),
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      channel.toLocaleLowerCase()
+    )
   );
 }
 

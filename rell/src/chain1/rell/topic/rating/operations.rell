@@ -1,25 +1,25 @@
-operation give_topic_star_rating(username: text, id: text, unique_id: text) {
-    val user = get_verified_user(username);
+operation give_topic_star_rating(username: text, descriptor_id: byte_array, id: text, unique_id: text) {
+    val user = get_verified_user(username, descriptor_id);
     create topic_star_rating(topic@{ .id == id }, user);
 
     val topicRating = tmp_topic_rating@{ topic@{ .id == id }};
     update topicRating ( stars = topicRating.stars + 1 );
 }
 
-operation remove_topic_star_rating(username: text, id: text, unique_id: text) {
-    val user = get_verified_user(username);
+operation remove_topic_star_rating(username: text, descriptor_id: byte_array, id: text, unique_id: text) {
+    val user = get_verified_user(username, descriptor_id);
     delete topic_star_rating@{ topic@{ .id == id }, user };
 
     val topicRating = tmp_topic_rating@{ topic@{ .id == id }};
     update topicRating ( stars = topicRating.stars - 1 );
 }
 
-operation give_reply_star_rating(username: text, id: text, unique_id: text) {
-    val user = get_verified_user(username);
+operation give_reply_star_rating(username: text, descriptor_id: byte_array, id: text, unique_id: text) {
+    val user = get_verified_user(username, descriptor_id);
     create reply_star_rating(topic_reply@{ .id == id }, user);
 }
 
-operation remove_reply_star_rating(username: text, id: text, unique_id: text) {
-    val user = get_verified_user(username);
+operation remove_reply_star_rating(username: text, descriptor_id: byte_array, id: text, unique_id: text) {
+    val user = get_verified_user(username, descriptor_id);
     delete reply_star_rating@{ topic_reply@{ .id == id }, user };
 }

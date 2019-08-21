@@ -46,13 +46,29 @@ export function updateUserSettings(user: ChromunityUser, avatar: string, descrip
   const userLC: string = user.name.toLocaleLowerCase();
   boomerang.remove(userLC);
 
-  return BLOCKCHAIN.then(bc => bc.call(user.ft3User, "update_user_settings", userLC, avatar, description));
+  return BLOCKCHAIN.then(bc =>
+    bc.call(
+      user.ft3User,
+      "update_user_settings",
+      userLC,
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      avatar,
+      description
+    )
+  );
 }
 
 export function toggleUserMute(user: ChromunityUser, name: string, muted: boolean) {
   boomerang.remove("muted-users");
   return BLOCKCHAIN.then(bc =>
-    bc.call(user.ft3User, "toggle_mute", user.name.toLocaleLowerCase(), name.toLocaleLowerCase(), muted ? 1 : 0)
+    bc.call(
+      user.ft3User,
+      "toggle_mute",
+      user.name.toLocaleLowerCase(),
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      name.toLocaleLowerCase(),
+      muted ? 1 : 0
+    )
   );
 }
 

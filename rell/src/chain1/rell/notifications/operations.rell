@@ -1,9 +1,9 @@
 
-operation create_notifications_for_users(name, id: text, trigger: text, content: text, usernames: set<text>) {
-    val user = get_verified_user(name);
+operation create_notifications_for_users(name, descriptor_id: byte_array, id: text, trigger: text, content: text, usernames: set<text>) {
+    val user = get_verified_user(name, descriptor_id);
 
     for (username in usernames) {
-        val toUser = user@?{ .name == username };
+        val toUser = user@?{ .name == username.lower_case() };
         if (toUser != null) {
             create notification(
                 id = id, 
@@ -17,8 +17,8 @@ operation create_notifications_for_users(name, id: text, trigger: text, content:
     }
 }
 
-operation remove_notifications_for_users(name, id: text, usernames: set<text>) {
-    val user = get_verified_user(name);
+operation remove_notifications_for_users(name, descriptor_id: byte_array, id: text, usernames: set<text>) {
+    val user = get_verified_user(name, descriptor_id);
 
     for (username in usernames) {
         val toUser = user@?{ .name == username };
@@ -28,7 +28,7 @@ operation remove_notifications_for_users(name, id: text, usernames: set<text>) {
     }
 }
 
-operation mark_notifications_since_timestamp_read(name, timestamp) {
-    val user = get_verified_user(name);
+operation mark_notifications_since_timestamp_read(name, descriptor_id: byte_array, timestamp) {
+    val user = get_verified_user(name, descriptor_id);
     update notification@*{ .user == user, .timestamp > timestamp } ( read = true );
 }

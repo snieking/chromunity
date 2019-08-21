@@ -36,7 +36,15 @@ function createDeterministicId(follower: string, following: string) {
 
 function updateFollowing(user: ChromunityUser, following: string, rellOperation: string) {
   boomerang.remove("user-" + user.name.toLocaleLowerCase());
-  return BLOCKCHAIN.then(bc => bc.call(user.ft3User, rellOperation, user.name.toLocaleLowerCase(), following.toLocaleLowerCase()));
+  return BLOCKCHAIN.then(bc =>
+    bc.call(
+      user.ft3User,
+      rellOperation,
+      user.name.toLocaleLowerCase(),
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      following.toLocaleLowerCase()
+    )
+  );
 }
 
 export function countUserFollowers(name: string): Promise<number> {

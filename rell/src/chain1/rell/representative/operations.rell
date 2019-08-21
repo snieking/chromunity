@@ -1,5 +1,5 @@
-operation remove_topic(username: text, topic_id: text) {
-    val user = get_verified_user(username);
+operation remove_topic(username: text, descriptor_id: byte_array, topic_id: text) {
+    val user = get_verified_user(username, descriptor_id);
 
     val recentElection = representative_election@{ .completed == true } ( .id, sort .timestamp );
     val representative = representative @{ user, .representative_election.id == recentElection.id };
@@ -15,8 +15,8 @@ operation remove_topic(username: text, topic_id: text) {
     );
 }
 
-operation remove_topic_reply(username: text, topic_reply_id: text) {
-    val user = get_verified_user(username);
+operation remove_topic_reply(username: text, descriptor_id: byte_array, topic_reply_id: text) {
+    val user = get_verified_user(username, descriptor_id);
 
     val recentElection = representative_election@{ .completed == true } ( .id, sort .timestamp );
     val representative = representative @{ user, .representative_election.id == recentElection.id };
@@ -32,8 +32,8 @@ operation remove_topic_reply(username: text, topic_reply_id: text) {
     );
 }
 
-operation suspend_user(username: text, user_to_be_suspended: text) {
-    val user = get_verified_user(username);
+operation suspend_user(username: text, descriptor_id: byte_array, user_to_be_suspended: text) {
+    val user = get_verified_user(username, descriptor_id);
 
     val recentElection = representative_election@{ .completed == true } ( .id, sort .timestamp );
     val representative = representative @{ user, .representative_election.id == recentElection.id };
@@ -66,8 +66,10 @@ operation suspend_user(username: text, user_to_be_suspended: text) {
     );
 }
 
-operation tmp_add_representative(admin_name: name, name) {
-    //require(is_signer(admin@{ .user.name == admin_name }( .user.pubkey )));
+operation tmp_add_representative(admin_name: name, descriptor_id: byte_array, name) {
+    val admin_user = get_verified_user(admin_name, descriptor_id);
+    admin@{ admin_user };
+
     val currentElection = representative_election @ { .timestamp <= op_context.last_block_time, .completed == true } (
         .id,
         -sort .timestamp
@@ -76,8 +78,10 @@ operation tmp_add_representative(admin_name: name, name) {
     create representative(user@{ .name == name }, representative_election@{ .id == currentElection.id });
 }
 
-operation tmp_remove_representative(admin_name: name, name) {
-    //require(is_signer(admin@{ .user.name == admin_name }( .user.pubkey )));
+operation tmp_remove_representative(admin_name: name, descriptor_id: byte_array, name) {
+    val admin_user = get_verified_user(admin_name, descriptor_id);
+    admin@{ admin_user };
+
     val currentElection = representative_election @ { .timestamp <= op_context.last_block_time, .completed == true } (
         .id,
         -sort .timestamp

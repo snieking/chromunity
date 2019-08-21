@@ -1,12 +1,12 @@
-operation create_following(follower: text, follows: text) {
+operation create_following(follower: text, descriptor_id: byte_array, follows: text) {
     require(follower != follows);
-    val user = get_verified_user(follower);
-    create follow(follower = user, follows = user@{ .name == follows });
+    val user = get_verified_user(follower, descriptor_id);
+    create follow(follower = user, follows = user@{ .name == follows.lower_case() });
 }
 
-operation remove_following(follower: text, follows: text) {
+operation remove_following(follower: text, descriptor_id: byte_array, follows: text) {
     require(follower != follows);
-    val user = get_verified_user(follower);
+    val user = get_verified_user(follower, descriptor_id);
 
-    delete follow@{ .follower == user, .follows == user@{ .name == follows } };
+    delete follow@{ .follower == user, .follows == user@{ .name == follows.lower_case() } };
 }

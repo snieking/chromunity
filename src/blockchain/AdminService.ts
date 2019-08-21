@@ -12,5 +12,13 @@ export function adminRemoveRepresentative(user: ChromunityUser, username: string
 
 function toggleRepresentative(user: ChromunityUser, username: string, rellOperation: string) {
   clearRepresentativesCache();
-  return BLOCKCHAIN.then(bc => bc.call(user.ft3User, rellOperation, user.name, username.toLocaleLowerCase()));
+  return BLOCKCHAIN.then(bc =>
+    bc.call(
+      user.ft3User,
+      rellOperation,
+      user.name,
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      username.toLocaleLowerCase()
+    )
+  );
 }

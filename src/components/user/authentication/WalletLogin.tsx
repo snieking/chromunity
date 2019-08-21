@@ -24,6 +24,9 @@ const useStyles = makeStyles(
     },
     input: {
       marginTop: "10px"
+    },
+    textField: {
+      marginBottom: "5px"
     }
   })
 );
@@ -54,8 +57,13 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
       {props.loading && <CircularProgress disableShrink />}
       {step === Step.INIT && (
         <div>
-          <Typography variant="subtitle1" component="p">
-            User authentication is handled by the Chromia Vault.
+          <Typography variant="subtitle1" component="p" className={classes.textField}>
+            User authentication is handled by Chromia Wallet.
+          </Typography>
+          <Typography variant="subtitle2" component="p" className={classes.textField}>
+            If you are signing in a new account,
+            then you will be redirected. If you already registered to Chromunity previously,
+            then you will receive a pop-up to authorize your device.
           </Typography>
           <TextField
             label="Account name"
@@ -74,13 +82,15 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
             className={classes.input}
             onClick={walletLogin}
           >
-            Sign in with Chromia Vault
+            Sign in with Chromia Wallet
           </Button>
         </div>
       )}
-      {step === Step.LOGIN_IN_PROGRESS &&
-        props.success &&
-        window.location.replace("/")}
+      {step === Step.LOGIN_IN_PROGRESS && (
+        <Typography variant="subtitle1" component="p">
+          If you do not see anything, make sure you allow pop-ups.
+        </Typography>
+      )}
       <Snackbar
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         open={errorOpen}

@@ -30,10 +30,10 @@ export function decrypt(data: string, key: string): string {
 }
 
 export function makeKeyPair() {
-    let privKey
+    let privKey;
     do {
         privKey = crypto.randomBytes(32)
-    } while (!secp256k1.privateKeyVerify(privKey))
-    const pubKey = secp256k1.publicKeyCreate(privKey)
+    } while (!secp256k1.privateKeyVerify(privKey));
+    const pubKey = secp256k1.publicKeyCreate(privKey);
     return { pubKey, privKey }
 }

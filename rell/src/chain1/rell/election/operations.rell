@@ -1,5 +1,6 @@
-operation trigger_election(admin_user: text, id: text, timestamp) {
-    //require(is_signer(admin@{ .user.name == admin_user}( .user.pubkey )));
+operation trigger_election(admin_user: text, descriptor_id: byte_array, id: text, timestamp) {
+    val user = get_verified_user(admin_user, descriptor_id);
+    admin@{ user };
 
     val currentElection = representative_election @? { .completed == false };
 
@@ -8,8 +9,9 @@ operation trigger_election(admin_user: text, id: text, timestamp) {
     }
 }
   
-operation complete_election(admin_user: text, representatives: set<text>) {
-    //require(is_signer(admin@{ .user.name == admin_user}( .user.pubkey )));
+operation complete_election(admin_user: text, descriptor_id: byte_array, representatives: set<text>) {
+    val op_user = get_verified_user(admin_user, descriptor_id);
+    admin@{ op_user };
 
     val currentElection = representative_election @ { .completed == false };
     log("Completing election: ", currentElection.id);
@@ -21,8 +23,8 @@ operation complete_election(admin_user: text, representatives: set<text>) {
     }
 }
 
-operation vote_for_candidate(voter: name, candidate: name) {
-    val user = get_verified_user(voter);
+operation vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: name) {
+    val user = get_verified_user(voter, descriptor_id);
 
     val currentElection = representative_election @ { .completed == false };
     log("Voting for candidate in election: ", currentElection.id);
@@ -32,8 +34,8 @@ operation vote_for_candidate(voter: name, candidate: name) {
     );
 }
 
-operation update_vote_for_candidate(voter: name, candidate: name) {
-    val user = get_verified_user(voter);
+operation update_vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: name) {
+    val user = get_verified_user(voter, descriptor_id);
 
     val currentElection = representative_election @ { .completed == false };    
     val election_candidate = representative_election_candidate@{
@@ -55,8 +57,8 @@ operation update_vote_for_candidate(voter: name, candidate: name) {
     );
 }
 
-operation sign_up_for_election(name) {
-    val user = get_verified_user(name);
+operation sign_up_for_election(name, descriptor_id: byte_array) {
+    val user = get_verified_user(name, descriptor_id);
 
     val currentElection = representative_election @ { .completed == false };
 
