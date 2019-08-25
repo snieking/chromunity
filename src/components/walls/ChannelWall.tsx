@@ -4,12 +4,7 @@ import { Badge, Container, IconButton, LinearProgress, MenuItem, Select, Tooltip
 import { ChromunityUser, Topic } from "../../types";
 
 import { RouteComponentProps } from "react-router";
-import {
-  countTopicsInChannel,
-  getTopicsByChannelAfterTimestamp,
-  getTopicsByChannelPriorToTimestamp,
-  getTopicsByChannelSortedByPopularityAfterTimestamp
-} from "../../blockchain/TopicService";
+import { countTopicsInChannel } from "../../blockchain/TopicService";
 import TopicOverviewCard from "../topic/TopicOverviewCard";
 import LoadMoreButton from "../buttons/LoadMoreButton";
 import {
@@ -26,20 +21,33 @@ import { getMutedUsers } from "../../blockchain/UserService";
 import { TOPIC_VIEW_SELECTOR_OPTION } from "./WallCommon";
 import { getUser } from "../../util/user-util";
 import { COLOR_SOFT_PINK } from "../../theme";
+import { connect } from "react-redux";
+import {
+  channelInit,
+  loadChannel,
+  loadChannelByPopularity,
+  loadOlderTopicsInChannel
+} from "../../redux/actions/ChannelActions";
+import { ApplicationState } from "../../redux/Store";
 
 interface MatchParams {
   channel: string;
 }
 
-export interface ChannelWallProps extends RouteComponentProps<MatchParams> {}
+export interface ChannelWallProps extends RouteComponentProps<MatchParams> {
+  loading: boolean;
+  topics: Topic[];
+  couldExistOlder: boolean;
+  channelInit: typeof channelInit;
+  loadChannel: typeof loadChannel;
+  loadOlderTopicsInChannel: typeof loadOlderTopicsInChannel;
+  loadChannelByPopularity: typeof loadChannelByPopularity;
+}
 
 export interface ChannelWallState {
-  topics: Topic[];
+  isLoading: boolean;
   representatives: string[];
   id: string;
-  timestampOnOldestTopic: number;
-  isLoading: boolean;
-  couldExistOlderTopics: boolean;
   channelFollowed: boolean;
   countOfTopics: number;
   countOfFollowers: number;
@@ -55,18 +63,15 @@ const StyledSelect = styled(Select)({
   marginRight: "10px"
 });
 
-const topicsPageSize: number = 25;
+const topicsPageSize: number = 15;
 
 class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
   constructor(props: ChannelWallProps) {
     super(props);
     this.state = {
-      topics: [],
       representatives: [],
       id: "",
-      timestampOnOldestTopic: Date.now(),
-      isLoading: true,
-      couldExistOlderTopics: false,
+      isLoading: false,
       channelFollowed: false,
       countOfTopics: 0,
       countOfFollowers: 0,
@@ -84,6 +89,7 @@ class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
   }
 
   componentDidMount(): void {
+    this.props.channelInit();
     this.retrieveTopics();
     getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
 
@@ -103,35 +109,18 @@ class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
   }
 
   retrieveTopics() {
-    this.setState({ isLoading: true });
     const channel = this.props.match.params.channel;
 
     if (channel != null) {
-      getTopicsByChannelPriorToTimestamp(channel, Date.now(), topicsPageSize).then(retrievedTopics => {
-        this.setState(prevState => ({
-          topics: retrievedTopics.concat(prevState.topics),
-          isLoading: false,
-          couldExistOlderTopics: retrievedTopics.length >= topicsPageSize
-        }));
-      });
+      this.props.loadChannel(channel, topicsPageSize);
     }
   }
 
   retrieveLatestTopics() {
-    this.setState({ isLoading: true });
     const channel = this.props.match.params.channel;
 
-    const timestamp: number =
-      this.state.topics.length > 0 ? this.state.topics[this.state.topics.length - 1].last_modified : Date.now();
-
     if (channel != null) {
-      getTopicsByChannelAfterTimestamp(channel, timestamp).then(retrievedTopics => {
-        this.setState(prevState => ({
-          topics: retrievedTopics.concat(prevState.topics),
-          countOfFollowers: prevState.countOfFollowers + retrievedTopics.length,
-          isLoading: false
-        }));
-      });
+      this.props.loadChannel(channel, topicsPageSize);
     }
   }
 
@@ -164,33 +153,16 @@ class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
   }
 
   retrieveOlderTopics() {
-    if (this.state.topics.length > 0) {
-      this.setState({ isLoading: true });
-      const channel = this.props.match.params.channel;
-      const oldestTimestamp: number = this.state.topics[this.state.topics.length - 1].last_modified;
-      getTopicsByChannelPriorToTimestamp(channel, oldestTimestamp, topicsPageSize).then(retrievedTopics => {
-        if (retrievedTopics.length > 0) {
-          this.setState(prevState => ({
-            topics: prevState.topics.concat(retrievedTopics),
-            isLoading: false,
-            couldExistOlderTopics: retrievedTopics.length >= topicsPageSize
-          }));
-        } else {
-          this.setState({ isLoading: false, couldExistOlderTopics: false });
-        }
-      });
-    }
+    this.props.loadOlderTopicsInChannel(topicsPageSize);
   }
 
   renderLoadMoreButton() {
-    if (this.state.couldExistOlderTopics) {
+    if (this.props.couldExistOlder) {
       return <LoadMoreButton onClick={this.retrieveOlderTopics} />;
     }
   }
 
   retrievePopularTopics(selected: TOPIC_VIEW_SELECTOR_OPTION) {
-    this.setState({ isLoading: true });
-
     const dayInMilliSeconds: number = 86400000;
     let timestamp: number;
 
@@ -209,23 +181,15 @@ class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
         timestamp = 0;
     }
 
-    getTopicsByChannelSortedByPopularityAfterTimestamp(this.props.match.params.channel, timestamp, topicsPageSize)
-      .then(topics =>
-        this.setState({
-          topics: topics,
-          couldExistOlderTopics: false,
-          isLoading: false
-        })
-      )
-      .catch(() => this.setState({ isLoading: false }));
+    this.props.loadChannelByPopularity(this.props.match.params.channel, timestamp, topicsPageSize);
   }
 
   handleSelectorChange(event: React.ChangeEvent<{ value: unknown }>) {
     const selected = event.target.value as TOPIC_VIEW_SELECTOR_OPTION;
 
-    if (this.state.selector !== selected) {
-      this.setState({ selector: selected, topics: [] });
+    this.setState({ selector: selected });
 
+    if (this.state.selector !== selected) {
       if (selected === TOPIC_VIEW_SELECTOR_OPTION.RECENT) {
         this.retrieveLatestTopics();
       } else if (selected === TOPIC_VIEW_SELECTOR_OPTION.POPULAR) {
@@ -238,7 +202,7 @@ class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
     const selected = event.target.value as TOPIC_VIEW_SELECTOR_OPTION;
 
     if (this.state.popularSelector !== selected) {
-      this.setState({ popularSelector: selected, topics: [] });
+      this.setState({ popularSelector: selected });
       this.retrievePopularTopics(selected);
     }
   }
@@ -266,7 +230,7 @@ class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
             </Badge>
           </IconButton>
 
-          {this.state.isLoading ? <LinearProgress variant="query" /> : <div />}
+          {this.state.isLoading || this.props.loading ? <LinearProgress variant="query" /> : <div />}
           <StyledSelect value={this.state.selector} onChange={this.handleSelectorChange}>
             <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.RECENT}>Recent</MenuItem>
             <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR}>Popular</MenuItem>
@@ -283,7 +247,7 @@ class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
           )}
           <br />
           <br />
-          {this.state.topics.map(topic => {
+          {this.props.topics.map(topic => {
             if (!this.state.mutedUsers.includes(topic.author)) {
               return (
                 <TopicOverviewCard
@@ -308,4 +272,25 @@ class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
   }
 }
 
-export default ChannelWall;
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    channelInit: () => dispatch(channelInit()),
+    loadChannel: (name: string, pageSize: number) => dispatch(loadChannel(name, pageSize)),
+    loadOlderTopicsInChannel: (pageSize: number) => dispatch(loadOlderTopicsInChannel(pageSize)),
+    loadChannelByPopularity: (name: string, timestamp: number, pageSize: number) =>
+      dispatch(loadChannelByPopularity(name, timestamp, pageSize))
+  };
+};
+
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    loading: store.channel.loading,
+    topics: store.channel.topics,
+    couldExistOlder: store.channel.couldExistOlder
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ChannelWall);

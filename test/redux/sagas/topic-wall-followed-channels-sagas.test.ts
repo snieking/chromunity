@@ -11,7 +11,7 @@ import { CREATE_RANDOM_TOPIC } from "../../topics";
 import { runSaga } from "redux-saga";
 import {
   loadFollowedChannelsTopics,
-  loadFollowedChannelsTopicsByPopularity, loadFollowedUsersTopics,
+  loadFollowedChannelsTopicsByPopularity,
   loadOlderFollowedChannelsTopics
 } from "../../../src/redux/sagas/TopicWallSagas";
 import { followChannel } from "../../../src/blockchain/ChannelService";

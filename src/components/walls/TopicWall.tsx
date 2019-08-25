@@ -55,7 +55,7 @@ const StyledSelector = styled(Select)({
   marginRight: "10px"
 });
 
-const topicsPageSize: number = 25;
+const topicsPageSize: number = 15;
 
 class TopicWall extends React.Component<Props, State> {
   constructor(props: Props) {
