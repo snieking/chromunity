@@ -1,14 +1,14 @@
-import { UserSettings } from "../src/types";
+import { UserSettings } from "../../src/types";
 import {
   getMutedUsers,
   getUserSettings,
   getUserSettingsCached,
   toggleUserMute,
   updateUserSettings
-} from "../src/blockchain/UserService";
+} from "../../src/blockchain/UserService";
 
-import { ChromunityUser } from "../src/types";
-import { CREATE_LOGGED_IN_USER } from "./users";
+import { ChromunityUser } from "../../src/types";
+import { CREATE_LOGGED_IN_USER } from "../users";
 
 jest.setTimeout(30000);
 

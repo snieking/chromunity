@@ -37,6 +37,7 @@ const CREATE_RANDOM_USER = (): TestUser => {
 
 const CREATE_LOGGED_IN_USER = async () => {
   const user = CREATE_RANDOM_USER();
+  console.log("About to loginUser: ", user);
   return loginUser(user);
 };
 

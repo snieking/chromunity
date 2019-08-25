@@ -1,5 +1,5 @@
-import {needsToBeSliced, sortByFrequency, stringToHexColor, timeAgoReadable} from "../src/util/util";
-import {getTags} from "../src/util/text-parsing";
+import {needsToBeSliced, sortByFrequency, stringToHexColor, timeAgoReadable} from "../../src/util/util";
+import {getTags} from "../../src/util/text-parsing";
 
 jest.setTimeout(30000);
 

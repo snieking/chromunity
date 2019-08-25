@@ -1,4 +1,4 @@
-import { ChromunityUser, UserNotification } from "../src/types";
+import { ChromunityUser, UserNotification } from "../../src/types";
 import {
     countUnreadUserNotifications,
     getUserNotificationsPriorToTimestamp,
@@ -6,8 +6,8 @@ import {
     removeNotificationsForId,
     sendNotifications,
     sendNotificationWithDeterministicId
-} from '../src/blockchain/NotificationService';
-import {CREATE_LOGGED_IN_USER} from "./users";
+} from '../../src/blockchain/NotificationService';
+import {CREATE_LOGGED_IN_USER} from "../users";
 
 jest.setTimeout(30000);
 

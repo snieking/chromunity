@@ -49,8 +49,6 @@ export function getUser(): ChromunityUser {
   const keyPair = getKeyPair();
   const username: string = getUsername();
 
-  console.log("keyPair", keyPair, "username", username);
-
   if (keyPair == null) return null;
   if (username == null) return null;
 
@@ -71,10 +69,16 @@ export function getCachedUserMeta(): Promise<UserMeta> {
     return new Promise<UserMeta>(resolve => resolve(meta));
   }
 
-  return getUserMeta(getUsername()).then(meta => {
-    setUserMeta(meta);
-    return meta;
-  });
+  const username = getUsername();
+
+  if (username != null) {
+    return getUserMeta(getUsername()).then(meta => {
+      setUserMeta(meta);
+      return meta;
+    });
+  } else {
+    return new Promise<UserMeta>(resolve => resolve(null));
+  }
 }
 
 export function godAlias(): string {

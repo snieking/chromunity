@@ -6,8 +6,8 @@ import {
     Topic,
     TopicReply,
     UserMeta
-} from "../src/types";
-import {getUserMeta} from "../src/blockchain/UserService";
+} from "../../src/types";
+import {getUserMeta} from "../../src/blockchain/UserService";
 import {
     completeElection,
     getElectionCandidates,
@@ -17,9 +17,9 @@ import {
     signUpForElection,
     triggerElection,
     voteForCandidate
-} from "../src/blockchain/ElectionService";
-import {sleepUntil} from "./helper";
-import {getCachedUserMeta, setUserMeta} from "../src/util/user-util";
+} from "../../src/blockchain/ElectionService";
+import {sleepUntil} from "../helper";
+import {getCachedUserMeta, setUserMeta} from "../../src/util/user-util";
 import {
     getAllRepresentativeActionsPriorToTimestamp,
     getCurrentRepresentativePeriod,
@@ -29,7 +29,7 @@ import {
     reportReply,
     reportTopic,
     suspendUser
-} from "../src/blockchain/RepresentativesService";
+} from "../../src/blockchain/RepresentativesService";
 import {
     createTopic,
     createTopicReply,
@@ -38,9 +38,9 @@ import {
     getTopicsByUserPriorToTimestamp,
     removeTopic,
     removeTopicReply
-} from "../src/blockchain/TopicService";
-import {adminAddRepresentative, adminRemoveRepresentative} from "../src/blockchain/AdminService";
-import {CREATE_LOGGED_IN_USER, GET_LOGGED_IN_ADMIN_USER} from "./users";
+} from "../../src/blockchain/TopicService";
+import {adminAddRepresentative, adminRemoveRepresentative} from "../../src/blockchain/AdminService";
+import {CREATE_LOGGED_IN_USER, GET_LOGGED_IN_ADMIN_USER} from "../users";
 
 
 jest.setTimeout(30000);
@@ -113,7 +113,7 @@ describe("election test", () => {
         expect(meta.suspended_until).toBeGreaterThan(Date.now());
 
         setUserMeta(meta);
-        meta = await getCachedUserMeta(secondUser.name);
+        meta = await getCachedUserMeta();
         expect(meta.suspended_until).toBeGreaterThan(Date.now());
     });
 

@@ -25,6 +25,7 @@ import { Favorite, FavoriteBorder } from "@material-ui/icons";
 import { getMutedUsers } from "../../blockchain/UserService";
 import { TOPIC_VIEW_SELECTOR_OPTION } from "./WallCommon";
 import { getUser } from "../../util/user-util";
+import { COLOR_SOFT_PINK } from "../../theme";
 
 interface MatchParams {
   channel: string;
@@ -49,6 +50,7 @@ export interface ChannelWallState {
 }
 
 const StyledSelect = styled(Select)({
+  color: COLOR_SOFT_PINK,
   float: "left",
   marginRight: "10px"
 });
@@ -120,7 +122,7 @@ class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
     const channel = this.props.match.params.channel;
 
     const timestamp: number =
-      this.state.topics.length > 0 ? this.state.topics[this.state.topics.length - 1].timestamp : Date.now();
+      this.state.topics.length > 0 ? this.state.topics[this.state.topics.length - 1].last_modified : Date.now();
 
     if (channel != null) {
       getTopicsByChannelAfterTimestamp(channel, timestamp).then(retrievedTopics => {
@@ -165,7 +167,7 @@ class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
     if (this.state.topics.length > 0) {
       this.setState({ isLoading: true });
       const channel = this.props.match.params.channel;
-      const oldestTimestamp: number = this.state.topics[this.state.topics.length - 1].timestamp;
+      const oldestTimestamp: number = this.state.topics[this.state.topics.length - 1].last_modified;
       getTopicsByChannelPriorToTimestamp(channel, oldestTimestamp, topicsPageSize).then(retrievedTopics => {
         if (retrievedTopics.length > 0) {
           this.setState(prevState => ({

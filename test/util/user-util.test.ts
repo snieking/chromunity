@@ -6,9 +6,9 @@ import {
   setRepresentative,
   setUsername,
   storeKeyPair
-} from "../src/util/user-util";
-import { ChromunityUser } from "../src/types";
-import { CREATE_LOGGED_IN_USER } from "./users";
+} from "../../src/util/user-util";
+import { ChromunityUser } from "../../src/types";
+import { CREATE_LOGGED_IN_USER } from "../users";
 
 describe("user utilities tests", () => {
   let user: ChromunityUser;

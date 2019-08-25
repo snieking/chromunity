@@ -1,16 +1,6 @@
 import React from "react";
 import { styled } from "@material-ui/core/styles";
 import { ChromunityUser, Topic } from "../../types";
-import {
-  getAllTopicsByPopularityAfterTimestamp,
-  getTopicsAfterTimestamp,
-  getTopicsByFollowedChannelSortedByPopularityAfterTimestamp,
-  getTopicsByFollowsSortedByPopularityAfterTimestamp,
-  getTopicsFromFollowedChannelsPriorToTimestamp,
-  getTopicsFromFollowsAfterTimestamp,
-  getTopicsFromFollowsPriorToTimestamp,
-  getTopicsPriorToTimestamp
-} from "../../blockchain/TopicService";
 import { Container, LinearProgress, MenuItem, Select } from "@material-ui/core";
 import TopicOverviewCard from "../topic/TopicOverviewCard";
 import NewTopicButton from "../buttons/NewTopicButton";
@@ -21,16 +11,38 @@ import { getRepresentatives } from "../../blockchain/RepresentativesService";
 import { getMutedUsers } from "../../blockchain/UserService";
 import { TOPIC_VIEW_SELECTOR_OPTION } from "./WallCommon";
 import { getUser } from "../../util/user-util";
+import { ApplicationState } from "../../redux/Store";
+import {
+  loadAllTopicsByPopularity,
+  loadAllTopicWall,
+  loadFollowedChannelsTopicsByPopularity,
+  loadFollowedChannelsTopicWall,
+  loadFollowedUsersTopicsByPopularity,
+  loadFollowedUsersTopicWall,
+  loadOlderAllTopics,
+  loadOlderFollowedChannelsTopics,
+  loadOlderFollowedUsersTopics
+} from "../../redux/actions/WallActions";
+import { connect } from "react-redux";
 
 interface Props {
   type: string;
+  loading: boolean;
+  topics: Topic[];
+  couldExistOlderTopics: boolean;
+  loadAllTopics: typeof loadAllTopicWall;
+  loadOlderTopics: typeof loadOlderAllTopics;
+  loadAllTopicsByPopularity: typeof loadAllTopicsByPopularity;
+  loadFollowedUsersTopics: typeof loadFollowedUsersTopicWall;
+  loadOlderFollowedUsersTopics: typeof loadOlderFollowedUsersTopics;
+  loadFollowedUsersTopicsByPopularity: typeof loadFollowedUsersTopicsByPopularity;
+  loadFollowedChannelsTopics: typeof loadFollowedChannelsTopicWall;
+  loadOlderFollowedChannelsTopics: typeof loadOlderFollowedChannelsTopics;
+  loadFollowedChannelsTopicsByPopularity: typeof loadFollowedChannelsTopicsByPopularity;
 }
 
 interface State {
-  topics: Topic[];
   representatives: string[];
-  isLoading: boolean;
-  couldExistOlderTopics: boolean;
   selector: TOPIC_VIEW_SELECTOR_OPTION;
   popularSelector: TOPIC_VIEW_SELECTOR_OPTION;
   mutedUsers: string[];
@@ -49,10 +61,7 @@ class TopicWall extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      topics: [],
       representatives: [],
-      isLoading: true,
-      couldExistOlderTopics: false,
       selector: TOPIC_VIEW_SELECTOR_OPTION.RECENT,
       popularSelector: TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK,
       mutedUsers: [],
@@ -66,7 +75,7 @@ class TopicWall extends React.Component<Props, State> {
   }
 
   renderLoadMoreButton() {
-    if (this.state.couldExistOlderTopics) {
+    if (this.props.couldExistOlderTopics) {
       return <LoadMoreButton onClick={this.retrieveOlderTopics} />;
     }
   }
@@ -85,7 +94,7 @@ class TopicWall extends React.Component<Props, State> {
     const selected = event.target.value as TOPIC_VIEW_SELECTOR_OPTION;
 
     if (this.state.selector !== selected) {
-      this.setState({ selector: selected, topics: [] });
+      this.setState({ selector: selected });
 
       if (selected === TOPIC_VIEW_SELECTOR_OPTION.RECENT) {
         this.retrieveLatestTopics();
@@ -99,18 +108,17 @@ class TopicWall extends React.Component<Props, State> {
     const selected = event.target.value as TOPIC_VIEW_SELECTOR_OPTION;
 
     if (this.state.popularSelector !== selected) {
-      this.setState({ popularSelector: selected, topics: [] });
+      this.setState({ popularSelector: selected });
       this.retrievePopularTopics(selected);
     }
   }
 
   render() {
-    console.log("LOGGED IN USER: ", this.state.user);
     return (
       <div>
         <Container fixed>
           <ChromiaPageHeader text={this.getHeader()} />
-          {this.state.isLoading ? <LinearProgress variant="query" /> : <div />}
+          {this.props.loading ? <LinearProgress variant="query" /> : <div />}
           {this.props.type === "tagFollowings" ? <TrendingChannels /> : <div />}
           {this.props.type === "tagFollowings" ? <ChromiaPageHeader text="Followed Channels" /> : <div />}
           <StyledSelector value={this.state.selector} onChange={this.handleSelectorChange}>
@@ -129,7 +137,7 @@ class TopicWall extends React.Component<Props, State> {
           )}
           <br />
           <br />
-          {this.state.topics.map(topic => {
+          {this.props.topics.map(topic => {
             if (!this.state.mutedUsers.includes(topic.author)) {
               return (
                 <TopicOverviewCard
@@ -157,79 +165,17 @@ class TopicWall extends React.Component<Props, State> {
     getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
   }
 
-  retrieveLatestTopicsForAll() {
-    let topics: Promise<Topic[]>;
-
-    if (this.state.topics.length === 0) {
-      topics = getTopicsPriorToTimestamp(Date.now(), topicsPageSize);
-    } else {
-      topics = getTopicsAfterTimestamp(this.state.topics[0].timestamp, topicsPageSize);
-    }
-
-    topics
-      .then(retrievedTopics => this.appendLatestTopics(retrievedTopics))
-      .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
-  }
-
-  retrieveLatestTopicsForUserFollowings() {
-    let topics: Promise<Topic[]>;
-
-    if (this.state.topics.length === 0) {
-      topics = getTopicsFromFollowsPriorToTimestamp(this.state.user, Date.now(), topicsPageSize);
-    } else {
-      topics = getTopicsFromFollowsAfterTimestamp(this.state.user, this.state.topics[0].timestamp, topicsPageSize);
-    }
-
-    topics
-      .then(retrievedTopics => this.appendLatestTopics(retrievedTopics))
-      .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
-  }
-
-  retrieveLatestTopicsForTagFollowings() {
-    let topics: Promise<Topic[]>;
-
-    if (this.state.topics.length === 0) {
-      topics = getTopicsFromFollowedChannelsPriorToTimestamp(this.state.user, Date.now(), topicsPageSize);
-    } else {
-      topics = getTopicsFromFollowedChannelsPriorToTimestamp(
-        this.state.user,
-        this.state.topics[0].timestamp,
-        topicsPageSize
-      );
-    }
-
-    topics
-      .then(retrievedTopics => this.appendLatestTopics(retrievedTopics))
-      .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
-  }
-
-  appendLatestTopics(topics: Topic[]) {
-    if (topics.length > 0) {
-      this.setState(prevState => ({
-        topics: Array.from(new Set(topics.concat(prevState.topics))),
-        isLoading: false,
-        couldExistOlderTopics: topics.length >= topicsPageSize
-      }));
-    } else {
-      this.setState({ isLoading: false, couldExistOlderTopics: false });
-    }
-  }
-
   retrieveLatestTopics() {
-    this.setState({ isLoading: true });
-
     if (this.props.type === "userFollowings") {
-      this.retrieveLatestTopicsForUserFollowings();
+      this.props.loadFollowedUsersTopics(this.state.user.name, topicsPageSize);
     } else if (this.props.type === "tagFollowings") {
-      this.retrieveLatestTopicsForTagFollowings();
+      this.props.loadFollowedChannelsTopics(this.state.user.name, topicsPageSize);
     } else {
-      this.retrieveLatestTopicsForAll();
+      this.props.loadAllTopics(topicsPageSize);
     }
   }
 
   retrievePopularTopics(selected: TOPIC_VIEW_SELECTOR_OPTION) {
-    this.setState({ isLoading: true });
-
     const dayInMilliSeconds: number = 86400000;
     let timestamp: number;
 
@@ -249,74 +195,58 @@ class TopicWall extends React.Component<Props, State> {
         break;
     }
 
-    let topics: Promise<Topic[]>;
     if (this.props.type === "userFollowings") {
-      topics = getTopicsByFollowsSortedByPopularityAfterTimestamp(this.state.user.name, timestamp, topicsPageSize);
+      this.props.loadFollowedUsersTopicsByPopularity(this.state.user.name, timestamp, topicsPageSize);
     } else if (this.props.type === "tagFollowings") {
-      topics = getTopicsByFollowedChannelSortedByPopularityAfterTimestamp(
-        this.state.user.name,
-        timestamp,
-        topicsPageSize
-      );
+      this.props.loadFollowedChannelsTopicsByPopularity(this.state.user.name, timestamp, topicsPageSize);
     } else {
-      topics = getAllTopicsByPopularityAfterTimestamp(timestamp, topicsPageSize);
-    }
-
-    topics
-      .then(topics =>
-        this.setState({
-          topics: topics,
-          couldExistOlderTopics: false,
-          isLoading: false
-        })
-      )
-      .catch(() => this.setState({ isLoading: false }));
-  }
-
-  retrieveOlderTopicsForUserFollowings(oldestTimestamp: number) {
-    getTopicsFromFollowsPriorToTimestamp(this.state.user, oldestTimestamp, topicsPageSize)
-      .then(retrievedTopics => this.appendOlderTopics(retrievedTopics))
-      .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
-  }
-
-  retrieveOlderTopicsForTagFollowings(oldestTimestamp: number) {
-    getTopicsFromFollowedChannelsPriorToTimestamp(this.state.user, oldestTimestamp, topicsPageSize)
-      .then(retrievedTopics => this.appendOlderTopics(retrievedTopics))
-      .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
-  }
-
-  retrieveOlderTopicsForAll(oldestTimestamp: number) {
-    getTopicsPriorToTimestamp(oldestTimestamp, topicsPageSize)
-      .then(retrievedTopics => this.appendOlderTopics(retrievedTopics))
-      .catch(() => this.setState({ isLoading: false, couldExistOlderTopics: false }));
-  }
-
-  appendOlderTopics(topics: Topic[]) {
-    if (topics.length > 0) {
-      this.setState(prevState => ({
-        topics: Array.from(new Set(prevState.topics.concat(topics))),
-        isLoading: false,
-        couldExistOlderTopics: topics.length >= topicsPageSize
-      }));
-    } else {
-      this.setState({ isLoading: false, couldExistOlderTopics: false });
+      this.props.loadAllTopicsByPopularity(timestamp, topicsPageSize);
     }
   }
 
   retrieveOlderTopics() {
-    if (this.state.topics.length > 0) {
-      this.setState({ isLoading: true });
-      const oldestTimestamp: number = this.state.topics[this.state.topics.length - 1].timestamp;
-
+    if (this.props.topics.length > 0) {
       if (this.props.type === "userFollowings") {
-        this.retrieveOlderTopicsForUserFollowings(oldestTimestamp);
+        this.props.loadOlderFollowedUsersTopics(this.state.user.name, topicsPageSize);
       } else if (this.props.type === "tagFollowings") {
-        this.retrieveOlderTopicsForTagFollowings(oldestTimestamp);
+        this.props.loadOlderFollowedChannelsTopics(this.state.user.name, topicsPageSize);
       } else {
-        this.retrieveOlderTopicsForAll(oldestTimestamp);
+        this.props.loadOlderTopics(topicsPageSize);
       }
     }
   }
 }
 
-export default TopicWall;
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    loadAllTopics: (pageSize: number) => dispatch(loadAllTopicWall(pageSize)),
+    loadOlderTopics: (pageSize: number) => dispatch(loadOlderAllTopics(pageSize)),
+    loadAllTopicsByPopularity: (timestamp: number, pageSize: number) =>
+      dispatch(loadAllTopicsByPopularity(timestamp, pageSize)),
+    loadFollowedUsersTopics: (username: string, pageSize: number) =>
+      dispatch(loadFollowedUsersTopicWall(username, pageSize)),
+    loadOlderFollowedUsersTopics: (username: string, pageSize: number) =>
+      dispatch(loadOlderFollowedUsersTopics(username, pageSize)),
+    loadFollowedUsersTopicsByPopularity: (username: string, timestamp: number, pageSize: number) =>
+      dispatch(loadFollowedUsersTopicsByPopularity(username, timestamp, pageSize)),
+    loadFollowedChannelsTopics: (username: string, pageSize: number) =>
+      dispatch(loadFollowedChannelsTopicWall(username, pageSize)),
+    loadOlderFollowedChannelsTopics: (username: string, pageSize: number) =>
+      dispatch(loadOlderFollowedChannelsTopics(username, pageSize)),
+    loadFollowedChannelsTopicsByPopularity: (username: string, timestamp: number, pageSize: number) =>
+      dispatch(loadFollowedChannelsTopicsByPopularity(username, timestamp, pageSize))
+  };
+};
+
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    topics: store.topicWall.topics,
+    loading: store.topicWall.loading,
+    couldExistOlderTopics: store.topicWall.couldExistOlder
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TopicWall);

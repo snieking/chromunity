@@ -9,6 +9,11 @@ const topicsCache = BoomerangCache.create("topic-bucket", {
   encrypt: false
 });
 
+const starRatingCache = BoomerangCache.create("rating-bucket", {
+  storage: "session",
+  encrypt: false
+});
+
 export function createTopic(user: ChromunityUser, channelName: string, title: string, message: string) {
   const topicId = uniqueId();
 
@@ -231,7 +236,17 @@ export function removeTopicStarRating(user: ChromunityUser, topicId: string) {
 }
 
 export function getTopicStarRaters(topicId: string): Promise<string[]> {
-  return GTX.query("get_star_rating_for_topic", { id: topicId });
+  const raters: string[] = starRatingCache.get(topicId);
+
+  if (raters != null) {
+    return new Promise<string[]>(resolve => resolve(raters));
+  }
+
+  return GTX.query("get_star_rating_for_topic", { id: topicId })
+    .then((raters: string[]) => {
+      starRatingCache.set(topicId, raters, 600);
+      return raters;
+    });
 }
 
 export function giveReplyStarRating(user: ChromunityUser, replyId: string) {
@@ -251,6 +266,7 @@ export function unsubscribeFromTopic(user: ChromunityUser, id: string) {
 }
 
 function modifyRatingAndSubscription(user: ChromunityUser, id: string, rellOperation: string) {
+  starRatingCache.remove(id);
   return BLOCKCHAIN.then(bc =>
     bc.call(
       user.ft3User,
@@ -303,7 +319,7 @@ function getTopicsForTimestamp(timestamp: number, pageSize: number, rellOperatio
 }
 
 export function getTopicsFromFollowsAfterTimestamp(
-  user: ChromunityUser,
+  user: string,
   timestamp: number,
   pageSize: number
 ): Promise<Topic[]> {
@@ -311,7 +327,7 @@ export function getTopicsFromFollowsAfterTimestamp(
 }
 
 export function getTopicsFromFollowsPriorToTimestamp(
-  user: ChromunityUser,
+  user: string,
   timestamp: number,
   pageSize: number
 ): Promise<Topic[]> {
@@ -319,13 +335,13 @@ export function getTopicsFromFollowsPriorToTimestamp(
 }
 
 function getTopicsFromFollowsForTimestamp(
-  user: ChromunityUser,
+  user: string,
   timestamp: number,
   pageSize: number,
   rellOperation: string
 ): Promise<Topic[]> {
   return GTX.query(rellOperation, {
-    name: user.name.toLocaleLowerCase(),
+    name: user.toLocaleLowerCase(),
     timestamp: timestamp,
     page_size: pageSize
   });
@@ -352,12 +368,12 @@ function countByUser(name: string, rellOperation: string): Promise<number> {
 }
 
 export function getTopicsFromFollowedChannelsPriorToTimestamp(
-  user: ChromunityUser,
+  username: string,
   timestamp: number,
   pageSize: number
 ): Promise<Topic[]> {
   return GTX.query("get_topics_by_followed_channels_prior_to_timestamp", {
-    username: user.name.toLocaleLowerCase(),
+    username: username.toLocaleLowerCase(),
     timestamp: timestamp,
     page_size: pageSize
   }).then((topics: Topic[]) => {

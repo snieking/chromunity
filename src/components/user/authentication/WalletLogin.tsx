@@ -60,11 +60,6 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
           <Typography variant="subtitle1" component="p" className={classes.textField}>
             User authentication is handled by Chromia Wallet.
           </Typography>
-          <Typography variant="subtitle2" component="p" className={classes.textField}>
-            If you are signing in a new account,
-            then you will be redirected. If you already registered to Chromunity previously,
-            then you will receive a pop-up to authorize your device.
-          </Typography>
           <TextField
             label="Account name"
             name="name"

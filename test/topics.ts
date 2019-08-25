@@ -7,6 +7,7 @@ const CREATE_RANDOM_TOPIC = (user: ChromunityUser, channel: string) => {
 };
 
 function upperCaseFirst(s: string) {
+    console.log("Creating topic with msg: ", s);
     return s.charAt(0).toUpperCase() + s.slice(1);
 }
 

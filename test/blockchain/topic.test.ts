@@ -1,4 +1,4 @@
-import { ChromunityUser, Topic, TopicReply } from "../src/types";
+import { ChromunityUser, Topic, TopicReply } from "../../src/types";
 import {
     countRepliesByUser,
     countReplyStarRatingForUser,
@@ -26,9 +26,9 @@ import {
     removeTopicStarRating,
     subscribeToTopic,
     unsubscribeFromTopic
-} from '../src/blockchain/TopicService';
-import {CREATE_LOGGED_IN_USER} from "./users";
-import {CREATE_RANDOM_TOPIC} from "./topics";
+} from '../../src/blockchain/TopicService';
+import {CREATE_LOGGED_IN_USER} from "../users";
+import {CREATE_RANDOM_TOPIC} from "../topics";
 
 jest.setTimeout(30000);
 
@@ -58,9 +58,9 @@ describe("topic tests", () => {
     });
 
     it('create many topics', async() => {
-        Array.from({ length: 50 }).forEach(async () => {
+        await Array.from({ length: 50 }).forEach(async () => {
             const user = await CREATE_LOGGED_IN_USER();
-            CREATE_RANDOM_TOPIC(user, "general");
+            await CREATE_RANDOM_TOPIC(user, "general");
         });
     });
 
