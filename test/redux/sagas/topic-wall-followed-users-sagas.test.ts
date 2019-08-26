@@ -208,4 +208,29 @@ describe("Topic wall [FOLLOWED USERS] saga tests", () => {
     expect(updateTopicsAction.couldExistOlder).toBe(false);
     expect(updateTopicsAction.wallType).toBe(WallType.NONE);
   });
+
+  it(testPrefix + " | no followed users", async () => {
+    const dispatchedActions: TopicWallActions[] = [];
+    const fakeStore = createFakeStore(dispatchedActions, {
+      followedUsers: {
+        updated: 0,
+        topics: []
+      }
+    });
+
+    const localUser = await CREATE_LOGGED_IN_USER();
+
+    await runSaga(fakeStore, loadFollowedUsersTopics, {
+      type: WallActionTypes.LOAD_FOLLOWED_USERS_TOPIC_WALL,
+      username: localUser.name,
+      pageSize: pageSize
+    }).toPromise();
+
+    const updateTopicsAction = getUpdateTopicsAction(dispatchedActions);
+
+    expect(updateTopicsAction.topics.length).toBe(0);
+    expect(updateTopicsAction.couldExistOlder).toBe(false);
+    expect(updateTopicsAction.wallType).toBe(WallType.USER);
+  });
+
 });

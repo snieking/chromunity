@@ -15,6 +15,7 @@ import TransitionGroup from "react-transition-group/TransitionGroup";
 import { Route, RouteComponentProps, Switch, withRouter } from "react-router";
 import TopicWall from "./components/walls/TopicWall";
 import WalletLogin from "./components/user/authentication/WalletLogin";
+import { ErrorPage } from "./components/static/ErrorPage";
 
 const Content: React.FunctionComponent<RouteComponentProps> = ({ location }) => {
   return (
@@ -37,6 +38,7 @@ const Content: React.FunctionComponent<RouteComponentProps> = ({ location }) => 
             <Route path="/gov/log" component={GovLog} />
             <Route path="/gov/reports" component={Reports} />
             <Route path="/t/:id" component={FullTopic} />
+            <Route path="/error" component={ErrorPage} />
           </Switch>
         </CSSTransition>
       </TransitionGroup>

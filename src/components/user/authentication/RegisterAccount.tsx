@@ -4,6 +4,7 @@ import { parse } from "query-string";
 import { accountRegister } from "../../../redux/actions/AccountActions";
 import { connect } from "react-redux";
 import { ApplicationState } from "../../../redux/Store";
+import { LinearProgress } from "@material-ui/core";
 
 interface MatchParams {
   username: string;
@@ -21,22 +22,13 @@ const RegisterAccount: React.FunctionComponent<Props> = props => {
   const username: string = props.match.params.username;
   props.accountRegister(accountId, username, vaultPubKey);
 
-  return (
-    <div>
-      <p>AccountId: {accountId}</p>
-      <p>Username: {username}</p>
-      <p>PubKey: {vaultPubKey}</p>
-    </div>
-  );
+  return <LinearProgress variant="query" />;
 };
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
-    accountRegister: (
-      accountId: string,
-      username: string,
-      vaultPubKey: string
-    ) => dispatch(accountRegister(accountId, username, vaultPubKey))
+    accountRegister: (accountId: string, username: string, vaultPubKey: string) =>
+      dispatch(accountRegister(accountId, username, vaultPubKey))
   };
 };
 

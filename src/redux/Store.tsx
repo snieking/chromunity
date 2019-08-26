@@ -20,14 +20,15 @@ const rootReducer = combineReducers<ApplicationState>({
   channel: channelReducer
 });
 
-const sagaMiddleware = createSagaMiddleware();
+const sagaMiddleware = createSagaMiddleware({
+  onError: () => {
+    window.location.replace("/error");
+  }
+});
+
+const store = createStore(rootReducer, undefined, applyMiddleware(sagaMiddleware));
 
 export default function configureStore(): Store<ApplicationState> {
-  const store = createStore(
-    rootReducer,
-    undefined,
-    applyMiddleware(sagaMiddleware)
-  );
   sagaMiddleware.run(rootSaga);
   return store;
 }

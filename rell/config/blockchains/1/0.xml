@@ -1098,7 +1098,11 @@ operation tmp_remove_representative(admin_name: name, descriptor_id: byte_array,
                             </entry>
                             <entry key="representative/queries.rell">
                                 <string>query get_representatives() {
-    val election = representative_election@{ .completed == true } ( .id, -sort .timestamp );
+    val election = representative_election@?{ .completed == true } ( .id, -sort .timestamp );
+
+    if (election == null) {
+        return ["admin"];
+    }
 
     return representative@*{
         .representative_election.id == election.id
@@ -1383,32 +1387,34 @@ query get_topics_by_user_id_prior_to_timestamp(name, timestamp, page_size: integ
 }
 
 query get_topics_from_follows_after_timestamp(name, timestamp, page_size: integer) {
-    return topic@*{
-        follow@{ .follower.name == name } ( .follows ),
-        .last_modified &gt; timestamp
+    return (topic, follow) @* {
+            follow.follower.name == name.lower_case(),
+            follow.follows == topic.author,
+            topic.last_modified &gt; timestamp
     }(
-        .id,
-        author=.author.display_name,
-        .title,
-        .message,
-        -sort .last_modified,
-        .removed,
-        .timestamp
+        topic.id,
+        author=topic.author.display_name,
+        topic.title,
+        topic.message,
+        topic.removed,
+        -sort topic.last_modified,
+        topic.timestamp
     ) limit page_size;
 }
 
 query get_topics_from_follows_prior_to_timestamp(name, timestamp, page_size: integer) {
-    return topic@*{
-        follow@{ .follower.name == name } ( .follows ),
-        .last_modified &lt; timestamp
+    return (topic, follow) @* {
+        follow.follower.name == name.lower_case(),
+        follow.follows == topic.author,
+        topic.last_modified &lt; timestamp
     }(
-        .id,
-        author=.author.display_name,
-        .title,
-        .message,
-        .removed,
-        -sort .last_modified,
-        .timestamp
+        topic.id,
+        author=topic.author.display_name,
+        topic.title,
+        topic.message,
+        topic.removed,
+        -sort topic.last_modified,
+        topic.timestamp
     ) limit page_size;
 }
 
