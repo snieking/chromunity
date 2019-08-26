@@ -34,6 +34,7 @@ export function storeKeyPair(keyPair: KeyPair): void {
 
 export function getKeyPair(): KeyPair {
   const keyPair = LOCAL_CACHE.get("keyPair");
+  if (keyPair == null) return null;
   return new KeyPair(keyPair.privKey);
 }
 
