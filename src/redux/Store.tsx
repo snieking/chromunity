@@ -1,25 +1,34 @@
 import { applyMiddleware, combineReducers, createStore, Store } from "redux";
-import {createAccountReducer, importAccountReducer, loginAccountReducer} from "./reducers/AccountReducers";
-import {CreateAccountState, ImportAccountState, LoginAccountState} from "./AccountTypes";
-import createSagaMiddleware from 'redux-saga'
+import createSagaMiddleware from "redux-saga";
 import rootSaga from "./sagas/index";
+import { AccountState } from "./AccountTypes";
+import { TopicWallState } from "./WallTypes";
+import { ChannelState } from "./ChannelTypes";
+import { loginReducer } from "./reducers/AccountReducers";
+import { topicWallReducer } from "./reducers/WallReducers";
+import { channelReducer } from "./reducers/ChannelReducers";
 
 export interface ApplicationState {
-  createAccount: CreateAccountState;
-  loginAccount: LoginAccountState;
-  importAccount: ImportAccountState;
+  account: AccountState;
+  topicWall: TopicWallState;
+  channel: ChannelState;
 }
 
 const rootReducer = combineReducers<ApplicationState>({
-  createAccount: createAccountReducer,
-  loginAccount: loginAccountReducer,
-  importAccount: importAccountReducer
+  account: loginReducer,
+  topicWall: topicWallReducer,
+  channel: channelReducer
 });
 
-const sagaMiddleware = createSagaMiddleware();
+const sagaMiddleware = createSagaMiddleware({
+  onError: () => {
+    window.location.replace("/error");
+  }
+});
 
-export default function configureStore(): Store<ApplicationState>{
-  const store = createStore(rootReducer, undefined, applyMiddleware(sagaMiddleware));
+const store = createStore(rootReducer, undefined, applyMiddleware(sagaMiddleware));
+
+export default function configureStore(): Store<ApplicationState> {
   sagaMiddleware.run(rootSaga);
   return store;
 }

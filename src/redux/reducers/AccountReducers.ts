@@ -1,149 +1,42 @@
-import {Reducer} from "redux";
-import {
-  AccountActionTypes,
-  CreateAccountActions,
-  CreateAccountState,
-  ImportAccountActions,
-  ImportAccountState,
-  LoginAccountActions,
-  LoginAccountState
-} from "../AccountTypes";
-import * as bip39 from "bip39";
+import { Reducer } from "redux";
+import { AccountActionTypes, AccountState, AccountActions } from "../AccountTypes";
 
-const initialCreateAccountState: CreateAccountState = {
-  loading: false,
-  name: "",
-  password: "",
-  mnemonic: "",
-  failure: false,
-  success: false,
-  error: ""
-};
-
-export const createAccountReducer: Reducer<
-  CreateAccountState,
-  CreateAccountActions
-> = (state = initialCreateAccountState, action) => {
-  switch (action.type) {
-    case AccountActionTypes.CREATE_CREDENTIALS: {
-      return {
-        ...state,
-        loading: false,
-        name: action.name,
-        password: action.password,
-        mnemonic: bip39.generateMnemonic(160)
-      };
-    }
-    case AccountActionTypes.REGISTER: {
-      return {
-        ...state,
-        loading: true
-      };
-    }
-    case AccountActionTypes.LOGIN_SUCCESS: {
-      return {
-        ...state,
-        loading: false,
-        success: true
-      };
-    }
-    case AccountActionTypes.REGISTER_FAILURE: {
-      return {
-        ...state,
-        loading: false,
-        failure: true,
-        error: "Failed to sign up, try another account name"
-      };
-    }
-    case AccountActionTypes.LOGIN_FAILURE: {
-      return {
-        ...state,
-        loading: false,
-        failure: true,
-        error: "Failed to login after successful sign up"
-      };
-    }
-  }
-  return state;
-};
-
-const initialLoginAccountState: LoginAccountState = {
+const initialAccountState: AccountState = {
   loading: false,
   success: false,
   failure: false,
-  error: ""
+  error: "",
+  accountId: "",
+  username: "",
+  keyPair: null,
+  vaultPubKey: null
 };
 
-export const loginAccountReducer: Reducer<
-  LoginAccountState,
-  LoginAccountActions
-> = (state = initialLoginAccountState, action) => {
+export const loginReducer: Reducer<AccountState, AccountActions> = (state = initialAccountState, action) => {
   switch (action.type) {
-    case AccountActionTypes.SUBMIT_LOGIN: {
+    case AccountActionTypes.ACCOUNT_REGISTER_CHECK: {
       return {
         ...state,
-        loading: true
+        loading: true,
+        username: action.username
       };
     }
-    case AccountActionTypes.LOGIN_SUCCESS: {
+    case AccountActionTypes.ACCOUNT_ADD_ACCOUNT_ID: {
       return {
         ...state,
-        loading: false,
-        success: true
+        accountId: action.accountId
       };
     }
-    case AccountActionTypes.LOGIN_FAILURE: {
+    case AccountActionTypes.ACCOUNT_REGISTER: {
+      console.log("REGISTERING ACCOUNT!");
       return {
         ...state,
-        loading: false,
-        failure: true,
-        error: "Failed to login, is the password correct?"
+        username: action.username,
+        vaultPubKey: action.vaultPubKey,
+        accountId: action.accountId
       };
     }
   }
-  return state;
-};
 
-const initialImportAccountState: ImportAccountState = {
-  loading: false,
-  mnemonic: "",
-  success: false,
-  failure: false,
-  error: ""
-};
-
-export const importAccountReducer: Reducer<
-  ImportAccountState,
-  ImportAccountActions
-> = (state = initialImportAccountState, action) => {
-  switch (action.type) {
-    case AccountActionTypes.IMPORT_MNEMONIC: {
-      return {
-        ...state,
-        mnemonic: action.mnemonic
-      }
-    }
-    case AccountActionTypes.IMPORT_LOGIN: {
-      return {
-        ...state,
-        loading: true
-      }
-    }
-    case AccountActionTypes.LOGIN_SUCCESS: {
-      return {
-        ...state,
-        loading: false,
-        success: true
-      }
-    }
-    case AccountActionTypes.LOGIN_FAILURE: {
-      return {
-        ...state,
-        loading: false,
-        failure: true,
-        error: "Failed to login, is the password correct?"
-      }
-    }
-  }
   return state;
 };

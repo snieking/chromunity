@@ -1,35 +1,42 @@
-import React from 'react';
+import React from "react";
 
-import {completeElection, getElectionVotes, triggerElection} from "../../../../blockchain/ElectionService";
-import {getUser} from "../../../../util/user-util";
-import {Button} from "@material-ui/core";
-
-export interface DictatorActionsState {
-
-}
+import { completeElection, getElectionVotes, triggerElection } from "../../../../blockchain/ElectionService";
+import { Button } from "@material-ui/core";
+import { getUser } from "../../../../util/user-util";
+import { ChromunityUser } from "../../../../types";
 
 const dayInMilliseconds: number = 10000;
 
-export class DictatorActions extends React.Component<{}, DictatorActionsState> {
-
-    constructor(props: unknown) {
-        super(props);
-        this.state = {};
-    }
-
-    completeElection() {
-        getElectionVotes().then((candidates: string[]) => {
-            completeElection(getUser(), candidates);
-        })
-    }
-
-    render() {
-        return (
-            <div>
-                <Button onClick={() => triggerElection(getUser(), Date.now() + (dayInMilliseconds * 7))}
-                        color="primary">Trigger election</Button>
-                <Button onClick={() => this.completeElection()} color="primary">Complete election</Button>
-            </div>
-        )
-    }
+interface State {
+  user: ChromunityUser;
 }
+
+class DictatorActions extends React.Component<{}, State> {
+  constructor(props: any) {
+    super(props);
+    this.state = {
+      user: getUser()
+    };
+  }
+
+  completeElection() {
+    getElectionVotes().then((candidates: string[]) => {
+      completeElection(this.state.user, candidates);
+    });
+  }
+
+  render() {
+    return (
+      <div>
+        <Button onClick={() => triggerElection(this.state.user, Date.now() + dayInMilliseconds * 7)} color="primary">
+          Trigger election
+        </Button>
+        <Button onClick={() => this.completeElection()} color="primary">
+          Complete election
+        </Button>
+      </div>
+    );
+  }
+}
+
+export default DictatorActions;

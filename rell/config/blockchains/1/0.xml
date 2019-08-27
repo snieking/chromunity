@@ -49,16 +49,14 @@ include 'operations';
 include 'queries';</string>
                             </entry>
                             <entry key="channel/operations.rell">
-                                <string>operation follow_channel(username: text, name) {
-    val user = get_verified_user(username);
-    // TODO: .lower_case() on Rell 0.9
-    create channel_following(user, name);
+                                <string>operation follow_channel(username: text, descriptor_id: byte_array, name) {
+    val user = get_verified_user(username, descriptor_id);
+    create channel_following(user, name.lower_case());
 }
 
-operation unfollow_channel(username: text, name) {
-    val user = get_verified_user(username);
-    // TODO: .lower_case() on Rell 0.9
-    delete channel_following@{ user, name};
+operation unfollow_channel(username: text, descriptor_id: byte_array, name) {
+    val user = get_verified_user(username, descriptor_id);
+    delete channel_following@{ user, name.lower_case()};
 }</string>
                             </entry>
                             <entry key="channel/queries.rell">
@@ -154,8 +152,9 @@ include 'operations';
 include 'queries';</string>
                             </entry>
                             <entry key="election/operations.rell">
-                                <string>operation trigger_election(admin_user: text, id: text, timestamp) {
-    require(is_signer(admin@{ .user.name == admin_user}( .user.pubkey )));
+                                <string>operation trigger_election(admin_user: text, descriptor_id: byte_array, id: text, timestamp) {
+    val user = get_verified_user(admin_user, descriptor_id);
+    admin@{ user };
 
     val currentElection = representative_election @? { .completed == false };
 
@@ -164,8 +163,9 @@ include 'queries';</string>
     }
 }
   
-operation complete_election(admin_user: text, representatives: set&lt;text&gt;) {
-    require(is_signer(admin@{ .user.name == admin_user}( .user.pubkey )));
+operation complete_election(admin_user: text, descriptor_id: byte_array, representatives: set&lt;text&gt;) {
+    val op_user = get_verified_user(admin_user, descriptor_id);
+    admin@{ op_user };
 
     val currentElection = representative_election @ { .completed == false };
     log("Completing election: ", currentElection.id);
@@ -177,8 +177,8 @@ operation complete_election(admin_user: text, representatives: set&lt;text&gt;) 
     }
 }
 
-operation vote_for_candidate(voter: name, candidate: name) {
-    val user = get_verified_user(voter);
+operation vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: name) {
+    val user = get_verified_user(voter, descriptor_id);
 
     val currentElection = representative_election @ { .completed == false };
     log("Voting for candidate in election: ", currentElection.id);
@@ -188,8 +188,8 @@ operation vote_for_candidate(voter: name, candidate: name) {
     );
 }
 
-operation update_vote_for_candidate(voter: name, candidate: name) {
-    val user = get_verified_user(voter);
+operation update_vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: name) {
+    val user = get_verified_user(voter, descriptor_id);
 
     val currentElection = representative_election @ { .completed == false };    
     val election_candidate = representative_election_candidate@{
@@ -211,8 +211,8 @@ operation update_vote_for_candidate(voter: name, candidate: name) {
     );
 }
 
-operation sign_up_for_election(name) {
-    val user = get_verified_user(name);
+operation sign_up_for_election(name, descriptor_id: byte_array) {
+    val user = get_verified_user(name, descriptor_id);
 
     val currentElection = representative_election @ { .completed == false };
 
@@ -264,17 +264,17 @@ include 'operations';
 include 'queries';</string>
                             </entry>
                             <entry key="follow/operations.rell">
-                                <string>operation create_following(follower: text, follows: text) {
+                                <string>operation create_following(follower: text, descriptor_id: byte_array, follows: text) {
     require(follower != follows);
-    val user = get_verified_user(follower);
-    create follow(follower = user, follows = user@{ .name == follows });
+    val user = get_verified_user(follower, descriptor_id);
+    create follow(follower = user, follows = user@{ .name == follows.lower_case() });
 }
 
-operation remove_following(follower: text, follows: text) {
+operation remove_following(follower: text, descriptor_id: byte_array, follows: text) {
     require(follower != follows);
-    val user = get_verified_user(follower);
+    val user = get_verified_user(follower, descriptor_id);
 
-    delete follow@{ .follower == user, .follows == user@{ .name == follows } };
+    delete follow@{ .follower == user, .follows == user@{ .name == follows.lower_case() } };
 }
 </string>
                             </entry>
@@ -286,6 +286,14 @@ query get_user_followers(name) {
 
 query get_user_follows(name) {
     return follow@*{ .follower == user@{ .name == name } } ( .follows.name );
+}
+</string>
+                            </entry>
+                            <entry key="ft3_config.rell">
+                                <string>object ft3_config {
+  blockchain_name: text = "Chromunity";
+  blockchain_website: text = "chromunity.com";
+  blockchain_description: text = "Decentralized Reddit";
 }
 </string>
                             </entry>
@@ -308,19 +316,20 @@ record multi_sig_args {
        pubkeys: list&lt;pubkey&gt;;
 }
 
-function check_single_sig_auth(args: byte_array, required_flags: list&lt;text&gt;): boolean {
+function check_single_sig_auth(args: byte_array, participants: list&lt;byte_array&gt;, required_flags: list&lt;text&gt;): boolean {
+    require(participants.size() == 1);
     val ss_args = single_sig_args.from_bytes(args);
     return
           ss_args.flags.contains_all(required_flags)
             and 
-          is_signer(ss_args.pubkey); 
+          is_signer(participants[0]);
 }
 
-function check_multi_sig_auth(args: byte_array, required_flags: list&lt;text&gt;): boolean {
+function check_multi_sig_auth(args: byte_array, participants: list&lt;byte_array&gt;, required_flags: list&lt;text&gt;): boolean {
    val multi_sign_args = multi_sig_args.from_bytes(args);
    if (not (multi_sign_args.flags.contains_all(required_flags))) return false;
    var num_sign = multi_sign_args.signatures_required;
-   for(s in multi_sign_args.pubkeys) {
+   for(s in participants) {
       if(is_signer(s)) {
           num_sign -= 1;
           if(num_sign &lt; 1) {return true;}
@@ -329,10 +338,10 @@ function check_multi_sig_auth(args: byte_array, required_flags: list&lt;text&gt;
    return false;
 }
 
-function check_auth_args (a_t: text, args: byte_array, required_flags: list&lt;text&gt;): boolean {
+function check_auth_args (a_t: text, args: byte_array, participants: list&lt;byte_array&gt;, required_flags: list&lt;text&gt;): boolean {
     return when (a_t) {
-        "S" -&gt; check_single_sig_auth(args, required_flags);
-        "M" -&gt; check_multi_sig_auth(args, required_flags);
+        "S" -&gt; check_single_sig_auth(args, participants, required_flags);
+        "M" -&gt; check_multi_sig_auth(args, participants, required_flags);
         else -&gt; false;
     };
 }
@@ -347,6 +356,7 @@ function require_auth (account, descriptor_id: byte_array, required_flags: list&
       check_auth_args(
        account_auth_descriptor.auth_type,
        account_auth_descriptor.args,
+       auth_descriptor_participant @* { account_auth_descriptor } ( .id ),
        required_flags
        )
    );  
@@ -360,6 +370,7 @@ function require_auth (account, descriptor_id: byte_array, required_flags: list&
 
 record auth_descriptor {
     auth_type: text;
+    participants: list&lt;byte_array&gt;;
     args: list&lt;gtv&gt;;
 }
 
@@ -382,16 +393,24 @@ class account_auth_descriptor {
      args: byte_array;
 }
 
+class auth_descriptor_participant {
+    key account_auth_descriptor, id: byte_array;
+}
+
 function _add_auth_descriptor (account, auth_descriptor) {
      val descriptor_id = auth_descriptor.hash();
-     create account_auth_descriptor (
+     val account_auth_descriptor = create account_auth_descriptor (
         account, descriptor_id,
         auth_descriptor.auth_type,
         args = auth_descriptor.args.to_gtv().to_bytes()
      );
+     for (participant in auth_descriptor.participants) {
+        create auth_descriptor_participant(account_auth_descriptor, id = participant);
+     }
 }
 
 function create_account_with_auth (auth_descriptor): byte_array {
+    print(auth_descriptor);
      val id = auth_descriptor.hash();
      val acc = create account (id);
      _add_auth_descriptor(
@@ -409,22 +428,59 @@ operation delete_auth_descriptor (account_id: byte_array, auth_descriptor_id: by
       };
 }
 
+operation delete_all_auth_descriptors_exclude(account_id: byte_array, auth_descriptor_id: byte_array) {
+    val account = account @ { .id == account_id };
+    require_auth(account, auth_descriptor_id, ["A"]);
+
+    delete (adp: auth_descriptor_participant, ad: account_auth_descriptor) @* {
+        ad.account == account and ad.descriptor_id != auth_descriptor_id and adp.account_auth_descriptor == ad
+    };
+
+    delete account_auth_descriptor @* {
+       .account == account,
+       .descriptor_id != auth_descriptor_id
+    };
+}
+
 operation add_auth_descriptor (account_id: byte_array, auth_id: byte_array, new_desc: auth_descriptor) {
       val account = account @ { .id == account_id };
       require_auth(account, auth_id, ["A"]);
       _add_auth_descriptor(account, new_desc);
 }
 
-</string>
+query get_account_auth_descriptors(id: byte_array) {
+    return account_auth_descriptor @* {
+        .account.id == id
+    } (
+        id = .descriptor_id,
+        type = .auth_type,
+        args = .args
+    );
+}
+
+query get_account_by_id(id: byte_array) {
+    return account @? { id } ( .id );
+}
+
+query get_account_by_auth_descriptor(auth_descriptor) {
+    return account @? { .id == auth_descriptor.hash() } ( .id );
+}
+
+query get_accounts_by_participant_id(id: byte_array) {
+    return auth_descriptor_participant @* { id } ( .account_auth_descriptor.account.id );
+}
+
+query get_accounts_by_auth_descriptor_id(descriptor_id: byte_array) {
+    return account_auth_descriptor @* { descriptor_id } ( .account.id );
+}</string>
                             </entry>
                             <entry key="lib/ft3/asset.rell">
                                 <string>//namespace ft3 {
   class asset {
     id: byte_array;
     key id;
-    name;
+    key name;
     issuing_chain_rid: byte_array;
-    key name, issuing_chain_rid;
   }
 
   class balance {
@@ -441,21 +497,78 @@ operation add_auth_descriptor (account_id: byte_array, auth_id: byte_array, new_
   }
 
   function register_asset (name, issuing_chain_rid: byte_array): asset {
-  print("HELLO");
-    print(11111, name.hash());
-    print(22222, issuing_chain_rid.hash());
    val id = (name, issuing_chain_rid).hash();
    return create asset (id, name, issuing_chain_rid);
   }
 
+  query get_asset_balances(account_id: byte_array) {
+    return balance @* { .account.id == account_id } (
+        id = .asset.id,
+        name = .asset.name,
+        amount = .amount,
+        chain_id = .asset.issuing_chain_rid
+    );
+  }
 
-   query get_asset_by_name_and_chain(name, issuing_chain_rid: text) {
-        return asset@{name, .issuing_chain_rid ==byte_array(issuing_chain_rid)}.id;
-   }
+  query get_asset_balance(account_id: byte_array, asset_id: byte_array) {
+    return balance @? {
+        .account.id == account_id,
+        .asset.id == asset_id
+    } (
+        id = .asset.id,
+        name = .asset.name,
+        amount = .amount,
+        chain_id = .asset.issuing_chain_rid
+    );
+  }
 
+  query get_asset_by_name(name) {
+    return asset @* { name } (
+        .id,
+        .name,
+        .issuing_chain_rid
+    );
+  }
 // }
 
 </string>
+                            </entry>
+                            <entry key="lib/ft3/blockchain.rell">
+                                <string>object blockchain {
+    mutable name: text = ft3_config.blockchain_name;
+    mutable website: text = ft3_config.blockchain_website;
+    mutable description: text = ft3_config.blockchain_description;
+}
+
+class linked_chain {
+    key chain_rid: byte_array;
+}
+
+operation update_blockchain(name, website: text, description: text) {
+    blockchain.name = name;
+    blockchain.website = website;
+    blockchain.description = description;
+}
+
+query get_blockchain_info() {
+    return (
+        name = blockchain.name,
+        website = blockchain.website,
+        description = blockchain.description
+    );
+}
+
+operation link_chain(chain_rid: byte_array) {
+    create linked_chain(chain_rid);
+}
+
+query get_linked_chains() {
+    return linked_chain @* {} ( .chain_rid );
+}
+
+query is_linked_with_chain(chain_rid: byte_array) {
+    return linked_chain @? { chain_rid } != null;
+}</string>
                             </entry>
                             <entry key="lib/ft3/core.rell">
                                 <string>include "account/main";
@@ -464,11 +577,215 @@ include "asset";
 include "history";
 include "transfer";</string>
                             </entry>
-                            <entry key="lib/ft3/ft3_basic.rell">
+                            <entry key="lib/ft3/crosschain/blockchain.rell">
+                                <string>class asset_origin {
+    key asset;
+    origin_chain_rid: byte_array;
+}
+
+function blockchain_account_id (blockchain_rid: byte_array): byte_array {
+   return ("B", blockchain_rid).hash();
+}
+
+function ensure_blockchain_account (blockchain_rid: byte_array): account {
+   val blockchain_account_id = blockchain_account_id(blockchain_rid);
+   val acc = account @? { .id == blockchain_account_id };
+   return if (acc??)  acc
+   else create account (id = blockchain_account_id);
+}
+
+function get_blockchain_account (blockchain_rid: byte_array): account {
+   return account @ { .id == blockchain_account_id(blockchain_rid) };
+}
+
+</string>
+                            </entry>
+                            <entry key="lib/ft3/crosschain/dev.rell">
+                                <string>operation dev_register_xc_asset (name, issuing_chain_rid: byte_array, origin_chain_rid: byte_array) {
+    require_dev();
+    val asset = register_asset(name, issuing_chain_rid);
+    create asset_origin (asset, origin_chain_rid);
+}</string>
+                            </entry>
+                            <entry key="lib/ft3/crosschain/structures.rell">
+                                <string>record operation_rec {
+   name;
+   args: list&lt;gtv&gt;;
+}
+
+record transaction_body_rec {
+    blockchain_rid: byte_array;
+    operations: list&lt;operation_rec&gt;;
+    signers: list&lt;gtv&gt;;
+}
+
+record transaction_rec {
+   body: transaction_body_rec;
+   signatures: list&lt;gtv&gt;;
+}
+
+record transaction_proof {
+     tx: virtual&lt;transaction_rec&gt;;
+     // block_header: byte_array;
+     // merkle_path: virtual&lt;list&lt;byte_array&gt;&gt;;
+     // tx_index: integer;
+     block_rid: byte_array;
+     block_signers: list&lt;byte_array&gt;;
+     signatures: list&lt;byte_array&gt;;     
+}
+
+function verify_transaction_proof( p: transaction_proof ) {
+   // TODO
+}</string>
+                            </entry>
+                            <entry key="lib/ft3/crosschain/transfer.rell">
+                                <string>record xc_target {
+    account_id: byte_array;
+    extra: map&lt;text, gtv&gt;;
+}
+
+function add_to_blockchain_balance (blockchain_rid: byte_array, asset, amount: integer) {
+    require( chain_context.blockchain_rid != blockchain_rid ); // cannot add to own account
+
+    val origin_chain_rid = asset_origin @? { asset } .origin_chain_rid;
+
+    if (exists(origin_chain_rid) and (blockchain_rid == origin_chain_rid)) {
+       // do nothing. in future we might track origin
+    } else {
+         val bc_acc = ensure_blockchain_account(blockchain_rid);
+         ensure_balance(bc_acc, asset).amount += amount;
+    }
+}
+
+operation init_xfer (source: xfer_input, target: xc_target, hops: list&lt;byte_array&gt;) {
+     consume_input(source, 0, map&lt;asset, integer&gt;());
+     val asset = asset @ { .id == source.asset_id };
+     add_to_blockchain_balance( hops[0], asset, source.amount );
+}
+
+record init_xfer_args {
+          source: xfer_input;
+          target: xc_target;
+          hops: list&lt;byte_array&gt;;
+}
+
+class applied_transfers { key tx_rid: byte_array; }
+
+operation apply_xfer (
+       init_tx_rid: byte_array,
+       init_tx: transaction_proof,
+       prev_hop: transaction_proof?,
+       hop_index: integer
+) {
+      require(init_tx.tx.hash() == init_tx_rid);
+      verify_transaction_proof( init_tx );
+      create applied_transfers (init_tx_rid);
+
+      require(init_tx.tx.body.operations[0].name == "ft3.xc.init_xfer");
+      val init_args = init_xfer_args.from_gtv(
+         init_tx.tx.body.operations[0].args.to_full().to_gtv()
+      );
+      val my_blockchain_rid = chain_context.blockchain_rid;
+      val source = init_args.source;
+
+      require(init_args.hops.size() &gt; hop_index);
+      require(init_args.hops[hop_index] == my_blockchain_rid);
+
+      val from_chain_rid: byte_array;
+
+      if (hop_index &gt; 0) {
+         from_chain_rid = init_args.hops[hop_index - 1];
+         
+         require(prev_hop);
+         verify_transaction_proof(prev_hop);
+         require(prev_hop.tx.body.blockchain_rid == from_chain_rid);
+         require(prev_hop.tx.body.operations[0].name == "ft3.xc.apply_xfer");
+         require(byte_array.from_gtv(prev_hop.tx.body.operations[0].args[0])
+              == init_tx_rid);
+      } else {
+         from_chain_rid = init_tx.tx.body.blockchain_rid;
+      }
+
+      val asset = asset @ { .id == source.asset_id };
+      val origin_chain_rid = asset_origin @ { asset } .origin_chain_rid;
+
+      // process "from" side
+      if (from_chain_rid == origin_chain_rid) {
+         // asset comes from origin -- do nothing
+      } else {
+         deduct_balance(
+             get_blockchain_account( from_chain_rid ),
+             asset, source.amount
+         );
+      }
+
+      // process "to" side
+      if (init_args.hops.size() &gt; hop_index + 1) {
+         // this hop is not last
+         val next_hop = init_args.hops[hop_index + 1];
+         add_to_blockchain_balance(next_hop, asset, source.amount);
+      } else {
+         // final hop -- send money to recipient account
+         val available_assets = map&lt;asset, integer&gt;();
+         available_assets[asset] = source.amount;
+         val target = init_args.target;
+         process_transfer_output(
+                xfer_output(
+                  account_id = target.account_id,
+                  asset_id = source.asset_id,
+                  amount = source.amount,
+                  extra = target.extra
+                ),
+                0,
+                available_assets
+         );
+      }
+}</string>
+                            </entry>
+                            <entry key="lib/ft3/dev_op.rell">
+                                <string>// namespace ft3 {
+
+object dev_state {
+   mutable allow_dev_ops: boolean = true;   
+}
+
+function require_dev() {
+    require(dev_state.allow_dev_ops);
+}
+
+
+operation dev_register_asset (name, issuing_chain_rid: byte_array, origin_chain_rid: byte_array) {
+    require_dev();
+    register_asset(name, issuing_chain_rid);
+}
+
+operation dev_give_balance (asset_id: byte_array, account_id: byte_array, amount: integer) {
+    require_dev();
+    require(amount &gt;= 0);
+    ensure_balance( account @ { account_id }, asset @ { .id == asset_id } ).amount += amount;
+}
+
+operation dev_register_account (auth_descriptor) {
+    require_dev();
+    create_account_with_auth( auth_descriptor );
+}
+</string>
+                            </entry>
+                            <entry key="lib/ft3/ft3_xc_basic_dev.rell">
                                 <string>namespace ft3 {
 
 include "account/auth_basic";
 include "core";
+include "dev_op";
+include "blockchain";
+
+ namespace xc {
+    include "crosschain/structures";
+    include "crosschain/blockchain";
+    include "crosschain/transfer";
+    include "crosschain/dev";
+ }
+
 
 }</string>
                             </entry>
@@ -483,11 +800,23 @@ include "core";
     op_index: integer;
     is_input: boolean;
     entry_index: integer;
-    
   }
 
-  
-
+  query get_payment_history(account_id: byte_array, after_block: integer) {
+    return payment_history_entry @* {
+        account @ { account_id },
+        .transaction.block.block_height &gt; after_block
+    } (
+        delta = .delta,
+        asset = .asset.name,
+        asset_id = .asset.id,
+        is_input = .is_input,
+        timestamp = .transaction.block.timestamp,
+        block_height = .transaction.block.block_height,
+        tx_rid = .transaction.tx_rid,
+        tx_data = .transaction.tx_data
+    );
+  }
 //}</string>
                             </entry>
                             <entry key="lib/ft3/transfer.rell">
@@ -578,7 +907,11 @@ operation transfer (inputs: list&lt;xfer_input&gt;, outputs: list&lt;xfer_output
 //}</string>
                             </entry>
                             <entry key="main.rell">
-                                <string>include 'util/index';
+                                <string>// INCLUDE OF FT3 LIBRARY
+include 'ft3_config';
+include 'lib/ft3/ft3_xc_basic_dev';
+
+include 'util/index';
 include 'user/index';
 include 'topic/index';
 include 'notifications/index';
@@ -586,9 +919,6 @@ include 'channel/index';
 include 'follow/index';
 include 'election/index';
 include 'representative/index';
-
-// INCLUDE OF FT# LIBRARY
-include 'lib/ft3/ft3_basic';
 </string>
                             </entry>
                             <entry key="notifications/index.rell">
@@ -605,11 +935,11 @@ include 'queries';</string>
                             </entry>
                             <entry key="notifications/operations.rell">
                                 <string>
-operation create_notifications_for_users(name, id: text, trigger: text, content: text, usernames: set&lt;text&gt;) {
-    val user = get_verified_user(name);
+operation create_notifications_for_users(name, descriptor_id: byte_array, id: text, trigger: text, content: text, usernames: set&lt;text&gt;) {
+    val user = get_verified_user(name, descriptor_id);
 
     for (username in usernames) {
-        val toUser = user@?{ .name == username };
+        val toUser = user@?{ .name == username.lower_case() };
         if (toUser != null) {
             create notification(
                 id = id, 
@@ -623,8 +953,8 @@ operation create_notifications_for_users(name, id: text, trigger: text, content:
     }
 }
 
-operation remove_notifications_for_users(name, id: text, usernames: set&lt;text&gt;) {
-    val user = get_verified_user(name);
+operation remove_notifications_for_users(name, descriptor_id: byte_array, id: text, usernames: set&lt;text&gt;) {
+    val user = get_verified_user(name, descriptor_id);
 
     for (username in usernames) {
         val toUser = user@?{ .name == username };
@@ -634,8 +964,8 @@ operation remove_notifications_for_users(name, id: text, usernames: set&lt;text&
     }
 }
 
-operation mark_notifications_since_timestamp_read(name, timestamp) {
-    val user = get_verified_user(name);
+operation mark_notifications_since_timestamp_read(name, descriptor_id: byte_array, timestamp) {
+    val user = get_verified_user(name, descriptor_id);
     update notification@*{ .user == user, .timestamp &gt; timestamp } ( read = true );
 }</string>
                             </entry>
@@ -674,8 +1004,8 @@ include 'queries';
 include '/representative/report/index';</string>
                             </entry>
                             <entry key="representative/operations.rell">
-                                <string>operation remove_topic(username: text, topic_id: text) {
-    val user = get_verified_user(username);
+                                <string>operation remove_topic(username: text, descriptor_id: byte_array, topic_id: text) {
+    val user = get_verified_user(username, descriptor_id);
 
     val recentElection = representative_election@{ .completed == true } ( .id, sort .timestamp );
     val representative = representative @{ user, .representative_election.id == recentElection.id };
@@ -691,8 +1021,8 @@ include '/representative/report/index';</string>
     );
 }
 
-operation remove_topic_reply(username: text, topic_reply_id: text) {
-    val user = get_verified_user(username);
+operation remove_topic_reply(username: text, descriptor_id: byte_array, topic_reply_id: text) {
+    val user = get_verified_user(username, descriptor_id);
 
     val recentElection = representative_election@{ .completed == true } ( .id, sort .timestamp );
     val representative = representative @{ user, .representative_election.id == recentElection.id };
@@ -708,8 +1038,8 @@ operation remove_topic_reply(username: text, topic_reply_id: text) {
     );
 }
 
-operation suspend_user(username: text, user_to_be_suspended: text) {
-    val user = get_verified_user(username);
+operation suspend_user(username: text, descriptor_id: byte_array, user_to_be_suspended: text) {
+    val user = get_verified_user(username, descriptor_id);
 
     val recentElection = representative_election@{ .completed == true } ( .id, sort .timestamp );
     val representative = representative @{ user, .representative_election.id == recentElection.id };
@@ -742,8 +1072,10 @@ operation suspend_user(username: text, user_to_be_suspended: text) {
     );
 }
 
-operation tmp_add_representative(admin_name: name, name) {
-    require(is_signer(admin@{ .user.name == admin_name }( .user.pubkey )));
+operation tmp_add_representative(admin_name: name, descriptor_id: byte_array, name) {
+    val admin_user = get_verified_user(admin_name, descriptor_id);
+    admin@{ admin_user };
+
     val currentElection = representative_election @ { .timestamp &lt;= op_context.last_block_time, .completed == true } (
         .id,
         -sort .timestamp
@@ -752,8 +1084,10 @@ operation tmp_add_representative(admin_name: name, name) {
     create representative(user@{ .name == name }, representative_election@{ .id == currentElection.id });
 }
 
-operation tmp_remove_representative(admin_name: name, name) {
-    require(is_signer(admin@{ .user.name == admin_name }( .user.pubkey )));
+operation tmp_remove_representative(admin_name: name, descriptor_id: byte_array, name) {
+    val admin_user = get_verified_user(admin_name, descriptor_id);
+    admin@{ admin_user };
+
     val currentElection = representative_election @ { .timestamp &lt;= op_context.last_block_time, .completed == true } (
         .id,
         -sort .timestamp
@@ -764,7 +1098,11 @@ operation tmp_remove_representative(admin_name: name, name) {
                             </entry>
                             <entry key="representative/queries.rell">
                                 <string>query get_representatives() {
-    val election = representative_election@{ .completed == true } ( .id, -sort .timestamp );
+    val election = representative_election@?{ .completed == true } ( .id, -sort .timestamp );
+
+    if (election == null) {
+        return ["admin"];
+    }
 
     return representative@*{
         .representative_election.id == election.id
@@ -796,17 +1134,15 @@ include 'operations';
 include 'queries';</string>
                             </entry>
                             <entry key="representative/report/operations.rell">
-                                <string>operation create_representative_report(username: text, id: text, text) {
-    val user = user@{ .name == username };
-    require(is_signer(user.pubkey));
+                                <string>operation create_representative_report(username: text, descriptor_id: byte_array, id: text, text) {
+    val user = get_verified_user(username, descriptor_id);
     require(user_meta@{ user }.suspended_until &lt; op_context.last_block_time);
 
     create representative_report(id= id, user, op_context.last_block_time, false, text = text);
 }
 
-operation handle_representative_report(username: text, id: text) {
-    val user = user@{ .name == username };
-    require(is_signer(user.pubkey));
+operation handle_representative_report(username: text, descriptor_id: byte_array, id: text) {
+    val user = get_verified_user(username, descriptor_id);
 
     val recentElection = representative_election@{ .completed == true } ( .id, sort .timestamp );
     val representative = representative @{ user, .representative_election.id == recentElection.id };
@@ -865,9 +1201,8 @@ include '/topic/rating/index';
 include '/topic/subscription/index';</string>
                             </entry>
                             <entry key="topic/operations.rell">
-                                <string>operation create_topic(id: text, username: text, channel_key: name, channel_name: name, title: name, message: text) {
-    log("Username: ", username);
-    val author = get_verified_user(username);
+                                <string>operation create_topic(id: text, descriptor_id: byte_array, username: text, channel_key: name, channel_name: name, title: name, message: text) {
+    val author = get_verified_user(username, descriptor_id);
 
     val topic = create topic(
         id = id, 
@@ -879,13 +1214,12 @@ include '/topic/subscription/index';</string>
         removed = false
     );
 
-    // TODO: .lower_case() on name (key)
-    create channel(name = channel_key, topic, op_context.last_block_time, display_name = channel_name);
+    create channel(name = channel_key.lower_case(), topic, op_context.last_block_time, display_name = channel_name);
     create tmp_topic_rating (topic, 0);
 }
 
-operation modify_topic(id: text, username: text, text) {
-    val author = get_verified_user(username);
+operation modify_topic(id: text, descriptor_id: byte_array, username: text, text) {
+    val author = get_verified_user(username, descriptor_id);
 
     val topic = topic@{ .id == id, .author == author };
     val fiveMinutesInMillis = 300000;
@@ -893,8 +1227,8 @@ operation modify_topic(id: text, username: text, text) {
     update topic ( message = text );
 }
 
-operation create_reply(topic_id: text, id: text, username: text, message: text) {
-    val author = get_verified_user(username);
+operation create_reply(topic_id: text, descriptor_id: byte_array, id: text, username: text, message: text) {
+    val author = get_verified_user(username, descriptor_id);
     val topic = find_topic_by_id(topic_id);
 
     create topic_reply(
@@ -912,8 +1246,8 @@ operation create_reply(topic_id: text, id: text, username: text, message: text) 
     }
 }
 
-operation modify_reply(id: text, username: text, text) {
-    val author = get_verified_user(username);
+operation modify_reply(id: text, descriptor_id: byte_array, username: text, text) {
+    val author = get_verified_user(username, descriptor_id);
 
     val reply = topic_reply@{ .id == id, .author == author };
     val fiveMinutesInMillis = 300000;
@@ -921,8 +1255,8 @@ operation modify_reply(id: text, username: text, text) {
     update reply ( message = text );
 }
 
-operation create_sub_reply(topic_id: text, parent_reply_id: text, id: text, username: text, message: text) {
-    val author = get_verified_user(username);
+operation create_sub_reply(topic_id: text, descriptor_id: byte_array, parent_reply_id: text, id: text, username: text, message: text) {
+    val author = get_verified_user(username, descriptor_id);
     val topic = find_topic_by_id(topic_id);
 
     val topic_reply = create topic_reply(
@@ -1053,32 +1387,34 @@ query get_topics_by_user_id_prior_to_timestamp(name, timestamp, page_size: integ
 }
 
 query get_topics_from_follows_after_timestamp(name, timestamp, page_size: integer) {
-    return topic@*{
-        follow@{ .follower.name == name } ( .follows ),
-        .last_modified &gt; timestamp
+    return (topic, follow) @* {
+            follow.follower.name == name.lower_case(),
+            follow.follows == topic.author,
+            topic.last_modified &gt; timestamp
     }(
-        .id,
-        author=.author.display_name,
-        .title,
-        .message,
-        -sort .last_modified,
-        .removed,
-        .timestamp
+        topic.id,
+        author=topic.author.display_name,
+        topic.title,
+        topic.message,
+        topic.removed,
+        -sort topic.last_modified,
+        topic.timestamp
     ) limit page_size;
 }
 
 query get_topics_from_follows_prior_to_timestamp(name, timestamp, page_size: integer) {
-    return topic@*{
-        follow@{ .follower.name == name } ( .follows ),
-        .last_modified &lt; timestamp
+    return (topic, follow) @* {
+        follow.follower.name == name.lower_case(),
+        follow.follows == topic.author,
+        topic.last_modified &lt; timestamp
     }(
-        .id,
-        author=.author.display_name,
-        .title,
-        .message,
-        .removed,
-        -sort .last_modified,
-        .timestamp
+        topic.id,
+        author=topic.author.display_name,
+        topic.title,
+        topic.message,
+        topic.removed,
+        -sort topic.last_modified,
+        topic.timestamp
     ) limit page_size;
 }
 
@@ -1176,29 +1512,29 @@ include 'operations';
 include 'queries';</string>
                             </entry>
                             <entry key="topic/rating/operations.rell">
-                                <string>operation give_topic_star_rating(username: text, id: text) {
-    val user = get_verified_user(username);
+                                <string>operation give_topic_star_rating(username: text, descriptor_id: byte_array, id: text, unique_id: text) {
+    val user = get_verified_user(username, descriptor_id);
     create topic_star_rating(topic@{ .id == id }, user);
 
     val topicRating = tmp_topic_rating@{ topic@{ .id == id }};
     update topicRating ( stars = topicRating.stars + 1 );
 }
 
-operation remove_topic_star_rating(username: text, id: text) {
-    val user = get_verified_user(username);
+operation remove_topic_star_rating(username: text, descriptor_id: byte_array, id: text, unique_id: text) {
+    val user = get_verified_user(username, descriptor_id);
     delete topic_star_rating@{ topic@{ .id == id }, user };
 
     val topicRating = tmp_topic_rating@{ topic@{ .id == id }};
     update topicRating ( stars = topicRating.stars - 1 );
 }
 
-operation give_reply_star_rating(username: text, id: text) {
-    val user = get_verified_user(username);
+operation give_reply_star_rating(username: text, descriptor_id: byte_array, id: text, unique_id: text) {
+    val user = get_verified_user(username, descriptor_id);
     create reply_star_rating(topic_reply@{ .id == id }, user);
 }
 
-operation remove_reply_star_rating(username: text, id: text) {
-    val user = get_verified_user(username);
+operation remove_reply_star_rating(username: text, descriptor_id: byte_array, id: text, unique_id: text) {
+    val user = get_verified_user(username, descriptor_id);
     delete reply_star_rating@{ topic_reply@{ .id == id }, user };
 }</string>
                             </entry>
@@ -1228,13 +1564,13 @@ include 'operations';
 include 'queries';</string>
                             </entry>
                             <entry key="topic/subscription/operations.rell">
-                                <string>operation subscribe_to_topic(username: text, id: text) {
-    val user = get_verified_user(username);
+                                <string>operation subscribe_to_topic(username: text, descriptor_id: byte_array, id: text, unique_id: text) {
+    val user = get_verified_user(username, descriptor_id);
     create subscription(topic@{ .id == id }, user);
 }
 
-operation unsubscribe_from_topic(username: text, id: text) {
-    val user = get_verified_user(username);
+operation unsubscribe_from_topic(username: text, descriptor_id: byte_array, id: text, unique_id: text) {
+    val user = get_verified_user(username, descriptor_id);
     delete subscription@{ topic@{ .id == id }, user };
 }</string>
                             </entry>
@@ -1244,10 +1580,10 @@ operation unsubscribe_from_topic(username: text, id: text) {
 }</string>
                             </entry>
                             <entry key="user/functions.rell">
-                                <string>function get_verified_user(name): user {
+                                <string>function get_verified_user(name, descriptor_id: byte_array): user {
     val user = user@{ .name == name };
-
-    require(is_signer(user.pubkey));
+    ft3.require_auth(user.account, descriptor_id, ["A"]);
+    //require(is_signer(user.pubkey));
     require(user_meta@{ user }.suspended_until &lt; op_context.last_block_time);
 
     return user;
@@ -1259,10 +1595,8 @@ operation unsubscribe_from_topic(username: text, id: text) {
 }
 
 class user {
-    key name;
+    key account: ft3.account, name;
     display_name: name;
-    pubkey;
-    registered: integer;
 }
 
 include 'functions';
@@ -1303,8 +1637,8 @@ include 'operations';
 include 'queries';</string>
                             </entry>
                             <entry key="user/mute/operations.rell">
-                                <string>operation toggle_mute(username: name, name, muted: boolean) {
-    val user = get_verified_user(username);
+                                <string>operation toggle_mute(username: name, descriptor_id: byte_array, name, muted: boolean) {
+    val user = get_verified_user(username, descriptor_id);
 
     if (muted) {
         create user_mute(user = user, muted_user = user@{ .name == name });
@@ -1319,30 +1653,31 @@ include 'queries';</string>
 }</string>
                             </entry>
                             <entry key="user/operations.rell">
-                                <string>operation register_user(name, display_name: text, pubkey) {
-    require(is_signer(pubkey));
-
-    log("Name: ", name, " - Display Name: ", display_name);
+                                <string>operation register_user(name, auth_descriptor: ft3.auth_descriptor, vault_auth_descriptor: ft3.auth_descriptor) {
+    val account_id = ft3.create_account_with_auth(auth_descriptor);
+    val account = ft3.account @ { account_id };
+    ft3._add_auth_descriptor(account, vault_auth_descriptor);
 
     if (name == "admin") {
-        val admin = create user(name, display_name, pubkey, op_context.transaction.block.block_height);
+        val admin = create user(name = name.lower_case(), display_name = name, account);
         create admin(admin);
         create user_settings(admin, avatar = "" , description = "");
         create user_meta(admin, times_suspended = 0, suspended_until = 0);
     } else {
-        val user = create user(name, display_name, pubkey, op_context.transaction.block.block_height);
+        val user = create user(name = name.lower_case(), display_name = name, account);
         create user_settings(user, avatar = "" , description = "");
         create user_meta(user, times_suspended = 0, suspended_until = 0);
     }
-}
-</string>
+}</string>
                             </entry>
                             <entry key="user/queries.rell">
-                                <string>
-query get_user(name) {
-    return user@?{ .name == name } ( name = .display_name, .pubkey, .registered );
+                                <string>query get_user(name) {
+    return user@?{ .name == name.lower_case() } ( name = .display_name );
 }
-</string>
+
+query get_account_id(name) {
+    return user@?{ .name == name.lower_case() } ( .account.id );
+}</string>
                             </entry>
                             <entry key="user/settings/index.rell">
                                 <string>class user_settings {
@@ -1355,13 +1690,13 @@ include 'operations';
 include 'queries';</string>
                             </entry>
                             <entry key="user/settings/operations.rell">
-                                <string>operation create_user_settings(name, avatar: text, description: text) {
-    val user = get_verified_user(name);
+                                <string>operation create_user_settings(name, descriptor_id: byte_array, avatar: text, description: text) {
+    val user = get_verified_user(name, descriptor_id);
     create user_settings(user, avatar = avatar, description = description);
 }
 
-operation update_user_settings(name, avatar: text, description: text) {
-    val user = get_verified_user(name);
+operation update_user_settings(name, descriptor_id: byte_array, avatar: text, description: text) {
+    val user = get_verified_user(name, descriptor_id);
     update user_settings@{ .user == user }( avatar = avatar, description = description );
 }</string>
                             </entry>

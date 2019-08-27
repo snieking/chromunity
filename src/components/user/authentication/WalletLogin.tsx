@@ -1,24 +1,15 @@
 import React, { useState } from "react";
 import { createStyles, makeStyles, Snackbar } from "@material-ui/core";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
-import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
-import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
-import Card from "@material-ui/core/Card";
-import { Link } from "react-router-dom";
-import { COLOR_SOFT_PINK } from "../../../theme";
-import CardContent from "@material-ui/core/CardContent";
-import {EncryptedAccount} from "../../../types";
-import { getAccounts } from "../../../util/user-util";
-import Account from "../Account";
-import List from "@material-ui/core/List";
-import { required, validate } from "../../../util/validations";
 import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
-import { submitLogin } from "../../../redux/actions/AccountActions";
+import { accountRegisteredCheck } from "../../../redux/actions/AccountActions";
 import { ApplicationState } from "../../../redux/Store";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { connect } from "react-redux";
+import Typography from "@material-ui/core/Typography";
+import TextField from "@material-ui/core/TextField";
 
 enum Step {
   INIT,
@@ -34,12 +25,8 @@ const useStyles = makeStyles(
     input: {
       marginTop: "10px"
     },
-    signUpButton: {
-      color: COLOR_SOFT_PINK,
-      borderColor: COLOR_SOFT_PINK,
-      "&:hover": {
-        borderColor: COLOR_SOFT_PINK
-      }
+    textField: {
+      marginBottom: "5px"
     }
   })
 );
@@ -48,140 +35,82 @@ interface Props {
   loading: boolean;
   success: boolean;
   failure: boolean;
-  login: typeof submitLogin;
+  error: string;
+  accountRegisteredCheck: typeof accountRegisteredCheck;
 }
-
-const accounts = getAccounts();
 
 const WalletLogin: React.FunctionComponent<Props> = props => {
   const classes = useStyles(props);
 
+  const [name, setName] = useState("");
   const [step, setStep] = useState(Step.INIT);
-  const [selectedAccount, setSelectedAccount] = useState<EncryptedAccount>(accounts[0]);
-  const [password, setPassword] = useState<string>("");
-  const [error, setError] = useState("");
-  const [errorOpen, setErrorOpen] = useState(false);
+  const [errorOpen, setErrorOpen] = useState(props.failure);
 
-  const doLogin = () => {
-    const validations = [
-      [selectedAccount.name, [required("Please pick an account")]],
-      [password, [required("Please enter a valid password")]]
-    ];
-
-    if (!validate(validations, setError)) {
-      setErrorOpen(true);
-      return;
-    }
-
+  const walletLogin = () => {
     setStep(Step.LOGIN_IN_PROGRESS);
-    props.login(selectedAccount.name, password, selectedAccount.encryptedSeed);
+    props.accountRegisteredCheck(name);
   };
 
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth="sm" className={classes.contentWrapper}>
       <ChromiaPageHeader text={"Login"} />
-      <Card raised={true}>
-        <CardContent className={classes.contentWrapper}>
-          {props.loading && <CircularProgress disableShrink />}
-
-          {step === Step.LOGIN_IN_PROGRESS &&
-            props.success &&
-            window.location.replace("/")}
-
-          {accounts.length > 0 ? (
-            <div>
-              <Typography component="p" variant="subtitle1">
-                Known Accounts
-              </Typography>
-
-              <List>
-                {accounts.map(account => (
-                  <Account
-                    key={account.name}
-                    account={account}
-                    selectedAccount={selectedAccount || accounts[0]}
-                    setSelectedAccount={setSelectedAccount}
-                  />
-                ))}
-              </List>
-
-              <TextField
-                label="Password"
-                name="password"
-                type="password"
-                fullWidth
-                value={password || ""}
-                onChange={({ target: { value } }) => setPassword(value)}
-                variant="outlined"
-                className={classes.input}
-                autoFocus
-              />
-              <Button
-                fullWidth
-                color="primary"
-                variant="outlined"
-                className={classes.input}
-                onClick={doLogin}
-              >
-                Sign in
-              </Button>
-            </div>
-          ) : (
-            <div>
-              <Typography component="p" variant="subtitle1">
-                No Known Accounts
-              </Typography>
-            </div>
-          )}
-
-          <Button
-            component={Link}
-            to="/wallet/import-account"
-            color="secondary"
-            variant="outlined"
+      {props.loading && <CircularProgress disableShrink />}
+      {step === Step.INIT && (
+        <div>
+          <Typography variant="subtitle1" component="p" className={classes.textField}>
+            User authentication is handled by Chromia Wallet.
+          </Typography>
+          <TextField
+            label="Account name"
+            name="name"
+            type="text"
             fullWidth
+            variant="outlined"
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+              setName(event.target.value)
+            }
             className={classes.input}
-          >
-            Import existing account
-          </Button>
-
+          />
           <Button
-            component={Link}
-            to="/wallet/sign-up"
             color="primary"
-            variant="outlined"
-            fullWidth
+            variant="contained"
             className={classes.input}
+            onClick={walletLogin}
           >
-            Sign up
+            Sign in with Chromia Wallet
           </Button>
-
-          <Snackbar
-            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-            open={errorOpen}
-            autoHideDuration={6000}
-            onClose={() => setErrorOpen(false)}
-          >
-            <CustomSnackbarContentWrapper variant="error" message={error} />
-          </Snackbar>
-        </CardContent>
-      </Card>
+        </div>
+      )}
+      {step === Step.LOGIN_IN_PROGRESS && (
+        <Typography variant="subtitle1" component="p">
+          If you do not see anything, make sure you allow pop-ups.
+        </Typography>
+      )}
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        open={errorOpen}
+        autoHideDuration={6000}
+        onClose={() => setErrorOpen(false)}
+      >
+        <CustomSnackbarContentWrapper variant="error" message={props.error} />
+      </Snackbar>
     </Container>
   );
 };
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
-    login: (name: string, password: string, seed: string) =>
-      dispatch(submitLogin(name, password, seed))
+    accountRegisteredCheck: (username: string) =>
+      dispatch(accountRegisteredCheck(username))
   };
 };
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    loading: store.loginAccount.loading,
-    success: store.loginAccount.success,
-    failure: store.loginAccount.failure
+    loading: store.account.loading,
+    success: store.account.success,
+    error: store.account.error,
+    failure: store.account.failure
   };
 };
 

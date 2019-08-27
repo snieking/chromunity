@@ -1,5 +1,10 @@
 query get_representatives() {
-    val election = representative_election@{ .completed == true } ( .id, -sort .timestamp );
+    val election = representative_election@?{ .completed == true } ( .id, -sort .timestamp );
+
+    // If no election yes, then admin is technically the only representative
+    if (election == null) {
+        return ["admin"];
+    }
 
     return representative@*{
         .representative_election.id == election.id

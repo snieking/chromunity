@@ -1,67 +1,102 @@
-import {login, register} from "../../blockchain/UserService";
-import {
-  AccountActionTypes,
-  AccountImportLoginAction,
-  AccountLoginSubmitAction,
-  CreateAccountState, ImportAccountState
-} from "../AccountTypes";
-import { takeLatest, select, put } from "redux-saga/effects";
-import { ApplicationState } from "../Store";
-import {loginFailure, loginSuccess, registerFailure, registerSuccess} from "../actions/AccountActions";
-import {decrypt, seedFromMnemonic} from "../../blockchain/CryptoService";
+import { AccountActionTypes, AccountRegisterAction, AccountRegisteredCheckAction } from "../AccountTypes";
+import { takeLatest } from "redux-saga/effects";
+import { SingleSignatureAuthDescriptor, FlagsType, User, Account } from "ft3-lib";
+import { KeyPair } from "ft3-lib";
+import config from "../../config.js";
+import { getAccountId } from "../../blockchain/UserService";
+import { BLOCKCHAIN } from "../../blockchain/Postchain";
+import { accountAddAccountId } from "../actions/AccountActions";
+import { getKeyPair, setUsername, storeKeyPair } from "../../util/user-util";
+import { makeKeyPair } from "../../blockchain/CryptoService";
 
 export function* accountWatcher() {
-  yield takeLatest(AccountActionTypes.REGISTER, registerAccount);
-  yield takeLatest(AccountActionTypes.REGISTER_SUCCESS, registerAccountSuccess);
-  yield takeLatest(AccountActionTypes.SUBMIT_LOGIN, loginAccount);
-  yield takeLatest(AccountActionTypes.IMPORT_LOGIN, importLogin);
+  yield takeLatest(AccountActionTypes.ACCOUNT_REGISTER_CHECK, checkIfRegistered);
+  yield takeLatest(AccountActionTypes.ACCOUNT_REGISTER, registerAccount);
 }
 
-function* registerAccount() {
-  const state: CreateAccountState = yield select(
-    (state: ApplicationState) => state.createAccount
+function* checkIfRegistered(action: AccountRegisteredCheckAction) {
+  const accountId = yield getAccountId(action.username);
+  if (!accountId) {
+    const returnUrl = encodeURIComponent(`${config.chromunityUrl}/user/register/${action.username}`);
+    window.location.replace(`${config.vaultUrl}/?route=/link-account&returnUrl=${returnUrl}`);
+  } else {
+    accountAddAccountId(accountId);
+    yield loginAccount(action.username);
+  }
+}
+
+function* registerAccount(action: AccountRegisterAction) {
+  const walletAuthDescriptor = new SingleSignatureAuthDescriptor(Buffer.from(action.vaultPubKey, "hex"), [
+    FlagsType.Account,
+    FlagsType.Transfer
+  ]);
+
+  const keyPair = retrieveKeyPair();
+
+  const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
+
+  const user = new User(keyPair, authDescriptor);
+  const bc = yield BLOCKCHAIN;
+  yield bc.call(user, "register_user", action.username, authDescriptor.toGTV(), walletAuthDescriptor.toGTV());
+  authorizeUser(action.username, keyPair);
+}
+
+function* loginAccount(username: string) {
+  let keyPair: KeyPair = new KeyPair(makeKeyPair().privKey.toString("hex"));
+
+  const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
+
+  const user = new User(keyPair, authDescriptor);
+  let accountId = yield getAccountId(username);
+  const blockchain = yield BLOCKCHAIN;
+  checkIfAuthDescriptorAdded(blockchain, user, accountId, username, keyPair);
+
+  const href = `${config.vaultUrl}/?route=/authorize&dappId=${
+    config.blockchainRID
+  }&accountId=${accountId}&pubkey=${keyPair.pubKey.toString("hex")}`;
+
+  let newWindow = window.open(
+    href,
+    "vault",
+    `toolbar=no,
+  location=no,
+  status=no,
+  menubar=no,
+  scrollbars=yes,
+  resizable=yes`
   );
 
-  try {
-    yield register(state.name, state.password, state.mnemonic);
-    yield put(registerSuccess());
-  } catch (error) {
-    yield put(registerFailure());
+  if (!newWindow.focus) {
+    newWindow.focus();
   }
 }
 
-function* registerAccountSuccess() {
-  const state: CreateAccountState = yield select(
-    (state: ApplicationState) => state.createAccount
-  );
+async function checkIfAuthDescriptorAdded(blockchain: any, user: User, accountId: string, username: string, keyPair: KeyPair) {
+  const accounts = await blockchain.getAccountsByAuthDescriptorId(user.authDescriptor.hash(), user);
 
-  try {
-    yield login(state.name, state.password, seedFromMnemonic(state.mnemonic, state.password));
-    yield put(loginSuccess());
-  } catch (error) {
-    yield put(loginFailure());
+  const isAdded = accounts.some((account: Account) => {
+    return account.id_.toString("hex").toUpperCase() === accountId.toUpperCase();
+  });
+
+  if (isAdded) {
+    authorizeUser(username, keyPair);
+  } else {
+    setTimeout(() => checkIfAuthDescriptorAdded(blockchain, user, accountId, username, keyPair), 3000);
   }
 }
 
-function* loginAccount(action: AccountLoginSubmitAction) {
-  try {
-    yield login(action.name, action.password, decrypt(action.encryptedSeed, action.password));
-    yield put(loginSuccess());
-  } catch (error) {
-    yield put(loginFailure());
+function retrieveKeyPair(): KeyPair {
+  let keyPair: KeyPair = getKeyPair();
+  if (!keyPair) {
+    const kp = makeKeyPair();
+    keyPair = new KeyPair(kp.privKey.toString("hex"));
   }
+
+  return keyPair;
 }
 
-function* importLogin(action: AccountImportLoginAction) {
-  const state: ImportAccountState = yield select(
-    (state: ApplicationState) => state.importAccount
-  );
-
-  try {
-    yield login(action.name, action.password, seedFromMnemonic(state.mnemonic, action.password));
-    yield put(loginSuccess());
-  } catch (error) {
-    yield put(loginFailure());
-  }
+function authorizeUser(username: string, keyPair: KeyPair) {
+  setUsername(username);
+  storeKeyPair(keyPair);
+  window.location.replace("/");
 }
-

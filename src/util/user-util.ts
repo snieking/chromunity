@@ -1,17 +1,16 @@
-import { EncryptedAccount, UserMeta } from "./../types";
-import { User } from "../types";
+import { ChromunityUser, UserMeta } from "../types";
 import * as BoomerangCache from "boomerang-cache";
 import { getRepresentatives } from "../blockchain/RepresentativesService";
-import { encrypt } from "../blockchain/CryptoService";
 import { getUserMeta } from "../blockchain/UserService";
+import { FlagsType, KeyPair, SingleSignatureAuthDescriptor, User } from "ft3-lib";
 
 const LOCAL_CACHE = BoomerangCache.create("local-bucket", {
   storage: "local",
   encrypt: false
 });
 const ENCRYPTED_LOCAL_CACHE = BoomerangCache.create("encrypted-local-bucket", {
-    storage: "local",
-    encrypt: true
+  storage: "local",
+  encrypt: true
 });
 const SESSION_CACHE = BoomerangCache.create("session-bucket", {
   storage: "session",
@@ -19,43 +18,45 @@ const SESSION_CACHE = BoomerangCache.create("session-bucket", {
 });
 
 const USER_KEY = "user";
-const ACCOUNTS_KEY = "accounts";
 const USER_META_KEY = "user_meta";
 const REPRESENTATIVE_KEY = "representative";
 
 export function clearSession(): void {
   ENCRYPTED_LOCAL_CACHE.clear();
+  LOCAL_CACHE.remove(USER_KEY);
   SESSION_CACHE.remove(USER_META_KEY);
   SESSION_CACHE.remove(REPRESENTATIVE_KEY);
 }
 
-export function getAccounts(): EncryptedAccount[] {
-  const accounts: EncryptedAccount[] = LOCAL_CACHE.get(ACCOUNTS_KEY);
-  return accounts != null ? accounts : [];
+export function storeKeyPair(keyPair: KeyPair): void {
+  LOCAL_CACHE.set("keyPair", keyPair);
 }
 
-export function deleteAccount(account: EncryptedAccount): void {
-  const accounts: EncryptedAccount[] = LOCAL_CACHE.get(ACCOUNTS_KEY);
-  let filteredAccounts = accounts.filter(e => e.name !== account.name);
-  LOCAL_CACHE.set(ACCOUNTS_KEY, filteredAccounts);
+export function getKeyPair(): KeyPair {
+  const keyPair = LOCAL_CACHE.get("keyPair");
+  if (keyPair == null) return null;
+  return new KeyPair(keyPair.privKey);
 }
 
-export function setUser(user: User, encryptionKey: string): void {
-  const accounts: EncryptedAccount[] = LOCAL_CACHE.get(ACCOUNTS_KEY);
+export function getUsername(): string {
+  return LOCAL_CACHE.get(USER_KEY);
+}
 
-  const account: EncryptedAccount = {
-    name: user.name,
-    encryptedSeed: encrypt(user.seed, encryptionKey)
-  };
+export function setUsername(username: string): void {
+  LOCAL_CACHE.set(USER_KEY, username);
+}
 
-  if (accounts == null) {
-    LOCAL_CACHE.set(ACCOUNTS_KEY, [account]);
-  } else {
-    let filteredAccounts = accounts.filter(e => e.name !== user.name);
-    LOCAL_CACHE.set(ACCOUNTS_KEY, [account].concat(filteredAccounts));
-  }
+export function getUser(): ChromunityUser {
+  const keyPair = getKeyPair();
+  const username: string = getUsername();
 
-    ENCRYPTED_LOCAL_CACHE.set(USER_KEY, user, 86400);
+  if (keyPair == null) return null;
+  if (username == null) return null;
+
+  const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
+  const ft3User = new User(keyPair, authDescriptor);
+
+  return { name: username, ft3User: ft3User };
 }
 
 export function setUserMeta(meta: UserMeta): void {
@@ -69,19 +70,16 @@ export function getCachedUserMeta(): Promise<UserMeta> {
     return new Promise<UserMeta>(resolve => resolve(meta));
   }
 
-  const user: User = getUser();
-  if (user == null) {
+  const username = getUsername();
+
+  if (username != null) {
+    return getUserMeta(getUsername()).then(meta => {
+      setUserMeta(meta);
+      return meta;
+    });
+  } else {
     return new Promise<UserMeta>(resolve => resolve(null));
   }
-
-  return getUserMeta(user.name).then(meta => {
-    setUserMeta(meta);
-    return meta;
-  });
-}
-
-export function getUser(): User {
-  return ENCRYPTED_LOCAL_CACHE.get(USER_KEY);
 }
 
 export function godAlias(): string {
@@ -89,8 +87,8 @@ export function godAlias(): string {
 }
 
 export function isGod(): boolean {
-  const user: User = getUser();
-  return user != null && user.name === godAlias();
+  const username = getUsername();
+  return username != null && username === godAlias();
 }
 
 export function setRepresentative(isRepresentative: boolean): void {
@@ -107,11 +105,10 @@ export function isRepresentative(): Promise<boolean> {
     return new Promise<boolean>(resolve => resolve(isRepresentative));
   }
 
+  const username = getUsername();
+
   return getRepresentatives()
-    .then(
-      (representatives: string[]) =>
-        getUser() != null && representatives.includes(getUser().name)
-    )
+    .then((representatives: string[]) => username != null && representatives.includes(username))
     .then((rep: boolean) => {
       setRepresentative(rep);
       return rep;
@@ -123,7 +120,5 @@ export function isRepresentative(): Promise<boolean> {
 }
 
 export function ifEmptyAvatarThenPlaceholder(avatar: string, seed: string) {
-  return avatar !== "" && avatar != null
-    ? avatar
-    : "https://avatars.dicebear.com/v2/gridy/" + seed + ".svg";
+  return avatar !== "" && avatar != null ? avatar : "https://avatars.dicebear.com/v2/gridy/" + seed + ".svg";
 }

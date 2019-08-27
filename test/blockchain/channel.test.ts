@@ -1,4 +1,4 @@
-import {Topic, User} from "../src/types";
+import { ChromunityUser, Topic } from "../../src/types";
 import {
     countChannelFollowers,
     followChannel,
@@ -6,7 +6,7 @@ import {
     getTopicChannelBelongings,
     getTrendingChannels,
     unfollowChannel
-} from "../src/blockchain/ChannelService";
+} from "../../src/blockchain/ChannelService";
 import {
     countTopicsInChannel,
     createTopic,
@@ -14,14 +14,15 @@ import {
     getTopicsByChannelPriorToTimestamp,
     getTopicsByChannelSortedByPopularityAfterTimestamp,
     getTopicsFromFollowedChannelsPriorToTimestamp
-} from "../src/blockchain/TopicService";
-import {CREATE_LOGGED_IN_USER} from "./users";
+} from "../../src/blockchain/TopicService";
+import {CREATE_LOGGED_IN_USER} from "../users";
+import { User } from "ft3-lib";
 
 jest.setTimeout(60000);
 
 describe("channel tests", () => {
 
-    let loggedInUser: User;
+    let loggedInUser: ChromunityUser;
 
     beforeAll(async () => {
         loggedInUser = await CREATE_LOGGED_IN_USER();
@@ -52,7 +53,7 @@ describe("channel tests", () => {
         expect(trendingChannels.length).toBeGreaterThanOrEqual(1);
 
         await followChannel(loggedInUser, channel);
-        var topicsWithFollowedChannel: Topic[] = await getTopicsFromFollowedChannelsPriorToTimestamp(loggedInUser, Date.now() + 3000, 10);
+        var topicsWithFollowedChannel: Topic[] = await getTopicsFromFollowedChannelsPriorToTimestamp(loggedInUser.name, Date.now() + 3000, 10);
         var followedChannels: string[] = await getFollowedChannels(loggedInUser.name);
         expect(topicsWithFollowedChannel.length).toBe(1);
         expect(followedChannels.length).toBe(1);
@@ -64,7 +65,7 @@ describe("channel tests", () => {
         expect(countOfFollowers).toBe(1);
 
         await unfollowChannel(loggedInUser, channel);
-        topicsWithFollowedChannel = await getTopicsFromFollowedChannelsPriorToTimestamp(loggedInUser, Date.now() + 3000, 10);
+        topicsWithFollowedChannel = await getTopicsFromFollowedChannelsPriorToTimestamp(loggedInUser.name, Date.now() + 3000, 10);
         followedChannels = await getFollowedChannels(loggedInUser.name);
         expect(topicsWithFollowedChannel.length).toBe(0);
         expect(followedChannels.length).toBe(0);
