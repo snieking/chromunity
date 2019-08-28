@@ -11,12 +11,10 @@ import { runSaga } from "redux-saga";
 import {
   loadAllTopics,
   loadAllTopicsByPopularity,
-  loadFollowedChannelsTopics,
   loadOlderAllTopics
 } from "../../../src/redux/sagas/TopicWallSagas";
 import { ChromunityUser, Topic } from "../../../src/types";
 import { getANumber } from "../../helper";
-import { followChannel } from "../../../src/blockchain/ChannelService";
 
 describe("Topic wall [ALL] saga tests", () => {
 

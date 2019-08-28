@@ -126,7 +126,7 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
     const fakeStore = createFakeStore(dispatchedActions, {
       wallType: WallType.CHANNEL,
       followedChannels: {
-        topics: createFakeTopics(Date.now()),
+        topics: createFakeTopics(0),
         updated: 0
       }
     });

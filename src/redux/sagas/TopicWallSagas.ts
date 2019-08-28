@@ -18,6 +18,7 @@ import {
   getTopicsAfterTimestamp,
   getTopicsByFollowedChannelSortedByPopularityAfterTimestamp,
   getTopicsByFollowsSortedByPopularityAfterTimestamp,
+  getTopicsFromFollowedChannelsAfterTimestamp,
   getTopicsFromFollowedChannelsPriorToTimestamp,
   getTopicsFromFollowsAfterTimestamp,
   getTopicsFromFollowsPriorToTimestamp,
@@ -171,7 +172,7 @@ export function* loadFollowedChannelsTopics(action: LoadFollowedChannelsTopicWal
   let retrievedTopics: Topic[];
   if (topics.length > 0) {
     // Load recent topics
-    retrievedTopics = yield getTopicsFromFollowedChannelsPriorToTimestamp(
+    retrievedTopics = yield getTopicsFromFollowedChannelsAfterTimestamp(
       action.username,
       topics[0].last_modified,
       action.pageSize

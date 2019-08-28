@@ -30,7 +30,7 @@ export function createTopic(user: ChromunityUser, channelName: string, title: st
       message
     );
   }).then((promise: unknown) => {
-    subscribeToTopic(user, topicId);
+    subscribeToTopic(user, topicId).then();
     return promise;
   });
 }
@@ -186,11 +186,13 @@ export function getTopicsByUserPriorToTimestamp(
   timestamp: number,
   pageSize: number
 ): Promise<Topic[]> {
+  console.log("Getting topics from username");
   return GTX.query("get_topics_by_user_id_prior_to_timestamp", {
     name: username.toLocaleLowerCase(),
     timestamp: timestamp,
     page_size: pageSize
   }).then((topics: Topic[]) => {
+    console.log("Retrieved topics in promise");
     topics.forEach(topic => topicsCache.set(topic.id, topic));
     return topics;
   });
@@ -242,11 +244,10 @@ export function getTopicStarRaters(topicId: string): Promise<string[]> {
     return new Promise<string[]>(resolve => resolve(raters));
   }
 
-  return GTX.query("get_star_rating_for_topic", { id: topicId })
-    .then((raters: string[]) => {
-      starRatingCache.set(topicId, raters, 600);
-      return raters;
-    });
+  return GTX.query("get_star_rating_for_topic", { id: topicId }).then((raters: string[]) => {
+    starRatingCache.set(topicId, raters, 600);
+    return raters;
+  });
 }
 
 export function giveReplyStarRating(user: ChromunityUser, replyId: string) {
@@ -367,12 +368,31 @@ function countByUser(name: string, rellOperation: string): Promise<number> {
   return GTX.query(rellOperation, { name: name.toLocaleLowerCase() });
 }
 
-export function getTopicsFromFollowedChannelsPriorToTimestamp(
+export function getTopicsFromFollowedChannelsAfterTimestamp(username: string, timestamp: number, pageSize: number) {
+  return getTopicsFromFollowedChannels(
+    username,
+    timestamp,
+    pageSize,
+    "get_topics_by_followed_channels_after_timestamp"
+  );
+}
+
+export function getTopicsFromFollowedChannelsPriorToTimestamp(username: string, timestamp: number, pageSize: number) {
+  return getTopicsFromFollowedChannels(
+    username,
+    timestamp,
+    pageSize,
+    "get_topics_by_followed_channels_prior_to_timestamp"
+  );
+}
+
+export function getTopicsFromFollowedChannels(
   username: string,
   timestamp: number,
-  pageSize: number
+  pageSize: number,
+  rellOperation: string
 ): Promise<Topic[]> {
-  return GTX.query("get_topics_by_followed_channels_prior_to_timestamp", {
+  return GTX.query(rellOperation, {
     username: username.toLocaleLowerCase(),
     timestamp: timestamp,
     page_size: pageSize
