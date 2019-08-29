@@ -60,7 +60,7 @@ export interface UserWallState {
   activeTab: number;
 }
 
-const topicsPageSize: number = 25;
+const topicsPageSize: number = 15;
 
 const UserWall = withStyles(styles)(
   class extends React.Component<UserWallProps, UserWallState> {

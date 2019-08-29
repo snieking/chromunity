@@ -68,7 +68,9 @@ const styles = createStyles({
     marginTop: "5px"
   },
   bottomBar: {
-    marginBottom: "5px"
+    marginBottom: "5px",
+    marginTop: "10px",
+    display: "inline-block"
   }
 });
 
@@ -212,21 +214,23 @@ const ProfileCard = withStyles(styles)(
       if (user != null && this.props.username !== user.name) {
         return (
           <div style={{ float: "right" }}>
+            <div style={{ float: "right" }}>
             {this.renderUserSuspensionDialog()}
-            {this.renderRepresentativeActions()}
-            <IconButton onClick={() => this.toggleMuteUser()}>
-              {this.state.muted ? (
-                <Tooltip title={"Unmute user"}>
-                  <VolumeUp fontSize={"large"} className={this.props.classes.iconBlue} />
-                </Tooltip>
-              ) : (
-                <Tooltip title="Mute user">
-                  <VolumeOff fontSize={"large"} />
-                </Tooltip>
-              )}
-            </IconButton>
-            {this.renderFollowButton()}
-            <br />
+              {this.renderRepresentativeActions()}
+              <IconButton onClick={() => this.toggleMuteUser()}>
+                {this.state.muted ? (
+                  <Tooltip title={"Unmute user"}>
+                    <VolumeUp fontSize={"large"} className={this.props.classes.iconBlue} />
+                  </Tooltip>
+                ) : (
+                  <Tooltip title="Mute user">
+                    <VolumeOff fontSize={"large"} />
+                  </Tooltip>
+                )}
+              </IconButton>
+              {this.renderFollowButton()}
+            </div>
+            <br/>
             <div className={this.props.classes.bottomBar}>
               <Badge badgeContent={this.state.userFollowings} showZero={true} color="primary">
                 <Tooltip title="Following users">
@@ -238,7 +242,6 @@ const ProfileCard = withStyles(styles)(
                   <StarRate style={{ marginLeft: "10px" }} />
                 </Tooltip>
               </Badge>
-              <StarRate style={{ marginLeft: "10px" }} />
               <Badge badgeContent={this.state.countOfTopics} showZero={true} color="primary">
                 <Tooltip title="Topics">
                   <Inbox style={{ marginLeft: "10px" }} />
