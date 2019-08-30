@@ -26,7 +26,7 @@ Chromunity can be run with a local blockchain which is useful during development
 * `psql chromunity`
 * `createuser -s postgres`
 * `psql -c "create role postchain LOGIN ENCRYPTED PASSWORD 'postchain'"`
-* `psql -c "grant ALL ON DATABASE chromaforum TO postchain"`
+* `psql -c "grant ALL ON DATABASE chromunity TO postchain"`
 * `\q`
 
 ### Starting local Postchain node
