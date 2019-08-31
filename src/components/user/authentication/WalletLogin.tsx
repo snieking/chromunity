@@ -10,23 +10,44 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import { connect } from "react-redux";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
+import { ReactComponent as LeftShapes } from "../../static/graphics/left-shapes.svg";
+import { ReactComponent as RightShapes } from "../../static/graphics/right-shapes.svg";
 
 enum Step {
   INIT,
   LOGIN_IN_PROGRESS
 }
 
-const useStyles = makeStyles(
+const useStyles = makeStyles(theme =>
   createStyles({
     contentWrapper: {
       textAlign: "center",
       padding: "20px"
+    },
+    outerWrapper: {
+      position: "relative"
+    },
+    innerWrapper: {
+      maxWidth: "400px",
+      margin: "0 auto"
     },
     input: {
       marginTop: "10px"
     },
     textField: {
       marginBottom: "5px"
+    },
+    leftShapes: {
+      [theme.breakpoints.down("sm")]: {
+        display: "none"
+      },
+      float: "left"
+    },
+    rightShapes: {
+      [theme.breakpoints.down("sm")]: {
+        display: "none"
+      },
+      float: "right"
     }
   })
 );
@@ -52,33 +73,31 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
   };
 
   return (
-    <Container maxWidth="sm" className={classes.contentWrapper}>
+    <Container maxWidth="md" className={classes.contentWrapper}>
       <ChromiaPageHeader text={"Login"} />
       {props.loading && <CircularProgress disableShrink />}
       {step === Step.INIT && (
         <div>
-          <Typography variant="subtitle1" component="p" className={classes.textField}>
-            User authentication is handled by Chromia Wallet.
-          </Typography>
-          <TextField
-            label="Account name"
-            name="name"
-            type="text"
-            fullWidth
-            variant="outlined"
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              setName(event.target.value)
-            }
-            className={classes.input}
-          />
-          <Button
-            color="primary"
-            variant="contained"
-            className={classes.input}
-            onClick={walletLogin}
-          >
-            Sign in with Chromia Wallet
-          </Button>
+          <LeftShapes className={classes.leftShapes} />
+          <RightShapes className={classes.rightShapes} />
+          <div className={classes.innerWrapper}>
+            <Typography variant="subtitle1" component="p" className={classes.textField}>
+              User authentication is provided by Chromia Wallet.
+            </Typography>
+            <TextField
+              label="Account name"
+              name="name"
+              type="text"
+              fullWidth
+              variant="outlined"
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => setName(event.target.value)}
+              className={classes.input}
+            />
+            <br />
+            <Button color="primary" variant="contained" fullWidth className={classes.input} onClick={walletLogin}>
+              Sign in with Chromia Wallet
+            </Button>
+          </div>
         </div>
       )}
       {step === Step.LOGIN_IN_PROGRESS && (
@@ -100,8 +119,7 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
-    accountRegisteredCheck: (username: string) =>
-      dispatch(accountRegisteredCheck(username))
+    accountRegisteredCheck: (username: string) => dispatch(accountRegisteredCheck(username))
   };
 };
 
