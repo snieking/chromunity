@@ -95,7 +95,7 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
             />
             <br />
             <Button color="primary" variant="contained" fullWidth className={classes.input} onClick={walletLogin}>
-              Sign in with Chromia Wallet
+              Register & Sign in
             </Button>
           </div>
         </div>

@@ -40,14 +40,15 @@ const useStyles = makeStyles((theme: Theme) =>
       flexGrow: 1
     },
     menuButton: {
-      marginRight: theme.spacing(1)
-    },
-    title: {
-      display: "none",
       [theme.breakpoints.up("sm")]: {
-        display: "block"
+        marginRight: theme.spacing(1)
       },
-      color: "#000000"
+      [theme.breakpoints.up("md")]: {
+        marginRight: theme.spacing(2)
+      },
+      [theme.breakpoints.up("lg")]: {
+        marginRight: theme.spacing(3)
+      }
     },
     inputRoot: {
       color: "inherit"
