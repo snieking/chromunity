@@ -61,23 +61,19 @@ export function* loadAllTopics(action: LoadAllTopicWallAction) {
 
   let topics: Topic[] = [];
   if (!cacheExpired(updated)) {
-    console.log("Using cached all wall topics, previously updated at: ", updated);
     yield put(updateTopicWallFromCache(WallType.ALL));
     return;
   } else {
     topics = yield select(getAllTopics);
-    console.log("Returning new wall: ", topics);
   }
 
   let couldExistOlder: boolean = topics.length <= action.pageSize;
 
   let retrievedTopics: Topic[];
   if (topics.length > 0) {
-    console.log("Length was more than 0: ", topics, "fetching topics after timestamp: ", topics[0].last_modified);
     // Load recent topics
     retrievedTopics = yield getTopicsAfterTimestamp(topics[0].last_modified, action.pageSize);
   } else {
-    console.log("Getting topics prior to current timestamp");
     retrievedTopics = yield getTopicsPriorToTimestamp(Date.now(), action.pageSize);
     couldExistOlder = retrievedTopics.length >= action.pageSize;
   }
@@ -90,14 +86,12 @@ export function* loadOlderAllTopics(action: LoadOlderAllTopicsAction) {
 
   let retrievedTopics: Topic[] = [];
   if (topics.length > 0) {
-    console.log("Searching timestamp older than: ", topics[topics.length - 1].last_modified);
     retrievedTopics = yield getTopicsPriorToTimestamp(topics[topics.length - 1].last_modified, action.pageSize);
   } else {
     retrievedTopics = yield getTopicsPriorToTimestamp(Date.now(), action.pageSize);
   }
 
   const updatedTopics: Topic[] = topics.concat(retrievedTopics);
-  console.log("Topics length: ", updatedTopics.length);
 
   yield put(updateTopics(updatedTopics, retrievedTopics.length >= action.pageSize, WallType.ALL));
 }
@@ -111,12 +105,10 @@ export function* loadFollowedUsersTopics(action: LoadFollowedUsersTopicWallActio
   const updated: number = yield select(getFollowedUsersUpdatedTime);
 
   if (!cacheExpired(updated)) {
-    console.log("Using cached followed users topics, previously updated at: ", updated);
     yield put(updateTopicWallFromCache(WallType.USER));
     return;
   }
 
-  console.log("Returning updated followed users wall");
   const topics: Topic[] = yield select(getFollowedUsersTopics);
 
   let retrievedTopics: Topic[];
@@ -161,12 +153,10 @@ export function* loadFollowedChannelsTopics(action: LoadFollowedChannelsTopicWal
   const updated: number = yield select(getFollowedChannelsUpdatedTime);
 
   if (!cacheExpired(updated)) {
-    console.log("Using cached followed channels topics, previously updated at: ", updated);
     yield put(updateTopicWallFromCache(WallType.CHANNEL));
     return;
   }
 
-  console.log("Returning updated followed channels wall");
   const topics: Topic[] = yield select(getFollowedChannelsTopics);
 
   let retrievedTopics: Topic[];
