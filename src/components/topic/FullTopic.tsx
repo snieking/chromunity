@@ -72,6 +72,9 @@ const styles = createStyles({
     marginBottom: "7px",
     marginRight: "-16px"
   },
+  content: {
+    marginRight: "5px"
+  },
   iconYellow: {
     color: COLOR_YELLOW
   },
@@ -312,11 +315,13 @@ const FullTopic = withStyles(styles)(
       return (
         <CardContent>
           {this.renderAuthor()}
-          <Timestamp milliseconds={this.state.topic.timestamp} />
-          <Typography gutterBottom variant="h6" component="h6">
-            {this.state.topic.title}
-          </Typography>
-          <MarkdownRenderer text={content} />
+          <div className={this.props.classes.content}>
+            <Timestamp milliseconds={this.state.topic.timestamp} />
+            <Typography gutterBottom variant="h6" component="h6">
+              {this.state.topic.title}
+            </Typography>
+            <MarkdownRenderer text={content} />
+          </div>
         </CardContent>
       );
     }

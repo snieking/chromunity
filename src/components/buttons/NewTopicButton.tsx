@@ -156,7 +156,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
           createTopic(this.state.user, topicChannel, topicTitle, topicMessage)
             .then(() => {
               this.setState({
-                newTopicStatusMessage: "topic created",
+                newTopicStatusMessage: "Topic created",
                 newTopicSuccessOpen: true
               });
               this.props.updateFunction();

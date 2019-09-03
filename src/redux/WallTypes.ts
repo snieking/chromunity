@@ -36,6 +36,7 @@ export interface UpdateTopicsAction {
 export interface LoadAllTopicWallAction {
   type: WallActionTypes.LOAD_ALL_TOPIC_WALL;
   pageSize: number;
+  ignoreCache: boolean;
 }
 
 export interface LoadOlderAllTopicsAction {
@@ -72,6 +73,7 @@ export interface LoadFollowedChannelsTopicWallAction {
   type: WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPIC_WALL;
   username: string;
   pageSize: number;
+  ignoreCache: boolean;
 }
 
 export interface LoadOlderFollowedChannelsTopicsAction {

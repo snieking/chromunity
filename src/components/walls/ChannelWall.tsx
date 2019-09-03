@@ -116,14 +116,6 @@ class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
     }
   }
 
-  retrieveLatestTopics() {
-    const channel = this.props.match.params.channel;
-
-    if (channel != null) {
-      this.props.loadChannel(channel, topicsPageSize);
-    }
-  }
-
   toggleChannelFollow() {
     if (!this.state.isLoading) {
       const channel = this.props.match.params.channel;
@@ -191,7 +183,7 @@ class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
 
     if (this.state.selector !== selected) {
       if (selected === TOPIC_VIEW_SELECTOR_OPTION.RECENT) {
-        this.retrieveLatestTopics();
+        this.retrieveTopics();
       } else if (selected === TOPIC_VIEW_SELECTOR_OPTION.POPULAR) {
         this.retrievePopularTopics(selected);
       }

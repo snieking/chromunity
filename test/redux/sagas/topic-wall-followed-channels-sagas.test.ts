@@ -89,7 +89,8 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
     await runSaga(fakeStore, loadFollowedChannelsTopics, {
       type: WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPIC_WALL,
       username: user.name,
-      pageSize: pageSize
+      pageSize: pageSize,
+      ignoreCache: false
     }).toPromise();
 
     const updateTopicsAction = getUpdateTopicAction(dispatchedActions);
@@ -111,7 +112,8 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
     await runSaga(fakeStore, loadFollowedChannelsTopics, {
       type: WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPIC_WALL,
       username: user.name,
-      pageSize: 1000
+      pageSize: 1000,
+      ignoreCache: false
     }).toPromise();
 
     const updateTopicsAction = getUpdateTopicAction(dispatchedActions);
@@ -134,7 +136,8 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
     await runSaga(fakeStore, loadFollowedChannelsTopics, {
       type: WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPIC_WALL,
       username: user.name,
-      pageSize: pageSize
+      pageSize: pageSize,
+      ignoreCache: false
     }).toPromise();
 
     const updateTopicsAction = getUpdateTopicAction(dispatchedActions);
@@ -182,7 +185,8 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
     await runSaga(fakeStore, loadFollowedChannelsTopics, {
       type: WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPIC_WALL,
       username: user.name,
-      pageSize: pageSize
+      pageSize: pageSize,
+      ignoreCache: false
     }).toPromise();
 
     const action = getUpdateTopicsFromCacheAction(dispatchedActions);

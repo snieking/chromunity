@@ -32,9 +32,10 @@ export const updateTopics: ActionCreator<UpdateTopicsAction> = (
   wallType: wallType
 });
 
-export const loadAllTopicWall: ActionCreator<LoadAllTopicWallAction> = (pageSize: number) => ({
+export const loadAllTopicWall: ActionCreator<LoadAllTopicWallAction> = (pageSize: number, ignoreCache: boolean) => ({
   type: WallActionTypes.LOAD_ALL_TOPIC_WALL,
-  pageSize: pageSize
+  pageSize: pageSize,
+  ignoreCache: ignoreCache
 });
 
 export const loadOlderAllTopics: ActionCreator<LoadOlderAllTopicsAction> = (pageSize: number) => ({
@@ -82,11 +83,13 @@ export const loadFollowedUsersTopicsByPopularity: ActionCreator<LoadFollowedUser
 
 export const loadFollowedChannelsTopicWall: ActionCreator<LoadFollowedChannelsTopicWallAction> = (
   username: string,
-  pageSize: number
+  pageSize: number,
+  ignoreCache: boolean
 ) => ({
   type: WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPIC_WALL,
   username: username,
-  pageSize: pageSize
+  pageSize: pageSize,
+  ignoreCache: ignoreCache
 });
 
 export const loadOlderFollowedChannelsTopics: ActionCreator<LoadOlderFollowedChannelsTopicsAction> = (

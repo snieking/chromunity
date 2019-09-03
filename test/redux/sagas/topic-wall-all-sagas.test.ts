@@ -8,16 +8,11 @@ import {
   WallType
 } from "../../../src/redux/WallTypes";
 import { runSaga } from "redux-saga";
-import {
-  loadAllTopics,
-  loadAllTopicsByPopularity,
-  loadOlderAllTopics
-} from "../../../src/redux/sagas/TopicWallSagas";
+import { loadAllTopics, loadAllTopicsByPopularity, loadOlderAllTopics } from "../../../src/redux/sagas/TopicWallSagas";
 import { ChromunityUser, Topic } from "../../../src/types";
 import { getANumber } from "../../helper";
 
 describe("Topic wall [ALL] saga tests", () => {
-
   const pageSize = 2;
   jest.setTimeout(30000);
 
@@ -80,9 +75,13 @@ describe("Topic wall [ALL] saga tests", () => {
 
   it("load all topics wall", async () => {
     const dispatchedActions: TopicWallActions[] = [];
-    const fakeStore = createFakeStore(dispatchedActions, ({ wallType: WallType.ALL, all: { topics: [], updated: 0 } }));
+    const fakeStore = createFakeStore(dispatchedActions, { wallType: WallType.ALL, all: { topics: [], updated: 0 } });
 
-    await runSaga(fakeStore, loadAllTopics, { type: WallActionTypes.LOAD_ALL_TOPIC_WALL, pageSize: pageSize }).toPromise();
+    await runSaga(fakeStore, loadAllTopics, {
+      type: WallActionTypes.LOAD_ALL_TOPIC_WALL,
+      pageSize: pageSize,
+      ignoreCache: false
+    }).toPromise();
     const updateTopicsAction = getUpdateTopicAction(dispatchedActions);
 
     expect(updateTopicsAction.topics.length).toBe(pageSize);
@@ -92,9 +91,13 @@ describe("Topic wall [ALL] saga tests", () => {
 
   it("load all topics wall | returns less than page size", async () => {
     const dispatchedActions: TopicWallActions[] = [];
-    const fakeStore = createFakeStore(dispatchedActions, ({ wallType: WallType.NONE, all: { topics: [], updated: 0 } }));
+    const fakeStore = createFakeStore(dispatchedActions, { wallType: WallType.NONE, all: { topics: [], updated: 0 } });
 
-    await runSaga(fakeStore, loadAllTopics, { type: WallActionTypes.LOAD_ALL_TOPIC_WALL, pageSize: 1000 }).toPromise();
+    await runSaga(fakeStore, loadAllTopics, {
+      type: WallActionTypes.LOAD_ALL_TOPIC_WALL,
+      pageSize: 1000,
+      ignoreCache: false
+    }).toPromise();
     const updateTopicsAction = getUpdateTopicAction(dispatchedActions);
 
     expect(updateTopicsAction.couldExistOlder).toBe(false);
@@ -108,7 +111,11 @@ describe("Topic wall [ALL] saga tests", () => {
       all: { topics: createFakeTopics(0), updated: 0 }
     });
 
-    await runSaga(fakeStore, loadAllTopics, { type: WallActionTypes.LOAD_ALL_TOPIC_WALL, pageSize: pageSize }).toPromise();
+    await runSaga(fakeStore, loadAllTopics, {
+      type: WallActionTypes.LOAD_ALL_TOPIC_WALL,
+      pageSize: pageSize,
+      ignoreCache: false
+    }).toPromise();
     const updateTopicsAction: UpdateTopicsAction = getUpdateTopicAction(dispatchedActions);
 
     expect(updateTopicsAction.topics.length).toBe(pageSize + 1);
@@ -127,7 +134,8 @@ describe("Topic wall [ALL] saga tests", () => {
 
     await runSaga(fakeStore, loadAllTopics, {
       type: WallActionTypes.LOAD_ALL_TOPIC_WALL,
-      pageSize: pageSize
+      pageSize: pageSize,
+      ignoreCache: false
     }).toPromise();
 
     const action = getUpdateTopicsFromCacheAction(dispatchedActions);
@@ -218,5 +226,4 @@ describe("Topic wall [ALL] saga tests", () => {
     expect(updateTopicsAction.couldExistOlder).toBe(false);
     expect(updateTopicsAction.wallType).toBe(WallType.NONE);
   });
-
 });

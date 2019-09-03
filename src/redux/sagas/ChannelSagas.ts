@@ -24,7 +24,6 @@ export const getPreviousChannel = (state: ApplicationState) => state.channel.nam
 export const getTopics = (state: ApplicationState) => state.channel.topics;
 
 export function* loadChannel(action: LoadChannelAction) {
-  console.log("Loading channel", action);
   const previousChannel: string = yield select(getPreviousChannel);
   const previousTopics: Topic[] = yield select(getTopics);
 

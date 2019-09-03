@@ -97,7 +97,7 @@ class TopicWall extends React.Component<Props, State> {
       this.setState({ selector: selected });
 
       if (selected === TOPIC_VIEW_SELECTOR_OPTION.RECENT) {
-        this.retrieveLatestTopics();
+        this.retrieveLatestTopics(false);
       } else if (selected === TOPIC_VIEW_SELECTOR_OPTION.POPULAR) {
         this.retrievePopularTopics(selected);
       }
@@ -152,7 +152,11 @@ class TopicWall extends React.Component<Props, State> {
           })}
           {this.renderLoadMoreButton()}
         </Container>
-        {this.state.user != null ? <NewTopicButton channel="" updateFunction={this.retrieveLatestTopics} /> : <div />}
+        {this.state.user != null ? (
+          <NewTopicButton channel="" updateFunction={() => this.retrieveLatestTopics(true)} />
+        ) : (
+          <div />
+        )}
       </div>
     );
   }
@@ -161,17 +165,17 @@ class TopicWall extends React.Component<Props, State> {
     if (this.state.user != null) {
       getMutedUsers(this.state.user).then(users => this.setState({ mutedUsers: users }));
     }
-    this.retrieveLatestTopics();
+    this.retrieveLatestTopics(false);
     getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
   }
 
-  retrieveLatestTopics() {
+  retrieveLatestTopics(ignoreCache: boolean) {
     if (this.props.type === "userFollowings") {
       this.props.loadFollowedUsersTopics(this.state.user.name, topicsPageSize);
     } else if (this.props.type === "tagFollowings") {
-      this.props.loadFollowedChannelsTopics(this.state.user.name, topicsPageSize);
+      this.props.loadFollowedChannelsTopics(this.state.user.name, topicsPageSize, ignoreCache);
     } else {
-      this.props.loadAllTopics(topicsPageSize);
+      this.props.loadAllTopics(topicsPageSize, ignoreCache);
     }
   }
 

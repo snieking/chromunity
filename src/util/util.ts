@@ -97,9 +97,6 @@ export function shuffle(array: string[]) {
 }
 
 export function removeDuplicateTopicsFromFirst(firstArr: Topic[], secondArr: Topic[]): Topic[] {
-  console.log("FirstArr to filter away from: ", firstArr);
-  console.log("SecondArr to use to check: ", secondArr);
-
   if (secondArr.length < 1) {
     return firstArr;
   }

@@ -61,7 +61,7 @@ export function* loadAllTopics(action: LoadAllTopicWallAction) {
   const updated: number = yield select(getAllUpdatedTime);
 
   let topics: Topic[] = [];
-  if (!cacheExpired(updated)) {
+  if (!action.ignoreCache && !cacheExpired(updated)) {
     yield put(updateTopicWallFromCache(WallType.ALL));
     return;
   } else {
@@ -165,7 +165,7 @@ export function* loadFollowedUsersTopicsByPopularity(action: LoadFollowedUsersTo
 export function* loadFollowedChannelsTopics(action: LoadFollowedChannelsTopicWallAction) {
   const updated: number = yield select(getFollowedChannelsUpdatedTime);
 
-  if (!cacheExpired(updated)) {
+  if (!action.ignoreCache && !cacheExpired(updated)) {
     yield put(updateTopicWallFromCache(WallType.CHANNEL));
     return;
   }
