@@ -1,3 +1,5 @@
+import { Topic } from "../types";
+
 export const uniqueId = function() {
   return Math.random()
     .toString(36)
@@ -92,4 +94,30 @@ export function shuffle(array: string[]) {
   }
 
   return array;
+}
+
+export function removeDuplicateTopicsFromFirst(firstArr: Topic[], secondArr: Topic[]): Topic[] {
+  console.log("FirstArr to filter away from: ", firstArr);
+  console.log("SecondArr to use to check: ", secondArr);
+
+  if (secondArr.length < 1) {
+    return firstArr;
+  }
+
+  let filteredArr: Topic[] = [];
+  for (let i = 0; i < firstArr.length; i++) {
+    let duplicateFound = false;
+    for (let j = 0; j < secondArr.length; j++) {
+      if (firstArr[i].id === secondArr[j].id) {
+        duplicateFound = true;
+        break;
+      }
+    }
+
+    if (!duplicateFound) {
+      filteredArr.push(firstArr[i]);
+    }
+  }
+
+  return filteredArr;
 }

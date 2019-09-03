@@ -139,6 +139,8 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
 
     const updateTopicsAction = getUpdateTopicAction(dispatchedActions);
 
+    console.log("topics: ", updateTopicsAction.topics);
+
     expect(updateTopicsAction.topics.length).toBe(pageSize + 1);
     expect(updateTopicsAction.couldExistOlder).toBe(true);
     expect(updateTopicsAction.wallType).toBe(WallType.CHANNEL);

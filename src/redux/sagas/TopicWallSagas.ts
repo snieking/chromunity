@@ -26,6 +26,7 @@ import {
 } from "../../blockchain/TopicService";
 import { updateTopicWallFromCache, updateTopics } from "../actions/WallActions";
 import { ApplicationState } from "../Store";
+import { removeDuplicateTopicsFromFirst } from "../../util/util";
 
 export function* topicWallWatcher() {
   yield takeLatest(WallActionTypes.LOAD_ALL_TOPIC_WALL, loadAllTopics);
@@ -78,7 +79,13 @@ export function* loadAllTopics(action: LoadAllTopicWallAction) {
     couldExistOlder = retrievedTopics.length >= action.pageSize;
   }
 
-  yield put(updateTopics(retrievedTopics.concat(topics), couldExistOlder, WallType.ALL));
+  yield put(
+    updateTopics(
+      retrievedTopics.concat(removeDuplicateTopicsFromFirst(topics, retrievedTopics)),
+      couldExistOlder,
+      WallType.ALL
+    )
+  );
 }
 
 export function* loadOlderAllTopics(action: LoadOlderAllTopicsAction) {
@@ -122,7 +129,13 @@ export function* loadFollowedUsersTopics(action: LoadFollowedUsersTopicWallActio
     retrievedTopics = yield getTopicsFromFollowsPriorToTimestamp(action.username, Date.now(), action.pageSize);
   }
 
-  yield put(updateTopics(topics.concat(retrievedTopics), retrievedTopics.length >= action.pageSize, WallType.USER));
+  yield put(
+    updateTopics(
+      retrievedTopics.concat(removeDuplicateTopicsFromFirst(topics, retrievedTopics)),
+      retrievedTopics.length >= action.pageSize,
+      WallType.USER
+    )
+  );
 }
 
 export function* loadOlderFollowedUsersTopics(action: LoadOlderFollowedUsersTopicsAction) {
@@ -171,7 +184,13 @@ export function* loadFollowedChannelsTopics(action: LoadFollowedChannelsTopicWal
     retrievedTopics = yield getTopicsFromFollowedChannelsPriorToTimestamp(action.username, Date.now(), action.pageSize);
   }
 
-  yield put(updateTopics(retrievedTopics.concat(topics), retrievedTopics.length >= action.pageSize, WallType.CHANNEL));
+  yield put(
+    updateTopics(
+      retrievedTopics.concat(removeDuplicateTopicsFromFirst(topics, retrievedTopics)),
+      retrievedTopics.length >= action.pageSize,
+      WallType.CHANNEL
+    )
+  );
 }
 
 export function* loadOlderFollowedChannelsTopics(action: LoadOlderFollowedChannelsTopicsAction) {

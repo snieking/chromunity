@@ -16,7 +16,6 @@ import {
     getTopicsFromFollowedChannelsPriorToTimestamp
 } from "../../src/blockchain/TopicService";
 import {CREATE_LOGGED_IN_USER} from "../users";
-import { User } from "ft3-lib";
 
 jest.setTimeout(60000);
 
