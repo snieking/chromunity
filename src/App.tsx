@@ -9,10 +9,20 @@ import { ThemeProvider } from "@material-ui/styles";
 import theme from "./theme";
 import { CssBaseline } from "@material-ui/core";
 import Content from "./Content";
+import ReactGA from 'react-ga';
+import config from "./config.js";
 
 interface Props {
   store: Store<ApplicationState>;
 }
+
+export const initGA = () => {
+  ReactGA.initialize(config.gaTrackingId);
+};
+
+export const pageView = () => {
+  ReactGA.pageview(window.location.pathname + window.location.search);
+};
 
 const App: React.FunctionComponent<Props> = props => {
   return (

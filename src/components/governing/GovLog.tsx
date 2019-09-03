@@ -6,6 +6,7 @@ import {Card, CardContent, Container, LinearProgress, Typography} from '@materia
 import LoadMoreButton from "../buttons/LoadMoreButton";
 import {parseContent} from '../../util/text-parsing';
 import Timestamp from "../common/Timestamp";
+import { initGA, pageView } from "../../App";
 
 interface GovLogState {
     actions: RepresentativeAction[];
@@ -30,6 +31,9 @@ export class GovLog extends React.Component<{}, GovLogState> {
 
     componentDidMount() {
         this.retrieveActions();
+
+        initGA();
+        pageView();
     }
 
     render() {

@@ -29,6 +29,7 @@ import {
   loadOlderTopicsInChannel
 } from "../../redux/actions/ChannelActions";
 import { ApplicationState } from "../../redux/Store";
+import { initGA, pageView } from "../../App";
 
 interface MatchParams {
   channel: string;
@@ -106,6 +107,9 @@ class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
 
     countChannelFollowers(channel).then(count => this.setState({ countOfFollowers: count }));
     countTopicsInChannel(channel).then(count => this.setState({ countOfTopics: count }));
+
+    initGA();
+    pageView();
   }
 
   retrieveTopics() {

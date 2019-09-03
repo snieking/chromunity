@@ -29,6 +29,7 @@ import {
   loadUserReplies,
   loadUserFollowedChannels
 } from "../../redux/actions/UserPageActions";
+import { initGA, pageView } from "../../App";
 
 const styles = createStyles({
   softPink: {
@@ -84,6 +85,9 @@ const UserWall = withStyles(styles)(
       this.props.loadUserReplies(topicsPageSize);
       this.props.loadUserFollowedChannels();
       getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
+
+      initGA();
+      pageView();
     }
 
     renderUserPageIntro() {

@@ -57,6 +57,7 @@ import Timestamp from "../common/Timestamp";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import { COLOR_ORANGE, COLOR_PURPLE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
+import { initGA, pageView } from "../../App";
 
 const styles = createStyles({
   authorName: {
@@ -174,6 +175,9 @@ const FullTopic = withStyles(styles)(
           subscribed: user != null && subscribers.includes(user.name)
         })
       );
+
+      initGA();
+      pageView();
     }
 
     consumeTopicData(topic: Topic): void {

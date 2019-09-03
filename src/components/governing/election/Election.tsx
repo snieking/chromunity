@@ -28,6 +28,7 @@ import DictatorActions from "./dictator/DictatorActions";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import { ChromunityUser } from "../../../types";
 import { COLOR_PURPLE } from "../../../theme";
+import { initGA, pageView } from "../../../App";
 
 const styles = createStyles({
   votedFor: {
@@ -115,6 +116,9 @@ const Election = withStyles(styles)(
           }
         }
       });
+
+      initGA();
+      pageView();
     }
 
     renderElectionVoteStatus() {

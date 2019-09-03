@@ -8,6 +8,7 @@ import NotificationCard from "./NotificationCard";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import LoadMoreButton from "../../buttons/LoadMoreButton";
 import { getUser } from "../../../util/user-util";
+import { initGA, pageView } from "../../../App";
 
 interface MatchParams {
   userId: string;
@@ -28,6 +29,9 @@ const UserNotifications: React.FunctionComponent<UserNotificationsProps> = props
     retrieveNotifications();
     // eslint-disable-next-line
   }, []);
+
+  initGA();
+  pageView();
 
   function retrieveNotifications() {
     const userId = props.match.params.userId;
