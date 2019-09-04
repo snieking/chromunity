@@ -335,15 +335,12 @@ function getTopicsForTimestamp(timestamp: number, pageSize: number, rellOperatio
   return GTX.query(rellOperation, {
     timestamp: timestamp,
     page_size: pageSize
-  })
-    .then((topics: Topic[]) => {
-      topics.forEach(topic => topicsCache.set(topic.id, topic));
-      return topics;
-    })
-    .finally(() => {
-      sw.stop();
-      gaRellQueryTiming(rellOperation, sw.getTime());
-    });
+  }).then((topics: Topic[]) => {
+    sw.stop();
+    gaRellQueryTiming(rellOperation, sw.getTime());
+    topics.forEach(topic => topicsCache.set(topic.id, topic));
+    return topics;
+  });
 }
 
 export function getTopicsFromFollowsAfterTimestamp(
