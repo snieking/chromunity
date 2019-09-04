@@ -7,6 +7,6 @@ config.blockchainRID = "88967baa4768cbcef11c508326ffb13a956689fcb6dc3ba17f4b895c
 config.chromunityUrl = "https://chromunity.com";
 config.vaultUrl = "https://wallet-v2.chromia.dev";
 
-config.gaTrackingId = "UA-122482523-3";
+config.gaTrackingId = "UA-122482523-5";
 
 module.exports = config;

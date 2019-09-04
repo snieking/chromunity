@@ -46,4 +46,8 @@ a {
   display: inline-block;
   text-decoration: none;
   color: #FFB500;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 99%;
 }

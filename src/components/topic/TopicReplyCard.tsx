@@ -286,7 +286,7 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     reportReply() {
-      const user: ChromunityUser = this.state.user;
+      const user: ChromunityUser = getUser();
 
       if (user != null) {
         reportReply(user, this.props.topicId, this.props.reply.id);

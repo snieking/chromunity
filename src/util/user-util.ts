@@ -20,16 +20,18 @@ const SESSION_CACHE = BoomerangCache.create("session-bucket", {
 const USER_KEY = "user";
 const USER_META_KEY = "user_meta";
 const REPRESENTATIVE_KEY = "representative";
+const KEYPAIR_KEY = "keyPair";
 
 export function clearSession(): void {
   ENCRYPTED_LOCAL_CACHE.clear();
   LOCAL_CACHE.remove(USER_KEY);
+  LOCAL_CACHE.remove(KEYPAIR_KEY);
   SESSION_CACHE.remove(USER_META_KEY);
   SESSION_CACHE.remove(REPRESENTATIVE_KEY);
 }
 
 export function storeKeyPair(keyPair: KeyPair): void {
-  LOCAL_CACHE.set("keyPair", keyPair);
+  LOCAL_CACHE.set(KEYPAIR_KEY, keyPair);
 }
 
 export function getKeyPair(): KeyPair {
