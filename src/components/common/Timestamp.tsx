@@ -2,7 +2,7 @@ import {timeAgoReadable} from "../../util/util";
 import {Typography} from "@material-ui/core";
 import React from "react";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import {COLOR_SOFT_PINK} from "../../theme";
+import { COLOR_SOFT_PINK } from "../../theme";
 
 
 interface Props {

@@ -74,7 +74,9 @@ const styles = createStyles({
     marginRight: "-16px"
   },
   content: {
-    marginRight: "5px"
+    marginRight: "5px",
+    whiteSpace: "normal",
+    maxWidth: "95%"
   },
   iconYellow: {
     color: COLOR_YELLOW

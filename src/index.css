@@ -46,8 +46,11 @@ a {
   display: inline-block;
   text-decoration: none;
   color: #FFB500;
+}
+
+p > a {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  max-width: 99%;
+  max-width: 80%;
 }
