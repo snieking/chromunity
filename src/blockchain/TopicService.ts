@@ -22,23 +22,21 @@ export function createTopic(user: ChromunityUser, channelName: string, title: st
   const sw = new Stopwatch();
 
   return BLOCKCHAIN.then(bc => {
-    return bc
-      .call(
-        user.ft3User,
-        "create_topic",
-        topicId,
-        user.ft3User.authDescriptor.hash().toString("hex"),
-        user.name.toLocaleLowerCase(),
-        channelName.toLocaleLowerCase(),
-        channelName,
-        title,
-        message
-      )
-      .finally(() => {
-        sw.stop();
-        gaRellOperationTiming("create_topic", sw.getTime());
-      });
+    return bc.call(
+      user.ft3User,
+      "create_topic",
+      topicId,
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      user.name.toLocaleLowerCase(),
+      channelName.toLocaleLowerCase(),
+      channelName,
+      title,
+      message
+    );
   }).then((promise: unknown) => {
+    sw.stop();
+    gaRellOperationTiming("create_topic", sw.getTime());
+
     subscribeToTopic(user, topicId).then();
     return promise;
   });
@@ -73,21 +71,19 @@ export function createTopicReply(user: ChromunityUser, topicId: string, message:
   sw.start();
 
   return BLOCKCHAIN.then(bc =>
-    bc
-      .call(
-        user.ft3User,
-        "create_reply",
-        topicId,
-        user.ft3User.authDescriptor.hash().toString("hex"),
-        replyId,
-        user.name.toLocaleLowerCase(),
-        message
-      )
-      .finally(() => {
-        sw.stop();
-        gaRellOperationTiming("create_reply", sw.getTime());
-      })
+    bc.call(
+      user.ft3User,
+      "create_reply",
+      topicId,
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      replyId,
+      user.name.toLocaleLowerCase(),
+      message
+    )
   ).then((promise: unknown) => {
+    sw.stop();
+    gaRellOperationTiming("create_reply", sw.getTime());
+
     getTopicSubscribers(topicId).then(users =>
       sendNotifications(
         user,
@@ -107,22 +103,20 @@ export function createTopicSubReply(user: ChromunityUser, topicId: string, reply
   sw.start();
 
   return BLOCKCHAIN.then(bc =>
-    bc
-      .call(
-        user.ft3User,
-        "create_sub_reply",
-        topicId,
-        user.ft3User.authDescriptor.hash().toString("hex"),
-        replyId,
-        subReplyId,
-        user.name.toLocaleLowerCase(),
-        message
-      )
-      .finally(() => {
-        sw.stop();
-        gaRellOperationTiming("create_sub_reply", sw.getTime());
-      })
+    bc.call(
+      user.ft3User,
+      "create_sub_reply",
+      topicId,
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      replyId,
+      subReplyId,
+      user.name.toLocaleLowerCase(),
+      message
+    )
   ).then((promise: unknown) => {
+    sw.stop();
+    gaRellOperationTiming("create_sub_reply", sw.getTime());
+
     getTopicSubscribers(topicId).then(users =>
       sendNotifications(
         user,
