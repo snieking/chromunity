@@ -1,8 +1,7 @@
 ---
 language: generic
 jdk: "openjdk8"
-node_js:
-  - node
+node_js: "node"
 
 dist: trusty
 
