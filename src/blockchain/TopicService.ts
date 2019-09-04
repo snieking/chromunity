@@ -22,23 +22,26 @@ export function createTopic(user: ChromunityUser, channelName: string, title: st
   const sw = new Stopwatch();
 
   return BLOCKCHAIN.then(bc => {
-    return bc.call(
-      user.ft3User,
-      "create_topic",
-      topicId,
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      user.name.toLocaleLowerCase(),
-      channelName.toLocaleLowerCase(),
-      channelName,
-      title,
-      message
-    );
+    return bc
+      .call(
+        user.ft3User,
+        "create_topic",
+        topicId,
+        user.ft3User.authDescriptor.hash().toString("hex"),
+        user.name.toLocaleLowerCase(),
+        channelName.toLocaleLowerCase(),
+        channelName,
+        title,
+        message
+      )
+      .finally(() => {
+        sw.stop();
+        gaRellOperationTiming("create_topic", sw.getTime());
+      });
   }).then((promise: unknown) => {
-    gaRellOperationTiming("create_topic", sw.getTime());
-
     subscribeToTopic(user, topicId).then();
     return promise;
-  }).finally(() => sw.stop());
+  });
 }
 
 export function modifyTopic(user: ChromunityUser, topicId: string, updatedText: string) {
@@ -70,18 +73,21 @@ export function createTopicReply(user: ChromunityUser, topicId: string, message:
   sw.start();
 
   return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
-      "create_reply",
-      topicId,
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      replyId,
-      user.name.toLocaleLowerCase(),
-      message
-    )
+    bc
+      .call(
+        user.ft3User,
+        "create_reply",
+        topicId,
+        user.ft3User.authDescriptor.hash().toString("hex"),
+        replyId,
+        user.name.toLocaleLowerCase(),
+        message
+      )
+      .finally(() => {
+        sw.stop();
+        gaRellOperationTiming("create_reply", sw.getTime());
+      })
   ).then((promise: unknown) => {
-    gaRellOperationTiming("create_topic_reply", sw.getTime());
-
     getTopicSubscribers(topicId).then(users =>
       sendNotifications(
         user,
@@ -91,7 +97,7 @@ export function createTopicReply(user: ChromunityUser, topicId: string, message:
       )
     );
     return promise;
-  }).finally(() => sw.stop());
+  });
 }
 
 export function createTopicSubReply(user: ChromunityUser, topicId: string, replyId: string, message: string) {
@@ -101,19 +107,22 @@ export function createTopicSubReply(user: ChromunityUser, topicId: string, reply
   sw.start();
 
   return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
-      "create_sub_reply",
-      topicId,
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      replyId,
-      subReplyId,
-      user.name.toLocaleLowerCase(),
-      message
-    )
+    bc
+      .call(
+        user.ft3User,
+        "create_sub_reply",
+        topicId,
+        user.ft3User.authDescriptor.hash().toString("hex"),
+        replyId,
+        subReplyId,
+        user.name.toLocaleLowerCase(),
+        message
+      )
+      .finally(() => {
+        sw.stop();
+        gaRellOperationTiming("create_sub_reply", sw.getTime());
+      })
   ).then((promise: unknown) => {
-    gaRellOperationTiming("create_topic_sub_reply", sw.getTime());
-
     getTopicSubscribers(topicId).then(users =>
       sendNotifications(
         user,
@@ -123,7 +132,7 @@ export function createTopicSubReply(user: ChromunityUser, topicId: string, reply
       )
     );
     return promise;
-  }).finally(() => sw.stop());
+  });
 }
 
 function createReplyTriggerString(name: string, id: string): string {
@@ -332,12 +341,15 @@ function getTopicsForTimestamp(timestamp: number, pageSize: number, rellOperatio
   return GTX.query(rellOperation, {
     timestamp: timestamp,
     page_size: pageSize
-  }).then((topics: Topic[]) => {
-    gaRellQueryTiming(rellOperation, sw.getTime());
-
-    topics.forEach(topic => topicsCache.set(topic.id, topic));
-    return topics;
-  }).finally(() => sw.stop());
+  })
+    .then((topics: Topic[]) => {
+      topics.forEach(topic => topicsCache.set(topic.id, topic));
+      return topics;
+    })
+    .finally(() => {
+      sw.stop();
+      gaRellQueryTiming(rellOperation, sw.getTime());
+    });
 }
 
 export function getTopicsFromFollowsAfterTimestamp(
