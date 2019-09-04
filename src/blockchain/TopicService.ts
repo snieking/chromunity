@@ -3,6 +3,8 @@ import { uniqueId } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 import { Topic, TopicReply, ChromunityUser } from "../types";
 import { sendNotifications } from "./NotificationService";
+import { gaRellOperationTiming, gaRellQueryTiming } from "../App";
+import { Stopwatch } from "ts-stopwatch";
 
 const topicsCache = BoomerangCache.create("topic-bucket", {
   storage: "session",
@@ -17,6 +19,8 @@ const starRatingCache = BoomerangCache.create("rating-bucket", {
 export function createTopic(user: ChromunityUser, channelName: string, title: string, message: string) {
   const topicId = uniqueId();
 
+  const sw = new Stopwatch();
+
   return BLOCKCHAIN.then(bc => {
     return bc.call(
       user.ft3User,
@@ -30,9 +34,11 @@ export function createTopic(user: ChromunityUser, channelName: string, title: st
       message
     );
   }).then((promise: unknown) => {
+    gaRellOperationTiming("create_topic", sw.getTime());
+
     subscribeToTopic(user, topicId).then();
     return promise;
-  });
+  }).finally(() => sw.stop());
 }
 
 export function modifyTopic(user: ChromunityUser, topicId: string, updatedText: string) {
@@ -60,6 +66,9 @@ function modifyText(user: ChromunityUser, id: string, updatedText: string, rellO
 export function createTopicReply(user: ChromunityUser, topicId: string, message: string) {
   const replyId = uniqueId();
 
+  const sw = new Stopwatch();
+  sw.start();
+
   return BLOCKCHAIN.then(bc =>
     bc.call(
       user.ft3User,
@@ -71,6 +80,8 @@ export function createTopicReply(user: ChromunityUser, topicId: string, message:
       message
     )
   ).then((promise: unknown) => {
+    gaRellOperationTiming("create_topic_reply", sw.getTime());
+
     getTopicSubscribers(topicId).then(users =>
       sendNotifications(
         user,
@@ -80,11 +91,14 @@ export function createTopicReply(user: ChromunityUser, topicId: string, message:
       )
     );
     return promise;
-  });
+  }).finally(() => sw.stop());
 }
 
 export function createTopicSubReply(user: ChromunityUser, topicId: string, replyId: string, message: string) {
   const subReplyId = uniqueId();
+
+  const sw = new Stopwatch();
+  sw.start();
 
   return BLOCKCHAIN.then(bc =>
     bc.call(
@@ -98,6 +112,8 @@ export function createTopicSubReply(user: ChromunityUser, topicId: string, reply
       message
     )
   ).then((promise: unknown) => {
+    gaRellOperationTiming("create_topic_sub_reply", sw.getTime());
+
     getTopicSubscribers(topicId).then(users =>
       sendNotifications(
         user,
@@ -107,7 +123,7 @@ export function createTopicSubReply(user: ChromunityUser, topicId: string, reply
       )
     );
     return promise;
-  });
+  }).finally(() => sw.stop());
 }
 
 function createReplyTriggerString(name: string, id: string): string {
@@ -310,13 +326,18 @@ export function getTopicsAfterTimestamp(timestamp: number, pageSize: number): Pr
 }
 
 function getTopicsForTimestamp(timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
+  const sw = new Stopwatch();
+  sw.start();
+
   return GTX.query(rellOperation, {
     timestamp: timestamp,
     page_size: pageSize
   }).then((topics: Topic[]) => {
+    gaRellQueryTiming(rellOperation, sw.getTime());
+
     topics.forEach(topic => topicsCache.set(topic.id, topic));
     return topics;
-  });
+  }).finally(() => sw.stop());
 }
 
 export function getTopicsFromFollowsAfterTimestamp(

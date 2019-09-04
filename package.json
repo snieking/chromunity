@@ -32,6 +32,7 @@
     "redux-saga": "^1.0.5",
     "scrypt-async": "^2.0.1",
     "secp256k1": "3.7.1",
+    "ts-stopwatch": "0.0.4",
     "typescript": "3.5.3",
     "yarn": "^1.16.0"
   },
