@@ -6,7 +6,7 @@ import {Card, CardContent, Container, LinearProgress, Typography} from '@materia
 import LoadMoreButton from "../buttons/LoadMoreButton";
 import {parseContent} from '../../util/text-parsing';
 import Timestamp from "../common/Timestamp";
-import { initGA, pageView } from "../../App";
+import { initGA, pageView } from "../../GoogleAnalytics";
 
 interface GovLogState {
     actions: RepresentativeAction[];

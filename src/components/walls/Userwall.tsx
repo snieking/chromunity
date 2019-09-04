@@ -29,7 +29,7 @@ import {
   loadUserReplies,
   loadUserFollowedChannels
 } from "../../redux/actions/UserPageActions";
-import { initGA, pageView } from "../../App";
+import { initGA, pageView } from "../../GoogleAnalytics";
 
 const styles = createStyles({
   softPink: {

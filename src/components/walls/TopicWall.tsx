@@ -24,7 +24,7 @@ import {
   loadOlderFollowedUsersTopics
 } from "../../redux/actions/WallActions";
 import { connect } from "react-redux";
-import { initGA, pageView } from "../../App";
+import { initGA, pageView } from "../../GoogleAnalytics";
 
 interface Props {
   type: string;

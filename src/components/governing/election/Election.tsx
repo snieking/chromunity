@@ -28,7 +28,7 @@ import DictatorActions from "./dictator/DictatorActions";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import { ChromunityUser } from "../../../types";
 import { COLOR_PURPLE } from "../../../theme";
-import { initGA, pageView } from "../../../App";
+import { initGA, pageView } from "../../../GoogleAnalytics";
 
 const styles = createStyles({
   votedFor: {

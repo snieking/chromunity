@@ -7,7 +7,7 @@ import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import { adminAddRepresentative, adminRemoveRepresentative } from "../../../blockchain/AdminService";
 import { ChromunityUser } from "../../../types";
 import { getUser } from "../../../util/user-util";
-import { initGA, pageView } from "../../../App";
+import { initGA, pageView } from "../../../GoogleAnalytics";
 
 export interface RepresentativesState {
   representatives: string[];

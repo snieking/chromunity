@@ -29,7 +29,7 @@ import {
   loadOlderTopicsInChannel
 } from "../../redux/actions/ChannelActions";
 import { ApplicationState } from "../../redux/Store";
-import { initGA, pageView } from "../../App";
+import { initGA, pageView } from "../../GoogleAnalytics";
 
 interface MatchParams {
   channel: string;

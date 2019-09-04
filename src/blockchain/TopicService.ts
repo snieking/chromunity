@@ -3,7 +3,7 @@ import { uniqueId } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 import { Topic, TopicReply, ChromunityUser } from "../types";
 import { sendNotifications } from "./NotificationService";
-import { gaRellOperationTiming, gaRellQueryTiming } from "../App";
+import { gaRellOperationTiming, gaRellQueryTiming } from "../GoogleAnalytics";
 import { Stopwatch } from "ts-stopwatch";
 
 const topicsCache = BoomerangCache.create("topic-bucket", {

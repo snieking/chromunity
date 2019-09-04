@@ -57,7 +57,7 @@ import Timestamp from "../common/Timestamp";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import { COLOR_ORANGE, COLOR_PURPLE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
-import { initGA, pageView } from "../../App";
+import { initGA, pageView } from "../../GoogleAnalytics";
 
 const styles = createStyles({
   authorName: {

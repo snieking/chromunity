@@ -8,7 +8,7 @@ import NotificationCard from "./NotificationCard";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import LoadMoreButton from "../../buttons/LoadMoreButton";
 import { getUser } from "../../../util/user-util";
-import { initGA, pageView } from "../../../App";
+import { initGA, pageView } from "../../../GoogleAnalytics";
 
 interface MatchParams {
   userId: string;
