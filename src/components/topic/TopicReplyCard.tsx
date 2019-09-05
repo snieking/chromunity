@@ -217,7 +217,7 @@ const TopicReplyCard = withStyles(styles)(
             className={this.props.classes.authorLink}
             to={"/u/" + this.props.reply.author}
             style={{
-              backgroundColor: this.props.representatives.includes(this.props.reply.author)
+              backgroundColor: this.props.representatives.includes(this.props.reply.author.toLocaleLowerCase())
                 ? COLOR_ORANGE
                 : COLOR_PURPLE
             }}

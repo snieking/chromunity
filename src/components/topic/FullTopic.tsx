@@ -300,7 +300,7 @@ const FullTopic = withStyles(styles)(
             className={this.props.classes.authorLink}
             to={"/u/" + this.state.topic.author}
             style={{
-              backgroundColor: this.state.representatives.includes(this.state.topic.author)
+              backgroundColor: this.state.representatives.includes(this.state.topic.author.toLocaleLowerCase())
                 ? COLOR_ORANGE
                 : COLOR_PURPLE
             }}
