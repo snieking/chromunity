@@ -12,7 +12,7 @@ import {
   withStyles,
   WithStyles
 } from "@material-ui/core";
-import { stringToHexColor } from "../../util/util";
+import { prepareUrlPath, stringToHexColor } from "../../util/util";
 import { getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { StarBorder, StarRate } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
@@ -83,7 +83,7 @@ const TopicOverviewCard = withStyles(styles)(
 
     render() {
       if (this.state.redirectToFullCard) {
-        return <Redirect to={"/t/" + this.props.topic.id} />;
+        return <Redirect to={"/t/" + this.props.topic.id + "/" + prepareUrlPath(this.props.topic.title)} />;
       } else {
         return (
           <div className={this.props.topic.removed ? this.props.classes.removed : ""}>

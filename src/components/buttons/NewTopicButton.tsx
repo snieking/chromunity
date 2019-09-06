@@ -270,7 +270,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                   <Tab
                     label={
                       <Typography component="span" variant="body2">
-                        Edit
+                        Editor
                       </Typography>
                     }
                     {...this.a11yProps(0)}

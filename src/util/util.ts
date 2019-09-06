@@ -6,6 +6,10 @@ export const uniqueId = function() {
     .substr(2, 16);
 };
 
+export function prepareUrlPath(path: string): string {
+  return path.toLocaleLowerCase().replace(/ /g, "-");
+}
+
 export function sortByFrequency(array: string[]): string[] {
   const frequency: any = {};
 
