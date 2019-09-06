@@ -20,3 +20,11 @@ export const gaRellOperationTiming = (variable: string, value: number) => {
 export const gaRellQueryTiming = (variable: string, value: number) => {
   ReactGA.timing({ category: "rell-query", variable: variable, value: value });
 };
+
+export const gaSocialEvent = (action: string, label: string) => {
+  ReactGA.event({ category: "Social", action: action, label: label });
+};
+
+export const gaException = (description: string) => {
+  ReactGA.exception({ description: description, fatal: false });
+};

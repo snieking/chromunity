@@ -2,6 +2,8 @@ import { ChromunityUser } from "../types";
 import { BLOCKCHAIN, GTX } from "./Postchain";
 import * as BoomerangCache from "boomerang-cache";
 import { removeNotificationsForId, sendNotificationWithDeterministicId } from "./NotificationService";
+import { gaRellOperationTiming, gaRellQueryTiming, gaSocialEvent } from "../GoogleAnalytics";
+import { createStopwatchStarted, handleGADuringException, stopStopwatch } from "../util/util";
 
 const boomerang = BoomerangCache.create("following-bucket", {
   storage: "session",
@@ -36,6 +38,9 @@ function createDeterministicId(follower: string, following: string) {
 
 function updateFollowing(user: ChromunityUser, following: string, rellOperation: string) {
   boomerang.remove("user-" + user.name.toLocaleLowerCase());
+  gaSocialEvent(rellOperation, following);
+  const sw = createStopwatchStarted();
+
   return BLOCKCHAIN.then(bc =>
     bc.call(
       user.ft3User,
@@ -44,17 +49,32 @@ function updateFollowing(user: ChromunityUser, following: string, rellOperation:
       user.ft3User.authDescriptor.hash().toString("hex"),
       following.toLocaleLowerCase()
     )
-  );
+  ).then(value => {
+    gaRellOperationTiming(rellOperation, stopStopwatch(sw));
+    return value;
+  }).catch((error: Error) => handleGADuringException(rellOperation, sw, error));
 }
 
 export function countUserFollowers(name: string): Promise<number> {
-  return GTX.query("get_user_followers", {
+  const query = "get_user_followers";
+  const sw = createStopwatchStarted();
+
+  return GTX.query(query, {
     name: name.toLocaleLowerCase()
-  }).then((arr: string[]) => arr.length);
+  }).then((arr: string[]) => {
+    gaRellQueryTiming(query, stopStopwatch(sw));
+    return arr.length;
+  }).catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
 export function countUserFollowings(name: string): Promise<number> {
-  return GTX.query("get_user_follows", { name: name.toLocaleLowerCase() }).then((arr: string[]) => arr.length);
+  const query = "get_user_follows";
+  const sw = createStopwatchStarted();
+
+  return GTX.query(query, { name: name.toLocaleLowerCase() }).then((arr: string[]) => {
+    gaRellQueryTiming(query, stopStopwatch(sw));
+    return arr.length;
+  });
 }
 
 export function amIAFollowerOf(user: ChromunityUser, name: string): Promise<boolean> {
@@ -64,10 +84,14 @@ export function amIAFollowerOf(user: ChromunityUser, name: string): Promise<bool
     return new Promise<boolean>(resolve => resolve(userFollows.includes(name.toLocaleLowerCase())));
   }
 
-  return GTX.query("get_user_follows", {
+  const query = "get_user_follows";
+  const sw = createStopwatchStarted();
+
+  return GTX.query(query, {
     name: user.name.toLocaleLowerCase()
   }).then((userFollows: string[]) => {
+    gaRellQueryTiming(query, stopStopwatch(sw));
     boomerang.set("user-" + user.name.toLocaleLowerCase(), userFollows.map(name => name.toLocaleLowerCase()));
     return userFollows.includes(name.toLocaleLowerCase());
-  });
+  }).catch((error: Error) => handleGADuringException(query, sw, error));
 }

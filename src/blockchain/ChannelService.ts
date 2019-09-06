@@ -1,7 +1,8 @@
 import { ChromunityUser } from "../types";
 import { BLOCKCHAIN, GTX } from "./Postchain";
-import { sortByFrequency } from "../util/util";
+import { createStopwatchStarted, handleGADuringException, sortByFrequency, stopStopwatch } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
+import { gaRellOperationTiming, gaRellQueryTiming, gaSocialEvent } from "../GoogleAnalytics";
 
 const channelsCache = BoomerangCache.create("channels-bucket", {
   storage: "session",
@@ -17,13 +18,22 @@ export function unfollowChannel(user: ChromunityUser, name: string) {
 }
 
 export function getFollowedChannels(user: string): Promise<string[]> {
-  return GTX.query("get_followed_channels", {
+  const query = "get_followed_channels";
+  const sw = createStopwatchStarted();
+
+  return GTX.query(query, {
     username: user.toLocaleLowerCase()
-  });
+  }).then((values: string[]) => {
+    gaRellQueryTiming(query, stopStopwatch(sw));
+    return values;
+  }).catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
 function modifyChannelollowing(user: ChromunityUser, channel: string, rellOperation: string) {
   channelsCache.remove(channel + ":followers");
+  gaSocialEvent(rellOperation, channel);
+  const sw = createStopwatchStarted();
+
   return BLOCKCHAIN.then(bc =>
     bc.call(
       user.ft3User,
@@ -32,7 +42,10 @@ function modifyChannelollowing(user: ChromunityUser, channel: string, rellOperat
       user.ft3User.authDescriptor.hash().toString("hex"),
       channel.toLocaleLowerCase()
     )
-  );
+  ).then(value => {
+    gaRellOperationTiming(rellOperation, stopStopwatch(sw));
+    return value;
+  }).catch((error: Error) => handleGADuringException(rellOperation, sw, error));
 }
 
 export function getTopicChannelBelongings(topicId: string): Promise<string[]> {
@@ -42,10 +55,14 @@ export function getTopicChannelBelongings(topicId: string): Promise<string[]> {
     return new Promise<string[]>(resolve => resolve(channelBelongings));
   }
 
-  return GTX.query("get_topic_channels_belongings", { topic_id: topicId }).then((belongings: string[]) => {
+  const query = "get_topic_channels_belongings";
+  const sw = createStopwatchStarted();
+
+  return GTX.query(query, { topic_id: topicId }).then((belongings: string[]) => {
+    gaRellQueryTiming(query, stopStopwatch(sw));
     channelsCache.set(topicId, belongings, 3600);
     return belongings;
-  });
+  }).catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
 export function getTrendingChannels(sinceDaysAgo: number): Promise<string[]> {
@@ -59,13 +76,17 @@ export function getTrendingChannels(sinceDaysAgo: number): Promise<string[]> {
   const pastDate: number = date.getDate() - sinceDaysAgo;
   date.setDate(pastDate);
 
-  return GTX.query("get_channels_since", {
+  const query = "get_channels_since";
+  const sw = createStopwatchStarted();
+
+  return GTX.query(query, {
     timestamp: date.getTime() / 1000
   }).then((tags: string[]) => {
+    gaRellQueryTiming(query, stopStopwatch(sw));
     trending = sortByFrequency(tags).slice(0, 10);
     channelsCache.set("trending", trending, 3600);
     return trending;
-  });
+  }).catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
 export function countChannelFollowers(channelName: string): Promise<number> {
@@ -76,10 +97,14 @@ export function countChannelFollowers(channelName: string): Promise<number> {
     return new Promise<number>(resolve => resolve(followers));
   }
 
-  return GTX.query("count_channel_followers", {
+  const query = "count_channel_followers";
+  const sw = createStopwatchStarted();
+
+  return GTX.query(query, {
     name: channelName.toLocaleLowerCase()
   }).then((count: number) => {
+    gaRellQueryTiming(query, stopStopwatch(sw));
     channelsCache.set(key, count, 600);
     return count;
-  });
+  }).catch((error: Error) => handleGADuringException(query, sw, error));
 }

@@ -1,7 +1,8 @@
 import { BLOCKCHAIN, GTX } from "./Postchain";
 import * as BoomerangCache from "boomerang-cache";
 import { ChromunityUser, UserNotification } from "../types";
-import { uniqueId } from "../util/util";
+import { createStopwatchStarted, handleGADuringException, stopStopwatch, uniqueId } from "../util/util";
+import { gaRellOperationTiming, gaRellQueryTiming } from "../GoogleAnalytics";
 
 const boomerang = BoomerangCache.create("notification-bucket", {
   storage: "session",
@@ -23,16 +24,22 @@ export function sendNotificationWithDeterministicId(
 }
 
 export function removeNotificationsForId(fromUser: ChromunityUser, id: string, usernames: string[]) {
+  const operation = "remove_notifications_for_users";
+  const sw = createStopwatchStarted();
+
   return BLOCKCHAIN.then(bc =>
     bc.call(
       fromUser.ft3User,
-      "remove_notifications_for_users",
+      operation,
       fromUser.name.toLocaleLowerCase(),
       fromUser.ft3User.authDescriptor.hash().toString("hex"),
       id,
       usernames.map(name => name.toLocaleLowerCase())
     )
-  );
+  ).then(value => {
+    gaRellOperationTiming(operation, stopStopwatch(sw));
+    return value;
+  }).catch((error: Error) => handleGADuringException(operation, sw, error));
 }
 
 function sendNotificationsInternal(
@@ -42,10 +49,13 @@ function sendNotificationsInternal(
   content: string,
   usernames: string[]
 ) {
+  const operation = "create_notifications_for_users";
+  const sw = createStopwatchStarted();
+
   return BLOCKCHAIN.then(bc =>
     bc.call(
       fromUser.ft3User,
-      "create_notifications_for_users",
+      operation,
       fromUser.name.toLocaleLowerCase(),
       fromUser.ft3User.authDescriptor.hash().toString("hex"),
       id,
@@ -53,22 +63,31 @@ function sendNotificationsInternal(
       content,
       usernames.map(name => name.toLocaleLowerCase())
     )
-  );
+  ).then(value => {
+    gaRellOperationTiming(operation, stopStopwatch(sw));
+    return value;
+  }).catch((error: Error) => handleGADuringException(operation, sw, error));
 }
 
 export function markNotificationsRead(user: ChromunityUser) {
   boomerang.remove("notis-" + user.name.toLocaleLowerCase());
   const epochSeconds = Math.round(new Date().getTime() / 1000);
 
+  const operation = "mark_notifications_since_timestamp_read";
+  const sw = createStopwatchStarted();
+
   return BLOCKCHAIN.then(bc =>
     bc.call(
       user.ft3User,
-      "mark_notifications_since_timestamp_read",
+      operation,
       user.name.toLocaleLowerCase(),
       user.ft3User.authDescriptor.hash().toString("hex"),
       epochSeconds
     )
-  );
+  ).then(value => {
+    gaRellOperationTiming(operation, stopStopwatch(sw));
+    return value;
+  }).catch((error: Error) => handleGADuringException(operation, sw, error));
 }
 
 export function getUserNotificationsPriorToTimestamp(
@@ -76,23 +95,32 @@ export function getUserNotificationsPriorToTimestamp(
   timestamp: number,
   pageSize: number
 ): Promise<UserNotification[]> {
-  return GTX.query("get_user_notifications_prior_to_timestamp", {
+  const query = "get_user_notifications_prior_to_timestamp";
+  const sw = createStopwatchStarted();
+
+  return GTX.query(query, {
     name: user.toLocaleLowerCase(),
     timestamp: timestamp,
     page_size: pageSize
-  });
+  }).then((userNotifications: UserNotification[]) => {
+    gaRellQueryTiming(query, stopStopwatch(sw));
+    return userNotifications;
+  }).catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
 export function countUnreadUserNotifications(user: string): Promise<number> {
   const count = boomerang.get("notis-" + user.toLocaleLowerCase());
 
   if (count == null) {
-    return GTX.query("count_unread_user_notifications", {
+    const query = "count_unread_user_notifications";
+    const sw = createStopwatchStarted();
+    return GTX.query(query, {
       name: user.toLocaleLowerCase()
     }).then((arr: unknown[]) => {
+      gaRellQueryTiming(query, stopStopwatch(sw));
       boomerang.set("notis-" + user, arr.length, 60);
       return arr.length;
-    });
+    }).catch((error: Error) => handleGADuringException(query, sw, error));
   } else {
     return new Promise<number>(resolve => resolve(count));
   }

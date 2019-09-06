@@ -1,10 +1,9 @@
 import { BLOCKCHAIN, GTX } from "./Postchain";
-import { uniqueId } from "../util/util";
+import { createStopwatchStarted, handleGADuringException, stopStopwatch, uniqueId } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 import { Topic, TopicReply, ChromunityUser } from "../types";
 import { sendNotifications } from "./NotificationService";
 import { gaRellOperationTiming, gaRellQueryTiming } from "../GoogleAnalytics";
-import { Stopwatch } from "ts-stopwatch";
 
 const topicsCache = BoomerangCache.create("topic-bucket", {
   storage: "session",
@@ -19,12 +18,13 @@ const starRatingCache = BoomerangCache.create("rating-bucket", {
 export function createTopic(user: ChromunityUser, channelName: string, title: string, message: string) {
   const topicId = uniqueId();
 
-  const sw = new Stopwatch();
+  const operation = "create_topic";
+  const sw = createStopwatchStarted();
 
   return BLOCKCHAIN.then(bc => {
     return bc.call(
       user.ft3User,
-      "create_topic",
+      operation,
       topicId,
       user.ft3User.authDescriptor.hash().toString("hex"),
       user.name.toLocaleLowerCase(),
@@ -33,13 +33,14 @@ export function createTopic(user: ChromunityUser, channelName: string, title: st
       title,
       message
     );
-  }).then((promise: unknown) => {
-    sw.stop();
-    gaRellOperationTiming("create_topic", sw.getTime());
+  })
+    .then((promise: unknown) => {
+      gaRellOperationTiming("create_topic", stopStopwatch(sw));
 
-    subscribeToTopic(user, topicId).then();
-    return promise;
-  });
+      subscribeToTopic(user, topicId).then();
+      return promise;
+    })
+    .catch(error => handleGADuringException(operation, sw, error));
 }
 
 export function modifyTopic(user: ChromunityUser, topicId: string, updatedText: string) {
@@ -52,6 +53,7 @@ export function modifyReply(user: ChromunityUser, replyId: string, updatedText: 
 }
 
 function modifyText(user: ChromunityUser, id: string, updatedText: string, rellOperation: string) {
+  const sw = createStopwatchStarted();
   return BLOCKCHAIN.then(bc =>
     bc.call(
       user.ft3User,
@@ -61,51 +63,57 @@ function modifyText(user: ChromunityUser, id: string, updatedText: string, rellO
       user.name.toLocaleLowerCase(),
       updatedText
     )
-  );
+  )
+    .then(value => {
+      gaRellOperationTiming(rellOperation, stopStopwatch(sw));
+      return value;
+    })
+    .catch(error => handleGADuringException(rellOperation, sw, error));
 }
 
 export function createTopicReply(user: ChromunityUser, topicId: string, message: string) {
   const replyId = uniqueId();
 
-  const sw = new Stopwatch();
-  sw.start();
+  const rellOperation = "create_reply";
+  const sw = createStopwatchStarted();
 
   return BLOCKCHAIN.then(bc =>
     bc.call(
       user.ft3User,
-      "create_reply",
+      rellOperation,
       topicId,
       user.ft3User.authDescriptor.hash().toString("hex"),
       replyId,
       user.name.toLocaleLowerCase(),
       message
     )
-  ).then((promise: unknown) => {
-    sw.stop();
-    gaRellOperationTiming("create_reply", sw.getTime());
+  )
+    .then((promise: unknown) => {
+      gaRellOperationTiming("create_reply", stopStopwatch(sw));
 
-    getTopicSubscribers(topicId).then(users =>
-      sendNotifications(
-        user,
-        createReplyTriggerString(user.name, topicId),
-        message,
-        users.map(name => name.toLocaleLowerCase()).filter(item => item !== user.name)
-      )
-    );
-    return promise;
-  });
+      getTopicSubscribers(topicId).then(users =>
+        sendNotifications(
+          user,
+          createReplyTriggerString(user.name, topicId),
+          message,
+          users.map(name => name.toLocaleLowerCase()).filter(item => item !== user.name)
+        )
+      );
+      return promise;
+    })
+    .catch(error => handleGADuringException(rellOperation, sw, error));
 }
 
 export function createTopicSubReply(user: ChromunityUser, topicId: string, replyId: string, message: string) {
   const subReplyId = uniqueId();
 
-  const sw = new Stopwatch();
-  sw.start();
+  const operation = "create_sub_reply";
+  const sw = createStopwatchStarted();
 
   return BLOCKCHAIN.then(bc =>
     bc.call(
       user.ft3User,
-      "create_sub_reply",
+      operation,
       topicId,
       user.ft3User.authDescriptor.hash().toString("hex"),
       replyId,
@@ -113,20 +121,21 @@ export function createTopicSubReply(user: ChromunityUser, topicId: string, reply
       user.name.toLocaleLowerCase(),
       message
     )
-  ).then((promise: unknown) => {
-    sw.stop();
-    gaRellOperationTiming("create_sub_reply", sw.getTime());
+  )
+    .then((promise: unknown) => {
+      gaRellOperationTiming("create_sub_reply", stopStopwatch(sw));
 
-    getTopicSubscribers(topicId).then(users =>
-      sendNotifications(
-        user,
-        createReplyTriggerString(user.name, topicId),
-        message,
-        users.map(name => name.toLocaleLowerCase()).filter(item => item !== user.name)
-      )
-    );
-    return promise;
-  });
+      getTopicSubscribers(topicId).then(users =>
+        sendNotifications(
+          user,
+          createReplyTriggerString(user.name, topicId),
+          message,
+          users.map(name => name.toLocaleLowerCase()).filter(item => item !== user.name)
+        )
+      );
+      return promise;
+    })
+    .catch(error => handleGADuringException(operation, sw, error));
 }
 
 function createReplyTriggerString(name: string, id: string): string {
@@ -135,27 +144,43 @@ function createReplyTriggerString(name: string, id: string): string {
 
 export function removeTopic(user: ChromunityUser, topicId: string) {
   topicsCache.remove(topicId);
+
+  const operation = "remove_topic";
+  const sw = createStopwatchStarted();
+
   return BLOCKCHAIN.then(bc =>
     bc.call(
       user.ft3User,
-      "remove_topic",
+      operation,
       user.name.toLocaleLowerCase(),
       user.ft3User.authDescriptor.hash().toString("hex"),
       topicId
     )
-  );
+  )
+    .then(value => {
+      gaRellOperationTiming("remove_topic", stopStopwatch(sw));
+      return value;
+    })
+    .catch(error => handleGADuringException(operation, sw, error));
 }
 
 export function removeTopicReply(user: ChromunityUser, topicReplyId: string) {
+  const operation = "remove_topic_reply";
+  const sw = createStopwatchStarted();
   return BLOCKCHAIN.then(bc =>
     bc.call(
       user.ft3User,
-      "remove_topic_reply",
+      operation,
       user.name.toLocaleLowerCase(),
       user.ft3User.authDescriptor.hash().toString("hex"),
       topicReplyId
     )
-  );
+  )
+    .then(value => {
+      gaRellOperationTiming("remove_topic_reply", stopStopwatch(sw));
+      return value;
+    })
+    .catch(error => handleGADuringException(operation, sw, error));
 }
 
 export function getTopicRepliesPriorToTimestamp(
@@ -175,13 +200,19 @@ export function getTopicRepliesAfterTimestamp(
 }
 
 function getTopicRepliesForTimestamp(topicId: string, timestamp: number, pageSize: number, rellOperation: string) {
+  const sw = createStopwatchStarted();
   return BLOCKCHAIN.then(bc =>
     bc.query(rellOperation, {
       topic_id: topicId,
       timestamp: timestamp,
       page_size: pageSize
     })
-  );
+  )
+    .then(value => {
+      gaRellQueryTiming(rellOperation, stopStopwatch(sw));
+      return value;
+    })
+    .catch(error => handleGADuringException(rellOperation, sw, error));
 }
 
 export function getTopicRepliesByUserPriorToTimestamp(
@@ -189,11 +220,18 @@ export function getTopicRepliesByUserPriorToTimestamp(
   timestamp: number,
   pageSize: number
 ): Promise<TopicReply[]> {
-  return GTX.query("get_topic_replies_by_user_prior_to_timestamp", {
+  const query = "get_topic_replies_by_user_prior_to_timestamp";
+  const sw = createStopwatchStarted();
+  return GTX.query(query, {
     name: name.toLocaleLowerCase(),
     timestamp: timestamp,
     page_size: pageSize
-  });
+  })
+    .then((replies: TopicReply[]) => {
+      gaRellQueryTiming(query, stopStopwatch(sw));
+      return replies;
+    })
+    .catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
 export function getTopicSubReplies(replyId: string): Promise<TopicReply[]> {
@@ -205,16 +243,19 @@ export function getTopicsByUserPriorToTimestamp(
   timestamp: number,
   pageSize: number
 ): Promise<Topic[]> {
-  console.log("Getting topics from username");
-  return GTX.query("get_topics_by_user_id_prior_to_timestamp", {
+  const query = "get_topics_by_user_id_prior_to_timestamp";
+  const sw = createStopwatchStarted();
+  return GTX.query(query, {
     name: username.toLocaleLowerCase(),
     timestamp: timestamp,
     page_size: pageSize
-  }).then((topics: Topic[]) => {
-    console.log("Retrieved topics in promise");
-    topics.forEach(topic => topicsCache.set(topic.id, topic));
-    return topics;
-  });
+  })
+    .then((topics: Topic[]) => {
+      gaRellQueryTiming(query, stopStopwatch(sw));
+      topics.forEach(topic => topicsCache.set(topic.id, topic));
+      return topics;
+    })
+    .catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
 export function getTopicsByChannelPriorToTimestamp(
@@ -222,38 +263,50 @@ export function getTopicsByChannelPriorToTimestamp(
   timestamp: number,
   pageSize: number
 ): Promise<Topic[]> {
-  return GTX.query("get_topics_by_channel_prior_to_timestamp", {
+  const query = "get_topics_by_channel_prior_to_timestamp";
+  const sw = createStopwatchStarted();
+
+  return GTX.query(query, {
     name: channelName.toLocaleLowerCase(),
     timestamp: timestamp,
     page_size: pageSize
-  }).then((topics: Topic[]) => {
-    topics.forEach(topic => topicsCache.set(topic.id, topic));
-    return topics;
-  });
+  })
+    .then((topics: Topic[]) => {
+      gaRellQueryTiming(query, stopStopwatch(sw));
+      topics.forEach(topic => topicsCache.set(topic.id, topic));
+      return topics;
+    })
+    .catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
 export function getTopicsByChannelAfterTimestamp(channelName: string, timestamp: number): Promise<Topic[]> {
-  return GTX.query("get_topics_by_channel_after_timestamp", {
+  const query = "get_topics_by_channel_after_timestamp";
+  const sw = createStopwatchStarted();
+
+  return GTX.query(query, {
     name: channelName.toLocaleLowerCase(),
     timestamp: timestamp
-  }).then((topics: Topic[]) => {
-    topics.forEach(topic => topicsCache.set(topic.id, topic));
-    return topics;
-  });
+  })
+    .then((topics: Topic[]) => {
+      gaRellQueryTiming(query, stopStopwatch(sw));
+      topics.forEach(topic => topicsCache.set(topic.id, topic));
+      return topics;
+    })
+    .catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
 export function countTopicsInChannel(channelName: string): Promise<number> {
-  return GTX.query("count_topics_by_channel", {
+  const query = "count_topics_by_channel";
+  const sw = createStopwatchStarted();
+
+  return GTX.query(query, {
     name: channelName.toLocaleLowerCase()
-  });
-}
-
-export function giveTopicStarRating(user: ChromunityUser, topicId: string) {
-  return modifyRatingAndSubscription(user, topicId, "give_topic_star_rating");
-}
-
-export function removeTopicStarRating(user: ChromunityUser, topicId: string) {
-  return modifyRatingAndSubscription(user, topicId, "remove_topic_star_rating");
+  })
+    .then((value: number) => {
+      gaRellQueryTiming(query, stopStopwatch(sw));
+      return value;
+    })
+    .catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
 export function getTopicStarRaters(topicId: string): Promise<string[]> {
@@ -263,10 +316,23 @@ export function getTopicStarRaters(topicId: string): Promise<string[]> {
     return new Promise<string[]>(resolve => resolve(raters));
   }
 
-  return GTX.query("get_star_rating_for_topic", { id: topicId }).then((raters: string[]) => {
-    starRatingCache.set(topicId, raters, 600);
-    return raters;
-  });
+  const query = "get_star_rating_for_topic";
+  const sw = createStopwatchStarted();
+  return GTX.query(query, { id: topicId })
+    .then((raters: string[]) => {
+      gaRellQueryTiming(query, stopStopwatch(sw));
+      starRatingCache.set(topicId, raters, 600);
+      return raters;
+    })
+    .catch((error: Error) => handleGADuringException(query, sw, error));
+}
+
+export function giveTopicStarRating(user: ChromunityUser, topicId: string) {
+  return modifyRatingAndSubscription(user, topicId, "give_topic_star_rating");
+}
+
+export function removeTopicStarRating(user: ChromunityUser, topicId: string) {
+  return modifyRatingAndSubscription(user, topicId, "remove_topic_star_rating");
 }
 
 export function giveReplyStarRating(user: ChromunityUser, replyId: string) {
@@ -287,6 +353,7 @@ export function unsubscribeFromTopic(user: ChromunityUser, id: string) {
 
 function modifyRatingAndSubscription(user: ChromunityUser, id: string, rellOperation: string) {
   starRatingCache.remove(id);
+  const sw = createStopwatchStarted();
   return BLOCKCHAIN.then(bc =>
     bc.call(
       user.ft3User,
@@ -296,15 +363,32 @@ function modifyRatingAndSubscription(user: ChromunityUser, id: string, rellOpera
       id,
       uniqueId()
     )
-  );
+  )
+    .then(value => {
+      gaRellOperationTiming(rellOperation, stopStopwatch(sw));
+      return value;
+    })
+    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
 }
 
 export function getReplyStarRaters(topicId: string): Promise<string[]> {
-  return GTX.query("get_star_rating_for_reply", { id: topicId });
+  const query = "get_star_rating_for_reply";
+  const sw = createStopwatchStarted();
+  return GTX.query(query, { id: topicId }).then((raters: string[]) => {
+    gaRellQueryTiming(query, stopStopwatch(sw));
+    return raters;
+  });
 }
 
 export function getTopicSubscribers(topicId: string): Promise<string[]> {
-  return GTX.query("get_subscribers_for_topic", { id: topicId });
+  const query = "get_subscribers_for_topic";
+  const sw = createStopwatchStarted();
+  return GTX.query(query, { id: topicId })
+    .then((subs: string[]) => {
+      gaRellQueryTiming(query, stopStopwatch(sw));
+      return subs;
+    })
+    .catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
 export function getTopicById(id: string): Promise<Topic> {
@@ -314,10 +398,16 @@ export function getTopicById(id: string): Promise<Topic> {
     return new Promise<Topic>(resolve => resolve(cachedTopic));
   }
 
-  return GTX.query("get_topic_by_id", { id: id }).then((topic: Topic) => {
-    topicsCache.set(id, topic, 300);
-    return topic;
-  });
+  const query = "get_topic_by_id";
+  const sw = createStopwatchStarted();
+
+  return GTX.query(query, { id: id })
+    .then((topic: Topic) => {
+      gaRellQueryTiming(query, stopStopwatch(sw));
+      topicsCache.set(id, topic, 300);
+      return topic;
+    })
+    .catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
 export function getTopicsPriorToTimestamp(timestamp: number, pageSize: number): Promise<Topic[]> {
@@ -329,18 +419,18 @@ export function getTopicsAfterTimestamp(timestamp: number, pageSize: number): Pr
 }
 
 function getTopicsForTimestamp(timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
-  const sw = new Stopwatch();
-  sw.start();
+  const sw = createStopwatchStarted();
 
   return GTX.query(rellOperation, {
     timestamp: timestamp,
     page_size: pageSize
-  }).then((topics: Topic[]) => {
-    sw.stop();
-    gaRellQueryTiming(rellOperation, sw.getTime());
-    topics.forEach(topic => topicsCache.set(topic.id, topic));
-    return topics;
-  });
+  })
+    .then((topics: Topic[]) => {
+      gaRellQueryTiming(rellOperation, stopStopwatch(sw));
+      topics.forEach(topic => topicsCache.set(topic.id, topic));
+      return topics;
+    })
+    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
 }
 
 export function getTopicsFromFollowsAfterTimestamp(
@@ -365,11 +455,18 @@ function getTopicsFromFollowsForTimestamp(
   pageSize: number,
   rellOperation: string
 ): Promise<Topic[]> {
+  const sw = createStopwatchStarted();
+
   return GTX.query(rellOperation, {
     name: user.toLocaleLowerCase(),
     timestamp: timestamp,
     page_size: pageSize
-  });
+  })
+    .then((topics: Topic[]) => {
+      gaRellQueryTiming(rellOperation, stopStopwatch(sw));
+      return topics;
+    })
+    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
 }
 
 export function countTopicsByUser(name: string) {
@@ -389,7 +486,13 @@ export function countReplyStarRatingForUser(name: string) {
 }
 
 function countByUser(name: string, rellOperation: string): Promise<number> {
-  return GTX.query(rellOperation, { name: name.toLocaleLowerCase() });
+  const sw = createStopwatchStarted();
+  return GTX.query(rellOperation, { name: name.toLocaleLowerCase() })
+    .then((count: number) => {
+      gaRellQueryTiming(rellOperation, stopStopwatch(sw));
+      return count;
+    })
+    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
 }
 
 export function getTopicsFromFollowedChannelsAfterTimestamp(username: string, timestamp: number, pageSize: number) {
@@ -416,24 +519,35 @@ export function getTopicsFromFollowedChannels(
   pageSize: number,
   rellOperation: string
 ): Promise<Topic[]> {
+  const sw = createStopwatchStarted();
   return GTX.query(rellOperation, {
     username: username.toLocaleLowerCase(),
     timestamp: timestamp,
     page_size: pageSize
-  }).then((topics: Topic[]) => {
-    var seen: Set<string> = new Set<string>();
-    return topics.filter(item => {
-      let k = item.id;
-      return seen.has(k) ? false : seen.add(k);
-    });
-  });
+  })
+    .then((topics: Topic[]) => {
+      gaRellQueryTiming(rellOperation, stopStopwatch(sw));
+      var seen: Set<string> = new Set<string>();
+      return topics.filter(item => {
+        let k = item.id;
+        return seen.has(k) ? false : seen.add(k);
+      });
+    })
+    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
 }
 
 export function getAllTopicsByPopularityAfterTimestamp(timestamp: number, pageSize: number): Promise<Topic[]> {
-  return GTX.query("get_all_topics_by_stars_since_timestamp", {
+  const query = "get_all_topics_by_stars_since_timestamp";
+  const sw = createStopwatchStarted();
+  return GTX.query(query, {
     timestamp: timestamp,
     page_size: pageSize
-  });
+  })
+    .then((topics: Topic[]) => {
+      gaRellQueryTiming(query, stopStopwatch(sw));
+      return topics;
+    })
+    .catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
 export function getTopicsByFollowsSortedByPopularityAfterTimestamp(
@@ -481,9 +595,15 @@ function getTopicsByPopularityAfterTimestamp(
   pageSize: number,
   rellOperation: string
 ): Promise<Topic[]> {
+  const sw = createStopwatchStarted();
   return GTX.query(rellOperation, {
     name: name.toLocaleLowerCase(),
     timestamp: timestamp,
     page_size: pageSize
-  });
+  })
+    .then((topics: Topic[]) => {
+      gaRellQueryTiming(rellOperation, stopStopwatch(sw));
+      return topics;
+    })
+    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
 }

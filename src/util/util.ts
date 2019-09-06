@@ -1,4 +1,23 @@
 import { Topic } from "../types";
+import { Stopwatch } from "ts-stopwatch";
+import { gaException } from "../GoogleAnalytics";
+
+export const handleGADuringException = (identifier: string, sw: Stopwatch, error: Error) => {
+  sw.stop();
+  gaException(identifier + ": " + error.message);
+  throw error;
+};
+
+export const createStopwatchStarted = (): Stopwatch => {
+  const sw = new Stopwatch();
+  sw.start();
+  return sw;
+};
+
+export const stopStopwatch = (sw: Stopwatch): number => {
+  sw.stop();
+  return sw.getTime();
+};
 
 export const uniqueId = function() {
   return Math.random()

@@ -1,5 +1,3 @@
-import ReactGA from "react-ga";
-
 export const initGA = () => {
   console.log("GA Stub: Initialized");
 };
@@ -18,4 +16,12 @@ export const gaRellOperationTiming = (variable: string, value: number) => {
 
 export const gaRellQueryTiming = (variable: string, value: number) => {
   console.log("GA Stub: Rell Query", variable, value);
+};
+
+export const gaSocialEvent = (action: string, label: string) => {
+  console.log("GA Stub: Social Event", action, label);
+};
+
+export const gaException = (description: string) => {
+  console.log("GA Stub: Exception", description);
 };

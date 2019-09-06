@@ -1,8 +1,9 @@
 import { BLOCKCHAIN, GTX } from "./Postchain";
 import { Election, RepresentativeAction, RepresentativeReport, ChromunityUser } from "../types";
-import { uniqueId } from "../util/util";
+import { createStopwatchStarted, handleGADuringException, stopStopwatch, uniqueId } from "../util/util";
 
 import * as BoomerangCache from "boomerang-cache";
+import { gaRellOperationTiming, gaSocialEvent } from "../GoogleAnalytics";
 
 const representativesCache = BoomerangCache.create("rep-bucket", { storage: "session", encrypt: true });
 
@@ -34,16 +35,33 @@ export function getAllRepresentativeActionsPriorToTimestamp(
 }
 
 export function handleReport(user: ChromunityUser, reportId: string) {
-  return BLOCKCHAIN.then(bc =>
-    bc.call(user.ft3User, "handle_representative_report", user.name.toLocaleLowerCase(), user.ft3User.authDescriptor.hash().toString("hex"), reportId)
-  );
-}
+  const rellOperation = "handle_representative_report";
+  gaSocialEvent(rellOperation, user.name);
 
-export function suspendUser(user: ChromunityUser, userToBeSuspended: string) {
+  const sw = createStopwatchStarted();
   return BLOCKCHAIN.then(bc =>
     bc.call(
       user.ft3User,
-      "suspend_user",
+      rellOperation,
+      user.name.toLocaleLowerCase(),
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      reportId
+    )
+  )
+    .then(value => {
+      gaRellOperationTiming(rellOperation, stopStopwatch(sw));
+      return value;
+    })
+    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
+}
+
+export function suspendUser(user: ChromunityUser, userToBeSuspended: string) {
+  const rellOperation = "suspend_user";
+  gaSocialEvent(rellOperation, userToBeSuspended);
+  return BLOCKCHAIN.then(bc =>
+    bc.call(
+      user.ft3User,
+      rellOperation,
       user.name.toLocaleLowerCase(),
       user.ft3User.authDescriptor.hash().toString("hex"),
       userToBeSuspended.toLocaleLowerCase()
@@ -60,16 +78,25 @@ export function reportReply(user: ChromunityUser, topicId: string, replyId: stri
 }
 
 function report(user: ChromunityUser, text: string) {
+  const rellOperation = "create_representative_report";
+  gaSocialEvent(rellOperation, text);
+  const sw = createStopwatchStarted();
+
   return BLOCKCHAIN.then(bc =>
     bc.call(
       user.ft3User,
-      "create_representative_report",
+      rellOperation,
       user.name.toLocaleLowerCase(),
       user.ft3User.authDescriptor.hash().toString("hex"),
       uniqueId(),
       text
     )
-  );
+  )
+    .then(value => {
+      gaRellOperationTiming(rellOperation, stopStopwatch(sw));
+      return value;
+    })
+    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
 }
 
 export function getUnhandledReports(): Promise<RepresentativeReport[]> {
