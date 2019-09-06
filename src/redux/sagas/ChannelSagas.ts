@@ -39,7 +39,6 @@ export function* loadChannel(action: LoadChannelAction) {
 }
 
 export function* loadOlderTopicsInChannel(action: LoadOlderTopicsInChannelAction) {
-  console.log("Loading older topics in channel", action);
   const previousChannel: string = yield select(getPreviousChannel);
   const previousTopics: Topic[] = yield select(getTopics);
 
@@ -56,7 +55,6 @@ export function* loadOlderTopicsInChannel(action: LoadOlderTopicsInChannelAction
 }
 
 export function* loadChannelByPopularity(action: LoadChannelByPopularityAction) {
-  console.log("Loading channels by popularity", action);
   const topics: Topic[] = yield getTopicsByChannelSortedByPopularityAfterTimestamp(
     action.name,
     action.timestamp,

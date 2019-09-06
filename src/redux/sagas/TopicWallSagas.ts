@@ -68,16 +68,15 @@ export function* loadAllTopics(action: LoadAllTopicWallAction) {
     topics = yield select(getAllTopics);
   }
 
-  let couldExistOlder: boolean = topics.length <= action.pageSize;
-
   let retrievedTopics: Topic[];
   if (topics.length > 0) {
     // Load recent topics
     retrievedTopics = yield getTopicsAfterTimestamp(topics[0].last_modified, action.pageSize);
   } else {
     retrievedTopics = yield getTopicsPriorToTimestamp(Date.now(), action.pageSize);
-    couldExistOlder = retrievedTopics.length >= action.pageSize;
   }
+
+  const couldExistOlder = retrievedTopics.length >= action.pageSize;
 
   yield put(
     updateTopics(
