@@ -9,7 +9,7 @@ const LoadMoreButton: React.FunctionComponent<LoadMoreButtonProps> = (props) => 
     return (
         <Button type="submit"
                 fullWidth
-                color="secondary"
+                color="primary"
                 onClick={() => props.onClick()}
                 variant="contained"
                 style={{marginTop: "5px"}}

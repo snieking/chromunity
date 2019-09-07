@@ -29,6 +29,7 @@ import {
   Typography
 } from "@material-ui/core";
 import { getUser } from "../../util/user-util";
+import ThemeSwitcher from "./ThemeSwitcher";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -136,6 +137,7 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
               </MenuItem>
             </Link>
             <br />
+            <ThemeSwitcher />
             <Link style={{ width: "100%" }} to="/user/logout">
               <MenuItem onClick={handleProfileClose}>
                 <ListItemIcon>

@@ -4,17 +4,16 @@ import { Badge, createStyles, makeStyles, Tooltip } from "@material-ui/core";
 import { Notifications, NotificationsActive } from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
 import { countUnreadUserNotifications } from "../../blockchain/NotificationService";
-import { COLOR_SOFT_PINK } from "../../theme";
 import { getUser } from "../../util/user-util";
 
 export interface NotificationsButtonProps {
   username: string;
 }
 
-const useStyles = makeStyles(
+const useStyles = makeStyles(theme =>
   createStyles({
     navIcon: {
-      color: COLOR_SOFT_PINK
+      color: theme.palette.primary.main
     }
   })
 );

@@ -1,7 +1,7 @@
 import React from "react";
 import * as ReactMarkdown from "react-markdown";
 import { makeStyles } from "@material-ui/core";
-import { COLOR_OFF_WHITE } from "../../theme";
+import { COLOR_CHROMIA_DARK, COLOR_OFF_WHITE } from "../../theme";
 
 interface Props {
   text: string;
@@ -18,10 +18,10 @@ const MarkdownRenderer: React.FunctionComponent<Props> = props => {
   );
 };
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   text: {
-    color: COLOR_OFF_WHITE
+    color: theme.palette.type === "light" ? COLOR_CHROMIA_DARK : COLOR_OFF_WHITE
   }
-});
+}));
 
 export default MarkdownRenderer;

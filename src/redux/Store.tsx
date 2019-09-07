@@ -9,19 +9,23 @@ import { topicWallReducer } from "./reducers/WallReducers";
 import { channelReducer } from "./reducers/ChannelReducers";
 import { UserPageState } from "./UserTypes";
 import { userPageReducer } from "./reducers/UserPageReducers";
+import { StylingState } from "./StylingTypes";
+import { stylingReducer } from "./reducers/StylingReducers";
 
 export interface ApplicationState {
   account: AccountState;
   topicWall: TopicWallState;
   channel: ChannelState;
   userPage: UserPageState;
+  styling: StylingState;
 }
 
 const rootReducer = combineReducers<ApplicationState>({
   account: loginReducer,
   topicWall: topicWallReducer,
   channel: channelReducer,
-  userPage: userPageReducer
+  userPage: userPageReducer,
+  styling: stylingReducer
 });
 
 const sagaMiddleware = createSagaMiddleware({

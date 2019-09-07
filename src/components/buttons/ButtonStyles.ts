@@ -1,24 +1,23 @@
-import {createStyles} from "@material-ui/core";
-import {COLOR_CHROMIA_DARK, COLOR_SOFT_PINK} from "../../theme";
+import { createStyles, Theme } from "@material-ui/core";
 
-export const largeButtonStyles = createStyles({
+export const largeButtonStyles = (theme: Theme) => createStyles({
     buttonWrapper: {
         position: "fixed",
         bottom: "1px",
         right: "1px"
     },
     button: {
-        backgroundColor: COLOR_SOFT_PINK,
+        backgroundColor: theme.palette.primary.main,
         marginRight: "5px",
         marginBottom: "5px",
         height: "64px",
         width: "64px",
         '&:hover': {
-            backgroundColor: COLOR_SOFT_PINK,
+            backgroundColor: theme.palette.primary.main,
         }
     },
     icon: {
-        color: COLOR_CHROMIA_DARK
+        color: theme.palette.background.default
     },
     content: {
         marginTop: "15px"

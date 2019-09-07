@@ -1,6 +1,7 @@
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 
-export const COLOR_CHROMIA_DARK_LIGHTEST = '#e2dfe6';
+export const COLOR_CHROMIA_LIGHTER = '#fbf8ff';
+export const COLOR_CHROMIA_LIGHT = '#f9f6fd';
 export const COLOR_CHROMIA_DARK_LIGHTER = '#333037';
 export const COLOR_CHROMIA_DARK = '#1F1A23';
 export const COLOR_CHROMIA_DARKER = '#1e1b23';
@@ -155,20 +156,25 @@ export const darkTheme = createMuiTheme({
             icon: {
                 color: COLOR_SOFT_PINK
             }
+        },
+        MuiChip: {
+            root: {
+                color: COLOR_OFF_WHITE
+            }
         }
     }
 });
 
 export const lightTheme = createMuiTheme({
     palette: {
-        type: 'dark',
+        type: 'light',
         primary: {
             main: COLOR_STEEL_BLUE
         },
         secondary: {
             main: COLOR_ORANGE
         },
-        background: {default: COLOR_CHROMIA_DARK_LIGHTEST}
+        background: {default: COLOR_CHROMIA_LIGHTER}
     },
     typography: {
         fontFamily: '"International", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -176,7 +182,7 @@ export const lightTheme = createMuiTheme({
     overrides: {
         MuiDialog: {
             paper: {
-                background: COLOR_CHROMIA_DARK_LIGHTER,
+                background: COLOR_OFF_WHITE,
                 border: "solid 1px",
                 borderColor: COLOR_STEEL_BLUE
             }
@@ -184,7 +190,7 @@ export const lightTheme = createMuiTheme({
         MuiTextField: {
             root: {
                 '& label.Mui-focused': {
-                    color: COLOR_SOFT_PINK
+                    color: COLOR_STEEL_BLUE
                 },
                 '& .MuiOutlinedInput-root': {
                     '& fieldset': {
@@ -194,19 +200,19 @@ export const lightTheme = createMuiTheme({
                         borderColor: COLOR_OFF_WHITE,
                     },
                     '&.Mui-focused fieldset': {
-                        borderColor: COLOR_SOFT_PINK,
+                        borderColor: COLOR_STEEL_BLUE,
                     },
-                    color: COLOR_OFF_WHITE
+                    color: COLOR_CHROMIA_DARK
                 },
                 '& label': {
-                    color: COLOR_OFF_WHITE,
+                    color: COLOR_CHROMIA_DARK,
                     opacity: 0.5
                 }
             }
         },
         MuiToolbar: {
             root: {
-                background: COLOR_CHROMIA_DARK_LIGHTEST
+                background: COLOR_CHROMIA_LIGHTER
             }
         },
         MuiTypography: {
@@ -224,7 +230,7 @@ export const lightTheme = createMuiTheme({
                 fontFamily: '"Battlefin", "International", "Roboto", "Helvetica", "Arial", "sans-serif"'
             },
             h6: {
-                color: COLOR_CHROMIA_DARK,
+                color: COLOR_STEEL_BLUE,
                 fontFamily: '"Battlefin", "International", "Roboto", "Helvetica", "Arial", "sans-serif"'
             },
             body1: {
@@ -246,13 +252,13 @@ export const lightTheme = createMuiTheme({
         },
         MuiMenu: {
             paper: {
-                background: COLOR_CHROMIA_DARK_LIGHTER
+                background: COLOR_OFF_WHITE
             }
         },
         MuiMenuItem: {
             gutters: {
                 color: COLOR_STEEL_BLUE,
-                background: COLOR_CHROMIA_DARK_LIGHTER
+                background: COLOR_OFF_WHITE
             }
         },
         MuiListItemIcon: {
@@ -267,7 +273,7 @@ export const lightTheme = createMuiTheme({
         },
         MuiPaper: {
             root: {
-                backgroundColor: COLOR_CHROMIA_DARK_LIGHTEST
+                backgroundColor: COLOR_CHROMIA_LIGHT
             }
         },
         MuiCard: {
@@ -289,7 +295,7 @@ export const lightTheme = createMuiTheme({
         MuiListItem: {
             "root": {
                 "&$selected": {
-                    "backgroundColor": COLOR_CHROMIA_DARK
+                    "backgroundColor": COLOR_OFF_WHITE
                 }
             }
         },
@@ -301,6 +307,11 @@ export const lightTheme = createMuiTheme({
         MuiSelect: {
             icon: {
                 color: COLOR_STEEL_BLUE
+            }
+        },
+        MuiChip: {
+            root: {
+                color: COLOR_OFF_WHITE
             }
         }
     }

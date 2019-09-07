@@ -7,7 +7,7 @@ import {
   LinearProgress,
   Paper,
   Tab,
-  Tabs,
+  Tabs, Theme,
   withStyles,
   WithStyles
 } from "@material-ui/core";
@@ -20,7 +20,6 @@ import LoadMoreButton from "../buttons/LoadMoreButton";
 import { getRepresentatives } from "../../blockchain/RepresentativesService";
 import TopicReplyOverviewCard from "../topic/TopicReplyOverviewCard";
 import { stringToHexColor } from "../../util/util";
-import { COLOR_SOFT_PINK } from "../../theme";
 import { connect } from "react-redux";
 import { ApplicationState } from "../../redux/Store";
 import {
@@ -31,9 +30,9 @@ import {
 } from "../../redux/actions/UserPageActions";
 import { initGA, pageView } from "../../GoogleAnalytics";
 
-const styles = createStyles({
-  softPink: {
-    color: COLOR_SOFT_PINK
+const styles = (theme: Theme) => createStyles({
+  text: {
+    color: theme.palette.primary.main
   }
 });
 
@@ -166,9 +165,9 @@ const UserWall = withStyles(styles)(
             {this.props.loading ? <LinearProgress variant="query" /> : <div />}
             {this.renderUserPageIntro()}
             <Tabs value={this.state.activeTab} onChange={this.handleChange} aria-label="User activity">
-              <Tab label="Topics" {...this.a11yProps(0)} className={this.props.classes.softPink} />
-              <Tab label="Replies" {...this.a11yProps(1)} className={this.props.classes.softPink} />
-              <Tab label="Channels" {...this.a11yProps(2)} className={this.props.classes.softPink} />
+              <Tab label="Topics" {...this.a11yProps(0)} className={this.props.classes.text} />
+              <Tab label="Replies" {...this.a11yProps(1)} className={this.props.classes.text} />
+              <Tab label="Channels" {...this.a11yProps(2)} className={this.props.classes.text} />
             </Tabs>
             {this.renderUserContent()}
             {this.renderLoadMoreButton()}
