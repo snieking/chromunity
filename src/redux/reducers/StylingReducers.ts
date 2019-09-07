@@ -3,7 +3,7 @@ import { darkTheme, lightTheme } from "../../theme";
 import { Reducer } from "redux";
 
 const initialStyling: StylingState = {
-  theme: "dark" === localStorage.getItem("theme") ? darkTheme : lightTheme
+  theme: "light" === localStorage.getItem("theme") ? lightTheme : darkTheme
 };
 
 export const stylingReducer: Reducer<StylingState, StylingActions> = (state = initialStyling, action) => {
