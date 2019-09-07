@@ -134,7 +134,7 @@ const TopicReplyOverviewCard = withStyles(styles)(
         <CardContent>
           <div style={{ float: "left" }}>
             <div className={this.props.classes.rating}>
-              <Badge color="primary" badgeContent={this.state.stars}>
+              <Badge color="secondary" badgeContent={this.state.stars}>
                 {this.state.ratedByMe ? <StarRate className="yellow-color" /> : <StarBorder className="purple-color" />}
               </Badge>
             </div>

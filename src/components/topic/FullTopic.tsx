@@ -338,7 +338,7 @@ const FullTopic = withStyles(styles)(
       return (
         <CardActions style={{ marginTop: "-20px" }}>
           <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
-            <Badge color="primary" badgeContent={this.state.stars}>
+            <Badge color="secondary" badgeContent={this.state.stars}>
               <Tooltip title="Like">
                 {this.state.ratedByMe ? <StarRate className={this.props.classes.iconYellow} /> : <StarBorder />}
               </Tooltip>

@@ -250,7 +250,7 @@ const TopicReplyCard = withStyles(styles)(
           </div>
           <div className={this.props.classes.bottomBar}>
             <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
-              <Badge className="star-badge" color="primary" badgeContent={this.state.stars}>
+              <Badge className="star-badge" color="secondary" badgeContent={this.state.stars}>
                 <Tooltip title="Like">
                   {this.state.ratedByMe ? <StarRate className={this.props.classes.iconYellow} /> : <StarBorder />}
                 </Tooltip>
