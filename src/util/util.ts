@@ -5,7 +5,7 @@ import { gaException } from "../GoogleAnalytics";
 export const handleGADuringException = (identifier: string, sw: Stopwatch, error: Error) => {
   sw.stop();
   gaException(identifier + ": " + error.message);
-  throw error;
+  return error;
 };
 
 export const createStopwatchStarted = (): Stopwatch => {

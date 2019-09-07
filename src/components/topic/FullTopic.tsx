@@ -8,11 +8,6 @@ import {
   CardContent,
   Container,
   createStyles,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   IconButton,
   LinearProgress,
   TextField,
@@ -59,6 +54,7 @@ import { COLOR_ORANGE, COLOR_PURPLE, COLOR_RED, COLOR_YELLOW } from "../../theme
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import { initGA, pageViewPath } from "../../GoogleAnalytics";
 import { prepareUrlPath } from "../../util/util";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 const styles = createStyles({
   authorName: {
@@ -111,6 +107,7 @@ export interface FullTopicState {
   couldExistOlderReplies: boolean;
   isLoading: boolean;
   removeTopicDialogOpen: boolean;
+  reportTopicDialogOpen: boolean;
   mutedUsers: string[];
   user: ChromunityUser;
 }
@@ -146,6 +143,7 @@ const FullTopic = withStyles(styles)(
         couldExistOlderReplies: false,
         isLoading: true,
         removeTopicDialogOpen: false,
+        reportTopicDialogOpen: false,
         mutedUsers: [],
         user: getUser()
       };
@@ -154,6 +152,8 @@ const FullTopic = withStyles(styles)(
       this.handleReplySubmit = this.handleReplySubmit.bind(this);
       this.retrieveOlderReplies = this.retrieveOlderReplies.bind(this);
       this.editTopicMessage = this.editTopicMessage.bind(this);
+      this.closeReportTopic = this.closeReportTopic.bind(this);
+      this.reportTopic = this.reportTopic.bind(this);
     }
 
     componentDidMount(): void {
@@ -364,7 +364,14 @@ const FullTopic = withStyles(styles)(
             <div />
           )}
 
-          <IconButton aria-label="Report" onClick={() => this.reportTopic()}>
+          <ConfirmDialog
+            text="This action will report the topic."
+            open={this.state.reportTopicDialogOpen}
+            onClose={this.closeReportTopic}
+            onConfirm={this.reportTopic}
+          />
+
+          <IconButton aria-label="Report-test" onClick={() => this.setState({ reportTopicDialogOpen: true })}>
             <Tooltip title="Report">
               <Report />
             </Tooltip>
@@ -380,7 +387,12 @@ const FullTopic = withStyles(styles)(
       modifyTopic(this.state.user, this.state.topic.id, text).then(() => window.location.reload());
     }
 
+    closeReportTopic() {
+      this.setState({ reportTopicDialogOpen: false });
+    }
+
     reportTopic() {
+      this.closeReportTopic();
       const user: ChromunityUser = this.state.user;
 
       if (user != null) {
@@ -402,38 +414,21 @@ const FullTopic = withStyles(styles)(
               </Tooltip>
             </IconButton>
 
-            <Dialog
+            <ConfirmDialog
+              text={
+                "This action will remove the topic, which makes sure that no one will be able to read the initial message."
+              }
               open={this.state.removeTopicDialogOpen}
               onClose={() => this.setState({ removeTopicDialogOpen: false })}
-              aria-labelledby="dialog-title"
-            >
-              <DialogTitle id="dialog-title">Are you sure?</DialogTitle>
-              <DialogContent>
-                <DialogContentText>
-                  This action will remove the topic, which makes sure that no one will be able to read the initial
-                  message.
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={() => this.setState({ removeTopicDialogOpen: false })} color="secondary">
-                  No
-                </Button>
-                <Button
-                  onClick={() =>
-                    this.setState(
-                      {
-                        removeTopicDialogOpen: false
-                      },
-                      () =>
-                        removeTopic(this.state.user, this.props.match.params.id).then(() => window.location.reload())
-                    )
-                  }
-                  color="primary"
-                >
-                  Yes
-                </Button>
-              </DialogActions>
-            </Dialog>
+              onConfirm={() =>
+                this.setState(
+                  {
+                    removeTopicDialogOpen: false
+                  },
+                  () => removeTopic(this.state.user, this.props.match.params.id).then(() => window.location.reload())
+                )
+              }
+            />
           </div>
         );
       }

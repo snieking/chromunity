@@ -39,6 +39,7 @@ import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import Timestamp from "../common/Timestamp";
 import { COLOR_ORANGE, COLOR_PURPLE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 const styles = createStyles({
   removed: {
@@ -92,6 +93,7 @@ interface State {
   subReplies: TopicReply[];
   userMeta: UserMeta;
   removeReplyDialogOpen: boolean;
+  reportReplyDialogOpen: boolean;
   isLoading: boolean;
   user: ChromunityUser;
 }
@@ -118,6 +120,7 @@ const TopicReplyCard = withStyles(styles)(
           times_suspended: 0
         },
         removeReplyDialogOpen: false,
+        reportReplyDialogOpen: false,
         isLoading: false,
         user: getUser()
       };
@@ -125,6 +128,8 @@ const TopicReplyCard = withStyles(styles)(
       this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
       this.sendReply = this.sendReply.bind(this);
       this.editReplyMessage = this.editReplyMessage.bind(this);
+      this.reportReply = this.reportReply.bind(this);
+      this.closeReportReply = this.closeReportReply.bind(this);
     }
 
     render() {
@@ -269,7 +274,14 @@ const TopicReplyCard = withStyles(styles)(
               </Tooltip>
             </IconButton>
 
-            <IconButton aria-label="Report" onClick={() => this.reportReply()}>
+            <ConfirmDialog
+              text="This action will report the message"
+              open={this.state.reportReplyDialogOpen}
+              onClose={this.closeReportReply}
+              onConfirm={this.reportReply}
+            />
+
+            <IconButton aria-label="Report" onClick={() => this.setState({ reportReplyDialogOpen: true })}>
               <Tooltip title="Report">
                 <Report />
               </Tooltip>
@@ -285,12 +297,16 @@ const TopicReplyCard = withStyles(styles)(
       modifyReply(this.state.user, this.props.reply.id, text).then(() => window.location.reload());
     }
 
+    closeReportReply() {
+      this.setState({ reportReplyDialogOpen: false });
+    }
+
     reportReply() {
+      this.closeReportReply();
       const user: ChromunityUser = getUser();
 
       if (user != null) {
-        reportReply(user, this.props.topicId, this.props.reply.id);
-        window.location.reload();
+        reportReply(user, this.props.topicId, this.props.reply.id).then(() => window.location.reload());
       } else {
         window.location.replace("/user/account");
       }
