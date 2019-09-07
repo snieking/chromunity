@@ -20,7 +20,6 @@ import { Favorite, FavoriteBorder } from "@material-ui/icons";
 import { getMutedUsers } from "../../blockchain/UserService";
 import { TOPIC_VIEW_SELECTOR_OPTION } from "./WallCommon";
 import { getUser } from "../../util/user-util";
-import { COLOR_SOFT_PINK } from "../../theme";
 import { connect } from "react-redux";
 import {
   channelInit,
@@ -58,11 +57,11 @@ export interface ChannelWallState {
   user: ChromunityUser;
 }
 
-const StyledSelect = styled(Select)({
-  color: COLOR_SOFT_PINK,
+const StyledSelect = styled(Select)(style => ({
+  color: style.theme.palette.primary.main,
   float: "left",
   marginRight: "10px"
-});
+}));
 
 const topicsPageSize: number = 15;
 

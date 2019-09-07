@@ -232,17 +232,17 @@ const ProfileCard = withStyles(styles)(
             </div>
             <br/>
             <div className={this.props.classes.bottomBar}>
-              <Badge badgeContent={this.state.userFollowings} showZero={true} color="primary">
+              <Badge badgeContent={this.state.userFollowings} showZero={true} color="secondary">
                 <Tooltip title="Following users">
                   <SupervisedUserCircle />
                 </Tooltip>
               </Badge>
-              <Badge badgeContent={this.state.topicStars + this.state.replyStars} showZero={true} color="primary">
+              <Badge badgeContent={this.state.topicStars + this.state.replyStars} showZero={true} color="secondary">
                 <Tooltip title="Stars">
                   <StarRate style={{ marginLeft: "10px" }} />
                 </Tooltip>
               </Badge>
-              <Badge badgeContent={this.state.countOfTopics} showZero={true} color="primary">
+              <Badge badgeContent={this.state.countOfTopics} showZero={true} color="secondary">
                 <Tooltip title="Topics">
                   <Inbox style={{ marginLeft: "10px" }} />
                 </Tooltip>
@@ -250,7 +250,7 @@ const ProfileCard = withStyles(styles)(
               <Badge
                 badgeContent={this.state.countOfReplies}
                 showZero={true}
-                color="primary"
+                color="secondary"
                 style={{ marginRight: "15px" }}
               >
                 <Tooltip title="Replies">
@@ -313,7 +313,7 @@ const ProfileCard = withStyles(styles)(
       const user: ChromunityUser = this.state.user;
       if (user != null && user.name === this.props.username) {
         return (
-          <Badge badgeContent={this.state.followers} showZero={true} color="primary">
+          <Badge badgeContent={this.state.followers} showZero={true} color="secondary">
             <Tooltip title="Followers">
               <Favorite fontSize="large" />
             </Tooltip>
@@ -322,7 +322,7 @@ const ProfileCard = withStyles(styles)(
       } else {
         return (
           <IconButton onClick={() => this.toggleFollowing()}>
-            <Badge badgeContent={this.state.followers} showZero={true} color="primary">
+            <Badge badgeContent={this.state.followers} showZero={true} color="secondary">
               <Tooltip title={this.state.following ? "Unfollow" : "Follow"}>
                 <Favorite fontSize="large" className={this.state.following ? this.props.classes.iconRed : ""} />
               </Tooltip>

@@ -28,13 +28,12 @@ import {
   Tooltip,
   Typography
 } from "@material-ui/core";
-import { COLOR_SOFT_PINK } from "../../theme";
 import { getUser } from "../../util/user-util";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     navIcon: {
-      color: COLOR_SOFT_PINK
+      color: theme.palette.primary.main
     },
     grow: {
       flexGrow: 1

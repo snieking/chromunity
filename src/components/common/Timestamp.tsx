@@ -2,7 +2,6 @@ import {timeAgoReadable} from "../../util/util";
 import {Typography} from "@material-ui/core";
 import React from "react";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import { COLOR_SOFT_PINK } from "../../theme";
 
 
 interface Props {
@@ -18,11 +17,11 @@ const Timestamp: React.FunctionComponent<Props> = (props) => {
     )
 };
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
     timestamp: {
-        color: COLOR_SOFT_PINK,
+        color: theme.palette.primary.main,
         fontSize: "12px"
     }
-});
+}));
 
 export default Timestamp;

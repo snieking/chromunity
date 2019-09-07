@@ -50,11 +50,11 @@ interface State {
   user: ChromunityUser;
 }
 
-const StyledSelector = styled(Select)({
-  color: "pink",
+const StyledSelector = styled(Select)(style => ({
+  color: style.theme.palette.primary.main,
   float: "left",
   marginRight: "10px"
-});
+}));
 
 const topicsPageSize: number = 15;
 

@@ -1,6 +1,5 @@
 import React from 'react';
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import {COLOR_CHROMIA_DARK_LIGHTER} from "../../theme";
 
 export enum AVATAR_SIZE {
     SMALL,
@@ -33,8 +32,7 @@ const Avatar: React.FunctionComponent<Props> = (props) => {
 
 const useStyles = makeStyles({
     avatar: {
-        borderRadius: "50%",
-        backgroundColor: COLOR_CHROMIA_DARK_LIGHTER
+        borderRadius: "50%"
     },
     small: {
         width: "40px",

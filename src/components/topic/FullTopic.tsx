@@ -365,7 +365,7 @@ const FullTopic = withStyles(styles)(
           )}
 
           <ConfirmDialog
-            text="This action will report the topic."
+            text="This action will report the topic"
             open={this.state.reportTopicDialogOpen}
             onClose={this.closeReportTopic}
             onConfirm={this.reportTopic}

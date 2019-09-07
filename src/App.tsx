@@ -6,7 +6,7 @@ import { ApplicationState } from "./redux/Store";
 import HeaderNav from "./components/static/HeaderNav";
 import Footer from "./components/static/Footer";
 import { ThemeProvider } from "@material-ui/styles";
-import theme from "./theme";
+import {darkTheme} from "./theme";
 import { CssBaseline } from "@material-ui/core";
 import Content from "./Content";
 
@@ -17,7 +17,7 @@ interface Props {
 const App: React.FunctionComponent<Props> = props => {
   return (
     <Provider store={props.store}>
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={darkTheme}>
         <CssBaseline />
         <Router>
           <HeaderNav />
