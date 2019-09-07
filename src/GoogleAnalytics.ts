@@ -25,6 +25,10 @@ export const gaSocialEvent = (action: string, label: string) => {
   ReactGA.event({ category: "Social", action: action, label: label });
 };
 
+export const gaGenericEvent = (category: string, action: string) => {
+  ReactGA.event({ category: category, action: action });
+};
+
 export const gaException = (description: string) => {
   ReactGA.exception({ description: description, fatal: false });
 };
