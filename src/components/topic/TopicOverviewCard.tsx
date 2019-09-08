@@ -31,7 +31,8 @@ const styles = createStyles({
   authorName: {
     display: "block",
     marginTop: "10px",
-    marginRight: "10px"
+    marginRight: "10px",
+    marginLeft: "5px",
   },
   rating: {
     marginTop: "10px"

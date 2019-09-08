@@ -19,7 +19,7 @@ const ThemeSwitcher: React.FunctionComponent<Props> = (props: Props) => {
       <ListItemIcon>
         <ColorLens />
       </ListItemIcon>
-      <Typography>{props.theme.palette.type === "dark" ? "Light theme" : "Dark Theme"}</Typography>
+      <Typography>{props.theme.palette.type === "dark" ? "Light theme" : "Dark theme"}</Typography>
     </MenuItem>
   );
 };
