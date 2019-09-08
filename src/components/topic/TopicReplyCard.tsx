@@ -38,7 +38,7 @@ import { reportReply } from "../../blockchain/RepresentativesService";
 import EditMessageButton from "../buttons/EditMessageButton";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import Timestamp from "../common/Timestamp";
-import { COLOR_ORANGE, COLOR_PURPLE, COLOR_RED, COLOR_YELLOW } from "../../theme";
+import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import ConfirmDialog from "../common/ConfirmDialog";
 

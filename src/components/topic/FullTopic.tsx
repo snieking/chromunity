@@ -51,7 +51,7 @@ import LoadMoreButton from "../buttons/LoadMoreButton";
 import { getRepresentatives, reportTopic } from "../../blockchain/RepresentativesService";
 import Timestamp from "../common/Timestamp";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
-import { COLOR_ORANGE, COLOR_PURPLE, COLOR_RED, COLOR_YELLOW } from "../../theme";
+import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import { initGA, pageViewPath } from "../../GoogleAnalytics";
 import { prepareUrlPath } from "../../util/util";
