@@ -65,12 +65,14 @@ const styles = createStyles({
   },
   description: {
     marginRight: "12px",
-    marginTop: "5px"
+    marginTop: "5px",
+    marginLeft: "10px"
   },
   bottomBar: {
     marginBottom: "5px",
     marginTop: "10px",
-    display: "inline-block"
+    display: "inline-block",
+    float: "right"
   }
 });
 
@@ -182,7 +184,7 @@ const ProfileCard = withStyles(styles)(
     renderRepresentativeActions() {
       if (this.state.isRepresentative) {
         return (
-          <div style={{ display: "inline" }}>
+          <div style={{ display: "inline"}}>
             <IconButton onClick={() => this.setState({ suspendUserDialogOpen: true })}>
               <Tooltip title="Suspend user">
                 <VoiceOverOff fontSize="large" className={this.props.classes.iconRed} />
