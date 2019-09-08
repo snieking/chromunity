@@ -80,7 +80,7 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
   function newTopicDialog() {
     return (
       <div>
-        <Dialog open={dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"sm"}>
+        <Dialog open={dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"md"}>
           <form onSubmit={createReply}>
             <DialogContent>
               <Tabs value={activeTab} onChange={handleTabChange} aria-label="New reply">
@@ -105,10 +105,10 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
               {activeTab === 1 && renderPreview()}
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setDialogOpen(false)} color="secondary" variant="outlined">
+              <Button onClick={() => setDialogOpen(false)} color="secondary" variant="contained">
                 Cancel
               </Button>
-              <Button type="submit" color="primary" variant="outlined">
+              <Button type="submit" color="primary" variant="contained">
                 Send
               </Button>
             </DialogActions>

@@ -21,6 +21,7 @@ import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import Timestamp from "../common/Timestamp";
 import { COLOR_ORANGE, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
+import { getRepresentatives } from "../../blockchain/RepresentativesService";
 
 const styles = createStyles({
   authorName: {
@@ -101,6 +102,13 @@ const TopicReplyOverviewCard = withStyles(styles)(
           avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.reply.author)
         });
       });
+
+      getRepresentatives().then(representatives =>
+        this.setState({
+          isRepresentative: representatives.includes(this.props.reply.author.toLocaleLowerCase())
+        })
+      );
+
       getReplyStarRaters(this.props.reply.id).then(usersWhoStarRated =>
         this.setState({
           stars: usersWhoStarRated.length,

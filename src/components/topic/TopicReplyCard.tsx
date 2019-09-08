@@ -15,6 +15,7 @@ import {
   IconButton,
   LinearProgress,
   TextField,
+  Theme,
   Tooltip,
   Typography,
   withStyles,
@@ -41,38 +42,45 @@ import { COLOR_ORANGE, COLOR_PURPLE, COLOR_RED, COLOR_YELLOW } from "../../theme
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import ConfirmDialog from "../common/ConfirmDialog";
 
-const styles = createStyles({
-  removed: {
-    opacity: 0.5
-  },
-  authorName: {
-    display: "block",
-    paddingTop: "2px",
-    paddingLeft: "5px",
-    paddingRight: "5px"
-  },
-  authorLink: {
-    float: "right",
-    borderRadius: "0 0 0 5px",
-    marginTop: "-18px",
-    marginBottom: "7px",
-    marginRight: "-16px"
-  },
-  bottomBar: {
-    marginTop: "7px",
-    marginBottom: "-22px",
-    marginLeft: "-10px"
-  },
-  iconYellow: {
-    color: COLOR_YELLOW
-  },
-  iconOrange: {
-    color: COLOR_ORANGE
-  },
-  iconRed: {
-    color: COLOR_RED
-  }
-});
+const styles = (theme: Theme) =>
+  createStyles({
+    removed: {
+      opacity: 0.5
+    },
+    authorName: {
+      display: "block",
+      paddingTop: "2px",
+      paddingLeft: "5px",
+      paddingRight: "5px"
+    },
+    authorLink: {
+      float: "right",
+      borderRadius: "0 0 0 5px",
+      marginTop: "-18px",
+      marginBottom: "7px",
+      marginRight: "-16px"
+    },
+    bottomBar: {
+      marginTop: "7px",
+      marginBottom: "-22px",
+      marginLeft: "-10px"
+    },
+    userColor: {
+      backgroundColor: theme.palette.secondary.main
+    },
+    repColor: {
+      backgroundColor: COLOR_ORANGE
+    },
+    iconYellow: {
+      color: COLOR_YELLOW
+    },
+    iconOrange: {
+      color: COLOR_ORANGE
+    },
+    iconRed: {
+      color: COLOR_RED
+    }
+  });
 
 interface Props extends WithStyles<typeof styles> {
   topicId: string;
@@ -219,13 +227,12 @@ const TopicReplyCard = withStyles(styles)(
       return (
         <div style={{ float: "right" }}>
           <Link
-            className={this.props.classes.authorLink}
+            className={`${this.props.classes.authorLink} ${
+              this.props.representatives.includes(this.props.reply.author.toLocaleLowerCase())
+                ? this.props.classes.repColor
+                : this.props.classes.userColor
+            }`}
             to={"/u/" + this.props.reply.author}
-            style={{
-              backgroundColor: this.props.representatives.includes(this.props.reply.author.toLocaleLowerCase())
-                ? COLOR_ORANGE
-                : COLOR_PURPLE
-            }}
           >
             <Typography gutterBottom variant="subtitle1" component="span">
               <span className={this.props.classes.authorName}>@{this.props.reply.author}</span>

@@ -172,7 +172,7 @@ export const lightTheme = createMuiTheme({
             main: COLOR_STEEL_BLUE
         },
         secondary: {
-            main: COLOR_ORANGE
+            main: COLOR_SOFT_PINK
         },
         background: {default: COLOR_CHROMIA_LIGHTER}
     },

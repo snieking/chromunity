@@ -244,7 +244,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         };
         return (
           <div>
-            <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"sm"}>
+            <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"md"}>
               <form onSubmit={this.createNewTopic}>
                 <DialogContent>
                   <br />
@@ -299,10 +299,10 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                   {this.state.activeTab === 1 && this.renderPreview()}
                 </DialogContent>
                 <DialogActions>
-                  <Button onClick={() => this.toggleNewTopicDialog()} color="secondary" variant="outlined">
+                  <Button onClick={() => this.toggleNewTopicDialog()} color="secondary" variant="contained">
                     Cancel
                   </Button>
-                  <Button type="submit" color="primary" variant="outlined">
+                  <Button type="submit" color="primary" variant="contained">
                     Create topic
                   </Button>
                 </DialogActions>

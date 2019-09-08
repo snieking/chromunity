@@ -11,6 +11,7 @@ import {
   IconButton,
   LinearProgress,
   TextField,
+  Theme,
   Tooltip,
   Typography,
   withStyles,
@@ -56,35 +57,42 @@ import { initGA, pageViewPath } from "../../GoogleAnalytics";
 import { prepareUrlPath } from "../../util/util";
 import ConfirmDialog from "../common/ConfirmDialog";
 
-const styles = createStyles({
-  authorName: {
-    display: "block",
-    paddingTop: "2px",
-    paddingLeft: "5px",
-    paddingRight: "5px"
-  },
-  authorLink: {
-    float: "right",
-    borderRadius: "0 0 0 5px",
-    marginTop: "-18px",
-    marginBottom: "7px",
-    marginRight: "-16px"
-  },
-  content: {
-    marginRight: "5px",
-    whiteSpace: "normal",
-    maxWidth: "95%"
-  },
-  iconYellow: {
-    color: COLOR_YELLOW
-  },
-  iconOrange: {
-    color: COLOR_ORANGE
-  },
-  iconRed: {
-    color: COLOR_RED
-  }
-});
+const styles = (theme: Theme) =>
+  createStyles({
+    authorName: {
+      display: "block",
+      paddingTop: "2px",
+      paddingLeft: "5px",
+      paddingRight: "5px"
+    },
+    authorLink: {
+      float: "right",
+      borderRadius: "0 0 0 5px",
+      marginTop: "-18px",
+      marginBottom: "7px",
+      marginRight: "-16px"
+    },
+    content: {
+      marginRight: "5px",
+      whiteSpace: "normal",
+      maxWidth: "95%"
+    },
+    userColor: {
+      backgroundColor: theme.palette.secondary.main
+    },
+    repColor: {
+      backgroundColor: COLOR_ORANGE
+    },
+    iconYellow: {
+      color: COLOR_YELLOW
+    },
+    iconOrange: {
+      color: COLOR_ORANGE
+    },
+    iconRed: {
+      color: COLOR_RED
+    }
+  });
 
 interface MatchParams {
   id: string;
@@ -298,13 +306,12 @@ const FullTopic = withStyles(styles)(
       return (
         <div style={{ float: "right" }}>
           <Link
-            className={this.props.classes.authorLink}
+            className={`${this.props.classes.authorLink} ${
+              this.state.representatives.includes(this.state.topic.author.toLocaleLowerCase())
+                ? this.props.classes.repColor
+                : this.props.classes.userColor
+            }`}
             to={"/u/" + this.state.topic.author}
-            style={{
-              backgroundColor: this.state.representatives.includes(this.state.topic.author.toLocaleLowerCase())
-                ? COLOR_ORANGE
-                : COLOR_PURPLE
-            }}
           >
             <Typography gutterBottom variant="subtitle1" component="span" className="typography">
               <span className={this.props.classes.authorName}>@{this.state.topic.author}</span>

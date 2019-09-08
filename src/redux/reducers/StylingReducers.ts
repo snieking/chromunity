@@ -2,9 +2,24 @@ import { StylingActions, StylingActionTypes, StylingState } from "../StylingType
 import { darkTheme, lightTheme } from "../../theme";
 import { Reducer } from "redux";
 import { gaGenericEvent } from "../../GoogleAnalytics";
+import { Theme } from "@material-ui/core";
+
+const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+const isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches;
+
+function getInitialTheme(): Theme {
+  const previousSelectedTheme = localStorage.getItem("theme");
+
+  if ("light" === previousSelectedTheme) return lightTheme;
+  if ("dark" === previousSelectedTheme) return darkTheme;
+  if (isDarkMode) return darkTheme;
+  if (isLightMode) return lightTheme;
+
+  return darkTheme;
+}
 
 const initialStyling: StylingState = {
-  theme: "light" === localStorage.getItem("theme") ? lightTheme : darkTheme
+  theme: getInitialTheme()
 };
 
 export const stylingReducer: Reducer<StylingState, StylingActions> = (state = initialStyling, action) => {

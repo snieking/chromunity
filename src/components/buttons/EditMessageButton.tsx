@@ -68,7 +68,7 @@ class EditMessageButton extends React.Component<EditMessageButtonProps, EditMess
   newTopicDialog() {
     return (
       <div>
-        <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"sm"}>
+        <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"md"}>
           <form onSubmit={() => this.props.submitFunction(this.state.message)}>
             <DialogContent>
               <br />
@@ -88,10 +88,10 @@ class EditMessageButton extends React.Component<EditMessageButtonProps, EditMess
               />
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => this.toggleDialog()} color="secondary" variant="outlined">
+              <Button onClick={() => this.toggleDialog()} color="secondary" variant="contained">
                 Cancel
               </Button>
-              <Button type="submit" color="primary" variant="outlined">
+              <Button type="submit" color="primary" variant="contained">
                 Send
               </Button>
             </DialogActions>
