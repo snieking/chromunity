@@ -9,4 +9,6 @@ config.vaultUrl = "http://localhost:3001";
 
 config.gaTrackingId = "UA-80662239-2";
 
+config.testMode = true;
+
 module.exports = config;

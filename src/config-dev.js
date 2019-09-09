@@ -9,4 +9,6 @@ config.vaultUrl = "https://wallet-v2.chromia.dev";
 
 config.gaTrackingId = "UA-122482523-5";
 
+config.testMode = false;
+
 module.exports = config;

@@ -24,7 +24,9 @@ const NotificationsButton: React.FunctionComponent<NotificationsButtonProps> = p
   const user = getUser();
 
   useEffect(() => {
-    countUnreadUserNotifications(props.username).then(count => setCounter(count));
+    countUnreadUserNotifications(props.username)
+      .then(count => setCounter(count))
+      .catch(() => setCounter(0));
     // eslint-disable-next-line
   }, []);
 

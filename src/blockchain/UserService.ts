@@ -5,8 +5,8 @@ import * as BoomerangCache from "boomerang-cache";
 import { createStopwatchStarted, stopStopwatch } from "../util/util";
 import { gaRellOperationTiming, gaRellQueryTiming } from "../GoogleAnalytics";
 
-const boomerang = BoomerangCache.create("avatar-bucket", {
-  storage: "local",
+const boomerang = BoomerangCache.create("avatars-bucket", {
+  storage: "session",
   encrypt: false
 });
 

@@ -7,32 +7,20 @@ import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 import Home from "@material-ui/icons/Home";
 import AccountCircle from "@material-ui/icons/AccountCircle";
-import {
-  ExitToApp,
-  Face,
-  Gavel,
-  HowToVote,
-  LocationCity,
-  People,
-  Report,
-  RssFeed,
-  Settings
-} from "@material-ui/icons";
+import { ExitToApp, Face, Gavel, HowToVote, LocationCity, People, Report, RssFeed, Settings } from "@material-ui/icons";
 
 import NotificationsButton from "../buttons/NotificationsButton";
-import {
-  Button,
-  ListItemIcon,
-  Menu,
-  MenuItem,
-  Tooltip,
-  Typography
-} from "@material-ui/core";
+import { Button, ListItemIcon, Menu, MenuItem, Tooltip, Typography } from "@material-ui/core";
 import { getUser } from "../../util/user-util";
 import ThemeSwitcher from "./ThemeSwitcher";
+import config from "../../config";
+import { COLOR_OFF_WHITE } from "../../theme";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    testInfo: {
+      textAlign: "center"
+    },
     navIcon: {
       color: theme.palette.primary.main
     },
@@ -70,13 +58,8 @@ const useStyles = makeStyles((theme: Theme) =>
 const HeaderNav: React.FunctionComponent = (props: unknown) => {
   const classes = useStyles(props);
   const user = getUser();
-  const [
-    profileAnchorEl,
-    setProfileAnchorEl
-  ] = React.useState<null | HTMLElement>(null);
-  const [govAnchorEl, setGovAnchorEl] = React.useState<null | HTMLElement>(
-    null
-  );
+  const [profileAnchorEl, setProfileAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [govAnchorEl, setGovAnchorEl] = React.useState<null | HTMLElement>(null);
 
   function handleProfileClick(event: React.MouseEvent<HTMLButtonElement>) {
     setProfileAnchorEl(event.currentTarget);
@@ -102,11 +85,7 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
             <NotificationsButton username={user.name} />
           </Link>
 
-          <Button
-            aria-controls="profile-menu"
-            aria-haspopup="true"
-            onClick={handleProfileClick}
-          >
+          <Button aria-controls="profile-menu" aria-haspopup="true" onClick={handleProfileClick}>
             <Tooltip title="Profile">
               <AccountCircle className={classes.navIcon} />
             </Tooltip>
@@ -167,11 +146,7 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
       return (
         <div>
           <Link to="/channels">
-            <IconButton
-              edge="start"
-              className={classes.menuButton}
-              aria-label="Open drawer"
-            >
+            <IconButton edge="start" className={classes.menuButton} aria-label="Open drawer">
               <Tooltip title="Channels">
                 <RssFeed className={classes.navIcon} />
               </Tooltip>
@@ -179,11 +154,7 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
           </Link>
 
           <Link to="/followings">
-            <IconButton
-              edge="start"
-              className={classes.menuButton}
-              aria-label="Open drawer"
-            >
+            <IconButton edge="start" className={classes.menuButton} aria-label="Open drawer">
               <Tooltip title="Users">
                 <People className={classes.navIcon} />
               </Tooltip>
@@ -194,16 +165,25 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
     }
   }
 
+  function renderTestInfoBar() {
+    if (config.testMode) {
+      return (
+        <AppBar position="static" color="secondary">
+          <Typography variant="body2" component="p" className={classes.testInfo}>
+            This is a development site. Data might be reset from time to time.
+          </Typography>
+        </AppBar>
+      );
+    }
+  }
+
   return (
     <div className={classes.grow}>
+      {renderTestInfoBar()}
       <AppBar position="static">
         <Toolbar>
           <Link to="/">
-            <IconButton
-              edge="start"
-              className={classes.menuButton}
-              aria-label="Open drawer"
-            >
+            <IconButton edge="start" className={classes.menuButton} aria-label="Open drawer">
               <Tooltip title="Home">
                 <Home className={classes.navIcon} />
               </Tooltip>
@@ -222,21 +202,13 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
             </Tooltip>
           </IconButton>
 
-          <Menu
-            id="gov-menu"
-            anchorEl={govAnchorEl}
-            keepMounted
-            open={Boolean(govAnchorEl)}
-            onClose={handleGovClose}
-          >
+          <Menu id="gov-menu" anchorEl={govAnchorEl} keepMounted open={Boolean(govAnchorEl)} onClose={handleGovClose}>
             <Link style={{ width: "100%" }} to="/gov/representatives">
               <MenuItem onClick={handleGovClose}>
                 <ListItemIcon>
                   <Face className="menu-item-button" />
                 </ListItemIcon>
-                <Typography className="menu-item-text">
-                  Representatives
-                </Typography>
+                <Typography className="menu-item-text">Representatives</Typography>
               </MenuItem>
             </Link>
             <br />
@@ -268,14 +240,11 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
             </Link>
           </Menu>
           <div className={classes.grow} />
-          <div className={classes.sectionDesktop}>
-            {profileSpecificNavigation()}
-          </div>
+          <div className={classes.sectionDesktop}>{profileSpecificNavigation()}</div>
         </Toolbar>
       </AppBar>
     </div>
   );
 };
 
-
-export default (HeaderNav);
+export default HeaderNav;

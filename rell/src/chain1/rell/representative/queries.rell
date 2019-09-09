@@ -21,3 +21,7 @@ query get_all_representative_actions(timestamp, page_size: integer) {
         .action 
     ) limit page_size;
 }
+
+query get_number_of_times_representative(name) {
+    return representative@*{ .user.name == name } ( .representative_election.id ).size();
+}

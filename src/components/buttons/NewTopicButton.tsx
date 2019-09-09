@@ -258,7 +258,6 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                   />
                   <br />
                   <Badge
-                    className="input-field-badge"
                     color="secondary"
                     badgeContent={maxTitleLength - this.state.topicTitle.length}
                     showZero
@@ -266,13 +265,12 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                     <TextField
                       autoFocus
                       margin="dense"
+                      type="text"
                       id="title"
                       label="Title"
-                      multiline
                       fullWidth
                       onChange={this.handleDialogTitleChange}
                       value={this.state.topicTitle}
-                      className="text-field"
                       variant="outlined"
                     />
                   </Badge>

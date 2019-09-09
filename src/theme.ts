@@ -273,7 +273,7 @@ export const lightTheme = createMuiTheme({
         },
         MuiPaper: {
             root: {
-                backgroundColor: COLOR_CHROMIA_LIGHT
+                backgroundColor: COLOR_OFF_WHITE
             }
         },
         MuiCard: {
