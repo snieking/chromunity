@@ -14,7 +14,6 @@ import { Button, ListItemIcon, Menu, MenuItem, Tooltip, Typography } from "@mate
 import { getUser } from "../../util/user-util";
 import ThemeSwitcher from "./ThemeSwitcher";
 import config from "../../config";
-import { COLOR_OFF_WHITE } from "../../theme";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

@@ -41,7 +41,6 @@ import Timestamp from "../common/Timestamp";
 import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import ConfirmDialog from "../common/ConfirmDialog";
-import { Redirect } from "react-router";
 
 const styles = (theme: Theme) =>
   createStyles({
