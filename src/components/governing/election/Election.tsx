@@ -61,7 +61,7 @@ export interface ElectionState {
 const renderer = ({ days, hours, minutes, seconds, completed }) => {
   if (completed) {
     // Render a completed state
-    window.location.replace("/");
+    window.location.href = "/";
     return <div />;
   } else {
     // Render a countdown

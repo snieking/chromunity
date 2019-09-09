@@ -218,7 +218,7 @@ const TopicReplyCard = withStyles(styles)(
               .catch(() => this.setState({ isLoading: false }));
           }
         } else {
-          window.location.replace("/user/login");
+          window.location.href = "/user/login";
         }
       }
     }
@@ -315,7 +315,7 @@ const TopicReplyCard = withStyles(styles)(
       if (user != null) {
         reportReply(user, this.props.topicId, this.props.reply.id).then(() => window.location.reload());
       } else {
-        window.location.replace("/user/login");
+        window.location.href = "/user/login";
       }
     }
 
@@ -368,7 +368,7 @@ const TopicReplyCard = withStyles(styles)(
     renderReplyBox() {
       const user: ChromunityUser = this.state.user;
       if (this.state.replyBoxOpen && user == null) {
-        window.location.replace("/user/login");
+        window.location.href = "/user/login";
       } else if (this.state.replyBoxOpen && this.state.userMeta.suspended_until > Date.now()) {
         this.setState({ replyBoxOpen: false });
         window.alert("User account temporarily suspended");

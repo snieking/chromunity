@@ -275,7 +275,7 @@ const FullTopic = withStyles(styles)(
               .catch(() => this.setState({ isLoading: false }));
           }
         } else {
-          window.location.replace("/user/login");
+          window.location.href = "/user/login";
         }
       }
     }
@@ -297,7 +297,7 @@ const FullTopic = withStyles(styles)(
               .catch(() => this.setState({ isLoading: false }));
           }
         } else {
-          window.location.replace("/user/login");
+          window.location.href = "/user/login";
         }
       }
     }
@@ -406,7 +406,7 @@ const FullTopic = withStyles(styles)(
         reportTopic(user, this.state.topic.id);
         window.location.reload();
       } else {
-        window.location.replace("/user/login");
+        window.location.href = "/user/login";
       }
     }
 

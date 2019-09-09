@@ -155,7 +155,7 @@ const Settings = withStyles(styles)(
     componentDidMount() {
       const user: ChromunityUser = this.state.user;
       if (user == null) {
-        window.location.replace("/account");
+        window.location.href = "/user/login";
       } else {
         getUserSettings(user).then((settings: UserSettings) => {
           this.setState({

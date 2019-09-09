@@ -30,7 +30,7 @@ const rootReducer = combineReducers<ApplicationState>({
 
 const sagaMiddleware = createSagaMiddleware({
   onError: () => {
-    window.location.replace("/error");
+    window.location.href = "/error";
   }
 });
 

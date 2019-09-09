@@ -98,5 +98,5 @@ function retrieveKeyPair(): KeyPair {
 function authorizeUser(username: string, keyPair: KeyPair) {
   setUsername(username);
   storeKeyPair(keyPair);
-  window.location.replace("/");
+  window.location.href = "/";
 }
