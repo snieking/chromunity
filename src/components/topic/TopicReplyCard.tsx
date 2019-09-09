@@ -41,6 +41,7 @@ import Timestamp from "../common/Timestamp";
 import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import ConfirmDialog from "../common/ConfirmDialog";
+import { Redirect } from "react-router";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -218,7 +219,7 @@ const TopicReplyCard = withStyles(styles)(
               .catch(() => this.setState({ isLoading: false }));
           }
         } else {
-          window.location.replace("/user/account");
+          window.location.replace("/user/login");
         }
       }
     }
@@ -315,7 +316,7 @@ const TopicReplyCard = withStyles(styles)(
       if (user != null) {
         reportReply(user, this.props.topicId, this.props.reply.id).then(() => window.location.reload());
       } else {
-        window.location.replace("/user/account");
+        window.location.replace("/user/login");
       }
     }
 
@@ -368,7 +369,7 @@ const TopicReplyCard = withStyles(styles)(
     renderReplyBox() {
       const user: ChromunityUser = this.state.user;
       if (this.state.replyBoxOpen && user == null) {
-        window.location.replace("/user/account");
+        window.location.replace("/user/login");
       } else if (this.state.replyBoxOpen && this.state.userMeta.suspended_until > Date.now()) {
         this.setState({ replyBoxOpen: false });
         window.alert("User account temporarily suspended");

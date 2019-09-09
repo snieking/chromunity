@@ -170,7 +170,8 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
       return (
         <AppBar position="static" color="secondary">
           <Typography variant="body2" component="p" className={classes.testInfo}>
-            This is a development site. Data might be reset from time to time.
+            This is a development version. Data might be reset from time to time. Please feel free to test, submit bug
+            reports as a topic and please provide console logs.
           </Typography>
         </AppBar>
       );
