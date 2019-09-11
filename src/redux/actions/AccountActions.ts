@@ -3,6 +3,7 @@ import { ActionCreator } from "redux";
 import {
   AccountActionTypes,
   AccountAddAccountIdAction,
+  AccountLoginAction,
   AccountRegisterAction,
   AccountRegisteredCheckAction
 } from "../AccountTypes";
@@ -26,4 +27,10 @@ export const accountRegister: ActionCreator<AccountRegisterAction> = (
   username: username,
   accountId: accountId,
   vaultPubKey: vaultPubKey
+});
+
+export const accountLogin: ActionCreator<AccountLoginAction> = (username: string, accountId: string) => ({
+  type: AccountActionTypes.ACCOUNT_LOGIN,
+  username: username,
+  accountId: accountId
 });

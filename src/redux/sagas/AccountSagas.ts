@@ -1,4 +1,9 @@
-import { AccountActionTypes, AccountRegisterAction, AccountRegisteredCheckAction } from "../AccountTypes";
+import {
+  AccountActionTypes,
+  AccountLoginAction,
+  AccountRegisterAction,
+  AccountRegisteredCheckAction
+} from "../AccountTypes";
 import { takeLatest } from "redux-saga/effects";
 import { SingleSignatureAuthDescriptor, FlagsType, User, Account } from "ft3-lib";
 import { KeyPair } from "ft3-lib";
@@ -12,6 +17,7 @@ import { makeKeyPair } from "../../blockchain/CryptoService";
 export function* accountWatcher() {
   yield takeLatest(AccountActionTypes.ACCOUNT_REGISTER_CHECK, checkIfRegistered);
   yield takeLatest(AccountActionTypes.ACCOUNT_REGISTER, registerAccount);
+  yield takeLatest(AccountActionTypes.ACCOUNT_LOGIN, loginAccount);
 }
 
 function* checkIfRegistered(action: AccountRegisteredCheckAction) {
@@ -21,7 +27,7 @@ function* checkIfRegistered(action: AccountRegisteredCheckAction) {
     window.location.replace(`${config.vaultUrl}/?route=/link-account&returnUrl=${returnUrl}`);
   } else {
     accountAddAccountId(accountId);
-    yield loginAccount(action.username);
+    yield walletLogin(action.username);
   }
 }
 
@@ -41,9 +47,9 @@ function* registerAccount(action: AccountRegisterAction) {
   authorizeUser(action.username, keyPair);
 }
 
-function* loginAccount(username: string) {
+function* walletLogin(username: string) {
   let keyPair: KeyPair = new KeyPair(makeKeyPair().privKey.toString("hex"));
-
+  storeKeyPair(keyPair);
   const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
 
   const user = new User(keyPair, authDescriptor);
@@ -51,27 +57,33 @@ function* loginAccount(username: string) {
   const blockchain = yield BLOCKCHAIN;
   checkIfAuthDescriptorAdded(blockchain, user, accountId, username, keyPair);
 
-  const href = `${config.vaultUrl}/?route=/authorize&dappId=${
-    config.blockchainRID
-  }&accountId=${accountId}&pubkey=${keyPair.pubKey.toString("hex")}`;
-
-  let newWindow = window.open(
-    href,
-    "vault",
-    `toolbar=no,
-  location=no,
-  status=no,
-  menubar=no,
-  scrollbars=yes,
-  resizable=yes`
+  const returnUrl = encodeURIComponent(`${config.chromunityUrl}/user/authorize/${username}/${accountId}`);
+  window.location.replace(
+    `${config.vaultUrl}/?route=/authorize&dappId=${
+      config.blockchainRID
+    }&accountId=${accountId}&pubkey=${keyPair.pubKey.toString("hex")}&successAction=${returnUrl}`
   );
-
-  if (!newWindow.focus) {
-    newWindow.focus();
-  }
 }
 
-async function checkIfAuthDescriptorAdded(blockchain: any, user: User, accountId: string, username: string, keyPair: KeyPair) {
+function* loginAccount(action: AccountLoginAction) {
+  let keyPair: KeyPair = retrieveKeyPair();
+
+  const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
+
+  const user = new User(keyPair, authDescriptor);
+
+  const blockchain = yield BLOCKCHAIN;
+
+  checkIfAuthDescriptorAdded(blockchain, user, action.accountId, action.username, keyPair);
+}
+
+async function checkIfAuthDescriptorAdded(
+  blockchain: any,
+  user: User,
+  accountId: string,
+  username: string,
+  keyPair: KeyPair
+) {
   const accounts = await blockchain.getAccountsByAuthDescriptorId(user.authDescriptor.hash(), user);
 
   const isAdded = accounts.some((account: Account) => {
@@ -97,6 +109,5 @@ function retrieveKeyPair(): KeyPair {
 
 function authorizeUser(username: string, keyPair: KeyPair) {
   setUsername(username);
-  storeKeyPair(keyPair);
   window.location.href = "/";
 }

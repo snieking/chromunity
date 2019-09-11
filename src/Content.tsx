@@ -16,6 +16,7 @@ import { Route, RouteComponentProps, Switch, withRouter } from "react-router";
 import TopicWall from "./components/walls/TopicWall";
 import WalletLogin from "./components/user/authentication/WalletLogin";
 import { ErrorPage } from "./components/static/ErrorPage";
+import LoginAccount from "./components/user/authentication/LoginAccount";
 
 const Content: React.FunctionComponent<RouteComponentProps> = ({ location }) => {
   return (
@@ -27,6 +28,7 @@ const Content: React.FunctionComponent<RouteComponentProps> = ({ location }) => 
             <Route path="/followings" component={() => <TopicWall type="userFollowings" />} />
             <Route path="/channels" component={() => <TopicWall type="tagFollowings" />} />
             <Route path="/user/register/:username" component={RegisterAccount} />
+            <Route path="/user/authorize/:username/:accountId" component={LoginAccount} />
             <Route path="/user/login" component={WalletLogin} />
             <Route path="/user/logout" component={Logout} />
             <Route path="/user/settings" component={Settings} />
