@@ -28,7 +28,7 @@ const styles = createStyles({
     display: "block",
     marginTop: "10px",
     marginRight: "10px",
-    marginLeft: "5px",
+    marginLeft: "10px",
   },
   rating: {
     marginTop: "10px"
@@ -82,7 +82,7 @@ const TopicReplyOverviewCard = withStyles(styles)(
 
     render() {
       if (this.state.redirectToTopic) {
-        return <Redirect to={"/t/" + this.props.reply.topic_id} />;
+        return <Redirect to={"/t/" + this.props.reply.topic_id} push />;
       } else {
         return (
           <div className={this.props.reply.removed ? "removed" : ""}>

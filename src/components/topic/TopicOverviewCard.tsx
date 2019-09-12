@@ -32,7 +32,7 @@ const styles = createStyles({
     display: "block",
     marginTop: "10px",
     marginRight: "10px",
-    marginLeft: "5px",
+    marginLeft: "5px"
   },
   rating: {
     marginTop: "10px"
@@ -84,7 +84,7 @@ const TopicOverviewCard = withStyles(styles)(
 
     render() {
       if (this.state.redirectToFullCard) {
-        return <Redirect to={"/t/" + this.props.topic.id + "/" + prepareUrlPath(this.props.topic.title)} />;
+        return <Redirect to={"/t/" + this.props.topic.id + "/" + prepareUrlPath(this.props.topic.title)} push />;
       } else {
         return (
           <div className={this.props.topic.removed ? this.props.classes.removed : ""}>

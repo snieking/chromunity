@@ -1,13 +1,10 @@
 import React from "react";
 
-import { Link } from "react-router-dom";
-
 import {
   Button,
   Card,
   CardActions,
   CardContent,
-  CardMedia,
   Container,
   createStyles,
   Grid,
@@ -27,20 +24,13 @@ import { getUser, isGod } from "../../../util/user-util";
 import DictatorActions from "./dictator/DictatorActions";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import { ChromunityUser } from "../../../types";
-import { COLOR_PURPLE } from "../../../theme";
 import { initGA, pageView } from "../../../GoogleAnalytics";
+import ElectionCandidateCard from "./ElectionCandidateCard";
 
 const styles = createStyles({
-  votedFor: {
-    border: "solid 3px",
-    borderColor: COLOR_PURPLE
-  },
   electionCard: {
     textAlign: "center",
     marginTop: "28px"
-  },
-  candidateCard: {
-    textAlign: "center"
   }
 });
 
@@ -89,6 +79,7 @@ const Election = withStyles(styles)(
         user: getUser()
       };
       this.renderElection = this.renderElection.bind(this);
+      this.voteForCandidate = this.voteForCandidate.bind(this);
     }
 
     componentDidMount(): void {
@@ -171,63 +162,8 @@ const Election = withStyles(styles)(
       }
     }
 
-    renderCandidateCard(name: string) {
-      return (
-        <Grid item xs={3}>
-          <Card
-            raised={true}
-            key={"candidate-" + name}
-            className={`${this.props.classes.candidateCard} ${this.state.votedFor ? this.props.classes.votedFor : ""}`}
-          >
-            <CardMedia
-              component="img"
-              alt="Election candidate"
-              height="140"
-              image="https://i.pravatar.cc/300"
-              title="Election candidate"
-            />
-            <CardContent>
-              <Typography gutterBottom variant="subtitle1" component="h5">
-                <Link to={"/u/" + name}>@{name}</Link>
-              </Typography>
-            </CardContent>
-            <CardActions style={{ justifyContent: "center" }}>{this.renderCandidateCardActions(name)}</CardActions>
-          </Card>
-        </Grid>
-      );
-    }
-
     voteForCandidate(name: string) {
       voteForCandidate(this.state.user, name).then(() => this.setState({ votedFor: name }));
-    }
-
-    renderCandidateCardActions(name: string) {
-      if (name === this.state.votedFor) {
-        return (
-          <div>
-            <Button fullWidth size="small" variant="outlined" color="secondary">
-              Share
-            </Button>
-          </div>
-        );
-      } else {
-        return (
-          <div>
-            <Button
-              fullWidth
-              size="small"
-              variant="outlined"
-              color="primary"
-              onClick={() => this.voteForCandidate(name)}
-            >
-              Vote
-            </Button>
-            <Button fullWidth size="small" variant="outlined" color="secondary">
-              Share
-            </Button>
-          </div>
-        );
-      }
     }
 
     render() {
@@ -242,7 +178,13 @@ const Election = withStyles(styles)(
             <CardActions>{this.renderParticipateButton()}</CardActions>
           </Card>
           <Grid container spacing={1}>
-            {this.state.electionCandidates.map(candidate => this.renderCandidateCard(candidate))}
+            {this.state.electionCandidates.map(candidate => (
+              <ElectionCandidateCard
+                candidate={candidate}
+                votedFor={this.state.votedFor}
+                voteForCandidate={this.voteForCandidate}
+              />
+            ))}
           </Grid>
         </Container>
       );

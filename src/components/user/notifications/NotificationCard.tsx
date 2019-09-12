@@ -1,16 +1,11 @@
 import React from "react";
 
-import {
-  Card,
-  CardContent,
-  createStyles,
-  makeStyles,
-  Typography
-} from "@material-ui/core";
+import { Card, CardContent, createStyles, makeStyles, Typography } from "@material-ui/core";
 import { UserNotification } from "../../../types";
 import { parseContent } from "../../../util/text-parsing";
 
 import Timestamp from "../../common/Timestamp";
+import MarkdownRenderer from "../../common/MarkdownRenderer";
 
 const useStyles = makeStyles(
   createStyles({
@@ -24,9 +19,7 @@ export interface NotificationCardProps {
   notification: UserNotification;
 }
 
-const NotificationCard: React.FunctionComponent<
-  NotificationCardProps
-> = props => {
+const NotificationCard: React.FunctionComponent<NotificationCardProps> = props => {
   const classes = useStyles(props);
 
   function renderTimeAgo() {
@@ -49,15 +42,7 @@ const NotificationCard: React.FunctionComponent<
 
   function renderContent() {
     if (props.notification.content !== "") {
-      return (
-        <Typography gutterBottom variant="body2" component="p">
-          <span
-            dangerouslySetInnerHTML={{
-              __html: parseContent(props.notification.content)
-            }}
-          />
-        </Typography>
-      );
+      return <MarkdownRenderer text={props.notification.content} />;
     }
   }
 
