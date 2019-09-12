@@ -29,7 +29,7 @@ const NotificationCard: React.FunctionComponent<NotificationCardProps> = props =
   function renderTrigger() {
     if (props.notification.trigger !== "") {
       return (
-        <Typography gutterBottom variant="h6" component="h6">
+        <Typography gutterBottom variant="subtitle1" component="h6">
           <span
             dangerouslySetInnerHTML={{
               __html: parseContent(props.notification.trigger)
