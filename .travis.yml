@@ -1,7 +1,7 @@
 ---
 language: generic
 jdk: "openjdk8"
-node_js: "9.8"
+node_js: "node"
 
 dist: trusty
 
@@ -55,7 +55,7 @@ deploy:
     on:
       branch: dev
     region: eu-west-1
-    cache_control: "max-age=3600"
+    cache_control: "max-age=600"
 
 after_deploy:
   # Allow `awscli` to make requests to CloudFront.

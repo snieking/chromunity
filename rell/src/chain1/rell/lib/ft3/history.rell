@@ -8,9 +8,21 @@
     op_index: integer;
     is_input: boolean;
     entry_index: integer;
-    
   }
 
-  
-
+  query get_payment_history(account_id: byte_array, after_block: integer) {
+    return payment_history_entry @* {
+        account @ { account_id },
+        .transaction.block.block_height > after_block
+    } (
+        delta = .delta,
+        asset = .asset.name,
+        asset_id = .asset.id,
+        is_input = .is_input,
+        timestamp = .transaction.block.timestamp,
+        block_height = .transaction.block.block_height,
+        tx_rid = .transaction.tx_rid,
+        tx_data = .transaction.tx_data
+    );
+  }
 //}

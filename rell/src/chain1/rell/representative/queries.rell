@@ -1,5 +1,10 @@
 query get_representatives() {
-    val election = representative_election@{ .completed == true } ( .id, -sort .timestamp );
+    val election = representative_election@?{ .completed == true } ( .id, -sort .timestamp );
+
+    // If no election yes, then admin is technically the only representative
+    if (election == null) {
+        return ["admin"];
+    }
 
     return representative@*{
         .representative_election.id == election.id
@@ -15,4 +20,8 @@ query get_all_representative_actions(timestamp, page_size: integer) {
         -sort .timestamp, 
         .action 
     ) limit page_size;
+}
+
+query get_number_of_times_representative(name) {
+    return representative@*{ .user.name == name } ( .representative_election.id ).size();
 }

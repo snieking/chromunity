@@ -1,11 +1,9 @@
-operation follow_channel(username: text, name) {
-    val user = get_verified_user(username);
-    // TODO: .lower_case() on Rell 0.9
-    create channel_following(user, name);
+operation follow_channel(username: text, descriptor_id: byte_array, name) {
+    val user = get_verified_user(username, descriptor_id);
+    create channel_following(user, name.lower_case());
 }
 
-operation unfollow_channel(username: text, name) {
-    val user = get_verified_user(username);
-    // TODO: .lower_case() on Rell 0.9
-    delete channel_following@{ user, name};
+operation unfollow_channel(username: text, descriptor_id: byte_array, name) {
+    val user = get_verified_user(username, descriptor_id);
+    delete channel_following@{ user, name.lower_case()};
 }

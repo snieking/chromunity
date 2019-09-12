@@ -1,14 +1,12 @@
-operation create_representative_report(username: text, id: text, text) {
-    val user = user@{ .name == username };
-    require(is_signer(user.pubkey));
+operation create_representative_report(username: text, descriptor_id: byte_array, id: text, text) {
+    val user = get_verified_user(username, descriptor_id);
     require(user_meta@{ user }.suspended_until < op_context.last_block_time);
 
     create representative_report(id= id, user, op_context.last_block_time, false, text = text);
 }
 
-operation handle_representative_report(username: text, id: text) {
-    val user = user@{ .name == username };
-    require(is_signer(user.pubkey));
+operation handle_representative_report(username: text, descriptor_id: byte_array, id: text) {
+    val user = get_verified_user(username, descriptor_id);
 
     val recentElection = representative_election@{ .completed == true } ( .id, sort .timestamp );
     val representative = representative @{ user, .representative_election.id == recentElection.id };

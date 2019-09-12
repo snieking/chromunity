@@ -1,110 +1,124 @@
-import {UserMeta, UserSettings} from './../types';
-import {GTX} from "./Postchain";
-import {seedFromMnemonic, seedToKey} from "./CryptoService";
-import {User} from "../types";
-import {setMnemonic, setUser, setUserMeta} from "../util/user-util";
+import { UserMeta, UserSettings } from "../types";
+import { BLOCKCHAIN, GTX } from "./Postchain";
+import { ChromunityUser } from "../types";
 import * as BoomerangCache from "boomerang-cache";
-import {uniqueId} from '../util/util';
+import { createStopwatchStarted, stopStopwatch } from "../util/util";
+import { gaRellOperationTiming, gaRellQueryTiming } from "../GoogleAnalytics";
 
-const boomerang = BoomerangCache.create("avatar-bucket", {storage: "local", encrypt: false});
-
-export function register(name: string, password: string, mnemonic: string) {
-    setMnemonic(mnemonic);
-
-    const seed = seedFromMnemonic(mnemonic, password);
-    const {privKey, pubKey} = seedToKey(seed);
-
-    const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("register_user", name.toLocaleLowerCase(), name, pubKey);
-    tx.sign(privKey, pubKey);
-    return tx.postAndWaitConfirmation();
-}
-
-export function login(name: string, password: string, mnemonic: string): Promise<User> {
-    setMnemonic(mnemonic);
-    return GTX.query("get_user", {name: name.toLocaleLowerCase()})
-        .then((blockchainUser: BlockchainUser) => {
-            const seed = seedFromMnemonic(mnemonic, password);
-            //const {privKey, pubKey} = seedToKey(seed);
-            // TODO: Validate pubkey matches with the one in the blockchain user
-
-            const user: User = {name: name, seed: seed};
-            setUser(user);
-
-            getUserMeta(name).then(meta => setUserMeta(meta));
-
-            return user;
-        });
-}
+const boomerang = BoomerangCache.create("avatars-bucket", {
+  storage: "session",
+  encrypt: false
+});
 
 export function isRegistered(name: string): Promise<boolean> {
-    return GTX.query("get_user", {name: name.toLocaleLowerCase()})
-        .then((any: any) => any != null)
-        .catch(false);
-}
+  const query = "get_user";
+  const sw = createStopwatchStarted();
 
-export function getUserMeta(username: string): Promise<UserMeta> {
-    return GTX.query("get_user_meta", {name: username.toLocaleLowerCase()});
-}
-
-export function getUserSettings(user: User): Promise<UserSettings> {
-    return GTX.query("get_user_settings", {name: user.name.toLocaleLowerCase()});
-}
-
-export function getUserSettingsCached(name: string, cacheDuration: number): Promise<UserSettings> {
-    const userLC: string = name.toLocaleLowerCase();
-    const cachedAvatar: UserSettings = boomerang.get(userLC);
-
-    if (cachedAvatar != null) {
-        return new Promise<UserSettings>(resolve => resolve(cachedAvatar));
-    }
-
-    return GTX.query("get_user_settings", {name: userLC}).then((settings: UserSettings) => {
-        boomerang.set(userLC, settings, cacheDuration);
-        return settings;
+  return GTX.query(query, { name: name.toLocaleLowerCase() })
+    .then((any: unknown) => {
+      gaRellQueryTiming(query, stopStopwatch(sw));
+      return any != null;
+    })
+    .catch(() => {
+      gaRellQueryTiming(query, stopStopwatch(sw));
+      return false;
     });
 }
 
-export function updateUserSettings(user: User, avatar: string, description: string) {
-    const userLC: string = user.name.toLocaleLowerCase();
-    boomerang.remove(userLC);
-
-    const {privKey, pubKey} = seedToKey(user.seed);
-
-    const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("update_user_settings", userLC, avatar, description);
-    tx.addOperation('nop', uniqueId());
-    tx.sign(privKey, pubKey);
-    return tx.postAndWaitConfirmation();
+export function getAccountId(username: string): Promise<string> {
+  return BLOCKCHAIN.then(bc => bc.query("get_account_id", { name: username }));
 }
 
-export function toggleUserMute(user: User, name: string, muted: boolean) {
-    boomerang.remove("muted-users");
-    const {privKey, pubKey} = seedToKey(user.seed);
-
-    const tx = GTX.newTransaction([pubKey]);
-    tx.addOperation("toggle_mute", user.name.toLocaleLowerCase(), name.toLocaleLowerCase(), muted ? 1 : 0);
-    tx.addOperation('nop', uniqueId());
-    tx.sign(privKey, pubKey);
-    return tx.postAndWaitConfirmation();
+export function getUserMeta(username: string): Promise<UserMeta> {
+  const query = "get_user_meta";
+  const sw = createStopwatchStarted();
+  return GTX.query(query, { name: username.toLocaleLowerCase() }).then((meta: UserMeta) => {
+    gaRellQueryTiming(query, stopStopwatch(sw));
+    return meta;
+  });
 }
 
-export function getMutedUsers(user: User): Promise<string[]> {
-    const mutedUsers: string[] = boomerang.get("muted-users");
+export function getUserSettings(user: ChromunityUser): Promise<UserSettings> {
+  const query = "get_user_settings";
+  const sw = createStopwatchStarted();
 
-    if (mutedUsers != null) {
-        return new Promise<string[]>(resolve => resolve(mutedUsers));
-    }
-
-    return GTX.query("get_muted_users", { username: user.name.toLocaleLowerCase() })
-        .then((users: string[]) => {
-            boomerang.set("muted-users", users, 86000);
-            return users;
-        });
+  return GTX.query(query, {
+    name: user.name.toLocaleLowerCase()
+  }).then((settings: UserSettings) => {
+    gaRellQueryTiming(query, stopStopwatch(sw));
+    return settings;
+  });
 }
 
-interface BlockchainUser {
-    name: string,
-    pubkey: string,
-    registered: number
+export function getUserSettingsCached(name: string, cacheDuration: number): Promise<UserSettings> {
+  const userLC: string = name.toLocaleLowerCase();
+  const cachedAvatar: UserSettings = boomerang.get(userLC);
+
+  if (cachedAvatar != null) {
+    return new Promise<UserSettings>(resolve => resolve(cachedAvatar));
+  }
+
+  const query = "get_user_settings";
+  const sw = createStopwatchStarted();
+
+  return GTX.query(query, { name: userLC }).then((settings: UserSettings) => {
+    gaRellQueryTiming(query, stopStopwatch(sw));
+    boomerang.set(userLC, settings, cacheDuration);
+    return settings;
+  });
+}
+
+export function updateUserSettings(user: ChromunityUser, avatar: string, description: string) {
+  const userLC: string = user.name.toLocaleLowerCase();
+  boomerang.remove(userLC);
+
+  const operation = "update_user_settings";
+  const sw = createStopwatchStarted();
+
+  return BLOCKCHAIN.then(bc =>
+    bc.call(user.ft3User, operation, userLC, user.ft3User.authDescriptor.hash().toString("hex"), avatar, description)
+  ).then(value => {
+    gaRellOperationTiming(operation, stopStopwatch(sw));
+    return value;
+  });
+}
+
+export function toggleUserMute(user: ChromunityUser, name: string, muted: boolean) {
+  boomerang.remove("muted-users");
+
+  const operation = "toggle_mute";
+  const sw = createStopwatchStarted();
+
+  return BLOCKCHAIN.then(bc =>
+    bc.call(
+      user.ft3User,
+      operation,
+      user.name.toLocaleLowerCase(),
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      name.toLocaleLowerCase(),
+      muted ? 1 : 0
+    )
+  ).then(value => {
+    gaRellOperationTiming(operation, stopStopwatch(sw));
+    return value;
+  });
+}
+
+export function getMutedUsers(user: ChromunityUser): Promise<string[]> {
+  const mutedUsers: string[] = boomerang.get("muted-users");
+
+  if (mutedUsers != null) {
+    return new Promise<string[]>(resolve => resolve(mutedUsers));
+  }
+
+  const query = "get_muted_users";
+  const sw = createStopwatchStarted();
+
+  return GTX.query(query, {
+    username: user.name.toLocaleLowerCase()
+  }).then((users: string[]) => {
+    gaRellQueryTiming(query, stopStopwatch(sw));
+    boomerang.set("muted-users", users, 86000);
+    return users;
+  });
 }

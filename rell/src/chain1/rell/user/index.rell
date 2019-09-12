@@ -3,10 +3,8 @@ class admin {
 }
 
 class user {
-    key name;
+    key account: ft3.account, name;
     display_name: name;
-    pubkey;
-    registered: integer;
 }
 
 include 'functions';

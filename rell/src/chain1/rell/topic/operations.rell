@@ -1,6 +1,5 @@
-operation create_topic(id: text, username: text, channel_key: name, channel_name: name, title: name, message: text) {
-    log("Username: ", username);
-    val author = get_verified_user(username);
+operation create_topic(id: text, descriptor_id: byte_array, username: text, channel_key: name, channel_name: name, title: name, message: text) {
+    val author = get_verified_user(username, descriptor_id);
 
     val topic = create topic(
         id = id, 
@@ -12,13 +11,12 @@ operation create_topic(id: text, username: text, channel_key: name, channel_name
         removed = false
     );
 
-    // TODO: .lower_case() on name (key)
-    create channel(name = channel_key, topic, op_context.last_block_time, display_name = channel_name);
+    create channel(name = channel_key.lower_case(), topic, op_context.last_block_time, display_name = channel_name);
     create tmp_topic_rating (topic, 0);
 }
 
-operation modify_topic(id: text, username: text, text) {
-    val author = get_verified_user(username);
+operation modify_topic(id: text, descriptor_id: byte_array, username: text, text) {
+    val author = get_verified_user(username, descriptor_id);
 
     val topic = topic@{ .id == id, .author == author };
     val fiveMinutesInMillis = 300000;
@@ -26,8 +24,8 @@ operation modify_topic(id: text, username: text, text) {
     update topic ( message = text );
 }
 
-operation create_reply(topic_id: text, id: text, username: text, message: text) {
-    val author = get_verified_user(username);
+operation create_reply(topic_id: text, descriptor_id: byte_array, id: text, username: text, message: text) {
+    val author = get_verified_user(username, descriptor_id);
     val topic = find_topic_by_id(topic_id);
 
     create topic_reply(
@@ -45,8 +43,8 @@ operation create_reply(topic_id: text, id: text, username: text, message: text) 
     }
 }
 
-operation modify_reply(id: text, username: text, text) {
-    val author = get_verified_user(username);
+operation modify_reply(id: text, descriptor_id: byte_array, username: text, text) {
+    val author = get_verified_user(username, descriptor_id);
 
     val reply = topic_reply@{ .id == id, .author == author };
     val fiveMinutesInMillis = 300000;
@@ -54,8 +52,8 @@ operation modify_reply(id: text, username: text, text) {
     update reply ( message = text );
 }
 
-operation create_sub_reply(topic_id: text, parent_reply_id: text, id: text, username: text, message: text) {
-    val author = get_verified_user(username);
+operation create_sub_reply(topic_id: text, descriptor_id: byte_array, parent_reply_id: text, id: text, username: text, message: text) {
+    val author = get_verified_user(username, descriptor_id);
     val topic = find_topic_by_id(topic_id);
 
     val topic_reply = create topic_reply(

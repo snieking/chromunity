@@ -34,7 +34,7 @@ const RepresentativeCard = withStyles(styles)(
         render() {
             if (this.props.name != null) {
                 return (
-                    <Grid item xs={3}>
+                    <Grid item xs={4}>
                         <Card key={"representative-" + this.props.name}
                               className={this.props.classes.representativeCard}>
                             <CardContent>

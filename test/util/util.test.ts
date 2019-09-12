@@ -1,5 +1,5 @@
-import {needsToBeSliced, sortByFrequency, stringToHexColor, timeAgoReadable} from "../src/util/util";
-import {getTags} from "../src/util/text-parsing";
+import {needsToBeSliced, sortByFrequency, stringToHexColor, timeAgoReadable} from "../../src/util/util";
+import {getTags} from "../../src/util/text-parsing";
 
 jest.setTimeout(30000);
 
@@ -27,14 +27,14 @@ describe("get tags from string", () => {
         expect(tags).toContain("#should");
         expect(tags).toContain("#try");
         expect(tags).toContain("#chromia");
-    })
+    });
 
     it("parse tags from string without tags", async () => {
         const s: string = "";
         const tags: string[] = getTags(s);
         expect(tags.length).toBe(0);
     })
-})
+});
 
 describe("Sorting by frequently tests", () => {
 
@@ -88,10 +88,10 @@ describe("string to hex color", () => {
     it("hex starts with '#'", async () => {
         const hex: string = stringToHexColor("hello");
         expect(hex.startsWith("#")).toBe(true);
-    })
+    });
 
     it("hex is 7 chars", async () => {
         const hex: string = stringToHexColor("hello");
         expect(hex.length).toBe(7);
     })
-})
+});

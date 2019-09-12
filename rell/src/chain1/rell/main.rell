@@ -1,3 +1,7 @@
+// INCLUDE OF FT3 LIBRARY
+include 'ft3_config';
+include 'lib/ft3/ft3_xc_basic_dev';
+
 include 'util/index';
 include 'user/index';
 include 'topic/index';
@@ -6,6 +10,3 @@ include 'channel/index';
 include 'follow/index';
 include 'election/index';
 include 'representative/index';
-
-// INCLUDE OF FT# LIBRARY
-include 'lib/ft3/ft3_basic';

@@ -1,4 +1,7 @@
-
 query get_user(name) {
-    return user@?{ .name == name } ( name = .display_name, .pubkey, .registered );
+    return user@?{ .name == name.lower_case() } ( name = .display_name );
+}
+
+query get_account_id(name) {
+    return user@?{ .name == name.lower_case() } ( .account.id );
 }

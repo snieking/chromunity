@@ -1,0 +1,35 @@
+object blockchain {
+    mutable name: text = ft3_config.blockchain_name;
+    mutable website: text = ft3_config.blockchain_website;
+    mutable description: text = ft3_config.blockchain_description;
+}
+
+class linked_chain {
+    key chain_rid: byte_array;
+}
+
+operation update_blockchain(name, website: text, description: text) {
+    blockchain.name = name;
+    blockchain.website = website;
+    blockchain.description = description;
+}
+
+query get_blockchain_info() {
+    return (
+        name = blockchain.name,
+        website = blockchain.website,
+        description = blockchain.description
+    );
+}
+
+operation link_chain(chain_rid: byte_array) {
+    create linked_chain(chain_rid);
+}
+
+query get_linked_chains() {
+    return linked_chain @* {} ( .chain_rid );
+}
+
+query is_linked_with_chain(chain_rid: byte_array) {
+    return linked_chain @? { chain_rid } != null;
+}

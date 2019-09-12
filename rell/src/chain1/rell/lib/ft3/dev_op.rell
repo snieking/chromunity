@@ -9,7 +9,7 @@ function require_dev() {
 }
 
 
-operation dev_register_asset (name, issuing_chain_rid: byte_array) {
+operation dev_register_asset (name, issuing_chain_rid: byte_array, origin_chain_rid: byte_array) {
     require_dev();
     register_asset(name, issuing_chain_rid);
 }
