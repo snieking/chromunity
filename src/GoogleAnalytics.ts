@@ -2,7 +2,7 @@ import ReactGA from "react-ga";
 import config from "./config";
 
 export const initGA = () => {
-  ReactGA.initialize(config.gaTrackingId);
+  ReactGA.initialize(config.gaTrackingId, { gaOptions: { sampleRate: 100, siteSpeedSampleRate: 100 } });
 };
 
 export const pageView = () => {
