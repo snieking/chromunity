@@ -28,7 +28,7 @@ import {
   loadUserReplies,
   loadUserFollowedChannels
 } from "../../redux/actions/UserPageActions";
-import { initGA, pageView } from "../../GoogleAnalytics";
+import { pageView } from "../../GoogleAnalytics";
 
 const styles = (theme: Theme) => createStyles({
   text: {
@@ -85,7 +85,6 @@ const UserWall = withStyles(styles)(
       this.props.loadUserFollowedChannels();
       getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
 
-      initGA();
       pageView();
     }
 

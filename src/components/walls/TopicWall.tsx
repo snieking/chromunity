@@ -24,7 +24,7 @@ import {
   loadOlderFollowedUsersTopics
 } from "../../redux/actions/WallActions";
 import { connect } from "react-redux";
-import { initGA, pageView } from "../../GoogleAnalytics";
+import { pageView } from "../../GoogleAnalytics";
 
 interface Props {
   type: string;
@@ -169,7 +169,6 @@ class TopicWall extends React.Component<Props, State> {
     this.retrieveLatestTopics(false);
     getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
 
-    initGA();
     pageView();
   }
 

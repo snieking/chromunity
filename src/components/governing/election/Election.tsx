@@ -24,7 +24,7 @@ import { getUser, isGod } from "../../../util/user-util";
 import DictatorActions from "./dictator/DictatorActions";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import { ChromunityUser } from "../../../types";
-import { initGA, pageView } from "../../../GoogleAnalytics";
+import { pageView } from "../../../GoogleAnalytics";
 import ElectionCandidateCard from "./ElectionCandidateCard";
 
 const styles = createStyles({
@@ -108,7 +108,6 @@ const Election = withStyles(styles)(
         }
       });
 
-      initGA();
       pageView();
     }
 

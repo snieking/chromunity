@@ -12,7 +12,7 @@ import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import { ReactComponent as LeftShapes } from "../../static/graphics/left-shapes.svg";
 import { ReactComponent as RightShapes } from "../../static/graphics/right-shapes.svg";
-import { initGA, pageView } from "../../../GoogleAnalytics";
+import { pageView } from "../../../GoogleAnalytics";
 
 enum Step {
   INIT,
@@ -68,7 +68,6 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
   const [step, setStep] = useState(Step.INIT);
   const [errorOpen, setErrorOpen] = useState(props.failure);
 
-  initGA();
   pageView();
 
   const walletLogin = () => {
@@ -106,7 +105,7 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
       )}
       {step === Step.LOGIN_IN_PROGRESS && (
         <Typography variant="subtitle1" component="p">
-          If you do not see anything, make sure you allow pop-ups.
+          Redirecting to Chromia Vault...
         </Typography>
       )}
       <Snackbar
