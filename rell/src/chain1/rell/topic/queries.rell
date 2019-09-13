@@ -151,7 +151,7 @@ query get_topic_by_id(id: text) {
 }
 
 query get_all_topics_by_stars_since_timestamp(timestamp, page_size: integer) {
-    return tmp_topic_rating@*{ .topic.timestamp > timestamp } (
+    return tmp_topic_rating@*{ .topic.last_modified > timestamp } (
         -sort .stars,
         id = .topic.id,
         author=.topic.author.display_name,
@@ -165,7 +165,7 @@ query get_all_topics_by_stars_since_timestamp(timestamp, page_size: integer) {
 query get_topics_by_follows_and_stars_since_timestamp(name, timestamp, page_size: integer) {
     return tmp_topic_rating@*{ 
             .topic.author == follow@{ .follower.name == name } ( .follows ),
-            .topic.timestamp > timestamp
+            .topic.last_modified > timestamp
         } (
         -sort .stars,
         id = .topic.id,
@@ -181,7 +181,7 @@ query get_topics_by_channel_after_timestamp_sorted_by_popularity(name, timestamp
     return (tmp_topic_rating, channel)@*{
         name == channel.name,
         tmp_topic_rating.topic == channel.topic,
-        tmp_topic_rating.topic.timestamp > timestamp
+        tmp_topic_rating.topic.last_modified > timestamp
     } (
         -sort .stars,
         id = channel.topic.id,
@@ -198,7 +198,7 @@ query get_topics_by_followed_channels_after_timestamp_sorted_by_popularity(name,
         channel_following.user == user@{ name },
         channel_following.name == channel.name,
         tmp_topic_rating.topic == channel.topic,
-        tmp_topic_rating.topic.timestamp > timestamp
+        tmp_topic_rating.topic.last_modified > timestamp
     } (
         -sort .stars,
         id = channel.topic.id,
