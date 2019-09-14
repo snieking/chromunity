@@ -11,8 +11,8 @@ import { UserPageState } from "./UserTypes";
 import { userPageReducer } from "./reducers/UserPageReducers";
 import { StylingState } from "./StylingTypes";
 import { stylingReducer } from "./reducers/StylingReducers";
-import { RepresentativesState } from "./RepresentativeTypes";
-import { representativesReducer } from "./reducers/RepresentativesReducers";
+import { GovernmentState } from "./GovernmentTypes";
+import { governmentReducer } from "./reducers/GovernmentReducers";
 
 export interface ApplicationState {
   account: AccountState;
@@ -20,7 +20,7 @@ export interface ApplicationState {
   channel: ChannelState;
   userPage: UserPageState;
   styling: StylingState;
-  representatives: RepresentativesState;
+  government: GovernmentState;
 }
 
 const rootReducer = combineReducers<ApplicationState>({
@@ -29,7 +29,7 @@ const rootReducer = combineReducers<ApplicationState>({
   channel: channelReducer,
   userPage: userPageReducer,
   styling: stylingReducer,
-  representatives: representativesReducer
+  government: governmentReducer
 });
 
 const sagaMiddleware = createSagaMiddleware({

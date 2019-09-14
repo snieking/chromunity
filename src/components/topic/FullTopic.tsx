@@ -57,7 +57,7 @@ import { pageViewPath } from "../../GoogleAnalytics";
 import { prepareUrlPath } from "../../util/util";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { ApplicationState } from "../../redux/Store";
-import { loadRepresentatives } from "../../redux/actions/RepresentativesActions";
+import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
 import { connect } from "react-redux";
 
 const styles = (theme: Theme) =>
@@ -550,7 +550,7 @@ const FullTopic = withStyles(styles)(
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    representatives: store.representatives.representatives
+    representatives: store.government.representatives
   }
 };
 

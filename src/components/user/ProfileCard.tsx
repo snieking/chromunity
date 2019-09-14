@@ -50,7 +50,7 @@ import { COLOR_RED, COLOR_STEEL_BLUE } from "../../theme";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import { NotFound } from "../static/NotFound";
 import { ApplicationState } from "../../redux/Store";
-import { loadRepresentatives } from "../../redux/actions/RepresentativesActions";
+import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
 import { connect } from "react-redux";
 
 const styles = createStyles({
@@ -344,7 +344,7 @@ const ProfileCard = withStyles(styles)(
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    representatives: store.representatives.representatives
+    representatives: store.government.representatives
   }
 };
 

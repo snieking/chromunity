@@ -15,15 +15,17 @@ import { getUser } from "../../util/user-util";
 import ThemeSwitcher from "./ThemeSwitcher";
 import config from "../../config";
 import { ApplicationState } from "../../redux/Store";
-import { loadRepresentatives, loadUnhandledReports } from "../../redux/actions/RepresentativesActions";
+import { checkActiveElection, loadRepresentatives, loadUnhandledReports } from "../../redux/actions/GovernmentActions";
 import { connect } from "react-redux";
 import Badge from "@material-ui/core/Badge";
 
 interface Props {
   representatives: string[];
   unhandledReports: number;
+  activeElection: boolean;
   loadRepresentatives: typeof loadRepresentatives;
   loadUnhandledReports: typeof loadUnhandledReports;
+  checkActiveElection: typeof checkActiveElection;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -72,6 +74,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   const [govAnchorEl, setGovAnchorEl] = React.useState<null | HTMLElement>(null);
 
   props.loadRepresentatives();
+  props.checkActiveElection();
 
   if (isRepresentative()) {
     props.loadUnhandledReports();
@@ -198,6 +201,22 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
     }
   }
 
+  function renderGovernmentIcon() {
+    if (isRepresentative() && props.unhandledReports > 0) {
+      return (
+        <Badge badgeContent={props.unhandledReports} color="secondary">
+          <LocationCity className={classes.navIcon} />
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge invisible={!props.activeElection} color="secondary">
+          <LocationCity className={classes.navIcon} />
+        </Badge>
+      );
+    }
+  }
+
   return (
     <div className={classes.grow}>
       {renderTestInfoBar()}
@@ -218,11 +237,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
             aria-controls="gov-menu"
             aria-haspopup="true"
           >
-            <Tooltip title="Governing">
-              <Badge badgeContent={isRepresentative() ? props.unhandledReports : 0} color="secondary">
-                <LocationCity className={classes.navIcon} />
-              </Badge>
-            </Tooltip>
+            <Tooltip title="Governing">{renderGovernmentIcon()}</Tooltip>
           </IconButton>
 
           <Menu id="gov-menu" anchorEl={govAnchorEl} keepMounted open={Boolean(govAnchorEl)} onClose={handleGovClose}>
@@ -238,7 +253,9 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
             <Link style={{ width: "100%" }} to="/gov/election">
               <MenuItem onClick={handleGovClose}>
                 <ListItemIcon>
-                  <HowToVote className="menu-item-button" />
+                  <Badge variant="dot" invisible={!props.activeElection} color="secondary">
+                    <HowToVote className="menu-item-button" />
+                  </Badge>
                 </ListItemIcon>
                 <Typography className="menu-item-text">Election</Typography>
               </MenuItem>
@@ -274,16 +291,18 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    representatives: store.representatives.representatives,
-    unhandledReports: store.representatives.unhandledReports,
-    loadUnhandledReports: store.representatives.unhandledReports
+    representatives: store.government.representatives,
+    unhandledReports: store.government.unhandledReports,
+    loadUnhandledReports: store.government.unhandledReports,
+    activeElection: store.government.activeElection
   };
 };
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
     loadRepresentatives: () => dispatch(loadRepresentatives()),
-    loadUnhandledReports: () => dispatch(loadUnhandledReports())
+    loadUnhandledReports: () => dispatch(loadUnhandledReports()),
+    checkActiveElection: () => dispatch(checkActiveElection())
   };
 };
 

@@ -1,31 +1,35 @@
 import { runSaga } from "redux-saga";
 import {
-  RepresentativesActions,
-  RepresentativesActionTypes,
+  GovernmentActions,
+  GovernmentActionTypes,
   UpdateRepresentativesAction
-} from "../../../src/redux/RepresentativeTypes";
-import { getCurrentRepresentatives, retrieveUnhandledReports } from "../../../src/redux/sagas/RepresentativesSagas";
+} from "../../../src/redux/GovernmentTypes";
+import {
+  checkActiveElection,
+  getCurrentRepresentatives,
+  retrieveUnhandledReports
+} from "../../../src/redux/sagas/GovernmentSagas";
 
 describe("Representatives sagas tests", () => {
 
   jest.setTimeout(30000);
 
-  const createFakeStore = (dispatchedActions: RepresentativesActions[], state: any) => {
+  const createFakeStore = (dispatchedActions: GovernmentActions[], state: any) => {
     return {
-      dispatch: (action: RepresentativesActions) => dispatchedActions.push(action),
+      dispatch: (action: GovernmentActions) => dispatchedActions.push(action),
       getState: () => ({ representatives: state })
     };
   };
 
-  const getUpdateRepresentativesAction = (dispatchedActions: RepresentativesActions[]): UpdateRepresentativesAction => {
+  const getUpdateRepresentativesAction = (dispatchedActions: GovernmentActions[]): UpdateRepresentativesAction => {
     expect(dispatchedActions.length).toBe(1);
     const action = dispatchedActions[0];
-    expect(action.type).toBe(RepresentativesActionTypes.UPDATE_REPRESENTATIVES);
+    expect(action.type).toBe(GovernmentActionTypes.UPDATE_REPRESENTATIVES);
     return action as UpdateRepresentativesAction;
   };
 
   it("admin is representative", async () => {
-    const dispatchedActions: RepresentativesActions[] = [];
+    const dispatchedActions: GovernmentActions[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       representativesLastUpdated: 0
     });
@@ -37,7 +41,7 @@ describe("Representatives sagas tests", () => {
   });
 
   it("representatives cache not expired yet", async () => {
-    const dispatchedActions: RepresentativesActions[] = [];
+    const dispatchedActions: GovernmentActions[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       representativesLastUpdated: Date.now()
     });
@@ -47,7 +51,7 @@ describe("Representatives sagas tests", () => {
   });
 
   it("get unhandled topics", async () => {
-    const dispatchedActions: RepresentativesActions[] = [];
+    const dispatchedActions: GovernmentActions[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       unhandledReportsLastUpdated: 0
     });
@@ -57,12 +61,32 @@ describe("Representatives sagas tests", () => {
   });
 
   it("unhandled topics cache not expired", async () => {
-    const dispatchedActions: RepresentativesActions[] = [];
+    const dispatchedActions: GovernmentActions[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       unhandledReportsLastUpdated: Date.now()
     });
 
     await runSaga(fakeStore, retrieveUnhandledReports).toPromise();
+    expect(dispatchedActions.length).toBe(0);
+  });
+
+  it("get active election", async () => {
+    const dispatchedActions: GovernmentActions[] = [];
+    const fakeStore = createFakeStore(dispatchedActions, {
+      activeElectionLastUpdated: 0
+    });
+
+    await runSaga(fakeStore, checkActiveElection).toPromise();
+    expect(dispatchedActions.length).toBe(1);
+  });
+
+  it("active election cache not expired", async () => {
+    const dispatchedActions: GovernmentActions[] = [];
+    const fakeStore = createFakeStore(dispatchedActions, {
+      activeElectionLastUpdated: Date.now()
+    });
+
+    await runSaga(fakeStore, checkActiveElection).toPromise();
     expect(dispatchedActions.length).toBe(0);
   });
 

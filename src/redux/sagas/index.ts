@@ -3,7 +3,7 @@ import {accountWatcher} from "./AccountSagas";
 import { topicWallWatcher } from "./TopicWallSagas";
 import { channelWatcher } from "./ChannelSagas";
 import { userPageWatcher } from "./UserPageSagas";
-import { representativesWatcher } from "./RepresentativesSagas";
+import { governmentWatcher } from "./GovernmentSagas";
 
 export default function* rootSaga() {
   yield all([
@@ -11,6 +11,6 @@ export default function* rootSaga() {
     topicWallWatcher(),
     channelWatcher(),
     userPageWatcher(),
-    representativesWatcher()
+    governmentWatcher()
   ]);
 }

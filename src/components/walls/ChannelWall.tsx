@@ -28,7 +28,7 @@ import {
 } from "../../redux/actions/ChannelActions";
 import { ApplicationState } from "../../redux/Store";
 import { pageView } from "../../GoogleAnalytics";
-import { loadRepresentatives } from "../../redux/actions/RepresentativesActions";
+import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
 
 interface MatchParams {
   channel: string;
@@ -277,7 +277,7 @@ const mapStateToProps = (store: ApplicationState) => {
     loading: store.channel.loading,
     topics: store.channel.topics,
     couldExistOlder: store.channel.couldExistOlder,
-    representatives: store.representatives.representatives
+    representatives: store.government.representatives
   };
 };
 

@@ -9,7 +9,7 @@ import { getUser } from "../../../util/user-util";
 import Timestamp from "../../common/Timestamp";
 import { COLOR_RED } from "../../../theme";
 import { ApplicationState } from "../../../redux/Store";
-import { loadRepresentatives } from "../../../redux/actions/RepresentativesActions";
+import { loadRepresentatives } from "../../../redux/actions/GovernmentActions";
 import { connect } from "react-redux";
 
 export interface ReportCardProps {
@@ -58,7 +58,7 @@ const ReportCard: React.FunctionComponent<ReportCardProps> = (props: ReportCardP
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    representatives: store.representatives.representatives
+    representatives: store.government.representatives
   }
 };
 

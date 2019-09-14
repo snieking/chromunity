@@ -22,7 +22,7 @@ import Timestamp from "../common/Timestamp";
 import { COLOR_ORANGE, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import { ApplicationState } from "../../redux/Store";
-import { loadRepresentatives } from "../../redux/actions/RepresentativesActions";
+import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
 import { connect } from "react-redux";
 
 const styles = createStyles({
@@ -178,7 +178,7 @@ const TopicReplyOverviewCard = withStyles(styles)(
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    representatives: store.representatives.representatives
+    representatives: store.government.representatives
   }
 };
 
