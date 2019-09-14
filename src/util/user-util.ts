@@ -1,6 +1,5 @@
 import { ChromunityUser, UserMeta } from "../types";
 import * as BoomerangCache from "boomerang-cache";
-import { getRepresentatives } from "../blockchain/RepresentativesService";
 import { getUserMeta } from "../blockchain/UserService";
 import { FlagsType, KeyPair, SingleSignatureAuthDescriptor, User } from "ft3-lib";
 
@@ -19,7 +18,6 @@ const SESSION_CACHE = BoomerangCache.create("session-bucket", {
 
 const USER_KEY = "user";
 const USER_META_KEY = "user_meta";
-const REPRESENTATIVE_KEY = "representative";
 const KEYPAIR_KEY = "keyPair";
 
 export function clearSession(): void {
@@ -27,7 +25,6 @@ export function clearSession(): void {
   LOCAL_CACHE.remove(USER_KEY);
   LOCAL_CACHE.remove(KEYPAIR_KEY);
   SESSION_CACHE.remove(USER_META_KEY);
-  SESSION_CACHE.remove(REPRESENTATIVE_KEY);
 }
 
 export function storeKeyPair(keyPair: KeyPair): void {
