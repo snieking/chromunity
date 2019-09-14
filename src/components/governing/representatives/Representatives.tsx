@@ -1,39 +1,39 @@
 import React from "react";
 
 import { Button, Card, CardContent, Container, Grid, TextField } from "@material-ui/core";
-import { getRepresentatives } from "../../../blockchain/RepresentativesService";
 import RepresentativeCard from "./RepresentativeCard";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import { adminAddRepresentative, adminRemoveRepresentative } from "../../../blockchain/AdminService";
 import { ChromunityUser } from "../../../types";
 import { getUser } from "../../../util/user-util";
 import { pageView } from "../../../GoogleAnalytics";
+import { ApplicationState } from "../../../redux/Store";
+import { loadRepresentatives } from "../../../redux/actions/RepresentativesActions";
+import { connect } from "react-redux";
 
-export interface RepresentativesState {
+interface Props {
   representatives: string[];
+  loadRepresentatives: typeof loadRepresentatives;
+}
+
+interface State {
   targetUsername: string;
   user: ChromunityUser;
 }
 
-class Representatives extends React.Component<{}, RepresentativesState> {
-  constructor(props: any) {
+class Representatives extends React.Component<Props, State> {
+  constructor(props: Props) {
     super(props);
     this.state = {
-      representatives: [],
       targetUsername: "",
       user: getUser()
     };
 
+    this.props.loadRepresentatives();
     this.handleUsernameChange = this.handleUsernameChange.bind(this);
   }
 
   componentDidMount(): void {
-    getRepresentatives().then((representatives: string[]) =>
-      this.setState({
-        representatives: representatives
-      })
-    );
-
     pageView();
   }
 
@@ -42,7 +42,7 @@ class Representatives extends React.Component<{}, RepresentativesState> {
       <Container fixed>
         <ChromiaPageHeader text="Representatives" />
         <Grid container spacing={1}>
-          {this.state.representatives.map(name => (
+          {this.props.representatives.map(name => (
             <RepresentativeCard name={name} key={name} />
           ))}
         </Grid>
@@ -99,4 +99,16 @@ class Representatives extends React.Component<{}, RepresentativesState> {
   }
 }
 
-export default Representatives;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    representatives: store.representatives.representatives
+  }
+};
+
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    loadRepresentatives: () => dispatch(loadRepresentatives())
+  }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Representatives);

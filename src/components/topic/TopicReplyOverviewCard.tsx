@@ -21,7 +21,9 @@ import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import Timestamp from "../common/Timestamp";
 import { COLOR_ORANGE, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
-import { getRepresentatives } from "../../blockchain/RepresentativesService";
+import { ApplicationState } from "../../redux/Store";
+import { loadRepresentatives } from "../../redux/actions/RepresentativesActions";
+import { connect } from "react-redux";
 
 const styles = createStyles({
   authorName: {
@@ -53,14 +55,14 @@ const styles = createStyles({
 
 interface Props extends WithStyles<typeof styles> {
   reply: TopicReply;
-  isRepresentative: boolean;
+  representatives: string[];
+  loadRepresentatives: typeof loadRepresentatives;
 }
 
 interface State {
   stars: number;
   ratedByMe: boolean;
   redirectToTopic: boolean;
-  isRepresentative: boolean;
   avatar: string;
   user: ChromunityUser;
 }
@@ -74,10 +76,12 @@ const TopicReplyOverviewCard = withStyles(styles)(
         stars: 0,
         ratedByMe: false,
         redirectToTopic: false,
-        isRepresentative: false,
         avatar: "",
         user: getUser()
       };
+
+      props.loadRepresentatives();
+      this.authorIsRepresentative = this.authorIsRepresentative.bind(this);
     }
 
     render() {
@@ -104,18 +108,16 @@ const TopicReplyOverviewCard = withStyles(styles)(
         });
       });
 
-      getRepresentatives().then(representatives =>
-        this.setState({
-          isRepresentative: representatives.includes(this.props.reply.author.toLocaleLowerCase())
-        })
-      );
-
       getReplyStarRaters(this.props.reply.id).then(usersWhoStarRated =>
         this.setState({
           stars: usersWhoStarRated.length,
           ratedByMe: usersWhoStarRated.includes(user != null && user.name)
         })
       );
+    }
+
+    authorIsRepresentative(): boolean {
+      return this.props.representatives.includes(this.props.reply.author.toLocaleLowerCase());
     }
 
     renderAuthor() {
@@ -126,7 +128,7 @@ const TopicReplyOverviewCard = withStyles(styles)(
               gutterBottom
               variant="subtitle2"
               component="span"
-              className={this.state.isRepresentative ? this.props.classes.representativeColor : ""}
+              className={this.authorIsRepresentative() ? this.props.classes.representativeColor : ""}
             >
               <span className={this.props.classes.authorName}>@{this.props.reply.author}</span>
             </Typography>
@@ -174,4 +176,16 @@ const TopicReplyOverviewCard = withStyles(styles)(
   }
 );
 
-export default TopicReplyOverviewCard;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    representatives: store.representatives.representatives
+  }
+};
+
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    loadRepresentatives: () => dispatch(loadRepresentatives())
+  }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps) (TopicReplyOverviewCard);

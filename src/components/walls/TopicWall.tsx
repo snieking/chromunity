@@ -7,7 +7,6 @@ import NewTopicButton from "../buttons/NewTopicButton";
 import LoadMoreButton from "../buttons/LoadMoreButton";
 import { TrendingChannels } from "../tags/TrendingTags";
 import ChromiaPageHeader from "../common/ChromiaPageHeader";
-import { getRepresentatives } from "../../blockchain/RepresentativesService";
 import { getMutedUsers } from "../../blockchain/UserService";
 import { TOPIC_VIEW_SELECTOR_OPTION } from "./WallCommon";
 import { getUser } from "../../util/user-util";
@@ -25,12 +24,14 @@ import {
 } from "../../redux/actions/WallActions";
 import { connect } from "react-redux";
 import { pageView } from "../../GoogleAnalytics";
+import { loadRepresentatives } from "../../redux/actions/RepresentativesActions";
 
 interface Props {
   type: string;
   loading: boolean;
   topics: Topic[];
   couldExistOlderTopics: boolean;
+  representatives: string[];
   loadAllTopics: typeof loadAllTopicWall;
   loadOlderTopics: typeof loadOlderAllTopics;
   loadAllTopicsByPopularity: typeof loadAllTopicsByPopularity;
@@ -40,10 +41,10 @@ interface Props {
   loadFollowedChannelsTopics: typeof loadFollowedChannelsTopicWall;
   loadOlderFollowedChannelsTopics: typeof loadOlderFollowedChannelsTopics;
   loadFollowedChannelsTopicsByPopularity: typeof loadFollowedChannelsTopicsByPopularity;
+  loadRepresentatives: typeof loadRepresentatives;
 }
 
 interface State {
-  representatives: string[];
   selector: TOPIC_VIEW_SELECTOR_OPTION;
   popularSelector: TOPIC_VIEW_SELECTOR_OPTION;
   mutedUsers: string[];
@@ -62,7 +63,6 @@ class TopicWall extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      representatives: [],
       selector: TOPIC_VIEW_SELECTOR_OPTION.RECENT,
       popularSelector: TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK,
       mutedUsers: [],
@@ -140,13 +140,7 @@ class TopicWall extends React.Component<Props, State> {
           <br />
           {this.props.topics.map(topic => {
             if (!this.state.mutedUsers.includes(topic.author)) {
-              return (
-                <TopicOverviewCard
-                  key={"card-" + topic.id}
-                  topic={topic}
-                  isRepresentative={this.state.representatives.includes(topic.author)}
-                />
-              );
+              return <TopicOverviewCard key={"card-" + topic.id} topic={topic} />;
             } else {
               return <div />;
             }
@@ -167,7 +161,6 @@ class TopicWall extends React.Component<Props, State> {
       getMutedUsers(this.state.user).then(users => this.setState({ mutedUsers: users }));
     }
     this.retrieveLatestTopics(false);
-    getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
 
     pageView();
   }
@@ -241,7 +234,8 @@ const mapDispatchToProps = (dispatch: any) => {
     loadOlderFollowedChannelsTopics: (username: string, pageSize: number) =>
       dispatch(loadOlderFollowedChannelsTopics(username, pageSize)),
     loadFollowedChannelsTopicsByPopularity: (username: string, timestamp: number, pageSize: number) =>
-      dispatch(loadFollowedChannelsTopicsByPopularity(username, timestamp, pageSize))
+      dispatch(loadFollowedChannelsTopicsByPopularity(username, timestamp, pageSize)),
+    loadRepresentatives: () => dispatch(loadRepresentatives())
   };
 };
 
@@ -249,7 +243,8 @@ const mapStateToProps = (store: ApplicationState) => {
   return {
     topics: store.topicWall.topics,
     loading: store.topicWall.loading,
-    couldExistOlderTopics: store.topicWall.couldExistOlder
+    couldExistOlderTopics: store.topicWall.couldExistOlder,
+    representatives: store.representatives.representatives
   };
 };
 

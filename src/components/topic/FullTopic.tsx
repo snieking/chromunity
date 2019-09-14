@@ -48,7 +48,7 @@ import {
 import { getMutedUsers, getUserSettingsCached } from "../../blockchain/UserService";
 import TopicReplyCard from "./TopicReplyCard";
 import LoadMoreButton from "../buttons/LoadMoreButton";
-import { getRepresentatives, reportTopic } from "../../blockchain/RepresentativesService";
+import { reportTopic } from "../../blockchain/RepresentativesService";
 import Timestamp from "../common/Timestamp";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
@@ -56,6 +56,9 @@ import MarkdownRenderer from "../common/MarkdownRenderer";
 import { pageViewPath } from "../../GoogleAnalytics";
 import { prepareUrlPath } from "../../util/util";
 import ConfirmDialog from "../common/ConfirmDialog";
+import { ApplicationState } from "../../redux/Store";
+import { loadRepresentatives } from "../../redux/actions/RepresentativesActions";
+import { connect } from "react-redux";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -100,11 +103,12 @@ interface MatchParams {
 
 export interface FullTopicProps extends RouteComponentProps<MatchParams>, WithStyles<typeof styles> {
   pathName: string;
+  representatives: string[];
+  loadRepresentatives: typeof loadRepresentatives;
 }
 
 export interface FullTopicState {
   topic: Topic;
-  representatives: string[];
   avatar: string;
   stars: number;
   ratedByMe: boolean;
@@ -140,7 +144,6 @@ const FullTopic = withStyles(styles)(
 
       this.state = {
         topic: initialTopic,
-        representatives: [],
         avatar: "",
         ratedByMe: false,
         subscribed: false,
@@ -180,12 +183,13 @@ const FullTopic = withStyles(styles)(
           ratedByMe: usersWhoStarRated.includes(user != null && user.name)
         })
       );
-      getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
       getTopicSubscribers(id).then(subscribers =>
         this.setState({
           subscribed: user != null && subscribers.includes(user.name)
         })
       );
+
+      this.props.loadRepresentatives();
     }
 
     consumeTopicData(topic: Topic): void {
@@ -306,7 +310,7 @@ const FullTopic = withStyles(styles)(
         <div style={{ float: "right" }}>
           <Link
             className={`${this.props.classes.authorLink} ${
-              this.state.representatives.includes(this.state.topic.author.toLocaleLowerCase())
+              this.props.representatives.includes(this.state.topic.author.toLocaleLowerCase())
                 ? this.props.classes.repColor
                 : this.props.classes.userColor
             }`}
@@ -411,7 +415,7 @@ const FullTopic = withStyles(styles)(
 
     renderAdminActions() {
       const user: ChromunityUser = this.state.user;
-      if (user != null && this.state.representatives.includes(user.name) && !this.state.topic.removed) {
+      if (user != null && this.props.representatives.includes(user.name) && !this.state.topic.removed) {
         return (
           <div style={{ display: "inline-block" }}>
             <IconButton aria-label="Remove topic" onClick={() => this.setState({ removeTopicDialogOpen: true })}>
@@ -529,7 +533,7 @@ const FullTopic = withStyles(styles)(
                 reply={reply}
                 indention={0}
                 topicId={this.state.topic.id}
-                representatives={this.state.representatives}
+                representatives={this.props.representatives}
                 mutedUsers={this.state.mutedUsers}
               />
             ))}
@@ -544,4 +548,16 @@ const FullTopic = withStyles(styles)(
   }
 );
 
-export default FullTopic;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    representatives: store.representatives.representatives
+  }
+};
+
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    loadRepresentatives: () => dispatch(loadRepresentatives())
+  }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps) (FullTopic);

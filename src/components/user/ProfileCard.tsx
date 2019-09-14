@@ -41,7 +41,7 @@ import {
   countTopicStarRatingForUser
 } from "../../blockchain/TopicService";
 
-import { getUser, ifEmptyAvatarThenPlaceholder, isRepresentative } from "../../util/user-util";
+import { getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { ChromunityUser } from "../../types";
 import { getMutedUsers, getUserSettingsCached, isRegistered, toggleUserMute } from "../../blockchain/UserService";
 import { suspendUser } from "../../blockchain/RepresentativesService";
@@ -49,6 +49,9 @@ import ChromiaPageHeader from "../common/ChromiaPageHeader";
 import { COLOR_RED, COLOR_STEEL_BLUE } from "../../theme";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import { NotFound } from "../static/NotFound";
+import { ApplicationState } from "../../redux/Store";
+import { loadRepresentatives } from "../../redux/actions/RepresentativesActions";
+import { connect } from "react-redux";
 
 const styles = createStyles({
   iconRed: {
@@ -78,6 +81,8 @@ const styles = createStyles({
 
 export interface ProfileCardProps extends WithStyles<typeof styles> {
   username: string;
+  representatives: string[];
+  loadRepresentatives: typeof loadRepresentatives;
 }
 
 export interface ProfileCardState {
@@ -93,7 +98,6 @@ export interface ProfileCardState {
   description: string;
   suspendUserDialogOpen: boolean;
   muted: boolean;
-  isRepresentative: boolean;
   user: ChromunityUser;
 }
 
@@ -115,9 +119,10 @@ const ProfileCard = withStyles(styles)(
         description: "",
         suspendUserDialogOpen: false,
         muted: false,
-        isRepresentative: false,
         user: getUser()
       };
+
+      props.loadRepresentatives();
 
       this.renderUserPage = this.renderUserPage.bind(this);
       this.toggleFollowing = this.toggleFollowing.bind(this);
@@ -155,10 +160,6 @@ const ProfileCard = withStyles(styles)(
           countRepliesByUser(this.props.username).then(count => this.setState({ countOfReplies: count }));
           countTopicStarRatingForUser(this.props.username).then(count => this.setState({ topicStars: count }));
           countReplyStarRatingForUser(this.props.username).then(count => this.setState({ replyStars: count }));
-
-          if (this.state.user != null) {
-            isRepresentative().then(representative => this.setState({ isRepresentative: representative }));
-          }
         }
       });
     }
@@ -182,7 +183,8 @@ const ProfileCard = withStyles(styles)(
     }
 
     renderRepresentativeActions() {
-      if (this.state.isRepresentative) {
+      const user = getUser();
+      if (user != null && this.props.representatives.includes(user.name.toLocaleLowerCase())) {
         return (
           <div style={{ display: "inline"}}>
             <IconButton onClick={() => this.setState({ suspendUserDialogOpen: true })}>
@@ -340,4 +342,16 @@ const ProfileCard = withStyles(styles)(
   }
 );
 
-export default ProfileCard;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    representatives: store.representatives.representatives
+  }
+};
+
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    loadRepresentatives: () => dispatch(loadRepresentatives())
+  }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps) (ProfileCard);

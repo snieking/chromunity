@@ -93,34 +93,6 @@ export function isGod(): boolean {
   return username != null && username === godAlias();
 }
 
-export function setRepresentative(isRepresentative: boolean): void {
-  SESSION_CACHE.set(REPRESENTATIVE_KEY, isRepresentative, 600);
-}
-
-/**
- * Checks whether or not the user is a representative and caches that response.
- */
-export function isRepresentative(): Promise<boolean> {
-  const isRepresentative: boolean = SESSION_CACHE.get(REPRESENTATIVE_KEY);
-
-  if (isRepresentative != null) {
-    return new Promise<boolean>(resolve => resolve(isRepresentative));
-  }
-
-  const username = getUsername();
-
-  return getRepresentatives()
-    .then((representatives: string[]) => username != null && representatives.includes(username))
-    .then((rep: boolean) => {
-      setRepresentative(rep);
-      return rep;
-    })
-    .catch(() => {
-      setRepresentative(false);
-      return false;
-    });
-}
-
 export function ifEmptyAvatarThenPlaceholder(avatar: string, seed: string) {
   return avatar !== "" && avatar != null ? avatar : "https://avatars.dicebear.com/v2/gridy/" + seed + ".svg";
 }

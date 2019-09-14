@@ -26,7 +26,6 @@ export const userPageReducer: Reducer<UserPageState, UserPageActions> = (state =
       }
     }
     case UserPageActionTypes.UPDATE_USER_TOPICS: {
-      console.log("Updating user topics");
       return {
         ...state,
         loading: false,

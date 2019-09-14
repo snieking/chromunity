@@ -14,6 +14,17 @@ import { Button, ListItemIcon, Menu, MenuItem, Tooltip, Typography } from "@mate
 import { getUser } from "../../util/user-util";
 import ThemeSwitcher from "./ThemeSwitcher";
 import config from "../../config";
+import { ApplicationState } from "../../redux/Store";
+import { loadRepresentatives, loadUnhandledReports } from "../../redux/actions/RepresentativesActions";
+import { connect } from "react-redux";
+import Badge from "@material-ui/core/Badge";
+
+interface Props {
+  representatives: string[];
+  unhandledReports: number;
+  loadRepresentatives: typeof loadRepresentatives;
+  loadUnhandledReports: typeof loadUnhandledReports;
+}
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -54,11 +65,17 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const HeaderNav: React.FunctionComponent = (props: unknown) => {
+const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   const classes = useStyles(props);
   const user = getUser();
   const [profileAnchorEl, setProfileAnchorEl] = React.useState<null | HTMLElement>(null);
   const [govAnchorEl, setGovAnchorEl] = React.useState<null | HTMLElement>(null);
+
+  props.loadRepresentatives();
+
+  if (isRepresentative()) {
+    props.loadUnhandledReports();
+  }
 
   function handleProfileClick(event: React.MouseEvent<HTMLButtonElement>) {
     setProfileAnchorEl(event.currentTarget);
@@ -74,6 +91,10 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
 
   function handleGovClose() {
     setGovAnchorEl(null);
+  }
+
+  function isRepresentative() {
+    return user != null && props.representatives.includes(user.name.toLocaleLowerCase());
   }
 
   function profileSpecificNavigation() {
@@ -198,7 +219,9 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
             aria-haspopup="true"
           >
             <Tooltip title="Governing">
-              <LocationCity className={classes.navIcon} />
+              <Badge badgeContent={isRepresentative() ? props.unhandledReports : 0} color="secondary">
+                <LocationCity className={classes.navIcon} />
+              </Badge>
             </Tooltip>
           </IconButton>
 
@@ -233,7 +256,9 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
             <Link style={{ width: "100%" }} to="/gov/reports">
               <MenuItem onClick={handleGovClose}>
                 <ListItemIcon>
-                  <Report className="menu-item-button" />
+                  <Badge badgeContent={isRepresentative() ? props.unhandledReports : 0} color="secondary">
+                    <Report className="menu-item-button" />
+                  </Badge>
                 </ListItemIcon>
                 <Typography className="menu-item-text">Reports</Typography>
               </MenuItem>
@@ -247,4 +272,22 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
   );
 };
 
-export default HeaderNav;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    representatives: store.representatives.representatives,
+    unhandledReports: store.representatives.unhandledReports,
+    loadUnhandledReports: store.representatives.unhandledReports
+  };
+};
+
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    loadRepresentatives: () => dispatch(loadRepresentatives()),
+    loadUnhandledReports: () => dispatch(loadUnhandledReports())
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(HeaderNav);

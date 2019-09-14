@@ -21,7 +21,7 @@ import {
   withStyles,
   WithStyles
 } from "@material-ui/core";
-import { getCachedUserMeta, getUser, ifEmptyAvatarThenPlaceholder, isRepresentative } from "../../util/user-util";
+import { getCachedUserMeta, getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { Delete, Reply, Report, StarBorder, StarRate } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import {
@@ -183,10 +183,6 @@ const TopicReplyCard = withStyles(styles)(
       );
       getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies }));
       getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
-
-      if (this.state.user != null) {
-        isRepresentative().then(isRepresentative => this.setState({ isRepresentative: isRepresentative }));
-      }
     }
 
     toggleStarRate() {

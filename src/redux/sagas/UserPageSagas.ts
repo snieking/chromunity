@@ -26,9 +26,7 @@ export function* loadUserTopics(action: LoadUserTopicsAction) {
   const topics: Topic[] = yield select(getTopics);
 
   const timestamp: number = topics.length > 0 ? topics[topics.length - 1].last_modified : Date.now();
-  console.log("Retrieving topics for user: ", username, " prior to timestamp: ", timestamp);
   const retrievedTopics: Topic[] = yield getTopicsByUserPriorToTimestamp(username, timestamp, action.pageSize);
-  console.log("Retrieved topics: ", retrievedTopics);
   yield put(updateUserTopics(topics.concat(retrievedTopics), retrievedTopics.length >= action.pageSize));
 }
 
