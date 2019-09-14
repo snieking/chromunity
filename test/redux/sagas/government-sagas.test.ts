@@ -17,7 +17,7 @@ describe("Representatives sagas tests", () => {
   const createFakeStore = (dispatchedActions: GovernmentActions[], state: any) => {
     return {
       dispatch: (action: GovernmentActions) => dispatchedActions.push(action),
-      getState: () => ({ representatives: state })
+      getState: () => ({ government: state })
     };
   };
 
