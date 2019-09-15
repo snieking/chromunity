@@ -1,23 +1,19 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import {
-  Card,
-  CardContent,
-  createStyles,
-  Grid,
-  Theme,
-  Typography,
-  withStyles,
-  WithStyles
-} from "@material-ui/core";
+import { Card, CardContent, createStyles, Grid, Theme, Typography, withStyles, WithStyles } from "@material-ui/core";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
 import { ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import Avatar, { AVATAR_SIZE } from "../../common/Avatar";
 import { COLOR_ORANGE } from "../../../theme";
-import { Face, Star } from "@material-ui/icons";
+import { ChatBubble, Face, Favorite, Star } from "@material-ui/icons";
 import Badge from "@material-ui/core/Badge";
 import { getTimesRepresentative } from "../../../blockchain/RepresentativesService";
-import { countReplyStarRatingForUser, countTopicStarRatingForUser } from "../../../blockchain/TopicService";
+import {
+  countRepliesByUser,
+  countReplyStarRatingForUser,
+  countTopicsByUser,
+  countTopicStarRatingForUser
+} from "../../../blockchain/TopicService";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -29,9 +25,13 @@ const styles = (theme: Theme) =>
     },
     statsDescr: {
       position: "relative",
-      [theme.breakpoints.up("xs")]: { left: 15 },
-      [theme.breakpoints.only("sm")]: { left: 0 },
-      textAlign: "center"
+      [theme.breakpoints.down("sm")]: {
+        marginTop: "5px"
+      },
+      [theme.breakpoints.up("md")]: {
+        display: "inline",
+        marginLeft: "15px"
+      }
     }
   });
 
@@ -44,19 +44,30 @@ export interface RepresentativeCardState {
   timesRepresentative: number;
   topicRating: number;
   replyRating: number;
+  favorites: number;
+  topics: number;
+  replies: number;
 }
 
 const RepresentativeCard = withStyles(styles)(
   class extends React.Component<RepresentativeCardProps, RepresentativeCardState> {
     constructor(props: RepresentativeCardProps) {
       super(props);
-      this.state = { avatar: "", timesRepresentative: 0, topicRating: 0, replyRating: 0 };
+      this.state = {
+        avatar: "",
+        timesRepresentative: 0,
+        topicRating: 0,
+        replyRating: 0,
+        favorites: 0,
+        topics: 0,
+        replies: 0
+      };
     }
 
     render() {
       if (this.props.name != null) {
         return (
-          <Grid item xs={4}>
+          <Grid item xs={6} sm={6} md={4}>
             <Card key={"representative-" + this.props.name} className={this.props.classes.representativeCard}>
               <CardContent>
                 <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} />
@@ -67,21 +78,39 @@ const RepresentativeCard = withStyles(styles)(
                 </Typography>
                 <br />
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={6}>
                     <Badge badgeContent={this.state.timesRepresentative} color="secondary" showZero>
-                      <Face className="menu-item-button" />
+                      <Face />
                     </Badge>
-                    <Typography variant="body1" component="span" className={this.props.classes.statsDescr}>
+                    <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
                       Elected
                     </Typography>
                   </Grid>
 
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={6}>
                     <Badge badgeContent={this.state.topicRating + this.state.replyRating} color="secondary" showZero>
                       <Star />
                     </Badge>
-                    <Typography variant="body1" component="span" className={this.props.classes.statsDescr}>
+                    <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
                       Ratings
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <Badge badgeContent={this.state.favorites} color="secondary" showZero>
+                      <Favorite />
+                    </Badge>
+                    <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
+                      Followers
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <Badge badgeContent={this.state.topics + this.state.replies} color="secondary" showZero>
+                      <ChatBubble />
+                    </Badge>
+                    <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
+                      Messages
                     </Typography>
                   </Grid>
                 </Grid>
@@ -102,6 +131,8 @@ const RepresentativeCard = withStyles(styles)(
       getTimesRepresentative(this.props.name).then(count => this.setState({ timesRepresentative: count }));
       countTopicStarRatingForUser(this.props.name).then(count => this.setState({ topicRating: count }));
       countReplyStarRatingForUser(this.props.name).then(count => this.setState({ replyRating: count }));
+      countTopicsByUser(this.props.name).then(count => this.setState({ topics: count }));
+      countRepliesByUser(this.props.name).then(count => this.setState({ replies: count }));
     }
   }
 );

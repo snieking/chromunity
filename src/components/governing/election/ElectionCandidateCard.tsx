@@ -4,10 +4,16 @@ import { Link } from "react-router-dom";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
 import { ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import Avatar, { AVATAR_SIZE } from "../../common/Avatar";
-import { Face, Star } from "@material-ui/icons";
+import { ChatBubble, Face, Favorite, Star } from "@material-ui/icons";
 import Badge from "@material-ui/core/Badge";
 import { getTimesRepresentative } from "../../../blockchain/RepresentativesService";
-import { countReplyStarRatingForUser, countTopicStarRatingForUser } from "../../../blockchain/TopicService";
+import {
+  countRepliesByUser,
+  countReplyStarRatingForUser,
+  countTopicsByUser,
+  countTopicStarRatingForUser
+} from "../../../blockchain/TopicService";
+import { countUserFollowers } from "../../../blockchain/FollowingService";
 
 const useStyles = makeStyles(theme =>
   createStyles({
@@ -20,9 +26,13 @@ const useStyles = makeStyles(theme =>
     },
     statsDescr: {
       position: "relative",
-      [theme.breakpoints.up("xs")]: { left: 15 },
-      [theme.breakpoints.only("sm")]: { left: 0 },
-      textAlign: "center"
+      [theme.breakpoints.down("sm")]: {
+        marginTop: "5px"
+      },
+      [theme.breakpoints.up("md")]: {
+        display: "inline",
+        marginLeft: "15px"
+      }
     }
   })
 );
@@ -39,6 +49,9 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
   const [timesRepresentative, setTimesRepresentative] = useState(0);
   const [topicRating, setTopicRating] = useState(0);
   const [replyRating, setReplyRating] = useState(0);
+  const [followers, setFollowers] = useState(0);
+  const [topics, setTopics] = useState(0);
+  const [replies, setReplies] = useState(0);
 
   useEffect(() => {
     getUserSettingsCached(props.candidate, 1440).then(settings =>
@@ -47,6 +60,9 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
     getTimesRepresentative(props.candidate).then(count => setTimesRepresentative(count));
     countTopicStarRatingForUser(props.candidate).then(count => setTopicRating(count));
     countReplyStarRatingForUser(props.candidate).then(count => setReplyRating(count));
+    countUserFollowers(props.candidate).then(count => setFollowers(count));
+    countTopicsByUser(props.candidate).then(count => setTopics(count));
+    countRepliesByUser(props.candidate).then(count => setReplies(count));
   }, [props.candidate]);
 
   function votedFor(): boolean {
@@ -54,7 +70,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
   }
 
   return (
-    <Grid item xs={4}>
+    <Grid item xs={6} sm={6} md={4}>
       <Card
         raised={true}
         key={"candidate-" + props.candidate}
@@ -67,21 +83,39 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
           </Typography>
           <br />
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={6}>
               <Badge badgeContent={timesRepresentative} color="secondary" showZero>
                 <Face className="menu-item-button" />
               </Badge>
-              <Typography variant="body1" component="span" className={classes.statsDescr}>
+              <Typography variant="body2" component="span" className={classes.statsDescr}>
                 Elected
               </Typography>
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={6}>
               <Badge badgeContent={topicRating + replyRating} color="secondary" showZero>
                 <Star />
               </Badge>
-              <Typography variant="body1" component="span" className={classes.statsDescr}>
+              <Typography variant="body2" component="span" className={classes.statsDescr}>
                 Ratings
+              </Typography>
+            </Grid>
+
+            <Grid item xs={6}>
+              <Badge badgeContent={followers} color="secondary" showZero>
+                <Favorite />
+              </Badge>
+              <Typography variant="body2" component="span" className={classes.statsDescr}>
+                Followers
+              </Typography>
+            </Grid>
+
+            <Grid item xs={6}>
+              <Badge badgeContent={topics + replies} color="secondary" showZero>
+                <ChatBubble />
+              </Badge>
+              <Typography variant="body2" component="span" className={classes.statsDescr}>
+                Messages
               </Typography>
             </Grid>
           </Grid>
