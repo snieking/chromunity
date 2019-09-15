@@ -77,7 +77,7 @@ const RepresentativeCard = withStyles(styles)(
                   </Link>
                 </Typography>
                 <br />
-                <Grid container spacing={2}>
+                <Grid container spacing={1}>
                   <Grid item xs={6}>
                     <Badge badgeContent={this.state.timesRepresentative} color="secondary" showZero>
                       <Face fontSize="large"/>

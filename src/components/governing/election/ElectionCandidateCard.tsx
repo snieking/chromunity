@@ -82,7 +82,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
             <Link to={"/u/" + props.candidate}>@{props.candidate}</Link>
           </Typography>
           <br />
-          <Grid container spacing={2}>
+          <Grid container spacing={1}>
             <Grid item xs={6}>
               <Badge badgeContent={timesRepresentative} color="secondary" showZero>
                 <Face fontSize="large" />
