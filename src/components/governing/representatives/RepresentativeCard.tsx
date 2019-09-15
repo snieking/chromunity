@@ -30,7 +30,7 @@ const styles = (theme: Theme) =>
       },
       [theme.breakpoints.up("md")]: {
         display: "inline",
-        marginLeft: "15px"
+        marginLeft: "10px"
       }
     }
   });
@@ -71,7 +71,7 @@ const RepresentativeCard = withStyles(styles)(
             <Card key={"representative-" + this.props.name} className={this.props.classes.representativeCard}>
               <CardContent>
                 <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} />
-                <Typography gutterBottom variant="subtitle1" component="p">
+                <Typography gutterBottom variant="h6" component="p">
                   <Link className={this.props.classes.link} to={"/u/" + this.props.name}>
                     @{this.props.name}
                   </Link>
@@ -80,7 +80,7 @@ const RepresentativeCard = withStyles(styles)(
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <Badge badgeContent={this.state.timesRepresentative} color="secondary" showZero>
-                      <Face />
+                      <Face fontSize="large"/>
                     </Badge>
                     <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
                       Elected
@@ -89,7 +89,7 @@ const RepresentativeCard = withStyles(styles)(
 
                   <Grid item xs={6}>
                     <Badge badgeContent={this.state.topicRating + this.state.replyRating} color="secondary" showZero>
-                      <Star />
+                      <Star fontSize="large"/>
                     </Badge>
                     <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
                       Ratings
@@ -98,7 +98,7 @@ const RepresentativeCard = withStyles(styles)(
 
                   <Grid item xs={6}>
                     <Badge badgeContent={this.state.favorites} color="secondary" showZero>
-                      <Favorite />
+                      <Favorite fontSize="large"/>
                     </Badge>
                     <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
                       Followers
@@ -107,7 +107,7 @@ const RepresentativeCard = withStyles(styles)(
 
                   <Grid item xs={6}>
                     <Badge badgeContent={this.state.topics + this.state.replies} color="secondary" showZero>
-                      <ChatBubble />
+                      <ChatBubble fontSize="large"/>
                     </Badge>
                     <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
                       Messages

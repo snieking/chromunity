@@ -78,14 +78,14 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
       >
         <CardContent>
           <Avatar src={avatar} size={AVATAR_SIZE.LARGE} />
-          <Typography gutterBottom variant="subtitle1" component="h5">
+          <Typography gutterBottom variant="h6" component="h5">
             <Link to={"/u/" + props.candidate}>@{props.candidate}</Link>
           </Typography>
           <br />
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <Badge badgeContent={timesRepresentative} color="secondary" showZero>
-                <Face className="menu-item-button" />
+                <Face fontSize="large" />
               </Badge>
               <Typography variant="body2" component="span" className={classes.statsDescr}>
                 Elected
@@ -94,7 +94,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
 
             <Grid item xs={6}>
               <Badge badgeContent={topicRating + replyRating} color="secondary" showZero>
-                <Star />
+                <Star fontSize="large" />
               </Badge>
               <Typography variant="body2" component="span" className={classes.statsDescr}>
                 Ratings
@@ -103,7 +103,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
 
             <Grid item xs={6}>
               <Badge badgeContent={followers} color="secondary" showZero>
-                <Favorite />
+                <Favorite fontSize="large" />
               </Badge>
               <Typography variant="body2" component="span" className={classes.statsDescr}>
                 Followers
@@ -112,7 +112,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
 
             <Grid item xs={6}>
               <Badge badgeContent={topics + replies} color="secondary" showZero>
-                <ChatBubble />
+                <ChatBubble fontSize="large" />
               </Badge>
               <Typography variant="body2" component="span" className={classes.statsDescr}>
                 Messages
