@@ -1,18 +1,13 @@
 import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  CardMedia,
-  createStyles,
-  Grid,
-  makeStyles,
-  Typography
-} from "@material-ui/core";
+import { Button, Card, CardActions, CardContent, createStyles, Grid, makeStyles, Typography } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
 import { ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
+import Avatar, { AVATAR_SIZE } from "../../common/Avatar";
+import { Face, Star } from "@material-ui/icons";
+import Badge from "@material-ui/core/Badge";
+import { getTimesRepresentative } from "../../../blockchain/RepresentativesService";
+import { countReplyStarRatingForUser, countTopicStarRatingForUser } from "../../../blockchain/TopicService";
 
 const useStyles = makeStyles(theme =>
   createStyles({
@@ -21,6 +16,12 @@ const useStyles = makeStyles(theme =>
       borderColor: theme.palette.secondary.main
     },
     candidateCard: {
+      textAlign: "center"
+    },
+    statsDescr: {
+      position: "relative",
+      [theme.breakpoints.up("xs")]: { left: 15 },
+      [theme.breakpoints.only("sm")]: { left: 0 },
       textAlign: "center"
     }
   })
@@ -35,10 +36,17 @@ interface Props {
 const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => {
   const classes = useStyles(props);
   const [avatar, setAvatar] = useState<string>(null);
+  const [timesRepresentative, setTimesRepresentative] = useState(0);
+  const [topicRating, setTopicRating] = useState(0);
+  const [replyRating, setReplyRating] = useState(0);
 
   useEffect(() => {
-    getUserSettingsCached(props.candidate, 1440)
-      .then(settings => setAvatar(ifEmptyAvatarThenPlaceholder(settings.avatar, props.candidate)));
+    getUserSettingsCached(props.candidate, 1440).then(settings =>
+      setAvatar(ifEmptyAvatarThenPlaceholder(settings.avatar, props.candidate))
+    );
+    getTimesRepresentative(props.candidate).then(count => setTimesRepresentative(count));
+    countTopicStarRatingForUser(props.candidate).then(count => setTopicRating(count));
+    countReplyStarRatingForUser(props.candidate).then(count => setReplyRating(count));
   }, [props.candidate]);
 
   function votedFor(): boolean {
@@ -52,17 +60,31 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
         key={"candidate-" + props.candidate}
         className={`${classes.candidateCard} ${votedFor() ? classes.votedFor : ""}`}
       >
-        <CardMedia
-          component="img"
-          alt="Election candidate"
-          height="140"
-          image={avatar}
-          title="Election candidate"
-        />
         <CardContent>
+          <Avatar src={avatar} size={AVATAR_SIZE.LARGE} />
           <Typography gutterBottom variant="subtitle1" component="h5">
             <Link to={"/u/" + props.candidate}>@{props.candidate}</Link>
           </Typography>
+          <br />
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <Badge badgeContent={timesRepresentative} color="secondary" showZero>
+                <Face className="menu-item-button" />
+              </Badge>
+              <Typography variant="body1" component="span" className={classes.statsDescr}>
+                Elected
+              </Typography>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <Badge badgeContent={topicRating + replyRating} color="secondary" showZero>
+                <Star />
+              </Badge>
+              <Typography variant="body1" component="span" className={classes.statsDescr}>
+                Ratings
+              </Typography>
+            </Grid>
+          </Grid>
         </CardContent>
         <CardActions style={{ justifyContent: "center" }}>{renderCandidateCardActions(props.candidate)}</CardActions>
       </Card>
@@ -97,7 +119,6 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
       );
     }
   }
-
 };
 
 export default ElectionCandidateCard;

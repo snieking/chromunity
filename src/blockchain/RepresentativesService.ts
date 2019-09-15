@@ -19,6 +19,10 @@ export function getRepresentatives(): Promise<string[]> {
   return GTX.query("get_representatives", {});
 }
 
+export function getTimesRepresentative(name: string) : Promise<number> {
+  return GTX.query("get_number_of_times_representative", { name: name });
+}
+
 export function getAllRepresentativeActionsPriorToTimestamp(
   timestamp: number,
   pageSize: number
