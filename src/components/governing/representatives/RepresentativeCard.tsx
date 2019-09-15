@@ -67,7 +67,7 @@ const RepresentativeCard = withStyles(styles)(
     render() {
       if (this.props.name != null) {
         return (
-          <Grid item xs={6} sm={6} md={4}>
+          <Grid item xs={6} sm={6} md={3}>
             <Card key={"representative-" + this.props.name} className={this.props.classes.representativeCard}>
               <CardContent>
                 <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} />

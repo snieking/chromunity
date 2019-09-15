@@ -70,7 +70,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
   }
 
   return (
-    <Grid item xs={6} sm={6} md={4}>
+    <Grid item xs={6} sm={6} md={3}>
       <Card
         raised={true}
         key={"candidate-" + props.candidate}
