@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import {
   Card,
   CardContent,
-  CardMedia,
   createStyles,
   Grid,
   Theme,
