@@ -1115,7 +1115,7 @@ operation tmp_remove_representative(admin_name: name, descriptor_id: byte_array,
                             </entry>
                             <entry key="representative/queries.rell">
                                 <string>query get_representatives() {
-    val election = representative_election@?{ .completed == true } ( .id, -sort .timestamp );
+    val election = representative_election@?{ .completed == true } ( .id, -sort .timestamp ) limit 1;
 
     // If no election yes, then admin is technically the only representative
     if (election == null) {

@@ -39,6 +39,7 @@ function* registerAccount(action: AccountRegisterAction) {
   ]);
 
   const keyPair = retrieveKeyPair();
+  storeKeyPair(keyPair);
 
   const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
 
@@ -52,12 +53,8 @@ function* registerAccount(action: AccountRegisterAction) {
 function* walletLogin(username: string) {
   let keyPair: KeyPair = new KeyPair(makeKeyPair().privKey.toString("hex"));
   storeKeyPair(keyPair);
-  const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
 
-  const user = new User(keyPair, authDescriptor);
   let accountId = yield getAccountId(username);
-  const blockchain = yield BLOCKCHAIN;
-  checkIfAuthDescriptorAdded(blockchain, user, accountId, username);
 
   const returnUrl = encodeURIComponent(`${config.chromunityUrl}/user/authorize/${username}/${accountId}`);
   window.location.replace(

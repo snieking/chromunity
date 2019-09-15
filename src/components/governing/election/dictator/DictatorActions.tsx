@@ -5,7 +5,7 @@ import { Button } from "@material-ui/core";
 import { getUser } from "../../../../util/user-util";
 import { ChromunityUser } from "../../../../types";
 
-const dayInMilliseconds: number = 10000;
+const dayInMilliseconds: number = 100000;
 
 interface State {
   user: ChromunityUser;

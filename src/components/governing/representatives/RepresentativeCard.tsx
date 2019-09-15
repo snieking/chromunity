@@ -30,7 +30,7 @@ const styles = (theme: Theme) =>
       },
       [theme.breakpoints.up("md")]: {
         display: "inline",
-        marginLeft: "10px"
+        marginLeft: "15px"
       }
     }
   });
