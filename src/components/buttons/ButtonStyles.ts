@@ -13,8 +13,8 @@ export const largeButtonStyles = (theme: Theme) => createStyles({
         height: "64px",
         width: "64px",
         [theme.breakpoints.up("md")]: {
-            height: "112px",
-            width: "112px",
+            height: "84px",
+            width: "84px",
         },
         '&:hover': {
             backgroundColor: theme.palette.primary.main,
@@ -25,8 +25,8 @@ export const largeButtonStyles = (theme: Theme) => createStyles({
         height: "32px",
         width: "32px",
         [theme.breakpoints.up("md")]: {
-            height: "54px",
-            width: "54px",
+            height: "32px",
+            width: "32px",
         },
     },
     content: {

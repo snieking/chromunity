@@ -133,12 +133,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         } else {
           const topicChannel: string = (this.state.channel as OptionType).value;
 
-          if (!/^[a-zA-Z0-9\s]+$/.test(topicTitle)) {
-            this.setState({
-              newTopicStatusMessage: "Title may only contain a-z, A-Z & 0-9 characters and whitespaces",
-              newTopicErrorOpen: true
-            });
-          } else if (topicTitle.length > maxTitleLength) {
+          if (topicTitle.length > maxTitleLength) {
             this.setState({
               newTopicStatusMessage: "Title is too long",
               newTopicErrorOpen: true
