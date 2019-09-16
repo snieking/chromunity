@@ -14,6 +14,7 @@ import {
   countTopicsByUser,
   countTopicStarRatingForUser
 } from "../../../blockchain/TopicService";
+import { countUserFollowers } from "../../../blockchain/FollowingService";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -44,7 +45,7 @@ export interface RepresentativeCardState {
   timesRepresentative: number;
   topicRating: number;
   replyRating: number;
-  favorites: number;
+  followers: number;
   topics: number;
   replies: number;
 }
@@ -58,7 +59,7 @@ const RepresentativeCard = withStyles(styles)(
         timesRepresentative: 0,
         topicRating: 0,
         replyRating: 0,
-        favorites: 0,
+        followers: 0,
         topics: 0,
         replies: 0
       };
@@ -77,10 +78,10 @@ const RepresentativeCard = withStyles(styles)(
                   </Link>
                 </Typography>
                 <br />
-                <Grid container spacing={1}>
+                <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <Badge badgeContent={this.state.timesRepresentative} color="secondary" showZero>
-                      <Face fontSize="large"/>
+                      <Face fontSize="large" />
                     </Badge>
                     <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
                       Elected
@@ -89,7 +90,7 @@ const RepresentativeCard = withStyles(styles)(
 
                   <Grid item xs={6}>
                     <Badge badgeContent={this.state.topicRating + this.state.replyRating} color="secondary" showZero>
-                      <Star fontSize="large"/>
+                      <Star fontSize="large" />
                     </Badge>
                     <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
                       Ratings
@@ -97,8 +98,8 @@ const RepresentativeCard = withStyles(styles)(
                   </Grid>
 
                   <Grid item xs={6}>
-                    <Badge badgeContent={this.state.favorites} color="secondary" showZero>
-                      <Favorite fontSize="large"/>
+                    <Badge badgeContent={this.state.followers} color="secondary" showZero>
+                      <Favorite fontSize="large" />
                     </Badge>
                     <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
                       Followers
@@ -107,7 +108,7 @@ const RepresentativeCard = withStyles(styles)(
 
                   <Grid item xs={6}>
                     <Badge badgeContent={this.state.topics + this.state.replies} color="secondary" showZero>
-                      <ChatBubble fontSize="large"/>
+                      <ChatBubble fontSize="large" />
                     </Badge>
                     <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
                       Messages
@@ -129,6 +130,7 @@ const RepresentativeCard = withStyles(styles)(
       );
 
       getTimesRepresentative(this.props.name).then(count => this.setState({ timesRepresentative: count }));
+      countUserFollowers(this.props.name).then(count => this.setState({ followers: count }));
       countTopicStarRatingForUser(this.props.name).then(count => this.setState({ topicRating: count }));
       countReplyStarRatingForUser(this.props.name).then(count => this.setState({ replyRating: count }));
       countTopicsByUser(this.props.name).then(count => this.setState({ topics: count }));

@@ -101,4 +101,5 @@ describe("emoji parsing", () => {
     it("parse smirk emoji", async () => {
        expect(parseEmojis(":smirk:")).toBe("😏");
     });
+
 });
