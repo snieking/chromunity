@@ -34,7 +34,7 @@ const NotificationsButton: React.FunctionComponent<NotificationsButtonProps> = p
     if (user != null) {
       return (
         <IconButton aria-label="Notifications" onClick={() => setCounter(0)}>
-          <Badge color="primary" badgeContent={counter}>
+          <Badge color="secondary" badgeContent={counter}>
             <Tooltip title="Notifications">
               {counter > 0 ? (
                 <NotificationsActive className={classes.navIcon} />
