@@ -1,3 +1,5 @@
+import emoji from 'emoji-dictionary'
+
 export function parseContent(message: string): string {
     return parseUsers(parseHashtags(parseTopics(message)));
 }
@@ -31,3 +33,5 @@ function parseTopics(message: string): string {
         "<a  class='blue-typography' href='$1$2'><b>$1$2</b></a>"
     );
 }
+
+export const parseEmojis = (text: string) => text.replace(/:\w+:/gi, name => emoji.getUnicode(name));

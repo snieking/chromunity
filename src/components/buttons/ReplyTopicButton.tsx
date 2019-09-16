@@ -13,6 +13,7 @@ import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import { UserMeta } from "../../types";
 import { largeButtonStyles } from "./ButtonStyles";
 import MarkdownRenderer from "../common/MarkdownRenderer";
+import { parseEmojis } from "../../util/text-parsing";
 
 export interface ReplyTopicButtonProps {
   submitFunction: Function;
@@ -43,7 +44,7 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
   function handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
     event.preventDefault();
     event.stopPropagation();
-    setMessage(event.target.value);
+    setMessage(parseEmojis(event.target.value));
   }
 
   function createReply(event: FormEvent<HTMLFormElement>) {

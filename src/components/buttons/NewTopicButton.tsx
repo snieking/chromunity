@@ -25,6 +25,7 @@ import {
 } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import withTheme from "@material-ui/core/styles/withTheme";
+import { parseEmojis } from "../../util/text-parsing";
 
 interface OptionType {
   label: string;
@@ -106,7 +107,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
         event.stopPropagation();
-        this.setState({ topicMessage: event.target.value });
+        this.setState({ topicMessage: parseEmojis(event.target.value) });
       }
 
       handleChannelChange(event: React.ChangeEvent<HTMLInputElement>) {

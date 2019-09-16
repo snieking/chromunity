@@ -10,6 +10,7 @@ import { getCachedUserMeta, getUser } from "../../util/user-util";
 import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import { ChromunityUser, UserMeta } from "../../types";
 import { Edit } from "@material-ui/icons";
+import { parseEmojis } from "../../util/text-parsing";
 
 export interface EditMessageButtonProps {
   submitFunction: Function;
@@ -60,7 +61,7 @@ class EditMessageButton extends React.Component<EditMessageButtonProps, EditMess
   handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
     event.preventDefault();
     event.stopPropagation();
-    this.setState({ message: event.target.value });
+    this.setState({ message: parseEmojis(event.target.value) });
   }
 
   createTopicButton() {}

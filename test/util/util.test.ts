@@ -1,5 +1,5 @@
 import {needsToBeSliced, sortByFrequency, stringToHexColor, timeAgoReadable} from "../../src/util/util";
-import {getTags} from "../../src/util/text-parsing";
+import { getTags, parseEmojis } from "../../src/util/text-parsing";
 
 jest.setTimeout(30000);
 
@@ -94,4 +94,11 @@ describe("string to hex color", () => {
         const hex: string = stringToHexColor("hello");
         expect(hex.length).toBe(7);
     })
+});
+
+describe("emoji parsing", () => {
+
+    it("parse smirk emoji", async () => {
+       expect(parseEmojis(":smirk:")).toBe("😏");
+    });
 });
