@@ -73,9 +73,7 @@ const styles = createStyles({
   },
   bottomBar: {
     marginBottom: "5px",
-    marginTop: "10px",
-    display: "inline-block",
-    float: "right"
+    marginTop: "10px"
   }
 });
 
@@ -126,6 +124,7 @@ const ProfileCard = withStyles(styles)(
 
       this.renderUserPage = this.renderUserPage.bind(this);
       this.toggleFollowing = this.toggleFollowing.bind(this);
+      this.renderIcons = this.renderIcons.bind(this);
       this.renderActions = this.renderActions.bind(this);
       this.suspendUser = this.suspendUser.bind(this);
       this.handleSuspendUserClose = this.handleSuspendUserClose.bind(this);
@@ -186,7 +185,7 @@ const ProfileCard = withStyles(styles)(
       const user = getUser();
       if (user != null && this.props.representatives.includes(user.name.toLocaleLowerCase())) {
         return (
-          <div style={{ display: "inline"}}>
+          <div style={{ display: "inline" }}>
             <IconButton onClick={() => this.setState({ suspendUserDialogOpen: true })}>
               <Tooltip title="Suspend user">
                 <VoiceOverOff fontSize="large" className={this.props.classes.iconRed} />
@@ -213,55 +212,60 @@ const ProfileCard = withStyles(styles)(
       this.setState({ muted: muted }, () => toggleUserMute(this.state.user, this.props.username, muted));
     }
 
+    renderIcons() {
+      return (
+        <div style={{ float: "right" }}>
+          {this.renderActions()}
+          <div className={this.props.classes.bottomBar}>
+            <Badge badgeContent={this.state.userFollowings} showZero={true} color="secondary">
+              <Tooltip title="Following users">
+                <SupervisedUserCircle />
+              </Tooltip>
+            </Badge>
+            <Badge badgeContent={this.state.topicStars + this.state.replyStars} showZero={true} color="secondary">
+              <Tooltip title="Stars">
+                <StarRate style={{ marginLeft: "10px" }} />
+              </Tooltip>
+            </Badge>
+            <Badge badgeContent={this.state.countOfTopics} showZero={true} color="secondary">
+              <Tooltip title="Topics">
+                <Inbox style={{ marginLeft: "10px" }} />
+              </Tooltip>
+            </Badge>
+            <Badge
+              badgeContent={this.state.countOfReplies}
+              showZero={true}
+              color="secondary"
+              style={{ marginRight: "15px" }}
+            >
+              <Tooltip title="Replies">
+                <ReplyAll style={{ marginLeft: "10px" }} />
+              </Tooltip>
+            </Badge>
+          </div>
+        </div>
+      );
+    }
+
     renderActions() {
       const user: ChromunityUser = this.state.user;
       if (user != null && this.props.username !== user.name) {
         return (
           <div style={{ float: "right" }}>
-            <div style={{ float: "right" }}>
             {this.renderUserSuspensionDialog()}
-              {this.renderRepresentativeActions()}
-              <IconButton onClick={() => this.toggleMuteUser()}>
-                {this.state.muted ? (
-                  <Tooltip title={"Unmute user"}>
-                    <VolumeUp fontSize={"large"} className={this.props.classes.iconBlue} />
-                  </Tooltip>
-                ) : (
-                  <Tooltip title="Mute user">
-                    <VolumeOff fontSize={"large"} />
-                  </Tooltip>
-                )}
-              </IconButton>
-              {this.renderFollowButton()}
-            </div>
-            <br/>
-            <div className={this.props.classes.bottomBar}>
-              <Badge badgeContent={this.state.userFollowings} showZero={true} color="secondary">
-                <Tooltip title="Following users">
-                  <SupervisedUserCircle />
+            {this.renderRepresentativeActions()}
+            <IconButton onClick={() => this.toggleMuteUser()}>
+              {this.state.muted ? (
+                <Tooltip title={"Unmute user"}>
+                  <VolumeUp fontSize={"large"} className={this.props.classes.iconBlue} />
                 </Tooltip>
-              </Badge>
-              <Badge badgeContent={this.state.topicStars + this.state.replyStars} showZero={true} color="secondary">
-                <Tooltip title="Stars">
-                  <StarRate style={{ marginLeft: "10px" }} />
+              ) : (
+                <Tooltip title="Mute user">
+                  <VolumeOff fontSize={"large"} />
                 </Tooltip>
-              </Badge>
-              <Badge badgeContent={this.state.countOfTopics} showZero={true} color="secondary">
-                <Tooltip title="Topics">
-                  <Inbox style={{ marginLeft: "10px" }} />
-                </Tooltip>
-              </Badge>
-              <Badge
-                badgeContent={this.state.countOfReplies}
-                showZero={true}
-                color="secondary"
-                style={{ marginRight: "15px" }}
-              >
-                <Tooltip title="Replies">
-                  <ReplyAll style={{ marginLeft: "10px" }} />
-                </Tooltip>
-              </Badge>
-            </div>
+              )}
+            </IconButton>
+            {this.renderFollowButton()}
           </div>
         );
       }
@@ -298,7 +302,7 @@ const ProfileCard = withStyles(styles)(
           <div>
             <ChromiaPageHeader text={"@" + this.props.username} />
             <Card key={"user-card"}>
-              {this.renderActions()}
+              {this.renderIcons()}
               <div className={this.props.classes.contentWrapper}>
                 <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} />
               </div>
@@ -345,13 +349,16 @@ const ProfileCard = withStyles(styles)(
 const mapStateToProps = (store: ApplicationState) => {
   return {
     representatives: store.government.representatives
-  }
+  };
 };
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
     loadRepresentatives: () => dispatch(loadRepresentatives())
-  }
+  };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps) (ProfileCard);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ProfileCard);
