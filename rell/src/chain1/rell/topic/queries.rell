@@ -163,17 +163,18 @@ query get_all_topics_by_stars_since_timestamp(timestamp, page_size: integer) {
 }
 
 query get_topics_by_follows_and_stars_since_timestamp(name, timestamp, page_size: integer) {
-    return tmp_topic_rating@*{ 
-            .topic.author == follow@{ .follower.name == name } ( .follows ),
-            .topic.last_modified > timestamp
+    return (tmp_topic_rating, follow) @*{
+            follow.follower.name == name,
+            tmp_topic_rating.topic.author == follow.follows,
+            tmp_topic_rating.topic.last_modified > timestamp
         } (
-        -sort .stars,
-        id = .topic.id,
-        author=.topic.author.display_name,
-        title=.topic.title,
-        message=.topic.message,
-        last_modified=.topic.last_modified,
-        timestamp=.topic.timestamp
+        -sort tmp_topic_rating.stars,
+        id = tmp_topic_rating.topic.id,
+        author=tmp_topic_rating.topic.author.display_name,
+        title=tmp_topic_rating.topic.title,
+        message=tmp_topic_rating.topic.message,
+        last_modified=tmp_topic_rating.topic.last_modified,
+        timestamp=tmp_topic_rating.topic.timestamp
     ) limit page_size;
 }
 
