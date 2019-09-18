@@ -71,6 +71,25 @@ function modifyText(user: ChromunityUser, id: string, updatedText: string, rellO
     .catch(error => handleGADuringException(rellOperation, sw, error));
 }
 
+export function deleteTopic(user: ChromunityUser, id: string) {
+  const rellOperation = "delete_topic";
+  const sw = createStopwatchStarted();
+  return BLOCKCHAIN.then(bc =>
+    bc.call(
+      user.ft3User,
+      rellOperation,
+      id,
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      user.name.toLocaleLowerCase()
+    )
+  )
+    .then(value => {
+      gaRellOperationTiming(rellOperation, stopStopwatch(sw));
+      return value;
+    })
+    .catch(error => handleGADuringException(rellOperation, sw, error));
+}
+
 export function createTopicReply(user: ChromunityUser, topicId: string, message: string) {
   const replyId = uniqueId();
 

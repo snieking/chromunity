@@ -243,7 +243,7 @@ class ChannelWall extends React.Component<Props, State> {
           <br />
           <br />
           {this.props.topics.map(topic => {
-            if (!this.state.mutedUsers.includes(topic.author)) {
+            if (!this.state.mutedUsers.includes(topic.author) && !topic.removed) {
               return <TopicOverviewCard key={topic.id} topic={topic} />;
             } else {
               return <div />;

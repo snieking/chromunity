@@ -22,6 +22,7 @@ import { RouteComponentProps } from "react-router";
 import ReplyTopicButton from "../buttons/ReplyTopicButton";
 import EditMessageButton from "../buttons/EditMessageButton";
 import {
+  deleteTopic,
   getTopicById,
   getTopicRepliesAfterTimestamp,
   getTopicRepliesPriorToTimestamp,
@@ -39,7 +40,7 @@ import { getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import {
   Delete,
   Notifications,
-  NotificationsActive,
+  NotificationsActive, RemoveCircle,
   Report,
   StarBorder,
   StarRate,
@@ -120,6 +121,7 @@ export interface FullTopicState {
   isLoading: boolean;
   removeTopicDialogOpen: boolean;
   reportTopicDialogOpen: boolean;
+  deleteTopicDialogOpen: boolean;
   mutedUsers: string[];
   user: ChromunityUser;
 }
@@ -155,6 +157,7 @@ const FullTopic = withStyles(styles)(
         isLoading: true,
         removeTopicDialogOpen: false,
         reportTopicDialogOpen: false,
+        deleteTopicDialogOpen: false,
         mutedUsers: [],
         user: getUser()
       };
@@ -165,6 +168,10 @@ const FullTopic = withStyles(styles)(
       this.editTopicMessage = this.editTopicMessage.bind(this);
       this.closeReportTopic = this.closeReportTopic.bind(this);
       this.reportTopic = this.reportTopic.bind(this);
+      this.isRepresentative = this.isRepresentative.bind(this);
+      this.closeDeleteTopic = this.closeDeleteTopic.bind(this);
+      this.deleteTopic = this.deleteTopic.bind(this);
+      this.renderDeleteButton = this.renderDeleteButton.bind(this);
     }
 
     componentDidMount(): void {
@@ -374,6 +381,8 @@ const FullTopic = withStyles(styles)(
             <div />
           )}
 
+          {this.renderDeleteButton()}
+
           <ConfirmDialog
             text="This action will report the topic"
             open={this.state.reportTopicDialogOpen}
@@ -413,9 +422,48 @@ const FullTopic = withStyles(styles)(
       }
     }
 
-    renderAdminActions() {
+    renderDeleteButton() {
       const user: ChromunityUser = this.state.user;
-      if (user != null && this.props.representatives.includes(user.name) && !this.state.topic.removed) {
+      if (
+        this.state.topic.timestamp + allowedEditTimeMillis > Date.now() &&
+        user != null &&
+        !this.isRepresentative() &&
+        this.state.topic.author === user.name
+      ) {
+        return (
+        <div>
+          <IconButton aria-label="Hide topic" onClick={() => this.setState({ deleteTopicDialogOpen: true })}>
+            <Tooltip title="Hide topic">
+              <RemoveCircle className={this.props.classes.iconRed} />
+            </Tooltip>
+          </IconButton>
+
+          <ConfirmDialog
+            text="This action will delete the topic from the walls, making it only visible on your user page and by direct link to it"
+            open={this.state.deleteTopicDialogOpen}
+            onClose={this.closeDeleteTopic}
+            onConfirm={this.deleteTopic}
+          />
+        </div>);
+      }
+    }
+
+    closeDeleteTopic() {
+      this.setState({ deleteTopicDialogOpen: false });
+    }
+
+    deleteTopic() {
+      this.closeDeleteTopic();
+      deleteTopic(this.state.user, this.state.topic.id).then(() => window.location.href = "/");
+    }
+
+    isRepresentative() {
+      const user: ChromunityUser = this.state.user;
+      return user != null && this.props.representatives.includes(user.name);
+    }
+
+    renderAdminActions() {
+      if (this.isRepresentative() && !this.state.topic.removed) {
         return (
           <div style={{ display: "inline-block" }}>
             <IconButton aria-label="Remove topic" onClick={() => this.setState({ removeTopicDialogOpen: true })}>
@@ -551,13 +599,16 @@ const FullTopic = withStyles(styles)(
 const mapStateToProps = (store: ApplicationState) => {
   return {
     representatives: store.government.representatives
-  }
+  };
 };
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
     loadRepresentatives: () => dispatch(loadRepresentatives())
-  }
+  };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps) (FullTopic);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(FullTopic);
