@@ -72,6 +72,7 @@ function modifyText(user: ChromunityUser, id: string, updatedText: string, rellO
 }
 
 export function deleteTopic(user: ChromunityUser, id: string) {
+  topicsCache.remove(id);
   const rellOperation = "delete_topic";
   const sw = createStopwatchStarted();
   return BLOCKCHAIN.then(bc =>
