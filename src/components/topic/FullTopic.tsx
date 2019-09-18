@@ -546,9 +546,6 @@ const FullTopic = withStyles(styles)(
 
     handleReplySubmit(): void {
       this.retrieveLatestReplies();
-      if (!this.state.subscribed) {
-        subscribeToTopic(this.state.user, this.state.topic.id).then(() => this.setState({ subscribed: true }));
-      }
     }
 
     renderReplyButton() {
