@@ -1,6 +1,6 @@
 query get_topics_by_channel_prior_to_timestamp(name, timestamp, page_size: integer) {
     // TODO: .lower_case() in Rell 0.9
-    return channel@*{ 
+    return channel@*{
         .name == name,
         .topic.last_modified < timestamp
     } (
@@ -9,7 +9,8 @@ query get_topics_by_channel_prior_to_timestamp(name, timestamp, page_size: integ
         title=.topic.title,
         message=.topic.message,
         timestamp=.topic.timestamp,
-        -sort last_modified=.topic.last_modified
+        -sort last_modified=.topic.last_modified,
+        removed=.topic.removed
     ) limit page_size;
 }
 
@@ -23,7 +24,8 @@ query get_topics_by_channel_after_timestamp(name, timestamp) {
         title=.topic.title,
         message=.topic.message,
         timestamp=.topic.timestamp,
-        -sort last_modified=.topic.last_modified
+        -sort last_modified=.topic.last_modified,
+        removed=.topic.removed
     );
 }
 
@@ -48,7 +50,8 @@ query get_topics_by_followed_channels_prior_to_timestamp(username: text, timesta
         title=channel.topic.title,
         message=channel.topic.message,
         timestamp=channel.topic.timestamp,
-        -sort last_modified=channel.topic.last_modified
+        -sort last_modified=channel.topic.last_modified,
+        removed=channel.topic.removed
     ) limit page_size;
 }
 
@@ -65,7 +68,8 @@ query get_topics_by_followed_channels_after_timestamp(username: text, timestamp,
         title=channel.topic.title,
         message=channel.topic.message,
         timestamp=channel.topic.timestamp,
-        -sort last_modified=channel.topic.last_modified
+        -sort last_modified=channel.topic.last_modified,
+        removed=channel.topic.removed
     ) limit page_size;
 }
 
