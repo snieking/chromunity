@@ -44,12 +44,16 @@ export function* topicWallWatcher() {
 
 export const getAllTopics = (state: ApplicationState) => state.topicWall.all.topics;
 export const getAllUpdatedTime = (state: ApplicationState) => state.topicWall.all.updated;
+const getAllCouldExistOlder = (state: ApplicationState) => state.topicWall.all.couldExistOlder;
 
 export const getFollowedChannelsTopics = (state: ApplicationState) => state.topicWall.followedChannels.topics;
 export const getFollowedChannelsUpdatedTime = (state: ApplicationState) => state.topicWall.followedChannels.updated;
+const getFollowedChannelsCouldExistOlder = (state: ApplicationState) =>
+  state.topicWall.followedChannels.couldExistOlder;
 
 export const getFollowedUsersTopics = (state: ApplicationState) => state.topicWall.followedUsers.topics;
 export const getFollowedUsersUpdatedTime = (state: ApplicationState) => state.topicWall.followedUsers.updated;
+const getFollowedUsersCouldExistOlder = (state: ApplicationState) => state.topicWall.followedUsers.couldExistOlder;
 
 const CACHE_DURATION_MILLIS = 1000 * 60;
 
@@ -69,14 +73,15 @@ export function* loadAllTopics(action: LoadAllTopicWallAction) {
   }
 
   let retrievedTopics: Topic[];
+  let couldExistOlder = false;
   if (topics.length > 0) {
     // Load recent topics
     retrievedTopics = yield getTopicsAfterTimestamp(topics[0].last_modified, action.pageSize);
+    couldExistOlder = yield select(getAllCouldExistOlder);
   } else {
     retrievedTopics = yield getTopicsPriorToTimestamp(Date.now(), action.pageSize);
+    couldExistOlder = retrievedTopics.length >= action.pageSize;
   }
-
-  const couldExistOlder = retrievedTopics.length >= action.pageSize;
 
   yield put(
     updateTopics(
@@ -118,20 +123,23 @@ export function* loadFollowedUsersTopics(action: LoadFollowedUsersTopicWallActio
   const topics: Topic[] = yield select(getFollowedUsersTopics);
 
   let retrievedTopics: Topic[];
+  let couldExistOlder = false;
   if (topics.length > 0) {
     retrievedTopics = yield getTopicsFromFollowsAfterTimestamp(
       action.username,
       topics[0].last_modified,
       action.pageSize
     );
+    couldExistOlder = yield select(getFollowedUsersCouldExistOlder);
   } else {
     retrievedTopics = yield getTopicsFromFollowsPriorToTimestamp(action.username, Date.now(), action.pageSize);
+    couldExistOlder = retrievedTopics.length >= action.pageSize;
   }
 
   yield put(
     updateTopics(
       retrievedTopics.concat(removeDuplicateTopicsFromFirst(topics, retrievedTopics)),
-      retrievedTopics.length >= action.pageSize,
+      couldExistOlder,
       WallType.USER
     )
   );
@@ -172,6 +180,7 @@ export function* loadFollowedChannelsTopics(action: LoadFollowedChannelsTopicWal
   const topics: Topic[] = yield select(getFollowedChannelsTopics);
 
   let retrievedTopics: Topic[];
+  let couldExistOlder = false;
   if (topics.length > 0) {
     // Load recent topics
     retrievedTopics = yield getTopicsFromFollowedChannelsAfterTimestamp(
@@ -179,14 +188,16 @@ export function* loadFollowedChannelsTopics(action: LoadFollowedChannelsTopicWal
       topics[0].last_modified,
       action.pageSize
     );
+    couldExistOlder = yield select(getFollowedChannelsCouldExistOlder);
   } else {
     retrievedTopics = yield getTopicsFromFollowedChannelsPriorToTimestamp(action.username, Date.now(), action.pageSize);
+    couldExistOlder = retrievedTopics.length >= action.pageSize;
   }
 
   yield put(
     updateTopics(
       retrievedTopics.concat(removeDuplicateTopicsFromFirst(topics, retrievedTopics)),
-      retrievedTopics.length >= action.pageSize,
+      couldExistOlder,
       WallType.CHANNEL
     )
   );
