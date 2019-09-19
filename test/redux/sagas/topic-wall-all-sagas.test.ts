@@ -108,7 +108,7 @@ describe("Topic wall [ALL] saga tests", () => {
     const dispatchedActions: TopicWallActions[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       wallType: WallType.ALL,
-      all: { topics: createFakeTopics(0), updated: 0 }
+      all: { topics: createFakeTopics(0), updated: 0, couldExistOlder: true }
     });
 
     await runSaga(fakeStore, loadAllTopics, {

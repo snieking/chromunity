@@ -129,7 +129,8 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
       wallType: WallType.CHANNEL,
       followedChannels: {
         topics: createFakeTopics(0),
-        updated: 0
+        updated: 0,
+        couldExistOlder: true
       }
     });
 
