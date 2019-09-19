@@ -104,6 +104,7 @@ interface State {
   reportReplyDialogOpen: boolean;
   isLoading: boolean;
   user: ChromunityUser;
+  timeLeftUntilNoLongerModifiable: number;
 }
 
 const allowedEditTimeMillis: number = 300000;
@@ -130,7 +131,8 @@ const TopicReplyCard = withStyles(styles)(
         removeReplyDialogOpen: false,
         reportReplyDialogOpen: false,
         isLoading: false,
-        user: getUser()
+        user: getUser(),
+        timeLeftUntilNoLongerModifiable: 0
       };
 
       this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
@@ -183,6 +185,16 @@ const TopicReplyCard = withStyles(styles)(
       );
       getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies }));
       getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
+
+      const modifiableUntil = this.props.reply.timestamp + allowedEditTimeMillis;
+      setInterval(() => {
+        this.setState({ timeLeftUntilNoLongerModifiable: this.getTimeLeft(modifiableUntil) });
+      }, 1000);
+    }
+
+    getTimeLeft(until: number): number {
+      const currentTime = Date.now();
+      return currentTime < until ? Math.floor((until - currentTime) / 1000) : 0;
     }
 
     toggleStarRate() {
@@ -262,7 +274,11 @@ const TopicReplyCard = withStyles(styles)(
             {this.props.reply.timestamp + allowedEditTimeMillis > Date.now() &&
             user != null &&
             this.props.reply.author === user.name ? (
-              <EditMessageButton value={this.props.reply.message} submitFunction={this.editReplyMessage} />
+              <EditMessageButton
+                modifiableUntil={this.state.timeLeftUntilNoLongerModifiable}
+                value={this.props.reply.message}
+                submitFunction={this.editReplyMessage}
+              />
             ) : null}
             <IconButton
               aria-label="Reply"

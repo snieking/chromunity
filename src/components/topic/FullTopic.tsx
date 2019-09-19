@@ -40,7 +40,8 @@ import { getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import {
   Delete,
   Notifications,
-  NotificationsActive, RemoveCircle,
+  NotificationsActive,
+  RemoveCircle,
   Report,
   StarBorder,
   StarRate,
@@ -124,6 +125,7 @@ export interface FullTopicState {
   deleteTopicDialogOpen: boolean;
   mutedUsers: string[];
   user: ChromunityUser;
+  timeLeftUntilNoLongerModifiable: number;
 }
 
 const repliesPageSize: number = 25;
@@ -159,7 +161,8 @@ const FullTopic = withStyles(styles)(
         reportTopicDialogOpen: false,
         deleteTopicDialogOpen: false,
         mutedUsers: [],
-        user: getUser()
+        user: getUser(),
+        timeLeftUntilNoLongerModifiable: 0
       };
 
       this.retrieveLatestReplies = this.retrieveLatestReplies.bind(this);
@@ -207,7 +210,18 @@ const FullTopic = withStyles(styles)(
         })
       );
 
+      const modifiableUntil = topic.timestamp + allowedEditTimeMillis;
+
+      setInterval(() => {
+        this.setState({ timeLeftUntilNoLongerModifiable: this.getTimeLeft(modifiableUntil) });
+      }, 1000);
+
       pageViewPath("/t/" + topic.id + "/" + prepareUrlPath(topic.title));
+    }
+
+    getTimeLeft(until: number): number {
+      const currentTime = Date.now();
+      return currentTime < until ? Math.floor((until - currentTime) / 1000) : 0;
     }
 
     retrieveLatestReplies(): void {
@@ -376,7 +390,11 @@ const FullTopic = withStyles(styles)(
           {this.state.topic.timestamp + allowedEditTimeMillis > Date.now() &&
           user != null &&
           this.state.topic.author === user.name ? (
-            <EditMessageButton value={this.state.topic.message} submitFunction={this.editTopicMessage} />
+            <EditMessageButton
+              value={this.state.topic.message}
+              modifiableUntil={this.state.timeLeftUntilNoLongerModifiable}
+              submitFunction={this.editTopicMessage}
+            />
           ) : (
             <div />
           )}
@@ -431,20 +449,23 @@ const FullTopic = withStyles(styles)(
         this.state.topic.author === user.name
       ) {
         return (
-        <div>
-          <IconButton aria-label="Hide topic" onClick={() => this.setState({ deleteTopicDialogOpen: true })}>
-            <Tooltip title="Hide topic">
-              <RemoveCircle className={this.props.classes.iconRed} />
-            </Tooltip>
-          </IconButton>
+          <div>
+            <IconButton aria-label="Hide topic" onClick={() => this.setState({ deleteTopicDialogOpen: true })}>
+              <Tooltip title="Hide topic">
+                <Badge max={600} badgeContent={this.state.timeLeftUntilNoLongerModifiable} color="secondary">
+                  <RemoveCircle className={this.props.classes.iconRed} />
+                </Badge>
+              </Tooltip>
+            </IconButton>
 
-          <ConfirmDialog
-            text="This action will delete the topic from the walls, making it only visible on your user page and by direct link to it"
-            open={this.state.deleteTopicDialogOpen}
-            onClose={this.closeDeleteTopic}
-            onConfirm={this.deleteTopic}
-          />
-        </div>);
+            <ConfirmDialog
+              text="This action will delete the topic from the walls, making it only visible on your user page and by direct link to it"
+              open={this.state.deleteTopicDialogOpen}
+              onClose={this.closeDeleteTopic}
+              onConfirm={this.deleteTopic}
+            />
+          </div>
+        );
       }
     }
 
@@ -454,7 +475,7 @@ const FullTopic = withStyles(styles)(
 
     deleteTopic() {
       this.closeDeleteTopic();
-      deleteTopic(this.state.user, this.state.topic.id).then(() => window.location.href = "/");
+      deleteTopic(this.state.user, this.state.topic.id).then(() => (window.location.href = "/"));
     }
 
     isRepresentative() {

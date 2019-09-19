@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Dialog, Snackbar, Tooltip } from "@material-ui/core";
+import { Badge, Dialog, Snackbar, Tooltip } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -15,6 +15,7 @@ import { parseEmojis } from "../../util/text-parsing";
 export interface EditMessageButtonProps {
   submitFunction: Function;
   value: string;
+  modifiableUntil: number;
 }
 
 export interface EditMessageButtonState {
@@ -107,7 +108,11 @@ class EditMessageButton extends React.Component<EditMessageButtonProps, EditMess
           open={this.state.replyStatusSuccessOpen}
           autoHideDuration={3000}
         >
-          <CustomSnackbarContentWrapper onClose={this.handleClose} variant="success" message={this.state.replySentStatus} />
+          <CustomSnackbarContentWrapper
+            onClose={this.handleClose}
+            variant="success"
+            message={this.state.replySentStatus}
+          />
         </Snackbar>
         <Snackbar
           anchorOrigin={{
@@ -117,7 +122,11 @@ class EditMessageButton extends React.Component<EditMessageButtonProps, EditMess
           open={this.state.replyStatusErrorOpen}
           autoHideDuration={3000}
         >
-          <CustomSnackbarContentWrapper onClose={this.handleClose} variant="error" message={this.state.replySentStatus} />
+          <CustomSnackbarContentWrapper
+            onClose={this.handleClose}
+            variant="error"
+            message={this.state.replySentStatus}
+          />
         </Snackbar>
       </div>
     );
@@ -129,7 +138,9 @@ class EditMessageButton extends React.Component<EditMessageButtonProps, EditMess
         <div style={{ display: "inline-block" }}>
           <Tooltip title="Edit">
             <IconButton aria-label="Edit" onClick={() => this.toggleDialog()}>
-              <Edit />
+              <Badge max={600} badgeContent={this.props.modifiableUntil} color="secondary">
+                <Edit />
+              </Badge>
             </IconButton>
           </Tooltip>
           {this.newTopicDialog()}
@@ -152,4 +163,4 @@ class EditMessageButton extends React.Component<EditMessageButtonProps, EditMess
   }
 }
 
-export default (EditMessageButton);
+export default EditMessageButton;
