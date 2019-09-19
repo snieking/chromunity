@@ -145,9 +145,8 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
         }}
         open={snackbarOpen}
         autoHideDuration={3000}
-        onClose={() => setSnackBarOpen(false)}
       >
-        <CustomSnackbarContentWrapper variant="info" message="Copied to clipboard" />
+        <CustomSnackbarContentWrapper onClose={() => setSnackBarOpen(false)} variant="info" message="Copied to clipboard" />
       </Snackbar>
     </div>
   );

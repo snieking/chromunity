@@ -112,9 +112,8 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         open={errorOpen}
         autoHideDuration={6000}
-        onClose={() => setErrorOpen(false)}
       >
-        <CustomSnackbarContentWrapper variant="error" message={props.error} />
+        <CustomSnackbarContentWrapper onClose={() => setErrorOpen(false)} variant="error" message={props.error} />
       </Snackbar>
     </Container>
   );

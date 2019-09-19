@@ -115,9 +115,8 @@ const AccountCredentialsForm: React.FunctionComponent<Props> = props => {
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         open={errorOpen}
         autoHideDuration={6000}
-        onClose={() => setErrorOpen(false)}
       >
-        <CustomSnackbarContentWrapper variant="error" message={error} />
+        <CustomSnackbarContentWrapper onClose={() => setErrorOpen(false)} variant="error" message={error} />
       </Snackbar>
     </div>
   );

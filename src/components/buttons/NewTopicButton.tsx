@@ -310,9 +310,8 @@ const NewTopicButton = withStyles(largeButtonStyles)(
               }}
               open={this.state.newTopicSuccessOpen}
               autoHideDuration={3000}
-              onClose={this.handleClose}
             >
-              <CustomSnackbarContentWrapper variant="success" message={this.state.newTopicStatusMessage} />
+              <CustomSnackbarContentWrapper onClose={this.handleClose} variant="success" message={this.state.newTopicStatusMessage} />
             </Snackbar>
             <Snackbar
               anchorOrigin={{
@@ -323,7 +322,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
               autoHideDuration={3000}
               onClose={this.handleClose}
             >
-              <CustomSnackbarContentWrapper variant="error" message={this.state.newTopicStatusMessage} />
+              <CustomSnackbarContentWrapper onClose={this.handleClose} variant="error" message={this.state.newTopicStatusMessage} />
             </Snackbar>
           </div>
         );

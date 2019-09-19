@@ -106,9 +106,8 @@ class EditMessageButton extends React.Component<EditMessageButtonProps, EditMess
           }}
           open={this.state.replyStatusSuccessOpen}
           autoHideDuration={3000}
-          onClose={this.handleClose}
         >
-          <CustomSnackbarContentWrapper variant="success" message={this.state.replySentStatus} />
+          <CustomSnackbarContentWrapper onClose={this.handleClose} variant="success" message={this.state.replySentStatus} />
         </Snackbar>
         <Snackbar
           anchorOrigin={{
@@ -117,9 +116,8 @@ class EditMessageButton extends React.Component<EditMessageButtonProps, EditMess
           }}
           open={this.state.replyStatusErrorOpen}
           autoHideDuration={3000}
-          onClose={this.handleClose}
         >
-          <CustomSnackbarContentWrapper variant="error" message={this.state.replySentStatus} />
+          <CustomSnackbarContentWrapper onClose={this.handleClose} variant="error" message={this.state.replySentStatus} />
         </Snackbar>
       </div>
     );

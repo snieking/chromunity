@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 export interface Props {
     className?: string;
     message?: string;
-    onClose?: () => void;
+    onClose: Function;
     isOpen?: () => false;
     variant: keyof typeof variantIcon;
 }
@@ -68,7 +68,7 @@ export function CustomSnackbarContentWrapper(props: Props) {
         </span>
             }
             action={[
-                <IconButton key="close" aria-label="Close" color="inherit" onClick={onClose}>
+                <IconButton key="close" aria-label="Close" color="inherit" onClick={() => onClose()}>
                     <CloseIcon className={classes.icon}/>
                 </IconButton>,
             ]}
