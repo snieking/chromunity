@@ -47,6 +47,7 @@ class EditMessageButton extends React.Component<EditMessageButtonProps, EditMess
     };
 
     this.toggleDialog = this.toggleDialog.bind(this);
+    this.submit = this.submit.bind(this);
     this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
     this.handleClose = this.handleClose.bind(this);
   }
@@ -65,7 +66,10 @@ class EditMessageButton extends React.Component<EditMessageButtonProps, EditMess
     this.setState({ message: parseEmojis(event.target.value) });
   }
 
-  createTopicButton() {}
+  submit() {
+    this.toggleDialog();
+    this.props.submitFunction(this.state.message);
+  }
 
   newTopicDialog() {
     return (
@@ -93,7 +97,7 @@ class EditMessageButton extends React.Component<EditMessageButtonProps, EditMess
               <Button onClick={() => this.toggleDialog()} color="secondary" variant="contained">
                 Cancel
               </Button>
-              <Button type="submit" color="primary" variant="contained">
+              <Button onClick={() => this.submit()} color="primary" variant="contained">
                 Send
               </Button>
             </DialogActions>

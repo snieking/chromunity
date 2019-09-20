@@ -421,7 +421,22 @@ const FullTopic = withStyles(styles)(
 
     editTopicMessage(text: string) {
       this.setState({ isLoading: true });
-      modifyTopic(this.state.user, this.state.topic.id, text).then(() => window.location.reload());
+      modifyTopic(this.state.user, this.state.topic.id, text)
+        .then(() =>
+          this.setState(prevState => ({
+            topic: {
+              id: prevState.topic.id,
+              author: prevState.topic.author,
+              title: prevState.topic.title,
+              message: text,
+              timestamp: prevState.topic.timestamp,
+              last_modified: prevState.topic.last_modified,
+              removed: prevState.topic.removed
+            },
+            isLoading: false
+          }))
+        )
+        .catch(() => this.setState({ isLoading: false }));
     }
 
     closeReportTopic() {
@@ -433,7 +448,7 @@ const FullTopic = withStyles(styles)(
       const user: ChromunityUser = this.state.user;
 
       if (user != null) {
-        reportTopic(user, this.state.topic.id);
+        reportTopic(user, this.state.topic.id).then();
         window.location.reload();
       } else {
         window.location.href = "/user/login";

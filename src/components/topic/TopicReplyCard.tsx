@@ -313,7 +313,10 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     editReplyMessage(text: string) {
-      modifyReply(this.state.user, this.props.reply.id, text).then(() => window.location.reload());
+      this.setState({ isLoading: true });
+      modifyReply(this.state.user, this.props.reply.id, text)
+        .then(() => window.location.reload())
+        .catch(() => this.setState({ isLoading: false }));
     }
 
     closeReportReply() {
