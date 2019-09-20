@@ -165,19 +165,23 @@ const ProfileCard = withStyles(styles)(
 
     toggleFollowing() {
       if (this.state.following) {
-        removeFollowing(this.state.user, this.props.username);
-        this.setState(prevState => ({
-          following: false,
-          followers: prevState.followers - 1,
-          userFollowings: prevState.userFollowings
-        }));
+        removeFollowing(this.state.user, this.props.username).then(() => {
+          this.setState(prevState => ({
+            following: false,
+            followers: prevState.followers - 1,
+            userFollowings: prevState.userFollowings
+          }));
+        });
       } else {
-        createFollowing(this.state.user, this.props.username);
-        this.setState(prevState => ({
-          following: true,
-          followers: prevState.followers + 1,
-          userFollowings: prevState.userFollowings
-        }));
+        createFollowing(this.state.user, this.props.username).then(() => {
+          console.log("SUCCESSSS!");
+          this.setState(prevState => ({
+            following: true,
+            followers: prevState.followers + 1,
+            userFollowings: prevState.userFollowings
+          }));
+        })
+          .catch(() => console.log("ERROR!!!!!"));
       }
     }
 
