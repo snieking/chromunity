@@ -30,7 +30,7 @@ operation delete_topic(id: text, descriptor_id: byte_array, username: text) {
      val topic = topic@{ .id == id, .author == author };
      val fiveMinutesInMillis = 300000;
      require(op_context.last_block_time < topic.timestamp + fiveMinutesInMillis);
-     update topic ( removed = true );
+     update topic ( removed = true, message = "Deleted by @" + username );
 }
 
 operation create_reply(topic_id: text, descriptor_id: byte_array, id: text, username: text, message: text) {

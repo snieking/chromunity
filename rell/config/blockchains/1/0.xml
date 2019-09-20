@@ -64,7 +64,8 @@ operation unfollow_channel(username: text, descriptor_id: byte_array, name) {
     // TODO: .lower_case() in Rell 0.9
     return channel@*{
         .name == name,
-        .topic.last_modified &lt; timestamp
+        .topic.last_modified &lt; timestamp,
+        .topic.removed == false
     } (
         id=.topic.id,
         author=.topic.author.display_name,
@@ -79,7 +80,8 @@ operation unfollow_channel(username: text, descriptor_id: byte_array, name) {
 query get_topics_by_channel_after_timestamp(name, timestamp) {
     return channel@*{ 
         .name == name,
-        .topic.last_modified &gt; timestamp
+        .topic.last_modified &gt; timestamp,
+        .topic.removed == false
     } (
         id=.topic.id,
         author=.topic.author.display_name,
@@ -104,7 +106,8 @@ query get_topics_by_followed_channels_prior_to_timestamp(username: text, timesta
     return (channel, channel_following) @* {
         channel_following.user == user,
         channel_following.name == channel.name,
-        channel.topic.last_modified &lt; timestamp
+        channel.topic.last_modified &lt; timestamp,
+        channel.topic.removed == false
     }
     (
         id=channel.topic.id,
@@ -122,7 +125,8 @@ query get_topics_by_followed_channels_after_timestamp(username: text, timestamp,
     return (channel, channel_following) @* {
         channel_following.user == user,
         channel_following.name == channel.name,
-        channel.topic.last_modified &gt; timestamp
+        channel.topic.last_modified &gt; timestamp,
+        channel.topic.removed == false
     }
     (
         id=channel.topic.id,
@@ -1204,6 +1208,7 @@ operation handle_representative_report(username: text, descriptor_id: byte_array
     mutable title: name;
     mutable message: text;
     mutable removed: boolean;
+    index removed;
 }
 
 class topic_reply {
@@ -1259,7 +1264,7 @@ operation delete_topic(id: text, descriptor_id: byte_array, username: text) {
      val topic = topic@{ .id == id, .author == author };
      val fiveMinutesInMillis = 300000;
      require(op_context.last_block_time &lt; topic.timestamp + fiveMinutesInMillis);
-     update topic ( removed = true );
+     update topic ( removed = true, message = "Deleted by @" + username );
 }
 
 operation create_reply(topic_id: text, descriptor_id: byte_array, id: text, username: text, message: text) {
@@ -1317,7 +1322,8 @@ operation create_sub_reply(topic_id: text, descriptor_id: byte_array, parent_rep
                             <entry key="topic/queries.rell">
                                 <string>query get_topics_after_timestamp(timestamp, page_size: integer) {
     return topic @* { 
-        .last_modified &gt; timestamp
+        .last_modified &gt; timestamp,
+        .removed == false
     }(
         .id,
         author=.author.display_name,
@@ -1331,7 +1337,8 @@ operation create_sub_reply(topic_id: text, descriptor_id: byte_array, parent_rep
 
 query get_topics_prior_to_timestamp(timestamp, page_size: integer) {
     return topic @* { 
-        .last_modified &lt; timestamp
+        .last_modified &lt; timestamp,
+        .removed == false
     }(
         .id,
         author=.author.display_name,
@@ -1425,7 +1432,8 @@ query get_topics_from_follows_after_timestamp(name, timestamp, page_size: intege
     return (topic, follow) @* {
             follow.follower.name == name.lower_case(),
             follow.follows == topic.author,
-            topic.last_modified &gt; timestamp
+            topic.last_modified &gt; timestamp,
+            topic.removed == false
     }(
         topic.id,
         author=topic.author.display_name,
@@ -1441,7 +1449,8 @@ query get_topics_from_follows_prior_to_timestamp(name, timestamp, page_size: int
     return (topic, follow) @* {
         follow.follower.name == name.lower_case(),
         follow.follows == topic.author,
-        topic.last_modified &lt; timestamp
+        topic.last_modified &lt; timestamp,
+        topic.removed == false
     }(
         topic.id,
         author=topic.author.display_name,
@@ -1468,7 +1477,10 @@ query get_topic_by_id(id: text) {
 }
 
 query get_all_topics_by_stars_since_timestamp(timestamp, page_size: integer) {
-    return tmp_topic_rating@*{ .topic.last_modified &gt; timestamp } (
+    return tmp_topic_rating@*{
+        .topic.last_modified &gt; timestamp,
+        .topic.removed == false
+    } (
         -sort .stars,
         id = .topic.id,
         author=.topic.author.display_name,
@@ -1484,7 +1496,8 @@ query get_topics_by_follows_and_stars_since_timestamp(name, timestamp, page_size
     return (tmp_topic_rating, follow) @*{
             follow.follower.name == name,
             tmp_topic_rating.topic.author == follow.follows,
-            tmp_topic_rating.topic.last_modified &gt; timestamp
+            tmp_topic_rating.topic.last_modified &gt; timestamp,
+            tmp_topic_rating.topic.removed == false
         } (
         -sort tmp_topic_rating.stars,
         id = tmp_topic_rating.topic.id,
@@ -1501,7 +1514,8 @@ query get_topics_by_channel_after_timestamp_sorted_by_popularity(name, timestamp
     return (tmp_topic_rating, channel)@*{
         name == channel.name,
         tmp_topic_rating.topic == channel.topic,
-        tmp_topic_rating.topic.last_modified &gt; timestamp
+        tmp_topic_rating.topic.last_modified &gt; timestamp,
+        tmp_topic_rating.topic.removed == false
     } (
         -sort .stars,
         id = channel.topic.id,
@@ -1519,7 +1533,8 @@ query get_topics_by_followed_channels_after_timestamp_sorted_by_popularity(name,
         channel_following.user == user@{ name },
         channel_following.name == channel.name,
         tmp_topic_rating.topic == channel.topic,
-        tmp_topic_rating.topic.last_modified &gt; timestamp
+        tmp_topic_rating.topic.last_modified &gt; timestamp,
+        tmp_topic_rating.topic.removed == false
     } (
         -sort .stars,
         id = channel.topic.id,
