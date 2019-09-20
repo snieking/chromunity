@@ -28,7 +28,6 @@ export const loginReducer: Reducer<AccountState, AccountActions> = (state = init
       };
     }
     case AccountActionTypes.ACCOUNT_REGISTER: {
-      console.log("REGISTERING ACCOUNT!");
       return {
         ...state,
         username: action.username,

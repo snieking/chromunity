@@ -255,7 +255,6 @@ const FullTopic = withStyles(styles)(
         const oldestTimestamp: number = this.state.topicReplies[this.state.topicReplies.length - 1].timestamp;
         getTopicRepliesPriorToTimestamp(this.state.topic.id, oldestTimestamp - 1, repliesPageSize).then(
           retrievedReplies => {
-            retrievedReplies.forEach(reply => console.log("Reply timestamp is: ", reply.timestamp));
             if (retrievedReplies.length > 0) {
               this.setState(prevState => ({
                 topicReplies: Array.from(new Set(prevState.topicReplies.concat(retrievedReplies))),

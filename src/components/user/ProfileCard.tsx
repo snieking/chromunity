@@ -174,14 +174,12 @@ const ProfileCard = withStyles(styles)(
         });
       } else {
         createFollowing(this.state.user, this.props.username).then(() => {
-          console.log("SUCCESSSS!");
           this.setState(prevState => ({
             following: true,
             followers: prevState.followers + 1,
             userFollowings: prevState.userFollowings
           }));
-        })
-          .catch(() => console.log("ERROR!!!!!"));
+        });
       }
     }
 

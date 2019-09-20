@@ -13,8 +13,6 @@ interface Props extends RouteComponentProps<Params> {}
 const CandidateElectionVoteLink: React.FunctionComponent<Props> = props => {
   const user = getUser();
 
-  console.log("Vote for: ", props.match.params.candidate);
-
   function onConfirm() {
     voteForCandidate(user, props.match.params.candidate)
       .then(() => navigateToElection())

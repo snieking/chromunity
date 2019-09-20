@@ -57,7 +57,6 @@ function updateFollowing(user: ChromunityUser, following: string, rellOperation:
   )
     .then(value => {
       gaRellOperationTiming(rellOperation, stopStopwatch(sw));
-      console.log("=================== ADADASDADASD");
       return value;
     })
     .catch((error: Error) => handleGADuringException(rellOperation, sw, error));

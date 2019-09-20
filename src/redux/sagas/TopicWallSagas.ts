@@ -63,7 +63,6 @@ const cacheExpired = (updated: number): boolean => {
 
 export function* loadAllTopics(action: LoadAllTopicWallAction) {
   const updated: number = yield select(getAllUpdatedTime);
-
   let topics: Topic[] = [];
   if (!action.ignoreCache && !cacheExpired(updated)) {
     yield put(updateTopicWallFromCache(WallType.ALL));

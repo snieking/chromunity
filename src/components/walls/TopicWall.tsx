@@ -219,7 +219,7 @@ class TopicWall extends React.Component<Props, State> {
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
-    loadAllTopics: (pageSize: number) => dispatch(loadAllTopicWall(pageSize)),
+    loadAllTopics: (pageSize: number, ignoreCache: boolean) => dispatch(loadAllTopicWall(pageSize, ignoreCache)),
     loadOlderTopics: (pageSize: number) => dispatch(loadOlderAllTopics(pageSize)),
     loadAllTopicsByPopularity: (timestamp: number, pageSize: number) =>
       dispatch(loadAllTopicsByPopularity(timestamp, pageSize)),
@@ -229,8 +229,8 @@ const mapDispatchToProps = (dispatch: any) => {
       dispatch(loadOlderFollowedUsersTopics(username, pageSize)),
     loadFollowedUsersTopicsByPopularity: (username: string, timestamp: number, pageSize: number) =>
       dispatch(loadFollowedUsersTopicsByPopularity(username, timestamp, pageSize)),
-    loadFollowedChannelsTopics: (username: string, pageSize: number) =>
-      dispatch(loadFollowedChannelsTopicWall(username, pageSize)),
+    loadFollowedChannelsTopics: (username: string, pageSize: number, ignoreCache: boolean) =>
+      dispatch(loadFollowedChannelsTopicWall(username, pageSize, ignoreCache)),
     loadOlderFollowedChannelsTopics: (username: string, pageSize: number) =>
       dispatch(loadOlderFollowedChannelsTopics(username, pageSize)),
     loadFollowedChannelsTopicsByPopularity: (username: string, timestamp: number, pageSize: number) =>
