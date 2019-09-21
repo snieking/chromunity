@@ -20,8 +20,9 @@ const MarkdownRenderer: React.FunctionComponent<Props> = props => {
 
 const useStyles = makeStyles(theme => ({
   text: {
-    color: theme.palette.type === "light" ? COLOR_CHROMIA_DARK : COLOR_OFF_WHITE
-  }
+    color: theme.palette.type === "light" ? COLOR_CHROMIA_DARK : COLOR_OFF_WHITE,
+    wordBreak: "break-all"
+  },
 }));
 
 export default MarkdownRenderer;
