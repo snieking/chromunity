@@ -494,7 +494,7 @@ const FullTopic = withStyles(styles)(
 
     isRepresentative() {
       const user: ChromunityUser = this.state.user;
-      return user != null && this.props.representatives.includes(user.name);
+      return user != null && this.props.representatives.includes(user.name.toLocaleLowerCase());
     }
 
     renderAdminActions() {

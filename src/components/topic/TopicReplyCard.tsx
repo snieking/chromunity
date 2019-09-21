@@ -96,7 +96,6 @@ interface State {
   ratedByMe: boolean;
   replyBoxOpen: boolean;
   replyMessage: string;
-  isRepresentative: boolean;
   hideThreadConfirmDialogOpen: boolean;
   avatar: string;
   subReplies: TopicReply[];
@@ -131,7 +130,6 @@ const TopicReplyCard = withStyles(styles)(
         ratedByMe: false,
         replyBoxOpen: false,
         replyMessage: "",
-        isRepresentative: false,
         hideThreadConfirmDialogOpen: false,
         avatar: "",
         subReplies: [],
@@ -153,6 +151,7 @@ const TopicReplyCard = withStyles(styles)(
       this.editReplyMessage = this.editReplyMessage.bind(this);
       this.reportReply = this.reportReply.bind(this);
       this.closeReportReply = this.closeReportReply.bind(this);
+      this.isRepresentative = this.isRepresentative.bind(this);
     }
 
     render() {
@@ -367,8 +366,13 @@ const TopicReplyCard = withStyles(styles)(
       }
     }
 
+    isRepresentative() {
+      const user: ChromunityUser = this.state.user;
+      return user != null && this.props.representatives.includes(user.name.toLocaleLowerCase());
+    }
+
     renderAdminActions() {
-      if (this.state.isRepresentative && !this.props.reply.removed) {
+      if (this.isRepresentative() && !this.props.reply.removed) {
         return (
           <div style={{ display: "inline-block" }}>
             <IconButton aria-label="Remove reply" onClick={() => this.setState({ removeReplyDialogOpen: true })}>
