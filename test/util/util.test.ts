@@ -1,4 +1,10 @@
-import {needsToBeSliced, sortByFrequency, stringToHexColor, timeAgoReadable} from "../../src/util/util";
+import {
+  needsToBeSliced,
+  printableMinutes,
+  sortByFrequency,
+  stringToHexColor,
+  timeAgoReadable
+} from "../../src/util/util";
 import { getTags, parseEmojis } from "../../src/util/text-parsing";
 
 jest.setTimeout(30000);
@@ -110,4 +116,19 @@ describe("emoji parsing", () => {
         expect(parseEmojis("hej :D whatsup?")).toBe("hej 😃 whatsup?");
     });
 
+});
+
+describe("printable minutes", () => {
+
+  it ("printable seconds", async () => {
+    expect(printableMinutes(40)).toBe("40s");
+  });
+
+  it("printable minutes and seconds", async () => {
+    expect(printableMinutes(61)).toBe("1m 1s");
+  });
+
+  it("printable minutes and seconds 2", async () => {
+    expect(printableMinutes(179)).toBe("2m 59s");
+  });
 });

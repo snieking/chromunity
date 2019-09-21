@@ -97,7 +97,12 @@ class EditMessageButton extends React.Component<EditMessageButtonProps, EditMess
               <Button onClick={() => this.toggleDialog()} color="secondary" variant="contained">
                 Cancel
               </Button>
-              <Button onClick={() => this.submit()} color="primary" variant="contained">
+              <Button
+                onKeyPress={e => e.key === "Enter" ? this.submit() : ""}
+                onClick={() => this.submit()}
+                color="primary"
+                variant="contained"
+              >
                 Send
               </Button>
             </DialogActions>
