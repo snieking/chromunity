@@ -330,7 +330,7 @@ const TopicReplyCard = withStyles(styles)(
                 </Tooltip>
               </IconButton>
             ) : (
-              <div />
+              <div style={{ display: "inline-block" }}/>
             )}
             {this.renderAdminActions()}
           </div>
