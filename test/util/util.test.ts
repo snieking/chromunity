@@ -102,4 +102,12 @@ describe("emoji parsing", () => {
        expect(parseEmojis(":smirk:")).toBe("😏");
     });
 
+    it("parse normal smiley emoji", async () => {
+        expect(parseEmojis(":D")).toBe("😃");
+    });
+
+    it("parse normal emoji with text around", async () => {
+        expect(parseEmojis("hej :D whatsup?")).toBe("hej 😃 whatsup?");
+    });
+
 });
