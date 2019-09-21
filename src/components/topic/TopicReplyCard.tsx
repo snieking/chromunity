@@ -22,7 +22,7 @@ import {
   WithStyles
 } from "@material-ui/core";
 import { getCachedUserMeta, getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
-import { Delete, Reply, Report, StarBorder, StarRate } from "@material-ui/icons";
+import { Delete, Reply, Report, StarBorder, StarRate, UnfoldMore } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import {
   createTopicSubReply,
@@ -41,6 +41,7 @@ import Timestamp from "../common/Timestamp";
 import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import ConfirmDialog from "../common/ConfirmDialog";
+import * as BoomerangCache from "boomerang-cache";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -105,14 +106,25 @@ interface State {
   isLoading: boolean;
   user: ChromunityUser;
   timeLeftUntilNoLongerModifiable: number;
+  renderSubReplies: boolean;
 }
 
 const allowedEditTimeMillis: number = 300000;
+const replyMaxRenderAgeMillis: number = 1000 * 60 * 60 * 24;
+
+const replyUnfoldCache = BoomerangCache.create("reply-unfold-bucket", {
+  storage: "local",
+  encrypt: false
+});
 
 const TopicReplyCard = withStyles(styles)(
   class extends React.Component<Props, State> {
     constructor(props: Props) {
       super(props);
+
+      const previouslyFoldedSubReplies: boolean = replyUnfoldCache.get(props.reply.id) != null;
+      const decisionToRenderSubReplies: boolean = replyUnfoldCache.get(props.reply.id);
+      const shouldRenderDueToTimestamp: boolean = props.reply.timestamp + replyMaxRenderAgeMillis > Date.now();
 
       this.state = {
         stars: 0,
@@ -132,7 +144,8 @@ const TopicReplyCard = withStyles(styles)(
         reportReplyDialogOpen: false,
         isLoading: false,
         user: getUser(),
-        timeLeftUntilNoLongerModifiable: 0
+        timeLeftUntilNoLongerModifiable: 0,
+        renderSubReplies: previouslyFoldedSubReplies ? decisionToRenderSubReplies : shouldRenderDueToTimestamp
       };
 
       this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
@@ -152,20 +165,26 @@ const TopicReplyCard = withStyles(styles)(
                 {this.renderCardContent()}
               </Card>
             </div>
-            {this.state.subReplies.map(reply => (
-              <TopicReplyCard
-                key={"reply-" + reply.id}
-                reply={reply}
-                indention={this.props.indention + 10}
-                topicId={this.props.topicId}
-                representatives={this.props.representatives}
-                mutedUsers={this.props.mutedUsers}
-              />
-            ))}
+            {this.renderSubReplies()}
           </div>
         );
       } else {
         return <div />;
+      }
+    }
+
+    renderSubReplies() {
+      if (this.state.renderSubReplies) {
+        return this.state.subReplies.map(reply => (
+          <TopicReplyCard
+            key={"reply-" + reply.id}
+            reply={reply}
+            indention={this.props.indention + 10}
+            topicId={this.props.topicId}
+            representatives={this.props.representatives}
+            mutedUsers={this.props.mutedUsers}
+          />
+        ));
       }
     }
 
@@ -305,11 +324,25 @@ const TopicReplyCard = withStyles(styles)(
                 <Report />
               </Tooltip>
             </IconButton>
+            {this.state.subReplies.length > 0 ? (
+              <IconButton aria-label="Load replies" onClick={() => this.toggleRenderReply()}>
+                <Tooltip title="Toggle replies">
+                  <UnfoldMore/>
+                </Tooltip>
+              </IconButton>
+            ) : (
+              <div />
+            )}
             {this.renderAdminActions()}
           </div>
           <div>{this.renderReplyBox()}</div>
         </CardContent>
       );
+    }
+
+    toggleRenderReply() {
+      replyUnfoldCache.set(this.props.reply.id, !this.state.renderSubReplies, replyMaxRenderAgeMillis * 7);
+      this.setState(prevState => ({ renderSubReplies: !prevState.renderSubReplies }));
     }
 
     editReplyMessage(text: string) {
