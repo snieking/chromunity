@@ -122,6 +122,8 @@ const replyUnfoldCache = BoomerangCache.create("reply-unfold-bucket", {
 
 const TopicReplyCard = withStyles(styles)(
   class extends React.Component<Props, State> {
+    private readonly textInput: React.RefObject<HTMLInputElement>;
+
     constructor(props: Props) {
       super(props);
 
@@ -150,6 +152,9 @@ const TopicReplyCard = withStyles(styles)(
         renderSubReplies: previouslyFoldedSubReplies ? decisionToRenderSubReplies : shouldRenderDueToTimestamp
       };
 
+      this.textInput = React.createRef();
+
+      this.focusTextInput = this.focusTextInput.bind(this);
       this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
       this.sendReply = this.sendReply.bind(this);
       this.editReplyMessage = this.editReplyMessage.bind(this);
@@ -445,6 +450,7 @@ const TopicReplyCard = withStyles(styles)(
                 fullWidth
                 onChange={this.handleReplyMessageChange}
                 value={this.state.replyMessage}
+                inputRef={this.textInput}
               />
               <EmojiPicker emojiAppender={this.addEmojiInReply} btnSize="sm" />
             </div>
@@ -467,7 +473,14 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     addEmojiInReply(emoji: any) {
+      this.focusTextInput();
       this.setState(prevState => ({ replyMessage: prevState.replyMessage + emoji }));
+    }
+
+    focusTextInput() {
+      if (this.textInput) {
+        setTimeout(() => this.textInput.current.focus(), 100);
+      }
     }
 
     handleReplyMessageChange(event: React.ChangeEvent<HTMLInputElement>) {

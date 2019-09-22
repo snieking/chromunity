@@ -1,4 +1,4 @@
-import React, { FormEvent, useEffect, useState } from "react";
+import React, { FormEvent, useEffect, useRef, useState } from "react";
 
 import { Dialog, makeStyles, Snackbar, Tab, Tabs, Typography } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
@@ -34,6 +34,8 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
   const [newReplyStatusMessage, setNewReplyStatusMessage] = useState<string>("");
   const [userMeta, setUserMeta] = useState<UserMeta>(null);
   const [activeTab, setActiveTab] = useState<number>(0);
+
+  const textInput = useRef(null);
 
   const user = getUser();
 
@@ -151,6 +153,7 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
           fullWidth
           onChange={handleDialogMessageChange}
           value={message}
+          inputRef={textInput}
         />
         <EmojiPicker emojiAppender={addEmoji} />
       </div>
@@ -159,6 +162,13 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
 
   function addEmoji(emoji: string) {
     setMessage(message + emoji);
+    focusTextInput();
+  }
+
+  function focusTextInput() {
+    if (textInput) {
+      setTimeout(() => textInput.current.focus(), 100);
+    }
   }
 
   function renderPreview() {

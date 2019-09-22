@@ -38,6 +38,8 @@ export interface EditMessageButtonState {
 
 const EditMessageButton = withStyles(styles)(
   class extends React.Component<EditMessageButtonProps, EditMessageButtonState> {
+    private textInput: React.RefObject<HTMLInputElement>;
+
     constructor(props: EditMessageButtonProps) {
       super(props);
 
@@ -55,6 +57,9 @@ const EditMessageButton = withStyles(styles)(
         user: getUser()
       };
 
+      this.textInput = React.createRef();
+
+      this.focusTextInput = this.focusTextInput.bind(this);
       this.toggleDialog = this.toggleDialog.bind(this);
       this.submit = this.submit.bind(this);
       this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
@@ -102,6 +107,7 @@ const EditMessageButton = withStyles(styles)(
                     fullWidth
                     onChange={this.handleDialogMessageChange}
                     value={this.state.message}
+                    inputRef={this.textInput}
                   />
                   <EmojiPicker emojiAppender={this.addEmoji} />
                 </div>
@@ -155,7 +161,14 @@ const EditMessageButton = withStyles(styles)(
     }
 
     addEmoji(emoji: string) {
+      this.focusTextInput();
       this.setState(prevState => ({ message: prevState.message + emoji }));
+    }
+
+    focusTextInput() {
+      if (this.textInput) {
+        setTimeout(() => this.textInput.current.focus(), 100);
+      }
     }
 
     render() {

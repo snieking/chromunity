@@ -61,6 +61,8 @@ const maxChannelLength: number = 20;
 const NewTopicButton = withStyles(largeButtonStyles)(
   withTheme(
     class extends React.Component<NewTopicButtonProps, NewTopicButtonState> {
+      private readonly textInput: React.RefObject<HTMLInputElement>;
+
       constructor(props: NewTopicButtonProps) {
         super(props);
 
@@ -83,6 +85,9 @@ const NewTopicButton = withStyles(largeButtonStyles)(
           user: getUser()
         };
 
+        this.textInput = React.createRef();
+
+        this.focusTextInput = this.focusTextInput.bind(this);
         this.toggleNewTopicDialog = this.toggleNewTopicDialog.bind(this);
         this.handleDialogTitleChange = this.handleDialogTitleChange.bind(this);
         this.handleChannelChange = this.handleChannelChange.bind(this);
@@ -351,6 +356,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
               onChange={this.handleDialogMessageChange}
               value={this.state.topicMessage}
               variant="outlined"
+              inputRef={this.textInput}
             />
             <EmojiPicker emojiAppender={this.addEmoji} />
           </div>
@@ -358,7 +364,14 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       }
 
       addEmoji(emoji: string) {
+        this.focusTextInput();
         this.setState(prevState => ({ topicMessage: prevState.topicMessage + emoji }));
+      }
+
+      focusTextInput() {
+        if (this.textInput) {
+          setTimeout(() => this.textInput.current.focus(), 100);
+        }
       }
 
       renderPreview() {
