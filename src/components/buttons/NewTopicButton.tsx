@@ -26,6 +26,8 @@ import {
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import withTheme from "@material-ui/core/styles/withTheme";
 import { parseEmojis } from "../../util/text-parsing";
+import "emoji-mart/css/emoji-mart.css";
+import EmojiPicker from "../common/EmojiPicker";
 
 interface OptionType {
   label: string;
@@ -89,6 +91,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         this.handleClose = this.handleClose.bind(this);
         this.handleChangeSingle = this.handleChangeSingle.bind(this);
         this.handleTabChange = this.handleTabChange.bind(this);
+        this.addEmoji = this.addEmoji.bind(this);
       }
 
       componentDidMount() {
@@ -253,11 +256,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                     styles={customStyles}
                   />
                   <br />
-                  <Badge
-                    color="secondary"
-                    badgeContent={maxTitleLength - this.state.topicTitle.length}
-                    showZero
-                  >
+                  <Badge color="secondary" badgeContent={maxTitleLength - this.state.topicTitle.length} showZero>
                     <TextField
                       autoFocus
                       margin="dense"
@@ -311,7 +310,11 @@ const NewTopicButton = withStyles(largeButtonStyles)(
               open={this.state.newTopicSuccessOpen}
               autoHideDuration={3000}
             >
-              <CustomSnackbarContentWrapper onClose={this.handleClose} variant="success" message={this.state.newTopicStatusMessage} />
+              <CustomSnackbarContentWrapper
+                onClose={this.handleClose}
+                variant="success"
+                message={this.state.newTopicStatusMessage}
+              />
             </Snackbar>
             <Snackbar
               anchorOrigin={{
@@ -322,7 +325,11 @@ const NewTopicButton = withStyles(largeButtonStyles)(
               autoHideDuration={3000}
               onClose={this.handleClose}
             >
-              <CustomSnackbarContentWrapper onClose={this.handleClose} variant="error" message={this.state.newTopicStatusMessage} />
+              <CustomSnackbarContentWrapper
+                onClose={this.handleClose}
+                variant="error"
+                message={this.state.newTopicStatusMessage}
+              />
             </Snackbar>
           </div>
         );
@@ -330,21 +337,28 @@ const NewTopicButton = withStyles(largeButtonStyles)(
 
       renderEditor() {
         return (
-          <TextField
-            margin="dense"
-            id="message"
-            multiline
-            label="Content"
-            type="text"
-            fullWidth
-            rows="5"
-            rowsMax="15"
-            onChange={this.handleDialogMessageChange}
-            value={this.state.topicMessage}
-            variant="outlined"
-            className={this.props.classes.content}
-          />
+          <div>
+            <TextField
+              margin="dense"
+              id="message"
+              multiline
+              label="Content"
+              type="text"
+              fullWidth
+              rows="5"
+              rowsMax="15"
+              onChange={this.handleDialogMessageChange}
+              value={this.state.topicMessage}
+              variant="outlined"
+              className={this.props.classes.content}
+            />
+            <EmojiPicker emojiAppender={this.addEmoji} />
+          </div>
         );
+      }
+
+      addEmoji(emoji: string) {
+        this.setState(prevState => ({ topicMessage: prevState.topicMessage + emoji }));
       }
 
       renderPreview() {

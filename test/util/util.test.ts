@@ -116,6 +116,30 @@ describe("emoji parsing", () => {
         expect(parseEmojis("hej :D whatsup?")).toBe("hej 😃 whatsup?");
     });
 
+    it("parse wink emoji", async () => {
+       expect(parseEmojis(";)")).toBe("😉");
+    });
+
+    it("parse expressionless emoji", async () => {
+        expect(parseEmojis(":|")).toBe("😑");
+    });
+
+    it("parse confounded emoji", async () => {
+        expect(parseEmojis(":s")).toBe("😖");
+    });
+
+    it("parse sweat_smile emoji", async () => {
+        expect(parseEmojis(":')")).toBe("😅");
+    });
+
+    it("parse stuck_out_tongue emoji", async () => {
+        expect(parseEmojis(":p")).toBe("😛");
+    });
+
+    it("parse open mouth emoji", async () => {
+        expect(parseEmojis(":o")).toBe("😮");
+    });
+
 });
 
 describe("printable minutes", () => {

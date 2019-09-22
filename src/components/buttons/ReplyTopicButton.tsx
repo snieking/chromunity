@@ -14,6 +14,7 @@ import { UserMeta } from "../../types";
 import { largeButtonStyles } from "./ButtonStyles";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import { parseEmojis } from "../../util/text-parsing";
+import EmojiPicker from "../common/EmojiPicker";
 
 export interface ReplyTopicButtonProps {
   submitFunction: Function;
@@ -136,22 +137,29 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
 
   function renderEditor() {
     return (
-      <TextField
-        autoFocus
-        margin="dense"
-        id="message"
-        multiline
-        label="Reply"
-        type="text"
-        rows="5"
-        rowsMax="15"
-        variant="outlined"
-        fullWidth
-        onChange={handleDialogMessageChange}
-        value={message}
-        className={classes.content}
-      />
+      <>
+        <TextField
+          autoFocus
+          margin="dense"
+          id="message"
+          multiline
+          label="Reply"
+          type="text"
+          rows="5"
+          rowsMax="15"
+          variant="outlined"
+          fullWidth
+          onChange={handleDialogMessageChange}
+          value={message}
+          className={classes.content}
+        />
+        <EmojiPicker emojiAppender={addEmoji} />
+      </>
     );
+  }
+
+  function addEmoji(emoji: string) {
+    setMessage(message + emoji);
   }
 
   function renderPreview() {

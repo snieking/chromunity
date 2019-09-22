@@ -42,6 +42,7 @@ import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import ConfirmDialog from "../common/ConfirmDialog";
 import * as BoomerangCache from "boomerang-cache";
+import EmojiPicker from "../common/EmojiPicker";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -152,6 +153,7 @@ const TopicReplyCard = withStyles(styles)(
       this.reportReply = this.reportReply.bind(this);
       this.closeReportReply = this.closeReportReply.bind(this);
       this.isRepresentative = this.isRepresentative.bind(this);
+      this.addEmojiInReply = this.addEmojiInReply.bind(this);
     }
 
     render() {
@@ -326,11 +328,11 @@ const TopicReplyCard = withStyles(styles)(
             {this.state.subReplies.length > 0 ? (
               <IconButton aria-label="Load replies" onClick={() => this.toggleRenderReply()}>
                 <Tooltip title="Toggle replies">
-                  <UnfoldMore/>
+                  <UnfoldMore />
                 </Tooltip>
               </IconButton>
             ) : (
-              <div style={{ display: "inline-block" }}/>
+              <div style={{ display: "inline-block" }} />
             )}
             {this.renderAdminActions()}
           </div>
@@ -440,20 +442,27 @@ const TopicReplyCard = withStyles(styles)(
               onChange={this.handleReplyMessageChange}
               value={this.state.replyMessage}
             />
-            <Button
-              onClick={() => this.setState({ replyBoxOpen: false })}
-              color="secondary"
-              variant="text"
-              style={{ marginRight: "5px" }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" color="primary" variant="text" onClick={() => this.sendReply()}>
-              Send
-            </Button>
+            <EmojiPicker emojiAppender={this.addEmojiInReply} btnSize="sm"/>
+            <div style={{ float: "right" }}>
+              <Button
+                onClick={() => this.setState({ replyBoxOpen: false })}
+                color="secondary"
+                variant="text"
+                style={{ marginRight: "5px" }}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" color="primary" variant="text" onClick={() => this.sendReply()}>
+                Send
+              </Button>
+            </div>
           </div>
         );
       }
+    }
+
+    addEmojiInReply(emoji: any) {
+      this.setState(prevState => ({ replyMessage: prevState.replyMessage + emoji }));
     }
 
     handleReplyMessageChange(event: React.ChangeEvent<HTMLInputElement>) {

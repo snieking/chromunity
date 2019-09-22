@@ -11,6 +11,7 @@ import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import { ChromunityUser, UserMeta } from "../../types";
 import { Edit } from "@material-ui/icons";
 import { parseEmojis } from "../../util/text-parsing";
+import EmojiPicker from "../common/EmojiPicker";
 
 export interface EditMessageButtonProps {
   submitFunction: Function;
@@ -50,6 +51,7 @@ class EditMessageButton extends React.Component<EditMessageButtonProps, EditMess
     this.submit = this.submit.bind(this);
     this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
     this.handleClose = this.handleClose.bind(this);
+    this.addEmoji = this.addEmoji.bind(this);
   }
 
   componentDidMount() {
@@ -92,6 +94,7 @@ class EditMessageButton extends React.Component<EditMessageButtonProps, EditMess
                 onChange={this.handleDialogMessageChange}
                 value={this.state.message}
               />
+              <EmojiPicker emojiAppender={this.addEmoji}/>
             </DialogContent>
             <DialogActions>
               <Button onClick={() => this.toggleDialog()} color="secondary" variant="contained">
@@ -139,6 +142,10 @@ class EditMessageButton extends React.Component<EditMessageButtonProps, EditMess
         </Snackbar>
       </div>
     );
+  }
+
+  addEmoji(emoji: string) {
+    this.setState(prevState => ({ message: prevState.message + emoji }));
   }
 
   render() {

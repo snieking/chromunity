@@ -36,12 +36,11 @@ function parseTopics(message: string): string {
 
 export const parseEmojis = (text: string) => text
   .replace(/:[dD]\b/gi, ":smiley:")
-  .replace(/;\)\b/gi, ":wink:")
-  .replace(/:\|\b/gi, ":expressionless:")
+  .replace(/;\)\B/gi, ":wink:")
+  .replace(/:\|\B/gi, ":expressionless:")
   .replace(/:[sS]\b/gi, ":confounded:")
-  .replace(/:'\)\b/gi, ":sweat_smile:")
+  .replace(/:'\)\B/gi, ":sweat_smile:")
   .replace(/<3\b/gi, ":heart:")
-  .replace(/\([yY]\)\b/gi, ":thumbsup:")
   .replace(/:[pP]\b/gi, ":stuck_out_tongue:")
   .replace(/:[oO]\b/gi, ":open_mouth:")
   .replace(/:\w+:/gi, name => emoji.getUnicode(name));
