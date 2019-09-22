@@ -3,7 +3,6 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import "emoji-mart/css/emoji-mart.css";
 import { Picker } from "emoji-mart";
 import { Popover } from "@material-ui/core";
-import Button from "@material-ui/core/Button";
 
 interface Props {
   emojiAppender: Function;
@@ -12,14 +11,16 @@ interface Props {
 
 const useStyles = makeStyles({
   emojiBoxOpener: {
+    cursor: "pointer",
     position: "absolute",
-    cursor: "pointer"
+    top: "13px",
+    right: "4px"
   },
   emojiSizeSmall: {
-    fontSize: "12px"
+    fontSize: "18px"
   },
   emojiSizeLarge: {
-    fontSize: "26px"
+    fontSize: "18px"
   },
   emojiBoxWrapper: {
     margin: "0 auto",
@@ -38,7 +39,7 @@ const EmojiPicker: React.FunctionComponent<Props> = (props: Props) => {
     setEmojiBoxOpen(false);
   }
 
-  function handleClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+  function handleClick(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     setAnchorEl(event.currentTarget);
     setEmojiBoxOpen(!emojiBoxOpen);
   }
@@ -50,9 +51,9 @@ const EmojiPicker: React.FunctionComponent<Props> = (props: Props) => {
 
   return (
     <div>
-      <Button className={`${classes.emojiBoxOpener} ${props.btnSize === "sm" ? classes.emojiSizeSmall : classes.emojiSizeLarge}`} onClick={handleClick}>
+      <div className={`${classes.emojiBoxOpener} ${props.btnSize === "sm" ? classes.emojiSizeSmall : classes.emojiSizeLarge}`} onClick={handleClick}>
         <span role="img" aria-label={"Emoji Picker"}>😀</span>
-      </Button>
+      </div>
 
       <Popover
         open={emojiBoxOpen}

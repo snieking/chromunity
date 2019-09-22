@@ -137,7 +137,7 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
 
   function renderEditor() {
     return (
-      <>
+      <div className={classes.editorWrapper}>
         <TextField
           autoFocus
           margin="dense"
@@ -151,10 +151,9 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
           fullWidth
           onChange={handleDialogMessageChange}
           value={message}
-          className={classes.content}
         />
         <EmojiPicker emojiAppender={addEmoji} />
-      </>
+      </div>
     );
   }
 
@@ -164,7 +163,7 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
 
   function renderPreview() {
     return (
-      <div className={classes.content}>
+      <div>
         <MarkdownRenderer text={message} />
       </div>
     );

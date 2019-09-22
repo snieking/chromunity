@@ -298,6 +298,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                   <Button type="submit" color="primary" variant="contained">
                     Create topic
                   </Button>
+                  <br/>
                 </DialogActions>
               </form>
             </Dialog>
@@ -337,7 +338,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
 
       renderEditor() {
         return (
-          <div>
+          <div className={this.props.classes.editorWrapper}>
             <TextField
               margin="dense"
               id="message"
@@ -350,7 +351,6 @@ const NewTopicButton = withStyles(largeButtonStyles)(
               onChange={this.handleDialogMessageChange}
               value={this.state.topicMessage}
               variant="outlined"
-              className={this.props.classes.content}
             />
             <EmojiPicker emojiAppender={this.addEmoji} />
           </div>
@@ -363,7 +363,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
 
       renderPreview() {
         return (
-          <div className={this.props.classes.content}>
+          <div>
             <MarkdownRenderer text={this.state.topicMessage} />
           </div>
         );

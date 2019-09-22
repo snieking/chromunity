@@ -81,6 +81,9 @@ const styles = (theme: Theme) =>
     },
     iconRed: {
       color: COLOR_RED
+    },
+    editorWrapper: {
+      position: "relative"
     }
   });
 
@@ -429,20 +432,22 @@ const TopicReplyCard = withStyles(styles)(
       } else if (this.state.replyBoxOpen) {
         return (
           <div style={{ marginTop: "20px" }}>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="message"
-              multiline
-              label="Reply"
-              type="text"
-              rows="3"
-              variant="outlined"
-              fullWidth
-              onChange={this.handleReplyMessageChange}
-              value={this.state.replyMessage}
-            />
-            <EmojiPicker emojiAppender={this.addEmojiInReply} btnSize="sm"/>
+            <div className={this.props.classes.editorWrapper}>
+              <TextField
+                autoFocus
+                margin="dense"
+                id="message"
+                multiline
+                label="Reply"
+                type="text"
+                rows="3"
+                variant="outlined"
+                fullWidth
+                onChange={this.handleReplyMessageChange}
+                value={this.state.replyMessage}
+              />
+              <EmojiPicker emojiAppender={this.addEmojiInReply} btnSize="sm" />
+            </div>
             <div style={{ float: "right" }}>
               <Button
                 onClick={() => this.setState({ replyBoxOpen: false })}

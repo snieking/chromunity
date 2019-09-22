@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Badge, Dialog, Snackbar, Tooltip } from "@material-ui/core";
+import { Badge, createStyles, Dialog, Snackbar, Tooltip, WithStyles } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -12,8 +12,15 @@ import { ChromunityUser, UserMeta } from "../../types";
 import { Edit } from "@material-ui/icons";
 import { parseEmojis } from "../../util/text-parsing";
 import EmojiPicker from "../common/EmojiPicker";
+import withStyles from "@material-ui/core/styles/withStyles";
 
-export interface EditMessageButtonProps {
+const styles = createStyles({
+  editorWrapper: {
+    position: "relative"
+  }
+});
+
+export interface EditMessageButtonProps extends WithStyles<typeof styles> {
   submitFunction: Function;
   value: string;
   modifiableUntil: number;
@@ -29,154 +36,158 @@ export interface EditMessageButtonState {
   user: ChromunityUser;
 }
 
-class EditMessageButton extends React.Component<EditMessageButtonProps, EditMessageButtonState> {
-  constructor(props: EditMessageButtonProps) {
-    super(props);
+const EditMessageButton = withStyles(styles)(
+  class extends React.Component<EditMessageButtonProps, EditMessageButtonState> {
+    constructor(props: EditMessageButtonProps) {
+      super(props);
 
-    this.state = {
-      message: props.value,
-      dialogOpen: false,
-      replyStatusSuccessOpen: false,
-      replyStatusErrorOpen: false,
-      replySentStatus: "",
-      userMeta: {
-        name: "",
-        suspended_until: Date.now() + 10000,
-        times_suspended: 0
-      },
-      user: getUser()
-    };
+      this.state = {
+        message: props.value,
+        dialogOpen: false,
+        replyStatusSuccessOpen: false,
+        replyStatusErrorOpen: false,
+        replySentStatus: "",
+        userMeta: {
+          name: "",
+          suspended_until: Date.now() + 10000,
+          times_suspended: 0
+        },
+        user: getUser()
+      };
 
-    this.toggleDialog = this.toggleDialog.bind(this);
-    this.submit = this.submit.bind(this);
-    this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
-    this.handleClose = this.handleClose.bind(this);
-    this.addEmoji = this.addEmoji.bind(this);
-  }
+      this.toggleDialog = this.toggleDialog.bind(this);
+      this.submit = this.submit.bind(this);
+      this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
+      this.handleClose = this.handleClose.bind(this);
+      this.addEmoji = this.addEmoji.bind(this);
+    }
 
-  componentDidMount() {
-    getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
-  }
+    componentDidMount() {
+      getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
+    }
 
-  toggleDialog() {
-    this.setState(prevState => ({ dialogOpen: !prevState.dialogOpen }));
-  }
+    toggleDialog() {
+      this.setState(prevState => ({ dialogOpen: !prevState.dialogOpen }));
+    }
 
-  handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.setState({ message: parseEmojis(event.target.value) });
-  }
+    handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.setState({ message: parseEmojis(event.target.value) });
+    }
 
-  submit() {
-    this.toggleDialog();
-    this.props.submitFunction(this.state.message);
-  }
+    submit() {
+      this.toggleDialog();
+      this.props.submitFunction(this.state.message);
+    }
 
-  newTopicDialog() {
-    return (
-      <div>
-        <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"md"}>
-          <form onSubmit={() => this.props.submitFunction(this.state.message)}>
-            <DialogContent>
-              <br />
-              <TextField
-                autoFocus
-                margin="dense"
-                id="message"
-                multiline
-                label="Text"
-                type="text"
-                rows="3"
-                rowsMax="15"
-                variant="outlined"
-                fullWidth
-                onChange={this.handleDialogMessageChange}
-                value={this.state.message}
-              />
-              <EmojiPicker emojiAppender={this.addEmoji}/>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => this.toggleDialog()} color="secondary" variant="contained">
-                Cancel
-              </Button>
-              <Button
-                onKeyPress={e => e.key === "Enter" ? this.submit() : ""}
-                onClick={() => this.submit()}
-                color="primary"
-                variant="contained"
-              >
-                Send
-              </Button>
-            </DialogActions>
-          </form>
-        </Dialog>
-
-        <Snackbar
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "left"
-          }}
-          open={this.state.replyStatusSuccessOpen}
-          autoHideDuration={3000}
-        >
-          <CustomSnackbarContentWrapper
-            onClose={this.handleClose}
-            variant="success"
-            message={this.state.replySentStatus}
-          />
-        </Snackbar>
-        <Snackbar
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "left"
-          }}
-          open={this.state.replyStatusErrorOpen}
-          autoHideDuration={3000}
-        >
-          <CustomSnackbarContentWrapper
-            onClose={this.handleClose}
-            variant="error"
-            message={this.state.replySentStatus}
-          />
-        </Snackbar>
-      </div>
-    );
-  }
-
-  addEmoji(emoji: string) {
-    this.setState(prevState => ({ message: prevState.message + emoji }));
-  }
-
-  render() {
-    if (this.state.user != null && this.state.userMeta.suspended_until < Date.now()) {
+    newTopicDialog() {
       return (
-        <div style={{ display: "inline-block" }}>
-          <Tooltip title="Edit">
-            <IconButton aria-label="Edit" onClick={() => this.toggleDialog()}>
-              <Badge max={600} badgeContent={this.props.modifiableUntil} color="secondary">
-                <Edit />
-              </Badge>
-            </IconButton>
-          </Tooltip>
-          {this.newTopicDialog()}
+        <div>
+          <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"md"}>
+            <form onSubmit={() => this.props.submitFunction(this.state.message)}>
+              <DialogContent>
+                <br />
+                <div className={this.props.classes.editorWrapper}>
+                  <TextField
+                    autoFocus
+                    margin="dense"
+                    id="message"
+                    multiline
+                    label="Text"
+                    type="text"
+                    rows="3"
+                    rowsMax="15"
+                    variant="outlined"
+                    fullWidth
+                    onChange={this.handleDialogMessageChange}
+                    value={this.state.message}
+                  />
+                  <EmojiPicker emojiAppender={this.addEmoji} />
+                </div>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => this.toggleDialog()} color="secondary" variant="contained">
+                  Cancel
+                </Button>
+                <Button
+                  onKeyPress={e => (e.key === "Enter" ? this.submit() : "")}
+                  onClick={() => this.submit()}
+                  color="primary"
+                  variant="contained"
+                >
+                  Send
+                </Button>
+              </DialogActions>
+            </form>
+          </Dialog>
+
+          <Snackbar
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left"
+            }}
+            open={this.state.replyStatusSuccessOpen}
+            autoHideDuration={3000}
+          >
+            <CustomSnackbarContentWrapper
+              onClose={this.handleClose}
+              variant="success"
+              message={this.state.replySentStatus}
+            />
+          </Snackbar>
+          <Snackbar
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left"
+            }}
+            open={this.state.replyStatusErrorOpen}
+            autoHideDuration={3000}
+          >
+            <CustomSnackbarContentWrapper
+              onClose={this.handleClose}
+              variant="error"
+              message={this.state.replySentStatus}
+            />
+          </Snackbar>
         </div>
       );
-    } else {
-      return null;
-    }
-  }
-
-  private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
-    if (reason === "clickaway") {
-      return;
     }
 
-    this.setState({
-      replyStatusSuccessOpen: false,
-      replyStatusErrorOpen: false
-    });
+    addEmoji(emoji: string) {
+      this.setState(prevState => ({ message: prevState.message + emoji }));
+    }
+
+    render() {
+      if (this.state.user != null && this.state.userMeta.suspended_until < Date.now()) {
+        return (
+          <div style={{ display: "inline-block" }}>
+            <Tooltip title="Edit">
+              <IconButton aria-label="Edit" onClick={() => this.toggleDialog()}>
+                <Badge max={600} badgeContent={this.props.modifiableUntil} color="secondary">
+                  <Edit />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+            {this.newTopicDialog()}
+          </div>
+        );
+      } else {
+        return null;
+      }
+    }
+
+    private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
+      if (reason === "clickaway") {
+        return;
+      }
+
+      this.setState({
+        replyStatusSuccessOpen: false,
+        replyStatusErrorOpen: false
+      });
+    }
   }
-}
+);
 
 export default EditMessageButton;

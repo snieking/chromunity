@@ -29,7 +29,7 @@ export const largeButtonStyles = (theme: Theme) => createStyles({
             width: "32px",
         },
     },
-    content: {
-        marginTop: "15px"
+    editorWrapper: {
+      position: "relative"
     }
 });
