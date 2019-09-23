@@ -59,7 +59,6 @@ const EditMessageButton = withStyles(styles)(
 
       this.textInput = React.createRef();
 
-      this.focusTextInput = this.focusTextInput.bind(this);
       this.toggleDialog = this.toggleDialog.bind(this);
       this.submit = this.submit.bind(this);
       this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
@@ -171,17 +170,10 @@ const EditMessageButton = withStyles(styles)(
         ].join("")
       }));
 
-      this.focusTextInput();
       setTimeout(() => {
-        this.textInput.current.selectionStart = startPosition + 1;
-        this.textInput.current.selectionEnd = startPosition + 1;
+        this.textInput.current.selectionStart = startPosition + 2;
+        this.textInput.current.selectionEnd = startPosition + 2;
       }, 100);
-    }
-
-    focusTextInput() {
-      if (this.textInput) {
-        setTimeout(() => this.textInput.current.focus(), 100);
-      }
     }
 
     render() {

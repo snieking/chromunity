@@ -87,7 +87,6 @@ const NewTopicButton = withStyles(largeButtonStyles)(
 
         this.textInput = React.createRef();
 
-        this.focusTextInput = this.focusTextInput.bind(this);
         this.toggleNewTopicDialog = this.toggleNewTopicDialog.bind(this);
         this.handleDialogTitleChange = this.handleDialogTitleChange.bind(this);
         this.handleChannelChange = this.handleChannelChange.bind(this);
@@ -374,17 +373,10 @@ const NewTopicButton = withStyles(largeButtonStyles)(
           ].join("")
         }));
 
-        this.focusTextInput();
         setTimeout(() => {
-          this.textInput.current.selectionStart = startPosition + 1;
-          this.textInput.current.selectionEnd = startPosition + 1;
+          this.textInput.current.selectionStart = startPosition + 2;
+          this.textInput.current.selectionEnd = startPosition + 2;
         }, 100);
-      }
-
-      focusTextInput() {
-        if (this.textInput) {
-          setTimeout(() => this.textInput.current.focus(), 100);
-        }
       }
 
       renderPreview() {

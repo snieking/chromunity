@@ -160,17 +160,10 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
   function addEmoji(emoji: string) {
     const startPosition = textInput.current.selectionStart;
     setMessage([message.slice(0, startPosition), emoji, message.slice(startPosition)].join(''));
-    focusTextInput();
     setTimeout(() => {
-      textInput.current.selectionStart = startPosition + 1;
-      textInput.current.selectionEnd = startPosition + 1;
+      textInput.current.selectionStart = startPosition + 2;
+      textInput.current.selectionEnd = startPosition + 2;
     }, 100);
-  }
-
-  function focusTextInput() {
-    if (textInput) {
-      setTimeout(() => textInput.current.focus(), 100);
-    }
   }
 
   function renderPreview() {
