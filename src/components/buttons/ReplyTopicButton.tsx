@@ -48,7 +48,6 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
     event.preventDefault();
     event.stopPropagation();
     setMessage(parseEmojis(event.target.value));
-    console.log("Position: ", event.target.selectionStart);
   }
 
   function createReply() {
