@@ -463,7 +463,7 @@ const TopicReplyCard = withStyles(styles)(
               >
                 Cancel
               </Button>
-              <Button type="submit" color="primary" variant="text" onClick={() => this.sendReply()}>
+              <Button color="primary" variant="text" onClick={() => this.sendReply()}>
                 Send
               </Button>
             </div>
@@ -473,8 +473,21 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     addEmojiInReply(emoji: any) {
+      const startPosition = this.textInput.current.selectionStart;
+
+      this.setState(prevState => ({
+        replyMessage: [
+          prevState.replyMessage.slice(0, startPosition),
+          emoji,
+          prevState.replyMessage.slice(startPosition)
+        ].join("")
+      }));
+
       this.focusTextInput();
-      this.setState(prevState => ({ replyMessage: prevState.replyMessage + emoji }));
+      setTimeout(() => {
+        this.textInput.current.selectionStart = startPosition + 1;
+        this.textInput.current.selectionEnd = startPosition + 1;
+      }, 100);
     }
 
     focusTextInput() {

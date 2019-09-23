@@ -161,8 +161,21 @@ const EditMessageButton = withStyles(styles)(
     }
 
     addEmoji(emoji: string) {
+      const startPosition = this.textInput.current.selectionStart;
+
+      this.setState(prevState => ({
+        message: [
+          prevState.message.slice(0, startPosition),
+          emoji,
+          prevState.message.slice(startPosition)
+        ].join("")
+      }));
+
       this.focusTextInput();
-      this.setState(prevState => ({ message: prevState.message + emoji }));
+      setTimeout(() => {
+        this.textInput.current.selectionStart = startPosition + 1;
+        this.textInput.current.selectionEnd = startPosition + 1;
+      }, 100);
     }
 
     focusTextInput() {

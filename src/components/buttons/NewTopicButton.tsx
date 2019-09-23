@@ -303,7 +303,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                   <Button type="submit" color="primary" variant="contained">
                     Create topic
                   </Button>
-                  <br/>
+                  <br />
                 </DialogActions>
               </form>
             </Dialog>
@@ -364,8 +364,21 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       }
 
       addEmoji(emoji: string) {
+        const startPosition = this.textInput.current.selectionStart;
+
+        this.setState(prevState => ({
+          topicMessage: [
+            prevState.topicMessage.slice(0, startPosition),
+            emoji,
+            prevState.topicMessage.slice(startPosition)
+          ].join("")
+        }));
+
         this.focusTextInput();
-        this.setState(prevState => ({ topicMessage: prevState.topicMessage + emoji }));
+        setTimeout(() => {
+          this.textInput.current.selectionStart = startPosition + 1;
+          this.textInput.current.selectionEnd = startPosition + 1;
+        }, 100);
       }
 
       focusTextInput() {

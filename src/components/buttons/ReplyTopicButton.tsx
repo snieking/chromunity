@@ -1,4 +1,4 @@
-import React, { FormEvent, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { Dialog, makeStyles, Snackbar, Tab, Tabs, Typography } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
@@ -35,7 +35,7 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
   const [userMeta, setUserMeta] = useState<UserMeta>(null);
   const [activeTab, setActiveTab] = useState<number>(0);
 
-  const textInput = useRef(null);
+  const textInput = useRef<HTMLInputElement>(null);
 
   const user = getUser();
 
@@ -48,11 +48,10 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
     event.preventDefault();
     event.stopPropagation();
     setMessage(parseEmojis(event.target.value));
+    console.log("Position: ", event.target.selectionStart);
   }
 
-  function createReply(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
+  function createReply() {
     createTopicReply(user, props.topicId, message)
       .then(() => {
         setNewReplyStatusMessage("Reply sent");
@@ -81,42 +80,40 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
     }
   }
 
-  function newTopicDialog() {
+  function newReplyDialog() {
     return (
       <div>
         <Dialog open={dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"md"}>
-          <form onSubmit={createReply}>
-            <DialogContent>
-              <Tabs value={activeTab} onChange={handleTabChange} aria-label="New reply">
-                <Tab
-                  label={
-                    <Typography component="span" variant="body2">
-                      Edit
-                    </Typography>
-                  }
-                  {...a11yProps(0)}
-                />
-                <Tab
-                  label={
-                    <Typography component="span" variant="body2">
-                      Preview
-                    </Typography>
-                  }
-                  {...a11yProps(1)}
-                />
-              </Tabs>
-              {activeTab === 0 && renderEditor()}
-              {activeTab === 1 && renderPreview()}
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setDialogOpen(false)} color="secondary" variant="contained">
-                Cancel
-              </Button>
-              <Button type="submit" color="primary" variant="contained">
-                Send
-              </Button>
-            </DialogActions>
-          </form>
+          <DialogContent>
+            <Tabs value={activeTab} onChange={handleTabChange} aria-label="New reply">
+              <Tab
+                label={
+                  <Typography component="span" variant="body2">
+                    Edit
+                  </Typography>
+                }
+                {...a11yProps(0)}
+              />
+              <Tab
+                label={
+                  <Typography component="span" variant="body2">
+                    Preview
+                  </Typography>
+                }
+                {...a11yProps(1)}
+              />
+            </Tabs>
+            {activeTab === 0 && renderEditor()}
+            {activeTab === 1 && renderPreview()}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDialogOpen(false)} color="secondary" variant="contained">
+              Cancel
+            </Button>
+            <Button onClick={() => createReply()} color="primary" variant="contained">
+              Send
+            </Button>
+          </DialogActions>
         </Dialog>
 
         <Snackbar
@@ -161,8 +158,13 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
   }
 
   function addEmoji(emoji: string) {
-    setMessage(message + emoji);
+    const startPosition = textInput.current.selectionStart;
+    setMessage([message.slice(0, startPosition), emoji, message.slice(startPosition)].join(''));
     focusTextInput();
+    setTimeout(() => {
+      textInput.current.selectionStart = startPosition + 1;
+      textInput.current.selectionEnd = startPosition + 1;
+    }, 100);
   }
 
   function focusTextInput() {
@@ -193,7 +195,7 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
   return (
     <div>
       {createTopicButton()}
-      {newTopicDialog()}
+      {newReplyDialog()}
     </div>
   );
 
