@@ -115,7 +115,7 @@ const TopicOverviewCard = withStyles(styles)(
       getTopicStarRaters(this.props.topic.id).then(usersWhoStarRated =>
         this.setState({
           stars: usersWhoStarRated.length,
-          ratedByMe: usersWhoStarRated.includes(user != null && user.name)
+          ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase())
         })
       );
     }

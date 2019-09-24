@@ -190,7 +190,7 @@ const FullTopic = withStyles(styles)(
       getTopicStarRaters(id).then(usersWhoStarRated =>
         this.setState({
           stars: usersWhoStarRated.length,
-          ratedByMe: usersWhoStarRated.includes(user != null && user.name)
+          ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase())
         })
       );
       getTopicSubscribers(id).then(subscribers =>

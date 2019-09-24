@@ -111,7 +111,7 @@ const TopicReplyOverviewCard = withStyles(styles)(
       getReplyStarRaters(this.props.reply.id).then(usersWhoStarRated =>
         this.setState({
           stars: usersWhoStarRated.length,
-          ratedByMe: usersWhoStarRated.includes(user != null && user.name)
+          ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase())
         })
       );
     }
