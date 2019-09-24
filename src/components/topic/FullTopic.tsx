@@ -187,7 +187,7 @@ const FullTopic = withStyles(styles)(
 
       getTopicById(id).then(topic => this.consumeTopicData(topic));
       this.retrieveLatestReplies();
-      getTopicStarRaters(id).then(usersWhoStarRated =>
+      getTopicStarRaters(id, true).then(usersWhoStarRated =>
         this.setState({
           stars: usersWhoStarRated.length,
           ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase())

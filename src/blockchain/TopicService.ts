@@ -329,11 +329,15 @@ export function countTopicsInChannel(channelName: string): Promise<number> {
     .catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
-export function getTopicStarRaters(topicId: string): Promise<string[]> {
-  const raters: string[] = starRatingCache.get(topicId);
+export function getTopicStarRaters(topicId: string, clearCache = false): Promise<string[]> {
+  if (clearCache) {
+    starRatingCache.remove(topicId);
+  } else {
+    const raters: string[] = starRatingCache.get(topicId);
 
-  if (raters != null) {
-    return new Promise<string[]>(resolve => resolve(raters));
+    if (raters != null) {
+      return new Promise<string[]>(resolve => resolve(raters));
+    }
   }
 
   const query = "get_star_rating_for_topic";
