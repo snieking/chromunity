@@ -29,7 +29,7 @@ function parseUsers(message: string): string {
 
 function parseTopics(message: string): string {
     return message.replace(
-        /(\/t\/)([a-z\d-#]+)/gi,
+        /(\/t\/)(\S+)/gi,
         "<a  class='blue-typography' href='$1$2'><b>$1$2</b></a>"
     );
 }
