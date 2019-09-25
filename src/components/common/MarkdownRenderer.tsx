@@ -14,6 +14,7 @@ const MarkdownRenderer: React.FunctionComponent<Props> = props => {
       className={classes.text}
       source={props.text}
       disallowedTypes={["heading", "image", "imageReference"]}
+      linkTarget="_blank"
     />
   );
 };
