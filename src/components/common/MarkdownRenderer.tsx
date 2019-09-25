@@ -13,7 +13,7 @@ const MarkdownRenderer: React.FunctionComponent<Props> = props => {
     <ReactMarkdown
       className={classes.text}
       source={props.text}
-      disallowedTypes={["heading", "image", "imageReference"]}
+      disallowedTypes={["heading"]}
       linkTarget="_blank"
     />
   );
@@ -26,6 +26,14 @@ const useStyles = makeStyles(theme => ({
     wordWrap: "break-word",
     '& a': {
       wordBreak: "break-all"
+    },
+    '& img': {
+      maxWidth: "95%",
+      maxHeight: "95%",
+      [theme.breakpoints.down("sm")]: {
+        maxWidth: "80%",
+        maxHeight: "80%"
+      }
     }
   },
 }));
