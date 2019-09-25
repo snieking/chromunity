@@ -1,5 +1,5 @@
 import { BLOCKCHAIN, GTX } from "./Postchain";
-import { createStopwatchStarted, handleGADuringException, prepareUrlPath, stopStopwatch, uniqueId } from "../util/util";
+import { createStopwatchStarted, handleGADuringException, stopStopwatch, uniqueId } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 import { Topic, TopicReply, ChromunityUser } from "../types";
 import { sendNotifications } from "./NotificationService";
