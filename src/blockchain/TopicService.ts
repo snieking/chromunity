@@ -159,7 +159,8 @@ export function createTopicSubReply(user: ChromunityUser, topicId: string, reply
 }
 
 function createReplyTriggerString(name: string, id: string): string {
-  return "@" + name + " replied to /t/" + id;
+  const topic: Topic = topicsCache.get(id);
+  return "@" + name + " replied to /t/" + id + topic != null ? ("/" + topic.title) : "";
 }
 
 export function removeTopic(user: ChromunityUser, topicId: string) {
