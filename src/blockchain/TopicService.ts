@@ -1,5 +1,5 @@
 import { BLOCKCHAIN, GTX } from "./Postchain";
-import { createStopwatchStarted, handleGADuringException, stopStopwatch, uniqueId } from "../util/util";
+import { createStopwatchStarted, handleGADuringException, prepareUrlPath, stopStopwatch, uniqueId } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 import { Topic, TopicReply, ChromunityUser } from "../types";
 import { sendNotifications } from "./NotificationService";
@@ -160,7 +160,7 @@ export function createTopicSubReply(user: ChromunityUser, topicId: string, reply
 
 function createReplyTriggerString(name: string, id: string): string {
   const topic: Topic = topicsCache.get(id);
-  return "@" + name + " replied to /t/" + id + topic != null ? ("/" + topic.title) : "";
+  return "@" + name + " replied to /t/" + id + topic != null ? ("/" + prepareUrlPath(topic.title)) : "";
 }
 
 export function removeTopic(user: ChromunityUser, topicId: string) {
