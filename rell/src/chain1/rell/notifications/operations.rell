@@ -7,7 +7,7 @@ operation create_notifications_for_users(name, descriptor_id: byte_array, id: te
         if (toUser != null) {
             create notification(
                 id = id, 
-                toUser!!, 
+                toUser, 
                 trigger = trigger,
                 content = content,
                 false, 
@@ -23,7 +23,7 @@ operation remove_notifications_for_users(name, descriptor_id: byte_array, id: te
     for (username in usernames) {
         val toUser = user@?{ .name == username };
         if (toUser != null) {
-            delete notification@{ id, toUser!! };
+            delete notification@{ id, toUser };
         }
     }
 }

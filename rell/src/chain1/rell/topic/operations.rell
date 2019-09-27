@@ -7,8 +7,7 @@ operation create_topic(id: text, descriptor_id: byte_array, username: text, chan
         timestamp = op_context.last_block_time,
         last_modified = op_context.last_block_time,
         title = title,
-        message = message,
-        removed = false
+        message = message
     );
 
     create channel(name = channel_key.lower_case(), topic, op_context.last_block_time, display_name = channel_name);
@@ -43,8 +42,7 @@ operation create_reply(topic_id: text, descriptor_id: byte_array, id: text, user
         author,
         timestamp = op_context.last_block_time,
         is_sub_reply = false,
-        message = message,
-        removed = false
+        message = message
     );
 
     if (not topic.removed) {

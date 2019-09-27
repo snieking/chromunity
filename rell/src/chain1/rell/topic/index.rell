@@ -6,7 +6,7 @@ class topic {
     index last_modified;
     mutable title: name;
     mutable message: text;
-    mutable removed: boolean;
+    mutable removed: boolean = false;
     index removed;
 }
 
@@ -15,9 +15,9 @@ class topic_reply {
     index topic;
     index author: user;
     index timestamp;
-    index is_sub_reply : boolean;
+    index is_sub_reply: boolean;
     mutable message: text;
-    mutable removed: boolean;
+    mutable removed: boolean = false;
 }
 
 class sub_reply {

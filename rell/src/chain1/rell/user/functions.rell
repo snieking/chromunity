@@ -8,3 +8,7 @@ function get_verified_user(name, descriptor_id: byte_array): user {
 
     return user;
 }
+
+function assert_admin(user) {
+	require(admin@?{ user }, app_error(error_type.USER_UNAUTHORIZED, "Assert admin"));
+}

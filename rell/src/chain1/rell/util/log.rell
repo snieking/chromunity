@@ -7,7 +7,7 @@ enum error_type {
 }
 
 function app_error(error_type, action: text): text {
-	val log = when(error_type) {
+	val msg = when(error_type) {
 		USER_UNAUTHORIZED -> message_with_code("CERR_10", "Requester was unauthorized", action);
 		USER_SUSPENDED -> message_with_code("CERR_11", "Requester was suspended", action);
 		TOPIC_IMMUTABLE -> message_with_code("CERR_20", "Topic is no longer mutable", action);
@@ -15,8 +15,8 @@ function app_error(error_type, action: text): text {
 		ILLEGAL_ACTION -> message_with_code("CERR_40", "The attempted action was illegal", action);
 	};
 	
-	log(log);
-	return log;
+	log(msg);
+	return msg;
 }
 
 function message_with_code(code: text, message: text, action: text): text {
