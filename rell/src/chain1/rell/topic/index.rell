@@ -1,7 +1,7 @@
 class topic {
     key id: text;
     index author: user;
-    index timestamp;
+    timestamp;
     mutable last_modified: timestamp;
     index last_modified;
     mutable title: name;

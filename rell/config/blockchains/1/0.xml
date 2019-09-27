@@ -1211,7 +1211,7 @@ function require_mutable(post_timestamp: timestamp, op_timestamp: timestamp, act
                                 <string>class topic {
     key id: text;
     index author: user;
-    index timestamp;
+    timestamp;
     mutable last_modified: timestamp;
     index last_modified;
     mutable title: name;
