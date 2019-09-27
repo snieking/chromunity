@@ -19,8 +19,8 @@ operation modify_topic(id: text, descriptor_id: byte_array, username: text, text
     val author = get_verified_user(username, descriptor_id);
 
     val topic = topic@{ .id == id, .author == author };
-    val fiveMinutesInMillis = 300000;
-    require(op_context.last_block_time < topic.timestamp + fiveMinutesInMillis);
+    require_mutable(topic.timestamp, op_context.last_block_time, "Modify topic");
+    
     update topic ( message = text );
 }
 
@@ -28,8 +28,8 @@ operation delete_topic(id: text, descriptor_id: byte_array, username: text) {
      val author = get_verified_user(username, descriptor_id);
 
      val topic = topic@{ .id == id, .author == author };
-     val fiveMinutesInMillis = 300000;
-     require(op_context.last_block_time < topic.timestamp + fiveMinutesInMillis);
+     require_mutable(topic.timestamp, op_context.last_block_time, "Delete topic");
+     
      update topic ( removed = true, message = "Deleted by @" + username );
 }
 
@@ -56,8 +56,8 @@ operation modify_reply(id: text, descriptor_id: byte_array, username: text, text
     val author = get_verified_user(username, descriptor_id);
 
     val reply = topic_reply@{ .id == id, .author == author };
-    val fiveMinutesInMillis = 300000;
-    require(op_context.last_block_time < reply.timestamp + fiveMinutesInMillis);
+    require_mutable(reply.timestamp, op_context.last_block_time, "Modify reply");
+    
     update reply ( message = text );
 }
 

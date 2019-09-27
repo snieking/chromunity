@@ -290,7 +290,7 @@ include 'queries';</string>
                             </entry>
                             <entry key="follow/operations.rell">
                                 <string>operation create_following(follower: text, descriptor_id: byte_array, follows: text) {
-    require(follower != follows);
+    require(follower != follows, app_error(error_type.ILLEGAL_ACTION, "Follow another user"));
     val user = get_verified_user(follower, descriptor_id);
     create follow(follower = user, follows = user@{ .name == follows.lower_case() });
 }
@@ -1072,7 +1072,10 @@ operation suspend_user(username: text, descriptor_id: byte_array, user_to_be_sus
     val suspendee = user@{ .name == user_to_be_suspended };
     val suspendee_meta = user_meta@{ suspendee };
 
-    require(suspendee_meta.suspended_until &lt; op_context.last_block_time);
+    require(
+    	suspendee_meta.suspended_until &lt; op_context.last_block_time, 
+    	app_error(error_type.REPRESENTATIVE_ALREADY_SUSPENDED, "Suspend user")
+    );
 
     val updatedTimesSuspended = suspendee_meta.times_suspended + 1;
     val oneDayMillis = 86400000;
@@ -1196,6 +1199,14 @@ operation handle_representative_report(username: text, descriptor_id: byte_array
                             <entry key="topic/functions.rell">
                                 <string>function find_topic_by_id(id: text): topic {
     return topic@{ .id == id };
+}
+
+function require_mutable(post_timestamp: timestamp, op_timestamp: timestamp, action: text) {
+	val fiveMinutesInMillis = 300000;
+    require(
+    	op_timestamp &lt; post_timestamp + fiveMinutesInMillis,
+    	app_error(error_type.TOPIC_IMMUTABLE, action)
+    );
 }</string>
                             </entry>
                             <entry key="topic/index.rell">
@@ -1253,8 +1264,8 @@ operation modify_topic(id: text, descriptor_id: byte_array, username: text, text
     val author = get_verified_user(username, descriptor_id);
 
     val topic = topic@{ .id == id, .author == author };
-    val fiveMinutesInMillis = 300000;
-    require(op_context.last_block_time &lt; topic.timestamp + fiveMinutesInMillis);
+    require_mutable(topic.timestamp, op_context.last_block_time, "Modify topic");
+    
     update topic ( message = text );
 }
 
@@ -1262,8 +1273,8 @@ operation delete_topic(id: text, descriptor_id: byte_array, username: text) {
      val author = get_verified_user(username, descriptor_id);
 
      val topic = topic@{ .id == id, .author == author };
-     val fiveMinutesInMillis = 300000;
-     require(op_context.last_block_time &lt; topic.timestamp + fiveMinutesInMillis);
+     require_mutable(topic.timestamp, op_context.last_block_time, "Delete topic");
+     
      update topic ( removed = true, message = "Deleted by @" + username );
 }
 
@@ -1290,8 +1301,8 @@ operation modify_reply(id: text, descriptor_id: byte_array, username: text, text
     val author = get_verified_user(username, descriptor_id);
 
     val reply = topic_reply@{ .id == id, .author == author };
-    val fiveMinutesInMillis = 300000;
-    require(op_context.last_block_time &lt; reply.timestamp + fiveMinutesInMillis);
+    require_mutable(reply.timestamp, op_context.last_block_time, "Modify reply");
+    
     update reply ( message = text );
 }
 
@@ -1638,8 +1649,10 @@ operation unsubscribe_from_topic(username: text, descriptor_id: byte_array, id: 
                                 <string>function get_verified_user(name, descriptor_id: byte_array): user {
     val user = user@{ .name == name };
     ft3.require_auth(user.account, descriptor_id, ["A"]);
-    //require(is_signer(user.pubkey));
-    require(user_meta@{ user }.suspended_until &lt; op_context.last_block_time);
+    require(
+    	user_meta@{ user }.suspended_until &lt; op_context.last_block_time, 
+    	app_error(error_type.USER_SUSPENDED, "Get verified user")
+    );
 
     return user;
 }</string>
@@ -1761,10 +1774,33 @@ operation update_user_settings(name, descriptor_id: byte_array, avatar: text, de
 }</string>
                             </entry>
                             <entry key="util/index.rell">
-                                <string>include 'text-util';</string>
+                                <string>include 'log';</string>
                             </entry>
-                            <entry key="util/text-util.rell">
-                                <string></string>
+                            <entry key="util/log.rell">
+                                <string>enum error_type {
+	USER_UNAUTHORIZED,
+	USER_SUSPENDED,
+	TOPIC_IMMUTABLE,
+	REPRESENTATIVE_ALREADY_SUSPENDED,
+	ILLEGAL_ACTION
+}
+
+function app_error(error_type, action: text): text {
+	val log = when(error_type) {
+		USER_UNAUTHORIZED -&gt; message_with_code("CERR_10", "Requester was unauthorized", action);
+		USER_SUSPENDED -&gt; message_with_code("CERR_11", "Requester was suspended", action);
+		TOPIC_IMMUTABLE -&gt; message_with_code("CERR_20", "Topic is no longer mutable", action);
+		REPRESENTATIVE_ALREADY_SUSPENDED -&gt; message_with_code("CERR_30", "User was already suspended", action);
+		ILLEGAL_ACTION -&gt; message_with_code("CERR_40", "The attempted action was illegal", action);
+	};
+	
+	log(log);
+	return log;
+}
+
+function message_with_code(code: text, message: text, action: text): text {
+	return '{"code":"' + code + '","message":"' + message + '","action":"' + action + '"}';
+}</string>
                             </entry>
                         </dict>
                     </entry>
