@@ -15,7 +15,8 @@ class topic_reply {
     index topic;
     index author: user;
     index timestamp;
-    index is_sub_reply: boolean;
+    is_sub_reply: boolean = false;
+    index is_sub_reply;
     mutable message: text;
     mutable removed: boolean = false;
 }

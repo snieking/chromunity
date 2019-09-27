@@ -41,7 +41,6 @@ operation create_reply(topic_id: text, descriptor_id: byte_array, id: text, user
         topic,
         author,
         timestamp = op_context.last_block_time,
-        is_sub_reply = false,
         message = message
     );
 
@@ -69,8 +68,7 @@ operation create_sub_reply(topic_id: text, descriptor_id: byte_array, parent_rep
         author,
         timestamp = op_context.last_block_time,
         is_sub_reply = true,
-        message = message,
-        removed = false
+        message = message
     );
 
     create sub_reply(
