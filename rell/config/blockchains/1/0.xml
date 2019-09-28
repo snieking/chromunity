@@ -982,7 +982,9 @@ operation remove_notifications_for_users(name, descriptor_id: byte_array, id: te
     for (username in usernames) {
         val to_user = user@?{ .name == username };
         if (to_user != null) {
-            delete notification@{ id, user == to_user };
+        	log("ID: ", id);
+        	log("ToUser: ", user);
+            delete notification@?{ id, .user == to_user };
         }
     }
 }
