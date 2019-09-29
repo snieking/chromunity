@@ -184,7 +184,6 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     openSubReplies() {
-      console.log("Opening sub replies for id: ", this.props.reply.id);
       this.setState({ renderSubReplies: true });
       replyUnfoldCache.set(this.props.reply.id, true, replyMaxRenderAgeMillis * 7);
       if (this.props.cascadeOpenSubReplies != null) {
