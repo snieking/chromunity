@@ -93,6 +93,7 @@ interface Props extends WithStyles<typeof styles> {
   indention: number;
   representatives: string[];
   mutedUsers: string[];
+  cascadeOpenSubReplies?: Function;
 }
 
 interface State {
@@ -161,6 +162,7 @@ const TopicReplyCard = withStyles(styles)(
       this.closeReportReply = this.closeReportReply.bind(this);
       this.isRepresentative = this.isRepresentative.bind(this);
       this.addEmojiInReply = this.addEmojiInReply.bind(this);
+      this.openSubReplies = this.openSubReplies.bind(this);
     }
 
     render() {
@@ -181,6 +183,15 @@ const TopicReplyCard = withStyles(styles)(
       }
     }
 
+    openSubReplies() {
+      console.log("Opening sub replies for id: ", this.props.reply.id);
+      this.setState({ renderSubReplies: true });
+      replyUnfoldCache.set(this.props.reply.id, true, replyMaxRenderAgeMillis * 7);
+      if (this.props.cascadeOpenSubReplies != null) {
+        this.props.cascadeOpenSubReplies();
+      }
+    }
+
     renderSubReplies() {
       if (this.state.renderSubReplies) {
         return this.state.subReplies.map(reply => (
@@ -191,6 +202,7 @@ const TopicReplyCard = withStyles(styles)(
             topicId={this.props.topicId}
             representatives={this.props.representatives}
             mutedUsers={this.props.mutedUsers}
+            cascadeOpenSubReplies={this.openSubReplies}
           />
         ));
       }
@@ -335,7 +347,12 @@ const TopicReplyCard = withStyles(styles)(
             {this.state.subReplies.length > 0 ? (
               <IconButton aria-label="Load replies" onClick={() => this.toggleRenderReply()}>
                 <Tooltip title="Toggle replies">
-                  <UnfoldMore />
+                  <Badge
+                    badgeContent={!this.state.renderSubReplies ? this.state.subReplies.length : 0}
+                    color="secondary"
+                  >
+                    <UnfoldMore />
+                  </Badge>
                 </Tooltip>
               </IconButton>
             ) : (
@@ -497,9 +514,10 @@ const TopicReplyCard = withStyles(styles)(
     sendReply() {
       const message: string = this.state.replyMessage;
       this.setState({ replyBoxOpen: false, replyMessage: "" });
-      createTopicSubReply(this.state.user, this.props.topicId, this.props.reply.id, message).then(() =>
-        getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies }))
-      );
+      createTopicSubReply(this.state.user, this.props.topicId, this.props.reply.id, message).then(() => {
+        getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies }));
+        this.openSubReplies();
+      });
     }
   }
 );
