@@ -114,7 +114,7 @@ export function createTopicReply(user: ChromunityUser, topicId: string, message:
       getTopicSubscribers(topicId).then(users =>
         sendNotifications(
           user,
-          createReplyTriggerString(user.name, topicId),
+          createReplyTriggerString(user.name, topicId, replyId),
           message,
           users.map(name => name.toLocaleLowerCase()).filter(item => item !== user.name)
         )
@@ -124,7 +124,13 @@ export function createTopicReply(user: ChromunityUser, topicId: string, message:
     .catch(error => handleGADuringException(rellOperation, sw, error));
 }
 
-export function createTopicSubReply(user: ChromunityUser, topicId: string, replyId: string, message: string) {
+export function createTopicSubReply(
+  user: ChromunityUser,
+  topicId: string,
+  replyId: string,
+  message: string,
+  replyTo: string
+) {
   const subReplyId = uniqueId();
 
   const operation = "create_sub_reply";
@@ -144,22 +150,26 @@ export function createTopicSubReply(user: ChromunityUser, topicId: string, reply
   )
     .then((promise: unknown) => {
       gaRellOperationTiming("create_sub_reply", stopStopwatch(sw));
+      getTopicSubscribers(topicId).then(users => {
+        if (!users.includes(replyTo)){
+          users.push(replyTo);
+        }
 
-      getTopicSubscribers(topicId).then(users =>
         sendNotifications(
           user,
-          createReplyTriggerString(user.name, topicId),
+          createReplyTriggerString(user.name, topicId, subReplyId),
           message,
           users.map(name => name.toLocaleLowerCase()).filter(item => item !== user.name)
-        )
-      );
+        );
+      });
       return promise;
     })
     .catch(error => handleGADuringException(operation, sw, error));
 }
 
-function createReplyTriggerString(name: string, id: string): string {
-  return "@" + name + " replied to /t/" + id;
+function createReplyTriggerString(name: string, id: string, replyId: string): string {
+  const topic: Topic = topicsCache.get(id);
+  return "@" + name + " replied to '" + topic.title + "' /t/" + id + "#" + replyId;
 }
 
 export function removeTopic(user: ChromunityUser, topicId: string) {

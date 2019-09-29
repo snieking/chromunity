@@ -175,7 +175,11 @@ const TopicReplyCard = withStyles(styles)(
         return (
           <div>
             <div className={this.props.reply.removed ? this.props.classes.removed : ""}>
-              <Card key={this.props.reply.id} style={{ marginLeft: this.props.indention + "px" }}>
+              <Card
+                key={this.props.reply.id}
+                style={{ marginLeft: this.props.indention + "px" }}
+                className={this.isReplyHighlighted() ? this.props.classes.highlighted : ""}
+              >
                 {this.state.isLoading ? <LinearProgress /> : <div />}
                 {this.renderCardContent()}
               </Card>
@@ -308,9 +312,7 @@ const TopicReplyCard = withStyles(styles)(
     renderCardContent() {
       const user: ChromunityUser = this.state.user;
       return (
-        <CardContent
-          className={this.isReplyHighlighted() ? this.props.classes.highlighted : ""}
-        >
+        <CardContent>
           {this.renderAuthor()}
           <div>
             <Timestamp milliseconds={this.props.reply.timestamp} />
@@ -528,7 +530,13 @@ const TopicReplyCard = withStyles(styles)(
     sendReply() {
       const message: string = this.state.replyMessage;
       this.setState({ replyBoxOpen: false, replyMessage: "" });
-      createTopicSubReply(this.state.user, this.props.topicId, this.props.reply.id, message).then(() => {
+      createTopicSubReply(
+        this.state.user,
+        this.props.topicId,
+        this.props.reply.id,
+        message,
+        this.props.reply.author
+      ).then(() => {
         getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies }));
         this.openSubReplies();
       });
