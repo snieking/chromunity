@@ -151,7 +151,7 @@ export function createTopicSubReply(
     .then((promise: unknown) => {
       gaRellOperationTiming("create_sub_reply", stopStopwatch(sw));
       getTopicSubscribers(topicId).then(users => {
-        if (!users.includes(replyTo)){
+        if (!users.includes(replyTo.toLocaleLowerCase())){
           users.push(replyTo);
         }
 
