@@ -84,6 +84,11 @@ const styles = (theme: Theme) =>
     },
     editorWrapper: {
       position: "relative"
+    },
+    highlighted: {
+      borderColor: theme.palette.secondary.main,
+      borderSize: "1px",
+      border: "solid"
     }
   });
 
@@ -228,6 +233,10 @@ const TopicReplyCard = withStyles(styles)(
       setInterval(() => {
         this.setState({ timeLeftUntilNoLongerModifiable: this.getTimeLeft(modifiableUntil) });
       }, 1000);
+
+      if (this.isReplyHighlighted()) {
+        this.openSubReplies();
+      }
     }
 
     getTimeLeft(until: number): number {
@@ -292,10 +301,16 @@ const TopicReplyCard = withStyles(styles)(
       );
     }
 
+    isReplyHighlighted(): boolean {
+      return window.location.href.indexOf("#" + this.props.reply.id) > -1;
+    }
+
     renderCardContent() {
       const user: ChromunityUser = this.state.user;
       return (
-        <CardContent>
+        <CardContent
+          className={this.isReplyHighlighted() ? this.props.classes.highlighted : ""}
+        >
           {this.renderAuthor()}
           <div>
             <Timestamp milliseconds={this.props.reply.timestamp} />
