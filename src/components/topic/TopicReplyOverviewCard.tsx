@@ -86,7 +86,7 @@ const TopicReplyOverviewCard = withStyles(styles)(
 
     render() {
       if (this.state.redirectToTopic) {
-        return <Redirect to={"/t/" + this.props.reply.topic_id} push />;
+        return <Redirect to={"/t/" + this.props.reply.topic_id + "#" + this.props.reply.id} push />;
       } else {
         return (
           <div className={this.props.reply.removed ? "removed" : ""}>
