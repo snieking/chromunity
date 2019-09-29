@@ -89,6 +89,9 @@ const styles = (theme: Theme) =>
       borderColor: theme.palette.secondary.main,
       borderSize: "1px",
       border: "solid"
+    },
+    hidden: {
+      display: "none"
     }
   });
 
@@ -189,7 +192,9 @@ const TopicReplyCard = withStyles(styles)(
                 {this.renderCardContent()}
               </Card>
             </div>
-            {this.renderSubReplies()}
+            <div className={!this.state.renderSubReplies ? this.props.classes.hidden : ""}>
+              {this.renderSubReplies()}
+            </div>
           </div>
         );
       } else {
@@ -206,19 +211,17 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     renderSubReplies() {
-      if (this.state.renderSubReplies) {
-        return this.state.subReplies.map(reply => (
-          <TopicReplyCard
-            key={"reply-" + reply.id}
-            reply={reply}
-            indention={this.props.indention + 10}
-            topicId={this.props.topicId}
-            representatives={this.props.representatives}
-            mutedUsers={this.props.mutedUsers}
-            cascadeOpenSubReplies={this.openSubReplies}
-          />
-        ));
-      }
+      return this.state.subReplies.map(reply => (
+        <TopicReplyCard
+          key={"reply-" + reply.id}
+          reply={reply}
+          indention={this.props.indention + 10}
+          topicId={this.props.topicId}
+          representatives={this.props.representatives}
+          mutedUsers={this.props.mutedUsers}
+          cascadeOpenSubReplies={this.openSubReplies}
+        />
+      ));
     }
 
     componentDidMount() {
