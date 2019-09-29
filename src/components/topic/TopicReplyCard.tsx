@@ -162,6 +162,10 @@ const TopicReplyCard = withStyles(styles)(
         renderSubReplies: previouslyFoldedSubReplies ? decisionToRenderSubReplies : shouldRenderDueToTimestamp
       };
 
+      if (!previouslyFoldedSubReplies && shouldRenderDueToTimestamp && this.props.cascadeOpenSubReplies != null) {
+        this.props.cascadeOpenSubReplies();
+      }
+
       this.textInput = React.createRef();
       this.cardRef = React.createRef();
 
