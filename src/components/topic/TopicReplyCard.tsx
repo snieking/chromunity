@@ -129,6 +129,7 @@ const replyUnfoldCache = BoomerangCache.create("reply-unfold-bucket", {
 const TopicReplyCard = withStyles(styles)(
   class extends React.Component<Props, State> {
     private readonly textInput: React.RefObject<HTMLInputElement>;
+    private readonly cardRef: React.RefObject<HTMLDivElement>;
 
     constructor(props: Props) {
       super(props);
@@ -159,6 +160,7 @@ const TopicReplyCard = withStyles(styles)(
       };
 
       this.textInput = React.createRef();
+      this.cardRef = React.createRef();
 
       this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
       this.sendReply = this.sendReply.bind(this);
@@ -170,6 +172,8 @@ const TopicReplyCard = withStyles(styles)(
       this.openSubReplies = this.openSubReplies.bind(this);
     }
 
+    scrollToReply = () => window.scrollTo(0, this.cardRef.current.offsetTop);
+
     render() {
       if (!this.props.mutedUsers.includes(this.props.reply.author)) {
         return (
@@ -177,6 +181,7 @@ const TopicReplyCard = withStyles(styles)(
             <div className={this.props.reply.removed ? this.props.classes.removed : ""}>
               <Card
                 key={this.props.reply.id}
+                ref={this.cardRef}
                 style={{ marginLeft: this.props.indention + "px" }}
                 className={this.isReplyHighlighted() ? this.props.classes.highlighted : ""}
               >
@@ -240,6 +245,7 @@ const TopicReplyCard = withStyles(styles)(
 
       if (this.isReplyHighlighted()) {
         this.openSubReplies();
+        this.scrollToReply();
       }
     }
 
