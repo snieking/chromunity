@@ -171,8 +171,8 @@ const EditMessageButton = withStyles(styles)(
       }));
 
       setTimeout(() => {
-        this.textInput.current.selectionStart = startPosition + 2;
-        this.textInput.current.selectionEnd = startPosition + 2;
+        this.textInput.current.selectionStart = startPosition + emoji.length;
+        this.textInput.current.selectionEnd = startPosition + emoji.length;
       }, 100);
     }
 

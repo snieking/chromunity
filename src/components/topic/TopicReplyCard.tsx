@@ -517,7 +517,7 @@ const TopicReplyCard = withStyles(styles)(
       }
     }
 
-    addEmojiInReply(emoji: any) {
+    addEmojiInReply(emoji: string) {
       const startPosition = this.textInput.current.selectionStart;
 
       this.setState(prevState => ({
@@ -529,8 +529,8 @@ const TopicReplyCard = withStyles(styles)(
       }));
 
       setTimeout(() => {
-        this.textInput.current.selectionStart = startPosition + 2;
-        this.textInput.current.selectionEnd = startPosition + 2;
+        this.textInput.current.selectionStart = startPosition + emoji.length;
+        this.textInput.current.selectionEnd = startPosition + emoji.length;
       }, 100);
     }
 

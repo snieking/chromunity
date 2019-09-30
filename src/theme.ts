@@ -2,6 +2,7 @@ import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 
 export const COLOR_CHROMIA_LIGHTER = '#fbf8ff';
 export const COLOR_CHROMIA_LIGHT = '#f9f6fd';
+export const COLOR_GRAY = '#c0bdc3';
 export const COLOR_CHROMIA_DARK_LIGHTER = '#333037';
 export const COLOR_CHROMIA_DARK = '#1F1A23';
 export const COLOR_CHROMIA_DARKER = '#1e1b23';
@@ -78,14 +79,14 @@ export const darkTheme = createMuiTheme({
                 fontFamily: '"Battlefin", "International", "Roboto", "Helvetica", "Arial", "sans-serif"'
             },
             h6: {
-                color: COLOR_SOFT_PINK,
+                color: COLOR_OFF_WHITE,
                 fontFamily: '"Battlefin", "International", "Roboto", "Helvetica", "Arial", "sans-serif"'
             },
             body1: {
-                color: COLOR_OFF_WHITE
+                color: COLOR_CHROMIA_LIGHT
             },
             body2: {
-                color: COLOR_OFF_WHITE
+                color: COLOR_CHROMIA_LIGHT
             },
             colorTextSecondary: {
                 color: COLOR_OFF_WHITE,

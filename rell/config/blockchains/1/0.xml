@@ -982,8 +982,6 @@ operation remove_notifications_for_users(name, descriptor_id: byte_array, id: te
     for (username in usernames) {
         val to_user = user@?{ .name == username };
         if (to_user != null) {
-        	log("ID: ", id);
-        	log("ToUser: ", user);
             delete notification@?{ id, .user == to_user };
         }
     }
@@ -1246,6 +1244,8 @@ include '/topic/subscription/index';</string>
                             <entry key="topic/operations.rell">
                                 <string>operation create_topic(id: text, descriptor_id: byte_array, username: text, channel_key: name, channel_name: name, title: name, message: text) {
     val author = get_verified_user(username, descriptor_id);
+    
+    require(false, app_error(error_type.USER_UNAUTHORIZED, "Error creating topic!!"));
 
     val topic = create topic(
         id = id, 

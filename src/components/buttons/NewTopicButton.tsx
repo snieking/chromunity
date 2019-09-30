@@ -168,7 +168,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                 });
                 this.props.updateFunction();
               })
-              .catch(() =>
+              .catch(error =>
                 this.setState({
                   newTopicStatusMessage: "Error while creating topic",
                   newTopicErrorOpen: true
@@ -374,8 +374,8 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         }));
 
         setTimeout(() => {
-          this.textInput.current.selectionStart = startPosition + 2;
-          this.textInput.current.selectionEnd = startPosition + 2;
+          this.textInput.current.selectionStart = startPosition + emoji.length;
+          this.textInput.current.selectionEnd = startPosition + emoji.length;
         }, 100);
       }
 

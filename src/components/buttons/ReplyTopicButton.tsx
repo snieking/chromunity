@@ -160,8 +160,8 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
     const startPosition = textInput.current.selectionStart;
     setMessage([message.slice(0, startPosition), emoji, message.slice(startPosition)].join(''));
     setTimeout(() => {
-      textInput.current.selectionStart = startPosition + 2;
-      textInput.current.selectionEnd = startPosition + 2;
+      textInput.current.selectionStart = startPosition + emoji.length;
+      textInput.current.selectionEnd = startPosition + emoji.length;
     }, 100);
   }
 

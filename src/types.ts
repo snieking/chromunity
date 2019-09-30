@@ -5,11 +5,6 @@ export interface ChromunityUser {
   ft3User: User;
 }
 
-export interface EncryptedAccount {
-  name: string;
-  encryptedSeed: string;
-}
-
 export interface UserMeta {
   name: string;
   times_suspended: number;
