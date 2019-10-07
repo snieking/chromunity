@@ -1,8 +1,5 @@
 import { applyMiddleware, combineReducers, compose, createStore, Store } from "redux";
 import createSagaMiddleware from "redux-saga";
-import { persistReducer } from "redux-persist";
-import storage from "redux-persist/lib/storage";
-import autoMergeLevel2 from "redux-persist/lib/stateReconciler/autoMergeLevel2";
 import rootSaga from "./sagas/index";
 import { AccountState } from "./AccountTypes";
 import { TopicWallState } from "./WallTypes";
@@ -39,12 +36,6 @@ const rootReducer = combineReducers<ApplicationState>({
   chat: chatReducer
 });
 
-const persistConfig = {
-  key: "root",
-  storage: storage,
-  stateReconciler: autoMergeLevel2
-};
-
 // Create Redux Store
 const middleware = [];
 const enhancers = [];
@@ -60,9 +51,7 @@ middleware.push(sagaMiddleware);
 // Assemble Middleware
 enhancers.push(applyMiddleware(...middleware));
 
-const pReducer = persistReducer<ApplicationState>(persistConfig, rootReducer);
-
-const store = createStore(pReducer, undefined, compose(...enhancers));
+const store = createStore(rootReducer, undefined, compose(...enhancers));
 export default function configureStore(): Store<ApplicationState> {
   sagaMiddleware.run(rootSaga);
   return store;
