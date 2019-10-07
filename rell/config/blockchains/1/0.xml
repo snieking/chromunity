@@ -241,7 +241,7 @@ operation send_chat_message(chat_id: text, descriptor_id: byte_array, username: 
                             </entry>
                             <entry key="chat/queries.rell">
                                 <string>query get_chat_user_pubkey(username: name): text? {
-	return chat_user@?{ .user.name == username } ( .rsa_pubkey );
+	return chat_user@?{ .user.name == username.lower_case() } ( .rsa_pubkey );
 }
 
 query get_user_chats(username: name): list&lt;chat_record&gt; {
@@ -1754,7 +1754,7 @@ operation unsubscribe_from_topic(username: text, descriptor_id: byte_array, id: 
                             </entry>
                             <entry key="user/functions.rell">
                                 <string>function get_verified_user(name, descriptor_id: byte_array): user {
-    val user = user@{ .name == name };
+    val user = user@{ .name == name.lower_case() };
     ft3.require_auth(user.account, descriptor_id, ["A"]);
     require(
     	user_meta@{ user }.suspended_until &lt; op_context.last_block_time, 

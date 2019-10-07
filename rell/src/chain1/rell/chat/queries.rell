@@ -1,5 +1,5 @@
 query get_chat_user_pubkey(username: name): text? {
-	return chat_user@?{ .user.name == username } ( .rsa_pubkey );
+	return chat_user@?{ .user.name == username.lower_case() } ( .rsa_pubkey );
 }
 
 query get_user_chats(username: name): list<chat_record> {
