@@ -1,0 +1,39 @@
+operation create_chat(chat_id: text, descriptor_id: byte_array, username: text, title: text, encrypted_chat_key: text) {
+	val founder = get_verified_user(username, descriptor_id);
+	
+	val chat = create chat(id = chat_id, title = title, timestamp = op_context.last_block_time);
+	create chat_membership(chat, chat_user@{ .user == founder }, encrypted_chat_key);
+}
+
+operation create_chat_user(descriptor_id: byte_array, username: text, rsa_pubkey: text) {
+	val user = get_verified_user(username, descriptor_id);
+	create chat_user(user, rsa_pubkey);
+}
+
+operation add_user_to_chat(descriptor_id: byte_array, username: text, chat_id: text, target_user: text, encrypted_chat_key: text) {
+	val user_already_in_chat = get_verified_user(username, descriptor_id);
+	create chat_membership(chat@{ .id == chat_id }, chat_user@{ .user.name == target_user.lower_case() }, encrypted_chat_key);
+}
+
+operation leave_chat(descriptor_id: byte_array, username: text, chat_id: text) {
+	val user = get_verified_user(username, descriptor_id);
+	val chat = chat@{ .id == chat_id };
+
+	delete chat_membership@{ chat, chat_user@{ user }};
+	
+	if (chat_membership@*{ chat } ( .member ).size() == 0) {
+		delete chat_message@*{ chat };
+		delete chat;
+	}
+}
+
+operation send_chat_message(chat_id: text, descriptor_id: byte_array, username: name, encrypted_msg: text) {
+	val user = get_verified_user(username, descriptor_id);
+	
+	val chat = chat@{ .id == chat_id };
+	val chat_user = chat_user@{ user };
+	val chat_member = chat_membership@?{ chat, chat_user };
+	require(chat_member != null, app_error(error_type.USER_UNAUTHORIZED, "Only a chat member can send a message"));
+	
+	create chat_message(chat, chat_user, op_context.last_block_time, encrypted_msg);
+}

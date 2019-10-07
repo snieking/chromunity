@@ -19,6 +19,7 @@ const SESSION_CACHE = BoomerangCache.create("session-bucket", {
 const USER_KEY = "user";
 const USER_META_KEY = "user_meta";
 const KEYPAIR_KEY = "keyPair";
+const RSA_PASS = "rsaPassPhrase";
 
 export function clearSession(): void {
   ENCRYPTED_LOCAL_CACHE.clear();
@@ -35,6 +36,14 @@ export function getKeyPair(): KeyPair {
   const keyPair = LOCAL_CACHE.get("keyPair");
   if (keyPair == null) return null;
   return new KeyPair(keyPair.privKey);
+}
+
+export function storeChatPassphrase(passphrase: string) {
+  ENCRYPTED_LOCAL_CACHE.set(RSA_PASS, passphrase);
+}
+
+export function getChatPassphrase(): any {
+  return ENCRYPTED_LOCAL_CACHE.get(RSA_PASS);
 }
 
 export function getUsername(): string {

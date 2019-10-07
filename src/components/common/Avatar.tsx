@@ -2,6 +2,7 @@ import React from 'react';
 import makeStyles from "@material-ui/core/styles/makeStyles";
 
 export enum AVATAR_SIZE {
+    X_SMALL,
     SMALL,
     MEDIUM,
     LARGE
@@ -20,12 +21,13 @@ const Avatar: React.FunctionComponent<Props> = (props) => {
             src={props.src}
             className={`
                 ${classes.avatar}
+                ${props.size === AVATAR_SIZE.X_SMALL ? classes.xSmall : ''}
                 ${props.size === AVATAR_SIZE.SMALL ? classes.small : ''}
                 ${props.size === AVATAR_SIZE.MEDIUM ? classes.medium : ''}
                 ${props.size === AVATAR_SIZE.LARGE ? classes.large : ''}
             `}
             alt="Profile Avatar"
-            onClick={() => props.onClick()}
+            onClick={() => props.onClick != null && props.onClick()}
         />
     );
 };
@@ -33,6 +35,10 @@ const Avatar: React.FunctionComponent<Props> = (props) => {
 const useStyles = makeStyles({
     avatar: {
         borderRadius: "50%"
+    },
+    xSmall: {
+        width: "30px",
+        height: "30px"
     },
     small: {
         width: "40px",

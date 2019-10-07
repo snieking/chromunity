@@ -6,6 +6,7 @@ import {
   timeAgoReadable
 } from "../../src/util/util";
 import { getTags, parseEmojis } from "../../src/util/text-parsing";
+import { makeKeyPair } from "../../src/blockchain/CryptoService";
 
 jest.setTimeout(30000);
 
@@ -155,4 +156,30 @@ describe("printable minutes", () => {
   it("printable minutes and seconds 2", async () => {
     expect(printableMinutes(179)).toBe("2m 59s");
   });
+
+});
+
+describe("crypto testing", () => {
+
+    it("crypto logic", async () => {
+       const user1 = makeKeyPair();
+       const user2 = makeKeyPair();
+
+       // User 1 sends invite to user 2
+       //   user2 accepts by adding his pubkey
+       // User 1 creates a membership by encrypting chat private key and storing it in membership
+       // User 2 can now decrypt the chat key when needed to encrypt and decrypt
+
+        // Viktor creates chat
+        //  Creates a keypair for the chat key, and encrypts it with Viktor's pubkey
+        //  [Rell] Creates a chat, and chat_membership with encrypted chat key
+        // Nastya requests to join chat
+        //  [Rell] Nastya creates a chat_join_request with her pubkey
+        // Viktor accepts the request
+        // Viktor encrypts the unencrypted chat key with Nastya's pubkey
+        //  [Rell] Viktor creates a chat_membership, and stores the encrypted chat key in the membership
+        // Nastya can now decrypt the chat key when needed to encrypt and decrypt chat messages
+
+    });
+
 });

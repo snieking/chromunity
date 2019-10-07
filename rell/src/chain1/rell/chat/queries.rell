@@ -1,0 +1,27 @@
+query get_chat_user_pubkey(username: name): text? {
+	return chat_user@?{ .user.name == username } ( .rsa_pubkey );
+}
+
+query get_user_chats(username: name): list<chat_record> {
+	
+	val member_chats = chat_membership@*{ .member.user.name == username.lower_case() };
+	val chat_records = list<chat_record>();
+	
+	for (member_chat in member_chats) {
+		val latest_message = chat_message@?{ .chat == member_chat.chat } ( .sender, -sort .timestamp, .encrypted_msg, -sort .chat.timestamp ) limit 1;
+		
+		if (latest_message != null) {
+			val message = message_record(sender = latest_message!!.sender.user.display_name, timestamp = latest_message!!.timestamp, encrypted_msg = latest_message!!.encrypted_msg);
+			chat_records.add(chat_record(id = member_chat.chat.id, title = member_chat.chat.title, last_message = message, encrypted_chat_key = member_chat.encrypted_chat_key, timestamp = member_chat.chat.timestamp));		
+		} else {
+			chat_records.add(chat_record(id = member_chat.chat.id, title = member_chat.chat.title, last_message = null, encrypted_chat_key = member_chat.encrypted_chat_key, timestamp = member_chat.chat.timestamp));	
+		}
+		
+	}
+	
+	return chat_records;
+}
+
+query get_chat_messages(id: text) {
+	return chat_message@*{ .chat.id == id } ( sender = chat_message.sender.user.display_name,  sort timestamp = chat_message.timestamp, encrypted_msg = chat_message.encrypted_msg );
+}

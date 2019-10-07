@@ -18,6 +18,7 @@ import WalletLogin from "./components/user/authentication/WalletLogin";
 import { ErrorPage } from "./components/static/ErrorPage";
 import LoginAccount from "./components/user/authentication/LoginAccount";
 import CandidateElectionVoteLink from "./components/governing/election/CandidateElectionVoteLink";
+import ChatPage from "./components/chat/ChatPage";
 
 const Content: React.FunctionComponent<RouteComponentProps> = ({ location }) => {
   return (
@@ -42,6 +43,7 @@ const Content: React.FunctionComponent<RouteComponentProps> = ({ location }) => 
             <Route path="/gov/log" component={GovLog} />
             <Route path="/gov/reports" component={Reports} />
             <Route path="/t/:id" component={FullTopic} />
+            <Route path="/chat" component={ChatPage} />
             <Route path="/error" component={ErrorPage} />
           </Switch>
         </CSSTransition>
