@@ -233,7 +233,7 @@ export const lightTheme = createMuiTheme({
                 color: COLOR_YELLOW
             },
             h1: {
-                color: COLOR_SOFT_PINK,
+                color: COLOR_STEEL_BLUE,
                 fontFamily: '"Battlefin", "International", "Roboto", "Helvetica", "Arial", "sans-serif"',
                 fontSize: "32px",
                 paddingTop: "20px"

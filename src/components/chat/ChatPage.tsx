@@ -235,7 +235,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   function renderChatCreationActions() {
     return (
       <div style={{ textAlign: "center", marginTop: "15px" }}>
-        <Button type="button" color="primary" variant="contained" onClick={() => props.createNewChat(user)}>
+        <Button type="button" color="secondary" variant="contained" onClick={() => props.createNewChat(user)}>
           New Chat
         </Button>
       </div>
