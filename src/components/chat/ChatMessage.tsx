@@ -17,11 +17,11 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     message: {
       background: "none",
+      maxWidth: "100%",
       overflowWrap: "break-word",
       wordWrap: "break-word",
-      "& a": {
         wordBreak: "break-all"
-      }
+
     },
     author: {
       margin: "0 auto"

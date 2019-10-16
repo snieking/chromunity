@@ -86,6 +86,7 @@ const useStyles = makeStyles((theme: Theme) =>
     chatMessages: {
       overflowY: "auto",
       width: "100%",
+      maxWidth: "100%",
       height: "80%",
       maxHeight: "70vh"
     },
