@@ -267,6 +267,14 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
         open={Boolean(wallAnchorEl)}
         onClose={handleWallMenuClose}
       >
+        <Link style={{ width: "100%" }} to="/">
+          <MenuItem onClick={handleWallMenuClose}>
+            <ListItemIcon>
+              <Home className="menu-item-button" />
+            </ListItemIcon>
+            <Typography className="menu-item-text">Home</Typography>
+          </MenuItem>
+        </Link>
         <Link style={{ width: "100%" }} to="/channels">
           <MenuItem onClick={handleWallMenuClose}>
             <ListItemIcon>
