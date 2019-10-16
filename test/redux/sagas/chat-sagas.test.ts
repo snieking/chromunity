@@ -71,7 +71,7 @@ describe("Chat Sagas test", () => {
     }).toPromise();
 
     expect(dispatchedChatActions.length).toBe(3);
-    let action = dispatchedChatActions[1];
+    let action = dispatchedChatActions[2];
     let openChatsAction = action as OpenChatAction;
     return openChatsAction.chat;
   };
@@ -102,8 +102,7 @@ describe("Chat Sagas test", () => {
   });
 
   it("Create and leave chat", async () => {
-    console.log("Create a chat with rsaKey ", chatUser2RsaKey, "and user ", chatUser2);
-    const newChat = await createChat(chatUser2RsaKey, chatUser2);
+    const newChat = await createChat(chatUser1RsaKey, chatUser1);
 
     const dispatchedChatActions: ChatActions[] = [];
     const fakeStore = createFakeStore(dispatchedChatActions, {
