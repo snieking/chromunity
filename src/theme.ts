@@ -74,6 +74,12 @@ export const darkTheme = createMuiTheme({
             caption: {
                 color: COLOR_YELLOW
             },
+            h1: {
+                color: COLOR_SOFT_PINK,
+                fontFamily: '"Battlefin", "International", "Roboto", "Helvetica", "Arial", "sans-serif"',
+                fontSize: "32px",
+                paddingTop: "20px"
+            },
             h5: {
                 color: COLOR_SOFT_PINK,
                 fontFamily: '"Battlefin", "International", "Roboto", "Helvetica", "Arial", "sans-serif"'

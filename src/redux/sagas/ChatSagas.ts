@@ -2,8 +2,10 @@ import {
   AddUserToChatAction,
   ChatActionTypes,
   CreateChatKeyPairAction,
-  CreateNewChatAction, LeaveChatAction,
+  CreateNewChatAction,
+  LeaveChatAction,
   LoadUserChatsAction,
+  ModifyTitleAction,
   OpenChatAction,
   RefreshOpenChatAction,
   SendMessageAction
@@ -24,13 +26,15 @@ import {
   createNewChat,
   getChatMessages,
   getUserChats,
-  getUserPubKey, leaveChat,
+  getUserPubKey,
+  leaveChat,
+  modifyTitle,
   sendChatMessage
 } from "../../blockchain/ChatService";
 import {
   loadUserChats,
   openChat,
-  refreshOpenChat,
+  refreshOpenChat, sendMessage,
   storeChatKeyPair,
   storeDecryptedChat,
   storeUserChats
@@ -50,6 +54,7 @@ export function* chatWatcher() {
   yield takeLatest(ChatActionTypes.SEND_MESSAGE, sendMessageSaga);
   yield takeLatest(ChatActionTypes.ADD_USER_TO_CHAT, addUserToChatSaga);
   yield takeLatest(ChatActionTypes.LEAVE_CHAT, leaveChatSaga);
+  yield takeLatest(ChatActionTypes.MODIFY_TITLE, modifyTitleSaga);
 }
 
 export const getRsaKey = (state: ApplicationState) => state.chat.rsaKey;
@@ -61,22 +66,16 @@ export const getLastUpdate = (state: ApplicationState) => state.chat.lastUpdate;
 const UPDATE_DURATION_MILLIS = 1000 * 60;
 
 const shouldUpdate = (updated: number): boolean => {
-  console.log("Last updated: ", updated);
   return Date.now() - updated > UPDATE_DURATION_MILLIS;
 };
 
 export function* checkChatAuthenticationSaga() {
-  console.log("CHecking auth");
-
   const rsaKey = yield select(getRsaKey);
-  console.log("RSA Key from Redux: ", rsaKey);
 
   if (rsaKey == null) {
     const rsaPassphrase = getChatPassphrase();
-    console.log("RSA Passphrase from Local Storage: ", rsaPassphrase);
 
     if (rsaPassphrase != null) {
-      console.log("Fetched from localStorage");
       const reconstructedRSAKey = generateRSAKey(rsaPassphrase);
       yield put(storeChatKeyPair(reconstructedRSAKey, true));
     }
@@ -87,9 +86,7 @@ export function* createChatKeyPairSaga(action: CreateChatKeyPairAction) {
   const pubKey: string = yield getUserPubKey(action.user.name);
 
   const rsaKey = generateRSAKey(action.password);
-  console.log("rsaKey: ", rsaKey.toJSON());
   const rsaPubKey = rsaKeyToPubKey(rsaKey);
-  console.log("RSA PubKey: ", rsaPubKey);
 
   if (pubKey != null && pubKey !== rsaPubKey) {
     console.log("New pubkey didn't match old one");
@@ -104,10 +101,8 @@ export function* createChatKeyPairSaga(action: CreateChatKeyPairAction) {
 
 export function* createNewChatSaga(action: CreateNewChatAction) {
   const id = uniqueId();
-  console.log("Id on new chat: ", id);
 
   const sharedChatKey = makeKeyPair().privKey;
-  console.log("Chat key", sharedChatKey.toString("hex"));
 
   const rsaKey = yield select(getRsaKey);
   const rsaPubKey = rsaKeyToPubKey(rsaKey);
@@ -128,6 +123,7 @@ export function* addUserToChatSaga(action: AddUserToChatAction) {
     const encryptedSharedChatKey = yield rsaEncrypt(decryptedChatKey.plaintext, targetUserPubKey);
 
     yield addUserToChat(action.user, chat.id, action.username, encryptedSharedChatKey.cipher);
+    yield sendMessage(action.user, chat, "I invited " + action.username + " to join us!");
   } else {
     console.log("User hasn't created a chat key yet", action.username);
   }
@@ -144,11 +140,9 @@ export function* loadUserChatsSaga(action: LoadUserChatsAction) {
   const lastUpdate = yield select(getLastUpdate);
 
   if (action.force || shouldUpdate(lastUpdate)) {
-    console.log("Load user chats: ", action);
     const chats: Chat[] = yield getUserChats(action.user);
     const prevChats: Chat[] = yield select(getChats);
-    console.log("Chats: ", chats);
-    if (!arraysEqual(chats, prevChats)) {
+    if (prevChats == null || !arraysEqual(chats, prevChats)) {
       yield put(
         storeUserChats(
           chats.sort(
@@ -192,7 +186,6 @@ export function* openChatSaga(action: OpenChatAction) {
 
 export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
   const chat = yield select(getActiveChat);
-  console.log("Refreshing open chat", chat);
 
   if (chat != null) {
     const prevMessages = yield select(getActiveChatMessages);
@@ -202,9 +195,7 @@ export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
       const rsaKey = yield select(getRsaKey);
       const sharedChatKey: any = yield rsaDecrypt(chat.encrypted_chat_key, rsaKey);
 
-
       const decryptedMessages: ChatMessageDecrypted = chatMessages.map((message: ChatMessage) => {
-        console.log("Message: ", message);
         return {
           sender: message.sender,
           timestamp: message.timestamp,
@@ -219,16 +210,23 @@ export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
 }
 
 export function* sendMessageSaga(action: SendMessageAction) {
-  console.log("Sending chat message: ", action);
   const rsaKey = yield select(getRsaKey);
-  console.log("Retrieved RSA key: ", rsaKey);
   const sharedChatKey: any = yield rsaDecrypt(action.chat.encrypted_chat_key, rsaKey);
-  console.log("Retrieved shared chat key: ", sharedChatKey);
 
   yield sendChatMessage(action.user, action.chat.id, encrypt(action.message, sharedChatKey.plaintext));
-  console.log("Sent message");
   yield put(refreshOpenChat(action.user.name));
-  console.log("Refresh chat");
+}
+
+export function* modifyTitleSaga(action: ModifyTitleAction) {
+  yield modifyTitle(action.user, action.chat.id, action.title);
+  const updatedChat: Chat = {
+    id: action.chat.id,
+    title: action.title,
+    encrypted_chat_key: action.chat.encrypted_chat_key,
+    timestamp: action.chat.timestamp,
+    last_message: action.chat.last_message
+  };
+  yield put(openChat(updatedChat));
 }
 
 function arraysEqual(arr1: Chat[], arr2: Chat[]) {

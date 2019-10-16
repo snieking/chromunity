@@ -12,7 +12,8 @@ export enum ChatActionTypes {
   OPEN_CHAT = "CHAT/OPEN",
   REFRESH_OPEN_CHAT = "CHAT/REFRESH",
   STORE_DECRYPTED_CHAT = "CHAT/DECRYPTED/STORE",
-  SEND_MESSAGE = "CHAT/MESSAGE/SEND"
+  SEND_MESSAGE = "CHAT/MESSAGE/SEND",
+  MODIFY_TITLE = "CHAT/TITLE/MODIFY"
 }
 
 export interface CheckChatAuthenticationAction {
@@ -78,6 +79,13 @@ export interface SendMessageAction {
   user: ChromunityUser;
   chat: Chat;
   message: string;
+}
+
+export interface ModifyTitleAction {
+  type: ChatActionTypes.MODIFY_TITLE;
+  user: ChromunityUser;
+  chat: Chat;
+  title: string;
 }
 
 export type ChatActions =

@@ -1,11 +1,16 @@
 import { ActionCreator } from "redux";
 import {
   AddUserToChatAction,
-  ChatActionTypes, CheckChatAuthenticationAction,
+  ChatActionTypes,
+  CheckChatAuthenticationAction,
   CreateChatKeyPairAction,
-  CreateNewChatAction, LeaveChatAction,
+  CreateNewChatAction,
+  LeaveChatAction,
   LoadUserChatsAction,
-  OpenChatAction, RefreshOpenChatAction, SendMessageAction,
+  ModifyTitleAction,
+  OpenChatAction,
+  RefreshOpenChatAction,
+  SendMessageAction,
   StoreChatKeyPairAction,
   StoreDecryptedChatAction,
   StoreUserChatsAction
@@ -78,4 +83,15 @@ export const sendMessage: ActionCreator<SendMessageAction> = (user: ChromunityUs
   user: user,
   chat: chat,
   message: message
+});
+
+export const modifyTitleAction: ActionCreator<ModifyTitleAction> = (
+  user: ChromunityUser,
+  chat: Chat,
+  title: string
+) => ({
+  type: ChatActionTypes.MODIFY_TITLE,
+  user: user,
+  chat: chat,
+  title: title
 });

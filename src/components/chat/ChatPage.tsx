@@ -8,6 +8,7 @@ import {
   createNewChat,
   leaveChatAction,
   loadUserChats,
+  modifyTitleAction,
   openChat,
   refreshOpenChat,
   sendMessage
@@ -24,7 +25,7 @@ import Grid from "@material-ui/core/Grid";
 import List from "@material-ui/core/List";
 import ChatListItem from "./ChatListItem";
 import ChatMessage from "./ChatMessage";
-import { GroupAdd, RemoveCircle } from "@material-ui/icons";
+import { GroupAdd, LibraryBooks, RemoveCircle } from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import Dialog from "@material-ui/core/Dialog";
@@ -33,6 +34,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";
 import ConfirmDialog from "../common/ConfirmDialog";
+import Drawer from "@material-ui/core/Drawer";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -46,11 +48,30 @@ const useStyles = makeStyles((theme: Theme) =>
     wrapper: {
       paddingTop: "15px"
     },
-    sidePanel: {
+    desktopSidePanel: {
+      [theme.breakpoints.down("md")]: {
+        display: "none"
+      },
       marginTop: "15px",
       borderRight: "2px solid",
       height: "100%",
       borderRightColor: theme.palette.primary.main
+    },
+    toggleDrawerButton: {
+      position: "fixed",
+      bottom: "10px",
+      left: "10px",
+      backgroundColor: theme.palette.primary.main
+    },
+    drawerButtonIcon: {
+      color: theme.palette.background.default
+    },
+    mobileSidePanel: {
+      [theme.breakpoints.up("lg")]: {
+        display: "none"
+      },
+      float: "left",
+      position: "relative"
     },
     chatWrapper: {
       margin: "0 auto",
@@ -58,7 +79,9 @@ const useStyles = makeStyles((theme: Theme) =>
       height: "100%"
     },
     chatActions: {
-      float: "right"
+      borderBottom: "solid 2px",
+      paddingBottom: "10px",
+      borderBottomColor: theme.palette.primary.main
     },
     chatMessages: {
       overflowY: "auto",
@@ -68,24 +91,18 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     messageWrapper: {
       marginTop: "5px",
-      position: "relative",
-      bottom: 0,
-      width: "100%"
+      bottom: 0
     },
     submitMessage: {
       top: "15px",
-      marginLeft: "1%",
-      width: "10%",
-      [theme.breakpoints.down("xs")]: {
-        marginLeft: "3%",
-        width: "5%"
-      }
+      marginLeft: "3%",
+      width: "10%"
     },
     messageField: {
-      width: "89%",
-      [theme.breakpoints.down("xs")]: {
-        width: "80%"
-      }
+      width: "70%"
+    },
+    title: {
+      cursor: "pointer"
     }
   })
 );
@@ -106,6 +123,7 @@ interface Props {
   refreshOpenChat: typeof refreshOpenChat;
   sendMessage: typeof sendMessage;
   leaveChat: typeof leaveChatAction;
+  modifyTitle: typeof modifyTitleAction;
 }
 
 interface State {
@@ -115,6 +133,9 @@ interface State {
   showAddDialog: boolean;
   userToAdd: string;
   showLeaveChatDialog: boolean;
+  modifyTitle: boolean;
+  updatedTitle: string;
+  drawerOpen: boolean;
 }
 
 const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
@@ -125,7 +146,10 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     message: "",
     showAddDialog: false,
     userToAdd: "",
-    showLeaveChatDialog: false
+    showLeaveChatDialog: false,
+    modifyTitle: false,
+    updatedTitle: "",
+    drawerOpen: false
   });
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -167,12 +191,38 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     }
   }
 
+  const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
+    if (
+      event.type === "keydown" &&
+      ((event as React.KeyboardEvent).key === "Tab" || (event as React.KeyboardEvent).key === "Shift")
+    ) {
+      return;
+    }
+
+    setValues({ ...values, drawerOpen: open });
+  };
+
+  const mobileDrawerList = () => (
+    <div>
+      {renderChatCreationActions()}
+      {listChatRooms()}
+    </div>
+  );
+
   function renderChat() {
     return (
       <>
         {props.loading ? <LinearProgress variant="query" /> : <div />}
+        <div className={classes.mobileSidePanel}>
+          <IconButton onClick={toggleDrawer(true)} className={classes.toggleDrawerButton}>
+            <LibraryBooks fontSize="large" className={classes.drawerButtonIcon} />
+          </IconButton>
+          <Drawer open={values.drawerOpen} onClose={toggleDrawer(false)}>
+            {mobileDrawerList()}
+          </Drawer>
+        </div>
         <Grid container spacing={1} className={classes.wrapper}>
-          <Grid item xs={2} className={classes.sidePanel}>
+          <Grid item xs={2} className={classes.desktopSidePanel}>
             {renderChatCreationActions()}
             {listChatRooms()}
           </Grid>
@@ -184,9 +234,11 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function renderChatCreationActions() {
     return (
-      <Button type="button" color="primary" variant="contained" onClick={() => props.createNewChat(user)}>
-        New Chat
-      </Button>
+      <div style={{ textAlign: "center", marginTop: "15px" }}>
+        <Button type="button" color="primary" variant="contained" onClick={() => props.createNewChat(user)}>
+          New Chat
+        </Button>
+      </div>
     );
   }
 
@@ -211,26 +263,70 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
         <Grid item xs={9} className={classes.chatWrapper}>
           <div>
             <div className={classes.chatActions}>
-              <IconButton onClick={() => setValues({ ...values, showLeaveChatDialog: true })}>
-                <Tooltip title="Leave chat">
-                  <RemoveCircle />
-                </Tooltip>
-              </IconButton>
-              {leaveChatDialog()}
-              <IconButton onClick={() => setValues({ ...values, showAddDialog: true })}>
-                <Tooltip title="Invite user">
-                  <GroupAdd fontSize="large" />
-                </Tooltip>
-              </IconButton>
-              {addUserDialog()}
+              <div style={{ float: "right" }}>
+                <IconButton onClick={() => setValues({ ...values, showLeaveChatDialog: true })}>
+                  <Tooltip title="Leave chat">
+                    <RemoveCircle />
+                  </Tooltip>
+                </IconButton>
+                {leaveChatDialog()}
+                <IconButton onClick={() => setValues({ ...values, showAddDialog: true })}>
+                  <Tooltip title="Invite user">
+                    <GroupAdd fontSize="large" />
+                  </Tooltip>
+                </IconButton>
+                {addUserDialog()}
+              </div>
+              <Typography
+                className={classes.title}
+                variant="h1"
+                component="h1"
+                onClick={() => setValues({ ...values, modifyTitle: true })}
+              >
+                {props.activeChat.title}
+              </Typography>
             </div>
-            <h1>{props.activeChat.title}</h1>
+            {editTitleDialog()}
           </div>
           {renderChatMessages()}
           {renderMessageWriter()}
         </Grid>
       );
     }
+  }
+
+  function editTitleDialog() {
+    return (
+      <Dialog open={values.modifyTitle} onClose={() => setValues({ ...values, modifyTitle: false })}>
+        <DialogTitle>Modify title</DialogTitle>
+        <DialogContent>
+          <DialogContentText>What should the new title be?</DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            label="Title"
+            type="text"
+            fullWidth
+            onChange={handleChange("updatedTitle")}
+            value={values.updatedTitle}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button color="secondary" variant="outlined" onClick={() => setValues({ ...values, modifyTitle: false })}>
+            Cancel
+          </Button>
+          <Button color="primary" variant="outlined" onClick={confirmUpdatedTitle}>
+            Update
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
+
+  function confirmUpdatedTitle() {
+    setValues({ ...values, modifyTitle: false });
+    props.modifyTitle(user, props.activeChat, values.updatedTitle);
   }
 
   function leaveChatDialog() {
@@ -250,21 +346,12 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function leaveChat() {
     clearInterval(interval);
-    props.leaveChat(user);
 
-    const index: number = props.chats.indexOf(props.activeChat);
-    let chat;
-    if (props.chats.length > 1 && index !== 0) {
-      chat = props.chats[0];
-      console.log("1st option...");
-      props.openChat(chat);
-    } else if (props.chats.length > 1) {
-      chat = props.chats[index + 1];
-      console.log("2nd option...");
-      props.openChat(chat);
-    }
+    const chat = props.chats.find(value => value.id !== props.activeChat.id);
+    props.openChat(chat);
 
     setValues({ ...values, showLeaveChatDialog: false, selectedChatId: chat.id });
+    props.leaveChat(user);
   }
 
   function addUserDialog() {
@@ -330,8 +417,10 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
           value={values.message}
           onChange={handleChange("message")}
           rowsMax={5}
+          variant="outlined"
+          color="secondary"
         />
-        <Button type="submit" size="small" className={classes.submitMessage} variant="contained" color="primary">
+        <Button type="submit" size="small" className={classes.submitMessage} variant="contained" color="secondary">
           Send
         </Button>
       </form>
@@ -403,7 +492,8 @@ const mapDispatchToProps = (dispatch: any) => {
     openChat: (chat: Chat) => dispatch(openChat(chat)),
     refreshOpenChat: (user: string) => dispatch(refreshOpenChat(user)),
     sendMessage: (user: ChromunityUser, chat: Chat, message: string) => dispatch(sendMessage(user, chat, message)),
-    leaveChat: (user: ChromunityUser) => dispatch(leaveChatAction(user))
+    leaveChat: (user: ChromunityUser) => dispatch(leaveChatAction(user)),
+    modifyTitle: (user: ChromunityUser, chat: Chat, title: string) => dispatch(modifyTitleAction(user, chat, title))
   };
 };
 

@@ -105,6 +105,27 @@ export function leaveChat(user: ChromunityUser, chatId: string) {
     .catch(error => handleGADuringException(operation, sw, error));
 }
 
+export function modifyTitle(user: ChromunityUser, chatId: string, updatedTitle: string) {
+  const operation = "modify_chat_title";
+
+  const sw = createStopwatchStarted();
+  return BLOCKCHAIN.then(bc => {
+    return bc.call(
+      user.ft3User,
+      operation,
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      user.name,
+      chatId,
+      updatedTitle
+    );
+  })
+    .then((promise: unknown) => {
+      gaRellOperationTiming(operation, stopStopwatch(sw));
+      return promise;
+    })
+    .catch(error => handleGADuringException(operation, sw, error));
+}
+
 export function getUserChats(username: string): Promise<Chat[]> {
   return GTX.query("get_user_chats", { username: username });
 }

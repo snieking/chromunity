@@ -8,6 +8,7 @@ import IconButton from "@material-ui/core/IconButton";
 import Home from "@material-ui/icons/Home";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import { ExitToApp, Face, Gavel, HowToVote, LocationCity, People, Report, RssFeed, Settings } from "@material-ui/icons";
+import {Menu as MenuIcon} from "@material-ui/icons/";
 
 import NotificationsButton from "../buttons/NotificationsButton";
 import { Button, ListItemIcon, Menu, MenuItem, Tooltip, Typography } from "@material-ui/core";
@@ -32,6 +33,18 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     testInfo: {
       textAlign: "center"
+    },
+    desktopWallNav: {
+      display: "inherit",
+      [theme.breakpoints.down("sm")]: {
+        display: "none"
+      }
+    },
+    mobileWallNav: {
+      display: "inherit",
+      [theme.breakpoints.up("md")]: {
+        display: "none"
+      }
     },
     navIcon: {
       color: theme.palette.primary.main
@@ -72,6 +85,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   const user = getUser();
   const [profileAnchorEl, setProfileAnchorEl] = React.useState<null | HTMLElement>(null);
   const [govAnchorEl, setGovAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [wallAnchorEl, setWallAnchorEl] = React.useState<null | HTMLElement>(null);
 
   props.loadRepresentatives();
   props.checkActiveElection();
@@ -94,6 +108,14 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
 
   function handleGovClose() {
     setGovAnchorEl(null);
+  }
+
+  function handleWallMenuClick(event: React.MouseEvent<HTMLButtonElement>) {
+    setWallAnchorEl(event.currentTarget);
+  }
+
+  function handleWallMenuClose() {
+    setWallAnchorEl(null);
   }
 
   function isRepresentative() {
@@ -217,29 +239,62 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
     }
   }
 
+  const desktopWallNav = () => (
+    <div className={classes.desktopWallNav}>
+      <Link to="/">
+        <IconButton edge="start" className={classes.menuButton} aria-label="Open drawer">
+          <Tooltip title="Home">
+            <Home className={classes.navIcon} />
+          </Tooltip>
+        </IconButton>
+      </Link>
+      {renderFavoriteWalls()}
+      <IconButton className={classes.menuButton} onClick={handleGovClick} aria-controls="gov-menu" aria-haspopup="true">
+        <Tooltip title="Governing">{renderGovernmentIcon()}</Tooltip>
+      </IconButton>
+    </div>
+  );
+
+  const mobileWallNav = () => (
+    <div className={classes.mobileWallNav}>
+      <IconButton className={classes.menuButton} onClick={handleWallMenuClick} aria-controls="wall-menu" aria-haspopup="true">
+        <MenuIcon />
+      </IconButton>
+      <Menu
+        id="wall-menu"
+        anchorEl={wallAnchorEl}
+        keepMounted
+        open={Boolean(wallAnchorEl)}
+        onClose={handleWallMenuClose}
+      >
+        <Link style={{ width: "100%" }} to="/channels">
+          <MenuItem onClick={handleWallMenuClose}>
+            <ListItemIcon>
+              <RssFeed className="menu-item-button" />
+            </ListItemIcon>
+            <Typography className="menu-item-text">Channels</Typography>
+          </MenuItem>
+        </Link>
+        <br />
+        <Link style={{ width: "100%" }} to="/followings">
+          <MenuItem onClick={handleWallMenuClose}>
+            <ListItemIcon>
+              <People className="menu-item-button" />
+            </ListItemIcon>
+            <Typography className="menu-item-text">Followings</Typography>
+          </MenuItem>
+        </Link>
+      </Menu>
+    </div>
+  );
+
   return (
     <div className={classes.grow}>
       {renderTestInfoBar()}
       <AppBar position="static">
         <Toolbar>
-          <Link to="/">
-            <IconButton edge="start" className={classes.menuButton} aria-label="Open drawer">
-              <Tooltip title="Home">
-                <Home className={classes.navIcon} />
-              </Tooltip>
-            </IconButton>
-          </Link>
-          {renderFavoriteWalls()}
-
-          <IconButton
-            className={classes.menuButton}
-            onClick={handleGovClick}
-            aria-controls="gov-menu"
-            aria-haspopup="true"
-          >
-            <Tooltip title="Governing">{renderGovernmentIcon()}</Tooltip>
-          </IconButton>
-
+          {desktopWallNav()}
+          {mobileWallNav()}
           <Menu id="gov-menu" anchorEl={govAnchorEl} keepMounted open={Boolean(govAnchorEl)} onClose={handleGovClose}>
             <Link style={{ width: "100%" }} to="/gov/representatives">
               <MenuItem onClick={handleGovClose}>
