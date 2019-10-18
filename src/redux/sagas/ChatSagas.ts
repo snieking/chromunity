@@ -24,7 +24,7 @@ import {
   addUserToChat,
   createChatUser,
   createNewChat,
-  getChatMessages,
+  getChatMessages, getChatParticipants,
   getUserChats,
   getUserPubKey,
   leaveChat,
@@ -35,7 +35,7 @@ import {
   loadUserChats,
   openChat,
   refreshOpenChat, sendMessage,
-  storeChatKeyPair,
+  storeChatKeyPair, storeChatParticipants,
   storeDecryptedChat,
   storeUserChats
 } from "../actions/ChatActions";
@@ -123,7 +123,7 @@ export function* addUserToChatSaga(action: AddUserToChatAction) {
     const encryptedSharedChatKey = yield rsaEncrypt(decryptedChatKey.plaintext, targetUserPubKey);
 
     yield addUserToChat(action.user, chat.id, action.username, encryptedSharedChatKey.cipher);
-    yield sendMessage(action.user, chat, "I invited " + action.username + " to join us!");
+    yield put(sendMessage(action.user, chat, "I invited '" + action.username + "' to join us, please welcome him/her!"));
   } else {
     console.log("User hasn't created a chat key yet", action.username);
   }
@@ -178,6 +178,9 @@ export function* openChatSaga(action: OpenChatAction) {
       };
     });
 
+    const participants = yield getChatParticipants(action.chat.id);
+
+    yield put(storeChatParticipants(participants));
     yield put(storeDecryptedChat(action.chat, decryptedMessages));
   } else {
     yield put(storeDecryptedChat(null, []));
@@ -203,6 +206,9 @@ export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
         };
       });
 
+      const participants = yield getChatParticipants(chat.id);
+
+      yield put(storeChatParticipants(participants));
       yield put(storeDecryptedChat(chat, decryptedMessages));
       yield put(loadUserChats(action.user, true));
     }

@@ -25,3 +25,7 @@ query get_user_chats(username: name): list<chat_record> {
 query get_chat_messages(id: text) {
 	return chat_message@*{ .chat.id == id } ( sender = chat_message.sender.user.display_name,  sort timestamp = chat_message.timestamp, encrypted_msg = chat_message.encrypted_msg );
 }
+
+query get_chat_participants(id: text) {
+	return chat_membership@*{ .chat.id == id } ( .member.user.display_name );
+}

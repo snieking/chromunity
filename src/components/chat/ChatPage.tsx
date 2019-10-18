@@ -25,7 +25,7 @@ import Grid from "@material-ui/core/Grid";
 import List from "@material-ui/core/List";
 import ChatListItem from "./ChatListItem";
 import ChatMessage from "./ChatMessage";
-import { GroupAdd, LibraryBooks, RemoveCircle } from "@material-ui/icons";
+import { GroupAdd, LibraryBooks, ListAlt, RemoveCircle } from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import Dialog from "@material-ui/core/Dialog";
@@ -35,6 +35,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";
 import ConfirmDialog from "../common/ConfirmDialog";
 import Drawer from "@material-ui/core/Drawer";
+import ChatParticipantListItem from "./ChatParticipantListItem";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -117,6 +118,7 @@ interface Props {
   chats: Chat[];
   activeChat: Chat;
   activeChatMessages: ChatMessageDecrypted[];
+  activeChatParticipants: string[];
   checkChatAuthentication: typeof checkChatAuthentication;
   createChatKeyPair: typeof createChatKeyPair;
   createNewChat: typeof createNewChat;
@@ -139,6 +141,7 @@ interface State {
   modifyTitle: boolean;
   updatedTitle: string;
   drawerOpen: boolean;
+  participantsDrawerOpen: boolean;
 }
 
 const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
@@ -152,7 +155,8 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     showLeaveChatDialog: false,
     modifyTitle: false,
     updatedTitle: "",
-    drawerOpen: false
+    drawerOpen: false,
+    participantsDrawerOpen: false
   });
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -206,6 +210,17 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     }
 
     setValues({ ...values, drawerOpen: open });
+  };
+
+  const toggleParticipantsDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
+    if (
+      event.type === "keydown" &&
+      ((event as React.KeyboardEvent).key === "Tab" || (event as React.KeyboardEvent).key === "Shift")
+    ) {
+      return;
+    }
+
+    setValues({ ...values, participantsDrawerOpen: open });
   };
 
   const mobileDrawerList = () => (
@@ -281,7 +296,13 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
                     <GroupAdd fontSize="large" />
                   </Tooltip>
                 </IconButton>
+                <IconButton onClick={() => setValues({ ...values, participantsDrawerOpen: true })}>
+                  <Tooltip title="Chat participants">
+                    <ListAlt fontSize="large" />
+                  </Tooltip>
+                </IconButton>
                 {addUserDialog()}
+                {listParticipants()}
               </div>
               <Typography
                 className={classes.title}
@@ -299,6 +320,18 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
         </Grid>
       );
     }
+  }
+
+  function listParticipants() {
+    return (
+      <Drawer anchor="right" open={values.participantsDrawerOpen} onClose={toggleParticipantsDrawer(false)}>
+        <List aria-label="main">
+          {props.activeChatParticipants.map(name => (
+            <ChatParticipantListItem name={name} key={name}/>
+          ))}
+        </List>
+      </Drawer>
+    )
   }
 
   function editTitleDialog() {
@@ -510,7 +543,8 @@ const mapStateToProps = (store: ApplicationState) => {
     successfullyAuthorized: store.chat.successfullyAuthorized,
     chats: store.chat.chats,
     activeChat: store.chat.activeChat,
-    activeChatMessages: store.chat.activeChatMessages
+    activeChatMessages: store.chat.activeChatMessages,
+    activeChatParticipants: store.chat.activeChatParticipants
   };
 };
 

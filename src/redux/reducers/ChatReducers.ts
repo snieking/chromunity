@@ -8,6 +8,7 @@ const initialChatState: ChatState = {
   chats: [],
   activeChat: null,
   activeChatMessages: [],
+  activeChatParticipants: [],
   lastUpdate: 0
 };
 
@@ -34,6 +35,12 @@ export const chatReducer: Reducer<ChatState, ChatActions> = (state = initialChat
         activeChat: action.chat,
         activeChatMessages: action.messages
       };
+    }
+    case ChatActionTypes.STORE_CHAT_PARTICIPANTS: {
+      return {
+        ...state,
+        activeChatParticipants: action.chatParticipants
+      }
     }
     case ChatActionTypes.OPEN_CHAT: {
       return {

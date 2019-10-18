@@ -4,6 +4,7 @@ export enum ChatActionTypes {
   CHECK_CHAT_AUTH_ACTION = "CHAT/AUTH/CHECK",
   CREATE_CHAT_KEY_PAIR = "CHAT/KEYPAIR/CREATE",
   STORE_CHAT_KEY_PAIR = "CHAT/KEYPAIR/STORE",
+  STORE_CHAT_PARTICIPANTS = "CHAT/PARTICIPANTS/STORE",
   CREATE_NEW_CHAT = "CHAT/CREATE/NEW",
   ADD_USER_TO_CHAT = "CHAT/USER/INVITE",
   LEAVE_CHAT = "CHAT/USER/LEAVE",
@@ -74,6 +75,11 @@ export interface StoreDecryptedChatAction {
   messages: ChatMessageDecrypted[];
 }
 
+export interface StoreChatParticipants {
+  type: ChatActionTypes.STORE_CHAT_PARTICIPANTS;
+  chatParticipants: string[];
+}
+
 export interface SendMessageAction {
   type: ChatActionTypes.SEND_MESSAGE;
   user: ChromunityUser;
@@ -99,6 +105,7 @@ export type ChatActions =
   | OpenChatAction
   | LeaveChatAction
   | StoreDecryptedChatAction
+  | StoreChatParticipants
   | SendMessageAction;
 
 export interface ChatState {
@@ -107,6 +114,7 @@ export interface ChatState {
   chats: Chat[];
   activeChat: Chat;
   activeChatMessages: ChatMessageDecrypted[];
+  activeChatParticipants: string[];
   lastUpdate: number;
   loading: boolean;
 }

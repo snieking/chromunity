@@ -11,7 +11,7 @@ import {
   OpenChatAction,
   RefreshOpenChatAction,
   SendMessageAction,
-  StoreChatKeyPairAction,
+  StoreChatKeyPairAction, StoreChatParticipants,
   StoreDecryptedChatAction,
   StoreUserChatsAction
 } from "../ChatTypes";
@@ -76,6 +76,11 @@ export const storeDecryptedChat: ActionCreator<StoreDecryptedChatAction> = (
   type: ChatActionTypes.STORE_DECRYPTED_CHAT,
   chat: chat,
   messages: messages
+});
+
+export const storeChatParticipants: ActionCreator<StoreChatParticipants> = (chatParticipants: string[]) => ({
+  type: ChatActionTypes.STORE_CHAT_PARTICIPANTS,
+  chatParticipants: chatParticipants
 });
 
 export const sendMessage: ActionCreator<SendMessageAction> = (user: ChromunityUser, chat: Chat, message: string) => ({

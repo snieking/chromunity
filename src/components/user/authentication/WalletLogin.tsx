@@ -67,12 +67,18 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
   const [name, setName] = useState("");
   const [step, setStep] = useState(Step.INIT);
   const [errorOpen, setErrorOpen] = useState(props.failure);
+  const [errorMsg, setErrorMsg] = useState("");
 
   pageView();
 
   const walletLogin = () => {
-    setStep(Step.LOGIN_IN_PROGRESS);
-    props.accountRegisteredCheck(name);
+    if (/\s/.test(name)) {
+      setErrorMsg("Username may not contain whitespace");
+      setErrorOpen(true);
+    } else {
+      setStep(Step.LOGIN_IN_PROGRESS);
+      props.accountRegisteredCheck(name);
+    }
   };
 
   return (
@@ -113,7 +119,7 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
         open={errorOpen}
         autoHideDuration={6000}
       >
-        <CustomSnackbarContentWrapper onClose={() => setErrorOpen(false)} variant="error" message={props.error} />
+        <CustomSnackbarContentWrapper onClose={() => setErrorOpen(false)} variant="error" message={errorMsg} />
       </Snackbar>
     </Container>
   );

@@ -133,3 +133,7 @@ export function getUserChats(username: string): Promise<Chat[]> {
 export function getChatMessages(id: string): Promise<ChatMessage[]> {
   return GTX.query("get_chat_messages", { id: id });
 }
+
+export function getChatParticipants(id: string): Promise<string[]> {
+  return GTX.query("get_chat_participants", { id: id });
+}
