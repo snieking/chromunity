@@ -86,8 +86,7 @@ const useStyles = makeStyles((theme: Theme) =>
       overflowY: "auto",
       width: "100%",
       maxWidth: "100%",
-      height: "80%",
-      maxHeight: "70vh",
+      height: "70vh",
       borderTopColor: theme.palette.primary.main,
       borderBottomColor: theme.palette.primary.main,
       borderTop: "outset 1px",
@@ -95,7 +94,8 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     messageWrapper: {
       paddingTop: "20px",
-      bottom: 0
+      bottom: 0,
+      textAlign: "center"
     },
     submitMessage: {
       top: "15px",
@@ -242,7 +242,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
             {mobileDrawerList()}
           </Drawer>
         </div>
-        <Grid container spacing={1} className={classes.wrapper}>
+        <Grid container spacing={0} className={classes.wrapper}>
           <Grid item xs={2} className={classes.desktopSidePanel}>
             {renderChatCreationActions()}
             {listChatRooms()}
@@ -281,7 +281,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   function renderOpenChat() {
     if (props.activeChat != null) {
       return (
-        <Grid item xs={9} className={classes.chatWrapper}>
+        <Grid item xs={12} md={9} className={classes.chatWrapper}>
           <div>
             <div className={classes.chatActions}>
               <div style={{ float: "right" }}>
