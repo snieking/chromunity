@@ -53,9 +53,9 @@ const useStyles = makeStyles((theme: Theme) =>
         display: "none"
       },
       marginTop: "15px",
-      borderRight: "2px solid",
       height: "100%",
-      borderRightColor: theme.palette.primary.main
+      borderRightColor: theme.palette.primary.main,
+      borderRight: "solid 2px"
     },
     toggleDrawerButton: {
       position: "fixed",
@@ -79,19 +79,21 @@ const useStyles = makeStyles((theme: Theme) =>
       height: "100%"
     },
     chatActions: {
-      borderBottom: "solid 2px",
-      paddingBottom: "10px",
-      borderBottomColor: theme.palette.primary.main
+      paddingBottom: "10px"
     },
     chatMessages: {
       overflowY: "auto",
       width: "100%",
       maxWidth: "100%",
       height: "80%",
-      maxHeight: "70vh"
+      maxHeight: "70vh",
+      borderTopColor: theme.palette.primary.main,
+      borderBottomColor: theme.palette.primary.main,
+      borderTop: "outset 1px",
+      borderBottom: "outset 1px"
     },
     messageWrapper: {
-      marginTop: "5px",
+      paddingTop: "20px",
       bottom: 0
     },
     submitMessage: {
@@ -163,6 +165,14 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     }
   });
 
+  useEffect(() => {
+    const el: HTMLDivElement = scrollRef.current;
+
+    if (el != null) {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, [props.activeChatMessages]);
+
   const user = getUser();
 
   if (user == null) {
@@ -185,11 +195,6 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     }
 
     props.refreshOpenChat(user.name);
-    const el: HTMLDivElement = scrollRef.current;
-
-    if (el != null) {
-      el.scrollTop = el.scrollHeight;
-    }
   }
 
   const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {

@@ -20,8 +20,7 @@ const useStyles = makeStyles((theme: Theme) =>
       maxWidth: "100%",
       overflowWrap: "break-word",
       wordWrap: "break-word",
-        wordBreak: "break-all"
-
+      wordBreak: "break-word"
     },
     author: {
       margin: "0 auto"
