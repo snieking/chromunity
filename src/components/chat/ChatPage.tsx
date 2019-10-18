@@ -78,7 +78,10 @@ const useStyles = makeStyles((theme: Theme) =>
       overflowY: "auto",
       width: "100%",
       maxWidth: "100%",
-      height: "60vh",
+      height: "50vh",
+      [theme.breakpoints.up("lg")]: {
+        height: "70vh",
+      },
       borderTopColor: theme.palette.primary.main,
       borderBottomColor: theme.palette.primary.main,
       borderTop: "outset 1px",
