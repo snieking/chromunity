@@ -25,7 +25,7 @@ import Grid from "@material-ui/core/Grid";
 import List from "@material-ui/core/List";
 import ChatListItem from "./ChatListItem";
 import ChatMessage from "./ChatMessage";
-import { GroupAdd, LibraryBooks, ListAlt, RemoveCircle } from "@material-ui/icons";
+import { GroupAdd, ListAlt, RemoveCircle } from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import Dialog from "@material-ui/core/Dialog";
@@ -36,6 +36,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import ConfirmDialog from "../common/ConfirmDialog";
 import Drawer from "@material-ui/core/Drawer";
 import ChatParticipantListItem from "./ChatParticipantListItem";
+import Box from "@material-ui/core/Box";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -57,15 +58,6 @@ const useStyles = makeStyles((theme: Theme) =>
       height: "100%",
       borderRightColor: theme.palette.primary.main,
       borderRight: "solid 2px"
-    },
-    toggleDrawerButton: {
-      position: "fixed",
-      bottom: "10px",
-      left: "10px",
-      backgroundColor: theme.palette.primary.main
-    },
-    drawerButtonIcon: {
-      color: theme.palette.background.default
     },
     mobileSidePanel: {
       [theme.breakpoints.up("lg")]: {
@@ -107,6 +99,18 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     title: {
       cursor: "pointer"
+    },
+    drawerOpenerBtn: {
+      position: "fixed",
+      top: "40vh",
+      left: "0",
+      width: "10px",
+      height: "80px",
+      borderRadius: "0px 25px 25px 0px",
+      backgroundColor: theme.palette.primary.main,
+      '&:hover': {
+        cursor: "pointer"
+      }
     }
   })
 );
@@ -235,9 +239,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       <>
         {props.loading ? <LinearProgress variant="query" /> : <div />}
         <div className={classes.mobileSidePanel}>
-          <IconButton onClick={toggleDrawer(true)} className={classes.toggleDrawerButton}>
-            <LibraryBooks fontSize="large" className={classes.drawerButtonIcon} />
-          </IconButton>
+          <Box className={classes.drawerOpenerBtn} onClick={toggleDrawer(true)} />
           <Drawer open={values.drawerOpen} onClose={toggleDrawer(false)}>
             {mobileDrawerList()}
           </Drawer>
