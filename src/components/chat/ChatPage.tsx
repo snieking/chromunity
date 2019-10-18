@@ -86,7 +86,7 @@ const useStyles = makeStyles((theme: Theme) =>
       overflowY: "auto",
       width: "100%",
       maxWidth: "100%",
-      height: "70vh",
+      height: "60vh",
       borderTopColor: theme.palette.primary.main,
       borderBottomColor: theme.palette.primary.main,
       borderTop: "outset 1px",
