@@ -29,3 +29,14 @@ query get_chat_messages(id: text) {
 query get_chat_participants(id: text) {
 	return chat_membership@*{ .chat.id == id } ( .member.user.display_name );
 }
+
+query get_followed_chat_users(username: name) {
+	return (chat_user, follow) @* {
+		follow.follower.name == username.lower_case(),
+		follow.follows == chat_user.user
+	} ( chat_user.user.display_name );
+}
+
+query get_chat_users() {
+	return chat_user @* {} ( chat_user.user.display_name );
+}

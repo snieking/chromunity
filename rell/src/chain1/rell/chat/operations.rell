@@ -13,7 +13,10 @@ operation create_chat_user(descriptor_id: byte_array, username: text, rsa_pubkey
 operation add_user_to_chat(descriptor_id: byte_array, username: text, chat_id: text, target_user: text, encrypted_chat_key: text) {
 	val user_already_in_chat = get_verified_user(username, descriptor_id);
 	val chat = chat@{ .id == chat_id };
-	create chat_membership(chat, chat_user@{ .user.name == target_user.lower_case() }, encrypted_chat_key);
+	
+	if (chat_membership @? { chat, .member.user.name == target_user.lower_case() } == null) {
+		create chat_membership(chat, chat_user@{ .user.name == target_user.lower_case() }, encrypted_chat_key);
+	}
 }
 
 operation leave_chat(descriptor_id: byte_array, username: text, chat_id: text) {
