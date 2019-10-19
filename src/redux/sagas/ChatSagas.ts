@@ -118,7 +118,7 @@ export function* createNewChatSaga(action: CreateNewChatAction) {
 export function* addUserToChatSaga(action: AddUserToChatAction) {
   const chatParticipants = yield select(getActiveChatParticipants);
 
-  if (!chatParticipants.includes(action.username)) {
+  if (chatParticipants == null || !chatParticipants.includes(action.username)) {
     const targetUserPubKey = yield getUserPubKey(action.username);
 
     if (targetUserPubKey != null) {
