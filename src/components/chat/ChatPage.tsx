@@ -53,7 +53,6 @@ import useTheme from "@material-ui/core/styles/useTheme";
 interface OptionType {
   label: string;
   value: string;
-  icon: HTMLElement;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -119,7 +118,16 @@ const useStyles = makeStyles((theme: Theme) =>
       width: "70%"
     },
     title: {
-      cursor: "pointer"
+      cursor: "pointer",
+      [theme.breakpoints.down("xs")]: {
+        fontSize: "24px"
+      }
+    },
+    chatActionBtn: {
+      fontSize: "28px",
+      [theme.breakpoints.down("xs")]: {
+        fontSize: "20px"
+      }
     },
     drawerOpenerBtn: {
       position: "fixed",
@@ -334,18 +342,18 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
               <div style={{ float: "right" }}>
                 <IconButton onClick={() => setValues({ ...values, showLeaveChatDialog: true })}>
                   <Tooltip title="Leave chat">
-                    <RemoveCircle />
+                    <RemoveCircle fontSize="inherit" className={classes.chatActionBtn} />
                   </Tooltip>
                 </IconButton>
                 {leaveChatDialog()}
                 <IconButton onClick={() => setValues({ ...values, showAddDialog: true })}>
                   <Tooltip title="Invite user">
-                    <GroupAdd fontSize="large" />
+                    <GroupAdd fontSize="inherit" className={classes.chatActionBtn} />
                   </Tooltip>
                 </IconButton>
                 <IconButton onClick={() => setValues({ ...values, participantsDrawerOpen: true })}>
                   <Tooltip title="Chat participants">
-                    <ListAlt fontSize="large" />
+                    <ListAlt fontSize="inherit" className={classes.chatActionBtn} />
                   </Tooltip>
                 </IconButton>
                 {addUserDialog()}
