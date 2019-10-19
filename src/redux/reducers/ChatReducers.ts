@@ -9,7 +9,10 @@ const initialChatState: ChatState = {
   activeChat: null,
   activeChatMessages: [],
   activeChatParticipants: [],
-  lastUpdate: 0
+  lastUpdate: 0,
+  followedChatUsers: [],
+  chatUsers: [],
+  chatUsersLastUpdate: 0
 };
 
 export const chatReducer: Reducer<ChatState, ChatActions> = (state = initialChatState, action) => {
@@ -57,6 +60,14 @@ export const chatReducer: Reducer<ChatState, ChatActions> = (state = initialChat
       return {
         ...state,
         loading: true
+      }
+    }
+    case ChatActionTypes.STORE_CHAT_USERS: {
+      return {
+        ...state,
+        followedChatUsers: action.followedChatUsers,
+        chatUsers: action.chatUsers,
+        chatUsersLastUpdate: Date.now()
       }
     }
   }

@@ -6,12 +6,15 @@ import {
   CreateChatKeyPairAction,
   CreateNewChatAction,
   LeaveChatAction,
+  LoadChatUsersAction,
   LoadUserChatsAction,
   ModifyTitleAction,
   OpenChatAction,
   RefreshOpenChatAction,
   SendMessageAction,
-  StoreChatKeyPairAction, StoreChatParticipants,
+  StoreChatKeyPairAction,
+  StoreChatParticipants,
+  StoreChatUsersAction,
   StoreDecryptedChatAction,
   StoreUserChatsAction
 } from "../ChatTypes";
@@ -99,4 +102,18 @@ export const modifyTitleAction: ActionCreator<ModifyTitleAction> = (
   user: user,
   chat: chat,
   title: title
+});
+
+export const loadChatUsersAction: ActionCreator<LoadChatUsersAction> = (user: ChromunityUser) => ({
+  type: ChatActionTypes.LOAD_CHAT_USERS,
+  user: user
+});
+
+export const storeChatUsersAction: ActionCreator<StoreChatUsersAction> = (
+  followedChatUsers: string[],
+  chatUsers: string[]
+) => ({
+  type: ChatActionTypes.STORE_CHAT_USERS,
+  followedChatUsers: followedChatUsers,
+  chatUsers: chatUsers
 });

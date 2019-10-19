@@ -7,6 +7,7 @@ import {
   createChatKeyPair,
   createNewChat,
   leaveChatAction,
+  loadChatUsersAction,
   loadUserChats,
   modifyTitleAction,
   openChat,
@@ -37,6 +38,23 @@ import ConfirmDialog from "../common/ConfirmDialog";
 import Drawer from "@material-ui/core/Drawer";
 import ChatParticipantListItem from "./ChatParticipantListItem";
 import Box from "@material-ui/core/Box";
+import Select, { createFilter } from "react-select";
+import { ValueType } from "react-select/src/types";
+import {
+  COLOR_CHROMIA_DARK,
+  COLOR_CHROMIA_DARK_LIGHTER,
+  COLOR_CHROMIA_LIGHT,
+  COLOR_CHROMIA_LIGHTER,
+  COLOR_OFF_WHITE,
+  COLOR_STEEL_BLUE
+} from "../../theme";
+import useTheme from "@material-ui/core/styles/useTheme";
+
+interface OptionType {
+  label: string;
+  value: string;
+  icon: HTMLElement;
+}
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -80,7 +98,7 @@ const useStyles = makeStyles((theme: Theme) =>
       maxWidth: "100%",
       height: "50vh",
       [theme.breakpoints.up("lg")]: {
-        height: "70vh",
+        height: "70vh"
       },
       borderTopColor: theme.palette.primary.main,
       borderBottomColor: theme.palette.primary.main,
@@ -111,9 +129,26 @@ const useStyles = makeStyles((theme: Theme) =>
       height: "80px",
       borderRadius: "0px 25px 25px 0px",
       backgroundColor: theme.palette.primary.main,
-      '&:hover': {
+      "&:hover": {
         cursor: "pointer"
       }
+    },
+    addUserDialog: {
+      position: "relative",
+      height: "auto",
+      overflow: "visible"
+    },
+    dialogStyle: {
+      overflow: "visible"
+    },
+    dropDownMenu: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      height: "100%",
+      overflow: "visible"
     }
   })
 );
@@ -126,6 +161,8 @@ interface Props {
   activeChat: Chat;
   activeChatMessages: ChatMessageDecrypted[];
   activeChatParticipants: string[];
+  followedChatUsers: string[];
+  chatUsers: string[];
   checkChatAuthentication: typeof checkChatAuthentication;
   createChatKeyPair: typeof createChatKeyPair;
   createNewChat: typeof createNewChat;
@@ -136,6 +173,8 @@ interface Props {
   sendMessage: typeof sendMessage;
   leaveChat: typeof leaveChatAction;
   modifyTitle: typeof modifyTitleAction;
+  loadChatUsers: typeof loadChatUsersAction;
+  theme: Theme;
 }
 
 interface State {
@@ -143,7 +182,7 @@ interface State {
   selectedChatId: string;
   message: string;
   showAddDialog: boolean;
-  userToAdd: string;
+  userToAdd: ValueType<OptionType>;
   showLeaveChatDialog: boolean;
   modifyTitle: boolean;
   updatedTitle: string;
@@ -153,12 +192,14 @@ interface State {
 
 const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   const classes = useStyles(props);
+  const theme = useTheme();
+
   const [values, setValues] = useState<State>({
     password: "",
     selectedChatId: "",
     message: "",
     showAddDialog: false,
-    userToAdd: "",
+    userToAdd: null,
     showLeaveChatDialog: false,
     modifyTitle: false,
     updatedTitle: "",
@@ -192,6 +233,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     props.loadUserChats(user.name);
   } else if (props.successfullyAuthorized && props.activeChat != null) {
     interval = setInterval(updateChats, 2500);
+    props.loadChatUsers(user);
   } else if (!props.successfullyAuthorized) {
     props.checkChatAuthentication();
   }
@@ -332,11 +374,11 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       <Drawer anchor="right" open={values.participantsDrawerOpen} onClose={toggleParticipantsDrawer(false)}>
         <List aria-label="main">
           {props.activeChatParticipants.map(name => (
-            <ChatParticipantListItem name={name} key={name}/>
+            <ChatParticipantListItem name={name} key={name} />
           ))}
         </List>
       </Drawer>
-    )
+    );
   }
 
   function editTitleDialog() {
@@ -398,24 +440,71 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     props.leaveChat(user);
   }
 
+  const suggestions = () => {
+    return props.chatUsers.map(user => ({ value: user, label: user } as OptionType));
+  };
+
+  const darkTheme = theme.palette.type === "dark";
+
+  const textColor = darkTheme ? COLOR_OFF_WHITE : COLOR_CHROMIA_DARK;
+  const backgroundColor = darkTheme ? COLOR_CHROMIA_DARK : COLOR_CHROMIA_LIGHTER;
+  const borderBottomColor = darkTheme ? COLOR_CHROMIA_DARK_LIGHTER : COLOR_CHROMIA_LIGHT;
+
+  const customStyles = {
+    option: (provided: any) => ({
+      ...provided,
+      color: textColor,
+      background: backgroundColor,
+      borderBottom: "2px solid",
+      borderBottomColor: borderBottomColor
+    }),
+    menu: (styles: any) => ({
+      ...styles,
+      maxHeight: "1000px",
+      zIndex: 999,
+      background: backgroundColor
+    }),
+    control: (provided: any) => ({
+      ...provided,
+      background: backgroundColor,
+      color: theme.palette.primary.main,
+      borderColor: COLOR_STEEL_BLUE,
+      "&:hover": { borderColor: textColor },
+      boxShadow: "none"
+    }),
+    singleValue: (provided: any, state: any) => {
+      const opacity = state.isDisabled ? 1 : 1;
+      const transition = "opacity 300ms";
+      const color = theme.palette.primary.main;
+      return { ...provided, color, opacity, transition };
+    },
+    input: (provided: any, state: any) => {
+      const color = textColor;
+      return { ...provided, color };
+    },
+    noOptionsMessage: (provided: any, state: any) => {
+      const color = theme.palette.primary.main;
+      return { color };
+    }
+  };
+
   function addUserDialog() {
     return (
-      <Dialog open={values.showAddDialog} onClose={closeAddUserDialog}>
+      <Dialog open={values.showAddDialog} onClose={closeAddUserDialog} fullWidth={true} maxWidth={"md"} PaperProps={{ className: classes.dialogStyle }}>
         <DialogTitle>Add user to chat</DialogTitle>
-        <DialogContent>
+        <DialogContent className={classes.addUserDialog}>
           <DialogContentText>
             Invite an user to the chat. The chat is end-to-end encrypted and only the participants are able to read the
             messages. Beacuse of this, the user has to have created a chat passphrase prior to being invited.
           </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="name"
-            label="Username"
-            type="text"
-            fullWidth
-            onChange={handleChange("userToAdd")}
-            value={values.userToAdd}
+          <Select
+            placeholder={"Chat user"}
+            isSearchable={true}
+            options={suggestions()}
+            styles={customStyles}
+            filterOption={createFilter({ ignoreAccents: false })}
+            onChange={(value: ValueType<OptionType>) => setValues({ ...values, userToAdd: value})}
+            className={classes.dropDownMenu}
           />
         </DialogContent>
         <DialogActions>
@@ -435,8 +524,8 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function confirmAddUser() {
-    props.addUserToChat(values.userToAdd, user);
-    setValues({ ...values, userToAdd: "", showAddDialog: false });
+    props.addUserToChat((values.userToAdd as OptionType).value, user);
+    setValues({ ...values, userToAdd: null, showAddDialog: false });
   }
 
   function renderChatMessages() {
@@ -537,7 +626,8 @@ const mapDispatchToProps = (dispatch: any) => {
     refreshOpenChat: (user: string) => dispatch(refreshOpenChat(user)),
     sendMessage: (user: ChromunityUser, chat: Chat, message: string) => dispatch(sendMessage(user, chat, message)),
     leaveChat: (user: ChromunityUser) => dispatch(leaveChatAction(user)),
-    modifyTitle: (user: ChromunityUser, chat: Chat, title: string) => dispatch(modifyTitleAction(user, chat, title))
+    modifyTitle: (user: ChromunityUser, chat: Chat, title: string) => dispatch(modifyTitleAction(user, chat, title)),
+    loadChatUsers: (user: ChromunityUser) => dispatch(loadChatUsersAction(user))
   };
 };
 
@@ -549,7 +639,9 @@ const mapStateToProps = (store: ApplicationState) => {
     chats: store.chat.chats,
     activeChat: store.chat.activeChat,
     activeChatMessages: store.chat.activeChatMessages,
-    activeChatParticipants: store.chat.activeChatParticipants
+    activeChatParticipants: store.chat.activeChatParticipants,
+    followedChatUsers: store.chat.followedChatUsers,
+    chatUsers: store.chat.chatUsers
   };
 };
 

@@ -342,7 +342,7 @@ const FullTopic = withStyles(styles)(
           </Link>
           <br />
           <div style={{ float: "right" }}>
-            <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} />
+            <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} name={this.state.topic.author}/>
           </div>
         </div>
       );

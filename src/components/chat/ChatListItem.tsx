@@ -43,7 +43,7 @@ const ChatListItem: React.FunctionComponent<Props> = (props: Props) => {
     >
       {avatar.length !== 0 && (
         <ListItemIcon style={{ float: "left" }}>
-          <Avatar src={avatar} size={AVATAR_SIZE.SMALL} />
+          <Avatar src={avatar} size={AVATAR_SIZE.SMALL} name={props.chat.last_message.sender} />
         </ListItemIcon>
       )}
       <ListItemText

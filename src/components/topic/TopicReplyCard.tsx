@@ -312,7 +312,7 @@ const TopicReplyCard = withStyles(styles)(
           </Link>
           <br />
           <div style={{ float: "right" }}>
-            <Avatar src={this.state.avatar} size={AVATAR_SIZE.MEDIUM} />
+            <Avatar src={this.state.avatar} size={AVATAR_SIZE.MEDIUM} name={this.props.reply.author}/>
           </div>
         </div>
       );

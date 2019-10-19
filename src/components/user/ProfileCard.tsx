@@ -317,7 +317,7 @@ const ProfileCard = withStyles(styles)(
             <Card key={"user-card"}>
               {this.renderIcons()}
               <div className={this.props.classes.contentWrapper}>
-                <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} />
+                <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} name={this.props.username}/>
               </div>
               <Typography variant="subtitle1" component="p" className={this.props.classes.description}>
                 {this.state.description !== "" ? this.state.description : "I haven't written any description yet..."}

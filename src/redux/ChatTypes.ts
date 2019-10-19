@@ -14,7 +14,9 @@ export enum ChatActionTypes {
   REFRESH_OPEN_CHAT = "CHAT/REFRESH",
   STORE_DECRYPTED_CHAT = "CHAT/DECRYPTED/STORE",
   SEND_MESSAGE = "CHAT/MESSAGE/SEND",
-  MODIFY_TITLE = "CHAT/TITLE/MODIFY"
+  MODIFY_TITLE = "CHAT/TITLE/MODIFY",
+  LOAD_CHAT_USERS = "LOAD/CHAT/USERS",
+  STORE_CHAT_USERS = "STORE/CHAT/USERS"
 }
 
 export interface CheckChatAuthenticationAction {
@@ -94,6 +96,17 @@ export interface ModifyTitleAction {
   title: string;
 }
 
+export interface LoadChatUsersAction {
+  type: ChatActionTypes.LOAD_CHAT_USERS;
+  user: ChromunityUser;
+}
+
+export interface StoreChatUsersAction {
+  type: ChatActionTypes.STORE_CHAT_USERS;
+  followedChatUsers: string[];
+  chatUsers: string[];
+}
+
 export type ChatActions =
   | CheckChatAuthenticationAction
   | CreateChatKeyPairAction
@@ -106,7 +119,9 @@ export type ChatActions =
   | LeaveChatAction
   | StoreDecryptedChatAction
   | StoreChatParticipants
-  | SendMessageAction;
+  | SendMessageAction
+  | LoadChatUsersAction
+  | StoreChatUsersAction;
 
 export interface ChatState {
   rsaKey: any;
@@ -117,4 +132,7 @@ export interface ChatState {
   activeChatParticipants: string[];
   lastUpdate: number;
   loading: boolean;
+  followedChatUsers: string[];
+  chatUsers: string[];
+  chatUsersLastUpdate: number;
 }

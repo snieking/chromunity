@@ -2,31 +2,30 @@ import React, { useState } from "react";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import "emoji-mart/css/emoji-mart.css";
 import { Picker } from "emoji-mart";
-import { Popover } from "@material-ui/core";
+import { createStyles, Popover, Theme } from "@material-ui/core";
 
 interface Props {
   emojiAppender: Function;
   btnSize?: string;
 }
 
-const useStyles = makeStyles({
+const useStyles =  makeStyles((theme: Theme) => createStyles({
   emojiBoxOpener: {
     cursor: "pointer",
     position: "absolute",
     top: "13px",
-    right: "4px"
+    right: "4px",
+    [theme.breakpoints.down("xs")]: {
+      display: "none"
+    }
   },
   emojiSizeSmall: {
     fontSize: "18px"
   },
   emojiSizeLarge: {
     fontSize: "18px"
-  },
-  emojiBoxWrapper: {
-    margin: "0 auto",
-    width: "100%"
   }
-});
+}));
 
 const EmojiPicker: React.FunctionComponent<Props> = (props: Props) => {
   const classes = useStyles(props);

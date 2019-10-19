@@ -3,7 +3,7 @@ import {
   ChatActionTypes,
   CreateChatKeyPairAction,
   CreateNewChatAction,
-  LeaveChatAction,
+  LeaveChatAction, LoadChatUsersAction,
   LoadUserChatsAction,
   ModifyTitleAction,
   OpenChatAction,
@@ -24,7 +24,7 @@ import {
   addUserToChat,
   createChatUser,
   createNewChat,
-  getChatMessages, getChatParticipants,
+  getChatMessages, getChatParticipants, getChatUsers, getFollowedChatUsers,
   getUserChats,
   getUserPubKey,
   leaveChat,
@@ -35,7 +35,7 @@ import {
   loadUserChats,
   openChat,
   refreshOpenChat, sendMessage,
-  storeChatKeyPair, storeChatParticipants,
+  storeChatKeyPair, storeChatParticipants, storeChatUsersAction,
   storeDecryptedChat,
   storeUserChats
 } from "../actions/ChatActions";
@@ -55,13 +55,16 @@ export function* chatWatcher() {
   yield takeLatest(ChatActionTypes.ADD_USER_TO_CHAT, addUserToChatSaga);
   yield takeLatest(ChatActionTypes.LEAVE_CHAT, leaveChatSaga);
   yield takeLatest(ChatActionTypes.MODIFY_TITLE, modifyTitleSaga);
+  yield takeLatest(ChatActionTypes.LOAD_CHAT_USERS, loadChatUsersSaga);
 }
 
 export const getRsaKey = (state: ApplicationState) => state.chat.rsaKey;
 export const getChats = (state: ApplicationState) => state.chat.chats;
 export const getActiveChat = (state: ApplicationState) => state.chat.activeChat;
 export const getActiveChatMessages = (state: ApplicationState) => state.chat.activeChatMessages;
+export const getActiveChatParticipants = (state: ApplicationState) => state.chat.activeChatParticipants;
 export const getLastUpdate = (state: ApplicationState) => state.chat.lastUpdate;
+export const getChatUsersLastUpdate = (state: ApplicationState) => state.chat.chatUsersLastUpdate;
 
 const UPDATE_DURATION_MILLIS = 1000 * 60;
 
@@ -113,19 +116,23 @@ export function* createNewChatSaga(action: CreateNewChatAction) {
 }
 
 export function* addUserToChatSaga(action: AddUserToChatAction) {
-  const targetUserPubKey = yield getUserPubKey(action.username);
+  const chatParticipants = yield select(getActiveChatParticipants);
 
-  if (targetUserPubKey != null) {
-    const chat = yield select(getActiveChat);
-    const rsaKey = yield select(getRsaKey);
+  if (!chatParticipants.includes(action.username)) {
+    const targetUserPubKey = yield getUserPubKey(action.username);
 
-    const decryptedChatKey = yield rsaDecrypt(chat.encrypted_chat_key, rsaKey);
-    const encryptedSharedChatKey = yield rsaEncrypt(decryptedChatKey.plaintext, targetUserPubKey);
+    if (targetUserPubKey != null) {
+      const chat = yield select(getActiveChat);
+      const rsaKey = yield select(getRsaKey);
 
-    yield addUserToChat(action.user, chat.id, action.username, encryptedSharedChatKey.cipher);
-    yield put(sendMessage(action.user, chat, "I invited '" + action.username + "' to join us, please welcome him/her!"));
-  } else {
-    console.log("User hasn't created a chat key yet", action.username);
+      const decryptedChatKey = yield rsaDecrypt(chat.encrypted_chat_key, rsaKey);
+      const encryptedSharedChatKey = yield rsaEncrypt(decryptedChatKey.plaintext, targetUserPubKey);
+
+      yield addUserToChat(action.user, chat.id, action.username, encryptedSharedChatKey.cipher);
+      yield put(sendMessage(action.user, chat, "I invited '" + action.username + "' to join us."));
+    } else {
+      console.log("User hasn't created a chat key yet", action.username);
+    }
   }
 }
 
@@ -233,6 +240,17 @@ export function* modifyTitleSaga(action: ModifyTitleAction) {
     last_message: action.chat.last_message
   };
   yield put(openChat(updatedChat));
+}
+
+export function* loadChatUsersSaga(action: LoadChatUsersAction) {
+  const lastUpdated = yield select(getChatUsersLastUpdate);
+
+  if (shouldUpdate(lastUpdated)) {
+    const followedChatUsers = yield getFollowedChatUsers(action.user.name);
+    const chatUsers = yield getChatUsers();
+
+    yield put(storeChatUsersAction(followedChatUsers, chatUsers));
+  }
 }
 
 function arraysEqual(arr1: Chat[], arr2: Chat[]) {

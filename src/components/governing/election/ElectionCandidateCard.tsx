@@ -92,7 +92,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
           className={`${classes.candidateCard} ${votedFor() ? classes.votedFor : ""}`}
         >
           <CardContent>
-            <Avatar src={avatar} size={AVATAR_SIZE.LARGE} />
+            <Avatar src={avatar} size={AVATAR_SIZE.LARGE} name={props.candidate}/>
             <Typography gutterBottom variant="h6" component="h5">
               <Link to={"/u/" + props.candidate}>@{props.candidate}</Link>
             </Typography>

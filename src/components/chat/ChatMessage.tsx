@@ -51,7 +51,7 @@ const ChatMessage: React.FunctionComponent<Props> = (props: Props) => {
       />
       <div className={classes.author}>
         <ListItemIcon style={{ float: "right" }}>
-          <Avatar src={avatar} size={AVATAR_SIZE.SMALL} />
+          <Avatar src={avatar} size={AVATAR_SIZE.SMALL} name={props.message.sender}/>
         </ListItemIcon>
         <br />
         <Link to={"/u/" + props.message.sender}>

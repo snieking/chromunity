@@ -71,7 +71,7 @@ const RepresentativeCard = withStyles(styles)(
           <Grid item xs={6} sm={6} md={3}>
             <Card key={"representative-" + this.props.name} className={this.props.classes.representativeCard}>
               <CardContent>
-                <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} />
+                <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} name={this.props.name}/>
                 <Typography gutterBottom variant="h6" component="p">
                   <Link className={this.props.classes.link} to={"/u/" + this.props.name}>
                     @{this.props.name}

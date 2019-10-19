@@ -34,7 +34,7 @@ const ChatParticipantListItem: React.FunctionComponent<Props> = (props: Props) =
     <ListItem button component="a" href={"/u/" + props.name} color="primary">
       {avatar.length !== 0 && (
         <ListItemIcon style={{ float: "left" }}>
-          <Avatar src={avatar} size={AVATAR_SIZE.SMALL} />
+          <Avatar src={avatar} size={AVATAR_SIZE.SMALL} name={props.name}/>
         </ListItemIcon>
       )}
       <ListItemText className={classes.name} primary={"@" + props.name} />

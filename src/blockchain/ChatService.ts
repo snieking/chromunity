@@ -137,3 +137,11 @@ export function getChatMessages(id: string): Promise<ChatMessage[]> {
 export function getChatParticipants(id: string): Promise<string[]> {
   return GTX.query("get_chat_participants", { id: id });
 }
+
+export function getFollowedChatUsers(username: string): Promise<string[]> {
+  return GTX.query("get_followed_chat_users", { username: username });
+}
+
+export function getChatUsers(): Promise<string[]> {
+  return GTX.query("get_chat_users", {});
+}

@@ -69,7 +69,7 @@ function sendNotificationsInternal(
         id,
         trigger,
         content,
-        usernames.map(name => name.toLocaleLowerCase())
+        usernames.map(name => name.toLocaleLowerCase()).filter(name => name !== fromUser.name)
       )
       .addOperation("nop", uniqueId())
       .build(fromUser.ft3User.authDescriptor.signers)

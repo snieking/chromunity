@@ -138,7 +138,7 @@ const TopicOverviewCard = withStyles(styles)(
             </Typography>
           </Link>
           <div style={{ float: "right" }}>
-            <Avatar src={this.state.avatar} size={AVATAR_SIZE.SMALL} />
+            <Avatar src={this.state.avatar} size={AVATAR_SIZE.SMALL} name={this.props.topic.author}/>
           </div>
         </div>
       );
