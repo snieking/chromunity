@@ -39,11 +39,11 @@ export const darkTheme = createMuiTheme({
         MuiTextField: {
             root: {
                 '& label.Mui-focused': {
-                    color: COLOR_PURPLE
+                    color: COLOR_SOFT_PINK
                 },
                 '& .MuiOutlinedInput-root': {
                     '& fieldset': {
-                        borderColor: COLOR_SOFT_PINK,
+                        borderColor: COLOR_PURPLE,
                     },
                     '&:hover fieldset': {
                         borderColor: COLOR_RED,

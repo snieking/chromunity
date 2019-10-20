@@ -17,8 +17,8 @@ interface Props {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     selected: {
-      borderBottom: "2px outset",
-      borderBottomColor: theme.palette.primary.main
+      borderBottom: "2px solid",
+      borderBottomColor: theme.palette.secondary.main
     }
   })
 );

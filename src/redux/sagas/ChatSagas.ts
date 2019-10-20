@@ -3,7 +3,8 @@ import {
   ChatActionTypes,
   CreateChatKeyPairAction,
   CreateNewChatAction,
-  LeaveChatAction, LoadChatUsersAction,
+  LeaveChatAction,
+  LoadChatUsersAction,
   LoadUserChatsAction,
   ModifyTitleAction,
   OpenChatAction,
@@ -24,7 +25,10 @@ import {
   addUserToChat,
   createChatUser,
   createNewChat,
-  getChatMessages, getChatParticipants, getChatUsers, getFollowedChatUsers,
+  getChatMessages,
+  getChatParticipants,
+  getChatUsers,
+  getFollowedChatUsers,
   getUserChats,
   getUserPubKey,
   leaveChat,
@@ -34,8 +38,11 @@ import {
 import {
   loadUserChats,
   openChat,
-  refreshOpenChat, sendMessage,
-  storeChatKeyPair, storeChatParticipants, storeChatUsersAction,
+  refreshOpenChat,
+  sendMessage,
+  storeChatKeyPair,
+  storeChatParticipants,
+  storeChatUsersAction,
   storeDecryptedChat,
   storeUserChats
 } from "../actions/ChatActions";
@@ -201,24 +208,22 @@ export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
     const prevMessages = yield select(getActiveChatMessages);
     const chatMessages = yield getChatMessages(chat.id);
 
-    if (chatMessages.length > prevMessages.length) {
-      const rsaKey = yield select(getRsaKey);
-      const sharedChatKey: any = yield rsaDecrypt(chat.encrypted_chat_key, rsaKey);
+    const rsaKey = yield select(getRsaKey);
+    const sharedChatKey: any = yield rsaDecrypt(chat.encrypted_chat_key, rsaKey);
 
-      const decryptedMessages: ChatMessageDecrypted = chatMessages.map((message: ChatMessage) => {
-        return {
-          sender: message.sender,
-          timestamp: message.timestamp,
-          msg: decrypt(message.encrypted_msg, sharedChatKey.plaintext)
-        };
-      });
+    const decryptedMessages: ChatMessageDecrypted = chatMessages.map((message: ChatMessage) => {
+      return {
+        sender: message.sender,
+        timestamp: message.timestamp,
+        msg: decrypt(message.encrypted_msg, sharedChatKey.plaintext)
+      };
+    });
 
-      const participants = yield getChatParticipants(chat.id);
+    const participants = yield getChatParticipants(chat.id);
 
-      yield put(storeChatParticipants(participants));
-      yield put(storeDecryptedChat(chat, decryptedMessages));
-      yield put(loadUserChats(action.user, true));
-    }
+    yield put(storeChatParticipants(participants));
+    yield put(storeDecryptedChat(chat, decryptedMessages));
+    yield put(loadUserChats(action.user, true));
   }
 }
 
@@ -240,6 +245,7 @@ export function* modifyTitleSaga(action: ModifyTitleAction) {
     last_message: action.chat.last_message
   };
   yield put(openChat(updatedChat));
+  yield put(loadUserChats(action.user.name, true));
 }
 
 export function* loadChatUsersSaga(action: LoadChatUsersAction) {

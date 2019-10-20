@@ -73,7 +73,7 @@ const useStyles = makeStyles((theme: Theme) =>
       },
       marginTop: "15px",
       height: "100%",
-      borderRightColor: theme.palette.primary.main,
+      borderRightColor: theme.palette.secondary.main,
       borderRight: "solid 2px"
     },
     mobileSidePanel: {
@@ -100,8 +100,8 @@ const useStyles = makeStyles((theme: Theme) =>
         height: "70vh"
       },
       borderTopColor: theme.palette.primary.main,
-      borderBottomColor: theme.palette.primary.main,
       borderTop: "outset 1px",
+      borderBottomColor: theme.palette.primary.main,
       borderBottom: "outset 1px"
     },
     messageWrapper: {
@@ -133,10 +133,10 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "fixed",
       top: "40vh",
       left: "0",
-      width: "10px",
+      width: "12px",
       height: "80px",
       borderRadius: "0px 25px 25px 0px",
-      backgroundColor: theme.palette.primary.main,
+      backgroundColor: theme.palette.secondary.main,
       "&:hover": {
         cursor: "pointer"
       }
@@ -240,7 +240,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   } else if (props.successfullyAuthorized && props.activeChat == null) {
     props.loadUserChats(user.name);
   } else if (props.successfullyAuthorized && props.activeChat != null) {
-    interval = setInterval(updateChats, 2500);
+    interval = setInterval(updateChats, 5000);
     props.loadChatUsers(user);
   } else if (!props.successfullyAuthorized) {
     props.checkChatAuthentication();
