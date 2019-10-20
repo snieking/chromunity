@@ -68,7 +68,6 @@ export function* chatWatcher() {
 export const getRsaKey = (state: ApplicationState) => state.chat.rsaKey;
 export const getChats = (state: ApplicationState) => state.chat.chats;
 export const getActiveChat = (state: ApplicationState) => state.chat.activeChat;
-export const getActiveChatMessages = (state: ApplicationState) => state.chat.activeChatMessages;
 export const getActiveChatParticipants = (state: ApplicationState) => state.chat.activeChatParticipants;
 export const getLastUpdate = (state: ApplicationState) => state.chat.lastUpdate;
 export const getChatUsersLastUpdate = (state: ApplicationState) => state.chat.chatUsersLastUpdate;
@@ -205,7 +204,6 @@ export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
   const chat = yield select(getActiveChat);
 
   if (chat != null) {
-    const prevMessages = yield select(getActiveChatMessages);
     const chatMessages = yield getChatMessages(chat.id);
 
     const rsaKey = yield select(getRsaKey);
