@@ -72,8 +72,8 @@ const styles = createStyles({
     marginLeft: "10px"
   },
   bottomBar: {
-    marginBottom: "5px",
-    marginTop: "10px"
+    float: "right",
+    marginBottom: "5px"
   }
 });
 
@@ -219,43 +219,45 @@ const ProfileCard = withStyles(styles)(
     renderIcons() {
       const user: ChromunityUser = this.state.user;
       return (
-        <div style={{ float: "right" }}>
-          {this.renderActions()}
-          <div className={this.props.classes.bottomBar}>
-            {user != null && this.props.username === user.name && (
-              <Badge badgeContent={this.state.followers} showZero={true} color="secondary" max={MAX_BADGE_NR}>
-                <Tooltip title="Followers">
-                  <Favorite />
-                </Tooltip>
-              </Badge>
-            )}
-            <Badge badgeContent={this.state.userFollowings} showZero={true} color="secondary" max={MAX_BADGE_NR}>
-              <Tooltip title="Following users">
-                <SupervisedUserCircle style={{ marginLeft: "10px" }}/>
+        <div className={this.props.classes.bottomBar}>
+          {user != null && this.props.username === user.name && (
+            <Badge badgeContent={this.state.followers} showZero={true} color="secondary" max={MAX_BADGE_NR}>
+              <Tooltip title="Followers">
+                <Favorite />
               </Tooltip>
             </Badge>
-            <Badge badgeContent={this.state.topicStars + this.state.replyStars} showZero={true} color="secondary" max={MAX_BADGE_NR}>
-              <Tooltip title="Stars">
-                <StarRate style={{ marginLeft: "10px" }} />
-              </Tooltip>
-            </Badge>
-            <Badge badgeContent={this.state.countOfTopics} showZero={true} color="secondary" max={MAX_BADGE_NR}>
-              <Tooltip title="Topics">
-                <Inbox style={{ marginLeft: "10px" }} />
-              </Tooltip>
-            </Badge>
-            <Badge
-              badgeContent={this.state.countOfReplies}
-              showZero={true}
-              max={MAX_BADGE_NR}
-              color="secondary"
-              style={{ marginRight: "15px" }}
-            >
-              <Tooltip title="Replies">
-                <ReplyAll style={{ marginLeft: "10px" }} />
-              </Tooltip>
-            </Badge>
-          </div>
+          )}
+          <Badge badgeContent={this.state.userFollowings} showZero={true} color="secondary" max={MAX_BADGE_NR}>
+            <Tooltip title="Following users">
+              <SupervisedUserCircle style={{ marginLeft: "10px" }} />
+            </Tooltip>
+          </Badge>
+          <Badge
+            badgeContent={this.state.topicStars + this.state.replyStars}
+            showZero={true}
+            color="secondary"
+            max={MAX_BADGE_NR}
+          >
+            <Tooltip title="Stars">
+              <StarRate style={{ marginLeft: "10px" }} />
+            </Tooltip>
+          </Badge>
+          <Badge badgeContent={this.state.countOfTopics} showZero={true} color="secondary" max={MAX_BADGE_NR}>
+            <Tooltip title="Topics">
+              <Inbox style={{ marginLeft: "10px" }} />
+            </Tooltip>
+          </Badge>
+          <Badge
+            badgeContent={this.state.countOfReplies}
+            showZero={true}
+            max={MAX_BADGE_NR}
+            color="secondary"
+            style={{ marginRight: "15px" }}
+          >
+            <Tooltip title="Replies">
+              <ReplyAll style={{ marginLeft: "10px" }} />
+            </Tooltip>
+          </Badge>
         </div>
       );
     }
@@ -315,13 +317,15 @@ const ProfileCard = withStyles(styles)(
           <div>
             <ChromiaPageHeader text={"@" + this.props.username} />
             <Card key={"user-card"}>
-              {this.renderIcons()}
+              {this.renderActions()}
               <div className={this.props.classes.contentWrapper}>
-                <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} name={this.props.username}/>
+                <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} name={this.props.username} />
               </div>
               <Typography variant="subtitle1" component="p" className={this.props.classes.description}>
                 {this.state.description !== "" ? this.state.description : "I haven't written any description yet..."}
               </Typography>
+              <div style={{ clear: "left" }} />
+              {this.renderIcons()}
             </Card>
           </div>
         );
