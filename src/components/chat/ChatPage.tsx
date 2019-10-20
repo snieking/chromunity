@@ -251,7 +251,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     if (el != null && newMessages) {
       el.scrollTop = el.scrollHeight;
     }
-  }, [props.activeChatMessages]);
+  }, [props.activeChatMessages, newMessages]);
 
   const user = getUser();
 
