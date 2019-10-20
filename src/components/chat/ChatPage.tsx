@@ -223,14 +223,6 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  let interval: any;
-
-  useEffect(() => {
-    if (interval != null) {
-      clearInterval(interval);
-    }
-  });
-
   const useCompare = (val: number) => {
     const prevVal = usePrevious(val);
     return prevVal !== val
@@ -246,12 +238,20 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   const newMessages: boolean = useCompare(props.activeChatMessages.length);
 
+  let interval: any;
   useEffect(() => {
     const el: HTMLDivElement = scrollRef.current;
     if (el != null && newMessages) {
       el.scrollTop = el.scrollHeight;
     }
   }, [props.activeChatMessages, newMessages]);
+
+
+  useEffect(() => {
+    if (interval != null) {
+      clearInterval(interval);
+    }
+  });
 
   const user = getUser();
 
@@ -286,7 +286,6 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       clearInterval(interval);
     }
 
-    handleScroll();
     props.refreshOpenChat(user.name);
   }
 
@@ -581,7 +580,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function renderChatMessages() {
     return (
-      <div className={classes.chatMessages} ref={scrollRef}>
+      <div className={classes.chatMessages} ref={scrollRef} onScroll={handleScroll}>
         <List>
           {props.activeChatMessages.map(message => (
             <ChatMessage key={message.timestamp} message={message} />
