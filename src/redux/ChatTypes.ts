@@ -16,7 +16,8 @@ export enum ChatActionTypes {
   SEND_MESSAGE = "CHAT/MESSAGE/SEND",
   MODIFY_TITLE = "CHAT/TITLE/MODIFY",
   LOAD_CHAT_USERS = "LOAD/CHAT/USERS",
-  STORE_CHAT_USERS = "STORE/CHAT/USERS"
+  STORE_CHAT_USERS = "STORE/CHAT/USERS",
+  LOAD_OLDER_MESSAGES = "LOAD/OLDER/MESSAGES"
 }
 
 export interface CheckChatAuthenticationAction {
@@ -75,6 +76,7 @@ export interface StoreDecryptedChatAction {
   type: ChatActionTypes.STORE_DECRYPTED_CHAT;
   chat: Chat;
   messages: ChatMessageDecrypted[];
+  couldExistOlderMessages: boolean;
 }
 
 export interface StoreChatParticipants {
@@ -107,6 +109,10 @@ export interface StoreChatUsersAction {
   chatUsers: string[];
 }
 
+export interface LoadOlderMessagesAction {
+  type: ChatActionTypes.LOAD_OLDER_MESSAGES
+}
+
 export type ChatActions =
   | CheckChatAuthenticationAction
   | CreateChatKeyPairAction
@@ -121,7 +127,8 @@ export type ChatActions =
   | StoreChatParticipants
   | SendMessageAction
   | LoadChatUsersAction
-  | StoreChatUsersAction;
+  | StoreChatUsersAction
+  | LoadOlderMessagesAction;
 
 export interface ChatState {
   rsaKey: any;
@@ -130,6 +137,7 @@ export interface ChatState {
   activeChat: Chat;
   activeChatMessages: ChatMessageDecrypted[];
   activeChatParticipants: string[];
+  activeChatCouldExistOlderMessages: boolean;
   lastUpdate: number;
   loading: boolean;
   followedChatUsers: string[];

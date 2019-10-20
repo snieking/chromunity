@@ -8,6 +8,7 @@ import {
   createNewChat,
   leaveChatAction,
   loadChatUsersAction,
+  loadOlderMessagesAction,
   loadUserChats,
   modifyTitleAction,
   openChat,
@@ -49,6 +50,7 @@ import {
   COLOR_STEEL_BLUE
 } from "../../theme";
 import useTheme from "@material-ui/core/styles/useTheme";
+import LoadMoreButton from "../buttons/LoadMoreButton";
 
 interface OptionType {
   label: string;
@@ -169,6 +171,7 @@ interface Props {
   activeChat: Chat;
   activeChatMessages: ChatMessageDecrypted[];
   activeChatParticipants: string[];
+  activeChatCouldExistOlderMessages: boolean;
   followedChatUsers: string[];
   chatUsers: string[];
   checkChatAuthentication: typeof checkChatAuthentication;
@@ -182,6 +185,7 @@ interface Props {
   leaveChat: typeof leaveChatAction;
   modifyTitle: typeof modifyTitleAction;
   loadChatUsers: typeof loadChatUsersAction;
+  loadOlderMessages: typeof loadOlderMessagesAction;
   theme: Theme;
 }
 
@@ -196,6 +200,7 @@ interface State {
   updatedTitle: string;
   drawerOpen: boolean;
   participantsDrawerOpen: boolean;
+  scrolledToTop: boolean;
 }
 
 const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
@@ -212,7 +217,8 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     modifyTitle: false,
     updatedTitle: "",
     drawerOpen: false,
-    participantsDrawerOpen: false
+    participantsDrawerOpen: false,
+    scrolledToTop: true
   });
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -225,10 +231,24 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     }
   });
 
+  const useCompare = (val: number) => {
+    const prevVal = usePrevious(val);
+    return prevVal !== val
+  };
+
+  const usePrevious = (value: number) => {
+    const ref = useRef<number>();
+    useEffect(() => {
+      ref.current = value;
+    });
+    return ref.current;
+  };
+
+  const newMessages: boolean = useCompare(props.activeChatMessages.length);
+
   useEffect(() => {
     const el: HTMLDivElement = scrollRef.current;
-
-    if (el != null) {
+    if (el != null && newMessages) {
       el.scrollTop = el.scrollHeight;
     }
   }, [props.activeChatMessages]);
@@ -246,6 +266,17 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     props.checkChatAuthentication();
   }
 
+  function handleScroll() {
+    const scrollDiv = scrollRef.current;
+    if (scrollDiv != null) {
+      if (!values.scrolledToTop && scrollDiv.scrollTop === 0) {
+        setValues({ ...values, scrolledToTop: true });
+      } else if (values.scrolledToTop && scrollDiv.scrollTop > 0) {
+        setValues({ ...values, scrolledToTop: false });
+      }
+    }
+  }
+
   if (values.selectedChatId.length === 0 && props.activeChat != null) {
     setValues({ ...values, selectedChatId: props.chats[0].id });
   }
@@ -255,6 +286,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       clearInterval(interval);
     }
 
+    handleScroll();
     props.refreshOpenChat(user.name);
   }
 
@@ -337,43 +369,48 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     if (props.activeChat != null) {
       return (
         <Grid item xs={12} md={9} className={classes.chatWrapper}>
-          <div>
-            <div className={classes.chatActions}>
-              <div style={{ float: "right" }}>
-                <IconButton onClick={() => setValues({ ...values, showLeaveChatDialog: true })}>
-                  <Tooltip title="Leave chat">
-                    <RemoveCircle fontSize="inherit" className={classes.chatActionBtn} />
-                  </Tooltip>
-                </IconButton>
-                {leaveChatDialog()}
-                <IconButton onClick={() => setValues({ ...values, showAddDialog: true })}>
-                  <Tooltip title="Invite user">
-                    <GroupAdd fontSize="inherit" className={classes.chatActionBtn} />
-                  </Tooltip>
-                </IconButton>
-                <IconButton onClick={() => setValues({ ...values, participantsDrawerOpen: true })}>
-                  <Tooltip title="Chat participants">
-                    <ListAlt fontSize="inherit" className={classes.chatActionBtn} />
-                  </Tooltip>
-                </IconButton>
-                {addUserDialog()}
-                {listParticipants()}
-              </div>
-              <Typography
-                className={classes.title}
-                variant="h1"
-                component="h1"
-                onClick={() => setValues({ ...values, modifyTitle: true })}
-              >
-                {props.activeChat.title}
-              </Typography>
+          <div className={classes.chatActions}>
+            <div style={{ float: "right" }}>
+              <IconButton onClick={() => setValues({ ...values, showLeaveChatDialog: true })}>
+                <Tooltip title="Leave chat">
+                  <RemoveCircle fontSize="inherit" className={classes.chatActionBtn} />
+                </Tooltip>
+              </IconButton>
+              {leaveChatDialog()}
+              <IconButton onClick={() => setValues({ ...values, showAddDialog: true })}>
+                <Tooltip title="Invite user">
+                  <GroupAdd fontSize="inherit" className={classes.chatActionBtn} />
+                </Tooltip>
+              </IconButton>
+              <IconButton onClick={() => setValues({ ...values, participantsDrawerOpen: true })}>
+                <Tooltip title="Chat participants">
+                  <ListAlt fontSize="inherit" className={classes.chatActionBtn} />
+                </Tooltip>
+              </IconButton>
+              {addUserDialog()}
+              {listParticipants()}
             </div>
-            {editTitleDialog()}
+            <Typography
+              className={classes.title}
+              variant="h1"
+              component="h1"
+              onClick={() => setValues({ ...values, modifyTitle: true })}
+            >
+              {props.activeChat.title}
+            </Typography>
           </div>
+          {editTitleDialog()}
+          {renderLoadOlderMessagesButton()}
           {renderChatMessages()}
           {renderMessageWriter()}
         </Grid>
       );
+    }
+  }
+
+  function renderLoadOlderMessagesButton() {
+    if (props.activeChatCouldExistOlderMessages && values.scrolledToTop) {
+      return <LoadMoreButton onClick={props.loadOlderMessages} />;
     }
   }
 
@@ -498,7 +535,13 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function addUserDialog() {
     return (
-      <Dialog open={values.showAddDialog} onClose={closeAddUserDialog} fullWidth={true} maxWidth={"md"} PaperProps={{ className: classes.dialogStyle }}>
+      <Dialog
+        open={values.showAddDialog}
+        onClose={closeAddUserDialog}
+        fullWidth={true}
+        maxWidth={"md"}
+        PaperProps={{ className: classes.dialogStyle }}
+      >
         <DialogTitle>Add user to chat</DialogTitle>
         <DialogContent className={classes.addUserDialog}>
           <DialogContentText>
@@ -511,7 +554,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
             options={suggestions()}
             styles={customStyles}
             filterOption={createFilter({ ignoreAccents: false })}
-            onChange={(value: ValueType<OptionType>) => setValues({ ...values, userToAdd: value})}
+            onChange={(value: ValueType<OptionType>) => setValues({ ...values, userToAdd: value })}
             className={classes.dropDownMenu}
           />
         </DialogContent>
@@ -635,7 +678,8 @@ const mapDispatchToProps = (dispatch: any) => {
     sendMessage: (user: ChromunityUser, chat: Chat, message: string) => dispatch(sendMessage(user, chat, message)),
     leaveChat: (user: ChromunityUser) => dispatch(leaveChatAction(user)),
     modifyTitle: (user: ChromunityUser, chat: Chat, title: string) => dispatch(modifyTitleAction(user, chat, title)),
-    loadChatUsers: (user: ChromunityUser) => dispatch(loadChatUsersAction(user))
+    loadChatUsers: (user: ChromunityUser) => dispatch(loadChatUsersAction(user)),
+    loadOlderMessages: () => dispatch(loadOlderMessagesAction())
   };
 };
 
@@ -647,6 +691,7 @@ const mapStateToProps = (store: ApplicationState) => {
     chats: store.chat.chats,
     activeChat: store.chat.activeChat,
     activeChatMessages: store.chat.activeChatMessages,
+    activeChatCouldExistOlderMessages: store.chat.activeChatCouldExistOlderMessages,
     activeChatParticipants: store.chat.activeChatParticipants,
     followedChatUsers: store.chat.followedChatUsers,
     chatUsers: store.chat.chatUsers

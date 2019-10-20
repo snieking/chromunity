@@ -7,6 +7,7 @@ import {
   CreateNewChatAction,
   LeaveChatAction,
   LoadChatUsersAction,
+  LoadOlderMessagesAction,
   LoadUserChatsAction,
   ModifyTitleAction,
   OpenChatAction,
@@ -74,11 +75,13 @@ export const refreshOpenChat: ActionCreator<RefreshOpenChatAction> = (user: stri
 
 export const storeDecryptedChat: ActionCreator<StoreDecryptedChatAction> = (
   chat: Chat,
-  messages: ChatMessageDecrypted[]
+  messages: ChatMessageDecrypted[],
+  couldExistOlderMessages
 ) => ({
   type: ChatActionTypes.STORE_DECRYPTED_CHAT,
   chat: chat,
-  messages: messages
+  messages: messages,
+  couldExistOlderMessages: couldExistOlderMessages
 });
 
 export const storeChatParticipants: ActionCreator<StoreChatParticipants> = (chatParticipants: string[]) => ({
@@ -116,4 +119,8 @@ export const storeChatUsersAction: ActionCreator<StoreChatUsersAction> = (
   type: ChatActionTypes.STORE_CHAT_USERS,
   followedChatUsers: followedChatUsers,
   chatUsers: chatUsers
+});
+
+export const loadOlderMessagesAction: ActionCreator<LoadOlderMessagesAction> = () => ({
+  type: ChatActionTypes.LOAD_OLDER_MESSAGES
 });

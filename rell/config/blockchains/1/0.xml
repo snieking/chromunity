@@ -275,8 +275,20 @@ query get_user_chats(username: name): list&lt;chat_record&gt; {
 	return chat_records;
 }
 
-query get_chat_messages(id: text) {
-	return chat_message@*{ .chat.id == id } ( sender = chat_message.sender.user.display_name,  sort timestamp = chat_message.timestamp, encrypted_msg = chat_message.encrypted_msg );
+query get_chat_messages(id: text, prior_to: timestamp, page_size: integer) {
+	return chat_message@*{ .chat.id == id, .timestamp &lt; prior_to } ( 
+		sender = chat_message.sender.user.display_name,  
+		-sort timestamp = chat_message.timestamp, 
+		encrypted_msg = chat_message.encrypted_msg
+	) limit page_size;
+}
+
+query get_chat_messages_after(id: text, after_timestamp: timestamp, page_size: integer) {
+	return chat_message@*{ .chat.id == id, .timestamp &gt; after_timestamp } ( 
+		sender = chat_message.sender.user.display_name,  
+		sort timestamp = chat_message.timestamp, 
+		encrypted_msg = chat_message.encrypted_msg
+	) limit page_size;
 }
 
 query get_chat_participants(id: text) {

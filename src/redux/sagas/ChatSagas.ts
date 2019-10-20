@@ -5,6 +5,7 @@ import {
   CreateNewChatAction,
   LeaveChatAction,
   LoadChatUsersAction,
+  LoadOlderMessagesAction,
   LoadUserChatsAction,
   ModifyTitleAction,
   OpenChatAction,
@@ -26,6 +27,7 @@ import {
   createChatUser,
   createNewChat,
   getChatMessages,
+  getChatMessagesAfterTimestamp,
   getChatParticipants,
   getChatUsers,
   getFollowedChatUsers,
@@ -63,12 +65,17 @@ export function* chatWatcher() {
   yield takeLatest(ChatActionTypes.LEAVE_CHAT, leaveChatSaga);
   yield takeLatest(ChatActionTypes.MODIFY_TITLE, modifyTitleSaga);
   yield takeLatest(ChatActionTypes.LOAD_CHAT_USERS, loadChatUsersSaga);
+  yield takeLatest(ChatActionTypes.LOAD_OLDER_MESSAGES, loadOlderMessagesSaga);
 }
+
+const PAGE_SIZE = 2;
 
 export const getRsaKey = (state: ApplicationState) => state.chat.rsaKey;
 export const getChats = (state: ApplicationState) => state.chat.chats;
 export const getActiveChat = (state: ApplicationState) => state.chat.activeChat;
 export const getActiveChatParticipants = (state: ApplicationState) => state.chat.activeChatParticipants;
+export const getActiveChatMessages = (state: ApplicationState) => state.chat.activeChatMessages;
+export const couldExistOlderMessages = (state: ApplicationState) => state.chat.activeChatCouldExistOlderMessages;
 export const getLastUpdate = (state: ApplicationState) => state.chat.lastUpdate;
 export const getChatUsersLastUpdate = (state: ApplicationState) => state.chat.chatUsersLastUpdate;
 
@@ -179,22 +186,23 @@ export function* loadUserChatsSaga(action: LoadUserChatsAction) {
 
 export function* openChatSaga(action: OpenChatAction) {
   if (action.chat != null) {
-    const chatMessages = yield getChatMessages(action.chat.id);
+    const chatMessages = yield getChatMessages(action.chat.id, Date.now(), PAGE_SIZE);
     const rsaKey = yield select(getRsaKey);
     const sharedChatKey: any = yield rsaDecrypt(action.chat.encrypted_chat_key, rsaKey);
 
-    const decryptedMessages: ChatMessageDecrypted = chatMessages.map((message: ChatMessage) => {
-      return {
-        sender: message.sender,
-        timestamp: message.timestamp,
-        msg: decrypt(message.encrypted_msg, sharedChatKey.plaintext)
-      };
-    });
+    const decryptedMessages: ChatMessageDecrypted[] = decryptMessages(rsaKey, sharedChatKey, chatMessages);
 
     const participants = yield getChatParticipants(action.chat.id);
+    const couldExistOlder = yield select(couldExistOlderMessages);
 
     yield put(storeChatParticipants(participants));
-    yield put(storeDecryptedChat(action.chat, decryptedMessages));
+    yield put(
+      storeDecryptedChat(
+        action.chat,
+        decryptedMessages,
+        determineCouldExistOlderMessages(decryptedMessages.length, couldExistOlder)
+      )
+    );
   } else {
     yield put(storeDecryptedChat(null, []));
   }
@@ -204,24 +212,37 @@ export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
   const chat = yield select(getActiveChat);
 
   if (chat != null) {
-    const chatMessages = yield getChatMessages(chat.id);
-
+    const previousMessages: ChatMessageDecrypted[] = yield select(getActiveChatMessages);
     const rsaKey = yield select(getRsaKey);
     const sharedChatKey: any = yield rsaDecrypt(chat.encrypted_chat_key, rsaKey);
 
-    const decryptedMessages: ChatMessageDecrypted = chatMessages.map((message: ChatMessage) => {
-      return {
-        sender: message.sender,
-        timestamp: message.timestamp,
-        msg: decrypt(message.encrypted_msg, sharedChatKey.plaintext)
-      };
-    });
+    let chatMessages: ChatMessage[];
+    if (previousMessages != null && previousMessages.length > 0) {
+      chatMessages = yield getChatMessagesAfterTimestamp(
+        chat.id,
+        previousMessages[previousMessages.length - 1].timestamp,
+        PAGE_SIZE
+      );
+    } else {
+      chatMessages = yield getChatMessages(chat.id, Date.now(), PAGE_SIZE);
+    }
 
-    const participants = yield getChatParticipants(chat.id);
+    const decryptedMessages: ChatMessageDecrypted[] = decryptMessages(rsaKey, sharedChatKey, chatMessages);
 
-    yield put(storeChatParticipants(participants));
-    yield put(storeDecryptedChat(chat, decryptedMessages));
-    yield put(loadUserChats(action.user, true));
+    if (decryptedMessages.length !== previousMessages.length) {
+      const participants = yield getChatParticipants(chat.id);
+
+      yield put(storeChatParticipants(participants));
+      const couldExistOlder = yield select(couldExistOlderMessages);
+      yield put(
+        storeDecryptedChat(
+          chat,
+          previousMessages.concat(decryptedMessages),
+          determineCouldExistOlderMessages(decryptedMessages.length, couldExistOlder)
+        )
+      );
+      yield put(loadUserChats(action.user, true));
+    }
   }
 }
 
@@ -255,6 +276,51 @@ export function* loadChatUsersSaga(action: LoadChatUsersAction) {
 
     yield put(storeChatUsersAction(followedChatUsers, chatUsers));
   }
+}
+
+export function* loadOlderMessagesSaga(action: LoadOlderMessagesAction) {
+  console.log("Loading older messages!");
+  const messages: ChatMessageDecrypted[] = yield select(getActiveChatMessages);
+
+  if (messages != null && messages.length >= PAGE_SIZE) {
+    console.log("About to load active chat");
+    const chat = yield select(getActiveChat);
+
+    const encOlderMessages = yield getChatMessages(chat.id, messages[0].timestamp, PAGE_SIZE);
+    console.log("Retrieved encrypted messages");
+    const rsaKey = yield select(getRsaKey);
+    const sharedChatKey: any = yield rsaDecrypt(chat.encrypted_chat_key, rsaKey);
+
+    const decryptedMessages = decryptMessages(rsaKey, sharedChatKey, encOlderMessages);
+    console.log("About to store updated decrypted chat");
+    const couldExistOlder = yield select(couldExistOlderMessages);
+
+    yield put(
+      storeDecryptedChat(
+        chat,
+        decryptedMessages.concat(messages),
+        determineCouldExistOlderMessages(decryptedMessages.length, couldExistOlder)
+      )
+    );
+
+    console.log("Stored decrypted chat");
+  } else {
+    console.log("Messages are less than pageSize, there shouldn't be any older messages", PAGE_SIZE);
+  }
+}
+
+function decryptMessages(rsaKey: any, sharedChatKey: any, chatMessages: ChatMessage[]): ChatMessageDecrypted[] {
+  return chatMessages.map((message: ChatMessage) => {
+    return {
+      sender: message.sender,
+      timestamp: message.timestamp,
+      msg: decrypt(message.encrypted_msg, sharedChatKey.plaintext)
+    };
+  });
+}
+
+function determineCouldExistOlderMessages(nrOfMessages: number, prevCouldExistOlderState: boolean): boolean {
+  return nrOfMessages === 0 ? prevCouldExistOlderState : nrOfMessages >= PAGE_SIZE;
 }
 
 function arraysEqual(arr1: Chat[], arr2: Chat[]) {

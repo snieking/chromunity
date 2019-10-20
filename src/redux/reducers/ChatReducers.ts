@@ -9,6 +9,7 @@ const initialChatState: ChatState = {
   activeChat: null,
   activeChatMessages: [],
   activeChatParticipants: [],
+  activeChatCouldExistOlderMessages: false,
   lastUpdate: 0,
   followedChatUsers: [],
   chatUsers: [],
@@ -36,7 +37,8 @@ export const chatReducer: Reducer<ChatState, ChatActions> = (state = initialChat
       return {
         ...state,
         activeChat: action.chat,
-        activeChatMessages: action.messages
+        activeChatMessages: action.messages,
+        activeChatCouldExistOlderMessages: action.couldExistOlderMessages
       };
     }
     case ChatActionTypes.STORE_CHAT_PARTICIPANTS: {

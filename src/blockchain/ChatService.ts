@@ -90,13 +90,7 @@ export function leaveChat(user: ChromunityUser, chatId: string) {
 
   const sw = createStopwatchStarted();
   return BLOCKCHAIN.then(bc => {
-    return bc.call(
-      user.ft3User,
-      operation,
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      user.name,
-      chatId
-    );
+    return bc.call(user.ft3User, operation, user.ft3User.authDescriptor.hash().toString("hex"), user.name, chatId);
   })
     .then((promise: unknown) => {
       gaRellOperationTiming(operation, stopStopwatch(sw));
@@ -130,8 +124,18 @@ export function getUserChats(username: string): Promise<Chat[]> {
   return GTX.query("get_user_chats", { username: username });
 }
 
-export function getChatMessages(id: string): Promise<ChatMessage[]> {
-  return GTX.query("get_chat_messages", { id: id });
+export function getChatMessages(id: string, priorTo: number, pageSize: number): Promise<ChatMessage[]> {
+  return GTX.query("get_chat_messages", { id: id, prior_to: priorTo, page_size: pageSize }).then(
+    (messages: ChatMessage[]) => messages.reverse()
+  );
+}
+
+export function getChatMessagesAfterTimestamp(
+  id: string,
+  afterTimestamp: number,
+  pageSize: number
+): Promise<ChatMessage[]> {
+  return GTX.query("get_chat_messages_after", { id: id, after_timestamp: afterTimestamp, page_size: pageSize });
 }
 
 export function getChatParticipants(id: string): Promise<string[]> {
