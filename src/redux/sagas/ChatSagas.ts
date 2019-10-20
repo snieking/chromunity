@@ -68,7 +68,7 @@ export function* chatWatcher() {
   yield takeLatest(ChatActionTypes.LOAD_OLDER_MESSAGES, loadOlderMessagesSaga);
 }
 
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 50;
 
 export const getRsaKey = (state: ApplicationState) => state.chat.rsaKey;
 export const getChats = (state: ApplicationState) => state.chat.chats;
