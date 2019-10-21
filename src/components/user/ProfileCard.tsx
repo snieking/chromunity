@@ -73,7 +73,8 @@ const styles = createStyles({
   },
   bottomBar: {
     float: "right",
-    marginBottom: "5px"
+    marginBottom: "5px",
+    marginTop: "5px"
   }
 });
 

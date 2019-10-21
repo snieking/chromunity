@@ -87,7 +87,7 @@ class TopicWall extends React.Component<Props, State> {
     } else if (this.props.type === "tagFollowings") {
       return "Trending Channels";
     } else {
-      return "Topics";
+      return "All Topics";
     }
   }
 

@@ -360,7 +360,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function selectChat(chat: Chat) {
-    setValues({ ...values, selectedChatId: chat.id });
+    setValues({ ...values, selectedChatId: chat.id, drawerOpen: false });
     props.openChat(chat);
   }
 

@@ -99,7 +99,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
             <br />
             <Grid container spacing={1}>
               <Grid item xs={6}>
-                <Badge badgeContent={timesRepresentative} color="secondary" showZero>
+                <Badge badgeContent={timesRepresentative} color="secondary" showZero max={99999}>
                   <Face fontSize="large" />
                 </Badge>
                 <Typography variant="body2" component="span" className={classes.statsDescr}>
@@ -108,7 +108,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
               </Grid>
 
               <Grid item xs={6}>
-                <Badge badgeContent={topicRating + replyRating} color="secondary" showZero>
+                <Badge badgeContent={topicRating + replyRating} color="secondary" showZero> max={99999}
                   <Star fontSize="large" />
                 </Badge>
                 <Typography variant="body2" component="span" className={classes.statsDescr}>
@@ -117,7 +117,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
               </Grid>
 
               <Grid item xs={6}>
-                <Badge badgeContent={followers} color="secondary" showZero>
+                <Badge badgeContent={followers} color="secondary" showZero max={99999}>
                   <Favorite fontSize="large" />
                 </Badge>
                 <Typography variant="body2" component="span" className={classes.statsDescr}>
@@ -126,7 +126,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
               </Grid>
 
               <Grid item xs={6}>
-                <Badge badgeContent={topics + replies} color="secondary" showZero>
+                <Badge badgeContent={topics + replies} color="secondary" showZero max={99999}>
                   <ChatBubble fontSize="large" />
                 </Badge>
                 <Typography variant="body2" component="span" className={classes.statsDescr}>
@@ -145,8 +145,9 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
         }}
         open={snackbarOpen}
         autoHideDuration={3000}
+        onClose={() => setSnackBarOpen(false)}
       >
-        <CustomSnackbarContentWrapper onClose={() => setSnackBarOpen(false)} variant="info" message="Copied to clipboard" />
+        <CustomSnackbarContentWrapper variant="info" message="Copied to clipboard" />
       </Snackbar>
     </div>
   );

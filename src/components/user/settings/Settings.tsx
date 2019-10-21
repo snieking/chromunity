@@ -136,15 +136,17 @@ const Settings = withStyles(styles)(
             anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
             open={this.state.updateSuccessOpen}
             autoHideDuration={3000}
+            onClose={this.handleClose}
           >
-            <CustomSnackbarContentWrapper onClose={this.handleClose} variant="success" message={this.state.settingsUpdateStatus} />
+            <CustomSnackbarContentWrapper variant="success" message={this.state.settingsUpdateStatus} />
           </Snackbar>
           <Snackbar
             anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
             open={this.state.updateErrorOpen}
             autoHideDuration={3000}
+            onClose={this.handleClose}
           >
-            <CustomSnackbarContentWrapper onClose={this.handleClose} variant="error" message={this.state.settingsUpdateStatus} />
+            <CustomSnackbarContentWrapper variant="error" message={this.state.settingsUpdateStatus} />
           </Snackbar>
         </div>
       );

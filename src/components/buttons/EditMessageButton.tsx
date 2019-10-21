@@ -133,10 +133,10 @@ const EditMessageButton = withStyles(styles)(
               horizontal: "left"
             }}
             open={this.state.replyStatusSuccessOpen}
+            onClose={this.handleClose}
             autoHideDuration={3000}
           >
             <CustomSnackbarContentWrapper
-              onClose={this.handleClose}
               variant="success"
               message={this.state.replySentStatus}
             />
@@ -148,9 +148,9 @@ const EditMessageButton = withStyles(styles)(
             }}
             open={this.state.replyStatusErrorOpen}
             autoHideDuration={3000}
+            onClose={this.handleClose}
           >
             <CustomSnackbarContentWrapper
-              onClose={this.handleClose}
               variant="error"
               message={this.state.replySentStatus}
             />

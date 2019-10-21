@@ -200,7 +200,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
 
           <Link to="/followings">
             <IconButton edge="start" className={classes.menuButton} aria-label="Open drawer">
-              <Tooltip title="Users">
+              <Tooltip title="Followed Users">
                 <People className={classes.navIcon} />
               </Tooltip>
             </IconButton>
@@ -243,7 +243,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
     <div className={classes.desktopWallNav}>
       <Link to="/">
         <IconButton edge="start" className={classes.menuButton} aria-label="Open drawer">
-          <Tooltip title="Home">
+          <Tooltip title="All">
             <Home className={classes.navIcon} />
           </Tooltip>
         </IconButton>
@@ -272,7 +272,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
             <ListItemIcon>
               <Home className="menu-item-button" />
             </ListItemIcon>
-            <Typography className="menu-item-text">Home</Typography>
+            <Typography className="menu-item-text">All</Typography>
           </MenuItem>
         </Link>
         <Link style={{ width: "100%" }} to="/channels">
@@ -289,7 +289,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
             <ListItemIcon>
               <People className="menu-item-button" />
             </ListItemIcon>
-            <Typography className="menu-item-text">Followings</Typography>
+            <Typography className="menu-item-text">Followed Users</Typography>
           </MenuItem>
         </Link>
       </Menu>

@@ -314,9 +314,9 @@ const NewTopicButton = withStyles(largeButtonStyles)(
               }}
               open={this.state.newTopicSuccessOpen}
               autoHideDuration={3000}
+              onClose={this.handleClose}
             >
               <CustomSnackbarContentWrapper
-                onClose={this.handleClose}
                 variant="success"
                 message={this.state.newTopicStatusMessage}
               />

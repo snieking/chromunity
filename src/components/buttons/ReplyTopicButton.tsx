@@ -119,15 +119,17 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
           anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
           open={newReplySuccessStatusOpen}
           autoHideDuration={3000}
+          onClose={handleClose}
         >
-          <CustomSnackbarContentWrapper onClose={handleClose} variant="success" message={newReplyStatusMessage} />
+          <CustomSnackbarContentWrapper variant="success" message={newReplyStatusMessage} />
         </Snackbar>
         <Snackbar
           anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
           open={newReplyErrorStatusOpen}
           autoHideDuration={3000}
+          onClose={handleClose}
         >
-          <CustomSnackbarContentWrapper onClose={handleClose} variant="error" message={newReplyStatusMessage} />
+          <CustomSnackbarContentWrapper variant="error" message={newReplyStatusMessage} />
         </Snackbar>
       </div>
     );
