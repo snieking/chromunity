@@ -10,6 +10,17 @@ operation create_chat_user(descriptor_id: byte_array, username: text, rsa_pubkey
 	create chat_user(user, rsa_pubkey);
 }
 
+operation delete_chat_user(descriptor_id: byte_array, username: text) {
+	val user = get_verified_user(username, descriptor_id);
+	val chat_user = chat_user@?{ user };
+	
+	if (chat_user != null) {
+		delete chat_membership@*{ .member == chat_user };
+		delete chat_message@*{ .sender == chat_user };
+		delete chat_user;
+	}
+}
+
 operation add_user_to_chat(descriptor_id: byte_array, username: text, chat_id: text, target_user: text, encrypted_chat_key: text) {
 	val user_already_in_chat = get_verified_user(username, descriptor_id);
 	val chat = chat@{ .id == chat_id };

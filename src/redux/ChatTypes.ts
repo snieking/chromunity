@@ -17,7 +17,9 @@ export enum ChatActionTypes {
   MODIFY_TITLE = "CHAT/TITLE/MODIFY",
   LOAD_CHAT_USERS = "LOAD/CHAT/USERS",
   STORE_CHAT_USERS = "STORE/CHAT/USERS",
-  LOAD_OLDER_MESSAGES = "LOAD/OLDER/MESSAGES"
+  LOAD_OLDER_MESSAGES = "LOAD/OLDER/MESSAGES",
+  DELETE_CHAT_USER = "CHAT/USER/DELETE",
+  STORE_ERROR_MESSAGE = "STORE/ERROR/MESSAGE"
 }
 
 export interface CheckChatAuthenticationAction {
@@ -113,6 +115,16 @@ export interface LoadOlderMessagesAction {
   type: ChatActionTypes.LOAD_OLDER_MESSAGES
 }
 
+export interface StoreErrorMessageAction {
+  type: ChatActionTypes.STORE_ERROR_MESSAGE;
+  message: string;
+}
+
+export interface DeleteChatUserAction {
+  type: ChatActionTypes.DELETE_CHAT_USER;
+  user: ChromunityUser;
+}
+
 export type ChatActions =
   | CheckChatAuthenticationAction
   | CreateChatKeyPairAction
@@ -128,7 +140,9 @@ export type ChatActions =
   | SendMessageAction
   | LoadChatUsersAction
   | StoreChatUsersAction
-  | LoadOlderMessagesAction;
+  | LoadOlderMessagesAction
+  | DeleteChatUserAction
+  | StoreErrorMessageAction;
 
 export interface ChatState {
   rsaKey: any;
@@ -143,4 +157,6 @@ export interface ChatState {
   followedChatUsers: string[];
   chatUsers: string[];
   chatUsersLastUpdate: number;
+  errorMessage: string;
+  errorMessageOpen: boolean;
 }

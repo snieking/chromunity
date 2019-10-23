@@ -6,6 +6,7 @@ import {
   checkChatAuthentication,
   createChatKeyPair,
   createNewChat,
+  deleteChatUserAction,
   leaveChatAction,
   loadChatUsersAction,
   loadOlderMessagesAction,
@@ -13,9 +14,10 @@ import {
   modifyTitleAction,
   openChat,
   refreshOpenChat,
-  sendMessage
+  sendMessage,
+  storeErrorMessage
 } from "../../redux/actions/ChatActions";
-import { Container, createStyles, LinearProgress, makeStyles, Theme } from "@material-ui/core";
+import { Container, createStyles, LinearProgress, makeStyles, Snackbar, Theme } from "@material-ui/core";
 import ChromiaPageHeader from "../common/ChromiaPageHeader";
 import Typography from "@material-ui/core/Typography";
 import { getUser } from "../../util/user-util";
@@ -51,6 +53,7 @@ import {
 } from "../../theme";
 import useTheme from "@material-ui/core/styles/useTheme";
 import LoadMoreButton from "../buttons/LoadMoreButton";
+import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 
 interface OptionType {
   label: string;
@@ -174,8 +177,11 @@ interface Props {
   activeChatCouldExistOlderMessages: boolean;
   followedChatUsers: string[];
   chatUsers: string[];
+  errorMessage: string;
+  errorMessageOpen: boolean;
   checkChatAuthentication: typeof checkChatAuthentication;
   createChatKeyPair: typeof createChatKeyPair;
+  deleteChatUser: typeof deleteChatUserAction;
   createNewChat: typeof createNewChat;
   addUserToChat: typeof addUserToChatAction;
   loadUserChats: typeof loadUserChats;
@@ -186,6 +192,7 @@ interface Props {
   modifyTitle: typeof modifyTitleAction;
   loadChatUsers: typeof loadChatUsersAction;
   loadOlderMessages: typeof loadOlderMessagesAction;
+  storeErrorMessage: typeof storeErrorMessage;
   theme: Theme;
 }
 
@@ -201,6 +208,9 @@ interface State {
   drawerOpen: boolean;
   participantsDrawerOpen: boolean;
   scrolledToTop: boolean;
+  snackbarMessage: string;
+  snackbarOpen: boolean;
+  showResetChatAccountDialog: boolean;
 }
 
 const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
@@ -218,14 +228,17 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     updatedTitle: "",
     drawerOpen: false,
     participantsDrawerOpen: false,
-    scrolledToTop: true
+    scrolledToTop: true,
+    snackbarMessage: "",
+    snackbarOpen: false,
+    showResetChatAccountDialog: false
   });
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const useCompare = (val: number) => {
     const prevVal = usePrevious(val);
-    return prevVal !== val
+    return prevVal !== val;
   };
 
   const usePrevious = (value: number) => {
@@ -245,7 +258,6 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       el.scrollTop = el.scrollHeight;
     }
   }, [props.activeChatMessages, newMessages]);
-
 
   useEffect(() => {
     if (interval != null) {
@@ -642,6 +654,16 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
         />
         <br />
         <br />
+        {resetChatAccountDialog()}
+        <Button
+          type="button"
+          variant="contained"
+          color="secondary"
+          style={{ marginRight: "5px" }}
+          onClick={() => setValues({ ...values, showResetChatAccountDialog: true })}
+        >
+          Reset account
+        </Button>
         <Button type="submit" variant="contained" color="primary">
           Proceed
         </Button>
@@ -649,9 +671,36 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     );
   }
 
+  function resetChatAccountDialog() {
+    return (
+      <ConfirmDialog
+        text="This action will reset your chat account, deleting all your chats memberships and messages"
+        open={values.showResetChatAccountDialog}
+        onClose={closeResetChatAccountDialog}
+        onConfirm={resetChatUser}
+      />
+    );
+  }
+
+  function closeResetChatAccountDialog() {
+    setValues({ ...values, showResetChatAccountDialog: false });
+  }
+
+  function resetChatUser() {
+    props.deleteChatUser(user);
+    setValues({
+      ...values,
+      snackbarMessage: "Chat account resetted",
+      snackbarOpen: true,
+      password: "",
+      showResetChatAccountDialog: false
+    });
+  }
+
   function proceed(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     props.createChatKeyPair(user, values.password);
+    setValues({ ...values, password: "" });
   }
 
   function renderContent() {
@@ -662,13 +711,34 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     }
   }
 
-  return <Container fixed>{renderContent()}</Container>;
+  return (
+    <Container fixed>
+      <div>{renderContent()}</div>
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        open={values.snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setValues({ ...values, snackbarMessage: "", snackbarOpen: false })}
+      >
+        <CustomSnackbarContentWrapper variant="success" message={values.snackbarMessage} />
+      </Snackbar>
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        open={props.errorMessageOpen}
+        autoHideDuration={3000}
+        onClose={() => props.storeErrorMessage(null)}
+      >
+        <CustomSnackbarContentWrapper variant="error" message={props.errorMessage} />
+      </Snackbar>
+    </Container>
+  );
 };
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
     checkChatAuthentication: () => dispatch(checkChatAuthentication()),
     createChatKeyPair: (user: ChromunityUser, password: string) => dispatch(createChatKeyPair(user, password)),
+    deleteChatUser: (user: ChromunityUser) => dispatch(deleteChatUserAction(user)),
     createNewChat: (user: ChromunityUser) => dispatch(createNewChat(user)),
     addUserToChat: (targetUser: string, user: ChromunityUser) => dispatch(addUserToChatAction(targetUser, user)),
     loadUserChats: (user: string) => dispatch(loadUserChats(user)),
@@ -678,7 +748,8 @@ const mapDispatchToProps = (dispatch: any) => {
     leaveChat: (user: ChromunityUser) => dispatch(leaveChatAction(user)),
     modifyTitle: (user: ChromunityUser, chat: Chat, title: string) => dispatch(modifyTitleAction(user, chat, title)),
     loadChatUsers: (user: ChromunityUser) => dispatch(loadChatUsersAction(user)),
-    loadOlderMessages: () => dispatch(loadOlderMessagesAction())
+    loadOlderMessages: () => dispatch(loadOlderMessagesAction()),
+    storeErrorMessage: (msg: string) => dispatch(storeErrorMessage(msg))
   };
 };
 
@@ -693,7 +764,9 @@ const mapStateToProps = (store: ApplicationState) => {
     activeChatCouldExistOlderMessages: store.chat.activeChatCouldExistOlderMessages,
     activeChatParticipants: store.chat.activeChatParticipants,
     followedChatUsers: store.chat.followedChatUsers,
-    chatUsers: store.chat.chatUsers
+    chatUsers: store.chat.chatUsers,
+    errorMessage: store.chat.errorMessage,
+    errorMessageOpen: store.chat.errorMessageOpen
   };
 };
 

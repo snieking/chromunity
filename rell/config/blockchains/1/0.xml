@@ -211,6 +211,17 @@ operation create_chat_user(descriptor_id: byte_array, username: text, rsa_pubkey
 	create chat_user(user, rsa_pubkey);
 }
 
+operation delete_chat_user(descriptor_id: byte_array, username: text) {
+	val user = get_verified_user(username, descriptor_id);
+	val chat_user = chat_user@?{ user };
+	
+	if (chat_user != null) {
+		delete chat_membership@*{ .member == chat_user };
+		delete chat_message@*{ .sender == chat_user };
+		delete chat_user;
+	}
+}
+
 operation add_user_to_chat(descriptor_id: byte_array, username: text, chat_id: text, target_user: text, encrypted_chat_key: text) {
 	val user_already_in_chat = get_verified_user(username, descriptor_id);
 	val chat = chat@{ .id == chat_id };
@@ -248,7 +259,8 @@ operation send_chat_message(chat_id: text, descriptor_id: byte_array, username: 
 	require(chat_member != null, app_error(error_type.USER_UNAUTHORIZED, "Only a chat member can send a message"));
 	
 	create chat_message(chat, chat_user, op_context.last_block_time, encrypted_msg);
-}</string>
+}
+</string>
                             </entry>
                             <entry key="chat/queries.rell">
                                 <string>query get_chat_user_pubkey(username: name): text? {

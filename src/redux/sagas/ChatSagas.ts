@@ -2,7 +2,7 @@ import {
   AddUserToChatAction,
   ChatActionTypes,
   CreateChatKeyPairAction,
-  CreateNewChatAction,
+  CreateNewChatAction, DeleteChatUserAction,
   LeaveChatAction,
   LoadChatUsersAction,
   LoadOlderMessagesAction,
@@ -25,7 +25,7 @@ import {
 import {
   addUserToChat,
   createChatUser,
-  createNewChat,
+  createNewChat, deleteChatUser,
   getChatMessages,
   getChatMessagesAfterTimestamp,
   getChatParticipants,
@@ -45,7 +45,7 @@ import {
   storeChatKeyPair,
   storeChatParticipants,
   storeChatUsersAction,
-  storeDecryptedChat,
+  storeDecryptedChat, storeErrorMessage,
   storeUserChats
 } from "../actions/ChatActions";
 import { uniqueId } from "../../util/util";
@@ -66,6 +66,7 @@ export function* chatWatcher() {
   yield takeLatest(ChatActionTypes.MODIFY_TITLE, modifyTitleSaga);
   yield takeLatest(ChatActionTypes.LOAD_CHAT_USERS, loadChatUsersSaga);
   yield takeLatest(ChatActionTypes.LOAD_OLDER_MESSAGES, loadOlderMessagesSaga);
+  yield takeLatest(ChatActionTypes.DELETE_CHAT_USER, deleteChatUserSaga);
 }
 
 const PAGE_SIZE = 50;
@@ -106,6 +107,7 @@ export function* createChatKeyPairSaga(action: CreateChatKeyPairAction) {
 
   if (pubKey != null && pubKey !== rsaPubKey) {
     console.log("New pubkey didn't match old one");
+    yield put(storeErrorMessage("Incorrect passphrase"));
     return;
   } else if (pubKey == null) {
     yield createChatUser(action.user, rsaPubKey);
@@ -278,21 +280,21 @@ export function* loadChatUsersSaga(action: LoadChatUsersAction) {
   }
 }
 
+export function* deleteChatUserSaga(action: DeleteChatUserAction) {
+  yield deleteChatUser(action.user);
+}
+
 export function* loadOlderMessagesSaga(action: LoadOlderMessagesAction) {
-  console.log("Loading older messages!");
   const messages: ChatMessageDecrypted[] = yield select(getActiveChatMessages);
 
   if (messages != null && messages.length >= PAGE_SIZE) {
-    console.log("About to load active chat");
     const chat = yield select(getActiveChat);
 
     const encOlderMessages = yield getChatMessages(chat.id, messages[0].timestamp, PAGE_SIZE);
-    console.log("Retrieved encrypted messages");
     const rsaKey = yield select(getRsaKey);
     const sharedChatKey: any = yield rsaDecrypt(chat.encrypted_chat_key, rsaKey);
 
     const decryptedMessages = decryptMessages(rsaKey, sharedChatKey, encOlderMessages);
-    console.log("About to store updated decrypted chat");
     const couldExistOlder = yield select(couldExistOlderMessages);
 
     yield put(
@@ -303,7 +305,6 @@ export function* loadOlderMessagesSaga(action: LoadOlderMessagesAction) {
       )
     );
 
-    console.log("Stored decrypted chat");
   } else {
     console.log("Messages are less than pageSize, there shouldn't be any older messages", PAGE_SIZE);
   }

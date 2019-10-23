@@ -11,9 +11,35 @@ export function createChatUser(user: ChromunityUser, pubKey: Buffer) {
   const operation = "create_chat_user";
 
   const sw = createStopwatchStarted();
-  return BLOCKCHAIN.then(bc => {
-    return bc.call(user.ft3User, operation, user.ft3User.authDescriptor.hash().toString("hex"), user.name, pubKey);
-  })
+  return BLOCKCHAIN.then(bc =>
+    bc
+      .transactionBuilder()
+      .addOperation(operation, user.ft3User.authDescriptor.hash().toString("hex"), user.name, pubKey)
+      .addOperation("nop", uniqueId())
+      .build(user.ft3User.authDescriptor.signers)
+      .sign(user.ft3User.keyPair)
+      .post()
+  )
+    .then((promise: unknown) => {
+      gaRellOperationTiming(operation, stopStopwatch(sw));
+      return promise;
+    })
+    .catch(error => handleGADuringException(operation, sw, error));
+}
+
+export function deleteChatUser(user: ChromunityUser) {
+  const operation = "delete_chat_user";
+
+  const sw = createStopwatchStarted();
+  return BLOCKCHAIN.then(bc =>
+    bc
+      .transactionBuilder()
+      .addOperation(operation, user.ft3User.authDescriptor.hash().toString("hex"), user.name)
+      .addOperation("nop", uniqueId())
+      .build(user.ft3User.authDescriptor.signers)
+      .sign(user.ft3User.keyPair)
+      .post()
+  )
     .then((promise: unknown) => {
       gaRellOperationTiming(operation, stopStopwatch(sw));
       return promise;
