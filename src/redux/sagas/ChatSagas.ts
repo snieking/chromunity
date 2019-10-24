@@ -80,7 +80,7 @@ export const couldExistOlderMessages = (state: ApplicationState) => state.chat.a
 export const getLastUpdate = (state: ApplicationState) => state.chat.lastUpdate;
 export const getChatUsersLastUpdate = (state: ApplicationState) => state.chat.chatUsersLastUpdate;
 
-const UPDATE_DURATION_MILLIS = 1000 * 60;
+const UPDATE_DURATION_MILLIS = 1000 * 30;
 
 const shouldUpdate = (updated: number): boolean => {
   return Date.now() - updated > UPDATE_DURATION_MILLIS;
