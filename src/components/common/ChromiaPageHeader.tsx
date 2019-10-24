@@ -26,10 +26,10 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     text: {
       [theme.breakpoints.down("md")]: {
-        fontSize: "18px"
+        fontSize: "22px"
       },
       [theme.breakpoints.down("sm")]: {
-        fontSize: "16px"
+        fontSize: "18px"
       }
     }
   })
