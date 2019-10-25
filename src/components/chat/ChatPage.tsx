@@ -54,6 +54,7 @@ import {
 import useTheme from "@material-ui/core/styles/useTheme";
 import LoadMoreButton from "../buttons/LoadMoreButton";
 import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
+import EmojiPicker from "../common/EmojiPicker";
 
 interface OptionType {
   label: string;
@@ -162,6 +163,14 @@ const useStyles = makeStyles((theme: Theme) =>
       bottom: 0,
       height: "100%",
       overflow: "visible"
+    },
+    editorWrapper: {
+      position: "relative"
+    },
+    emojiWrapper: {
+      position: "absolute",
+      top: -8,
+      left: "85%"
     }
   })
 );
@@ -216,6 +225,7 @@ interface State {
 const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   const classes = useStyles(props);
   const theme = useTheme();
+  const textInput = useRef<HTMLInputElement>(null);
 
   const [values, setValues] = useState<State>({
     password: "",
@@ -602,19 +612,37 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     );
   }
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.shiftKey && event.keyCode === 13) {
+      setValues({ ...values, message: values.message + "\n" });
+      event.preventDefault();
+    } else if (!event.shiftKey && event.keyCode === 13) {
+      event.preventDefault();
+      sendMessage();
+    }
+  };
+
   function renderMessageWriter() {
     return (
-      <form className={classes.messageWrapper} onSubmit={sendMessage}>
-        <TextField
-          autoFocus
-          className={classes.messageField}
-          label="Message"
-          value={values.message}
-          onChange={handleChange("message")}
-          rowsMax={5}
-          variant="outlined"
-          color="secondary"
-        />
+      <form className={classes.messageWrapper} onSubmit={submitMessage}>
+        <div className={classes.editorWrapper}>
+          <TextField
+            autoFocus
+            className={classes.messageField}
+            label="Message"
+            value={values.message}
+            onChange={handleChange("message")}
+            rowsMax={5}
+            multiline
+            variant="outlined"
+            color="secondary"
+            onKeyDown={handleKeyDown}
+            inputRef={textInput}
+          />
+          <div className={classes.emojiWrapper}>
+            <EmojiPicker emojiAppender={addEmoji} />
+          </div>
+        </div>
         <Button type="submit" size="small" className={classes.submitMessage} variant="contained" color="secondary">
           Send
         </Button>
@@ -622,11 +650,26 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     );
   }
 
-  function sendMessage(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function addEmoji(emoji: string) {
+    const startPosition = textInput.current.selectionStart;
+    setValues({
+      ...values,
+      message: [values.message.slice(0, startPosition), emoji, values.message.slice(startPosition)].join("")
+    });
+    setTimeout(() => {
+      textInput.current.selectionStart = startPosition + emoji.length;
+      textInput.current.selectionEnd = startPosition + emoji.length;
+    }, 100);
+  }
 
+  function submitMessage(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    sendMessage();
+  }
+
+  function sendMessage() {
     if (values.message.length > 0) {
-      props.sendMessage(user, props.activeChat, values.message);
+      props.sendMessage(user, props.activeChat, values.message.trim());
       setValues({ ...values, message: "" });
     }
   }
