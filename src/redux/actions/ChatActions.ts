@@ -2,13 +2,14 @@ import { ActionCreator } from "redux";
 import {
   AddUserToChatAction,
   ChatActionTypes,
-  CheckChatAuthenticationAction,
+  CheckChatAuthenticationAction, CountUnreadChatsAction,
   CreateChatKeyPairAction,
-  CreateNewChatAction, DeleteChatUserAction,
+  CreateNewChatAction,
+  DeleteChatUserAction,
   LeaveChatAction,
   LoadChatUsersAction,
   LoadOlderMessagesAction,
-  LoadUserChatsAction,
+  LoadUserChatsAction, MarkChatAsReadAction,
   ModifyTitleAction,
   OpenChatAction,
   RefreshOpenChatAction,
@@ -16,7 +17,8 @@ import {
   StoreChatKeyPairAction,
   StoreChatParticipants,
   StoreChatUsersAction,
-  StoreDecryptedChatAction, StoreErrorMessageAction,
+  StoreDecryptedChatAction,
+  StoreErrorMessageAction, StoreUnreadChatsCountAction,
   StoreUserChatsAction
 } from "../ChatTypes";
 import { Chat, ChatMessageDecrypted, ChromunityUser } from "../../types";
@@ -52,7 +54,7 @@ export const leaveChatAction: ActionCreator<LeaveChatAction> = (user: Chromunity
   user: user
 });
 
-export const loadUserChats: ActionCreator<LoadUserChatsAction> = (user: string, force?: boolean) => ({
+export const loadUserChats: ActionCreator<LoadUserChatsAction> = (user: ChromunityUser, force?: boolean) => ({
   type: ChatActionTypes.LOAD_USER_CHATS,
   user: user,
   force: force
@@ -63,12 +65,13 @@ export const storeUserChats: ActionCreator<StoreUserChatsAction> = (chats: Chat[
   chats: chats
 });
 
-export const openChat: ActionCreator<OpenChatAction> = (chat: Chat) => ({
+export const openChat: ActionCreator<OpenChatAction> = (chat: Chat, user: ChromunityUser) => ({
   type: ChatActionTypes.OPEN_CHAT,
-  chat: chat
+  chat: chat,
+  user: user
 });
 
-export const refreshOpenChat: ActionCreator<RefreshOpenChatAction> = (user: string) => ({
+export const refreshOpenChat: ActionCreator<RefreshOpenChatAction> = (user: ChromunityUser) => ({
   type: ChatActionTypes.REFRESH_OPEN_CHAT,
   user: user
 });
@@ -133,4 +136,20 @@ export const deleteChatUserAction: ActionCreator<DeleteChatUserAction> = (user: 
 export const storeErrorMessage: ActionCreator<StoreErrorMessageAction> = (msg: string) => ({
   type: ChatActionTypes.STORE_ERROR_MESSAGE,
   message: msg
+});
+
+export const countUnreadChatsAction: ActionCreator<CountUnreadChatsAction> = (user: ChromunityUser) => ({
+  type: ChatActionTypes.COUNT_UNREAD_CHATS,
+  user: user
+});
+
+export const storeUnreadChatsCountAction: ActionCreator<StoreUnreadChatsCountAction> = (count: number) => ({
+  type: ChatActionTypes.STORE_UNREAD_CHATS_COUNT,
+  count: count
+});
+
+export const markChatAsReadAction: ActionCreator<MarkChatAsReadAction> = (user: ChromunityUser, chat: Chat) => ({
+  type: ChatActionTypes.MARK_CHAT_AS_READ,
+  user: user,
+  chat: chat
 });

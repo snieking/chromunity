@@ -75,6 +75,7 @@ export interface Chat {
   last_message: ChatMessage;
   encrypted_chat_key: string;
   timestamp: number;
+  last_opened: number;
 }
 
 export interface ChatMessage {

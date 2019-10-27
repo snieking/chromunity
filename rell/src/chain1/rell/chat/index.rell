@@ -12,6 +12,7 @@ class chat_user {
 class chat_membership {
 	key chat, member: chat_user;
 	encrypted_chat_key: text;
+	mutable last_opened: timestamp = 0;
 }
 
 class chat_message {
@@ -27,6 +28,7 @@ record chat_record {
 	last_message: message_record?;
 	encrypted_chat_key: text;
 	timestamp;
+	last_opened: timestamp;
 }
 
 record message_record {

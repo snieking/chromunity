@@ -10,7 +10,7 @@ import {
   leaveChatAction,
   loadChatUsersAction,
   loadOlderMessagesAction,
-  loadUserChats,
+  loadUserChats, markChatAsReadAction,
   modifyTitleAction,
   openChat,
   refreshOpenChat,
@@ -103,7 +103,7 @@ const useStyles = makeStyles((theme: Theme) =>
       maxWidth: "100%",
       height: "50vh",
       [theme.breakpoints.up("lg")]: {
-        height: "70vh"
+        height: "62vh"
       },
       borderTopColor: theme.palette.primary.main,
       borderTop: "outset 1px",
@@ -170,7 +170,7 @@ const useStyles = makeStyles((theme: Theme) =>
     emojiWrapper: {
       position: "absolute",
       top: -8,
-      left: "85%"
+      left: "78.7%"
     }
   })
 );
@@ -202,6 +202,7 @@ interface Props {
   loadChatUsers: typeof loadChatUsersAction;
   loadOlderMessages: typeof loadOlderMessagesAction;
   storeErrorMessage: typeof storeErrorMessage;
+  markChatAsRead: typeof markChatAsReadAction;
   theme: Theme;
 }
 
@@ -280,10 +281,11 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   if (user == null) {
     return <Redirect to={"/user/login"} />;
   } else if (props.successfullyAuthorized && props.activeChat == null) {
-    props.loadUserChats(user.name);
+    props.loadUserChats(user);
   } else if (props.successfullyAuthorized && props.activeChat != null) {
     interval = setInterval(updateChats, 5000);
     props.loadChatUsers(user);
+    props.markChatAsRead(user, props.activeChat);
   } else if (!props.successfullyAuthorized) {
     props.checkChatAuthentication();
   }
@@ -308,7 +310,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       clearInterval(interval);
     }
 
-    props.refreshOpenChat(user.name);
+    props.refreshOpenChat(user);
   }
 
   const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
@@ -383,7 +385,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function selectChat(chat: Chat) {
     setValues({ ...values, selectedChatId: chat.id, drawerOpen: false });
-    props.openChat(chat);
+    props.openChat(chat, user);
   }
 
   function renderOpenChat() {
@@ -500,7 +502,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     clearInterval(interval);
 
     const chat = props.chats.find(value => value.id !== props.activeChat.id);
-    props.openChat(chat);
+    props.openChat(chat, user);
 
     setValues({ ...values, showLeaveChatDialog: false, selectedChatId: chat.id });
     props.leaveChat(user);
@@ -550,7 +552,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     },
     noOptionsMessage: (provided: any, state: any) => {
       const color = theme.palette.primary.main;
-      return { color };
+      return { ...provided, color };
     }
   };
 
@@ -642,10 +644,10 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
           <div className={classes.emojiWrapper}>
             <EmojiPicker emojiAppender={addEmoji} />
           </div>
+          <Button type="submit" size="small" className={classes.submitMessage} variant="contained" color="secondary">
+            Send
+          </Button>
         </div>
-        <Button type="submit" size="small" className={classes.submitMessage} variant="contained" color="secondary">
-          Send
-        </Button>
       </form>
     );
   }
@@ -784,15 +786,16 @@ const mapDispatchToProps = (dispatch: any) => {
     deleteChatUser: (user: ChromunityUser) => dispatch(deleteChatUserAction(user)),
     createNewChat: (user: ChromunityUser) => dispatch(createNewChat(user)),
     addUserToChat: (targetUser: string, user: ChromunityUser) => dispatch(addUserToChatAction(targetUser, user)),
-    loadUserChats: (user: string) => dispatch(loadUserChats(user)),
-    openChat: (chat: Chat) => dispatch(openChat(chat)),
+    loadUserChats: (user: ChromunityUser) => dispatch(loadUserChats(user)),
+    openChat: (chat: Chat, user: ChromunityUser) => dispatch(openChat(chat, user)),
     refreshOpenChat: (user: string) => dispatch(refreshOpenChat(user)),
     sendMessage: (user: ChromunityUser, chat: Chat, message: string) => dispatch(sendMessage(user, chat, message)),
     leaveChat: (user: ChromunityUser) => dispatch(leaveChatAction(user)),
     modifyTitle: (user: ChromunityUser, chat: Chat, title: string) => dispatch(modifyTitleAction(user, chat, title)),
     loadChatUsers: (user: ChromunityUser) => dispatch(loadChatUsersAction(user)),
     loadOlderMessages: () => dispatch(loadOlderMessagesAction()),
-    storeErrorMessage: (msg: string) => dispatch(storeErrorMessage(msg))
+    storeErrorMessage: (msg: string) => dispatch(storeErrorMessage(msg)),
+    markChatAsRead: (user: ChromunityUser, chat: Chat) => dispatch(markChatAsReadAction(user, chat))
   };
 };
 

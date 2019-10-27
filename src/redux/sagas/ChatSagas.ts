@@ -1,12 +1,12 @@
 import {
   AddUserToChatAction,
-  ChatActionTypes,
+  ChatActionTypes, CountUnreadChatsAction,
   CreateChatKeyPairAction,
   CreateNewChatAction, DeleteChatUserAction,
   LeaveChatAction,
   LoadChatUsersAction,
   LoadOlderMessagesAction,
-  LoadUserChatsAction,
+  LoadUserChatsAction, MarkChatAsReadAction,
   ModifyTitleAction,
   OpenChatAction,
   RefreshOpenChatAction,
@@ -23,7 +23,7 @@ import {
   rsaKeyToPubKey
 } from "../../blockchain/CryptoService";
 import {
-  addUserToChat,
+  addUserToChat, countUnreadChats,
   createChatUser,
   createNewChat, deleteChatUser,
   getChatMessages,
@@ -33,11 +33,12 @@ import {
   getFollowedChatUsers,
   getUserChats,
   getUserPubKey,
-  leaveChat,
+  leaveChat, markChatAsRead,
   modifyTitle,
   sendChatMessage
 } from "../../blockchain/ChatService";
 import {
+  countUnreadChatsAction,
   loadUserChats,
   openChat,
   refreshOpenChat,
@@ -45,7 +46,7 @@ import {
   storeChatKeyPair,
   storeChatParticipants,
   storeChatUsersAction,
-  storeDecryptedChat, storeErrorMessage,
+  storeDecryptedChat, storeErrorMessage, storeUnreadChatsCountAction,
   storeUserChats
 } from "../actions/ChatActions";
 import { uniqueId } from "../../util/util";
@@ -67,6 +68,8 @@ export function* chatWatcher() {
   yield takeLatest(ChatActionTypes.LOAD_CHAT_USERS, loadChatUsersSaga);
   yield takeLatest(ChatActionTypes.LOAD_OLDER_MESSAGES, loadOlderMessagesSaga);
   yield takeLatest(ChatActionTypes.DELETE_CHAT_USER, deleteChatUserSaga);
+  yield takeLatest(ChatActionTypes.COUNT_UNREAD_CHATS, countUnreadChatsSaga);
+  yield takeLatest(ChatActionTypes.MARK_CHAT_AS_READ, markChatAsReadSaga);
 }
 
 const PAGE_SIZE = 50;
@@ -127,7 +130,7 @@ export function* createNewChatSaga(action: CreateNewChatAction) {
   const encryptedSharedChatKey = yield rsaEncrypt(sharedChatKey.toString("hex"), rsaPubKey);
 
   yield createNewChat(action.user, id, encryptedSharedChatKey.cipher);
-  yield put(loadUserChats(action.user.name, true));
+  yield put(loadUserChats(action.user, true));
 }
 
 export function* addUserToChatSaga(action: AddUserToChatAction) {
@@ -155,14 +158,14 @@ export function* leaveChatSaga(action: LeaveChatAction) {
   const chat = yield select(getActiveChat);
 
   yield leaveChat(action.user, chat.id);
-  yield put(loadUserChats(action.user.name, true));
+  yield put(loadUserChats(action.user, true));
 }
 
 export function* loadUserChatsSaga(action: LoadUserChatsAction) {
   const lastUpdate = yield select(getLastUpdate);
 
   if (action.force || shouldUpdate(lastUpdate)) {
-    const chats: Chat[] = yield getUserChats(action.user);
+    const chats: Chat[] = yield getUserChats(action.user.name);
     const prevChats: Chat[] = yield select(getChats);
     if (prevChats == null || !arraysEqual(chats, prevChats)) {
       yield put(
@@ -180,7 +183,7 @@ export function* loadUserChatsSaga(action: LoadUserChatsAction) {
       const activeChat = yield select(getActiveChat);
 
       if (activeChat == null) {
-        yield put(openChat(chats[0]));
+        yield put(openChat(chats[0], action.user));
       }
     }
   }
@@ -205,6 +208,9 @@ export function* openChatSaga(action: OpenChatAction) {
         determineCouldExistOlderMessages(decryptedMessages.length, couldExistOlder)
       )
     );
+
+    yield markChatAsRead(action.user, action.chat.id);
+    yield put(countUnreadChatsAction(action.user));
   } else {
     yield put(storeDecryptedChat(null, []));
   }
@@ -212,6 +218,7 @@ export function* openChatSaga(action: OpenChatAction) {
 
 export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
   const chat = yield select(getActiveChat);
+  console.log("Refreshing open chats: ", action.user);
 
   if (chat != null) {
     const previousMessages: ChatMessageDecrypted[] = yield select(getActiveChatMessages);
@@ -244,6 +251,8 @@ export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
         )
       );
       yield put(loadUserChats(action.user, true));
+      yield markChatAsRead(action.user, chat.id);
+      yield put(countUnreadChatsAction(action.user));
     }
   }
 }
@@ -253,7 +262,7 @@ export function* sendMessageSaga(action: SendMessageAction) {
   const sharedChatKey: any = yield rsaDecrypt(action.chat.encrypted_chat_key, rsaKey);
 
   yield sendChatMessage(action.user, action.chat.id, encrypt(action.message, sharedChatKey.plaintext));
-  yield put(refreshOpenChat(action.user.name));
+  yield put(refreshOpenChat(action.user));
 }
 
 export function* modifyTitleSaga(action: ModifyTitleAction) {
@@ -263,10 +272,11 @@ export function* modifyTitleSaga(action: ModifyTitleAction) {
     title: action.title,
     encrypted_chat_key: action.chat.encrypted_chat_key,
     timestamp: action.chat.timestamp,
-    last_message: action.chat.last_message
+    last_message: action.chat.last_message,
+    last_opened: action.chat.last_opened
   };
-  yield put(openChat(updatedChat));
-  yield put(loadUserChats(action.user.name, true));
+  yield put(openChat(updatedChat, action.user));
+  yield put(loadUserChats(action.user, true));
 }
 
 export function* loadChatUsersSaga(action: LoadChatUsersAction) {
@@ -308,6 +318,16 @@ export function* loadOlderMessagesSaga(action: LoadOlderMessagesAction) {
   } else {
     console.log("Messages are less than pageSize, there shouldn't be any older messages", PAGE_SIZE);
   }
+}
+
+export function* countUnreadChatsSaga(action: CountUnreadChatsAction) {
+  const count = yield countUnreadChats(action.user.name);
+  yield put(storeUnreadChatsCountAction(count));
+}
+
+export function* markChatAsReadSaga(action: MarkChatAsReadAction) {
+  yield markChatAsRead(action.user, action.chat.id);
+  yield put(countUnreadChatsAction(action.user));
 }
 
 function decryptMessages(rsaKey: any, sharedChatKey: any, chatMessages: ChatMessage[]): ChatMessageDecrypted[] {

@@ -124,6 +124,24 @@ export function leaveChat(user: ChromunityUser, chatId: string) {
     })
     .catch(error => handleGADuringException(operation, sw, error));
 }
+export function markChatAsRead(user: ChromunityUser, chatId: string) {
+  const operation = "update_last_opened_timestamp";
+
+  const sw = createStopwatchStarted();
+  return BLOCKCHAIN.then(bc =>
+    bc
+      .transactionBuilder()
+      .addOperation(operation, chatId, user.ft3User.authDescriptor.hash().toString("hex"), user.name)
+      .addOperation("nop", uniqueId())
+      .build(user.ft3User.authDescriptor.signers)
+      .sign(user.ft3User.keyPair)
+      .post())
+    .then((promise: unknown) => {
+      gaRellOperationTiming(operation, stopStopwatch(sw));
+      return promise;
+    })
+    .catch(error => handleGADuringException(operation, sw, error));
+}
 
 export function modifyTitle(user: ChromunityUser, chatId: string, updatedTitle: string) {
   const operation = "modify_chat_title";
@@ -174,4 +192,8 @@ export function getFollowedChatUsers(username: string): Promise<string[]> {
 
 export function getChatUsers(): Promise<string[]> {
   return GTX.query("get_chat_users", {});
+}
+
+export function countUnreadChats(username: string): Promise<number> {
+  return GTX.query("count_unread_chats", { username: username });
 }

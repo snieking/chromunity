@@ -59,3 +59,11 @@ operation send_chat_message(chat_id: text, descriptor_id: byte_array, username: 
 	
 	create chat_message(chat, chat_user, op_context.last_block_time, encrypted_msg);
 }
+
+operation update_last_opened_timestamp(chat_id: text, descriptor_id: byte_array, username: name) {
+	val user = get_verified_user(username, descriptor_id);
+	update chat_membership@{ 
+		.chat.id == chat_id, 
+		.member.user == user
+	} ( last_opened = op_context.last_block_time );
+}

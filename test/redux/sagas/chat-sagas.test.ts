@@ -66,7 +66,7 @@ describe("Chat Sagas test", () => {
 
     await runSaga(fakeStore, loadUserChatsSaga, {
       type: ChatActionTypes.LOAD_USER_CHATS,
-      user: user.name,
+      user: user,
       force: true
     }).toPromise();
 

@@ -19,7 +19,10 @@ export enum ChatActionTypes {
   STORE_CHAT_USERS = "STORE/CHAT/USERS",
   LOAD_OLDER_MESSAGES = "LOAD/OLDER/MESSAGES",
   DELETE_CHAT_USER = "CHAT/USER/DELETE",
-  STORE_ERROR_MESSAGE = "STORE/ERROR/MESSAGE"
+  STORE_ERROR_MESSAGE = "STORE/ERROR/MESSAGE",
+  COUNT_UNREAD_CHATS = "COUNT/CHATS/UNREAD",
+  STORE_UNREAD_CHATS_COUNT = "STORE/CHATS/UNREAD/COUNT",
+  MARK_CHAT_AS_READ = "MARK/CHAT/AS/READ"
 }
 
 export interface CheckChatAuthenticationAction {
@@ -56,7 +59,7 @@ export interface LeaveChatAction {
 export interface LoadUserChatsAction {
   type: ChatActionTypes.LOAD_USER_CHATS;
   force?: boolean;
-  user: string;
+  user: ChromunityUser;
 }
 
 export interface StoreUserChatsAction {
@@ -67,11 +70,12 @@ export interface StoreUserChatsAction {
 export interface OpenChatAction {
   type: ChatActionTypes.OPEN_CHAT;
   chat: Chat;
+  user: ChromunityUser;
 }
 
 export interface RefreshOpenChatAction {
   type: ChatActionTypes.REFRESH_OPEN_CHAT;
-  user: string;
+  user: ChromunityUser;
 }
 
 export interface StoreDecryptedChatAction {
@@ -125,6 +129,22 @@ export interface DeleteChatUserAction {
   user: ChromunityUser;
 }
 
+export interface CountUnreadChatsAction {
+  type: ChatActionTypes.COUNT_UNREAD_CHATS;
+  user: ChromunityUser;
+}
+
+export interface StoreUnreadChatsCountAction {
+  type: ChatActionTypes.STORE_UNREAD_CHATS_COUNT;
+  count: number;
+}
+
+export interface MarkChatAsReadAction {
+  type: ChatActionTypes.MARK_CHAT_AS_READ;
+  user: ChromunityUser;
+  chat: Chat;
+}
+
 export type ChatActions =
   | CheckChatAuthenticationAction
   | CreateChatKeyPairAction
@@ -142,7 +162,10 @@ export type ChatActions =
   | StoreChatUsersAction
   | LoadOlderMessagesAction
   | DeleteChatUserAction
-  | StoreErrorMessageAction;
+  | StoreErrorMessageAction
+  | CountUnreadChatsAction
+  | StoreUnreadChatsCountAction
+  | MarkChatAsReadAction;
 
 export interface ChatState {
   rsaKey: any;
@@ -159,4 +182,5 @@ export interface ChatState {
   chatUsersLastUpdate: number;
   errorMessage: string;
   errorMessageOpen: boolean;
+  unreadChats: number;
 }

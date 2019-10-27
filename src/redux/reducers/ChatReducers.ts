@@ -15,7 +15,8 @@ const initialChatState: ChatState = {
   chatUsers: [],
   chatUsersLastUpdate: 0,
   errorMessage: "",
-  errorMessageOpen: false
+  errorMessageOpen: false,
+  unreadChats: 0
 };
 
 export const chatReducer: Reducer<ChatState, ChatActions> = (state = initialChatState, action) => {
@@ -79,6 +80,12 @@ export const chatReducer: Reducer<ChatState, ChatActions> = (state = initialChat
         ...state,
         errorMessage: action.message,
         errorMessageOpen: action.message != null && action.message !== ""
+      }
+    }
+    case ChatActionTypes.STORE_UNREAD_CHATS_COUNT: {
+      return {
+        ...state,
+        unreadChats: action.count
       }
     }
   }

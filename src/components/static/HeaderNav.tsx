@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
@@ -7,8 +7,19 @@ import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 import Home from "@material-ui/icons/Home";
 import AccountCircle from "@material-ui/icons/AccountCircle";
-import { ExitToApp, Face, Gavel, HowToVote, LocationCity, People, Report, RssFeed, Settings } from "@material-ui/icons";
-import {Menu as MenuIcon} from "@material-ui/icons/";
+import {
+  Chat,
+  ExitToApp,
+  Face,
+  Gavel,
+  HowToVote,
+  LocationCity,
+  People,
+  Report,
+  RssFeed,
+  Settings
+} from "@material-ui/icons";
+import { Menu as MenuIcon } from "@material-ui/icons/";
 
 import NotificationsButton from "../buttons/NotificationsButton";
 import { Button, ListItemIcon, Menu, MenuItem, Tooltip, Typography } from "@material-ui/core";
@@ -19,14 +30,18 @@ import { ApplicationState } from "../../redux/Store";
 import { checkActiveElection, loadRepresentatives, loadUnhandledReports } from "../../redux/actions/GovernmentActions";
 import { connect } from "react-redux";
 import Badge from "@material-ui/core/Badge";
+import { countUnreadChatsAction } from "../../redux/actions/ChatActions";
+import { ChromunityUser } from "../../types";
 
 interface Props {
   representatives: string[];
   unhandledReports: number;
   activeElection: boolean;
+  unreadChats: number;
   loadRepresentatives: typeof loadRepresentatives;
   loadUnhandledReports: typeof loadUnhandledReports;
   checkActiveElection: typeof checkActiveElection;
+  countUnreadChats: typeof countUnreadChatsAction;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -87,11 +102,26 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   const [govAnchorEl, setGovAnchorEl] = React.useState<null | HTMLElement>(null);
   const [wallAnchorEl, setWallAnchorEl] = React.useState<null | HTMLElement>(null);
 
+  let interval: any;
+  useEffect(() => {
+    if (interval != null) {
+      clearInterval(interval);
+    }
+  });
+
+  function clearInterval(interval: any) {
+
+  }
+
   props.loadRepresentatives();
   props.checkActiveElection();
 
   if (isRepresentative()) {
     props.loadUnhandledReports();
+  }
+
+  if (user != null) {
+    interval = setInterval(() => props.countUnreadChats(user), 30000);
   }
 
   function handleProfileClick(event: React.MouseEvent<HTMLButtonElement>) {
@@ -126,6 +156,15 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
     if (user != null) {
       return (
         <div>
+          <Tooltip title="Chat">
+            <Link to="/chat">
+              <IconButton>
+                <Badge badgeContent={props.unreadChats} color="secondary">
+                  <Chat />
+                </Badge>
+              </IconButton>
+            </Link>
+          </Tooltip>
           <Link to={"/notifications/" + user.name}>
             <NotificationsButton username={user.name} />
           </Link>
@@ -257,7 +296,12 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
 
   const mobileWallNav = () => (
     <div className={classes.mobileWallNav}>
-      <IconButton className={classes.menuButton} onClick={handleWallMenuClick} aria-controls="wall-menu" aria-haspopup="true">
+      <IconButton
+        className={classes.menuButton}
+        onClick={handleWallMenuClick}
+        aria-controls="wall-menu"
+        aria-haspopup="true"
+      >
         <MenuIcon />
       </IconButton>
       <Menu
@@ -357,7 +401,8 @@ const mapStateToProps = (store: ApplicationState) => {
     representatives: store.government.representatives,
     unhandledReports: store.government.unhandledReports,
     loadUnhandledReports: store.government.unhandledReports,
-    activeElection: store.government.activeElection
+    activeElection: store.government.activeElection,
+    unreadChats: store.chat.unreadChats
   };
 };
 
@@ -365,7 +410,8 @@ const mapDispatchToProps = (dispatch: any) => {
   return {
     loadRepresentatives: () => dispatch(loadRepresentatives()),
     loadUnhandledReports: () => dispatch(loadUnhandledReports()),
-    checkActiveElection: () => dispatch(checkActiveElection())
+    checkActiveElection: () => dispatch(checkActiveElection()),
+    countUnreadChats: (user: ChromunityUser) => dispatch(countUnreadChatsAction(user))
   };
 };
 
