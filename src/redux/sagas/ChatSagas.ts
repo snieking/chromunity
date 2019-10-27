@@ -238,7 +238,7 @@ export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
 
     const decryptedMessages: ChatMessageDecrypted[] = decryptMessages(rsaKey, sharedChatKey, chatMessages);
 
-    if (decryptedMessages.length !== previousMessages.length) {
+    if (decryptedMessages.length > 0) {
       const participants = yield getChatParticipants(chat.id);
 
       yield put(storeChatParticipants(participants));
