@@ -30,7 +30,7 @@ describe("channel tests", () => {
 
     it("retrieve topics by channels queries", async () => {
         const title: string = "Chromia";
-        const channel: string = "welcome";
+        const channel: string = "welcome_home";
 
         const timestampPriorToCreation: number = Date.now();
         await createTopic(loggedInUser, channel, title, "Hello chromia");

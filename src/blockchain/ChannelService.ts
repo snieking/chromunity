@@ -1,6 +1,12 @@
 import { ChromunityUser } from "../types";
 import { BLOCKCHAIN, GTX } from "./Postchain";
-import { createStopwatchStarted, handleGADuringException, sortByFrequency, stopStopwatch } from "../util/util";
+import {
+  createStopwatchStarted,
+  handleGADuringException,
+  sortByFrequency,
+  stopStopwatch,
+  uniqueId
+} from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 import { gaRellOperationTiming, gaRellQueryTiming, gaSocialEvent } from "../GoogleAnalytics";
 
@@ -23,10 +29,12 @@ export function getFollowedChannels(user: string): Promise<string[]> {
 
   return GTX.query(query, {
     username: user.toLocaleLowerCase()
-  }).then((values: string[]) => {
-    gaRellQueryTiming(query, stopStopwatch(sw));
-    return values;
-  }).catch((error: Error) => handleGADuringException(query, sw, error));
+  })
+    .then((values: string[]) => {
+      gaRellQueryTiming(query, stopStopwatch(sw));
+      return values;
+    })
+    .catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
 function modifyChannelollowing(user: ChromunityUser, channel: string, rellOperation: string) {
@@ -35,17 +43,24 @@ function modifyChannelollowing(user: ChromunityUser, channel: string, rellOperat
   const sw = createStopwatchStarted();
 
   return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
-      rellOperation,
-      user.name.toLocaleLowerCase(),
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      channel.toLocaleLowerCase()
-    )
-  ).then(value => {
-    gaRellOperationTiming(rellOperation, stopStopwatch(sw));
-    return value;
-  }).catch((error: Error) => handleGADuringException(rellOperation, sw, error));
+    bc
+      .transactionBuilder()
+      .addOperation(
+        rellOperation,
+        user.name.toLocaleLowerCase(),
+        user.ft3User.authDescriptor.hash().toString("hex"),
+        channel.toLocaleLowerCase()
+      )
+      .addOperation("nop", uniqueId())
+      .build(user.ft3User.authDescriptor.signers)
+      .sign(user.ft3User.keyPair)
+      .post()
+  )
+    .then(value => {
+      gaRellOperationTiming(rellOperation, stopStopwatch(sw));
+      return value;
+    })
+    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
 }
 
 export function getTopicChannelBelongings(topicId: string): Promise<string[]> {
@@ -58,11 +73,13 @@ export function getTopicChannelBelongings(topicId: string): Promise<string[]> {
   const query = "get_topic_channels_belongings";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, { topic_id: topicId }).then((belongings: string[]) => {
-    gaRellQueryTiming(query, stopStopwatch(sw));
-    channelsCache.set(topicId, belongings, 3600);
-    return belongings;
-  }).catch((error: Error) => handleGADuringException(query, sw, error));
+  return GTX.query(query, { topic_id: topicId })
+    .then((belongings: string[]) => {
+      gaRellQueryTiming(query, stopStopwatch(sw));
+      channelsCache.set(topicId, belongings, 3600);
+      return belongings;
+    })
+    .catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
 export function getTrendingChannels(sinceDaysAgo: number): Promise<string[]> {
@@ -81,12 +98,14 @@ export function getTrendingChannels(sinceDaysAgo: number): Promise<string[]> {
 
   return GTX.query(query, {
     timestamp: date.getTime() / 1000
-  }).then((tags: string[]) => {
-    gaRellQueryTiming(query, stopStopwatch(sw));
-    trending = sortByFrequency(tags).slice(0, 10);
-    channelsCache.set("trending", trending, 3600);
-    return trending;
-  }).catch((error: Error) => handleGADuringException(query, sw, error));
+  })
+    .then((tags: string[]) => {
+      gaRellQueryTiming(query, stopStopwatch(sw));
+      trending = sortByFrequency(tags).slice(0, 10);
+      channelsCache.set("trending", trending, 3600);
+      return trending;
+    })
+    .catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
 export function countChannelFollowers(channelName: string): Promise<number> {
@@ -102,9 +121,11 @@ export function countChannelFollowers(channelName: string): Promise<number> {
 
   return GTX.query(query, {
     name: channelName.toLocaleLowerCase()
-  }).then((count: number) => {
-    gaRellQueryTiming(query, stopStopwatch(sw));
-    channelsCache.set(key, count, 600);
-    return count;
-  }).catch((error: Error) => handleGADuringException(query, sw, error));
+  })
+    .then((count: number) => {
+      gaRellQueryTiming(query, stopStopwatch(sw));
+      channelsCache.set(key, count, 600);
+      return count;
+    })
+    .catch((error: Error) => handleGADuringException(query, sw, error));
 }

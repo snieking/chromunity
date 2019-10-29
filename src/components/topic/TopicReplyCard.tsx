@@ -21,8 +21,8 @@ import {
   withStyles,
   WithStyles
 } from "@material-ui/core";
-import { getCachedUserMeta, getUser, ifEmptyAvatarThenPlaceholder, isRepresentative } from "../../util/user-util";
-import { Delete, Reply, Report, StarBorder, StarRate } from "@material-ui/icons";
+import { getCachedUserMeta, getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
+import { Delete, Reply, Report, StarBorder, StarRate, UnfoldMore } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import {
   createTopicSubReply,
@@ -41,6 +41,8 @@ import Timestamp from "../common/Timestamp";
 import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import ConfirmDialog from "../common/ConfirmDialog";
+import * as BoomerangCache from "boomerang-cache";
+import EmojiPicker from "../common/EmojiPicker";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -79,6 +81,17 @@ const styles = (theme: Theme) =>
     },
     iconRed: {
       color: COLOR_RED
+    },
+    editorWrapper: {
+      position: "relative"
+    },
+    highlighted: {
+      borderColor: theme.palette.secondary.main,
+      borderSize: "1px",
+      border: "solid"
+    },
+    hidden: {
+      display: "none"
     }
   });
 
@@ -88,6 +101,7 @@ interface Props extends WithStyles<typeof styles> {
   indention: number;
   representatives: string[];
   mutedUsers: string[];
+  cascadeOpenSubReplies?: Function;
 }
 
 interface State {
@@ -95,7 +109,6 @@ interface State {
   ratedByMe: boolean;
   replyBoxOpen: boolean;
   replyMessage: string;
-  isRepresentative: boolean;
   hideThreadConfirmDialogOpen: boolean;
   avatar: string;
   subReplies: TopicReply[];
@@ -104,21 +117,35 @@ interface State {
   reportReplyDialogOpen: boolean;
   isLoading: boolean;
   user: ChromunityUser;
+  timeLeftUntilNoLongerModifiable: number;
+  renderSubReplies: boolean;
 }
 
 const allowedEditTimeMillis: number = 300000;
+const replyMaxRenderAgeMillis: number = 1000 * 60 * 60 * 24;
+
+const replyUnfoldCache = BoomerangCache.create("reply-unfold-bucket", {
+  storage: "local",
+  encrypt: false
+});
 
 const TopicReplyCard = withStyles(styles)(
   class extends React.Component<Props, State> {
+    private readonly textInput: React.RefObject<HTMLInputElement>;
+    private readonly cardRef: React.RefObject<HTMLDivElement>;
+
     constructor(props: Props) {
       super(props);
+
+      const previouslyFoldedSubReplies: boolean = replyUnfoldCache.get(props.reply.id) != null;
+      const decisionToRenderSubReplies: boolean = replyUnfoldCache.get(props.reply.id);
+      const shouldRenderDueToTimestamp: boolean = props.reply.timestamp + replyMaxRenderAgeMillis > Date.now();
 
       this.state = {
         stars: 0,
         ratedByMe: false,
         replyBoxOpen: false,
         replyMessage: "",
-        isRepresentative: false,
         hideThreadConfirmDialogOpen: false,
         avatar: "",
         subReplies: [],
@@ -130,41 +157,75 @@ const TopicReplyCard = withStyles(styles)(
         removeReplyDialogOpen: false,
         reportReplyDialogOpen: false,
         isLoading: false,
-        user: getUser()
+        user: getUser(),
+        timeLeftUntilNoLongerModifiable: 0,
+        renderSubReplies: previouslyFoldedSubReplies ? decisionToRenderSubReplies : shouldRenderDueToTimestamp
       };
+
+      if (!previouslyFoldedSubReplies && shouldRenderDueToTimestamp && this.props.cascadeOpenSubReplies != null) {
+        this.props.cascadeOpenSubReplies();
+      }
+
+      this.textInput = React.createRef();
+      this.cardRef = React.createRef();
 
       this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
       this.sendReply = this.sendReply.bind(this);
       this.editReplyMessage = this.editReplyMessage.bind(this);
       this.reportReply = this.reportReply.bind(this);
       this.closeReportReply = this.closeReportReply.bind(this);
+      this.isRepresentative = this.isRepresentative.bind(this);
+      this.addEmojiInReply = this.addEmojiInReply.bind(this);
+      this.openSubReplies = this.openSubReplies.bind(this);
     }
+
+    scrollToReply = () => window.scrollTo(0, this.cardRef.current.offsetTop);
 
     render() {
       if (!this.props.mutedUsers.includes(this.props.reply.author)) {
         return (
           <div>
             <div className={this.props.reply.removed ? this.props.classes.removed : ""}>
-              <Card key={this.props.reply.id} style={{ marginLeft: this.props.indention + "px" }}>
+              <Card
+                key={this.props.reply.id}
+                ref={this.cardRef}
+                style={{ marginLeft: this.props.indention + "px" }}
+                className={this.isReplyHighlighted() ? this.props.classes.highlighted : ""}
+              >
                 {this.state.isLoading ? <LinearProgress /> : <div />}
                 {this.renderCardContent()}
               </Card>
             </div>
-            {this.state.subReplies.map(reply => (
-              <TopicReplyCard
-                key={"reply-" + reply.id}
-                reply={reply}
-                indention={this.props.indention + 10}
-                topicId={this.props.topicId}
-                representatives={this.props.representatives}
-                mutedUsers={this.props.mutedUsers}
-              />
-            ))}
+            <div className={!this.state.renderSubReplies ? this.props.classes.hidden : ""}>
+              {this.renderSubReplies()}
+            </div>
           </div>
         );
       } else {
         return <div />;
       }
+    }
+
+    openSubReplies() {
+      this.setState({ renderSubReplies: true });
+      replyUnfoldCache.set(this.props.reply.id, true, replyMaxRenderAgeMillis * 7);
+      if (this.props.cascadeOpenSubReplies != null) {
+        this.props.cascadeOpenSubReplies();
+      }
+    }
+
+    renderSubReplies() {
+      return this.state.subReplies.map(reply => (
+        <TopicReplyCard
+          key={"reply-" + reply.id}
+          reply={reply}
+          indention={this.props.indention + 10}
+          topicId={this.props.topicId}
+          representatives={this.props.representatives}
+          mutedUsers={this.props.mutedUsers}
+          cascadeOpenSubReplies={this.openSubReplies}
+        />
+      ));
     }
 
     componentDidMount() {
@@ -178,15 +239,26 @@ const TopicReplyCard = withStyles(styles)(
       getReplyStarRaters(this.props.reply.id).then(usersWhoStarRated =>
         this.setState({
           stars: usersWhoStarRated.length,
-          ratedByMe: usersWhoStarRated.includes(user != null && user.name)
+          ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase())
         })
       );
       getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies }));
       getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
 
-      if (this.state.user != null) {
-        isRepresentative().then(isRepresentative => this.setState({ isRepresentative: isRepresentative }));
+      const modifiableUntil = this.props.reply.timestamp + allowedEditTimeMillis;
+      setInterval(() => {
+        this.setState({ timeLeftUntilNoLongerModifiable: this.getTimeLeft(modifiableUntil) });
+      }, 1000);
+
+      if (this.isReplyHighlighted()) {
+        this.openSubReplies();
+        this.scrollToReply();
       }
+    }
+
+    getTimeLeft(until: number): number {
+      const currentTime = Date.now();
+      return currentTime < until ? Math.floor((until - currentTime) / 1000) : 0;
     }
 
     toggleStarRate() {
@@ -240,10 +312,14 @@ const TopicReplyCard = withStyles(styles)(
           </Link>
           <br />
           <div style={{ float: "right" }}>
-            <Avatar src={this.state.avatar} size={AVATAR_SIZE.MEDIUM} />
+            <Avatar src={this.state.avatar} size={AVATAR_SIZE.MEDIUM} name={this.props.reply.author}/>
           </div>
         </div>
       );
+    }
+
+    isReplyHighlighted(): boolean {
+      return window.location.href.indexOf("#" + this.props.reply.id) > -1;
     }
 
     renderCardContent() {
@@ -266,7 +342,11 @@ const TopicReplyCard = withStyles(styles)(
             {this.props.reply.timestamp + allowedEditTimeMillis > Date.now() &&
             user != null &&
             this.props.reply.author === user.name ? (
-              <EditMessageButton value={this.props.reply.message} submitFunction={this.editReplyMessage} />
+              <EditMessageButton
+                modifiableUntil={this.state.timeLeftUntilNoLongerModifiable}
+                value={this.props.reply.message}
+                submitFunction={this.editReplyMessage}
+              />
             ) : null}
             <IconButton
               aria-label="Reply"
@@ -293,6 +373,20 @@ const TopicReplyCard = withStyles(styles)(
                 <Report />
               </Tooltip>
             </IconButton>
+            {this.state.subReplies.length > 0 ? (
+              <IconButton aria-label="Load replies" onClick={() => this.toggleRenderReply()}>
+                <Tooltip title="Toggle replies">
+                  <Badge
+                    badgeContent={!this.state.renderSubReplies ? this.state.subReplies.length : 0}
+                    color="secondary"
+                  >
+                    <UnfoldMore />
+                  </Badge>
+                </Tooltip>
+              </IconButton>
+            ) : (
+              <div style={{ display: "inline-block" }} />
+            )}
             {this.renderAdminActions()}
           </div>
           <div>{this.renderReplyBox()}</div>
@@ -300,8 +394,16 @@ const TopicReplyCard = withStyles(styles)(
       );
     }
 
+    toggleRenderReply() {
+      replyUnfoldCache.set(this.props.reply.id, !this.state.renderSubReplies, replyMaxRenderAgeMillis * 7);
+      this.setState(prevState => ({ renderSubReplies: !prevState.renderSubReplies }));
+    }
+
     editReplyMessage(text: string) {
-      modifyReply(this.state.user, this.props.reply.id, text).then(() => window.location.reload());
+      this.setState({ isLoading: true });
+      modifyReply(this.state.user, this.props.reply.id, text)
+        .then(() => window.location.reload())
+        .catch(() => this.setState({ isLoading: false }));
     }
 
     closeReportReply() {
@@ -319,8 +421,13 @@ const TopicReplyCard = withStyles(styles)(
       }
     }
 
+    isRepresentative() {
+      const user: ChromunityUser = this.state.user;
+      return user != null && this.props.representatives.includes(user.name.toLocaleLowerCase());
+    }
+
     renderAdminActions() {
-      if (this.state.isRepresentative && !this.props.reply.removed) {
+      if (this.isRepresentative() && !this.props.reply.removed) {
         return (
           <div style={{ display: "inline-block" }}>
             <IconButton aria-label="Remove reply" onClick={() => this.setState({ removeReplyDialogOpen: true })}>
@@ -375,33 +482,56 @@ const TopicReplyCard = withStyles(styles)(
       } else if (this.state.replyBoxOpen) {
         return (
           <div style={{ marginTop: "20px" }}>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="message"
-              multiline
-              label="Reply"
-              type="text"
-              rows="3"
-              variant="outlined"
-              fullWidth
-              onChange={this.handleReplyMessageChange}
-              value={this.state.replyMessage}
-            />
-            <Button
-              onClick={() => this.setState({ replyBoxOpen: false })}
-              color="secondary"
-              variant="text"
-              style={{ marginRight: "5px" }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" color="primary" variant="text" onClick={() => this.sendReply()}>
-              Send
-            </Button>
+            <div className={this.props.classes.editorWrapper}>
+              <TextField
+                autoFocus
+                margin="dense"
+                id="message"
+                multiline
+                label="Reply"
+                type="text"
+                rows="3"
+                variant="outlined"
+                fullWidth
+                onChange={this.handleReplyMessageChange}
+                value={this.state.replyMessage}
+                inputRef={this.textInput}
+              />
+              <EmojiPicker emojiAppender={this.addEmojiInReply} btnSize="sm" />
+            </div>
+            <div style={{ float: "right" }}>
+              <Button
+                onClick={() => this.setState({ replyBoxOpen: false })}
+                color="secondary"
+                variant="text"
+                style={{ marginRight: "5px" }}
+              >
+                Cancel
+              </Button>
+              <Button color="primary" variant="text" onClick={() => this.sendReply()}>
+                Send
+              </Button>
+            </div>
           </div>
         );
       }
+    }
+
+    addEmojiInReply(emoji: string) {
+      const startPosition = this.textInput.current.selectionStart;
+
+      this.setState(prevState => ({
+        replyMessage: [
+          prevState.replyMessage.slice(0, startPosition),
+          emoji,
+          prevState.replyMessage.slice(startPosition)
+        ].join("")
+      }));
+
+      setTimeout(() => {
+        this.textInput.current.selectionStart = startPosition + emoji.length;
+        this.textInput.current.selectionEnd = startPosition + emoji.length;
+      }, 100);
     }
 
     handleReplyMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -413,9 +543,16 @@ const TopicReplyCard = withStyles(styles)(
     sendReply() {
       const message: string = this.state.replyMessage;
       this.setState({ replyBoxOpen: false, replyMessage: "" });
-      createTopicSubReply(this.state.user, this.props.topicId, this.props.reply.id, message).then(() =>
-        getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies }))
-      );
+      createTopicSubReply(
+        this.state.user,
+        this.props.topicId,
+        this.props.reply.id,
+        message,
+        this.props.reply.author
+      ).then(() => {
+        getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies }));
+        this.openSubReplies();
+      });
     }
   }
 );

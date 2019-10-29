@@ -62,30 +62,34 @@ operation unfollow_channel(username: text, descriptor_id: byte_array, name) {
                             <entry key="channel/queries.rell">
                                 <string>query get_topics_by_channel_prior_to_timestamp(name, timestamp, page_size: integer) {
     // TODO: .lower_case() in Rell 0.9
-    return channel@*{ 
+    return channel@*{
         .name == name,
-        .topic.last_modified &lt; timestamp
+        .topic.last_modified &lt; timestamp,
+        .topic.removed == false
     } (
         id=.topic.id,
         author=.topic.author.display_name,
         title=.topic.title,
         message=.topic.message,
         timestamp=.topic.timestamp,
-        -sort last_modified=.topic.last_modified
+        -sort last_modified=.topic.last_modified,
+        removed=.topic.removed
     ) limit page_size;
 }
 
 query get_topics_by_channel_after_timestamp(name, timestamp) {
     return channel@*{ 
         .name == name,
-        .topic.last_modified &gt; timestamp
+        .topic.last_modified &gt; timestamp,
+        .topic.removed == false
     } (
         id=.topic.id,
         author=.topic.author.display_name,
         title=.topic.title,
         message=.topic.message,
         timestamp=.topic.timestamp,
-        -sort last_modified=.topic.last_modified
+        -sort last_modified=.topic.last_modified,
+        removed=.topic.removed
     );
 }
 
@@ -102,7 +106,8 @@ query get_topics_by_followed_channels_prior_to_timestamp(username: text, timesta
     return (channel, channel_following) @* {
         channel_following.user == user,
         channel_following.name == channel.name,
-        channel.topic.last_modified &lt; timestamp
+        channel.topic.last_modified &lt; timestamp,
+        channel.topic.removed == false
     }
     (
         id=channel.topic.id,
@@ -110,7 +115,27 @@ query get_topics_by_followed_channels_prior_to_timestamp(username: text, timesta
         title=channel.topic.title,
         message=channel.topic.message,
         timestamp=channel.topic.timestamp,
-        -sort last_modified=channel.topic.last_modified
+        -sort last_modified=channel.topic.last_modified,
+        removed=channel.topic.removed
+    ) limit page_size;
+}
+
+query get_topics_by_followed_channels_after_timestamp(username: text, timestamp, page_size: integer) {
+    val user = user@{ .name == username};
+    return (channel, channel_following) @* {
+        channel_following.user == user,
+        channel_following.name == channel.name,
+        channel.topic.last_modified &gt; timestamp,
+        channel.topic.removed == false
+    }
+    (
+        id=channel.topic.id,
+        author=channel.topic.author.display_name,
+        title=channel.topic.title,
+        message=channel.topic.message,
+        timestamp=channel.topic.timestamp,
+        -sort last_modified=channel.topic.last_modified,
+        removed=channel.topic.removed
     ) limit page_size;
 }
 
@@ -149,6 +174,199 @@ query get_topic_channels_belongings(topic_id: text) {
 }
 </string>
                             </entry>
+                            <entry key="chat/index.rell">
+                                <string>class chat {
+	key id: text;
+	mutable title: text;
+	timestamp;
+}
+
+class chat_user {
+	key user;
+	rsa_pubkey: text;
+}
+
+class chat_membership {
+	key chat, member: chat_user;
+	encrypted_chat_key: text;
+	mutable last_opened: timestamp = 0;
+}
+
+class chat_message {
+	index chat;
+	index sender: chat_user;
+	index timestamp;
+	encrypted_msg: text;
+}
+
+record chat_record {
+	id: text;
+	title: text;
+	last_message: message_record?;
+	encrypted_chat_key: text;
+	timestamp;
+	last_opened: timestamp;
+}
+
+record message_record {
+	sender: name;
+	timestamp;
+	encrypted_msg: text;
+}
+
+include 'operations';
+include 'queries';</string>
+                            </entry>
+                            <entry key="chat/operations.rell">
+                                <string>operation create_chat(chat_id: text, descriptor_id: byte_array, username: text, title: text, encrypted_chat_key: text) {
+	val founder = get_verified_user(username, descriptor_id);
+	
+	val chat = create chat(id = chat_id, title = title, timestamp = op_context.last_block_time);
+	create chat_membership(chat, chat_user@{ .user == founder }, encrypted_chat_key);
+}
+
+operation create_chat_user(descriptor_id: byte_array, username: text, rsa_pubkey: text) {
+	val user = get_verified_user(username, descriptor_id);
+	create chat_user(user, rsa_pubkey);
+}
+
+operation delete_chat_user(descriptor_id: byte_array, username: text) {
+	val user = get_verified_user(username, descriptor_id);
+	val chat_user = chat_user@?{ user };
+	
+	if (chat_user != null) {
+		delete chat_membership@*{ .member == chat_user };
+		delete chat_message@*{ .sender == chat_user };
+		delete chat_user;
+	}
+}
+
+operation add_user_to_chat(descriptor_id: byte_array, username: text, chat_id: text, target_user: text, encrypted_chat_key: text) {
+	val user_already_in_chat = get_verified_user(username, descriptor_id);
+	val chat = chat@{ .id == chat_id };
+	
+	if (chat_membership @? { chat, .member.user.name == target_user.lower_case() } == null) {
+		create chat_membership(chat, chat_user@{ .user.name == target_user.lower_case() }, encrypted_chat_key);
+	}
+}
+
+operation leave_chat(descriptor_id: byte_array, username: text, chat_id: text) {
+	val user = get_verified_user(username, descriptor_id);
+	val chat = chat@{ .id == chat_id };
+
+	delete chat_membership@{ chat, chat_user@{ user }};
+	
+	if (chat_membership@*{ chat } ( .member ).size() == 0) {
+		delete chat_message@*{ chat };
+		delete chat;
+	}
+}
+
+operation modify_chat_title(descriptor_id: byte_array, username: text, chat_id: text, title: text) {
+	val user = get_verified_user(username, descriptor_id);
+	val chat = chat@{ .id == chat_id };
+	chat_membership@{ chat, chat_user@{ user }};
+	update chat ( title = title );
+}
+
+operation send_chat_message(chat_id: text, descriptor_id: byte_array, username: name, encrypted_msg: text) {
+	val user = get_verified_user(username, descriptor_id);
+	
+	val chat = chat@{ .id == chat_id };
+	val chat_user = chat_user@{ user };
+	val chat_member = chat_membership@?{ chat, chat_user };
+	require(chat_member != null, app_error(error_type.USER_UNAUTHORIZED, "Only a chat member can send a message"));
+	
+	create chat_message(chat, chat_user, op_context.last_block_time, encrypted_msg);
+}
+
+operation update_last_opened_timestamp(chat_id: text, descriptor_id: byte_array, username: name) {
+	val user = get_verified_user(username, descriptor_id);
+	update chat_membership@{ 
+		.chat.id == chat_id, 
+		.member.user == user
+	} ( last_opened = op_context.last_block_time );
+}
+</string>
+                            </entry>
+                            <entry key="chat/queries.rell">
+                                <string>query get_chat_user_pubkey(username: name): text? {
+	return chat_user@?{ .user.name == username.lower_case() } ( .rsa_pubkey );
+}
+
+query get_user_chats(username: name): list&lt;chat_record&gt; {
+	
+	val member_chats = chat_membership@*{ .member.user.name == username.lower_case() };
+	val chat_records = list&lt;chat_record&gt;();
+	
+	for (member_chat in member_chats) {
+		val latest_message = chat_message@?{ .chat == member_chat.chat } ( .sender, -sort .timestamp, .encrypted_msg, -sort .chat.timestamp ) limit 1;
+		
+		if (latest_message != null) {
+			val message = message_record(sender = latest_message!!.sender.user.display_name, timestamp = latest_message!!.timestamp, encrypted_msg = latest_message!!.encrypted_msg);
+			chat_records.add(chat_record(
+				id = member_chat.chat.id, 
+				title = member_chat.chat.title, 
+				last_message = message, 
+				encrypted_chat_key = member_chat.encrypted_chat_key, 
+				timestamp = member_chat.chat.timestamp,
+				last_opened = member_chat.last_opened
+			));		
+		} else {
+			chat_records.add(chat_record(
+				id = member_chat.chat.id, 
+				title = member_chat.chat.title, 
+				last_message = null, 
+				encrypted_chat_key = member_chat.encrypted_chat_key, 
+				timestamp = member_chat.chat.timestamp,
+				last_opened = member_chat.last_opened
+			));	
+		}
+		
+	}
+	
+	return chat_records;
+}
+
+query get_chat_messages(id: text, prior_to: timestamp, page_size: integer) {
+	return chat_message@*{ .chat.id == id, .timestamp &lt; prior_to } ( 
+		sender = chat_message.sender.user.display_name,  
+		-sort timestamp = chat_message.timestamp, 
+		encrypted_msg = chat_message.encrypted_msg
+	) limit page_size;
+}
+
+query get_chat_messages_after(id: text, after_timestamp: timestamp, page_size: integer) {
+	return chat_message@*{ .chat.id == id, .timestamp &gt; after_timestamp } ( 
+		sender = chat_message.sender.user.display_name,  
+		sort timestamp = chat_message.timestamp, 
+		encrypted_msg = chat_message.encrypted_msg
+	) limit page_size;
+}
+
+query get_chat_participants(id: text) {
+	return chat_membership@*{ .chat.id == id } ( .member.user.display_name );
+}
+
+query get_followed_chat_users(username: name) {
+	return (chat_user, follow) @* {
+		follow.follower.name == username.lower_case(),
+		follow.follows == chat_user.user
+	} ( chat_user.user.display_name );
+}
+
+query get_chat_users() {
+	return chat_user @* {} ( chat_user.user.display_name );
+}
+
+query count_unread_chats(username: name) {
+	return set&lt;chat&gt;((chat_membership, chat_message)@*{
+		chat_membership.member.user.name == username,
+		chat_message.timestamp &gt; chat_membership.last_opened,
+		chat_membership.chat == chat_message.chat
+	} ( chat_membership.chat )).size();
+}</string>
+                            </entry>
                             <entry key="election/index.rell">
                                 <string>class representative_election {
     key id: text;
@@ -171,7 +389,7 @@ include 'queries';</string>
                             <entry key="election/operations.rell">
                                 <string>operation trigger_election(admin_user: text, descriptor_id: byte_array, id: text, timestamp) {
     val user = get_verified_user(admin_user, descriptor_id);
-    admin@{ user };
+    assert_admin(user);
 
     val currentElection = representative_election @? { .completed == false };
 
@@ -182,10 +400,9 @@ include 'queries';</string>
   
 operation complete_election(admin_user: text, descriptor_id: byte_array, representatives: set&lt;text&gt;) {
     val op_user = get_verified_user(admin_user, descriptor_id);
-    admin@{ op_user };
+    assert_admin(op_user);
 
     val currentElection = representative_election @ { .completed == false };
-    log("Completing election: ", currentElection.id);
     update currentElection ( completed = true );
 
     for (representative in representatives) {
@@ -198,7 +415,6 @@ operation vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: 
     val user = get_verified_user(voter, descriptor_id);
 
     val currentElection = representative_election @ { .completed == false };
-    log("Voting for candidate in election: ", currentElection.id);
     create representative_election_vote(
         user,
         representative_election_candidate@{ user@{ .name == candidate }, currentElection }
@@ -282,7 +498,7 @@ include 'queries';</string>
                             </entry>
                             <entry key="follow/operations.rell">
                                 <string>operation create_following(follower: text, descriptor_id: byte_array, follows: text) {
-    require(follower != follows);
+    require(follower != follows, app_error(error_type.ILLEGAL_ACTION, "Follow another user"));
     val user = get_verified_user(follower, descriptor_id);
     create follow(follower = user, follows = user@{ .name == follows.lower_case() });
 }
@@ -936,6 +1152,7 @@ include 'channel/index';
 include 'follow/index';
 include 'election/index';
 include 'representative/index';
+include 'chat/index';
 </string>
                             </entry>
                             <entry key="notifications/index.rell">
@@ -960,7 +1177,7 @@ operation create_notifications_for_users(name, descriptor_id: byte_array, id: te
         if (toUser != null) {
             create notification(
                 id = id, 
-                toUser!!, 
+                toUser, 
                 trigger = trigger,
                 content = content,
                 false, 
@@ -974,9 +1191,9 @@ operation remove_notifications_for_users(name, descriptor_id: byte_array, id: te
     val user = get_verified_user(name, descriptor_id);
 
     for (username in usernames) {
-        val toUser = user@?{ .name == username };
-        if (toUser != null) {
-            delete notification@{ id, toUser!! };
+        val to_user = user@?{ .name == username };
+        if (to_user != null) {
+            delete notification@?{ id, .user == to_user };
         }
     }
 }
@@ -1064,7 +1281,10 @@ operation suspend_user(username: text, descriptor_id: byte_array, user_to_be_sus
     val suspendee = user@{ .name == user_to_be_suspended };
     val suspendee_meta = user_meta@{ suspendee };
 
-    require(suspendee_meta.suspended_until &lt; op_context.last_block_time);
+    require(
+    	suspendee_meta.suspended_until &lt; op_context.last_block_time, 
+    	app_error(error_type.REPRESENTATIVE_ALREADY_SUSPENDED, "Suspend user")
+    );
 
     val updatedTimesSuspended = suspendee_meta.times_suspended + 1;
     val oneDayMillis = 86400000;
@@ -1115,7 +1335,7 @@ operation tmp_remove_representative(admin_name: name, descriptor_id: byte_array,
                             </entry>
                             <entry key="representative/queries.rell">
                                 <string>query get_representatives() {
-    val election = representative_election@?{ .completed == true } ( .id, -sort .timestamp );
+    val election = representative_election@?{ .completed == true } ( .id, -sort .timestamp ) limit 1;
 
     // If no election yes, then admin is technically the only representative
     if (election == null) {
@@ -1188,18 +1408,27 @@ operation handle_representative_report(username: text, descriptor_id: byte_array
                             <entry key="topic/functions.rell">
                                 <string>function find_topic_by_id(id: text): topic {
     return topic@{ .id == id };
+}
+
+function require_mutable(post_timestamp: timestamp, op_timestamp: timestamp, action: text) {
+	val fiveMinutesInMillis = 300000;
+    require(
+    	op_timestamp &lt; post_timestamp + fiveMinutesInMillis,
+    	app_error(error_type.TOPIC_IMMUTABLE, action)
+    );
 }</string>
                             </entry>
                             <entry key="topic/index.rell">
                                 <string>class topic {
     key id: text;
     index author: user;
-    index timestamp;
+    timestamp;
     mutable last_modified: timestamp;
     index last_modified;
     mutable title: name;
     mutable message: text;
-    mutable removed: boolean;
+    mutable removed: boolean = false;
+    index removed;
 }
 
 class topic_reply {
@@ -1207,9 +1436,10 @@ class topic_reply {
     index topic;
     index author: user;
     index timestamp;
-    index is_sub_reply : boolean;
+    is_sub_reply: boolean = false;
+    index is_sub_reply;
     mutable message: text;
-    mutable removed: boolean;
+    mutable removed: boolean = false;
 }
 
 class sub_reply {
@@ -1225,15 +1455,14 @@ include '/topic/subscription/index';</string>
                             <entry key="topic/operations.rell">
                                 <string>operation create_topic(id: text, descriptor_id: byte_array, username: text, channel_key: name, channel_name: name, title: name, message: text) {
     val author = get_verified_user(username, descriptor_id);
-
+    
     val topic = create topic(
         id = id, 
         author,
         timestamp = op_context.last_block_time,
         last_modified = op_context.last_block_time,
         title = title,
-        message = message,
-        removed = false
+        message = message
     );
 
     create channel(name = channel_key.lower_case(), topic, op_context.last_block_time, display_name = channel_name);
@@ -1244,9 +1473,18 @@ operation modify_topic(id: text, descriptor_id: byte_array, username: text, text
     val author = get_verified_user(username, descriptor_id);
 
     val topic = topic@{ .id == id, .author == author };
-    val fiveMinutesInMillis = 300000;
-    require(op_context.last_block_time &lt; topic.timestamp + fiveMinutesInMillis);
+    require_mutable(topic.timestamp, op_context.last_block_time, "Modify topic");
+    
     update topic ( message = text );
+}
+
+operation delete_topic(id: text, descriptor_id: byte_array, username: text) {
+     val author = get_verified_user(username, descriptor_id);
+
+     val topic = topic@{ .id == id, .author == author };
+     require_mutable(topic.timestamp, op_context.last_block_time, "Delete topic");
+     
+     update topic ( removed = true, message = "Deleted by @" + username );
 }
 
 operation create_reply(topic_id: text, descriptor_id: byte_array, id: text, username: text, message: text) {
@@ -1258,9 +1496,7 @@ operation create_reply(topic_id: text, descriptor_id: byte_array, id: text, user
         topic,
         author,
         timestamp = op_context.last_block_time,
-        is_sub_reply = false,
-        message = message,
-        removed = false
+        message = message
     );
 
     if (not topic.removed) {
@@ -1272,8 +1508,8 @@ operation modify_reply(id: text, descriptor_id: byte_array, username: text, text
     val author = get_verified_user(username, descriptor_id);
 
     val reply = topic_reply@{ .id == id, .author == author };
-    val fiveMinutesInMillis = 300000;
-    require(op_context.last_block_time &lt; reply.timestamp + fiveMinutesInMillis);
+    require_mutable(reply.timestamp, op_context.last_block_time, "Modify reply");
+    
     update reply ( message = text );
 }
 
@@ -1287,8 +1523,7 @@ operation create_sub_reply(topic_id: text, descriptor_id: byte_array, parent_rep
         author,
         timestamp = op_context.last_block_time,
         is_sub_reply = true,
-        message = message,
-        removed = false
+        message = message
     );
 
     create sub_reply(
@@ -1304,7 +1539,8 @@ operation create_sub_reply(topic_id: text, descriptor_id: byte_array, parent_rep
                             <entry key="topic/queries.rell">
                                 <string>query get_topics_after_timestamp(timestamp, page_size: integer) {
     return topic @* { 
-        .last_modified &gt; timestamp
+        .last_modified &gt; timestamp,
+        .removed == false
     }(
         .id,
         author=.author.display_name,
@@ -1318,7 +1554,8 @@ operation create_sub_reply(topic_id: text, descriptor_id: byte_array, parent_rep
 
 query get_topics_prior_to_timestamp(timestamp, page_size: integer) {
     return topic @* { 
-        .last_modified &lt; timestamp
+        .last_modified &lt; timestamp,
+        .removed == false
     }(
         .id,
         author=.author.display_name,
@@ -1412,7 +1649,8 @@ query get_topics_from_follows_after_timestamp(name, timestamp, page_size: intege
     return (topic, follow) @* {
             follow.follower.name == name.lower_case(),
             follow.follows == topic.author,
-            topic.last_modified &gt; timestamp
+            topic.last_modified &gt; timestamp,
+            topic.removed == false
     }(
         topic.id,
         author=topic.author.display_name,
@@ -1428,7 +1666,8 @@ query get_topics_from_follows_prior_to_timestamp(name, timestamp, page_size: int
     return (topic, follow) @* {
         follow.follower.name == name.lower_case(),
         follow.follows == topic.author,
-        topic.last_modified &lt; timestamp
+        topic.last_modified &lt; timestamp,
+        topic.removed == false
     }(
         topic.id,
         author=topic.author.display_name,
@@ -1455,29 +1694,36 @@ query get_topic_by_id(id: text) {
 }
 
 query get_all_topics_by_stars_since_timestamp(timestamp, page_size: integer) {
-    return tmp_topic_rating@*{ .topic.timestamp &gt; timestamp } (
+    return tmp_topic_rating@*{
+        .topic.last_modified &gt; timestamp,
+        .topic.removed == false
+    } (
         -sort .stars,
         id = .topic.id,
         author=.topic.author.display_name,
         title=.topic.title,
         message=.topic.message,
         last_modified=.topic.last_modified,
-        timestamp=.topic.timestamp
+        timestamp=.topic.timestamp,
+        removed=.topic.removed
     ) limit page_size;
 }
 
 query get_topics_by_follows_and_stars_since_timestamp(name, timestamp, page_size: integer) {
-    return tmp_topic_rating@*{ 
-            .topic.author == follow@{ .follower.name == name } ( .follows ),
-            .topic.timestamp &gt; timestamp
+    return (tmp_topic_rating, follow) @*{
+            follow.follower.name == name,
+            tmp_topic_rating.topic.author == follow.follows,
+            tmp_topic_rating.topic.last_modified &gt; timestamp,
+            tmp_topic_rating.topic.removed == false
         } (
-        -sort .stars,
-        id = .topic.id,
-        author=.topic.author.display_name,
-        title=.topic.title,
-        message=.topic.message,
-        last_modified=.topic.last_modified,
-        timestamp=.topic.timestamp
+        -sort tmp_topic_rating.stars,
+        id = tmp_topic_rating.topic.id,
+        author=tmp_topic_rating.topic.author.display_name,
+        title=tmp_topic_rating.topic.title,
+        message=tmp_topic_rating.topic.message,
+        last_modified=tmp_topic_rating.topic.last_modified,
+        timestamp=tmp_topic_rating.topic.timestamp,
+        removed=tmp_topic_rating.topic.removed
     ) limit page_size;
 }
 
@@ -1485,7 +1731,8 @@ query get_topics_by_channel_after_timestamp_sorted_by_popularity(name, timestamp
     return (tmp_topic_rating, channel)@*{
         name == channel.name,
         tmp_topic_rating.topic == channel.topic,
-        tmp_topic_rating.topic.timestamp &gt; timestamp
+        tmp_topic_rating.topic.last_modified &gt; timestamp,
+        tmp_topic_rating.topic.removed == false
     } (
         -sort .stars,
         id = channel.topic.id,
@@ -1493,7 +1740,8 @@ query get_topics_by_channel_after_timestamp_sorted_by_popularity(name, timestamp
         title=channel.topic.title,
         message=channel.topic.message,
         last_modified=channel.topic.last_modified,
-        timestamp=channel.topic.timestamp
+        timestamp=channel.topic.timestamp,
+        removed=channel.topic.removed
     ) limit page_size;
 }
 
@@ -1502,7 +1750,8 @@ query get_topics_by_followed_channels_after_timestamp_sorted_by_popularity(name,
         channel_following.user == user@{ name },
         channel_following.name == channel.name,
         tmp_topic_rating.topic == channel.topic,
-        tmp_topic_rating.topic.timestamp &gt; timestamp
+        tmp_topic_rating.topic.last_modified &gt; timestamp,
+        tmp_topic_rating.topic.removed == false
     } (
         -sort .stars,
         id = channel.topic.id,
@@ -1510,7 +1759,8 @@ query get_topics_by_followed_channels_after_timestamp_sorted_by_popularity(name,
         title=channel.topic.title,
         message=channel.topic.message,
         last_modified=channel.topic.last_modified,
-        timestamp=channel.topic.timestamp
+        timestamp=channel.topic.timestamp,
+        removed=channel.topic.removed
     ) limit page_size;
 }</string>
                             </entry>
@@ -1603,12 +1853,18 @@ operation unsubscribe_from_topic(username: text, descriptor_id: byte_array, id: 
                             </entry>
                             <entry key="user/functions.rell">
                                 <string>function get_verified_user(name, descriptor_id: byte_array): user {
-    val user = user@{ .name == name };
+    val user = user@{ .name == name.lower_case() };
     ft3.require_auth(user.account, descriptor_id, ["A"]);
-    //require(is_signer(user.pubkey));
-    require(user_meta@{ user }.suspended_until &lt; op_context.last_block_time);
+    require(
+    	user_meta@{ user }.suspended_until &lt; op_context.last_block_time, 
+    	app_error(error_type.USER_SUSPENDED, "Get verified user")
+    );
 
     return user;
+}
+
+function assert_admin(user) {
+	require(admin@?{ user }, app_error(error_type.USER_UNAUTHORIZED, "Assert admin"));
 }</string>
                             </entry>
                             <entry key="user/index.rell">
@@ -1728,10 +1984,33 @@ operation update_user_settings(name, descriptor_id: byte_array, avatar: text, de
 }</string>
                             </entry>
                             <entry key="util/index.rell">
-                                <string>include 'text-util';</string>
+                                <string>include 'log';</string>
                             </entry>
-                            <entry key="util/text-util.rell">
-                                <string></string>
+                            <entry key="util/log.rell">
+                                <string>enum error_type {
+	USER_UNAUTHORIZED,
+	USER_SUSPENDED,
+	TOPIC_IMMUTABLE,
+	REPRESENTATIVE_ALREADY_SUSPENDED,
+	ILLEGAL_ACTION
+}
+
+function app_error(error_type, action: text): text {
+	val msg = when(error_type) {
+		USER_UNAUTHORIZED -&gt; message_with_code("CERR_10", "Requester was unauthorized", action);
+		USER_SUSPENDED -&gt; message_with_code("CERR_11", "Requester was suspended", action);
+		TOPIC_IMMUTABLE -&gt; message_with_code("CERR_20", "Topic is no longer mutable", action);
+		REPRESENTATIVE_ALREADY_SUSPENDED -&gt; message_with_code("CERR_30", "User was already suspended", action);
+		ILLEGAL_ACTION -&gt; message_with_code("CERR_40", "The attempted action was illegal", action);
+	};
+	
+	log(msg);
+	return msg;
+}
+
+function message_with_code(code: text, message: text, action: text): text {
+	return '{"code":"' + code + '","message":"' + message + '","action":"' + action + '"}';
+}</string>
                             </entry>
                         </dict>
                     </entry>

@@ -3,6 +3,7 @@ import * as hdkey from "hdkey";
 import * as cryptoJS from 'crypto-js';
 import * as crypto from 'crypto'
 import * as secp256k1 from 'secp256k1'
+import * as cryptico from "cryptico";
 
 export function generateRandomMnemonic(): string {
     return bip39.generateMnemonic();
@@ -10,6 +11,10 @@ export function generateRandomMnemonic(): string {
 
 export function seedFromMnemonic(mnemonic: string, password: string) {
     return bip39.mnemonicToSeedSync(mnemonic, password).toString("hex");
+}
+
+export function seedFromPassword(password: string): Promise<string> {
+    return bip39.mnemonicToSeed(password).toString("hex");
 }
 
 export function seedToKey(seed: string): { privKey: Buffer, pubKey: Buffer } {
@@ -27,6 +32,22 @@ export function encrypt(data: string, key: string): string {
 
 export function decrypt(data: string, key: string): string {
     return cryptoJS.AES.decrypt(data, key).toString(cryptoJS.enc.Utf8);
+}
+
+export function generateRSAKey(passphrase: string) {
+    return cryptico.generateRSAKey(passphrase, 1024);
+}
+
+export function rsaKeyToPubKey(rsaKey: any) {
+    return cryptico.publicKeyString(rsaKey);
+}
+
+export function rsaEncrypt(data: string, rsaPubKey: string): string {
+    return cryptico.encrypt(data, rsaPubKey);
+}
+
+export function rsaDecrypt(data: string, rsaKey: any): any {
+    return cryptico.decrypt(data, rsaKey);
 }
 
 export function makeKeyPair() {

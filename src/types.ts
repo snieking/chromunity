@@ -5,11 +5,6 @@ export interface ChromunityUser {
   ft3User: User;
 }
 
-export interface EncryptedAccount {
-  name: string;
-  encryptedSeed: string;
-}
-
 export interface UserMeta {
   name: string;
   times_suspended: number;
@@ -67,4 +62,30 @@ export interface RepresentativeReport {
   timestamp: number;
   handled: boolean;
   text: string;
+}
+
+export interface ChatUserKeys {
+  pubkey: string;
+  encrypted_rsa: string;
+}
+
+export interface Chat {
+  id: string;
+  title: string;
+  last_message: ChatMessage;
+  encrypted_chat_key: string;
+  timestamp: number;
+  last_opened: number;
+}
+
+export interface ChatMessage {
+  sender: string;
+  timestamp: number;
+  encrypted_msg: string;
+}
+
+export interface ChatMessageDecrypted {
+  sender: string;
+  timestamp: number;
+  msg: string;
 }

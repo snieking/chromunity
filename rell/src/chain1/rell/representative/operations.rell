@@ -41,7 +41,10 @@ operation suspend_user(username: text, descriptor_id: byte_array, user_to_be_sus
     val suspendee = user@{ .name == user_to_be_suspended };
     val suspendee_meta = user_meta@{ suspendee };
 
-    require(suspendee_meta.suspended_until < op_context.last_block_time);
+    require(
+    	suspendee_meta.suspended_until < op_context.last_block_time, 
+    	app_error(error_type.REPRESENTATIVE_ALREADY_SUSPENDED, "Suspend user")
+    );
 
     val updatedTimesSuspended = suspendee_meta.times_suspended + 1;
     val oneDayMillis = 86400000;

@@ -10,7 +10,7 @@ import MarkdownRenderer from "../../common/MarkdownRenderer";
 const useStyles = makeStyles(
   createStyles({
     notificationRead: {
-      opacity: 0.7
+      opacity: 0.6
     }
   })
 );

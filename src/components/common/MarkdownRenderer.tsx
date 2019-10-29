@@ -13,15 +13,29 @@ const MarkdownRenderer: React.FunctionComponent<Props> = props => {
     <ReactMarkdown
       className={classes.text}
       source={props.text}
-      disallowedTypes={["heading", "image", "imageReference"]}
+      disallowedTypes={["heading"]}
+      linkTarget="_blank"
     />
   );
 };
 
 const useStyles = makeStyles(theme => ({
   text: {
-    color: theme.palette.type === "light" ? COLOR_CHROMIA_DARK : COLOR_OFF_WHITE
-  }
+    color: theme.palette.type === "light" ? COLOR_CHROMIA_DARK : COLOR_OFF_WHITE,
+    overflowWrap: "break-word",
+    wordWrap: "break-word",
+    '& a': {
+      wordBreak: "break-all"
+    },
+    '& img': {
+      maxWidth: "95%",
+      maxHeight: "95%",
+      [theme.breakpoints.down("sm")]: {
+        maxWidth: "80%",
+        maxHeight: "80%"
+      }
+    }
+  },
 }));
 
 export default MarkdownRenderer;

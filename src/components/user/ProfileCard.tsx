@@ -41,7 +41,7 @@ import {
   countTopicStarRatingForUser
 } from "../../blockchain/TopicService";
 
-import { getUser, ifEmptyAvatarThenPlaceholder, isRepresentative } from "../../util/user-util";
+import { getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { ChromunityUser } from "../../types";
 import { getMutedUsers, getUserSettingsCached, isRegistered, toggleUserMute } from "../../blockchain/UserService";
 import { suspendUser } from "../../blockchain/RepresentativesService";
@@ -49,6 +49,9 @@ import ChromiaPageHeader from "../common/ChromiaPageHeader";
 import { COLOR_RED, COLOR_STEEL_BLUE } from "../../theme";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import { NotFound } from "../static/NotFound";
+import { ApplicationState } from "../../redux/Store";
+import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
+import { connect } from "react-redux";
 
 const styles = createStyles({
   iconRed: {
@@ -69,15 +72,16 @@ const styles = createStyles({
     marginLeft: "10px"
   },
   bottomBar: {
+    float: "right",
     marginBottom: "5px",
-    marginTop: "10px",
-    display: "inline-block",
-    float: "right"
+    marginTop: "5px"
   }
 });
 
 export interface ProfileCardProps extends WithStyles<typeof styles> {
   username: string;
+  representatives: string[];
+  loadRepresentatives: typeof loadRepresentatives;
 }
 
 export interface ProfileCardState {
@@ -93,9 +97,10 @@ export interface ProfileCardState {
   description: string;
   suspendUserDialogOpen: boolean;
   muted: boolean;
-  isRepresentative: boolean;
   user: ChromunityUser;
 }
+
+const MAX_BADGE_NR = 9999999;
 
 const ProfileCard = withStyles(styles)(
   class extends React.Component<ProfileCardProps, ProfileCardState> {
@@ -115,12 +120,14 @@ const ProfileCard = withStyles(styles)(
         description: "",
         suspendUserDialogOpen: false,
         muted: false,
-        isRepresentative: false,
         user: getUser()
       };
 
+      props.loadRepresentatives();
+
       this.renderUserPage = this.renderUserPage.bind(this);
       this.toggleFollowing = this.toggleFollowing.bind(this);
+      this.renderIcons = this.renderIcons.bind(this);
       this.renderActions = this.renderActions.bind(this);
       this.suspendUser = this.suspendUser.bind(this);
       this.handleSuspendUserClose = this.handleSuspendUserClose.bind(this);
@@ -155,36 +162,35 @@ const ProfileCard = withStyles(styles)(
           countRepliesByUser(this.props.username).then(count => this.setState({ countOfReplies: count }));
           countTopicStarRatingForUser(this.props.username).then(count => this.setState({ topicStars: count }));
           countReplyStarRatingForUser(this.props.username).then(count => this.setState({ replyStars: count }));
-
-          if (this.state.user != null) {
-            isRepresentative().then(representative => this.setState({ isRepresentative: representative }));
-          }
         }
       });
     }
 
     toggleFollowing() {
       if (this.state.following) {
-        removeFollowing(this.state.user, this.props.username);
-        this.setState(prevState => ({
-          following: false,
-          followers: prevState.followers - 1,
-          userFollowings: prevState.userFollowings
-        }));
+        removeFollowing(this.state.user, this.props.username).then(() => {
+          this.setState(prevState => ({
+            following: false,
+            followers: prevState.followers - 1,
+            userFollowings: prevState.userFollowings
+          }));
+        });
       } else {
-        createFollowing(this.state.user, this.props.username);
-        this.setState(prevState => ({
-          following: true,
-          followers: prevState.followers + 1,
-          userFollowings: prevState.userFollowings
-        }));
+        createFollowing(this.state.user, this.props.username).then(() => {
+          this.setState(prevState => ({
+            following: true,
+            followers: prevState.followers + 1,
+            userFollowings: prevState.userFollowings
+          }));
+        });
       }
     }
 
     renderRepresentativeActions() {
-      if (this.state.isRepresentative) {
+      const user = getUser();
+      if (user != null && this.props.representatives.includes(user.name.toLocaleLowerCase())) {
         return (
-          <div style={{ display: "inline"}}>
+          <div style={{ display: "inline" }}>
             <IconButton onClick={() => this.setState({ suspendUserDialogOpen: true })}>
               <Tooltip title="Suspend user">
                 <VoiceOverOff fontSize="large" className={this.props.classes.iconRed} />
@@ -211,55 +217,71 @@ const ProfileCard = withStyles(styles)(
       this.setState({ muted: muted }, () => toggleUserMute(this.state.user, this.props.username, muted));
     }
 
+    renderIcons() {
+      const user: ChromunityUser = this.state.user;
+      return (
+        <div className={this.props.classes.bottomBar}>
+          {user != null && this.props.username === user.name && (
+            <Badge badgeContent={this.state.followers} showZero={true} color="secondary" max={MAX_BADGE_NR}>
+              <Tooltip title="Followers">
+                <Favorite />
+              </Tooltip>
+            </Badge>
+          )}
+          <Badge badgeContent={this.state.userFollowings} showZero={true} color="secondary" max={MAX_BADGE_NR}>
+            <Tooltip title="Following users">
+              <SupervisedUserCircle style={{ marginLeft: "10px" }} />
+            </Tooltip>
+          </Badge>
+          <Badge
+            badgeContent={this.state.topicStars + this.state.replyStars}
+            showZero={true}
+            color="secondary"
+            max={MAX_BADGE_NR}
+          >
+            <Tooltip title="Stars">
+              <StarRate style={{ marginLeft: "10px" }} />
+            </Tooltip>
+          </Badge>
+          <Badge badgeContent={this.state.countOfTopics} showZero={true} color="secondary" max={MAX_BADGE_NR}>
+            <Tooltip title="Topics">
+              <Inbox style={{ marginLeft: "10px" }} />
+            </Tooltip>
+          </Badge>
+          <Badge
+            badgeContent={this.state.countOfReplies}
+            showZero={true}
+            max={MAX_BADGE_NR}
+            color="secondary"
+            style={{ marginRight: "15px" }}
+          >
+            <Tooltip title="Replies">
+              <ReplyAll style={{ marginLeft: "10px" }} />
+            </Tooltip>
+          </Badge>
+        </div>
+      );
+    }
+
     renderActions() {
       const user: ChromunityUser = this.state.user;
       if (user != null && this.props.username !== user.name) {
         return (
           <div style={{ float: "right" }}>
-            <div style={{ float: "right" }}>
             {this.renderUserSuspensionDialog()}
-              {this.renderRepresentativeActions()}
-              <IconButton onClick={() => this.toggleMuteUser()}>
-                {this.state.muted ? (
-                  <Tooltip title={"Unmute user"}>
-                    <VolumeUp fontSize={"large"} className={this.props.classes.iconBlue} />
-                  </Tooltip>
-                ) : (
-                  <Tooltip title="Mute user">
-                    <VolumeOff fontSize={"large"} />
-                  </Tooltip>
-                )}
-              </IconButton>
-              {this.renderFollowButton()}
-            </div>
-            <br/>
-            <div className={this.props.classes.bottomBar}>
-              <Badge badgeContent={this.state.userFollowings} showZero={true} color="secondary">
-                <Tooltip title="Following users">
-                  <SupervisedUserCircle />
+            {this.renderRepresentativeActions()}
+            <IconButton onClick={() => this.toggleMuteUser()}>
+              {this.state.muted ? (
+                <Tooltip title={"Unmute user"}>
+                  <VolumeUp fontSize={"large"} className={this.props.classes.iconBlue} />
                 </Tooltip>
-              </Badge>
-              <Badge badgeContent={this.state.topicStars + this.state.replyStars} showZero={true} color="secondary">
-                <Tooltip title="Stars">
-                  <StarRate style={{ marginLeft: "10px" }} />
+              ) : (
+                <Tooltip title="Mute user">
+                  <VolumeOff fontSize={"large"} />
                 </Tooltip>
-              </Badge>
-              <Badge badgeContent={this.state.countOfTopics} showZero={true} color="secondary">
-                <Tooltip title="Topics">
-                  <Inbox style={{ marginLeft: "10px" }} />
-                </Tooltip>
-              </Badge>
-              <Badge
-                badgeContent={this.state.countOfReplies}
-                showZero={true}
-                color="secondary"
-                style={{ marginRight: "15px" }}
-              >
-                <Tooltip title="Replies">
-                  <ReplyAll style={{ marginLeft: "10px" }} />
-                </Tooltip>
-              </Badge>
-            </div>
+              )}
+            </IconButton>
+            {this.renderFollowButton()}
           </div>
         );
       }
@@ -298,11 +320,13 @@ const ProfileCard = withStyles(styles)(
             <Card key={"user-card"}>
               {this.renderActions()}
               <div className={this.props.classes.contentWrapper}>
-                <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} />
+                <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} name={this.props.username} />
               </div>
               <Typography variant="subtitle1" component="p" className={this.props.classes.description}>
                 {this.state.description !== "" ? this.state.description : "I haven't written any description yet..."}
               </Typography>
+              <div style={{ clear: "left" }} />
+              {this.renderIcons()}
             </Card>
           </div>
         );
@@ -315,7 +339,7 @@ const ProfileCard = withStyles(styles)(
       const user: ChromunityUser = this.state.user;
       if (user != null && user.name === this.props.username) {
         return (
-          <Badge badgeContent={this.state.followers} showZero={true} color="secondary">
+          <Badge badgeContent={this.state.followers} showZero={true} color="secondary" max={MAX_BADGE_NR}>
             <Tooltip title="Followers">
               <Favorite fontSize="large" />
             </Tooltip>
@@ -324,7 +348,7 @@ const ProfileCard = withStyles(styles)(
       } else {
         return (
           <IconButton onClick={() => this.toggleFollowing()}>
-            <Badge badgeContent={this.state.followers} showZero={true} color="secondary">
+            <Badge badgeContent={this.state.followers} showZero={true} color="secondary" max={MAX_BADGE_NR}>
               <Tooltip title={this.state.following ? "Unfollow" : "Follow"}>
                 <Favorite fontSize="large" className={this.state.following ? this.props.classes.iconRed : ""} />
               </Tooltip>
@@ -340,4 +364,19 @@ const ProfileCard = withStyles(styles)(
   }
 );
 
-export default ProfileCard;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    representatives: store.government.representatives
+  };
+};
+
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    loadRepresentatives: () => dispatch(loadRepresentatives())
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ProfileCard);

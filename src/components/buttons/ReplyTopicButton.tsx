@@ -1,4 +1,4 @@
-import React, { FormEvent, useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { Dialog, makeStyles, Snackbar, Tab, Tabs, Typography } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
@@ -13,6 +13,8 @@ import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import { UserMeta } from "../../types";
 import { largeButtonStyles } from "./ButtonStyles";
 import MarkdownRenderer from "../common/MarkdownRenderer";
+import { parseEmojis } from "../../util/text-parsing";
+import EmojiPicker from "../common/EmojiPicker";
 
 export interface ReplyTopicButtonProps {
   submitFunction: Function;
@@ -33,6 +35,8 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
   const [userMeta, setUserMeta] = useState<UserMeta>(null);
   const [activeTab, setActiveTab] = useState<number>(0);
 
+  const textInput = useRef<HTMLInputElement>(null);
+
   const user = getUser();
 
   useEffect(() => {
@@ -43,12 +47,10 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
   function handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
     event.preventDefault();
     event.stopPropagation();
-    setMessage(event.target.value);
+    setMessage(parseEmojis(event.target.value));
   }
 
-  function createReply(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
+  function createReply() {
     createTopicReply(user, props.topicId, message)
       .then(() => {
         setNewReplyStatusMessage("Reply sent");
@@ -77,42 +79,40 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
     }
   }
 
-  function newTopicDialog() {
+  function newReplyDialog() {
     return (
       <div>
         <Dialog open={dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"md"}>
-          <form onSubmit={createReply}>
-            <DialogContent>
-              <Tabs value={activeTab} onChange={handleTabChange} aria-label="New reply">
-                <Tab
-                  label={
-                    <Typography component="span" variant="body2">
-                      Edit
-                    </Typography>
-                  }
-                  {...a11yProps(0)}
-                />
-                <Tab
-                  label={
-                    <Typography component="span" variant="body2">
-                      Preview
-                    </Typography>
-                  }
-                  {...a11yProps(1)}
-                />
-              </Tabs>
-              {activeTab === 0 && renderEditor()}
-              {activeTab === 1 && renderPreview()}
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setDialogOpen(false)} color="secondary" variant="contained">
-                Cancel
-              </Button>
-              <Button type="submit" color="primary" variant="contained">
-                Send
-              </Button>
-            </DialogActions>
-          </form>
+          <DialogContent>
+            <Tabs value={activeTab} onChange={handleTabChange} aria-label="New reply">
+              <Tab
+                label={
+                  <Typography component="span" variant="body2">
+                    Edit
+                  </Typography>
+                }
+                {...a11yProps(0)}
+              />
+              <Tab
+                label={
+                  <Typography component="span" variant="body2">
+                    Preview
+                  </Typography>
+                }
+                {...a11yProps(1)}
+              />
+            </Tabs>
+            {activeTab === 0 && renderEditor()}
+            {activeTab === 1 && renderPreview()}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDialogOpen(false)} color="secondary" variant="contained">
+              Cancel
+            </Button>
+            <Button onClick={() => createReply()} color="primary" variant="contained">
+              Send
+            </Button>
+          </DialogActions>
         </Dialog>
 
         <Snackbar
@@ -137,27 +137,39 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
 
   function renderEditor() {
     return (
-      <TextField
-        autoFocus
-        margin="dense"
-        id="message"
-        multiline
-        label="Reply"
-        type="text"
-        rows="5"
-        rowsMax="15"
-        variant="outlined"
-        fullWidth
-        onChange={handleDialogMessageChange}
-        value={message}
-        className={classes.content}
-      />
+      <div className={classes.editorWrapper}>
+        <TextField
+          autoFocus
+          margin="dense"
+          id="message"
+          multiline
+          label="Reply"
+          type="text"
+          rows="5"
+          rowsMax="15"
+          variant="outlined"
+          fullWidth
+          onChange={handleDialogMessageChange}
+          value={message}
+          inputRef={textInput}
+        />
+        <EmojiPicker emojiAppender={addEmoji} />
+      </div>
     );
+  }
+
+  function addEmoji(emoji: string) {
+    const startPosition = textInput.current.selectionStart;
+    setMessage([message.slice(0, startPosition), emoji, message.slice(startPosition)].join(''));
+    setTimeout(() => {
+      textInput.current.selectionStart = startPosition + emoji.length;
+      textInput.current.selectionEnd = startPosition + emoji.length;
+    }, 100);
   }
 
   function renderPreview() {
     return (
-      <div className={classes.content}>
+      <div>
         <MarkdownRenderer text={message} />
       </div>
     );
@@ -177,7 +189,7 @@ const ReplyTopicButton: React.FunctionComponent<ReplyTopicButtonProps> = props =
   return (
     <div>
       {createTopicButton()}
-      {newTopicDialog()}
+      {newReplyDialog()}
     </div>
   );
 

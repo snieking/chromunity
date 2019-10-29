@@ -5,7 +5,7 @@ import { gaException } from "../GoogleAnalytics";
 export const handleGADuringException = (identifier: string, sw: Stopwatch, error: Error) => {
   sw.stop();
   gaException(identifier + ": " + error.message);
-  return error;
+  throw error;
 };
 
 export const createStopwatchStarted = (): Stopwatch => {
@@ -20,9 +20,14 @@ export const stopStopwatch = (sw: Stopwatch): number => {
 };
 
 export const uniqueId = function() {
-  return Math.random()
-    .toString(36)
-    .substr(2, 16);
+  let dt = new Date().getTime();
+  const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = (dt + Math.random()*16)%16 | 0;
+    dt = Math.floor(dt/16);
+    return (c==='x' ? r :((r&0x3)|0x8)).toString(16);
+  });
+
+  return uuid.substr(0, 13);
 };
 
 export function prepareUrlPath(path: string): string {
@@ -65,6 +70,17 @@ export function timeAgoReadable(timestamp: number): string {
   } else {
     const minutesAgo: number = Math.round(timeAgo / minuteInMillis);
     return `${minutesAgo} ${minutesAgo === 1 ? "minute" : "minutes"} ago`;
+  }
+}
+
+export function printableMinutes(seconds: number): string {
+  if (seconds < 60) {
+    return seconds + "s";
+  } else {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+
+    return m + "m " + s + "s";
   }
 }
 

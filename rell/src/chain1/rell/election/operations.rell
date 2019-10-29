@@ -1,6 +1,6 @@
 operation trigger_election(admin_user: text, descriptor_id: byte_array, id: text, timestamp) {
     val user = get_verified_user(admin_user, descriptor_id);
-    admin@{ user };
+    assert_admin(user);
 
     val currentElection = representative_election @? { .completed == false };
 
@@ -11,10 +11,9 @@ operation trigger_election(admin_user: text, descriptor_id: byte_array, id: text
   
 operation complete_election(admin_user: text, descriptor_id: byte_array, representatives: set<text>) {
     val op_user = get_verified_user(admin_user, descriptor_id);
-    admin@{ op_user };
+    assert_admin(op_user);
 
     val currentElection = representative_election @ { .completed == false };
-    log("Completing election: ", currentElection.id);
     update currentElection ( completed = true );
 
     for (representative in representatives) {
@@ -27,7 +26,6 @@ operation vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: 
     val user = get_verified_user(voter, descriptor_id);
 
     val currentElection = representative_election @ { .completed == false };
-    log("Voting for candidate in election: ", currentElection.id);
     create representative_election_vote(
         user,
         representative_election_candidate@{ user@{ .name == candidate }, currentElection }

@@ -14,7 +14,6 @@ import {
   unfollowChannel
 } from "../../blockchain/ChannelService";
 import ChromiaPageHeader from "../common/ChromiaPageHeader";
-import { getRepresentatives } from "../../blockchain/RepresentativesService";
 import NewTopicButton from "../buttons/NewTopicButton";
 import { Favorite, FavoriteBorder } from "@material-ui/icons";
 import { getMutedUsers } from "../../blockchain/UserService";
@@ -28,25 +27,27 @@ import {
   loadOlderTopicsInChannel
 } from "../../redux/actions/ChannelActions";
 import { ApplicationState } from "../../redux/Store";
-import { initGA, pageView } from "../../GoogleAnalytics";
+import { pageView } from "../../GoogleAnalytics";
+import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
 
 interface MatchParams {
   channel: string;
 }
 
-export interface ChannelWallProps extends RouteComponentProps<MatchParams> {
+interface Props extends RouteComponentProps<MatchParams> {
   loading: boolean;
   topics: Topic[];
   couldExistOlder: boolean;
+  representatives: string[];
   channelInit: typeof channelInit;
   loadChannel: typeof loadChannel;
   loadOlderTopicsInChannel: typeof loadOlderTopicsInChannel;
   loadChannelByPopularity: typeof loadChannelByPopularity;
+  loadRepresentatives: typeof loadRepresentatives;
 }
 
-export interface ChannelWallState {
+interface State {
   isLoading: boolean;
-  representatives: string[];
   id: string;
   channelFollowed: boolean;
   countOfTopics: number;
@@ -65,11 +66,10 @@ const StyledSelect = styled(Select)(style => ({
 
 const topicsPageSize: number = 15;
 
-class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
-  constructor(props: ChannelWallProps) {
+class ChannelWall extends React.Component<Props, State> {
+  constructor(props: Props) {
     super(props);
     this.state = {
-      representatives: [],
       id: "",
       isLoading: false,
       channelFollowed: false,
@@ -81,6 +81,8 @@ class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
       user: getUser()
     };
 
+    this.props.loadRepresentatives();
+
     this.retrieveTopics = this.retrieveTopics.bind(this);
     this.retrieveOlderTopics = this.retrieveOlderTopics.bind(this);
     this.retrievePopularTopics = this.retrievePopularTopics.bind(this);
@@ -91,7 +93,6 @@ class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
   componentDidMount(): void {
     this.props.channelInit();
     this.retrieveTopics();
-    getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
 
     const channel = this.props.match.params.channel;
     const user: ChromunityUser = this.state.user;
@@ -107,7 +108,6 @@ class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
     countChannelFollowers(channel).then(count => this.setState({ countOfFollowers: count }));
     countTopicsInChannel(channel).then(count => this.setState({ countOfTopics: count }));
 
-    initGA();
     pageView();
   }
 
@@ -243,14 +243,8 @@ class ChannelWall extends React.Component<ChannelWallProps, ChannelWallState> {
           <br />
           <br />
           {this.props.topics.map(topic => {
-            if (!this.state.mutedUsers.includes(topic.author)) {
-              return (
-                <TopicOverviewCard
-                  key={topic.id}
-                  topic={topic}
-                  isRepresentative={this.state.representatives.includes(topic.author)}
-                />
-              );
+            if (!this.state.mutedUsers.includes(topic.author) && !topic.removed) {
+              return <TopicOverviewCard key={topic.id} topic={topic} />;
             } else {
               return <div />;
             }
@@ -273,7 +267,8 @@ const mapDispatchToProps = (dispatch: any) => {
     loadChannel: (name: string, pageSize: number) => dispatch(loadChannel(name, pageSize)),
     loadOlderTopicsInChannel: (pageSize: number) => dispatch(loadOlderTopicsInChannel(pageSize)),
     loadChannelByPopularity: (name: string, timestamp: number, pageSize: number) =>
-      dispatch(loadChannelByPopularity(name, timestamp, pageSize))
+      dispatch(loadChannelByPopularity(name, timestamp, pageSize)),
+    loadRepresentatives: () => dispatch(loadRepresentatives())
   };
 };
 
@@ -281,7 +276,8 @@ const mapStateToProps = (store: ApplicationState) => {
   return {
     loading: store.channel.loading,
     topics: store.channel.topics,
-    couldExistOlder: store.channel.couldExistOlder
+    couldExistOlder: store.channel.couldExistOlder,
+    representatives: store.government.representatives
   };
 };
 

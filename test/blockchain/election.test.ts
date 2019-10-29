@@ -23,7 +23,7 @@ import {getCachedUserMeta, setUserMeta} from "../../src/util/user-util";
 import {
     getAllRepresentativeActionsPriorToTimestamp,
     getCurrentRepresentativePeriod,
-    getRepresentatives,
+    getRepresentatives, getTimesRepresentative,
     getUnhandledReports,
     handleReport,
     reportReply,
@@ -81,6 +81,9 @@ describe("election test", () => {
 
         expect(election.id).toBe(electionId);
         expect(representatives).toContain(adminUser.name);
+
+        const timesRepresentative = await getTimesRepresentative(adminUser.name);
+        expect(timesRepresentative).toBe(1);
     });
 
     it("as a representative remove topic and replies", async () => {

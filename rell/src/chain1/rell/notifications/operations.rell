@@ -7,7 +7,7 @@ operation create_notifications_for_users(name, descriptor_id: byte_array, id: te
         if (toUser != null) {
             create notification(
                 id = id, 
-                toUser!!, 
+                toUser, 
                 trigger = trigger,
                 content = content,
                 false, 
@@ -21,9 +21,9 @@ operation remove_notifications_for_users(name, descriptor_id: byte_array, id: te
     val user = get_verified_user(name, descriptor_id);
 
     for (username in usernames) {
-        val toUser = user@?{ .name == username };
-        if (toUser != null) {
-            delete notification@{ id, toUser!! };
+        val to_user = user@?{ .name == username };
+        if (to_user != null) {
+            delete notification@?{ id, .user == to_user };
         }
     }
 }

@@ -1,14 +1,13 @@
 operation create_topic(id: text, descriptor_id: byte_array, username: text, channel_key: name, channel_name: name, title: name, message: text) {
     val author = get_verified_user(username, descriptor_id);
-
+    
     val topic = create topic(
         id = id, 
         author,
         timestamp = op_context.last_block_time,
         last_modified = op_context.last_block_time,
         title = title,
-        message = message,
-        removed = false
+        message = message
     );
 
     create channel(name = channel_key.lower_case(), topic, op_context.last_block_time, display_name = channel_name);
@@ -19,9 +18,18 @@ operation modify_topic(id: text, descriptor_id: byte_array, username: text, text
     val author = get_verified_user(username, descriptor_id);
 
     val topic = topic@{ .id == id, .author == author };
-    val fiveMinutesInMillis = 300000;
-    require(op_context.last_block_time < topic.timestamp + fiveMinutesInMillis);
+    require_mutable(topic.timestamp, op_context.last_block_time, "Modify topic");
+    
     update topic ( message = text );
+}
+
+operation delete_topic(id: text, descriptor_id: byte_array, username: text) {
+     val author = get_verified_user(username, descriptor_id);
+
+     val topic = topic@{ .id == id, .author == author };
+     require_mutable(topic.timestamp, op_context.last_block_time, "Delete topic");
+     
+     update topic ( removed = true, message = "Deleted by @" + username );
 }
 
 operation create_reply(topic_id: text, descriptor_id: byte_array, id: text, username: text, message: text) {
@@ -33,9 +41,7 @@ operation create_reply(topic_id: text, descriptor_id: byte_array, id: text, user
         topic,
         author,
         timestamp = op_context.last_block_time,
-        is_sub_reply = false,
-        message = message,
-        removed = false
+        message = message
     );
 
     if (not topic.removed) {
@@ -47,8 +53,8 @@ operation modify_reply(id: text, descriptor_id: byte_array, username: text, text
     val author = get_verified_user(username, descriptor_id);
 
     val reply = topic_reply@{ .id == id, .author == author };
-    val fiveMinutesInMillis = 300000;
-    require(op_context.last_block_time < reply.timestamp + fiveMinutesInMillis);
+    require_mutable(reply.timestamp, op_context.last_block_time, "Modify reply");
+    
     update reply ( message = text );
 }
 
@@ -62,8 +68,7 @@ operation create_sub_reply(topic_id: text, descriptor_id: byte_array, parent_rep
         author,
         timestamp = op_context.last_block_time,
         is_sub_reply = true,
-        message = message,
-        removed = false
+        message = message
     );
 
     create sub_reply(

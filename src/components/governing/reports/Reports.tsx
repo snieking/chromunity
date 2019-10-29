@@ -4,7 +4,7 @@ import {Container, LinearProgress} from '@material-ui/core';
 import {getUnhandledReports} from '../../../blockchain/RepresentativesService';
 import ReportCard from './ReportCard';
 import ChromiaPageHeader from '../../common/ChromiaPageHeader';
-import { initGA, pageView } from "../../../GoogleAnalytics";
+import { pageView } from "../../../GoogleAnalytics";
 
 type State = {
     reports: RepresentativeReport[];
@@ -23,7 +23,6 @@ export class Reports extends React.Component<{}, State> {
             .then(reports => this.setState({reports: reports, isLoading: false}))
             .catch(() => this.setState({isLoading: false}));
 
-        initGA();
         pageView();
     }
 

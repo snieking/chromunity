@@ -10,3 +10,4 @@ include 'channel/index';
 include 'follow/index';
 include 'election/index';
 include 'representative/index';
+include 'chat/index';

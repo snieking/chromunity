@@ -20,9 +20,11 @@ import { Redirect } from "react-router";
 import { getTopicStarRaters } from "../../blockchain/TopicService";
 import { getTopicChannelBelongings } from "../../blockchain/ChannelService";
 import { COLOR_ORANGE, COLOR_YELLOW } from "../../theme";
-import { getRepresentatives } from "../../blockchain/RepresentativesService";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import Timestamp from "../common/Timestamp";
+import { ApplicationState } from "../../redux/Store";
+import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
+import { connect } from "react-redux";
 
 const styles = createStyles({
   representativeColor: {
@@ -53,14 +55,14 @@ const styles = createStyles({
 
 interface Props extends WithStyles<typeof styles> {
   topic: Topic;
-  isRepresentative: boolean;
+  representatives: string[];
+  loadRepresentatives: typeof loadRepresentatives;
 }
 
 interface State {
   stars: number;
   ratedByMe: boolean;
   redirectToFullCard: boolean;
-  isRepresentative: boolean;
   avatar: string;
   channels: string[];
   user: ChromunityUser;
@@ -71,15 +73,18 @@ const TopicOverviewCard = withStyles(styles)(
     constructor(props: Props) {
       super(props);
 
+      this.props.loadRepresentatives();
+
       this.state = {
         stars: 0,
         channels: [],
         ratedByMe: false,
         redirectToFullCard: false,
-        isRepresentative: false,
         avatar: "",
         user: getUser()
       };
+
+      this.authorIsRepresentative = this.authorIsRepresentative.bind(this);
     }
 
     render() {
@@ -106,19 +111,17 @@ const TopicOverviewCard = withStyles(styles)(
         })
       );
 
-      getRepresentatives().then(representatives =>
-        this.setState({
-          isRepresentative: representatives.includes(this.props.topic.author.toLocaleLowerCase())
-        })
-      );
-
       const user: ChromunityUser = this.state.user;
       getTopicStarRaters(this.props.topic.id).then(usersWhoStarRated =>
         this.setState({
           stars: usersWhoStarRated.length,
-          ratedByMe: usersWhoStarRated.includes(user != null && user.name)
+          ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase())
         })
       );
+    }
+
+    authorIsRepresentative(): boolean {
+      return this.props.representatives.includes(this.props.topic.author.toLocaleLowerCase());
     }
 
     renderAuthor() {
@@ -129,13 +132,13 @@ const TopicOverviewCard = withStyles(styles)(
               gutterBottom
               variant="subtitle2"
               component="span"
-              className={this.state.isRepresentative ? this.props.classes.representativeColor : ""}
+              className={this.authorIsRepresentative() ? this.props.classes.representativeColor : ""}
             >
               <span className={this.props.classes.authorName}>@{this.props.topic.author}</span>
             </Typography>
           </Link>
           <div style={{ float: "right" }}>
-            <Avatar src={this.state.avatar} size={AVATAR_SIZE.SMALL} />
+            <Avatar src={this.state.avatar} size={AVATAR_SIZE.SMALL} name={this.props.topic.author}/>
           </div>
         </div>
       );
@@ -191,4 +194,16 @@ const TopicOverviewCard = withStyles(styles)(
   }
 );
 
-export default TopicOverviewCard;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    representatives: store.government.representatives
+  }
+};
+
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    loadRepresentatives: () => dispatch(loadRepresentatives())
+  }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps) (TopicOverviewCard);

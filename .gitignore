@@ -34,6 +34,7 @@ yarn-error.log*
 *.pid
 package-lock.json
 *.iml
+.classpath
 
 # Exclude copyrighted fonts
 *.otf
@@ -42,3 +43,4 @@ package-lock.json
 
 # Emacs
 *~
+/bin/

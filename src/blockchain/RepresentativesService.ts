@@ -16,15 +16,11 @@ export function clearRepresentativesCache() {
 }
 
 export function getRepresentatives(): Promise<string[]> {
-  const currentReps: string[] = representativesCache.get("current-reps");
-  if (currentReps != null) {
-    return new Promise<string[]>(resolve => resolve(currentReps));
-  }
+  return GTX.query("get_representatives", {});
+}
 
-  return GTX.query("get_representatives", {}).then((reps: string[]) => {
-    representativesCache.set("current-reps", reps, 600);
-    return reps;
-  });
+export function getTimesRepresentative(name: string) : Promise<number> {
+  return GTX.query("get_number_of_times_representative", { name: name });
 }
 
 export function getAllRepresentativeActionsPriorToTimestamp(

@@ -1,7 +1,3 @@
-export const initGA = () => {
-  console.log("GA Stub: Initialized");
-};
-
 export const pageView = () => {
   console.log("GA Stub: PageView");
 };

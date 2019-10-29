@@ -12,7 +12,7 @@ import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import { ReactComponent as LeftShapes } from "../../static/graphics/left-shapes.svg";
 import { ReactComponent as RightShapes } from "../../static/graphics/right-shapes.svg";
-import { initGA, pageView } from "../../../GoogleAnalytics";
+import { pageView } from "../../../GoogleAnalytics";
 
 enum Step {
   INIT,
@@ -67,13 +67,23 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
   const [name, setName] = useState("");
   const [step, setStep] = useState(Step.INIT);
   const [errorOpen, setErrorOpen] = useState(props.failure);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  initGA();
   pageView();
 
   const walletLogin = () => {
-    setStep(Step.LOGIN_IN_PROGRESS);
-    props.accountRegisteredCheck(name);
+    if (/\s/.test(name)) {
+      setErrorMsg("Username may not contain whitespace");
+      setErrorOpen(true);
+      setName("");
+    } else if (!/[a-zA-Z0-9]/.test(name.charAt(0))) {
+      setErrorMsg("Username must start with a a-z, A-Z or 0-9 character");
+      setErrorOpen(true);
+      setName("");
+    } else {
+      setStep(Step.LOGIN_IN_PROGRESS);
+      props.accountRegisteredCheck(name);
+    }
   };
 
   return (
@@ -106,16 +116,16 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
       )}
       {step === Step.LOGIN_IN_PROGRESS && (
         <Typography variant="subtitle1" component="p">
-          If you do not see anything, make sure you allow pop-ups.
+          Redirecting to Chromia Vault...
         </Typography>
       )}
       <Snackbar
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         open={errorOpen}
-        autoHideDuration={6000}
+        autoHideDuration={3000}
         onClose={() => setErrorOpen(false)}
       >
-        <CustomSnackbarContentWrapper variant="error" message={props.error} />
+        <CustomSnackbarContentWrapper variant="error" message={errorMsg} />
       </Snackbar>
     </Container>
   );

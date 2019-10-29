@@ -28,18 +28,25 @@ export function removeNotificationsForId(fromUser: ChromunityUser, id: string, u
   const sw = createStopwatchStarted();
 
   return BLOCKCHAIN.then(bc =>
-    bc.call(
-      fromUser.ft3User,
-      operation,
-      fromUser.name.toLocaleLowerCase(),
-      fromUser.ft3User.authDescriptor.hash().toString("hex"),
-      id,
-      usernames.map(name => name.toLocaleLowerCase())
-    )
-  ).then(value => {
-    gaRellOperationTiming(operation, stopStopwatch(sw));
-    return value;
-  }).catch((error: Error) => handleGADuringException(operation, sw, error));
+    bc
+      .transactionBuilder()
+      .addOperation(
+        operation,
+        fromUser.name.toLocaleLowerCase(),
+        fromUser.ft3User.authDescriptor.hash().toString("hex"),
+        id,
+        usernames.map(name => name.toLocaleLowerCase())
+      )
+      .addOperation("nop", uniqueId())
+      .build(fromUser.ft3User.authDescriptor.signers)
+      .sign(fromUser.ft3User.keyPair)
+      .post()
+  )
+    .then(value => {
+      gaRellOperationTiming(operation, stopStopwatch(sw));
+      return value;
+    })
+    .catch((error: Error) => handleGADuringException(operation, sw, error));
 }
 
 function sendNotificationsInternal(
@@ -53,20 +60,27 @@ function sendNotificationsInternal(
   const sw = createStopwatchStarted();
 
   return BLOCKCHAIN.then(bc =>
-    bc.call(
-      fromUser.ft3User,
-      operation,
-      fromUser.name.toLocaleLowerCase(),
-      fromUser.ft3User.authDescriptor.hash().toString("hex"),
-      id,
-      trigger,
-      content,
-      usernames.map(name => name.toLocaleLowerCase())
-    )
-  ).then(value => {
-    gaRellOperationTiming(operation, stopStopwatch(sw));
-    return value;
-  }).catch((error: Error) => handleGADuringException(operation, sw, error));
+    bc
+      .transactionBuilder()
+      .addOperation(
+        operation,
+        fromUser.name.toLocaleLowerCase(),
+        fromUser.ft3User.authDescriptor.hash().toString("hex"),
+        id,
+        trigger,
+        content,
+        usernames.map(name => name.toLocaleLowerCase()).filter(name => name !== fromUser.name)
+      )
+      .addOperation("nop", uniqueId())
+      .build(fromUser.ft3User.authDescriptor.signers)
+      .sign(fromUser.ft3User.keyPair)
+      .post()
+  )
+    .then(value => {
+      gaRellOperationTiming(operation, stopStopwatch(sw));
+      return value;
+    })
+    .catch((error: Error) => handleGADuringException(operation, sw, error));
 }
 
 export function markNotificationsRead(user: ChromunityUser) {
@@ -84,10 +98,12 @@ export function markNotificationsRead(user: ChromunityUser) {
       user.ft3User.authDescriptor.hash().toString("hex"),
       epochSeconds
     )
-  ).then(value => {
-    gaRellOperationTiming(operation, stopStopwatch(sw));
-    return value;
-  }).catch((error: Error) => handleGADuringException(operation, sw, error));
+  )
+    .then(value => {
+      gaRellOperationTiming(operation, stopStopwatch(sw));
+      return value;
+    })
+    .catch((error: Error) => handleGADuringException(operation, sw, error));
 }
 
 export function getUserNotificationsPriorToTimestamp(
@@ -102,10 +118,12 @@ export function getUserNotificationsPriorToTimestamp(
     name: user.toLocaleLowerCase(),
     timestamp: timestamp,
     page_size: pageSize
-  }).then((userNotifications: UserNotification[]) => {
-    gaRellQueryTiming(query, stopStopwatch(sw));
-    return userNotifications;
-  }).catch((error: Error) => handleGADuringException(query, sw, error));
+  })
+    .then((userNotifications: UserNotification[]) => {
+      gaRellQueryTiming(query, stopStopwatch(sw));
+      return userNotifications;
+    })
+    .catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
 export function countUnreadUserNotifications(user: string): Promise<number> {
@@ -116,11 +134,13 @@ export function countUnreadUserNotifications(user: string): Promise<number> {
     const sw = createStopwatchStarted();
     return GTX.query(query, {
       name: user.toLocaleLowerCase()
-    }).then((arr: unknown[]) => {
-      gaRellQueryTiming(query, stopStopwatch(sw));
-      boomerang.set("notis-" + user, arr.length, 60);
-      return arr.length;
-    }).catch((error: Error) => handleGADuringException(query, sw, error));
+    })
+      .then((arr: unknown[]) => {
+        gaRellQueryTiming(query, stopStopwatch(sw));
+        boomerang.set("notis-" + user, arr.length, 60);
+        return arr.length;
+      })
+      .catch((error: Error) => handleGADuringException(query, sw, error));
   } else {
     return new Promise<number>(resolve => resolve(count));
   }

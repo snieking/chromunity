@@ -25,6 +25,9 @@ import {
 } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import withTheme from "@material-ui/core/styles/withTheme";
+import { parseEmojis } from "../../util/text-parsing";
+import "emoji-mart/css/emoji-mart.css";
+import EmojiPicker from "../common/EmojiPicker";
 
 interface OptionType {
   label: string;
@@ -58,6 +61,8 @@ const maxChannelLength: number = 20;
 const NewTopicButton = withStyles(largeButtonStyles)(
   withTheme(
     class extends React.Component<NewTopicButtonProps, NewTopicButtonState> {
+      private readonly textInput: React.RefObject<HTMLInputElement>;
+
       constructor(props: NewTopicButtonProps) {
         super(props);
 
@@ -80,6 +85,8 @@ const NewTopicButton = withStyles(largeButtonStyles)(
           user: getUser()
         };
 
+        this.textInput = React.createRef();
+
         this.toggleNewTopicDialog = this.toggleNewTopicDialog.bind(this);
         this.handleDialogTitleChange = this.handleDialogTitleChange.bind(this);
         this.handleChannelChange = this.handleChannelChange.bind(this);
@@ -88,6 +95,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         this.handleClose = this.handleClose.bind(this);
         this.handleChangeSingle = this.handleChangeSingle.bind(this);
         this.handleTabChange = this.handleTabChange.bind(this);
+        this.addEmoji = this.addEmoji.bind(this);
       }
 
       componentDidMount() {
@@ -106,7 +114,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
         event.stopPropagation();
-        this.setState({ topicMessage: event.target.value });
+        this.setState({ topicMessage: parseEmojis(event.target.value) });
       }
 
       handleChannelChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -133,12 +141,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         } else {
           const topicChannel: string = (this.state.channel as OptionType).value;
 
-          if (!/^[a-zA-Z0-9\s]+$/.test(topicTitle)) {
-            this.setState({
-              newTopicStatusMessage: "Title may only contain a-z, A-Z & 0-9 characters and whitespaces",
-              newTopicErrorOpen: true
-            });
-          } else if (topicTitle.length > maxTitleLength) {
+          if (topicTitle.length > maxTitleLength) {
             this.setState({
               newTopicStatusMessage: "Title is too long",
               newTopicErrorOpen: true
@@ -165,7 +168,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                 });
                 this.props.updateFunction();
               })
-              .catch(() =>
+              .catch(error =>
                 this.setState({
                   newTopicStatusMessage: "Error while creating topic",
                   newTopicErrorOpen: true
@@ -257,11 +260,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                     styles={customStyles}
                   />
                   <br />
-                  <Badge
-                    color="secondary"
-                    badgeContent={maxTitleLength - this.state.topicTitle.length}
-                    showZero
-                  >
+                  <Badge color="secondary" badgeContent={maxTitleLength - this.state.topicTitle.length} showZero>
                     <TextField
                       autoFocus
                       margin="dense"
@@ -303,6 +302,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                   <Button type="submit" color="primary" variant="contained">
                     Create topic
                   </Button>
+                  <br />
                 </DialogActions>
               </form>
             </Dialog>
@@ -316,7 +316,10 @@ const NewTopicButton = withStyles(largeButtonStyles)(
               autoHideDuration={3000}
               onClose={this.handleClose}
             >
-              <CustomSnackbarContentWrapper variant="success" message={this.state.newTopicStatusMessage} />
+              <CustomSnackbarContentWrapper
+                variant="success"
+                message={this.state.newTopicStatusMessage}
+              />
             </Snackbar>
             <Snackbar
               anchorOrigin={{
@@ -327,7 +330,11 @@ const NewTopicButton = withStyles(largeButtonStyles)(
               autoHideDuration={3000}
               onClose={this.handleClose}
             >
-              <CustomSnackbarContentWrapper variant="error" message={this.state.newTopicStatusMessage} />
+              <CustomSnackbarContentWrapper
+                onClose={this.handleClose}
+                variant="error"
+                message={this.state.newTopicStatusMessage}
+              />
             </Snackbar>
           </div>
         );
@@ -335,26 +342,46 @@ const NewTopicButton = withStyles(largeButtonStyles)(
 
       renderEditor() {
         return (
-          <TextField
-            margin="dense"
-            id="message"
-            multiline
-            label="Content"
-            type="text"
-            fullWidth
-            rows="5"
-            rowsMax="15"
-            onChange={this.handleDialogMessageChange}
-            value={this.state.topicMessage}
-            variant="outlined"
-            className={this.props.classes.content}
-          />
+          <div className={this.props.classes.editorWrapper}>
+            <TextField
+              margin="dense"
+              id="message"
+              multiline
+              label="Content"
+              type="text"
+              fullWidth
+              rows="5"
+              rowsMax="15"
+              onChange={this.handleDialogMessageChange}
+              value={this.state.topicMessage}
+              variant="outlined"
+              inputRef={this.textInput}
+            />
+            <EmojiPicker emojiAppender={this.addEmoji} />
+          </div>
         );
+      }
+
+      addEmoji(emoji: string) {
+        const startPosition = this.textInput.current.selectionStart;
+
+        this.setState(prevState => ({
+          topicMessage: [
+            prevState.topicMessage.slice(0, startPosition),
+            emoji,
+            prevState.topicMessage.slice(startPosition)
+          ].join("")
+        }));
+
+        setTimeout(() => {
+          this.textInput.current.selectionStart = startPosition + emoji.length;
+          this.textInput.current.selectionEnd = startPosition + emoji.length;
+        }, 100);
       }
 
       renderPreview() {
         return (
-          <div className={this.props.classes.content}>
+          <div>
             <MarkdownRenderer text={this.state.topicMessage} />
           </div>
         );

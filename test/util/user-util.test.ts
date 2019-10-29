@@ -2,8 +2,6 @@ import {
   godAlias,
   ifEmptyAvatarThenPlaceholder,
   isGod,
-  isRepresentative,
-  setRepresentative,
   setUsername,
   storeKeyPair
 } from "../../src/util/user-util";
@@ -17,12 +15,6 @@ describe("user utilities tests", () => {
     user = await CREATE_LOGGED_IN_USER();
   });
 
-  it("representative status cached in sessionStorage encrypted", async () => {
-    const representative: boolean = await isRepresentative();
-    expect(representative).toBe(false);
-    expect(sessionStorage.getItem("session-bucket:representative")).not.toBe(false);
-  });
-
   it("god alias is admin", async () => {
     storeKeyPair(user.ft3User.keyPair);
     setUsername(user.name);
@@ -31,12 +23,6 @@ describe("user utilities tests", () => {
     expect(godAlias()).toBe("admin");
     setUsername("admin");
     expect(isGod()).toBe(true);
-  });
-
-  it("set representative", async () => {
-    setRepresentative(true);
-    const representative: boolean = await isRepresentative();
-    expect(representative).toBe(true);
   });
 
   it("avatar placeholder", async () => {

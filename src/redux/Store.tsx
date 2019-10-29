@@ -1,4 +1,4 @@
-import { applyMiddleware, combineReducers, createStore, Store } from "redux";
+import { applyMiddleware, combineReducers, compose, createStore, Store } from "redux";
 import createSagaMiddleware from "redux-saga";
 import rootSaga from "./sagas/index";
 import { AccountState } from "./AccountTypes";
@@ -11,6 +11,10 @@ import { UserPageState } from "./UserTypes";
 import { userPageReducer } from "./reducers/UserPageReducers";
 import { StylingState } from "./StylingTypes";
 import { stylingReducer } from "./reducers/StylingReducers";
+import { GovernmentState } from "./GovernmentTypes";
+import { governmentReducer } from "./reducers/GovernmentReducers";
+import { chatReducer } from "./reducers/ChatReducers";
+import { ChatState } from "./ChatTypes";
 
 export interface ApplicationState {
   account: AccountState;
@@ -18,6 +22,8 @@ export interface ApplicationState {
   channel: ChannelState;
   userPage: UserPageState;
   styling: StylingState;
+  government: GovernmentState;
+  chat: ChatState;
 }
 
 const rootReducer = combineReducers<ApplicationState>({
@@ -25,17 +31,27 @@ const rootReducer = combineReducers<ApplicationState>({
   topicWall: topicWallReducer,
   channel: channelReducer,
   userPage: userPageReducer,
-  styling: stylingReducer
+  styling: stylingReducer,
+  government: governmentReducer,
+  chat: chatReducer
 });
 
+// Create Redux Store
+const middleware = [];
+const enhancers = [];
+
+// Create Saga MiddleWare
 const sagaMiddleware = createSagaMiddleware({
   onError: () => {
     window.location.href = "/error";
   }
 });
+middleware.push(sagaMiddleware);
 
-const store = createStore(rootReducer, undefined, applyMiddleware(sagaMiddleware));
+// Assemble Middleware
+enhancers.push(applyMiddleware(...middleware));
 
+const store = createStore(rootReducer, undefined, compose(...enhancers));
 export default function configureStore(): Store<ApplicationState> {
   sagaMiddleware.run(rootSaga);
   return store;

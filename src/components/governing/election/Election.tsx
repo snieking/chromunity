@@ -24,7 +24,7 @@ import { getUser, isGod } from "../../../util/user-util";
 import DictatorActions from "./dictator/DictatorActions";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import { ChromunityUser } from "../../../types";
-import { initGA, pageView } from "../../../GoogleAnalytics";
+import { pageView } from "../../../GoogleAnalytics";
 import ElectionCandidateCard from "./ElectionCandidateCard";
 
 const styles = createStyles({
@@ -108,7 +108,6 @@ const Election = withStyles(styles)(
         }
       });
 
-      initGA();
       pageView();
     }
 
@@ -168,21 +167,23 @@ const Election = withStyles(styles)(
 
     render() {
       return (
-        <Container fixed maxWidth="md">
+        <Container fixed>
           <ChromiaPageHeader text="Election" />
-          <Card raised={true} key={"next-election"} className={this.props.classes.electionCard}>
+          <Card raised={false} key={"next-election"} className={this.props.classes.electionCard}>
             <CardContent>
               {this.renderElection()}
               {this.renderElectionVoteStatus()}
             </CardContent>
             <CardActions>{this.renderParticipateButton()}</CardActions>
           </Card>
+          <br/>
           <Grid container spacing={1}>
             {this.state.electionCandidates.map(candidate => (
               <ElectionCandidateCard
                 candidate={candidate}
                 votedFor={this.state.votedFor}
                 voteForCandidate={this.voteForCandidate}
+                key={"candiate-" + candidate}
               />
             ))}
           </Grid>

@@ -83,12 +83,12 @@ describe("topic tests", () => {
         const upvotedBy3: string[] = await getReplyStarRaters(reply.id);
         expect(upvotedBy3.length).toBe(1);
 
-        await createTopicSubReply(secondLoggedInUser, topic.id, reply.id, "Are you certain?");
+        await createTopicSubReply(secondLoggedInUser, topic.id, reply.id, "Are you certain?", userLoggedIn.name);
         const subReplies: TopicReply[] = await getTopicSubReplies(reply.id);
         expect(subReplies.length).toBe(1);
 
         const subReply: TopicReply = subReplies[0];
-        await createTopicSubReply(userLoggedIn, topic.id, subReply.id, "I am always certain");
+        await createTopicSubReply(userLoggedIn, topic.id, subReply.id, "I am always certain", secondLoggedInUser.name);
 
         const subSubReplies: TopicReply[] = await getTopicSubReplies(subReply.id);
         expect(subSubReplies.length).toBe(1);

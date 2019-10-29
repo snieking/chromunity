@@ -71,6 +71,26 @@ function modifyText(user: ChromunityUser, id: string, updatedText: string, rellO
     .catch(error => handleGADuringException(rellOperation, sw, error));
 }
 
+export function deleteTopic(user: ChromunityUser, id: string) {
+  topicsCache.remove(id);
+  const rellOperation = "delete_topic";
+  const sw = createStopwatchStarted();
+  return BLOCKCHAIN.then(bc =>
+    bc.call(
+      user.ft3User,
+      rellOperation,
+      id,
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      user.name.toLocaleLowerCase()
+    )
+  )
+    .then(value => {
+      gaRellOperationTiming(rellOperation, stopStopwatch(sw));
+      return value;
+    })
+    .catch(error => handleGADuringException(rellOperation, sw, error));
+}
+
 export function createTopicReply(user: ChromunityUser, topicId: string, message: string) {
   const replyId = uniqueId();
 
@@ -94,7 +114,7 @@ export function createTopicReply(user: ChromunityUser, topicId: string, message:
       getTopicSubscribers(topicId).then(users =>
         sendNotifications(
           user,
-          createReplyTriggerString(user.name, topicId),
+          createReplyTriggerString(user.name, topicId, replyId),
           message,
           users.map(name => name.toLocaleLowerCase()).filter(item => item !== user.name)
         )
@@ -104,7 +124,13 @@ export function createTopicReply(user: ChromunityUser, topicId: string, message:
     .catch(error => handleGADuringException(rellOperation, sw, error));
 }
 
-export function createTopicSubReply(user: ChromunityUser, topicId: string, replyId: string, message: string) {
+export function createTopicSubReply(
+  user: ChromunityUser,
+  topicId: string,
+  replyId: string,
+  message: string,
+  replyTo: string
+) {
   const subReplyId = uniqueId();
 
   const operation = "create_sub_reply";
@@ -124,22 +150,26 @@ export function createTopicSubReply(user: ChromunityUser, topicId: string, reply
   )
     .then((promise: unknown) => {
       gaRellOperationTiming("create_sub_reply", stopStopwatch(sw));
+      getTopicSubscribers(topicId).then(users => {
+        if (!users.includes(replyTo.toLocaleLowerCase())){
+          users.push(replyTo);
+        }
 
-      getTopicSubscribers(topicId).then(users =>
         sendNotifications(
           user,
-          createReplyTriggerString(user.name, topicId),
+          createReplyTriggerString(user.name, topicId, subReplyId),
           message,
           users.map(name => name.toLocaleLowerCase()).filter(item => item !== user.name)
-        )
-      );
+        );
+      });
       return promise;
     })
     .catch(error => handleGADuringException(operation, sw, error));
 }
 
-function createReplyTriggerString(name: string, id: string): string {
-  return "@" + name + " replied to /t/" + id;
+function createReplyTriggerString(name: string, id: string, replyId: string): string {
+  const topic: Topic = topicsCache.get(id);
+  return "@" + name + " replied to '" + topic.title + "' /t/" + id + "#" + replyId;
 }
 
 export function removeTopic(user: ChromunityUser, topicId: string) {
@@ -309,11 +339,15 @@ export function countTopicsInChannel(channelName: string): Promise<number> {
     .catch((error: Error) => handleGADuringException(query, sw, error));
 }
 
-export function getTopicStarRaters(topicId: string): Promise<string[]> {
-  const raters: string[] = starRatingCache.get(topicId);
+export function getTopicStarRaters(topicId: string, clearCache = false): Promise<string[]> {
+  if (clearCache) {
+    starRatingCache.remove(topicId);
+  } else {
+    const raters: string[] = starRatingCache.get(topicId);
 
-  if (raters != null) {
-    return new Promise<string[]>(resolve => resolve(raters));
+    if (raters != null) {
+      return new Promise<string[]>(resolve => resolve(raters));
+    }
   }
 
   const query = "get_star_rating_for_topic";

@@ -37,7 +37,6 @@ const CREATE_RANDOM_USER = (): TestUser => {
 
 const CREATE_LOGGED_IN_USER = async () => {
   const user = CREATE_RANDOM_USER();
-  console.log("About to loginUser: ", user);
   return loginUser(user);
 };
 
@@ -69,7 +68,6 @@ const loginUser = async (user: TestUser): Promise<ChromunityUser> => {
   const account = await bc.registerAccount(walletAuthDescriptor, walletUser);
   await bc.call(ft3User, "register_user", user.name, authDescriptor.toGTV(), walletAuthDescriptor.toGTV());
 
-  console.log("User:", user.name, " registered account:", account);
   return new Promise<ChromunityUser>(resolve => resolve({ name: user.name, ft3User: ft3User }));
 };
 

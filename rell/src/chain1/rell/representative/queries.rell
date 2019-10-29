@@ -1,5 +1,5 @@
 query get_representatives() {
-    val election = representative_election@?{ .completed == true } ( .id, -sort .timestamp );
+    val election = representative_election@?{ .completed == true } ( .id, -sort .timestamp ) limit 1;
 
     // If no election yes, then admin is technically the only representative
     if (election == null) {

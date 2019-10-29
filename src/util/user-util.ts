@@ -1,6 +1,5 @@
 import { ChromunityUser, UserMeta } from "../types";
 import * as BoomerangCache from "boomerang-cache";
-import { getRepresentatives } from "../blockchain/RepresentativesService";
 import { getUserMeta } from "../blockchain/UserService";
 import { FlagsType, KeyPair, SingleSignatureAuthDescriptor, User } from "ft3-lib";
 
@@ -19,15 +18,14 @@ const SESSION_CACHE = BoomerangCache.create("session-bucket", {
 
 const USER_KEY = "user";
 const USER_META_KEY = "user_meta";
-const REPRESENTATIVE_KEY = "representative";
 const KEYPAIR_KEY = "keyPair";
+const RSA_PASS = "rsaPassPhrase";
 
 export function clearSession(): void {
   ENCRYPTED_LOCAL_CACHE.clear();
   LOCAL_CACHE.remove(USER_KEY);
   LOCAL_CACHE.remove(KEYPAIR_KEY);
   SESSION_CACHE.remove(USER_META_KEY);
-  SESSION_CACHE.remove(REPRESENTATIVE_KEY);
 }
 
 export function storeKeyPair(keyPair: KeyPair): void {
@@ -38,6 +36,14 @@ export function getKeyPair(): KeyPair {
   const keyPair = LOCAL_CACHE.get("keyPair");
   if (keyPair == null) return null;
   return new KeyPair(keyPair.privKey);
+}
+
+export function storeChatPassphrase(passphrase: string) {
+  ENCRYPTED_LOCAL_CACHE.set(RSA_PASS, passphrase);
+}
+
+export function getChatPassphrase(): any {
+  return ENCRYPTED_LOCAL_CACHE.get(RSA_PASS);
 }
 
 export function getUsername(): string {
@@ -91,34 +97,6 @@ export function godAlias(): string {
 export function isGod(): boolean {
   const username = getUsername();
   return username != null && username === godAlias();
-}
-
-export function setRepresentative(isRepresentative: boolean): void {
-  SESSION_CACHE.set(REPRESENTATIVE_KEY, isRepresentative, 600);
-}
-
-/**
- * Checks whether or not the user is a representative and caches that response.
- */
-export function isRepresentative(): Promise<boolean> {
-  const isRepresentative: boolean = SESSION_CACHE.get(REPRESENTATIVE_KEY);
-
-  if (isRepresentative != null) {
-    return new Promise<boolean>(resolve => resolve(isRepresentative));
-  }
-
-  const username = getUsername();
-
-  return getRepresentatives()
-    .then((representatives: string[]) => username != null && representatives.includes(username))
-    .then((rep: boolean) => {
-      setRepresentative(rep);
-      return rep;
-    })
-    .catch(() => {
-      setRepresentative(false);
-      return false;
-    });
 }
 
 export function ifEmptyAvatarThenPlaceholder(avatar: string, seed: string) {

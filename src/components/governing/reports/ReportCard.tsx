@@ -5,12 +5,17 @@ import { Card, CardContent, createStyles, IconButton, makeStyles, Tooltip, Typog
 import { parseContent } from "../../../util/text-parsing";
 import { ReportOff } from "@material-ui/icons";
 import { handleReport } from "../../../blockchain/RepresentativesService";
-import { getUser, isRepresentative } from "../../../util/user-util";
+import { getUser } from "../../../util/user-util";
 import Timestamp from "../../common/Timestamp";
 import { COLOR_RED } from "../../../theme";
+import { ApplicationState } from "../../../redux/Store";
+import { loadRepresentatives } from "../../../redux/actions/GovernmentActions";
+import { connect } from "react-redux";
 
 export interface ReportCardProps {
   report: RepresentativeReport;
+  representatives: string[];
+  loadRepresentatives: typeof loadRepresentatives;
 }
 
 const useStyles = makeStyles(
@@ -27,7 +32,7 @@ const ReportCard: React.FunctionComponent<ReportCardProps> = (props: ReportCardP
     <Card key={props.report.id}>
       <CardContent>
         <Timestamp milliseconds={props.report.timestamp} />
-        {user != null && isRepresentative() ? (
+        {user != null && props.representatives.includes(user.name.toLocaleLowerCase()) ? (
           <IconButton
             aria-label="Report"
             onClick={() => handleReport(user, props.report.id).then(() => window.location.reload())}
@@ -51,4 +56,16 @@ const ReportCard: React.FunctionComponent<ReportCardProps> = (props: ReportCardP
   );
 };
 
-export default ReportCard;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    representatives: store.government.representatives
+  }
+};
+
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    loadRepresentatives: () => dispatch(loadRepresentatives())
+  }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps) (ReportCard);

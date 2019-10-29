@@ -22,6 +22,7 @@ import { RouteComponentProps } from "react-router";
 import ReplyTopicButton from "../buttons/ReplyTopicButton";
 import EditMessageButton from "../buttons/EditMessageButton";
 import {
+  deleteTopic,
   getTopicById,
   getTopicRepliesAfterTimestamp,
   getTopicRepliesPriorToTimestamp,
@@ -40,6 +41,7 @@ import {
   Delete,
   Notifications,
   NotificationsActive,
+  RemoveCircle,
   Report,
   StarBorder,
   StarRate,
@@ -48,14 +50,17 @@ import {
 import { getMutedUsers, getUserSettingsCached } from "../../blockchain/UserService";
 import TopicReplyCard from "./TopicReplyCard";
 import LoadMoreButton from "../buttons/LoadMoreButton";
-import { getRepresentatives, reportTopic } from "../../blockchain/RepresentativesService";
+import { reportTopic } from "../../blockchain/RepresentativesService";
 import Timestamp from "../common/Timestamp";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
-import { initGA, pageViewPath } from "../../GoogleAnalytics";
+import { pageViewPath } from "../../GoogleAnalytics";
 import { prepareUrlPath } from "../../util/util";
 import ConfirmDialog from "../common/ConfirmDialog";
+import { ApplicationState } from "../../redux/Store";
+import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
+import { connect } from "react-redux";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -100,11 +105,12 @@ interface MatchParams {
 
 export interface FullTopicProps extends RouteComponentProps<MatchParams>, WithStyles<typeof styles> {
   pathName: string;
+  representatives: string[];
+  loadRepresentatives: typeof loadRepresentatives;
 }
 
 export interface FullTopicState {
   topic: Topic;
-  representatives: string[];
   avatar: string;
   stars: number;
   ratedByMe: boolean;
@@ -116,8 +122,10 @@ export interface FullTopicState {
   isLoading: boolean;
   removeTopicDialogOpen: boolean;
   reportTopicDialogOpen: boolean;
+  deleteTopicDialogOpen: boolean;
   mutedUsers: string[];
   user: ChromunityUser;
+  timeLeftUntilNoLongerModifiable: number;
 }
 
 const repliesPageSize: number = 25;
@@ -140,7 +148,6 @@ const FullTopic = withStyles(styles)(
 
       this.state = {
         topic: initialTopic,
-        representatives: [],
         avatar: "",
         ratedByMe: false,
         subscribed: false,
@@ -152,8 +159,10 @@ const FullTopic = withStyles(styles)(
         isLoading: true,
         removeTopicDialogOpen: false,
         reportTopicDialogOpen: false,
+        deleteTopicDialogOpen: false,
         mutedUsers: [],
-        user: getUser()
+        user: getUser(),
+        timeLeftUntilNoLongerModifiable: 0
       };
 
       this.retrieveLatestReplies = this.retrieveLatestReplies.bind(this);
@@ -162,6 +171,10 @@ const FullTopic = withStyles(styles)(
       this.editTopicMessage = this.editTopicMessage.bind(this);
       this.closeReportTopic = this.closeReportTopic.bind(this);
       this.reportTopic = this.reportTopic.bind(this);
+      this.isRepresentative = this.isRepresentative.bind(this);
+      this.closeDeleteTopic = this.closeDeleteTopic.bind(this);
+      this.deleteTopic = this.deleteTopic.bind(this);
+      this.renderDeleteButton = this.renderDeleteButton.bind(this);
     }
 
     componentDidMount(): void {
@@ -174,18 +187,19 @@ const FullTopic = withStyles(styles)(
 
       getTopicById(id).then(topic => this.consumeTopicData(topic));
       this.retrieveLatestReplies();
-      getTopicStarRaters(id).then(usersWhoStarRated =>
+      getTopicStarRaters(id, true).then(usersWhoStarRated =>
         this.setState({
           stars: usersWhoStarRated.length,
-          ratedByMe: usersWhoStarRated.includes(user != null && user.name)
+          ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase())
         })
       );
-      getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
       getTopicSubscribers(id).then(subscribers =>
         this.setState({
           subscribed: user != null && subscribers.includes(user.name)
         })
       );
+
+      this.props.loadRepresentatives();
     }
 
     consumeTopicData(topic: Topic): void {
@@ -196,8 +210,18 @@ const FullTopic = withStyles(styles)(
         })
       );
 
-      initGA();
+      const modifiableUntil = topic.timestamp + allowedEditTimeMillis;
+
+      setInterval(() => {
+        this.setState({ timeLeftUntilNoLongerModifiable: this.getTimeLeft(modifiableUntil) });
+      }, 1000);
+
       pageViewPath("/t/" + topic.id + "/" + prepareUrlPath(topic.title));
+    }
+
+    getTimeLeft(until: number): number {
+      const currentTime = Date.now();
+      return currentTime < until ? Math.floor((until - currentTime) / 1000) : 0;
     }
 
     retrieveLatestReplies(): void {
@@ -231,7 +255,6 @@ const FullTopic = withStyles(styles)(
         const oldestTimestamp: number = this.state.topicReplies[this.state.topicReplies.length - 1].timestamp;
         getTopicRepliesPriorToTimestamp(this.state.topic.id, oldestTimestamp - 1, repliesPageSize).then(
           retrievedReplies => {
-            retrievedReplies.forEach(reply => console.log("Reply timestamp is: ", reply.timestamp));
             if (retrievedReplies.length > 0) {
               this.setState(prevState => ({
                 topicReplies: Array.from(new Set(prevState.topicReplies.concat(retrievedReplies))),
@@ -307,7 +330,7 @@ const FullTopic = withStyles(styles)(
         <div style={{ float: "right" }}>
           <Link
             className={`${this.props.classes.authorLink} ${
-              this.state.representatives.includes(this.state.topic.author.toLocaleLowerCase())
+              this.props.representatives.includes(this.state.topic.author.toLocaleLowerCase())
                 ? this.props.classes.repColor
                 : this.props.classes.userColor
             }`}
@@ -319,7 +342,7 @@ const FullTopic = withStyles(styles)(
           </Link>
           <br />
           <div style={{ float: "right" }}>
-            <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} />
+            <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} name={this.state.topic.author}/>
           </div>
         </div>
       );
@@ -366,10 +389,16 @@ const FullTopic = withStyles(styles)(
           {this.state.topic.timestamp + allowedEditTimeMillis > Date.now() &&
           user != null &&
           this.state.topic.author === user.name ? (
-            <EditMessageButton value={this.state.topic.message} submitFunction={this.editTopicMessage} />
+            <EditMessageButton
+              value={this.state.topic.message}
+              modifiableUntil={this.state.timeLeftUntilNoLongerModifiable}
+              submitFunction={this.editTopicMessage}
+            />
           ) : (
             <div />
           )}
+
+          {this.renderDeleteButton()}
 
           <ConfirmDialog
             text="This action will report the topic"
@@ -391,7 +420,22 @@ const FullTopic = withStyles(styles)(
 
     editTopicMessage(text: string) {
       this.setState({ isLoading: true });
-      modifyTopic(this.state.user, this.state.topic.id, text).then(() => window.location.reload());
+      modifyTopic(this.state.user, this.state.topic.id, text)
+        .then(() =>
+          this.setState(prevState => ({
+            topic: {
+              id: prevState.topic.id,
+              author: prevState.topic.author,
+              title: prevState.topic.title,
+              message: text,
+              timestamp: prevState.topic.timestamp,
+              last_modified: prevState.topic.last_modified,
+              removed: prevState.topic.removed
+            },
+            isLoading: false
+          }))
+        )
+        .catch(() => this.setState({ isLoading: false }));
     }
 
     closeReportTopic() {
@@ -403,16 +447,58 @@ const FullTopic = withStyles(styles)(
       const user: ChromunityUser = this.state.user;
 
       if (user != null) {
-        reportTopic(user, this.state.topic.id);
+        reportTopic(user, this.state.topic.id).then();
         window.location.reload();
       } else {
         window.location.href = "/user/login";
       }
     }
 
-    renderAdminActions() {
+    renderDeleteButton() {
       const user: ChromunityUser = this.state.user;
-      if (user != null && this.state.representatives.includes(user.name) && !this.state.topic.removed) {
+      if (
+        this.state.topic.timestamp + allowedEditTimeMillis > Date.now() &&
+        user != null &&
+        !this.isRepresentative() &&
+        this.state.topic.author === user.name
+      ) {
+        return (
+          <div>
+            <IconButton aria-label="Hide topic" onClick={() => this.setState({ deleteTopicDialogOpen: true })}>
+              <Tooltip title="Hide topic">
+                <Badge max={600} badgeContent={this.state.timeLeftUntilNoLongerModifiable} color="secondary">
+                  <RemoveCircle className={this.props.classes.iconRed} />
+                </Badge>
+              </Tooltip>
+            </IconButton>
+
+            <ConfirmDialog
+              text="This action will delete the topic from the walls, making it only visible on your user page and by direct link to it"
+              open={this.state.deleteTopicDialogOpen}
+              onClose={this.closeDeleteTopic}
+              onConfirm={this.deleteTopic}
+            />
+          </div>
+        );
+      }
+    }
+
+    closeDeleteTopic() {
+      this.setState({ deleteTopicDialogOpen: false });
+    }
+
+    deleteTopic() {
+      this.closeDeleteTopic();
+      deleteTopic(this.state.user, this.state.topic.id).then(() => (window.location.href = "/"));
+    }
+
+    isRepresentative() {
+      const user: ChromunityUser = this.state.user;
+      return user != null && this.props.representatives.includes(user.name.toLocaleLowerCase());
+    }
+
+    renderAdminActions() {
+      if (this.isRepresentative() && !this.state.topic.removed) {
         return (
           <div style={{ display: "inline-block" }}>
             <IconButton aria-label="Remove topic" onClick={() => this.setState({ removeTopicDialogOpen: true })}>
@@ -495,9 +581,6 @@ const FullTopic = withStyles(styles)(
 
     handleReplySubmit(): void {
       this.retrieveLatestReplies();
-      if (!this.state.subscribed) {
-        subscribeToTopic(this.state.user, this.state.topic.id).then(() => this.setState({ subscribed: true }));
-      }
     }
 
     renderReplyButton() {
@@ -530,7 +613,7 @@ const FullTopic = withStyles(styles)(
                 reply={reply}
                 indention={0}
                 topicId={this.state.topic.id}
-                representatives={this.state.representatives}
+                representatives={this.props.representatives}
                 mutedUsers={this.state.mutedUsers}
               />
             ))}
@@ -545,4 +628,19 @@ const FullTopic = withStyles(styles)(
   }
 );
 
-export default FullTopic;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    representatives: store.government.representatives
+  };
+};
+
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    loadRepresentatives: () => dispatch(loadRepresentatives())
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(FullTopic);

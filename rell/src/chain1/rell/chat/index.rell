@@ -1,0 +1,41 @@
+class chat {
+	key id: text;
+	mutable title: text;
+	timestamp;
+}
+
+class chat_user {
+	key user;
+	rsa_pubkey: text;
+}
+
+class chat_membership {
+	key chat, member: chat_user;
+	encrypted_chat_key: text;
+	mutable last_opened: timestamp = 0;
+}
+
+class chat_message {
+	index chat;
+	index sender: chat_user;
+	index timestamp;
+	encrypted_msg: text;
+}
+
+record chat_record {
+	id: text;
+	title: text;
+	last_message: message_record?;
+	encrypted_chat_key: text;
+	timestamp;
+	last_opened: timestamp;
+}
+
+record message_record {
+	sender: name;
+	timestamp;
+	encrypted_msg: text;
+}
+
+include 'operations';
+include 'queries';

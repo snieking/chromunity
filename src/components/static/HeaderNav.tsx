@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
@@ -7,18 +7,59 @@ import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 import Home from "@material-ui/icons/Home";
 import AccountCircle from "@material-ui/icons/AccountCircle";
-import { ExitToApp, Face, Gavel, HowToVote, LocationCity, People, Report, RssFeed, Settings } from "@material-ui/icons";
+import {
+  Chat,
+  ExitToApp,
+  Face,
+  Gavel,
+  HowToVote,
+  LocationCity,
+  People,
+  Report,
+  RssFeed,
+  Settings
+} from "@material-ui/icons";
+import { Menu as MenuIcon } from "@material-ui/icons/";
 
 import NotificationsButton from "../buttons/NotificationsButton";
 import { Button, ListItemIcon, Menu, MenuItem, Tooltip, Typography } from "@material-ui/core";
 import { getUser } from "../../util/user-util";
 import ThemeSwitcher from "./ThemeSwitcher";
 import config from "../../config";
+import { ApplicationState } from "../../redux/Store";
+import { checkActiveElection, loadRepresentatives, loadUnhandledReports } from "../../redux/actions/GovernmentActions";
+import { connect } from "react-redux";
+import Badge from "@material-ui/core/Badge";
+import { countUnreadChatsAction } from "../../redux/actions/ChatActions";
+import { ChromunityUser } from "../../types";
+
+interface Props {
+  representatives: string[];
+  unhandledReports: number;
+  activeElection: boolean;
+  unreadChats: number;
+  loadRepresentatives: typeof loadRepresentatives;
+  loadUnhandledReports: typeof loadUnhandledReports;
+  checkActiveElection: typeof checkActiveElection;
+  countUnreadChats: typeof countUnreadChatsAction;
+}
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     testInfo: {
       textAlign: "center"
+    },
+    desktopWallNav: {
+      display: "inherit",
+      [theme.breakpoints.down("sm")]: {
+        display: "none"
+      }
+    },
+    mobileWallNav: {
+      display: "inherit",
+      [theme.breakpoints.up("md")]: {
+        display: "none"
+      }
     },
     navIcon: {
       color: theme.palette.primary.main
@@ -54,11 +95,34 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const HeaderNav: React.FunctionComponent = (props: unknown) => {
+const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   const classes = useStyles(props);
   const user = getUser();
   const [profileAnchorEl, setProfileAnchorEl] = React.useState<null | HTMLElement>(null);
   const [govAnchorEl, setGovAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [wallAnchorEl, setWallAnchorEl] = React.useState<null | HTMLElement>(null);
+
+  let interval: any;
+  useEffect(() => {
+    if (interval != null) {
+      clearInterval(interval);
+    }
+  });
+
+  function clearInterval(interval: any) {
+
+  }
+
+  props.loadRepresentatives();
+  props.checkActiveElection();
+
+  if (isRepresentative()) {
+    props.loadUnhandledReports();
+  }
+
+  if (user != null) {
+    interval = setInterval(() => props.countUnreadChats(user), 30000);
+  }
 
   function handleProfileClick(event: React.MouseEvent<HTMLButtonElement>) {
     setProfileAnchorEl(event.currentTarget);
@@ -76,10 +140,31 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
     setGovAnchorEl(null);
   }
 
+  function handleWallMenuClick(event: React.MouseEvent<HTMLButtonElement>) {
+    setWallAnchorEl(event.currentTarget);
+  }
+
+  function handleWallMenuClose() {
+    setWallAnchorEl(null);
+  }
+
+  function isRepresentative() {
+    return user != null && props.representatives.includes(user.name.toLocaleLowerCase());
+  }
+
   function profileSpecificNavigation() {
     if (user != null) {
       return (
         <div>
+          <Tooltip title="Chat">
+            <Link to="/chat">
+              <IconButton>
+                <Badge badgeContent={props.unreadChats} color="secondary">
+                  <Chat />
+                </Badge>
+              </IconButton>
+            </Link>
+          </Tooltip>
           <Link to={"/notifications/" + user.name}>
             <NotificationsButton username={user.name} />
           </Link>
@@ -154,7 +239,7 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
 
           <Link to="/followings">
             <IconButton edge="start" className={classes.menuButton} aria-label="Open drawer">
-              <Tooltip title="Users">
+              <Tooltip title="Followed Users">
                 <People className={classes.navIcon} />
               </Tooltip>
             </IconButton>
@@ -177,31 +262,91 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
     }
   }
 
+  function renderGovernmentIcon() {
+    if (isRepresentative() && props.unhandledReports > 0) {
+      return (
+        <Badge badgeContent={props.unhandledReports} color="secondary">
+          <LocationCity className={classes.navIcon} />
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge invisible={!props.activeElection} color="secondary">
+          <LocationCity className={classes.navIcon} />
+        </Badge>
+      );
+    }
+  }
+
+  const desktopWallNav = () => (
+    <div className={classes.desktopWallNav}>
+      <Link to="/">
+        <IconButton edge="start" className={classes.menuButton} aria-label="Open drawer">
+          <Tooltip title="All">
+            <Home className={classes.navIcon} />
+          </Tooltip>
+        </IconButton>
+      </Link>
+      {renderFavoriteWalls()}
+      <IconButton className={classes.menuButton} onClick={handleGovClick} aria-controls="gov-menu" aria-haspopup="true">
+        <Tooltip title="Governing">{renderGovernmentIcon()}</Tooltip>
+      </IconButton>
+    </div>
+  );
+
+  const mobileWallNav = () => (
+    <div className={classes.mobileWallNav}>
+      <IconButton
+        className={classes.menuButton}
+        onClick={handleWallMenuClick}
+        aria-controls="wall-menu"
+        aria-haspopup="true"
+      >
+        <MenuIcon />
+      </IconButton>
+      <Menu
+        id="wall-menu"
+        anchorEl={wallAnchorEl}
+        keepMounted
+        open={Boolean(wallAnchorEl)}
+        onClose={handleWallMenuClose}
+      >
+        <Link style={{ width: "100%" }} to="/">
+          <MenuItem onClick={handleWallMenuClose}>
+            <ListItemIcon>
+              <Home className="menu-item-button" />
+            </ListItemIcon>
+            <Typography className="menu-item-text">All</Typography>
+          </MenuItem>
+        </Link>
+        <Link style={{ width: "100%" }} to="/channels">
+          <MenuItem onClick={handleWallMenuClose}>
+            <ListItemIcon>
+              <RssFeed className="menu-item-button" />
+            </ListItemIcon>
+            <Typography className="menu-item-text">Channels</Typography>
+          </MenuItem>
+        </Link>
+        <br />
+        <Link style={{ width: "100%" }} to="/followings">
+          <MenuItem onClick={handleWallMenuClose}>
+            <ListItemIcon>
+              <People className="menu-item-button" />
+            </ListItemIcon>
+            <Typography className="menu-item-text">Followed Users</Typography>
+          </MenuItem>
+        </Link>
+      </Menu>
+    </div>
+  );
+
   return (
     <div className={classes.grow}>
       {renderTestInfoBar()}
       <AppBar position="static">
         <Toolbar>
-          <Link to="/">
-            <IconButton edge="start" className={classes.menuButton} aria-label="Open drawer">
-              <Tooltip title="Home">
-                <Home className={classes.navIcon} />
-              </Tooltip>
-            </IconButton>
-          </Link>
-          {renderFavoriteWalls()}
-
-          <IconButton
-            className={classes.menuButton}
-            onClick={handleGovClick}
-            aria-controls="gov-menu"
-            aria-haspopup="true"
-          >
-            <Tooltip title="Governing">
-              <LocationCity className={classes.navIcon} />
-            </Tooltip>
-          </IconButton>
-
+          {desktopWallNav()}
+          {mobileWallNav()}
           <Menu id="gov-menu" anchorEl={govAnchorEl} keepMounted open={Boolean(govAnchorEl)} onClose={handleGovClose}>
             <Link style={{ width: "100%" }} to="/gov/representatives">
               <MenuItem onClick={handleGovClose}>
@@ -215,7 +360,9 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
             <Link style={{ width: "100%" }} to="/gov/election">
               <MenuItem onClick={handleGovClose}>
                 <ListItemIcon>
-                  <HowToVote className="menu-item-button" />
+                  <Badge variant="dot" invisible={!props.activeElection} color="secondary">
+                    <HowToVote className="menu-item-button" />
+                  </Badge>
                 </ListItemIcon>
                 <Typography className="menu-item-text">Election</Typography>
               </MenuItem>
@@ -233,7 +380,9 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
             <Link style={{ width: "100%" }} to="/gov/reports">
               <MenuItem onClick={handleGovClose}>
                 <ListItemIcon>
-                  <Report className="menu-item-button" />
+                  <Badge badgeContent={isRepresentative() ? props.unhandledReports : 0} color="secondary">
+                    <Report className="menu-item-button" />
+                  </Badge>
                 </ListItemIcon>
                 <Typography className="menu-item-text">Reports</Typography>
               </MenuItem>
@@ -247,4 +396,26 @@ const HeaderNav: React.FunctionComponent = (props: unknown) => {
   );
 };
 
-export default HeaderNav;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    representatives: store.government.representatives,
+    unhandledReports: store.government.unhandledReports,
+    loadUnhandledReports: store.government.unhandledReports,
+    activeElection: store.government.activeElection,
+    unreadChats: store.chat.unreadChats
+  };
+};
+
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    loadRepresentatives: () => dispatch(loadRepresentatives()),
+    loadUnhandledReports: () => dispatch(loadUnhandledReports()),
+    checkActiveElection: () => dispatch(checkActiveElection()),
+    countUnreadChats: (user: ChromunityUser) => dispatch(countUnreadChatsAction(user))
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(HeaderNav);

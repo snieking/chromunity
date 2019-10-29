@@ -2,6 +2,7 @@ import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 
 export const COLOR_CHROMIA_LIGHTER = '#fbf8ff';
 export const COLOR_CHROMIA_LIGHT = '#f9f6fd';
+export const COLOR_GRAY = '#c0bdc3';
 export const COLOR_CHROMIA_DARK_LIGHTER = '#333037';
 export const COLOR_CHROMIA_DARK = '#1F1A23';
 export const COLOR_CHROMIA_DARKER = '#1e1b23';
@@ -42,13 +43,13 @@ export const darkTheme = createMuiTheme({
                 },
                 '& .MuiOutlinedInput-root': {
                     '& fieldset': {
-                        borderColor: COLOR_STEEL_BLUE,
+                        borderColor: COLOR_PURPLE,
                     },
                     '&:hover fieldset': {
-                        borderColor: COLOR_OFF_WHITE,
+                        borderColor: COLOR_RED,
                     },
                     '&.Mui-focused fieldset': {
-                        borderColor: COLOR_SOFT_PINK,
+                        borderColor: COLOR_PURPLE,
                     },
                     color: COLOR_OFF_WHITE
                 },
@@ -73,19 +74,25 @@ export const darkTheme = createMuiTheme({
             caption: {
                 color: COLOR_YELLOW
             },
+            h1: {
+                color: COLOR_SOFT_PINK,
+                fontFamily: '"Battlefin", "International", "Roboto", "Helvetica", "Arial", "sans-serif"',
+                fontSize: "32px",
+                paddingTop: "20px"
+            },
             h5: {
                 color: COLOR_SOFT_PINK,
                 fontFamily: '"Battlefin", "International", "Roboto", "Helvetica", "Arial", "sans-serif"'
             },
             h6: {
-                color: COLOR_SOFT_PINK,
+                color: COLOR_OFF_WHITE,
                 fontFamily: '"Battlefin", "International", "Roboto", "Helvetica", "Arial", "sans-serif"'
             },
             body1: {
-                color: COLOR_OFF_WHITE
+                color: COLOR_CHROMIA_LIGHT
             },
             body2: {
-                color: COLOR_OFF_WHITE
+                color: COLOR_CHROMIA_LIGHT
             },
             colorTextSecondary: {
                 color: COLOR_OFF_WHITE,
@@ -197,7 +204,7 @@ export const lightTheme = createMuiTheme({
                         borderColor: COLOR_STEEL_BLUE,
                     },
                     '&:hover fieldset': {
-                        borderColor: COLOR_OFF_WHITE,
+                        borderColor: COLOR_RED,
                     },
                     '&.Mui-focused fieldset': {
                         borderColor: COLOR_STEEL_BLUE,
@@ -224,6 +231,12 @@ export const lightTheme = createMuiTheme({
             },
             caption: {
                 color: COLOR_YELLOW
+            },
+            h1: {
+                color: COLOR_STEEL_BLUE,
+                fontFamily: '"Battlefin", "International", "Roboto", "Helvetica", "Arial", "sans-serif"',
+                fontSize: "32px",
+                paddingTop: "20px"
             },
             h5: {
                 color: COLOR_STEEL_BLUE,

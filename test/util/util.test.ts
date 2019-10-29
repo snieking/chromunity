@@ -1,5 +1,12 @@
-import {needsToBeSliced, sortByFrequency, stringToHexColor, timeAgoReadable} from "../../src/util/util";
-import {getTags} from "../../src/util/text-parsing";
+import {
+  needsToBeSliced,
+  printableMinutes,
+  sortByFrequency,
+  stringToHexColor,
+  timeAgoReadable
+} from "../../src/util/util";
+import { getTags, parseEmojis } from "../../src/util/text-parsing";
+import { makeKeyPair } from "../../src/blockchain/CryptoService";
 
 jest.setTimeout(30000);
 
@@ -94,4 +101,85 @@ describe("string to hex color", () => {
         const hex: string = stringToHexColor("hello");
         expect(hex.length).toBe(7);
     })
+});
+
+describe("emoji parsing", () => {
+
+    it("parse smirk emoji", async () => {
+       expect(parseEmojis(":smirk:")).toBe("😏");
+    });
+
+    it("parse normal smiley emoji", async () => {
+        expect(parseEmojis(":D")).toBe("😃");
+    });
+
+    it("parse normal emoji with text around", async () => {
+        expect(parseEmojis("hej :D whatsup?")).toBe("hej 😃 whatsup?");
+    });
+
+    it("parse wink emoji", async () => {
+       expect(parseEmojis(";)")).toBe("😉");
+    });
+
+    it("parse expressionless emoji", async () => {
+        expect(parseEmojis(":|")).toBe("😑");
+    });
+
+    it("parse confounded emoji", async () => {
+        expect(parseEmojis(":s")).toBe("😖");
+    });
+
+    it("parse sweat_smile emoji", async () => {
+        expect(parseEmojis(":')")).toBe("😅");
+    });
+
+    it("parse stuck_out_tongue emoji", async () => {
+        expect(parseEmojis(":p")).toBe("😛");
+    });
+
+    it("parse open mouth emoji", async () => {
+        expect(parseEmojis(":o")).toBe("😮");
+    });
+
+});
+
+describe("printable minutes", () => {
+
+  it ("printable seconds", async () => {
+    expect(printableMinutes(40)).toBe("40s");
+  });
+
+  it("printable minutes and seconds", async () => {
+    expect(printableMinutes(61)).toBe("1m 1s");
+  });
+
+  it("printable minutes and seconds 2", async () => {
+    expect(printableMinutes(179)).toBe("2m 59s");
+  });
+
+});
+
+describe("crypto testing", () => {
+
+    it("crypto logic", async () => {
+       const user1 = makeKeyPair();
+       const user2 = makeKeyPair();
+
+       // User 1 sends invite to user 2
+       //   user2 accepts by adding his pubkey
+       // User 1 creates a membership by encrypting chat private key and storing it in membership
+       // User 2 can now decrypt the chat key when needed to encrypt and decrypt
+
+        // Viktor creates chat
+        //  Creates a keypair for the chat key, and encrypts it with Viktor's pubkey
+        //  [Rell] Creates a chat, and chat_membership with encrypted chat key
+        // Nastya requests to join chat
+        //  [Rell] Nastya creates a chat_join_request with her pubkey
+        // Viktor accepts the request
+        // Viktor encrypts the unencrypted chat key with Nastya's pubkey
+        //  [Rell] Viktor creates a chat_membership, and stores the encrypted chat key in the membership
+        // Nastya can now decrypt the chat key when needed to encrypt and decrypt chat messages
+
+    });
+
 });

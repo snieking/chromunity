@@ -7,7 +7,8 @@ import {
   LinearProgress,
   Paper,
   Tab,
-  Tabs, Theme,
+  Tabs,
+  Theme,
   withStyles,
   WithStyles
 } from "@material-ui/core";
@@ -17,7 +18,6 @@ import { RouteComponentProps } from "react-router";
 import ProfileCard from "../user/ProfileCard";
 import TopicOverviewCard from "../topic/TopicOverviewCard";
 import LoadMoreButton from "../buttons/LoadMoreButton";
-import { getRepresentatives } from "../../blockchain/RepresentativesService";
 import TopicReplyOverviewCard from "../topic/TopicReplyOverviewCard";
 import { stringToHexColor } from "../../util/util";
 import { connect } from "react-redux";
@@ -28,13 +28,14 @@ import {
   loadUserReplies,
   loadUserFollowedChannels
 } from "../../redux/actions/UserPageActions";
-import { initGA, pageView } from "../../GoogleAnalytics";
+import { pageView } from "../../GoogleAnalytics";
 
-const styles = (theme: Theme) => createStyles({
-  text: {
-    color: theme.palette.primary.main
-  }
-});
+const styles = (theme: Theme) =>
+  createStyles({
+    text: {
+      color: theme.palette.primary.main
+    }
+  });
 
 interface MatchParams {
   userId: string;
@@ -83,9 +84,7 @@ const UserWall = withStyles(styles)(
       this.props.loadUserTopics(topicsPageSize);
       this.props.loadUserReplies(topicsPageSize);
       this.props.loadUserFollowedChannels();
-      getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
 
-      initGA();
       pageView();
     }
 
@@ -114,21 +113,9 @@ const UserWall = withStyles(styles)(
 
     renderUserContent() {
       if (this.state.activeTab === 0) {
-        return this.props.topics.map(topic => (
-          <TopicOverviewCard
-            key={topic.id}
-            topic={topic}
-            isRepresentative={this.state.representatives.includes(topic.author)}
-          />
-        ));
+        return this.props.topics.map(topic => <TopicOverviewCard key={topic.id} topic={topic} />);
       } else if (this.state.activeTab === 1) {
-        return this.props.replies.map(reply => (
-          <TopicReplyOverviewCard
-            key={reply.id}
-            reply={reply}
-            isRepresentative={this.state.representatives.includes(reply.author)}
-          />
-        ));
+        return this.props.replies.map(reply => <TopicReplyOverviewCard key={reply.id} reply={reply} />);
       } else if (this.state.activeTab === 2 && this.props.userFollowedChannels.length > 0) {
         return (
           <Paper>

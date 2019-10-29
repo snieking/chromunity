@@ -127,7 +127,7 @@ describe("Topic wall [FOLLOWED USERS] saga tests", () => {
     const dispatchedActions: TopicWallActions[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       wallType: WallType.USER,
-      followedUsers: { topics: createFakeTopics(0), updated: 0 }
+      followedUsers: { topics: createFakeTopics(0), updated: 0, couldExistOlder: true }
     });
 
     await runSaga(fakeStore, loadFollowedUsersTopics, {

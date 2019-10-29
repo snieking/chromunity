@@ -1,8 +1,14 @@
 function get_verified_user(name, descriptor_id: byte_array): user {
-    val user = user@{ .name == name };
+    val user = user@{ .name == name.lower_case() };
     ft3.require_auth(user.account, descriptor_id, ["A"]);
-    //require(is_signer(user.pubkey));
-    require(user_meta@{ user }.suspended_until < op_context.last_block_time);
+    require(
+    	user_meta@{ user }.suspended_until < op_context.last_block_time, 
+    	app_error(error_type.USER_SUSPENDED, "Get verified user")
+    );
 
     return user;
+}
+
+function assert_admin(user) {
+	require(admin@?{ user }, app_error(error_type.USER_UNAUTHORIZED, "Assert admin"));
 }

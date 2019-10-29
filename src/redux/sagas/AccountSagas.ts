@@ -13,6 +13,7 @@ import { BLOCKCHAIN } from "../../blockchain/Postchain";
 import { accountAddAccountId } from "../actions/AccountActions";
 import { getKeyPair, setUsername, storeKeyPair } from "../../util/user-util";
 import { makeKeyPair } from "../../blockchain/CryptoService";
+import { gaSocialEvent } from "../../GoogleAnalytics";
 
 export function* accountWatcher() {
   yield takeLatest(AccountActionTypes.ACCOUNT_REGISTER_CHECK, checkIfRegistered);
@@ -38,24 +39,22 @@ function* registerAccount(action: AccountRegisterAction) {
   ]);
 
   const keyPair = retrieveKeyPair();
+  storeKeyPair(keyPair);
 
   const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
 
   const user = new User(keyPair, authDescriptor);
   const bc = yield BLOCKCHAIN;
   yield bc.call(user, "register_user", action.username, authDescriptor.toGTV(), walletAuthDescriptor.toGTV());
-  authorizeUser(action.username, keyPair);
+  gaSocialEvent("Register", action.username);
+  authorizeUser(action.username);
 }
 
 function* walletLogin(username: string) {
   let keyPair: KeyPair = new KeyPair(makeKeyPair().privKey.toString("hex"));
   storeKeyPair(keyPair);
-  const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
 
-  const user = new User(keyPair, authDescriptor);
   let accountId = yield getAccountId(username);
-  const blockchain = yield BLOCKCHAIN;
-  checkIfAuthDescriptorAdded(blockchain, user, accountId, username, keyPair);
 
   const returnUrl = encodeURIComponent(`${config.chromunityUrl}/user/authorize/${username}/${accountId}`);
   window.location.replace(
@@ -74,15 +73,14 @@ function* loginAccount(action: AccountLoginAction) {
 
   const blockchain = yield BLOCKCHAIN;
 
-  checkIfAuthDescriptorAdded(blockchain, user, action.accountId, action.username, keyPair);
+  checkIfAuthDescriptorAdded(blockchain, user, action.accountId, action.username);
 }
 
 async function checkIfAuthDescriptorAdded(
   blockchain: any,
   user: User,
   accountId: string,
-  username: string,
-  keyPair: KeyPair
+  username: string
 ) {
   const accounts = await blockchain.getAccountsByAuthDescriptorId(user.authDescriptor.hash(), user);
 
@@ -91,9 +89,9 @@ async function checkIfAuthDescriptorAdded(
   });
 
   if (isAdded) {
-    authorizeUser(username, keyPair);
+    authorizeUser(username);
   } else {
-    setTimeout(() => checkIfAuthDescriptorAdded(blockchain, user, accountId, username, keyPair), 3000);
+    setTimeout(() => checkIfAuthDescriptorAdded(blockchain, user, accountId, username), 3000);
   }
 }
 
@@ -107,7 +105,8 @@ function retrieveKeyPair(): KeyPair {
   return keyPair;
 }
 
-function authorizeUser(username: string, keyPair: KeyPair) {
+function authorizeUser(username: string) {
   setUsername(username);
+  gaSocialEvent("Login", username);
   window.location.href = "/";
 }

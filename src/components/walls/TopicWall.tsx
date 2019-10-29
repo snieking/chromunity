@@ -7,7 +7,6 @@ import NewTopicButton from "../buttons/NewTopicButton";
 import LoadMoreButton from "../buttons/LoadMoreButton";
 import { TrendingChannels } from "../tags/TrendingTags";
 import ChromiaPageHeader from "../common/ChromiaPageHeader";
-import { getRepresentatives } from "../../blockchain/RepresentativesService";
 import { getMutedUsers } from "../../blockchain/UserService";
 import { TOPIC_VIEW_SELECTOR_OPTION } from "./WallCommon";
 import { getUser } from "../../util/user-util";
@@ -24,13 +23,15 @@ import {
   loadOlderFollowedUsersTopics
 } from "../../redux/actions/WallActions";
 import { connect } from "react-redux";
-import { initGA, pageView } from "../../GoogleAnalytics";
+import { pageView } from "../../GoogleAnalytics";
+import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
 
 interface Props {
   type: string;
   loading: boolean;
   topics: Topic[];
   couldExistOlderTopics: boolean;
+  representatives: string[];
   loadAllTopics: typeof loadAllTopicWall;
   loadOlderTopics: typeof loadOlderAllTopics;
   loadAllTopicsByPopularity: typeof loadAllTopicsByPopularity;
@@ -40,10 +41,10 @@ interface Props {
   loadFollowedChannelsTopics: typeof loadFollowedChannelsTopicWall;
   loadOlderFollowedChannelsTopics: typeof loadOlderFollowedChannelsTopics;
   loadFollowedChannelsTopicsByPopularity: typeof loadFollowedChannelsTopicsByPopularity;
+  loadRepresentatives: typeof loadRepresentatives;
 }
 
 interface State {
-  representatives: string[];
   selector: TOPIC_VIEW_SELECTOR_OPTION;
   popularSelector: TOPIC_VIEW_SELECTOR_OPTION;
   mutedUsers: string[];
@@ -62,7 +63,6 @@ class TopicWall extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      representatives: [],
       selector: TOPIC_VIEW_SELECTOR_OPTION.RECENT,
       popularSelector: TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK,
       mutedUsers: [],
@@ -87,7 +87,7 @@ class TopicWall extends React.Component<Props, State> {
     } else if (this.props.type === "tagFollowings") {
       return "Trending Channels";
     } else {
-      return "Topics";
+      return "All Topics";
     }
   }
 
@@ -139,14 +139,8 @@ class TopicWall extends React.Component<Props, State> {
           <br />
           <br />
           {this.props.topics.map(topic => {
-            if (!this.state.mutedUsers.includes(topic.author)) {
-              return (
-                <TopicOverviewCard
-                  key={"card-" + topic.id}
-                  topic={topic}
-                  isRepresentative={this.state.representatives.includes(topic.author)}
-                />
-              );
+            if (!this.state.mutedUsers.includes(topic.author) && !topic.removed) {
+              return <TopicOverviewCard key={"card-" + topic.id} topic={topic} />;
             } else {
               return <div />;
             }
@@ -167,9 +161,7 @@ class TopicWall extends React.Component<Props, State> {
       getMutedUsers(this.state.user).then(users => this.setState({ mutedUsers: users }));
     }
     this.retrieveLatestTopics(false);
-    getRepresentatives().then(representatives => this.setState({ representatives: representatives }));
 
-    initGA();
     pageView();
   }
 
@@ -227,7 +219,7 @@ class TopicWall extends React.Component<Props, State> {
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
-    loadAllTopics: (pageSize: number) => dispatch(loadAllTopicWall(pageSize)),
+    loadAllTopics: (pageSize: number, ignoreCache: boolean) => dispatch(loadAllTopicWall(pageSize, ignoreCache)),
     loadOlderTopics: (pageSize: number) => dispatch(loadOlderAllTopics(pageSize)),
     loadAllTopicsByPopularity: (timestamp: number, pageSize: number) =>
       dispatch(loadAllTopicsByPopularity(timestamp, pageSize)),
@@ -237,12 +229,13 @@ const mapDispatchToProps = (dispatch: any) => {
       dispatch(loadOlderFollowedUsersTopics(username, pageSize)),
     loadFollowedUsersTopicsByPopularity: (username: string, timestamp: number, pageSize: number) =>
       dispatch(loadFollowedUsersTopicsByPopularity(username, timestamp, pageSize)),
-    loadFollowedChannelsTopics: (username: string, pageSize: number) =>
-      dispatch(loadFollowedChannelsTopicWall(username, pageSize)),
+    loadFollowedChannelsTopics: (username: string, pageSize: number, ignoreCache: boolean) =>
+      dispatch(loadFollowedChannelsTopicWall(username, pageSize, ignoreCache)),
     loadOlderFollowedChannelsTopics: (username: string, pageSize: number) =>
       dispatch(loadOlderFollowedChannelsTopics(username, pageSize)),
     loadFollowedChannelsTopicsByPopularity: (username: string, timestamp: number, pageSize: number) =>
-      dispatch(loadFollowedChannelsTopicsByPopularity(username, timestamp, pageSize))
+      dispatch(loadFollowedChannelsTopicsByPopularity(username, timestamp, pageSize)),
+    loadRepresentatives: () => dispatch(loadRepresentatives())
   };
 };
 
@@ -250,7 +243,8 @@ const mapStateToProps = (store: ApplicationState) => {
   return {
     topics: store.topicWall.topics,
     loading: store.topicWall.loading,
-    couldExistOlderTopics: store.topicWall.couldExistOlder
+    couldExistOlderTopics: store.topicWall.couldExistOlder,
+    representatives: store.government.representatives
   };
 };
 
