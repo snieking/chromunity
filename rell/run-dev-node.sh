@@ -10,4 +10,4 @@ if [[ $1 == "WIPE_DB" ]]; then
 fi
 
 
-exec postchain-node/postchain.sh run-node-auto -d config
+exec postchain-node/postchain.sh run-node -cid 1 -nc config/node-config.properties
