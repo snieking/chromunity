@@ -1,0 +1,18 @@
+import ft3_acc: lib.ft3.account;
+import user.meta;
+import util;
+
+function get_verified_user(name, descriptor_id: byte_array): user {
+    val user = user@{ .name == name.lower_case() };
+    ft3_acc.require_auth(user.account, descriptor_id, ["A"]);
+    require(
+    	meta.user_meta@{ user }.suspended_until < op_context.last_block_time,
+    	util.app_error(util.error_type.USER_SUSPENDED, "Get verified user")
+    );
+
+    return user;
+}
+
+function assert_admin(user) {
+	require(admin@?{ user }, util.app_error(util.error_type.USER_UNAUTHORIZED, "Assert admin"));
+}

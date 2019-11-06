@@ -1,0 +1,31 @@
+import user;
+
+entity topic {
+    key id: text;
+    index author: user.user;
+    timestamp;
+    mutable last_modified: timestamp;
+    index last_modified;
+    mutable title: name;
+    mutable message: text;
+    mutable removed: boolean = false;
+    index removed;
+}
+
+entity topic_reply {
+    key id: text;
+    index topic;
+    index author: user.user;
+    index timestamp;
+    is_sub_reply: boolean = false;
+    index is_sub_reply;
+    mutable message: text;
+    mutable removed: boolean = false;
+}
+
+entity sub_reply {
+    key parent_reply: topic_reply, child_reply: topic_reply;
+}
+
+import topic.rating;
+import topic.subscription;

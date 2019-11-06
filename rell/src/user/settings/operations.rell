@@ -1,0 +1,11 @@
+import user;
+
+operation create_user_settings(name, descriptor_id: byte_array, avatar: text, description: text) {
+    val user = user.get_verified_user(name, descriptor_id);
+    create user_settings(user, avatar = avatar, description = description);
+}
+
+operation update_user_settings(name, descriptor_id: byte_array, avatar: text, description: text) {
+    val user = user.get_verified_user(name, descriptor_id);
+    update user_settings@{ .user == user }( avatar = avatar, description = description );
+}

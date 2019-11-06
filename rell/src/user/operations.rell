@@ -1,0 +1,21 @@
+import ft3_acc: lib.ft3.account;
+
+import user.settings;
+import user.meta;
+
+operation register_user(name, ft3_acc.auth_descriptor, vault_auth_descriptor: ft3_acc.auth_descriptor) {
+    val account_id = x''; //FIXME ft3_acc.create_account_with_auth(ft3_acc.auth_descriptor);
+    val account = ft3_acc.account @ { account_id };
+    ft3_acc._add_auth_descriptor(account, vault_auth_descriptor);
+
+    if (name == "admin") {
+        val admin = create user(name = name.lower_case(), display_name = name, account);
+        create admin(admin);
+        create settings.user_settings(admin, avatar = "" , description = "");
+        create meta.user_meta(admin, times_suspended = 0, suspended_until = 0);
+    } else {
+        val user = create user(name = name.lower_case(), display_name = name, account);
+        create settings.user_settings(user, avatar = "" , description = "");
+        create meta.user_meta(user, times_suspended = 0, suspended_until = 0);
+    }
+}

@@ -1,0 +1,28 @@
+import acc: ^.account;
+
+@log entity payment_history_entry {
+    index acc.account, asset;
+    delta: integer;
+
+    // helps to locate exact position of payment entry in transaction
+    op_index: integer;
+    is_input: boolean;
+    entry_index: integer;
+}
+
+query get_payment_history(account_id: byte_array, after_block: integer) {
+    return payment_history_entry @* {
+        acc.account @ { account_id },
+        .transaction.block.block_height > after_block
+    } (
+        delta = .delta,
+        asset = .asset.name,
+        asset_id = .asset.id,
+        is_input = .is_input,
+        timestamp = .transaction.block.timestamp,
+        block_height = .transaction.block.block_height,
+        entry_index = .entry_index,
+        tx_rid = .transaction.tx_rid,
+        tx_data = .transaction.tx_data
+    );
+}

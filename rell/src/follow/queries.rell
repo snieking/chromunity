@@ -1,0 +1,9 @@
+import user;
+
+query get_user_followers(name) {
+    return follow@*{ .follows == user.user @ { .name == name } }( .follower.name );
+}
+
+query get_user_follows(name) {
+    return follow@*{ .follower == user.user@{ .name == name } } ( .follows.name );
+}

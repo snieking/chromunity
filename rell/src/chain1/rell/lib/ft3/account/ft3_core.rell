@@ -1,4 +1,0 @@
-include "account/main";
-include "asset";
-include "history";
-include "transfer";
