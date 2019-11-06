@@ -1,3 +1,6 @@
+@mount('ft3')
+module;
+
 struct auth_descriptor {
     auth_type: text;
     participants: list<byte_array>;
