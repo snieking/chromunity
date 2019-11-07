@@ -79,7 +79,6 @@ const EditMessageButton = withStyles(styles)(
       event.stopPropagation();
       this.setState({ message: parseEmojis(event.target.value) });
     }
-  }
 
     submit() {
       this.toggleDialog();
