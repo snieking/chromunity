@@ -1,8 +1,0 @@
-class user_meta {
-    key user;
-    mutable times_suspended: integer;
-    mutable suspended_until: timestamp;
-}
-
-include 'operations';
-include 'queries';

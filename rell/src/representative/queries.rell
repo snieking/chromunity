@@ -1,0 +1,29 @@
+import election;
+
+query get_representatives() {
+    val election = election.representative_election@?{ .completed == true } ( .id, -sort .timestamp ) limit 1;
+
+    // If no election yes, then admin is technically the only representative
+    if (election == null) {
+        return ["admin"];
+    }
+
+    return representative@*{
+        .representative_election.id == election.id
+    } ( .user.name );
+}
+
+query get_all_representative_actions(timestamp, page_size: integer) {
+    return representative_action@*{
+        .timestamp < timestamp
+    } (
+        .id,
+        representative = .representative.user.name,
+        -sort .timestamp,
+        .action
+    ) limit page_size;
+}
+
+query get_number_of_times_representative(name) {
+    return representative@*{ .user.name == name } ( .representative_election.id ).size();
+}

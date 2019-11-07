@@ -1,0 +1,5 @@
+import topic;
+
+query get_subscribers_for_topic(id: text) {
+    return subscription@*{ topic.topic@{ .id == id }} ( .user.name );
+}

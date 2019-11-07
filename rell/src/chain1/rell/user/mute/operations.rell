@@ -1,9 +1,0 @@
-operation toggle_mute(username: name, descriptor_id: byte_array, name, muted: boolean) {
-    val user = get_verified_user(username, descriptor_id);
-
-    if (muted) {
-        create user_mute(user = user, muted_user = user@{ .name == name });
-    } else {
-        delete user_mute@{ .user == user, .muted_user == user@{ .name == name }};
-    }
-}

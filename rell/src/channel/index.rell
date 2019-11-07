@@ -1,0 +1,12 @@
+import user;
+import topic;
+
+entity channel {
+    key name, topic.topic;
+    index timestamp;
+    display_name: name;
+}
+
+entity channel_following {
+    key user.user, name;
+}

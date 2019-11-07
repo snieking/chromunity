@@ -1,0 +1,59 @@
+import acc: ^.account;
+
+entity asset {
+    id: byte_array;
+    key id;
+    key name;
+    issuing_chain_rid: byte_array;
+}
+
+entity balance {
+    key acc.account, asset;
+    mutable amount: integer = 0;
+}
+
+function ensure_balance(acc.account, asset): balance {
+    val balance = balance @? {asset, account};
+    if (balance != null) {
+       return balance;
+    }
+    else return create balance(account, asset, amount = 0);
+}
+
+function register_asset (name, issuing_chain_rid: byte_array): asset {
+   val id = (name, issuing_chain_rid).hash();
+   return create asset (id, name, issuing_chain_rid);
+}
+
+function _get_asset_balances(account_id: byte_array): list<(id:byte_array,name:text,amount:integer,chain_id:byte_array)> {
+    return balance @* { .account.id == account_id } (
+      id = .asset.id,
+      name = .asset.name,
+      amount = .amount,
+      chain_id = .asset.issuing_chain_rid
+    );
+}
+
+query get_asset_balances(account_id: byte_array) {
+    return _get_asset_balances(account_id);
+}
+
+query get_asset_balance(account_id: byte_array, asset_id: byte_array) {
+    return balance @? {
+        .account.id == account_id,
+        .asset.id == asset_id
+    } (
+        id = .asset.id,
+        name = .asset.name,
+        amount = .amount,
+        chain_id = .asset.issuing_chain_rid
+    );
+}
+
+query get_asset_by_name(name) {
+    return asset @* { name } (
+        .id,
+        .name,
+        .issuing_chain_rid
+    );
+}

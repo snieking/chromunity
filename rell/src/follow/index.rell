@@ -1,0 +1,5 @@
+import user;
+
+entity follow {
+    key follower: user.user, follows: user.user;
+}

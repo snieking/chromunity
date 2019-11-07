@@ -1,8 +1,0 @@
-class user_settings {
-    key user;
-    mutable avatar: text;
-    mutable description: text;
-}
-
-include 'operations';
-include 'queries';
