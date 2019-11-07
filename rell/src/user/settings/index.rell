@@ -1,0 +1,7 @@
+import user;
+
+entity user_settings {
+    key user.user;
+    mutable avatar: text;
+    mutable description: text;
+}

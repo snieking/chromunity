@@ -1,0 +1,231 @@
+import channel;
+import follow;
+import topic.rating;
+import user;
+
+query get_topics_after_timestamp(timestamp, page_size: integer) {
+    return topic @* {
+        .last_modified > timestamp,
+        .removed == false
+    }(
+        .id,
+        author=.author.display_name,
+        .title,
+        .message,
+        -sort .last_modified,
+        .removed,
+        .timestamp
+    ) limit page_size;
+}
+
+query get_topics_prior_to_timestamp(timestamp, page_size: integer) {
+    return topic @* {
+        .last_modified < timestamp,
+        .removed == false
+    }(
+        .id,
+        author=.author.display_name,
+        .title,
+        .message,
+        -sort .last_modified,
+        .removed,
+        .timestamp
+    ) limit page_size;
+}
+
+query get_topic_replies_prior_to_timestamp(topic_id: text, timestamp, page_size: integer) {
+    return topic_reply@*{
+        topic@{ .id == topic_id },
+        .timestamp < timestamp,
+        .is_sub_reply == false
+    }(
+        .id,
+        topic_id = .topic.id,
+        author=.author.display_name,
+        .message,
+        .is_sub_reply,
+        .removed,
+        -sort .timestamp
+    ) limit page_size;
+}
+
+query get_topic_replies_after_timestamp(topic_id: text, timestamp, page_size: integer) {
+    return topic_reply@*{
+        topic@{ .id == topic_id },
+        .timestamp > timestamp,
+        .is_sub_reply == false
+    }(
+        .id,
+        topic_id = .topic.id,
+        author=.author.display_name,
+        .message,
+        .is_sub_reply,
+        .removed,
+        -sort .timestamp
+    ) limit page_size;
+}
+
+query get_topic_replies_by_user_prior_to_timestamp(name, timestamp, page_size: integer) {
+    return topic_reply@*{ .author.name == name, .timestamp < timestamp } (
+        .id,
+        topic_id = .topic.id,
+        author=.author.display_name,
+        .message,
+        .is_sub_reply,
+        .removed,
+        -sort .timestamp
+    ) limit page_size;
+}
+
+query count_topics_by_user(name): integer {
+    return topic@*{ .author.name == name }( .id ).size();
+}
+
+query count_replies_by_user(name): integer {
+    return topic_reply@*{ .author.name == name }( .id ).size();
+}
+
+query get_sub_replies(parent_reply_id: text) {
+    return sub_reply@*{ .parent_reply.id == parent_reply_id } (
+        id=.child_reply.id,
+        author=.child_reply.author.display_name,
+        message=.child_reply.message,
+        is_sub_reply=.child_reply.is_sub_reply,
+        removed = .child_reply.removed,
+        sort timestamp=.child_reply.timestamp
+    );
+}
+
+query get_topics_by_user_id_prior_to_timestamp(name, timestamp, page_size: integer) {
+    return topic@*{
+        user.user@{ .name == name },
+        .last_modified < timestamp
+    }(
+        .id,
+        author=.author.display_name,
+        .title,
+        .message,
+        -sort .last_modified,
+        .removed,
+        .timestamp
+    ) limit page_size;
+}
+
+query get_topics_from_follows_after_timestamp(name, timestamp, page_size: integer) {
+    return (topic, follow.follow) @* {
+            follow.follower.name == name.lower_case(),
+            follow.follows == topic.author,
+            topic.last_modified > timestamp,
+            topic.removed == false
+    }(
+        topic.id,
+        author=topic.author.display_name,
+        topic.title,
+        topic.message,
+        topic.removed,
+        -sort topic.last_modified,
+        topic.timestamp
+    ) limit page_size;
+}
+
+query get_topics_from_follows_prior_to_timestamp(name, timestamp, page_size: integer) {
+    return (topic, follow.follow) @* {
+        follow.follower.name == name.lower_case(),
+        follow.follows == topic.author,
+        topic.last_modified < timestamp,
+        topic.removed == false
+    }(
+        topic.id,
+        author=topic.author.display_name,
+        topic.title,
+        topic.message,
+        topic.removed,
+        -sort topic.last_modified,
+        topic.timestamp
+    ) limit page_size;
+}
+
+query get_topic_by_id(id: text) {
+    return topic@{
+        .id == id
+    }(
+        .id,
+        author=.author.display_name,
+        .title,
+        .message,
+        .removed,
+        -sort .last_modified,
+        .timestamp
+    );
+}
+
+query get_all_topics_by_stars_since_timestamp(timestamp, page_size: integer) {
+    return rating.tmp_topic_rating@*{
+        .topic.last_modified > timestamp,
+        .topic.removed == false
+    } (
+        -sort .stars,
+        id = .topic.id,
+        author=.topic.author.display_name,
+        title=.topic.title,
+        message=.topic.message,
+        last_modified=.topic.last_modified,
+        timestamp=.topic.timestamp,
+        removed=.topic.removed
+    ) limit page_size;
+}
+
+query get_topics_by_follows_and_stars_since_timestamp(name, timestamp, page_size: integer) {
+    return (rating.tmp_topic_rating, follow.follow) @*{
+            follow.follower.name == name,
+            tmp_topic_rating.topic.author == follow.follows,
+            tmp_topic_rating.topic.last_modified > timestamp,
+            tmp_topic_rating.topic.removed == false
+        } (
+        -sort tmp_topic_rating.stars,
+        id = tmp_topic_rating.topic.id,
+        author=tmp_topic_rating.topic.author.display_name,
+        title=tmp_topic_rating.topic.title,
+        message=tmp_topic_rating.topic.message,
+        last_modified=tmp_topic_rating.topic.last_modified,
+        timestamp=tmp_topic_rating.topic.timestamp,
+        removed=tmp_topic_rating.topic.removed
+    ) limit page_size;
+}
+
+query get_topics_by_channel_after_timestamp_sorted_by_popularity(name, timestamp, page_size: integer) {
+    return (rating.tmp_topic_rating, channel.channel)@*{
+        name == channel.name,
+        tmp_topic_rating.topic == channel.topic,
+        tmp_topic_rating.topic.last_modified > timestamp,
+        tmp_topic_rating.topic.removed == false
+    } (
+        -sort .stars,
+        id = channel.topic.id,
+        author=channel.topic.author.display_name,
+        title=channel.topic.title,
+        message=channel.topic.message,
+        last_modified=channel.topic.last_modified,
+        timestamp=channel.topic.timestamp,
+        removed=channel.topic.removed
+    ) limit page_size;
+}
+
+query get_topics_by_followed_channels_after_timestamp_sorted_by_popularity(name, timestamp, page_size: integer) {
+    return (rating.tmp_topic_rating, channel.channel_following, channel.channel)@*{
+        channel_following.user == user.user@{ name },
+        channel_following.name == channel.name,
+        tmp_topic_rating.topic == channel.topic,
+        tmp_topic_rating.topic.last_modified > timestamp,
+        tmp_topic_rating.topic.removed == false
+    } (
+        -sort .stars,
+        id = channel.topic.id,
+        author=channel.topic.author.display_name,
+        title=channel.topic.title,
+        message=channel.topic.message,
+        last_modified=channel.topic.last_modified,
+        timestamp=channel.topic.timestamp,
+        removed=channel.topic.removed
+    ) limit page_size;
+}

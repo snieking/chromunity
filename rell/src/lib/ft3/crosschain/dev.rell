@@ -1,0 +1,8 @@
+import ft3: ^.core;
+import ^.core.dev_op;
+
+operation dev_register_xc_asset (name, issuing_chain_rid: byte_array, origin_chain_rid: byte_array) {
+    dev_op.require_dev();
+    val asset = ft3.register_asset(name, issuing_chain_rid);
+    create asset_origin (asset, origin_chain_rid);
+}

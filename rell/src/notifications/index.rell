@@ -1,0 +1,9 @@
+import user;
+
+entity notification {
+    key id: text, user.user;
+    trigger: text;
+    content: text;
+    mutable read: boolean;
+    index timestamp;
+}

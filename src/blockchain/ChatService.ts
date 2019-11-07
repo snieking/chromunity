@@ -2,6 +2,14 @@ import { BLOCKCHAIN, GTX } from "./Postchain";
 import { Chat, ChatMessage, ChromunityUser } from "../types";
 import { gaRellOperationTiming } from "../GoogleAnalytics";
 import { createStopwatchStarted, handleGADuringException, stopStopwatch, uniqueId } from "../util/util";
+import * as BoomerangCache from "boomerang-cache";
+
+const UNREAD_CHATS_KEY = "unreadChats";
+
+const chatCache = BoomerangCache.create("chat-bucket", {
+  storage: "session",
+  encrypt: false
+});
 
 export function getUserPubKey(username: string): Promise<string> {
   return GTX.query("get_chat_user_pubkey", { username: username });
@@ -125,6 +133,7 @@ export function leaveChat(user: ChromunityUser, chatId: string) {
     .catch(error => handleGADuringException(operation, sw, error));
 }
 export function markChatAsRead(user: ChromunityUser, chatId: string) {
+  chatCache.remove(UNREAD_CHATS_KEY);
   const operation = "update_last_opened_timestamp";
 
   const sw = createStopwatchStarted();
@@ -135,7 +144,8 @@ export function markChatAsRead(user: ChromunityUser, chatId: string) {
       .addOperation("nop", uniqueId())
       .build(user.ft3User.authDescriptor.signers)
       .sign(user.ft3User.keyPair)
-      .post())
+      .post()
+  )
     .then((promise: unknown) => {
       gaRellOperationTiming(operation, stopStopwatch(sw));
       return promise;
@@ -195,5 +205,12 @@ export function getChatUsers(): Promise<string[]> {
 }
 
 export function countUnreadChats(username: string): Promise<number> {
-  return GTX.query("count_unread_chats", { username: username });
+  const count = chatCache.get(UNREAD_CHATS_KEY);
+
+  return count != null
+    ? new Promise<number>(resolve => resolve(count))
+    : GTX.query("count_unread_chats", { username: username }).then((count: number) => {
+        chatCache.set(UNREAD_CHATS_KEY, count, 60);
+        return count;
+      });
 }

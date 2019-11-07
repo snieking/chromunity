@@ -1,0 +1,6 @@
+import user;
+import topic;
+
+entity subscription {
+    key topic.topic, user.user;
+}

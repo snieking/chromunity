@@ -1,0 +1,67 @@
+import user;
+import representative;
+
+operation trigger_election(admin_user: text, descriptor_id: byte_array, id: text, timestamp) {
+    val u = user.get_verified_user(admin_user, descriptor_id);
+    user.assert_admin(u);
+
+    val currentElection = representative_election @? { .completed == false };
+
+    if (currentElection == null) {
+        create representative_election(id, timestamp, false);
+    }
+}
+
+operation complete_election(admin_user: text, descriptor_id: byte_array, representatives: set<text>) {
+    val op_user = user.get_verified_user(admin_user, descriptor_id);
+    user.assert_admin(op_user);
+
+    val currentElection = representative_election @ { .completed == false };
+    update currentElection ( completed = true );
+
+    for (representative in representatives) {
+        val user = user.user@{ .name == representative };
+        create representative.representative(user, currentElection);
+    }
+}
+
+operation vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: name) {
+    val user = user.get_verified_user(voter, descriptor_id);
+
+    val currentElection = representative_election @ { .completed == false };
+    create representative_election_vote(
+        user,
+        representative_election_candidate@{ user.user@{ .name == candidate }, currentElection }
+    );
+}
+
+operation update_vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: name) {
+    val user = user.get_verified_user(voter, descriptor_id);
+
+    val currentElection = representative_election @ { .completed == false };
+    val election_candidate = representative_election_candidate@{
+        currentElection,
+        user.user@{ .name == candidate }
+    };
+
+    delete representative_election_vote@?{
+        .user == user,
+        election_candidate
+    };
+
+    create representative_election_vote(
+        user,
+        representative_election_candidate@{
+            .user.name == candidate,
+            currentElection
+        }
+    );
+}
+
+operation sign_up_for_election(name, descriptor_id: byte_array) {
+    val user = user.get_verified_user(name, descriptor_id);
+
+    val currentElection = representative_election @ { .completed == false };
+
+    create representative_election_candidate(currentElection, user);
+}

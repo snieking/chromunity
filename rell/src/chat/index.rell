@@ -1,0 +1,40 @@
+import user;
+
+entity chat {
+	key id: text;
+	mutable title: text;
+	timestamp;
+}
+
+entity chat_user {
+	key user.user;
+	rsa_pubkey: text;
+}
+
+entity chat_membership {
+	key chat, member: chat_user;
+	encrypted_chat_key: text;
+	mutable last_opened: timestamp = 0;
+}
+
+entity chat_message {
+	index chat;
+	index sender: chat_user;
+	index timestamp;
+	encrypted_msg: text;
+}
+
+struct chat_record {
+	id: text;
+	title: text;
+	last_message: message_record?;
+	encrypted_chat_key: text;
+	timestamp;
+	last_opened: timestamp;
+}
+
+struct message_record {
+	sender: name;
+	timestamp;
+	encrypted_msg: text;
+}

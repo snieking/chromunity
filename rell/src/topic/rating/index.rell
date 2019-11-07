@@ -1,0 +1,17 @@
+import user;
+import topic;
+
+entity topic_star_rating {
+    key topic.topic, user.user;
+}
+
+// To be deleted when GROUP BY and COUNT is supported, then will use topic_star_rating instead
+entity tmp_topic_rating {
+    key topic.topic;
+    mutable stars: integer;
+    index stars;
+}
+
+entity reply_star_rating {
+    key topic.topic_reply, user.user;
+}

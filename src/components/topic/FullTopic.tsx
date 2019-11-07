@@ -19,9 +19,9 @@ import {
 } from "@material-ui/core";
 
 import { RouteComponentProps } from "react-router";
-import ReplyTopicButton from "../buttons/ReplyTopicButton";
 import EditMessageButton from "../buttons/EditMessageButton";
 import {
+  createTopicReply,
   deleteTopic,
   getTopicById,
   getTopicRepliesAfterTimestamp,
@@ -42,6 +42,7 @@ import {
   Notifications,
   NotificationsActive,
   RemoveCircle,
+  Reply,
   Report,
   StarBorder,
   StarRate,
@@ -175,6 +176,8 @@ const FullTopic = withStyles(styles)(
       this.closeDeleteTopic = this.closeDeleteTopic.bind(this);
       this.deleteTopic = this.deleteTopic.bind(this);
       this.renderDeleteButton = this.renderDeleteButton.bind(this);
+      this.toggleReplyBox = this.toggleReplyBox.bind(this);
+      this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
     }
 
     componentDidMount(): void {
@@ -342,7 +345,7 @@ const FullTopic = withStyles(styles)(
           </Link>
           <br />
           <div style={{ float: "right" }}>
-            <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} name={this.state.topic.author}/>
+            <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} name={this.state.topic.author} />
           </div>
         </div>
       );
@@ -397,6 +400,12 @@ const FullTopic = withStyles(styles)(
           ) : (
             <div />
           )}
+
+          <IconButton onClick={this.toggleReplyBox}>
+            <Tooltip title="Reply">
+              <Reply className={this.state.replyBoxOpen ? this.props.classes.iconOrange : ""} />
+            </Tooltip>
+          </IconButton>
 
           {this.renderDeleteButton()}
 
@@ -530,19 +539,13 @@ const FullTopic = withStyles(styles)(
     renderTopic() {
       return (
         <div className={this.state.topic.removed ? "removed" : ""}>
-          <Card raised={true} key={this.state.topic.id} className="topic-card">
+          <Card raised={true} key={this.state.topic.id}>
             {this.renderCardContent(this.state.topic.message)}
             {this.renderCardActions()}
+            {this.state.replyBoxOpen ? this.renderReplyForm() : <div />}
           </Card>
-          {this.state.replyBoxOpen ? this.renderReplyBox() : <div />}
         </div>
       );
-    }
-
-    renderReplyBox() {
-      if (this.state.replyBoxOpen) {
-        return <Card key={"reply-box"}>{this.renderReplyForm()}</Card>;
-      }
     }
 
     toggleReplyBox(): void {
@@ -555,42 +558,49 @@ const FullTopic = withStyles(styles)(
 
     renderReplyForm() {
       return (
-        <div className="reply-container">
-          <Container>
-            <TextField
-              margin="normal"
-              id="message"
-              multiline
-              type="text"
-              fullWidth
-              value={this.state.replyMessage}
-              onChange={this.handleReplyMessageChange}
-            />
-            <Button type="button" onClick={() => this.toggleReplyBox()}>
+        <div style={{ margin: "15px" }}>
+          <TextField
+            label="Reply"
+            margin="dense"
+            variant="outlined"
+            id="message"
+            multiline
+            type="text"
+            rows="3"
+            fullWidth
+            value={this.state.replyMessage}
+            onChange={this.handleReplyMessageChange}
+          />
+          <div style={{ float: "right" }}>
+            <Button type="button" onClick={() => this.toggleReplyBox()} color="secondary" variant="outlined">
               Cancel
             </Button>
-            <Button type="submit" onClick={() => this.handleReplySubmit()}>
+            <Button
+              type="submit"
+              onClick={() => this.handleReplySubmit()}
+              color="primary"
+              variant="outlined"
+              style={{ marginLeft: "5px" }}
+            >
               Reply
             </Button>
             <br />
             <br />
-          </Container>
+          </div>
         </div>
       );
     }
 
     handleReplySubmit(): void {
-      this.retrieveLatestReplies();
-    }
-
-    renderReplyButton() {
-      return (
-        <ReplyTopicButton
-          submitFunction={this.handleReplySubmit}
-          topicId={this.props.match.params.id}
-          topicAuthor={this.state.topic.author}
-        />
-      );
+      const user = getUser();
+      if (user != null) {
+        this.setState({ isLoading: true, replyBoxOpen: false });
+        createTopicReply(user, this.state.topic.id, this.state.replyMessage)
+          .then(() => {
+            this.retrieveLatestReplies();
+            this.setState({ replyMessage: "" });
+          });
+      }
     }
 
     renderLoadMoreButton() {
@@ -618,7 +628,6 @@ const FullTopic = withStyles(styles)(
               />
             ))}
             {this.renderLoadMoreButton()}
-            {this.renderReplyButton()}
           </Container>
         );
       } else {

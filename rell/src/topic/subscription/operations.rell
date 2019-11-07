@@ -1,0 +1,12 @@
+import user;
+import topic;
+
+operation subscribe_to_topic(username: text, descriptor_id: byte_array, id: text, unique_id: text) {
+    val user = user.get_verified_user(username, descriptor_id);
+    create subscription(topic.topic@{ .id == id }, user);
+}
+
+operation unsubscribe_from_topic(username: text, descriptor_id: byte_array, id: text, unique_id: text) {
+    val user = user.get_verified_user(username, descriptor_id);
+    delete subscription@{ topic.topic@{ .id == id }, user };
+}

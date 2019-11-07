@@ -1,5 +1,0 @@
-include "account/main";
-include "account/auth_basic";
-include "asset";
-include "history";
-include "transfer";

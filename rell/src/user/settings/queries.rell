@@ -1,0 +1,5 @@
+import user;
+
+query get_user_settings(name) {
+    return user_settings@?{ user.user@{ .name == name }} ( .avatar, .description );
+}

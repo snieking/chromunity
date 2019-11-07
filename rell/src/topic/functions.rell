@@ -1,0 +1,13 @@
+import util;
+
+function find_topic_by_id(id: text): topic {
+    return topic@{ .id == id };
+}
+
+function require_mutable(post_timestamp: timestamp, op_timestamp: timestamp, action: text) {
+	val fiveMinutesInMillis = 300000;
+    require(
+    	op_timestamp < post_timestamp + fiveMinutesInMillis,
+    	util.app_error(util.error_type.TOPIC_IMMUTABLE, action)
+    );
+}

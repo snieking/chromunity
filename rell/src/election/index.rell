@@ -1,0 +1,16 @@
+import user;
+
+entity representative_election {
+    key id: text;
+    index timestamp;
+    mutable completed: boolean;
+    index completed;
+}
+
+entity representative_election_candidate {
+  key representative_election, user.user;
+}
+
+entity representative_election_vote {
+    key user.user, representative_election_candidate;
+}

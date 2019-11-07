@@ -1,0 +1,9 @@
+import user;
+
+query get_user_meta(name) {
+    return user_meta@{ user.user@{ name }} (
+        name = .user.name,
+        times_suspended = .times_suspended,
+        suspended_until = .suspended_until
+    );
+}

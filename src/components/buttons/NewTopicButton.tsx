@@ -242,7 +242,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
           },
           noOptionsMessage: (provided: any, state: any) => {
             const color = theme.palette.primary.main;
-            return { color };
+            return { ...provided, color };
           }
         };
         return (
