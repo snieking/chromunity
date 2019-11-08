@@ -4,7 +4,6 @@
 # rell
 rell/logs/*
 rell/config/blockchains/*
-rell/postchain-node/*
 
 # dependencies
 /node_modules
