@@ -62,6 +62,11 @@ operation modify_reply(id: text, descriptor_id: byte_array, username: text, text
     update reply ( message = text );
 }
 
+operation delete_reply(id: text, descriptor_id: byte_array, username: text) {
+	val author = user.get_verified_user(username, descriptor_id);
+	delete topic_reply@{ id, author };
+}
+
 operation create_sub_reply(topic_id: text, descriptor_id: byte_array, parent_reply_id: text, id: text, username: text, message: text) {
     val author = user.get_verified_user(username, descriptor_id);
     val topic = find_topic_by_id(topic_id);
