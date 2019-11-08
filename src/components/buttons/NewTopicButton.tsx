@@ -28,6 +28,7 @@ import withTheme from "@material-ui/core/styles/withTheme";
 import { parseEmojis } from "../../util/text-parsing";
 import "emoji-mart/css/emoji-mart.css";
 import EmojiPicker from "../common/EmojiPicker";
+import Tooltip from "@material-ui/core/Tooltip";
 
 interface OptionType {
   label: string;
@@ -168,7 +169,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                 });
                 this.props.updateFunction();
               })
-              .catch(error =>
+              .catch(() =>
                 this.setState({
                   newTopicStatusMessage: "Error while creating topic",
                   newTopicErrorOpen: true
@@ -183,13 +184,15 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         if (this.state.user != null && this.state.userMeta.suspended_until < Date.now()) {
           return (
             <div className={this.props.classes.buttonWrapper}>
-              <IconButton
-                aria-label="New topic"
-                onClick={() => this.toggleNewTopicDialog()}
-                className={this.props.classes.button}
-              >
-                <Forum fontSize="inherit" className={this.props.classes.icon} />
-              </IconButton>
+              <Tooltip title="Create new topic">
+                <IconButton
+                  aria-label="New topic"
+                  onClick={() => this.toggleNewTopicDialog()}
+                  className={this.props.classes.button}
+                >
+                  <Forum fontSize="inherit" className={this.props.classes.icon} />
+                </IconButton>
+              </Tooltip>
             </div>
           );
         }
@@ -316,10 +319,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
               autoHideDuration={3000}
               onClose={this.handleClose}
             >
-              <CustomSnackbarContentWrapper
-                variant="success"
-                message={this.state.newTopicStatusMessage}
-              />
+              <CustomSnackbarContentWrapper variant="success" message={this.state.newTopicStatusMessage} />
             </Snackbar>
             <Snackbar
               anchorOrigin={{
