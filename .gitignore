@@ -1,8 +1,10 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 
-# ignore log files
+# rell
 rell/logs/*
+rell/config/blockchains/*
+rell/postchain-node/*
 
 # dependencies
 /node_modules
@@ -30,7 +32,6 @@ yarn-error.log*
 # IDE
 .idea/
 .vscode/
-*.project
 *.pid
 package-lock.json
 *.iml
@@ -39,7 +40,6 @@ package-lock.json
 # Exclude copyrighted fonts
 *.otf
 *.ttf
-
 
 # Emacs
 *~
