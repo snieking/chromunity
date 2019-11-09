@@ -25,7 +25,7 @@ import { getCachedUserMeta, getUser, ifEmptyAvatarThenPlaceholder } from "../../
 import { Delete, Reply, Report, StarBorder, StarRate, UnfoldMore } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import {
-  createTopicSubReply,
+  createTopicSubReply, deleteReply,
   getReplyStarRaters,
   getTopicSubReplies,
   giveReplyStarRating,
@@ -172,6 +172,7 @@ const TopicReplyCard = withStyles(styles)(
       this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
       this.sendReply = this.sendReply.bind(this);
       this.editReplyMessage = this.editReplyMessage.bind(this);
+      this.deleteReplyMessage = this.deleteReplyMessage.bind(this);
       this.reportReply = this.reportReply.bind(this);
       this.closeReportReply = this.closeReportReply.bind(this);
       this.isRepresentative = this.isRepresentative.bind(this);
@@ -345,7 +346,8 @@ const TopicReplyCard = withStyles(styles)(
               <EditMessageButton
                 modifiableUntil={this.state.timeLeftUntilNoLongerModifiable}
                 value={this.props.reply.message}
-                submitFunction={this.editReplyMessage}
+                editFunction={this.editReplyMessage}
+                deleteFunction={this.deleteReplyMessage}
               />
             ) : null}
             <IconButton
@@ -402,6 +404,13 @@ const TopicReplyCard = withStyles(styles)(
     editReplyMessage(text: string) {
       this.setState({ isLoading: true });
       modifyReply(this.state.user, this.props.reply.id, text)
+        .then(() => window.location.reload())
+        .catch(() => this.setState({ isLoading: false }));
+    }
+
+    deleteReplyMessage() {
+      this.setState({ isLoading: true });
+      deleteReply(this.state.user, this.props.reply.id)
         .then(() => window.location.reload())
         .catch(() => this.setState({ isLoading: false }));
     }

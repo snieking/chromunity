@@ -395,7 +395,8 @@ const FullTopic = withStyles(styles)(
             <EditMessageButton
               value={this.state.topic.message}
               modifiableUntil={this.state.timeLeftUntilNoLongerModifiable}
-              submitFunction={this.editTopicMessage}
+              editFunction={this.editTopicMessage}
+              deleteFunction={this.deleteTopic}
             />
           ) : (
             <div />
@@ -570,6 +571,7 @@ const FullTopic = withStyles(styles)(
             fullWidth
             value={this.state.replyMessage}
             onChange={this.handleReplyMessageChange}
+            autoFocus
           />
           <div style={{ float: "right" }}>
             <Button type="button" onClick={() => this.toggleReplyBox()} color="secondary" variant="outlined">

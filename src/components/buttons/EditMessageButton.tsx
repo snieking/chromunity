@@ -1,6 +1,17 @@
 import React from "react";
 
-import { Badge, createStyles, Dialog, Snackbar, Tooltip, WithStyles } from "@material-ui/core";
+import {
+  Badge,
+  createStyles,
+  Dialog,
+  ListItemIcon,
+  Menu,
+  MenuItem,
+  Snackbar,
+  Tooltip,
+  Typography,
+  WithStyles
+} from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -9,10 +20,11 @@ import IconButton from "@material-ui/core/IconButton";
 import { getCachedUserMeta, getUser } from "../../util/user-util";
 import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import { ChromunityUser, UserMeta } from "../../types";
-import { Edit } from "@material-ui/icons";
+import { Delete, Edit, MoreHoriz } from "@material-ui/icons";
 import { parseEmojis } from "../../util/text-parsing";
 import EmojiPicker from "../common/EmojiPicker";
 import withStyles from "@material-ui/core/styles/withStyles";
+import ConfirmDialog from "../common/ConfirmDialog";
 
 const styles = createStyles({
   editorWrapper: {
@@ -21,13 +33,16 @@ const styles = createStyles({
 });
 
 export interface EditMessageButtonProps extends WithStyles<typeof styles> {
-  submitFunction: Function;
+  editFunction: Function;
+  deleteFunction: Function;
   value: string;
   modifiableUntil: number;
 }
 
 export interface EditMessageButtonState {
-  dialogOpen: boolean;
+  editDialogOpen: boolean;
+  deleteDialogOpen: boolean;
+  anchorEl: HTMLElement;
   message: string;
   replyStatusSuccessOpen: boolean;
   replyStatusErrorOpen: boolean;
@@ -45,9 +60,11 @@ const EditMessageButton = withStyles(styles)(
 
       this.state = {
         message: props.value,
-        dialogOpen: false,
+        editDialogOpen: false,
+        deleteDialogOpen: false,
         replyStatusSuccessOpen: false,
         replyStatusErrorOpen: false,
+        anchorEl: null,
         replySentStatus: "",
         userMeta: {
           name: "",
@@ -59,19 +76,26 @@ const EditMessageButton = withStyles(styles)(
 
       this.textInput = React.createRef();
 
-      this.toggleDialog = this.toggleDialog.bind(this);
-      this.submit = this.submit.bind(this);
+      this.toggleEditDialog = this.toggleEditDialog.bind(this);
+      this.toggleDeleteDialog = this.toggleDeleteDialog.bind(this);
+      this.submitEdit = this.submitEdit.bind(this);
+      this.closeMenu = this.closeMenu.bind(this);
       this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
       this.handleClose = this.handleClose.bind(this);
       this.addEmoji = this.addEmoji.bind(this);
+      this.renderSnackbars = this.renderSnackbars.bind(this);
     }
 
     componentDidMount() {
       getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
     }
 
-    toggleDialog() {
-      this.setState(prevState => ({ dialogOpen: !prevState.dialogOpen }));
+    toggleEditDialog() {
+      this.setState(prevState => ({ editDialogOpen: !prevState.editDialogOpen, anchorEl: null }));
+    }
+
+    toggleDeleteDialog() {
+      this.setState(prevState => ({ deleteDialogOpen: !prevState.deleteDialogOpen, anchorEl: null }));
     }
 
     handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -80,16 +104,16 @@ const EditMessageButton = withStyles(styles)(
       this.setState({ message: parseEmojis(event.target.value) });
     }
 
-    submit() {
-      this.toggleDialog();
-      this.props.submitFunction(this.state.message);
+    submitEdit() {
+      this.toggleEditDialog();
+      this.props.editFunction(this.state.message);
     }
 
-    newTopicDialog() {
+    editDialog() {
       return (
         <div>
-          <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"md"}>
-            <form onSubmit={() => this.props.submitFunction(this.state.message)}>
+          <Dialog open={this.state.editDialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"md"}>
+            <form>
               <DialogContent>
                 <br />
                 <div className={this.props.classes.editorWrapper}>
@@ -112,12 +136,12 @@ const EditMessageButton = withStyles(styles)(
                 </div>
               </DialogContent>
               <DialogActions>
-                <Button onClick={() => this.toggleDialog()} color="secondary" variant="contained">
+                <Button onClick={() => this.toggleEditDialog()} color="secondary" variant="contained">
                   Cancel
                 </Button>
                 <Button
-                  onKeyPress={e => (e.key === "Enter" ? this.submit() : "")}
-                  onClick={() => this.submit()}
+                  onKeyPress={e => (e.key === "Enter" ? this.submitEdit() : "")}
+                  onClick={() => this.submitEdit()}
                   color="primary"
                   variant="contained"
                 >
@@ -126,7 +150,13 @@ const EditMessageButton = withStyles(styles)(
               </DialogActions>
             </form>
           </Dialog>
+        </div>
+      );
+    }
 
+    renderSnackbars() {
+      return (
+        <div>
           <Snackbar
             anchorOrigin={{
               vertical: "bottom",
@@ -136,10 +166,7 @@ const EditMessageButton = withStyles(styles)(
             onClose={this.handleClose}
             autoHideDuration={3000}
           >
-            <CustomSnackbarContentWrapper
-              variant="success"
-              message={this.state.replySentStatus}
-            />
+            <CustomSnackbarContentWrapper variant="success" message={this.state.replySentStatus} />
           </Snackbar>
           <Snackbar
             anchorOrigin={{
@@ -150,10 +177,7 @@ const EditMessageButton = withStyles(styles)(
             autoHideDuration={3000}
             onClose={this.handleClose}
           >
-            <CustomSnackbarContentWrapper
-              variant="error"
-              message={this.state.replySentStatus}
-            />
+            <CustomSnackbarContentWrapper variant="error" message={this.state.replySentStatus} />
           </Snackbar>
         </div>
       );
@@ -163,11 +187,7 @@ const EditMessageButton = withStyles(styles)(
       const startPosition = this.textInput.current.selectionStart;
 
       this.setState(prevState => ({
-        message: [
-          prevState.message.slice(0, startPosition),
-          emoji,
-          prevState.message.slice(startPosition)
-        ].join("")
+        message: [prevState.message.slice(0, startPosition), emoji, prevState.message.slice(startPosition)].join("")
       }));
 
       setTimeout(() => {
@@ -176,18 +196,58 @@ const EditMessageButton = withStyles(styles)(
       }, 100);
     }
 
+    closeMenu() {
+      this.setState({ anchorEl: null });
+    }
+
+    renderMenu() {
+      return (
+        <Menu
+          id="profile-menu"
+          anchorEl={this.state.anchorEl}
+          keepMounted
+          open={Boolean(this.state.anchorEl)}
+          onClose={this.closeMenu}
+        >
+          <MenuItem onClick={this.toggleEditDialog}>
+            <ListItemIcon>
+              <Edit />
+            </ListItemIcon>
+            <Typography>Edit</Typography>
+          </MenuItem>
+          <MenuItem onClick={this.toggleDeleteDialog}>
+            <ListItemIcon>
+              <Delete />
+            </ListItemIcon>
+            <Typography>Delete</Typography>
+          </MenuItem>
+        </Menu>
+      );
+    }
+
     render() {
       if (this.state.user != null && this.state.userMeta.suspended_until < Date.now()) {
         return (
           <div style={{ display: "inline-block" }}>
             <Tooltip title="Edit">
-              <IconButton aria-label="Edit" onClick={() => this.toggleDialog()}>
+              <IconButton
+                aria-label="Edit"
+                onClick={(event: React.MouseEvent<HTMLElement>) => this.setState({ anchorEl: event.currentTarget })}
+              >
                 <Badge max={600} badgeContent={this.props.modifiableUntil} color="secondary">
-                  <Edit />
+                  <MoreHoriz />
                 </Badge>
               </IconButton>
             </Tooltip>
-            {this.newTopicDialog()}
+            {this.renderMenu()}
+            {this.editDialog()}
+            <ConfirmDialog
+              onConfirm={this.props.deleteFunction}
+              onClose={this.toggleDeleteDialog}
+              open={this.state.deleteDialogOpen}
+              text="This action will delete the message"
+            />
+            {this.renderSnackbars()}
           </div>
         );
       } else {

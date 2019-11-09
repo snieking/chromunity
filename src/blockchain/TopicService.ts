@@ -52,6 +52,25 @@ export function modifyReply(user: ChromunityUser, replyId: string, updatedText: 
   return modifyText(user, replyId, updatedText, "modify_reply");
 }
 
+export function deleteReply(user: ChromunityUser, replyId: string) {
+  const rellOperation = "delete_reply";
+  const sw = createStopwatchStarted();
+  return BLOCKCHAIN.then(bc =>
+    bc.call(
+      user.ft3User,
+      rellOperation,
+      replyId,
+      user.ft3User.authDescriptor.hash().toString("hex"),
+      user.name.toLocaleLowerCase()
+    )
+  )
+    .then(value => {
+      gaRellOperationTiming(rellOperation, stopStopwatch(sw));
+      return value;
+    })
+    .catch(error => handleGADuringException(rellOperation, sw, error));
+}
+
 function modifyText(user: ChromunityUser, id: string, updatedText: string, rellOperation: string) {
   const sw = createStopwatchStarted();
   return BLOCKCHAIN.then(bc =>
@@ -151,7 +170,7 @@ export function createTopicSubReply(
     .then((promise: unknown) => {
       gaRellOperationTiming("create_sub_reply", stopStopwatch(sw));
       getTopicSubscribers(topicId).then(users => {
-        if (!users.includes(replyTo.toLocaleLowerCase())){
+        if (!users.includes(replyTo.toLocaleLowerCase())) {
           users.push(replyTo);
         }
 
