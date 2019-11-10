@@ -125,7 +125,11 @@ const TopicOverviewCard = withStyles(styles)(
     }
 
     authorIsRepresentative(): boolean {
-      return this.props.representatives.includes(this.props.topic.author.toLocaleLowerCase());
+      return this.props.representatives.includes(
+        this.props.topic.latest_poster != null
+          ? this.props.topic.latest_poster.toLocaleLowerCase()
+          : this.props.topic.author.toLocaleLowerCase()
+      );
     }
 
     renderAuthor() {
