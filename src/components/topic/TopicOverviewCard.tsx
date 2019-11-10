@@ -85,6 +85,7 @@ const TopicOverviewCard = withStyles(styles)(
       };
 
       this.authorIsRepresentative = this.authorIsRepresentative.bind(this);
+      console.log("Topic", this.props.topic);
     }
 
     render() {
@@ -105,7 +106,10 @@ const TopicOverviewCard = withStyles(styles)(
 
     componentDidMount() {
       getTopicChannelBelongings(this.props.topic.id).then(channels => this.setState({ channels: channels }));
-      getUserSettingsCached(this.props.topic.author, 1440).then(settings =>
+      getUserSettingsCached(
+        this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author,
+        1440
+      ).then(settings =>
         this.setState({
           avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.topic.author)
         })
@@ -134,11 +138,13 @@ const TopicOverviewCard = withStyles(styles)(
               component="span"
               className={this.authorIsRepresentative() ? this.props.classes.representativeColor : ""}
             >
-              <span className={this.props.classes.authorName}>@{this.props.topic.author}</span>
+              <span className={this.props.classes.authorName}>
+                @{this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author}
+              </span>
             </Typography>
           </Link>
           <div style={{ float: "right" }}>
-            <Avatar src={this.state.avatar} size={AVATAR_SIZE.SMALL} name={this.props.topic.author}/>
+            <Avatar src={this.state.avatar} size={AVATAR_SIZE.SMALL} name={this.props.topic.author} />
           </div>
         </div>
       );
@@ -197,13 +203,16 @@ const TopicOverviewCard = withStyles(styles)(
 const mapStateToProps = (store: ApplicationState) => {
   return {
     representatives: store.government.representatives
-  }
+  };
 };
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
     loadRepresentatives: () => dispatch(loadRepresentatives())
-  }
+  };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps) (TopicOverviewCard);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TopicOverviewCard);

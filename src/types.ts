@@ -19,6 +19,7 @@ export interface Topic {
   timestamp: number;
   last_modified: number;
   removed: boolean;
+  latest_poster: string;
 }
 
 export interface TopicReply {

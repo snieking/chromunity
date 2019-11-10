@@ -4,7 +4,7 @@ import topic.rating;
 import user;
 
 query get_topics_after_timestamp(timestamp, page_size: integer) {
-    return topic @* {
+    val topics = topic @* {
         .last_modified > timestamp,
         .removed == false
     }(
@@ -16,10 +16,27 @@ query get_topics_after_timestamp(timestamp, page_size: integer) {
         .removed,
         .timestamp
     ) limit page_size;
+    
+    val ext_topics = list<ext_topic>();
+    for (topic in topics) {
+    	val ext_topic = ext_topic (
+			id = topic.id,
+			author = topic.author,
+			title = topic.title,
+			message = topic.message,
+			timestamp = topic.timestamp,
+			last_modified = topic.last_modified,
+			removed = topic.removed,
+			latest_poster = get_latest_poster_in_topic(topic.id, topic.author)
+		);
+    	ext_topics.add(ext_topic);
+    }
+    
+    return ext_topics;
 }
 
-query get_topics_prior_to_timestamp(timestamp, page_size: integer) {
-    return topic @* {
+query get_topics_prior_to_timestamp(timestamp, page_size: integer): list<ext_topic> {
+    val topics = topic @* {
         .last_modified < timestamp,
         .removed == false
     }(
@@ -31,6 +48,23 @@ query get_topics_prior_to_timestamp(timestamp, page_size: integer) {
         .removed,
         .timestamp
     ) limit page_size;
+        
+    val ext_topics = list<ext_topic>();
+    for (topic in topics) {
+    	val ext_topic = ext_topic (
+			id = topic.id,
+			author = topic.author,
+			title = topic.title,
+			message = topic.message,
+			timestamp = topic.timestamp,
+			last_modified = topic.last_modified,
+			removed = topic.removed,
+			latest_poster = get_latest_poster_in_topic(topic.id, topic.author)
+		);
+    	ext_topics.add(ext_topic);
+    }
+    
+    return ext_topics;
 }
 
 query get_topic_replies_prior_to_timestamp(topic_id: text, timestamp, page_size: integer) {
@@ -97,7 +131,7 @@ query get_sub_replies(parent_reply_id: text) {
 }
 
 query get_topics_by_user_id_prior_to_timestamp(name, timestamp, page_size: integer) {
-    return topic@*{
+    val topics = topic@*{
         user.user@{ .name == name },
         .last_modified < timestamp
     }(
@@ -109,10 +143,27 @@ query get_topics_by_user_id_prior_to_timestamp(name, timestamp, page_size: integ
         .removed,
         .timestamp
     ) limit page_size;
+    
+    val ext_topics = list<ext_topic>();
+    for (topic in topics) {
+    	val ext_topic = ext_topic (
+			id = topic.id,
+			author = topic.author,
+			title = topic.title,
+			message = topic.message,
+			timestamp = topic.timestamp,
+			last_modified = topic.last_modified,
+			removed = topic.removed,
+			latest_poster = get_latest_poster_in_topic(topic.id, topic.author)
+		);
+    	ext_topics.add(ext_topic);
+    }
+    
+    return ext_topics;
 }
 
 query get_topics_from_follows_after_timestamp(name, timestamp, page_size: integer) {
-    return (topic, follow.follow) @* {
+    val topics = (topic, follow.follow) @* {
             follow.follower.name == name.lower_case(),
             follow.follows == topic.author,
             topic.last_modified > timestamp,
@@ -126,10 +177,27 @@ query get_topics_from_follows_after_timestamp(name, timestamp, page_size: intege
         -sort topic.last_modified,
         topic.timestamp
     ) limit page_size;
+    
+    val ext_topics = list<ext_topic>();
+    for (topic in topics) {
+    	val ext_topic = ext_topic (
+			id = topic.id,
+			author = topic.author,
+			title = topic.title,
+			message = topic.message,
+			timestamp = topic.timestamp,
+			last_modified = topic.last_modified,
+			removed = topic.removed,
+			latest_poster = get_latest_poster_in_topic(topic.id, topic.author)
+		);
+    	ext_topics.add(ext_topic);
+    }
+    
+    return ext_topics;
 }
 
 query get_topics_from_follows_prior_to_timestamp(name, timestamp, page_size: integer) {
-    return (topic, follow.follow) @* {
+    val topics = (topic, follow.follow) @* {
         follow.follower.name == name.lower_case(),
         follow.follows == topic.author,
         topic.last_modified < timestamp,
@@ -143,6 +211,23 @@ query get_topics_from_follows_prior_to_timestamp(name, timestamp, page_size: int
         -sort topic.last_modified,
         topic.timestamp
     ) limit page_size;
+    
+    val ext_topics = list<ext_topic>();
+    for (topic in topics) {
+    	val ext_topic = ext_topic (
+			id = topic.id,
+			author = topic.author,
+			title = topic.title,
+			message = topic.message,
+			timestamp = topic.timestamp,
+			last_modified = topic.last_modified,
+			removed = topic.removed,
+			latest_poster = get_latest_poster_in_topic(topic.id, topic.author)
+		);
+    	ext_topics.add(ext_topic);
+    }
+    
+    return ext_topics;
 }
 
 query get_topic_by_id(id: text) {
@@ -160,7 +245,7 @@ query get_topic_by_id(id: text) {
 }
 
 query get_all_topics_by_stars_since_timestamp(timestamp, page_size: integer) {
-    return rating.tmp_topic_rating@*{
+    val topics = rating.tmp_topic_rating@*{
         .topic.last_modified > timestamp,
         .topic.removed == false
     } (
@@ -173,10 +258,27 @@ query get_all_topics_by_stars_since_timestamp(timestamp, page_size: integer) {
         timestamp=.topic.timestamp,
         removed=.topic.removed
     ) limit page_size;
+    
+    val ext_topics = list<ext_topic>();
+    for (topic in topics) {
+    	val ext_topic = ext_topic (
+			id = topic.id,
+			author = topic.author,
+			title = topic.title,
+			message = topic.message,
+			timestamp = topic.timestamp,
+			last_modified = topic.last_modified,
+			removed = topic.removed,
+			latest_poster = get_latest_poster_in_topic(topic.id, topic.author)
+		);
+    	ext_topics.add(ext_topic);
+    }
+    
+    return ext_topics;
 }
 
 query get_topics_by_follows_and_stars_since_timestamp(name, timestamp, page_size: integer) {
-    return (rating.tmp_topic_rating, follow.follow) @*{
+    val topics = (rating.tmp_topic_rating, follow.follow) @*{
             follow.follower.name == name,
             tmp_topic_rating.topic.author == follow.follows,
             tmp_topic_rating.topic.last_modified > timestamp,
@@ -191,10 +293,27 @@ query get_topics_by_follows_and_stars_since_timestamp(name, timestamp, page_size
         timestamp=tmp_topic_rating.topic.timestamp,
         removed=tmp_topic_rating.topic.removed
     ) limit page_size;
+    
+    val ext_topics = list<ext_topic>();
+    for (topic in topics) {
+    	val ext_topic = ext_topic (
+			id = topic.id,
+			author = topic.author,
+			title = topic.title,
+			message = topic.message,
+			timestamp = topic.timestamp,
+			last_modified = topic.last_modified,
+			removed = topic.removed,
+			latest_poster = get_latest_poster_in_topic(topic.id, topic.author)
+		);
+    	ext_topics.add(ext_topic);
+    }
+    
+    return ext_topics;
 }
 
 query get_topics_by_channel_after_timestamp_sorted_by_popularity(name, timestamp, page_size: integer) {
-    return (rating.tmp_topic_rating, channel.channel)@*{
+    val topics = (rating.tmp_topic_rating, channel.channel)@*{
         name == channel.name,
         tmp_topic_rating.topic == channel.topic,
         tmp_topic_rating.topic.last_modified > timestamp,
@@ -209,10 +328,27 @@ query get_topics_by_channel_after_timestamp_sorted_by_popularity(name, timestamp
         timestamp=channel.topic.timestamp,
         removed=channel.topic.removed
     ) limit page_size;
+    
+    val ext_topics = list<ext_topic>();
+    for (topic in topics) {
+    	val ext_topic = ext_topic (
+			id = topic.id,
+			author = topic.author,
+			title = topic.title,
+			message = topic.message,
+			timestamp = topic.timestamp,
+			last_modified = topic.last_modified,
+			removed = topic.removed,
+			latest_poster = get_latest_poster_in_topic(topic.id, topic.author)
+		);
+    	ext_topics.add(ext_topic);
+    }
+    
+    return ext_topics;
 }
 
 query get_topics_by_followed_channels_after_timestamp_sorted_by_popularity(name, timestamp, page_size: integer) {
-    return (rating.tmp_topic_rating, channel.channel_following, channel.channel)@*{
+    val topics = (rating.tmp_topic_rating, channel.channel_following, channel.channel)@*{
         channel_following.user == user.user@{ name },
         channel_following.name == channel.name,
         tmp_topic_rating.topic == channel.topic,
@@ -228,4 +364,21 @@ query get_topics_by_followed_channels_after_timestamp_sorted_by_popularity(name,
         timestamp=channel.topic.timestamp,
         removed=channel.topic.removed
     ) limit page_size;
+    
+    val ext_topics = list<ext_topic>();
+    for (topic in topics) {
+    	val ext_topic = ext_topic (
+			id = topic.id,
+			author = topic.author,
+			title = topic.title,
+			message = topic.message,
+			timestamp = topic.timestamp,
+			last_modified = topic.last_modified,
+			removed = topic.removed,
+			latest_poster = get_latest_poster_in_topic(topic.id, topic.author)
+		);
+    	ext_topics.add(ext_topic);
+    }
+    
+    return ext_topics;
 }

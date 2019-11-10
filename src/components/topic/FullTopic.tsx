@@ -142,7 +142,8 @@ const FullTopic = withStyles(styles)(
         message: "",
         timestamp: 0,
         last_modified: 0,
-        removed: true
+        removed: true,
+        latest_poster: ""
       };
 
       this.state = {
@@ -433,7 +434,8 @@ const FullTopic = withStyles(styles)(
               message: text,
               timestamp: prevState.topic.timestamp,
               last_modified: prevState.topic.last_modified,
-              removed: prevState.topic.removed
+              removed: prevState.topic.removed,
+              latest_poster: prevState.topic.latest_poster
             },
             isLoading: false
           }))

@@ -11,3 +11,19 @@ function require_mutable(post_timestamp: timestamp, op_timestamp: timestamp, act
     	util.app_error(util.error_type.TOPIC_IMMUTABLE, action)
     );
 }
+
+function get_latest_poster_in_topic(id: text, topic_author: name): text {
+	val latest_reply = topic_reply@?{ 
+		.topic.id == id,
+		.removed == false
+	} (
+		sort .timestamp,
+		.author
+	) limit 1;
+	
+	if (latest_reply != null) {
+		return latest_reply.author.display_name;
+	} else {
+		return topic_author;
+	}
+}

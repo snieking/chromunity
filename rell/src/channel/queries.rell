@@ -2,8 +2,7 @@ import user;
 import topic;
 
 query get_topics_by_channel_prior_to_timestamp(name, timestamp, page_size: integer) {
-    // TODO: .lower_case() in Rell 0.9
-    return channel@*{
+    val topics = channel@*{
         .name == name,
         .topic.last_modified < timestamp,
         .topic.removed == false
@@ -16,10 +15,27 @@ query get_topics_by_channel_prior_to_timestamp(name, timestamp, page_size: integ
         -sort last_modified=.topic.last_modified,
         removed=.topic.removed
     ) limit page_size;
+    
+    val ext_topics = list<topic.ext_topic>();
+    for (t in topics) {
+    	val ext_t = topic.ext_topic (
+			id = t.id,
+			author = t.author,
+			title = t.title,
+			message = t.message,
+			timestamp = t.timestamp,
+			last_modified = t.last_modified,
+			removed = t.removed,
+			latest_poster = topic.get_latest_poster_in_topic(t.id, t.author)
+		);
+    	ext_topics.add(ext_t);
+    }
+    
+    return ext_topics;
 }
 
 query get_topics_by_channel_after_timestamp(name, timestamp) {
-    return channel@*{
+    val topics = channel@*{
         .name == name,
         .topic.last_modified > timestamp,
         .topic.removed == false
@@ -32,6 +48,23 @@ query get_topics_by_channel_after_timestamp(name, timestamp) {
         -sort last_modified=.topic.last_modified,
         removed=.topic.removed
     );
+    
+    val ext_topics = list<topic.ext_topic>();
+    for (t in topics) {
+    	val ext_t = topic.ext_topic (
+			id = t.id,
+			author = t.author,
+			title = t.title,
+			message = t.message,
+			timestamp = t.timestamp,
+			last_modified = t.last_modified,
+			removed = t.removed,
+			latest_poster = topic.get_latest_poster_in_topic(t.id, t.author)
+		);
+    	ext_topics.add(ext_t);
+    }
+    
+    return ext_topics;
 }
 
 query count_topics_by_channel(name) {
@@ -44,7 +77,7 @@ query count_channel_followers(name) {
 
 query get_topics_by_followed_channels_prior_to_timestamp(username: text, timestamp, page_size: integer) {
     val user = user.user@{ .name == username};
-    return (channel, channel_following) @* {
+    val topics = (channel, channel_following) @* {
         channel_following.user == user,
         channel_following.name == channel.name,
         channel.topic.last_modified < timestamp,
@@ -59,11 +92,28 @@ query get_topics_by_followed_channels_prior_to_timestamp(username: text, timesta
         -sort last_modified=channel.topic.last_modified,
         removed=channel.topic.removed
     ) limit page_size;
+    
+    val ext_topics = list<topic.ext_topic>();
+    for (t in topics) {
+    	val ext_t = topic.ext_topic (
+			id = t.id,
+			author = t.author,
+			title = t.title,
+			message = t.message,
+			timestamp = t.timestamp,
+			last_modified = t.last_modified,
+			removed = t.removed,
+			latest_poster = topic.get_latest_poster_in_topic(t.id, t.author)
+		);
+    	ext_topics.add(ext_t);
+    }
+    
+    return ext_topics;
 }
 
 query get_topics_by_followed_channels_after_timestamp(username: text, timestamp, page_size: integer) {
     val user = user.user@{ .name == username};
-    return (channel, channel_following) @* {
+    val topics = (channel, channel_following) @* {
         channel_following.user == user,
         channel_following.name == channel.name,
         channel.topic.last_modified > timestamp,
@@ -78,6 +128,23 @@ query get_topics_by_followed_channels_after_timestamp(username: text, timestamp,
         -sort last_modified=channel.topic.last_modified,
         removed=channel.topic.removed
     ) limit page_size;
+    
+    val ext_topics = list<topic.ext_topic>();
+    for (t in topics) {
+    	val ext_t = topic.ext_topic (
+			id = t.id,
+			author = t.author,
+			title = t.title,
+			message = t.message,
+			timestamp = t.timestamp,
+			last_modified = t.last_modified,
+			removed = t.removed,
+			latest_poster = topic.get_latest_poster_in_topic(t.id, t.author)
+		);
+    	ext_topics.add(ext_t);
+    }
+    
+    return ext_topics;
 }
 
 query get_followed_channels(username: text) {

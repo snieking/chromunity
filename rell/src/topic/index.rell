@@ -27,5 +27,16 @@ entity sub_reply {
     key parent_reply: topic_reply, child_reply: topic_reply;
 }
 
+struct ext_topic {
+	id: text;
+	author: text;
+	title: text;
+	message: text;
+	timestamp;
+	last_modified: timestamp;
+	removed: boolean;
+	latest_poster: name;
+}
+
 import topic.rating;
 import topic.subscription;
