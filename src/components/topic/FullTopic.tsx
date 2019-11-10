@@ -41,7 +41,6 @@ import {
   Delete,
   Notifications,
   NotificationsActive,
-  RemoveCircle,
   Reply,
   Report,
   StarBorder,
@@ -123,7 +122,6 @@ export interface FullTopicState {
   isLoading: boolean;
   removeTopicDialogOpen: boolean;
   reportTopicDialogOpen: boolean;
-  deleteTopicDialogOpen: boolean;
   mutedUsers: string[];
   user: ChromunityUser;
   timeLeftUntilNoLongerModifiable: number;
@@ -160,7 +158,6 @@ const FullTopic = withStyles(styles)(
         isLoading: true,
         removeTopicDialogOpen: false,
         reportTopicDialogOpen: false,
-        deleteTopicDialogOpen: false,
         mutedUsers: [],
         user: getUser(),
         timeLeftUntilNoLongerModifiable: 0
@@ -173,9 +170,7 @@ const FullTopic = withStyles(styles)(
       this.closeReportTopic = this.closeReportTopic.bind(this);
       this.reportTopic = this.reportTopic.bind(this);
       this.isRepresentative = this.isRepresentative.bind(this);
-      this.closeDeleteTopic = this.closeDeleteTopic.bind(this);
       this.deleteTopic = this.deleteTopic.bind(this);
-      this.renderDeleteButton = this.renderDeleteButton.bind(this);
       this.toggleReplyBox = this.toggleReplyBox.bind(this);
       this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
     }
@@ -408,8 +403,6 @@ const FullTopic = withStyles(styles)(
             </Tooltip>
           </IconButton>
 
-          {this.renderDeleteButton()}
-
           <ConfirmDialog
             text="This action will report the topic"
             open={this.state.reportTopicDialogOpen}
@@ -464,41 +457,7 @@ const FullTopic = withStyles(styles)(
       }
     }
 
-    renderDeleteButton() {
-      const user: ChromunityUser = this.state.user;
-      if (
-        this.state.topic.timestamp + allowedEditTimeMillis > Date.now() &&
-        user != null &&
-        !this.isRepresentative() &&
-        this.state.topic.author === user.name
-      ) {
-        return (
-          <div>
-            <IconButton aria-label="Hide topic" onClick={() => this.setState({ deleteTopicDialogOpen: true })}>
-              <Tooltip title="Hide topic">
-                <Badge max={600} badgeContent={this.state.timeLeftUntilNoLongerModifiable} color="secondary">
-                  <RemoveCircle className={this.props.classes.iconRed} />
-                </Badge>
-              </Tooltip>
-            </IconButton>
-
-            <ConfirmDialog
-              text="This action will delete the topic from the walls, making it only visible on your user page and by direct link to it"
-              open={this.state.deleteTopicDialogOpen}
-              onClose={this.closeDeleteTopic}
-              onConfirm={this.deleteTopic}
-            />
-          </div>
-        );
-      }
-    }
-
-    closeDeleteTopic() {
-      this.setState({ deleteTopicDialogOpen: false });
-    }
-
     deleteTopic() {
-      this.closeDeleteTopic();
       deleteTopic(this.state.user, this.state.topic.id).then(() => (window.location.href = "/"));
     }
 
