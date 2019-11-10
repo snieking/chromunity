@@ -46,7 +46,8 @@ describe("User page saga tests", () => {
         message: "message",
         timestamp: timestamp,
         last_modified: timestamp,
-        removed: false
+        removed: false,
+        latest_poster: "author"
       }
     ];
   };
