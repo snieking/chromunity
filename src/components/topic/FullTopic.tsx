@@ -61,6 +61,7 @@ import ConfirmDialog from "../common/ConfirmDialog";
 import { ApplicationState } from "../../redux/Store";
 import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
 import { connect } from "react-redux";
+import EmojiPicker from "../common/EmojiPicker";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -132,6 +133,8 @@ const allowedEditTimeMillis: number = 300000;
 
 const FullTopic = withStyles(styles)(
   class extends React.Component<FullTopicProps, FullTopicState> {
+    private readonly textInput: React.RefObject<HTMLInputElement>;
+
     constructor(props: FullTopicProps) {
       super(props);
 
@@ -164,6 +167,8 @@ const FullTopic = withStyles(styles)(
         timeLeftUntilNoLongerModifiable: 0
       };
 
+      this.textInput = React.createRef();
+
       this.retrieveLatestReplies = this.retrieveLatestReplies.bind(this);
       this.handleReplySubmit = this.handleReplySubmit.bind(this);
       this.retrieveOlderReplies = this.retrieveOlderReplies.bind(this);
@@ -174,6 +179,7 @@ const FullTopic = withStyles(styles)(
       this.deleteTopic = this.deleteTopic.bind(this);
       this.toggleReplyBox = this.toggleReplyBox.bind(this);
       this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
+      this.addEmojiInReply = this.addEmojiInReply.bind(this);
     }
 
     componentDidMount(): void {
@@ -520,7 +526,7 @@ const FullTopic = withStyles(styles)(
 
     renderReplyForm() {
       return (
-        <div style={{ margin: "15px" }}>
+        <div style={{ margin: "15px", position: "relative" }}>
           <TextField
             label="Reply"
             margin="dense"
@@ -532,8 +538,10 @@ const FullTopic = withStyles(styles)(
             fullWidth
             value={this.state.replyMessage}
             onChange={this.handleReplyMessageChange}
+            inputRef={this.textInput}
             autoFocus
           />
+          <EmojiPicker emojiAppender={this.addEmojiInReply} btnSize="sm" />
           <div style={{ float: "right" }}>
             <Button type="button" onClick={() => this.toggleReplyBox()} color="secondary" variant="outlined">
               Cancel
@@ -552,6 +560,23 @@ const FullTopic = withStyles(styles)(
           </div>
         </div>
       );
+    }
+
+    addEmojiInReply(emoji: string) {
+      const startPosition = this.textInput.current.selectionStart;
+
+      this.setState(prevState => ({
+        replyMessage: [
+          prevState.replyMessage.slice(0, startPosition),
+          emoji,
+          prevState.replyMessage.slice(startPosition)
+        ].join("")
+      }));
+
+      setTimeout(() => {
+        this.textInput.current.selectionStart = startPosition + emoji.length;
+        this.textInput.current.selectionEnd = startPosition + emoji.length;
+      }, 100);
     }
 
     handleReplySubmit(): void {

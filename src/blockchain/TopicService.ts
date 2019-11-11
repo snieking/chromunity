@@ -433,6 +433,24 @@ export function getReplyStarRaters(topicId: string): Promise<string[]> {
   });
 }
 
+export function countTopicReplies(topicId: string): Promise<number> {
+  const count: number = topicsCache.get(topicId + "-reply_count");
+
+    console.log("Count was: ", count);
+  if (count != null) {
+    return new Promise<number>(resolve => resolve(count));
+  }
+
+  const query = "count_topic_replies";
+  const sw = createStopwatchStarted();
+  return GTX.query(query, { topic_id: topicId }).then((count: number) => {
+    gaRellQueryTiming(query, stopStopwatch(sw));
+
+    topicsCache.set(topicId + "-reply_count", count, 600);
+    return count;
+  });
+}
+
 export function getTopicSubscribers(topicId: string): Promise<string[]> {
   const query = "get_subscribers_for_topic";
   const sw = createStopwatchStarted();

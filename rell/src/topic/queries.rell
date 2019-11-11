@@ -83,6 +83,10 @@ query get_topic_replies_prior_to_timestamp(topic_id: text, timestamp, page_size:
     ) limit page_size;
 }
 
+query count_topic_replies(topic_id: text) {
+	return topic_reply@*{ .topic.id == topic_id }( .id ).size();
+}
+
 query get_topic_replies_after_timestamp(topic_id: text, timestamp, page_size: integer) {
     return topic_reply@*{
         topic@{ .id == topic_id },

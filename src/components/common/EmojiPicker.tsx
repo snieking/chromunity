@@ -3,6 +3,7 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import "emoji-mart/css/emoji-mart.css";
 import { Picker } from "emoji-mart";
 import { createStyles, Popover, Theme } from "@material-ui/core";
+import emojiIcon from './emoji.png';
 
 interface Props {
   emojiAppender: Function;
@@ -14,7 +15,7 @@ const useStyles =  makeStyles((theme: Theme) => createStyles({
     cursor: "pointer",
     position: "absolute",
     top: "13px",
-    right: "4px",
+    right: "5px",
     [theme.breakpoints.down("xs")]: {
       display: "none"
     }
@@ -24,6 +25,10 @@ const useStyles =  makeStyles((theme: Theme) => createStyles({
   },
   emojiSizeLarge: {
     fontSize: "18px"
+  },
+  icon: {
+    height: "18px",
+    width: "18px"
   }
 }));
 
@@ -51,7 +56,7 @@ const EmojiPicker: React.FunctionComponent<Props> = (props: Props) => {
   return (
     <div>
       <div className={`${classes.emojiBoxOpener} ${props.btnSize === "sm" ? classes.emojiSizeSmall : classes.emojiSizeLarge}`} onClick={handleClick}>
-        <span role="img" aria-label={"Emoji Picker"}>😀</span>
+        <img src={emojiIcon} alt="Emoji Picker" className={classes.icon}/>
       </div>
 
       <Popover

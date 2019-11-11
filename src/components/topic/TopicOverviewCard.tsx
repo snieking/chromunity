@@ -8,6 +8,7 @@ import {
   CardContent,
   Chip,
   createStyles,
+  Theme,
   Typography,
   withStyles,
   WithStyles
@@ -17,7 +18,7 @@ import { getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { StarBorder, StarRate } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import { Redirect } from "react-router";
-import { getTopicStarRaters } from "../../blockchain/TopicService";
+import { countTopicReplies, getTopicStarRaters } from "../../blockchain/TopicService";
 import { getTopicChannelBelongings } from "../../blockchain/ChannelService";
 import { COLOR_ORANGE, COLOR_YELLOW } from "../../theme";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
@@ -26,32 +27,38 @@ import { ApplicationState } from "../../redux/Store";
 import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
 import { connect } from "react-redux";
 
-const styles = createStyles({
-  representativeColor: {
-    color: COLOR_ORANGE
-  },
-  authorName: {
-    display: "block",
-    marginTop: "10px",
-    marginRight: "10px",
-    marginLeft: "5px"
-  },
-  rating: {
-    marginTop: "10px"
-  },
-  overviewDetails: {
-    marginLeft: "42px"
-  },
-  iconYellow: {
-    color: COLOR_YELLOW
-  },
-  tagChips: {
-    display: "inline"
-  },
-  removed: {
-    opacity: 0.5
-  }
-});
+const styles = (theme: Theme) =>
+  createStyles({
+    representativeColor: {
+      color: COLOR_ORANGE
+    },
+    authorName: {
+      display: "block",
+      marginTop: "10px",
+      marginRight: "10px",
+      marginLeft: "5px"
+    },
+    rating: {
+      marginTop: "10px"
+    },
+    overviewDetails: {
+      marginLeft: "42px"
+    },
+    iconYellow: {
+      color: COLOR_YELLOW
+    },
+    tagChips: {
+      display: "inline"
+    },
+    removed: {
+      opacity: 0.5
+    },
+    replyStatusText: {
+      [theme.breakpoints.down("md")]: {
+        display: "none"
+      }
+    }
+  });
 
 interface Props extends WithStyles<typeof styles> {
   topic: Topic;
@@ -66,6 +73,7 @@ interface State {
   avatar: string;
   channels: string[];
   user: ChromunityUser;
+  numberOfReplies: number;
 }
 
 const TopicOverviewCard = withStyles(styles)(
@@ -81,11 +89,11 @@ const TopicOverviewCard = withStyles(styles)(
         ratedByMe: false,
         redirectToFullCard: false,
         avatar: "",
-        user: getUser()
+        user: getUser(),
+        numberOfReplies: 0
       };
 
       this.authorIsRepresentative = this.authorIsRepresentative.bind(this);
-      console.log("Topic", this.props.topic);
     }
 
     render() {
@@ -122,6 +130,7 @@ const TopicOverviewCard = withStyles(styles)(
           ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase())
         })
       );
+      countTopicReplies(this.props.topic.id).then(count => this.setState({ numberOfReplies: count }));
     }
 
     authorIsRepresentative(): boolean {
@@ -132,7 +141,7 @@ const TopicOverviewCard = withStyles(styles)(
       );
     }
 
-    renderAuthor() {
+    renderReplyStatus() {
       return (
         <div style={{ float: "right" }}>
           <Link to={"/u/" + this.props.topic.author}>
@@ -148,7 +157,9 @@ const TopicOverviewCard = withStyles(styles)(
             </Typography>
           </Link>
           <div style={{ float: "right" }}>
-            <Avatar src={this.state.avatar} size={AVATAR_SIZE.SMALL} name={this.props.topic.author} />
+            <Badge color="secondary" badgeContent={this.state.numberOfReplies}>
+              <Avatar src={this.state.avatar} size={AVATAR_SIZE.SMALL} name={this.props.topic.author} />
+            </Badge>
           </div>
         </div>
       );
@@ -190,7 +201,7 @@ const TopicOverviewCard = withStyles(styles)(
               </Badge>
             </div>
           </div>
-          {this.renderAuthor()}
+          {this.renderReplyStatus()}
           <div className={this.props.classes.overviewDetails}>
             <Timestamp milliseconds={this.props.topic.last_modified} />
             <Typography variant="subtitle1" component="span" style={{ marginRight: "10px" }}>
