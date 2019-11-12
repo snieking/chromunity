@@ -157,7 +157,7 @@ const TopicOverviewCard = withStyles(styles)(
             </Typography>
           </Link>
           <div style={{ float: "right" }}>
-            <Badge color="secondary" badgeContent={this.state.numberOfReplies} max={9999}>
+            <Badge color="primary" badgeContent={this.state.numberOfReplies} max={999}>
               <Avatar src={this.state.avatar} size={AVATAR_SIZE.SMALL} name={this.props.topic.author} />
             </Badge>
           </div>
