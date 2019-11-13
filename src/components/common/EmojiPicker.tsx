@@ -14,8 +14,8 @@ const useStyles =  makeStyles((theme: Theme) => createStyles({
   emojiBoxOpener: {
     cursor: "pointer",
     position: "absolute",
-    top: "13px",
-    right: "5px",
+    top: "14px",
+    right: "6px",
     [theme.breakpoints.down("xs")]: {
       display: "none"
     }
