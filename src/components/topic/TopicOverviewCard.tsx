@@ -119,7 +119,10 @@ const TopicOverviewCard = withStyles(styles)(
         1440
       ).then(settings =>
         this.setState({
-          avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.topic.author)
+          avatar: ifEmptyAvatarThenPlaceholder(
+            settings.avatar,
+            this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author
+          )
         })
       );
 
@@ -144,7 +147,12 @@ const TopicOverviewCard = withStyles(styles)(
     renderReplyStatus() {
       return (
         <div style={{ float: "right" }}>
-          <Link to={"/u/" + this.props.topic.author}>
+          <Link
+            to={
+              "/u/" +
+              (this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author)
+            }
+          >
             <Typography
               gutterBottom
               variant="subtitle2"
@@ -158,7 +166,11 @@ const TopicOverviewCard = withStyles(styles)(
           </Link>
           <div style={{ float: "right" }}>
             <Badge color="primary" badgeContent={this.state.numberOfReplies} max={999}>
-              <Avatar src={this.state.avatar} size={AVATAR_SIZE.SMALL} name={this.props.topic.author} />
+              <Avatar
+                src={this.state.avatar}
+                size={AVATAR_SIZE.SMALL}
+                name={this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author}
+              />
             </Badge>
           </div>
         </div>
