@@ -94,6 +94,7 @@ const TopicOverviewCard = withStyles(styles)(
       };
 
       this.authorIsRepresentative = this.authorIsRepresentative.bind(this);
+      this.setAvatar = this.setAvatar.bind(this);
     }
 
     render() {
@@ -114,6 +115,25 @@ const TopicOverviewCard = withStyles(styles)(
 
     componentDidMount() {
       getTopicChannelBelongings(this.props.topic.id).then(channels => this.setState({ channels: channels }));
+
+      const user: ChromunityUser = this.state.user;
+      this.setAvatar();
+      getTopicStarRaters(this.props.topic.id).then(usersWhoStarRated =>
+        this.setState({
+          stars: usersWhoStarRated.length,
+          ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase())
+        })
+      );
+      countTopicReplies(this.props.topic.id).then(count => this.setState({ numberOfReplies: count }));
+    }
+
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
+      if (this.props.topic.latest_poster !== prevProps.topic.latest_poster) {
+        this.setAvatar();
+      }
+    }
+
+    setAvatar() {
       getUserSettingsCached(
         this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author,
         1440
@@ -125,15 +145,6 @@ const TopicOverviewCard = withStyles(styles)(
           )
         })
       );
-
-      const user: ChromunityUser = this.state.user;
-      getTopicStarRaters(this.props.topic.id).then(usersWhoStarRated =>
-        this.setState({
-          stars: usersWhoStarRated.length,
-          ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase())
-        })
-      );
-      countTopicReplies(this.props.topic.id).then(count => this.setState({ numberOfReplies: count }));
     }
 
     authorIsRepresentative(): boolean {
