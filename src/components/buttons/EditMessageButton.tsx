@@ -79,6 +79,7 @@ const EditMessageButton = withStyles(styles)(
       this.toggleEditDialog = this.toggleEditDialog.bind(this);
       this.toggleDeleteDialog = this.toggleDeleteDialog.bind(this);
       this.submitEdit = this.submitEdit.bind(this);
+      this.submitDelete = this.submitDelete.bind(this);
       this.closeMenu = this.closeMenu.bind(this);
       this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
       this.handleClose = this.handleClose.bind(this);
@@ -107,6 +108,11 @@ const EditMessageButton = withStyles(styles)(
     submitEdit() {
       this.toggleEditDialog();
       this.props.editFunction(this.state.message);
+    }
+
+    submitDelete() {
+      this.toggleDeleteDialog();
+      this.props.deleteFunction();
     }
 
     editDialog() {
@@ -242,7 +248,7 @@ const EditMessageButton = withStyles(styles)(
             {this.renderMenu()}
             {this.editDialog()}
             <ConfirmDialog
-              onConfirm={this.props.deleteFunction}
+              onConfirm={this.submitDelete}
               onClose={this.toggleDeleteDialog}
               open={this.state.deleteDialogOpen}
               text="This action will delete the message"
