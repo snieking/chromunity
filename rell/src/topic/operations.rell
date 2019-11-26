@@ -66,6 +66,8 @@ operation delete_reply(id: text, descriptor_id: byte_array, username: text) {
 	val author = user.get_verified_user(username, descriptor_id);
 	val reply = topic_reply@{ id, author };
 	require_mutable(reply.timestamp, op_context.last_block_time, "Delete reply");
+	
+	delete sub_reply@?{ .child_reply == reply };
 	delete reply;
 }
 
