@@ -70,7 +70,7 @@ export function reportTopic(user: ChromunityUser, topicId: string) {
 }
 
 export function reportReply(user: ChromunityUser, topicId: string, replyId: string) {
-  return report(user, "Reply /t/" + topicId + "#reply-" + replyId + " was reported by @" + user.name);
+  return report(user, "Reply /t/" + topicId + "#" + replyId + " was reported by @" + user.name);
 }
 
 function report(user: ChromunityUser, text: string) {
