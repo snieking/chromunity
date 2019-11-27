@@ -5,7 +5,7 @@
     <chains>
         <chain name="user" iid="1" brid="01234567abcdef01234567abcdef01234567abcdef01234567abcdef01234567">
             <config height="0">
-                <app module="user" />
+                <app module="" />
             </config>
         </chain>
     </chains>
