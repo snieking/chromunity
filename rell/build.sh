@@ -5,11 +5,8 @@
 
 set -eu
 
-rm -rf config/blockchains
-mkdir config/blockchains
-mkdir config/blockchains/1
+rm -rf target
 
 echo "Compiling Chromunity blockchain"
-postchain-node/rellcfg.sh --template config/config.template.xml -d src/ "" config/blockchains/1/0.xml
-cp config/brid.txt config/blockchains/1/brid.txt
+postchain-node/multigen.sh run.xml --source-dir=src --output-dir=target
 echo "Successfully compiled Chromunity blockchain"

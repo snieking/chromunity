@@ -1,0 +1,12 @@
+<run wipe-db="false">
+    <nodes>
+        <config src="config/node-config.properties" add-signers="false" />
+    </nodes>
+    <chains>
+        <chain name="user" iid="1" brid="01234567abcdef01234567abcdef01234567abcdef01234567abcdef01234567">
+            <config height="0">
+                <app module="user" />
+            </config>
+        </chain>
+    </chains>
+</run>

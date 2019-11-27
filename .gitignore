@@ -3,7 +3,7 @@
 
 # rell
 rell/logs/*
-rell/config/blockchains/*
+rell/target/*
 
 # dependencies
 /node_modules
