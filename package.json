@@ -29,6 +29,7 @@
     "react-dom": "^16.8.6",
     "react-ga": "^2.6.0",
     "react-markdown": "4.1.0",
+    "react-piwik": "^1.8.0",
     "react-redux": "^7.1.0",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
