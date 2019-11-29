@@ -3,6 +3,10 @@ import config from "./config";
 
 let initialized: boolean = false;
 
+declare global {
+  interface Window { _paq: any; }
+}
+
 const initGA = () => {
   if (!initialized) {
     ReactGA.initialize(config.gaTrackingId, { gaOptions: { sampleRate: 100, siteSpeedSampleRate: 100 } });
@@ -12,6 +16,8 @@ const initGA = () => {
 
 export const pageView = () => {
   initGA();
+  const _paq = window._paq || [];
+  _paq.push(['trackPageView']);
   ReactGA.pageview(window.location.pathname + window.location.search);
 };
 

@@ -8,25 +8,17 @@ import Footer from "./components/static/Footer";
 import { CssBaseline } from "@material-ui/core";
 import Content from "./Content";
 import DynamicTheme from "./DynamicTheme";
-import ReactPiwik from 'react-piwik';
-import history from "./history";
 
 interface Props {
   store: Store<ApplicationState>;
 }
-
-const piwik = new ReactPiwik({
-  url: 'dev.chromunity.com',
-  siteId: 1,
-  trackErrors: true,
-});
 
 const App: React.FunctionComponent<Props> = props => {
   return (
     <Provider store={props.store}>
       <DynamicTheme>
         <CssBaseline />
-        <Router history={piwik.connectToHistory(history)}>
+        <Router>
           <HeaderNav />
           <Content />
           <Footer />
