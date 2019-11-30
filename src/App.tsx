@@ -19,8 +19,8 @@ const piwik = new ReactPiwik({
   url: 'https://matomo.chromia.dev/',
   siteId: 3,
   trackErrors: true,
-  jsFilename: "matomo.js",
-  phphFilename: "matomo.php"
+  jsFilename: "js/",
+  phpFilename: "js/"
 });
 
 ReactPiwik.push(['enableHeartBeatTimer']);
