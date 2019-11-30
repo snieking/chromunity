@@ -48,7 +48,13 @@ export function getChatPassphrase(): any {
 }
 
 export function getUsername(): string {
-  return LOCAL_CACHE.get(USER_KEY);
+  const username = LOCAL_CACHE.get(USER_KEY);
+
+  if (username != null) {
+    ReactPiwik.push(['setUserId', username]);
+  }
+
+  return username;
 }
 
 export function setUsername(username: string): void {
@@ -61,8 +67,6 @@ export function getUser(): ChromunityUser {
 
   if (keyPair == null) return null;
   if (username == null) return null;
-
-  ReactPiwik.push(['setUserId', username]);
 
   const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
   const ft3User = new User(keyPair, authDescriptor);
