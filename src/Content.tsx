@@ -20,7 +20,6 @@ import LoginAccount from "./components/user/authentication/LoginAccount";
 import CandidateElectionVoteLink from "./components/governing/election/CandidateElectionVoteLink";
 import ChatPage from "./components/chat/ChatPage";
 
-
 const Content: React.FunctionComponent<RouteComponentProps> = ({ location }) => {
   return (
     <div className="content">

@@ -23,6 +23,9 @@ const piwik = new ReactPiwik({
   phphFilename: "matomo.php"
 });
 
+ReactPiwik.push(['enableHeartBeatTimer']);
+ReactPiwik.push(['trackPageView']);
+
 const App: React.FunctionComponent<Props> = props => {
   return (
     <Provider store={props.store}>
