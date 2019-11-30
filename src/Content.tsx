@@ -19,6 +19,10 @@ import { ErrorPage } from "./components/static/ErrorPage";
 import LoginAccount from "./components/user/authentication/LoginAccount";
 import CandidateElectionVoteLink from "./components/governing/election/CandidateElectionVoteLink";
 import ChatPage from "./components/chat/ChatPage";
+import ReactPiwik from "react-piwik";
+
+ReactPiwik.push(['enableHeartBeatTimer']);
+ReactPiwik.push(['trackPageView']);
 
 const Content: React.FunctionComponent<RouteComponentProps> = ({ location }) => {
   return (

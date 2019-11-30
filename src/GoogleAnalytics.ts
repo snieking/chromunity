@@ -1,5 +1,6 @@
 import ReactGA from "react-ga";
 import config from "./config";
+import ReactPiwik from "react-piwik";
 
 let initialized: boolean = false;
 
@@ -16,8 +17,6 @@ const initGA = () => {
 
 export const pageView = () => {
   initGA();
-  const _paq = window._paq || [];
-  _paq.push(['trackPageView']);
   ReactGA.pageview(window.location.pathname + window.location.search);
 };
 
@@ -44,9 +43,11 @@ export const gaSocialEvent = (action: string, label: string) => {
 export const gaGenericEvent = (category: string, action: string) => {
   initGA();
   ReactGA.event({ category: category, action: action });
+  ReactPiwik.push(['trackEvent', category, action]);
 };
 
 export const gaException = (description: string) => {
   initGA();
   ReactGA.exception({ description: description, fatal: false });
+  ReactPiwik.push(['trackEvent', "exceptions", description]);
 };

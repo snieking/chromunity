@@ -2,6 +2,7 @@ import { ChromunityUser, UserMeta } from "../types";
 import * as BoomerangCache from "boomerang-cache";
 import { getUserMeta } from "../blockchain/UserService";
 import { FlagsType, KeyPair, SingleSignatureAuthDescriptor, User } from "ft3-lib";
+import ReactPiwik from "react-piwik";
 
 const LOCAL_CACHE = BoomerangCache.create("local-bucket", {
   storage: "local",
@@ -60,6 +61,8 @@ export function getUser(): ChromunityUser {
 
   if (keyPair == null) return null;
   if (username == null) return null;
+
+  ReactPiwik.push(['setUserId', username]);
 
   const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
   const ft3User = new User(keyPair, authDescriptor);
