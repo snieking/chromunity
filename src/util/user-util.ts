@@ -51,7 +51,11 @@ export function getUsername(): string {
   const username = LOCAL_CACHE.get(USER_KEY);
 
   if (username != null) {
-    ReactPiwik.push(['setUserId', username]);
+    try {
+      ReactPiwik.push(['setUserId', username]);
+    } catch(error) {
+      console.log("Error pushing Matomo metrics", username, error);
+    }
   }
 
   return username;
