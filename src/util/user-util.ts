@@ -22,6 +22,8 @@ const USER_META_KEY = "user_meta";
 const KEYPAIR_KEY = "keyPair";
 const RSA_PASS = "rsaPassPhrase";
 
+let matomoUserSet: boolean = false;
+
 export function clearSession(): void {
   ENCRYPTED_LOCAL_CACHE.clear();
   LOCAL_CACHE.remove(USER_KEY);
@@ -50,9 +52,10 @@ export function getChatPassphrase(): any {
 export function getUsername(): string {
   const username = LOCAL_CACHE.get(USER_KEY);
 
-  if (username != null) {
+  if (username != null && !matomoUserSet) {
     try {
       ReactPiwik.push(['setUserId', username]);
+      matomoUserSet = true;
     } catch(error) {
       console.log("Error pushing Matomo metrics", username, error);
     }
