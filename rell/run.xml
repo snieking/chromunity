@@ -3,7 +3,7 @@
         <config src="config/node-config.properties" add-signers="false" />
     </nodes>
     <chains>
-        <chain name="user" iid="1" brid="88967baa4768cbcef11c508326ffb13a956689fcb6dc3ba17f4b895cbb1577a3">
+        <chain name="user" iid="1">
             <config height="0">
                 <app module="" />
             </config>
