@@ -51,7 +51,7 @@
     "test": "react-scripts test",
     "test-bc": "jest",
     "eject": "react-scripts eject",
-    "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls"
+    "coveralls": "jest --coverage --setupFiles dotenv/config && cat ./coverage/lcov.info | coveralls"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -80,6 +80,7 @@
     "coveralls": "^3.0.6",
     "prettier": "^1.18.2",
     "redux-logger": "^3.0.6",
-    "ts-jest": "^24.0.2"
+    "ts-jest": "^24.0.2",
+    "dotenv": "^8.2.0"
   }
 }
