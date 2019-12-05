@@ -1,6 +1,6 @@
 <run wipe-db="false">
     <nodes>
-        <config src="config/node-config.properties" add-signers="false" />
+        <config src="config/node-config.properties" add-signers="true" />
     </nodes>
     <chains>
         <chain name="user" iid="1">
