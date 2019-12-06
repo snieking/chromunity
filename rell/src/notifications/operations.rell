@@ -6,7 +6,7 @@ operation create_notifications_for_users(name, descriptor_id: byte_array, id: te
 
     for (username in usernames) {
         val toUser = user.user@?{ .name == username.lower_case() };
-        if (toUser != null and mute.user_mute@?{ .the_user == toUser, .muted_user == opr_user } == null) {
+        if (toUser != null and mute.user_mute@?{ .user == toUser, .muted_user == opr_user } == null) {
             create notification(
                 id = id,
                 toUser,

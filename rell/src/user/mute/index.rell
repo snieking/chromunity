@@ -1,5 +1,5 @@
 import user;
 
 entity user_mute {
-    key the_user: user.user, muted_user: user.user;
+    key user.user, muted_user: user.user;
 }
