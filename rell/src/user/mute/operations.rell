@@ -4,8 +4,8 @@ operation toggle_mute(username: name, descriptor_id: byte_array, name, muted: bo
     val user = user.get_verified_user(username, descriptor_id);
 
     if (muted) {
-        create user_mute(user = user, muted_user = user.user@{ .name == name });
+        create user_mute(the_user = user, muted_user = user.user@{ .name == name });
     } else {
-        delete user_mute@{ .user == user, .muted_user == user.user@{ .name == name }};
+        delete user_mute@{ .the_user == user, .muted_user == user.user@{ .name == name }};
     }
 }

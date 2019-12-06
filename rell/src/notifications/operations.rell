@@ -1,11 +1,12 @@
 import user;
+import user.mute;
 
 operation create_notifications_for_users(name, descriptor_id: byte_array, id: text, trigger: text, content: text, usernames: set<text>) {
-    val user = user.get_verified_user(name, descriptor_id);
+    val opr_user = user.get_verified_user(name, descriptor_id);
 
     for (username in usernames) {
         val toUser = user.user@?{ .name == username.lower_case() };
-        if (toUser != null) {
+        if (toUser != null and mute.user_mute@?{ .the_user == toUser, .muted_user == opr_user } == null) {
             create notification(
                 id = id,
                 toUser,
