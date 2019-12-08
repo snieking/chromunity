@@ -32,11 +32,9 @@ When new features are stable enough in the `dev` branch, they are merged to the 
 
 #### Setting up Postgres for Postchain
 * `createdb chromunity`
-* `psql chromunity`
 * `createuser -s postgres`
 * `psql -c "create role postchain LOGIN ENCRYPTED PASSWORD 'postchain'"`
 * `psql -c "grant ALL ON DATABASE chromunity TO postchain"`
-* `\q`
 
 #### Starting local Postchain node
 * `cd rell`
