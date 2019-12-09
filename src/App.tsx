@@ -12,7 +12,6 @@ import ReactPiwik from "react-piwik";
 import history from "./history";
 import * as Sentry from '@sentry/browser';
 import * as config from "./config";
-import { getUsername } from "./util/user-util";
 
 interface Props {
   store: Store<ApplicationState>;
