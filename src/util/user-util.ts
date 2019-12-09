@@ -3,6 +3,7 @@ import * as BoomerangCache from "boomerang-cache";
 import { getUserMeta } from "../blockchain/UserService";
 import { FlagsType, KeyPair, SingleSignatureAuthDescriptor, User } from "ft3-lib";
 import ReactPiwik from "react-piwik";
+import * as Sentry from '@sentry/browser';
 
 const LOCAL_CACHE = BoomerangCache.create("local-bucket", {
   storage: "local",
@@ -22,7 +23,7 @@ const USER_META_KEY = "user_meta";
 const KEYPAIR_KEY = "keyPair";
 const RSA_PASS = "rsaPassPhrase";
 
-let matomoUserSet: boolean = false;
+let debugUserSet: boolean = false;
 
 export function clearSession(): void {
   ENCRYPTED_LOCAL_CACHE.clear();
@@ -52,12 +53,13 @@ export function getChatPassphrase(): any {
 export function getUsername(): string {
   const username = LOCAL_CACHE.get(USER_KEY);
 
-  if (username != null && !matomoUserSet) {
+  if (username != null && !debugUserSet) {
     try {
+      Sentry.configureScope(scope => scope.setUser({"username": username}));
       ReactPiwik.push(['setUserId', username]);
-      matomoUserSet = true;
+      debugUserSet = true;
     } catch(error) {
-      console.log("Error pushing Matomo metrics", username, error);
+      console.log("Error adding username for debug", username, error);
     }
   }
 

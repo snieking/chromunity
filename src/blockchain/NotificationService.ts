@@ -91,13 +91,18 @@ export function markNotificationsRead(user: ChromunityUser) {
   const sw = createStopwatchStarted();
 
   return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
-      operation,
-      user.name.toLocaleLowerCase(),
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      epochSeconds
-    )
+    bc
+      .transactionBuilder()
+      .addOperation(
+        operation,
+        user.name.toLocaleLowerCase(),
+        user.ft3User.authDescriptor.hash().toString("hex"),
+        epochSeconds
+      )
+      .addOperation("nop", uniqueId())
+      .build(user.ft3User.authDescriptor.signers)
+      .sign(user.ft3User.keyPair)
+      .post()
   )
     .then(value => {
       gaRellOperationTiming(operation, stopStopwatch(sw));
