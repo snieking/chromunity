@@ -28,7 +28,7 @@ const UserNotifications: React.FunctionComponent<UserNotificationsProps> = props
   useEffect(() => {
     retrieveNotifications();
     // eslint-disable-next-line
-  }, [notifications, couldExistOlderNotifications, isLoading]);
+  }, []);
 
   pageView();
 
