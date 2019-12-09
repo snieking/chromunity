@@ -41,12 +41,15 @@ const UserNotifications: React.FunctionComponent<UserNotificationsProps> = props
 
     getUserNotificationsPriorToTimestamp(userId, timestamp, notificationsPageSize)
       .then(retrievedNotifications => {
-        setNotifications(Array.from(new Set(notifications.concat(retrievedNotifications))));
         setLoading(false);
-        setCouldExistOlderNotifications(retrievedNotifications.length >= notificationsPageSize);
 
-        if (user != null && user.name === userId) {
-          markNotificationsRead(user).then();
+        if (retrievedNotifications.length > 0 && (notifications.length < 1 || retrievedNotifications[0].id !== notifications[0].id)) {
+          setNotifications(Array.from(new Set(notifications.concat(retrievedNotifications))));
+          setCouldExistOlderNotifications(retrievedNotifications.length >= notificationsPageSize);
+
+          if (user != null && user.name === userId) {
+            markNotificationsRead(user).then();
+          }
         }
       })
       .catch(() => setLoading(false));
