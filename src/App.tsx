@@ -11,12 +11,24 @@ import DynamicTheme from "./DynamicTheme";
 import ReactPiwik from "react-piwik";
 import history from "./history";
 import * as Sentry from '@sentry/browser';
+import * as config from "./config";
+import { getUsername } from "./util/user-util";
 
 interface Props {
   store: Store<ApplicationState>;
 }
 
-Sentry.init({dsn: "https://a45f0d3d7c5d42819cabb34e32f56998@sentry.io/1851343"});
+Sentry.init({
+  dsn: config.sentryDsn,
+  environment: config.sentryEnvironment,
+  beforeSend(event, hint) {
+    // Check if it is an exception, and if so, show the report dialog
+    if (event.exception) {
+      Sentry.showReportDialog({ eventId: event.event_id, user: { name: getUsername() }});
+    }
+    return event;
+  }
+});
 
 const piwik = new ReactPiwik({
   url: 'https://matomo.chromia.dev/',

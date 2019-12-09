@@ -9,6 +9,9 @@ config.vaultUrl = "https://wallet-v2.chromia.dev";
 
 config.gaTrackingId = "UA-122482523-5";
 
+config.sentryDsn = "https://a45f0d3d7c5d42819cabb34e32f56998@sentry.io/1851343";
+config.sentryEnvironment = "prod";
+
 config.testMode = false;
 
 module.exports = config;
