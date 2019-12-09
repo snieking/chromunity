@@ -10,10 +10,13 @@ import Content from "./Content";
 import DynamicTheme from "./DynamicTheme";
 import ReactPiwik from "react-piwik";
 import history from "./history";
+import * as Sentry from '@sentry/browser';
 
 interface Props {
   store: Store<ApplicationState>;
 }
+
+Sentry.init({dsn: "https://a45f0d3d7c5d42819cabb34e32f56998@sentry.io/1851343"});
 
 const piwik = new ReactPiwik({
   url: 'https://matomo.chromia.dev/',
