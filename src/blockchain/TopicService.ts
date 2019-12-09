@@ -1,5 +1,5 @@
 import { BLOCKCHAIN, GTX } from "./Postchain";
-import { createStopwatchStarted, handleGADuringException, stopStopwatch, uniqueId } from "../util/util";
+import { createStopwatchStarted, handleException, stopStopwatch, uniqueId } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 import { Topic, TopicReply, ChromunityUser } from "../types";
 import { sendNotifications } from "./NotificationService";
@@ -40,7 +40,7 @@ export function createTopic(user: ChromunityUser, channelName: string, title: st
       subscribeToTopic(user, topicId).then();
       return promise;
     })
-    .catch(error => handleGADuringException(operation, sw, error));
+    .catch(error => handleException(operation, sw, error));
 }
 
 export function modifyTopic(user: ChromunityUser, topicId: string, updatedText: string) {
@@ -68,7 +68,7 @@ export function deleteReply(user: ChromunityUser, replyId: string) {
       gaRellOperationTiming(rellOperation, stopStopwatch(sw));
       return value;
     })
-    .catch(error => handleGADuringException(rellOperation, sw, error));
+    .catch(error => handleException(rellOperation, sw, error));
 }
 
 function modifyText(user: ChromunityUser, id: string, updatedText: string, rellOperation: string) {
@@ -87,7 +87,7 @@ function modifyText(user: ChromunityUser, id: string, updatedText: string, rellO
       gaRellOperationTiming(rellOperation, stopStopwatch(sw));
       return value;
     })
-    .catch(error => handleGADuringException(rellOperation, sw, error));
+    .catch(error => handleException(rellOperation, sw, error));
 }
 
 export function deleteTopic(user: ChromunityUser, id: string) {
@@ -107,7 +107,7 @@ export function deleteTopic(user: ChromunityUser, id: string) {
       gaRellOperationTiming(rellOperation, stopStopwatch(sw));
       return value;
     })
-    .catch(error => handleGADuringException(rellOperation, sw, error));
+    .catch(error => handleException(rellOperation, sw, error));
 }
 
 export function createTopicReply(user: ChromunityUser, topicId: string, message: string) {
@@ -140,7 +140,7 @@ export function createTopicReply(user: ChromunityUser, topicId: string, message:
       );
       return promise;
     })
-    .catch(error => handleGADuringException(rellOperation, sw, error));
+    .catch(error => handleException(rellOperation, sw, error));
 }
 
 export function createTopicSubReply(
@@ -183,7 +183,7 @@ export function createTopicSubReply(
       });
       return promise;
     })
-    .catch(error => handleGADuringException(operation, sw, error));
+    .catch(error => handleException(operation, sw, error));
 }
 
 function createReplyTriggerString(name: string, id: string, replyId: string): string {
@@ -210,7 +210,7 @@ export function removeTopic(user: ChromunityUser, topicId: string) {
       gaRellOperationTiming("remove_topic", stopStopwatch(sw));
       return value;
     })
-    .catch(error => handleGADuringException(operation, sw, error));
+    .catch(error => handleException(operation, sw, error));
 }
 
 export function removeTopicReply(user: ChromunityUser, topicReplyId: string) {
@@ -229,7 +229,7 @@ export function removeTopicReply(user: ChromunityUser, topicReplyId: string) {
       gaRellOperationTiming("remove_topic_reply", stopStopwatch(sw));
       return value;
     })
-    .catch(error => handleGADuringException(operation, sw, error));
+    .catch(error => handleException(operation, sw, error));
 }
 
 export function getTopicRepliesPriorToTimestamp(
@@ -261,7 +261,7 @@ function getTopicRepliesForTimestamp(topicId: string, timestamp: number, pageSiz
       gaRellQueryTiming(rellOperation, stopStopwatch(sw));
       return value;
     })
-    .catch(error => handleGADuringException(rellOperation, sw, error));
+    .catch(error => handleException(rellOperation, sw, error));
 }
 
 export function getTopicRepliesByUserPriorToTimestamp(
@@ -280,7 +280,7 @@ export function getTopicRepliesByUserPriorToTimestamp(
       gaRellQueryTiming(query, stopStopwatch(sw));
       return replies;
     })
-    .catch((error: Error) => handleGADuringException(query, sw, error));
+    .catch((error: Error) => handleException(query, sw, error));
 }
 
 export function getTopicSubReplies(replyId: string): Promise<TopicReply[]> {
@@ -304,7 +304,7 @@ export function getTopicsByUserPriorToTimestamp(
       topics.forEach(topic => topicsCache.set(topic.id, topic));
       return topics;
     })
-    .catch((error: Error) => handleGADuringException(query, sw, error));
+    .catch((error: Error) => handleException(query, sw, error));
 }
 
 export function getTopicsByChannelPriorToTimestamp(
@@ -325,7 +325,7 @@ export function getTopicsByChannelPriorToTimestamp(
       topics.forEach(topic => topicsCache.set(topic.id, topic));
       return topics;
     })
-    .catch((error: Error) => handleGADuringException(query, sw, error));
+    .catch((error: Error) => handleException(query, sw, error));
 }
 
 export function getTopicsByChannelAfterTimestamp(channelName: string, timestamp: number): Promise<Topic[]> {
@@ -341,7 +341,7 @@ export function getTopicsByChannelAfterTimestamp(channelName: string, timestamp:
       topics.forEach(topic => topicsCache.set(topic.id, topic));
       return topics;
     })
-    .catch((error: Error) => handleGADuringException(query, sw, error));
+    .catch((error: Error) => handleException(query, sw, error));
 }
 
 export function countTopicsInChannel(channelName: string): Promise<number> {
@@ -355,7 +355,7 @@ export function countTopicsInChannel(channelName: string): Promise<number> {
       gaRellQueryTiming(query, stopStopwatch(sw));
       return value;
     })
-    .catch((error: Error) => handleGADuringException(query, sw, error));
+    .catch((error: Error) => handleException(query, sw, error));
 }
 
 export function getTopicStarRaters(topicId: string, clearCache = false): Promise<string[]> {
@@ -377,7 +377,7 @@ export function getTopicStarRaters(topicId: string, clearCache = false): Promise
       starRatingCache.set(topicId, raters, 600);
       return raters;
     })
-    .catch((error: Error) => handleGADuringException(query, sw, error));
+    .catch((error: Error) => handleException(query, sw, error));
 }
 
 export function giveTopicStarRating(user: ChromunityUser, topicId: string) {
@@ -421,7 +421,7 @@ function modifyRatingAndSubscription(user: ChromunityUser, id: string, rellOpera
       gaRellOperationTiming(rellOperation, stopStopwatch(sw));
       return value;
     })
-    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
+    .catch((error: Error) => handleException(rellOperation, sw, error));
 }
 
 export function getReplyStarRaters(topicId: string): Promise<string[]> {
@@ -459,7 +459,7 @@ export function getTopicSubscribers(topicId: string): Promise<string[]> {
       gaRellQueryTiming(query, stopStopwatch(sw));
       return subs;
     })
-    .catch((error: Error) => handleGADuringException(query, sw, error));
+    .catch((error: Error) => handleException(query, sw, error));
 }
 
 export function getTopicById(id: string): Promise<Topic> {
@@ -478,7 +478,7 @@ export function getTopicById(id: string): Promise<Topic> {
       topicsCache.set(id, topic, 300);
       return topic;
     })
-    .catch((error: Error) => handleGADuringException(query, sw, error));
+    .catch((error: Error) => handleException(query, sw, error));
 }
 
 export function getTopicsPriorToTimestamp(timestamp: number, pageSize: number): Promise<Topic[]> {
@@ -501,7 +501,7 @@ function getTopicsForTimestamp(timestamp: number, pageSize: number, rellOperatio
       topics.forEach(topic => topicsCache.set(topic.id, topic));
       return topics;
     })
-    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
+    .catch((error: Error) => handleException(rellOperation, sw, error));
 }
 
 export function getTopicsFromFollowsAfterTimestamp(
@@ -537,7 +537,7 @@ function getTopicsFromFollowsForTimestamp(
       gaRellQueryTiming(rellOperation, stopStopwatch(sw));
       return topics;
     })
-    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
+    .catch((error: Error) => handleException(rellOperation, sw, error));
 }
 
 export function countTopicsByUser(name: string) {
@@ -563,7 +563,7 @@ function countByUser(name: string, rellOperation: string): Promise<number> {
       gaRellQueryTiming(rellOperation, stopStopwatch(sw));
       return count;
     })
-    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
+    .catch((error: Error) => handleException(rellOperation, sw, error));
 }
 
 export function getTopicsFromFollowedChannelsAfterTimestamp(username: string, timestamp: number, pageSize: number) {
@@ -604,7 +604,7 @@ export function getTopicsFromFollowedChannels(
         return seen.has(k) ? false : seen.add(k);
       });
     })
-    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
+    .catch((error: Error) => handleException(rellOperation, sw, error));
 }
 
 export function getAllTopicsByPopularityAfterTimestamp(timestamp: number, pageSize: number): Promise<Topic[]> {
@@ -618,7 +618,7 @@ export function getAllTopicsByPopularityAfterTimestamp(timestamp: number, pageSi
       gaRellQueryTiming(query, stopStopwatch(sw));
       return topics;
     })
-    .catch((error: Error) => handleGADuringException(query, sw, error));
+    .catch((error: Error) => handleException(query, sw, error));
 }
 
 export function getTopicsByFollowsSortedByPopularityAfterTimestamp(
@@ -676,5 +676,5 @@ function getTopicsByPopularityAfterTimestamp(
       gaRellQueryTiming(rellOperation, stopStopwatch(sw));
       return topics;
     })
-    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
+    .catch((error: Error) => handleException(rellOperation, sw, error));
 }

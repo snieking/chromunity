@@ -2,7 +2,7 @@ import { ChromunityUser } from "../types";
 import { BLOCKCHAIN, GTX } from "./Postchain";
 import {
   createStopwatchStarted,
-  handleGADuringException,
+  handleException,
   sortByFrequency,
   stopStopwatch,
   uniqueId
@@ -34,7 +34,7 @@ export function getFollowedChannels(user: string): Promise<string[]> {
       gaRellQueryTiming(query, stopStopwatch(sw));
       return values;
     })
-    .catch((error: Error) => handleGADuringException(query, sw, error));
+    .catch((error: Error) => handleException(query, sw, error));
 }
 
 function modifyChannelollowing(user: ChromunityUser, channel: string, rellOperation: string) {
@@ -60,7 +60,7 @@ function modifyChannelollowing(user: ChromunityUser, channel: string, rellOperat
       gaRellOperationTiming(rellOperation, stopStopwatch(sw));
       return value;
     })
-    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
+    .catch((error: Error) => handleException(rellOperation, sw, error));
 }
 
 export function getTopicChannelBelongings(topicId: string): Promise<string[]> {
@@ -79,7 +79,7 @@ export function getTopicChannelBelongings(topicId: string): Promise<string[]> {
       channelsCache.set(topicId, belongings, 3600);
       return belongings;
     })
-    .catch((error: Error) => handleGADuringException(query, sw, error));
+    .catch((error: Error) => handleException(query, sw, error));
 }
 
 export function getTrendingChannels(sinceDaysAgo: number): Promise<string[]> {
@@ -105,7 +105,7 @@ export function getTrendingChannels(sinceDaysAgo: number): Promise<string[]> {
       channelsCache.set("trending", trending, 3600);
       return trending;
     })
-    .catch((error: Error) => handleGADuringException(query, sw, error));
+    .catch((error: Error) => handleException(query, sw, error));
 }
 
 export function countChannelFollowers(channelName: string): Promise<number> {
@@ -127,5 +127,5 @@ export function countChannelFollowers(channelName: string): Promise<number> {
       channelsCache.set(key, count, 600);
       return count;
     })
-    .catch((error: Error) => handleGADuringException(query, sw, error));
+    .catch((error: Error) => handleException(query, sw, error));
 }

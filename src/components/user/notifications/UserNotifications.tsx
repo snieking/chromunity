@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Container, LinearProgress } from "@material-ui/core";
 
 import { RouteComponentProps } from "react-router";
@@ -24,11 +24,7 @@ const UserNotifications: React.FunctionComponent<UserNotificationsProps> = props
   const [couldExistOlderNotifications, setCouldExistOlderNotifications] = useState<boolean>(false);
 
   const user = getUser();
-
-  useEffect(() => {
-    retrieveNotifications();
-    // eslint-disable-next-line
-  }, []);
+  retrieveNotifications();
 
   pageView();
 
@@ -46,7 +42,7 @@ const UserNotifications: React.FunctionComponent<UserNotificationsProps> = props
         setCouldExistOlderNotifications(retrievedNotifications.length >= notificationsPageSize);
 
         if (user != null && user.name === userId) {
-          markNotificationsRead(user);
+          markNotificationsRead(user).then();
         }
       })
       .catch(() => setLoading(false));

@@ -3,7 +3,7 @@ import { BLOCKCHAIN, GTX } from "./Postchain";
 import * as BoomerangCache from "boomerang-cache";
 import { removeNotificationsForId, sendNotificationWithDeterministicId } from "./NotificationService";
 import { gaRellOperationTiming, gaRellQueryTiming, gaSocialEvent } from "../GoogleAnalytics";
-import { createStopwatchStarted, handleGADuringException, stopStopwatch, uniqueId } from "../util/util";
+import { createStopwatchStarted, handleException, stopStopwatch, uniqueId } from "../util/util";
 
 const boomerang = BoomerangCache.create("following-bucket", {
   storage: "session",
@@ -59,7 +59,7 @@ function updateFollowing(user: ChromunityUser, following: string, rellOperation:
       gaRellOperationTiming(rellOperation, stopStopwatch(sw));
       return value;
     })
-    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
+    .catch((error: Error) => handleException(rellOperation, sw, error));
 }
 
 export function countUserFollowers(name: string): Promise<number> {
@@ -73,7 +73,7 @@ export function countUserFollowers(name: string): Promise<number> {
       gaRellQueryTiming(query, stopStopwatch(sw));
       return arr.length;
     })
-    .catch((error: Error) => handleGADuringException(query, sw, error));
+    .catch((error: Error) => handleException(query, sw, error));
 }
 
 export function countUserFollowings(name: string): Promise<number> {
@@ -104,5 +104,5 @@ export function amIAFollowerOf(user: ChromunityUser, name: string): Promise<bool
       boomerang.set("user-" + user.name.toLocaleLowerCase(), userFollows.map(name => name.toLocaleLowerCase()));
       return userFollows.includes(name.toLocaleLowerCase());
     })
-    .catch((error: Error) => handleGADuringException(query, sw, error));
+    .catch((error: Error) => handleException(query, sw, error));
 }

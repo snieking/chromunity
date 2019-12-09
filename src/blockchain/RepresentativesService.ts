@@ -1,6 +1,6 @@
 import { BLOCKCHAIN, GTX } from "./Postchain";
 import { Election, RepresentativeAction, RepresentativeReport, ChromunityUser } from "../types";
-import { createStopwatchStarted, handleGADuringException, stopStopwatch, uniqueId } from "../util/util";
+import { createStopwatchStarted, handleException, stopStopwatch, uniqueId } from "../util/util";
 
 import * as BoomerangCache from "boomerang-cache";
 import { gaRellOperationTiming, gaSocialEvent } from "../GoogleAnalytics";
@@ -48,7 +48,7 @@ export function handleReport(user: ChromunityUser, reportId: string) {
       gaRellOperationTiming(rellOperation, stopStopwatch(sw));
       return value;
     })
-    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
+    .catch((error: Error) => handleException(rellOperation, sw, error));
 }
 
 export function suspendUser(user: ChromunityUser, userToBeSuspended: string) {
@@ -92,7 +92,7 @@ function report(user: ChromunityUser, text: string) {
       gaRellOperationTiming(rellOperation, stopStopwatch(sw));
       return value;
     })
-    .catch((error: Error) => handleGADuringException(rellOperation, sw, error));
+    .catch((error: Error) => handleException(rellOperation, sw, error));
 }
 
 export function getUnhandledReports(): Promise<RepresentativeReport[]> {

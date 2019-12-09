@@ -1,7 +1,7 @@
 import { BLOCKCHAIN, GTX } from "./Postchain";
 import { Chat, ChatMessage, ChromunityUser } from "../types";
 import { gaRellOperationTiming } from "../GoogleAnalytics";
-import { createStopwatchStarted, handleGADuringException, stopStopwatch, uniqueId } from "../util/util";
+import { createStopwatchStarted, handleException, stopStopwatch, uniqueId } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 
 const UNREAD_CHATS_KEY = "unreadChats";
@@ -32,7 +32,7 @@ export function createChatUser(user: ChromunityUser, pubKey: Buffer) {
       gaRellOperationTiming(operation, stopStopwatch(sw));
       return promise;
     })
-    .catch(error => handleGADuringException(operation, sw, error));
+    .catch(error => handleException(operation, sw, error));
 }
 
 export function deleteChatUser(user: ChromunityUser) {
@@ -52,7 +52,7 @@ export function deleteChatUser(user: ChromunityUser) {
       gaRellOperationTiming(operation, stopStopwatch(sw));
       return promise;
     })
-    .catch(error => handleGADuringException(operation, sw, error));
+    .catch(error => handleException(operation, sw, error));
 }
 
 export function createNewChat(user: ChromunityUser, chatId: string, encryptedChatKey: string) {
@@ -74,7 +74,7 @@ export function createNewChat(user: ChromunityUser, chatId: string, encryptedCha
       gaRellOperationTiming(operation, stopStopwatch(sw));
       return promise;
     })
-    .catch(error => handleGADuringException(operation, sw, error));
+    .catch(error => handleException(operation, sw, error));
 }
 
 export function sendChatMessage(user: ChromunityUser, chatId: string, message: string) {
@@ -94,7 +94,7 @@ export function sendChatMessage(user: ChromunityUser, chatId: string, message: s
       gaRellOperationTiming(operation, stopStopwatch(sw));
       return promise;
     })
-    .catch(error => handleGADuringException(operation, sw, error));
+    .catch(error => handleException(operation, sw, error));
 }
 
 export function addUserToChat(user: ChromunityUser, chatId: string, targetUser: string, encryptedChatKey: string) {
@@ -116,7 +116,7 @@ export function addUserToChat(user: ChromunityUser, chatId: string, targetUser: 
       gaRellOperationTiming(operation, stopStopwatch(sw));
       return promise;
     })
-    .catch(error => handleGADuringException(operation, sw, error));
+    .catch(error => handleException(operation, sw, error));
 }
 
 export function leaveChat(user: ChromunityUser, chatId: string) {
@@ -130,7 +130,7 @@ export function leaveChat(user: ChromunityUser, chatId: string) {
       gaRellOperationTiming(operation, stopStopwatch(sw));
       return promise;
     })
-    .catch(error => handleGADuringException(operation, sw, error));
+    .catch(error => handleException(operation, sw, error));
 }
 export function markChatAsRead(user: ChromunityUser, chatId: string) {
   chatCache.remove(UNREAD_CHATS_KEY);
@@ -150,7 +150,7 @@ export function markChatAsRead(user: ChromunityUser, chatId: string) {
       gaRellOperationTiming(operation, stopStopwatch(sw));
       return promise;
     })
-    .catch(error => handleGADuringException(operation, sw, error));
+    .catch(error => handleException(operation, sw, error));
 }
 
 export function modifyTitle(user: ChromunityUser, chatId: string, updatedTitle: string) {
@@ -171,7 +171,7 @@ export function modifyTitle(user: ChromunityUser, chatId: string, updatedTitle: 
       gaRellOperationTiming(operation, stopStopwatch(sw));
       return promise;
     })
-    .catch(error => handleGADuringException(operation, sw, error));
+    .catch(error => handleException(operation, sw, error));
 }
 
 export function getUserChats(username: string): Promise<Chat[]> {

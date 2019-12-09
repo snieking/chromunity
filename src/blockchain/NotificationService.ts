@@ -1,7 +1,7 @@
 import { BLOCKCHAIN, GTX } from "./Postchain";
 import * as BoomerangCache from "boomerang-cache";
 import { ChromunityUser, UserNotification } from "../types";
-import { createStopwatchStarted, handleGADuringException, stopStopwatch, uniqueId } from "../util/util";
+import { createStopwatchStarted, handleException, stopStopwatch, uniqueId } from "../util/util";
 import { gaRellOperationTiming, gaRellQueryTiming } from "../GoogleAnalytics";
 
 const boomerang = BoomerangCache.create("notification-bucket", {
@@ -46,7 +46,7 @@ export function removeNotificationsForId(fromUser: ChromunityUser, id: string, u
       gaRellOperationTiming(operation, stopStopwatch(sw));
       return value;
     })
-    .catch((error: Error) => handleGADuringException(operation, sw, error));
+    .catch((error: Error) => handleException(operation, sw, error));
 }
 
 function sendNotificationsInternal(
@@ -80,7 +80,7 @@ function sendNotificationsInternal(
       gaRellOperationTiming(operation, stopStopwatch(sw));
       return value;
     })
-    .catch((error: Error) => handleGADuringException(operation, sw, error));
+    .catch((error: Error) => handleException(operation, sw, error));
 }
 
 export function markNotificationsRead(user: ChromunityUser) {
@@ -103,7 +103,7 @@ export function markNotificationsRead(user: ChromunityUser) {
       gaRellOperationTiming(operation, stopStopwatch(sw));
       return value;
     })
-    .catch((error: Error) => handleGADuringException(operation, sw, error));
+    .catch((error: Error) => handleException(operation, sw, error));
 }
 
 export function getUserNotificationsPriorToTimestamp(
@@ -123,7 +123,7 @@ export function getUserNotificationsPriorToTimestamp(
       gaRellQueryTiming(query, stopStopwatch(sw));
       return userNotifications;
     })
-    .catch((error: Error) => handleGADuringException(query, sw, error));
+    .catch((error: Error) => handleException(query, sw, error));
 }
 
 export function countUnreadUserNotifications(user: string): Promise<number> {
@@ -140,7 +140,7 @@ export function countUnreadUserNotifications(user: string): Promise<number> {
         boomerang.set("notis-" + user, arr.length, 60);
         return arr.length;
       })
-      .catch((error: Error) => handleGADuringException(query, sw, error));
+      .catch((error: Error) => handleException(query, sw, error));
   } else {
     return new Promise<number>(resolve => resolve(count));
   }
