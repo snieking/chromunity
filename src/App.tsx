@@ -24,7 +24,7 @@ Sentry.init({
   beforeSend(event, hint) {
     // Check if it is an exception, and if so, show the report dialog
     if (event.exception && config.testMode) {
-      Sentry.showReportDialog({ eventId: event.event_id, user: { name: getUsername() }});
+      Sentry.showReportDialog({ eventId: event.event_id });
     }
     return event;
   }

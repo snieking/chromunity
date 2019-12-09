@@ -21,14 +21,19 @@ const notificationsPageSize: number = 25;
 const UserNotifications: React.FunctionComponent<UserNotificationsProps> = props => {
   const [notifications, setNotifications] = useState<UserNotification[]>([]);
   const [isLoading, setLoading] = useState<boolean>(false);
+  const [initialNotificationsRetrieved, setInitialNotificationsRetrieved] = useState(false);
   const [couldExistOlderNotifications, setCouldExistOlderNotifications] = useState<boolean>(false);
 
   const user = getUser();
-  retrieveNotifications();
+
+  if (!initialNotificationsRetrieved) {
+    retrieveNotifications();
+  }
 
   pageView();
 
   function retrieveNotifications() {
+    setInitialNotificationsRetrieved(true);
     const userId = props.match.params.userId;
 
     setLoading(true);
