@@ -6,6 +6,7 @@
 # rell
 rell/logs/*
 rell/target/*
+postchain-node
 
 # dependencies
 /node_modules
