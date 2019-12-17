@@ -76,7 +76,7 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
       setErrorMsg("Username may not contain whitespace");
       setErrorOpen(true);
       setName("");
-    } else if (!/[a-zA-Z0-9]{3,16}/.test(name.charAt(0))) {
+    } else if (!/[a-zA-Z0-9]{3,16}/.test(name)) {
       setErrorMsg("Username must start with a a-z, A-Z or 0-9 character. Username should have a size between 3-16 characters.");
       setErrorOpen(true);
       setName("");
