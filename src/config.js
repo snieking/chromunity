@@ -9,7 +9,7 @@ config.vaultUrl = "http://localhost:3001";
 
 config.gaTrackingId = "UA-80662239-2";
 
-config.sentryDsn = "https://a45f0d3d7c5d42819cabb34e32f56998@sentry.io/1851343";
+config.sentryDsn = "https://9fcd3766732c4665b89f08e2d58b286f@sentry.io/1870353";
 config.sentryEnvironment = "local";
 
 config.testMode = true;
