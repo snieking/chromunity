@@ -166,9 +166,9 @@ class TopicWall extends React.Component<Props, State> {
   }
 
   retrieveLatestTopics(ignoreCache: boolean) {
-    if (this.props.type === "userFollowings") {
+    if (this.props.type === "userFollowings" && this.state.user) {
       this.props.loadFollowedUsersTopics(this.state.user.name, topicsPageSize);
-    } else if (this.props.type === "tagFollowings") {
+    } else if (this.props.type === "tagFollowings" && this.state.user) {
       this.props.loadFollowedChannelsTopics(this.state.user.name, topicsPageSize, ignoreCache);
     } else {
       this.props.loadAllTopics(topicsPageSize, ignoreCache);
