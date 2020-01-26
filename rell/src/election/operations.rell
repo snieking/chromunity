@@ -76,26 +76,31 @@ operation vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: 
 operation update_vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: name) {
     val user = user.get_verified_user(voter, descriptor_id);
 
-    val currentElection = representative_election @ { .completed == false };
+    val current_election = representative_election@{ .completed == false };
+    
+    val old_candidate_votes = representative_election_candidate@*{ current_election };
+
+	for (old_candidate in old_candidate_votes) {
+	    delete representative_election_vote@{
+	        .user == user,
+	        old_candidate
+	    };
+	    
+	    update temp_votes_counter@ {
+	    	old_candidate
+	    } ( votes -= 1 );
+	}
+
     val election_candidate = representative_election_candidate@{
-        currentElection,
+        current_election,
         user.user@{ .name == candidate }
     };
-
-    delete representative_election_vote@?{
-        .user == user,
-        election_candidate
-    };
-    
-    update temp_votes_counter@ {
-    	election_candidate
-    } ( votes -= 1 );
 
     val new_vote = create representative_election_vote(
         user,
         representative_election_candidate@{
             .user.name == candidate,
-            currentElection
+            current_election
         }
     );
     

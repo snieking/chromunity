@@ -25,7 +25,7 @@ query get_user_vote_in_election(name) {
     return representative_election_vote@?{
         .user == user.user@{ .name == name },
         .representative_election_candidate.representative_election == representative_election @ { .completed == false }
-    } ( .representative_election_candidate.user.name );
+    } ( .representative_election_candidate.user.name ) limit 1;
 }
 
 query get_current_representative_period(timestamp) {
