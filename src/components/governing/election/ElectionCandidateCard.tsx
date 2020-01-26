@@ -38,8 +38,13 @@ const useStyles = makeStyles(theme =>
     },
     statsDescr: {
       position: "relative",
-      marginTop: "5px",
-      marginBottom: "10px"
+      [theme.breakpoints.down("sm")]: {
+        marginTop: "5px"
+      },
+      [theme.breakpoints.up("md")]: {
+        display: "inline",
+        marginLeft: "15px"
+      }
     }
   })
 );
