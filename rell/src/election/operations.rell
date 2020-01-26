@@ -62,24 +62,10 @@ operation vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: 
 	require(voter != candidate, "You can't vote for yourself");
     val user = user.get_verified_user(voter, descriptor_id);
 
-    val currentElection = representative_election @ { .completed == false };
-    val vote = create representative_election_vote(
-        user,
-        representative_election_candidate@{ user.user@{ .name == candidate }, currentElection }
-    );
+    val current_election = representative_election @ { .completed == false };
     
-    update temp_votes_counter@ {
-    	vote.representative_election_candidate
-    } ( votes += 1 );
-}
-
-operation update_vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: name) {
-    val user = user.get_verified_user(voter, descriptor_id);
-
-    val current_election = representative_election@{ .completed == false };
-    
+    // Clean up older votes in-case the user already voted
     val old_candidate_votes = representative_election_candidate@*{ current_election };
-
 	for (old_candidate in old_candidate_votes) {
 	    delete representative_election_vote@{
 	        .user == user,
@@ -90,22 +76,15 @@ operation update_vote_for_candidate(voter: name, descriptor_id: byte_array, cand
 	    	old_candidate
 	    } ( votes -= 1 );
 	}
-
-    val election_candidate = representative_election_candidate@{
-        current_election,
-        user.user@{ .name == candidate }
-    };
-
-    val new_vote = create representative_election_vote(
+    
+    
+    val vote = create representative_election_vote(
         user,
-        representative_election_candidate@{
-            .user.name == candidate,
-            current_election
-        }
+        representative_election_candidate@{ user.user@{ .name == candidate }, current_election }
     );
     
     update temp_votes_counter@ {
-    	new_vote.representative_election_candidate
+    	vote.representative_election_candidate
     } ( votes += 1 );
 }
 
