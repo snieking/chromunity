@@ -65,16 +65,18 @@ operation vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: 
     val current_election = representative_election @ { .completed == false };
     
     // Clean up older votes in-case the user already voted
-    val old_candidate_votes = representative_election_candidate@*{ current_election };
-	for (old_candidate in old_candidate_votes) {
-	    delete representative_election_vote@{
-	        .user == user,
-	        old_candidate
-	    };
+    val old_candidate_votes = representative_election_vote@*{ 
+    	user,
+    	.representative_election_candidate.representative_election == current_election
+    };
+	for (old_candidate_vote in old_candidate_votes) {
 	    
 	    update temp_votes_counter@ {
-	    	old_candidate
+	    	old_candidate_vote.representative_election_candidate
 	    } ( votes -= 1 );
+	    
+	   	delete old_candidate_vote;
+	    
 	}
     
     
