@@ -47,12 +47,7 @@ export function getElectionVoteForUser(name: string): Promise<string> {
 }
 
 export function getElectionCandidates(): Promise<string[]> {
-  console.log("** GETTING CANDIDATES");
-  return GTX.query("get_election_candidates", {})
-    .then((canditates: string[]) => {
-      console.log("*** FOUND CANDIDATES: ", canditates);
-      return canditates;
-    });
+  return GTX.query("get_election_candidates", {});
 }
 
 export function getUncompletedElection(): Promise<string> {

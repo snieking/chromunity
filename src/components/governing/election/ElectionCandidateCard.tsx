@@ -81,73 +81,70 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
   }
 
   return (
-    <div>
-      <Grid item xs={6} sm={6} md={6}>
-        <Card
-          raised={true}
-          key={"candidate-" + props.candidate}
-          className={`${classes.candidateCard} ${votedFor() ? classes.votedFor : ""}`}
-        >
-          <CardContent>
-            <Avatar src={avatar} size={AVATAR_SIZE.LARGE} name={props.candidate} />
-            <Typography gutterBottom variant="h6" component="h5">
-              <Link to={"/u/" + props.candidate}>@{props.candidate}</Link>
-            </Typography>
-            <br />
-            <Grid container spacing={1}>
-              <Grid item xs={6}>
-                <Badge badgeContent={timesRepresentative} color="secondary" showZero max={99999}>
-                  <Face fontSize="large" />
-                </Badge>
-                <Typography variant="body2" component="span" className={classes.statsDescr}>
-                  Elected
-                </Typography>
-              </Grid>
-
-              <Grid item xs={6}>
-                <Badge badgeContent={topicRating + replyRating} color="secondary" showZero max={99999}>
-                  <Star fontSize="large" />
-                </Badge>
-                <br />
-                <Typography variant="body2" component="span" className={classes.statsDescr}>
-                  Ratings
-                </Typography>
-              </Grid>
-
-              <Grid item xs={6}>
-                <Badge badgeContent={followers} color="secondary" showZero max={99999}>
-                  <Favorite fontSize="large" />
-                </Badge>
-                <Typography variant="body2" component="span" className={classes.statsDescr}>
-                  Followers
-                </Typography>
-              </Grid>
-
-              <Grid item xs={6}>
-                <Badge badgeContent={topics + replies} color="secondary" showZero max={99999}>
-                  <ChatBubble fontSize="large" />
-                </Badge>
-                <Typography variant="body2" component="span" className={classes.statsDescr}>
-                  Messages
-                </Typography>
-              </Grid>
-            </Grid>
-          </CardContent>
-          <CardActions style={{ justifyContent: "center" }}>{renderCandidateCardActions(props.candidate)}</CardActions>
-        </Card>
-      </Grid>
-      <Snackbar
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left"
-        }}
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => setSnackBarOpen(false)}
+    <Grid item xs={6} sm={6} md={3}>
+      <Card
+        key={"candidate-" + props.candidate}
+        className={`${classes.candidateCard} ${votedFor() ? classes.votedFor : ""}`}
       >
-        <CustomSnackbarContentWrapper variant="info" message="Copied to clipboard" />
-      </Snackbar>
-    </div>
+        <CardContent>
+          <Avatar src={avatar} size={AVATAR_SIZE.LARGE} name={props.candidate} />
+          <Typography gutterBottom variant="h6" component="p">
+            <Link to={"/u/" + props.candidate}>@{props.candidate}</Link>
+          </Typography>
+          <br />
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Badge badgeContent={timesRepresentative} color="secondary" showZero max={99999}>
+                <Face fontSize="large" />
+              </Badge>
+              <Typography variant="body2" component="span" className={classes.statsDescr}>
+                Elected
+              </Typography>
+            </Grid>
+
+            <Grid item xs={6}>
+              <Badge badgeContent={topicRating + replyRating} color="secondary" showZero max={99999}>
+                <Star fontSize="large" />
+              </Badge>
+              <br />
+              <Typography variant="body2" component="span" className={classes.statsDescr}>
+                Ratings
+              </Typography>
+            </Grid>
+
+            <Grid item xs={6}>
+              <Badge badgeContent={followers} color="secondary" showZero max={99999}>
+                <Favorite fontSize="large" />
+              </Badge>
+              <Typography variant="body2" component="span" className={classes.statsDescr}>
+                Followers
+              </Typography>
+            </Grid>
+
+            <Grid item xs={6}>
+              <Badge badgeContent={topics + replies} color="secondary" showZero max={99999}>
+                <ChatBubble fontSize="large" />
+              </Badge>
+              <Typography variant="body2" component="span" className={classes.statsDescr}>
+                Messages
+              </Typography>
+            </Grid>
+          </Grid>
+          <Snackbar
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left"
+            }}
+            open={snackbarOpen}
+            autoHideDuration={3000}
+            onClose={() => setSnackBarOpen(false)}
+          >
+            <CustomSnackbarContentWrapper variant="info" message="Copied to clipboard" />
+          </Snackbar>
+        </CardContent>
+        <CardActions style={{ justifyContent: "center" }}>{renderCandidateCardActions(props.candidate)}</CardActions>
+      </Card>
+    </Grid>
   );
 
   function renderCandidateCardActions(name: string) {
