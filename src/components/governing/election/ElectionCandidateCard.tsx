@@ -111,7 +111,6 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
               <Badge badgeContent={topicRating + replyRating} color="secondary" showZero max={99999}>
                 <Star fontSize="large" />
               </Badge>
-              <br />
               <Typography variant="body2" component="span" className={classes.statsDescr}>
                 Ratings
               </Typography>
