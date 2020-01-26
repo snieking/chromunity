@@ -50,7 +50,7 @@
     "build-dev": "cp ./src/config.js ./src/config.bak.js && cp ./src/config-dev.js ./src/config.js && react-scripts build && mv ./src/config.bak.js ./src/config.js",
     "build-local": "react-scripts build",
     "test": "react-scripts test",
-    "test-bc": "jest",
+    "test-bc": "jest --setupFiles dotenv/config",
     "eject": "react-scripts eject",
     "coveralls": "jest --coverage --setupFiles dotenv/config && cat ./coverage/lcov.info | coveralls"
   },

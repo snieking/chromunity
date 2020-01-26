@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:11
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: chromunity
+      POSTGRES_USER: postchain
+      POSTGRES_PASSWORD: postchain
+
+  chromunity:
+    container_name: chromunity
+    image: snieking/chromunity
+    links:
+      - postgres
+    ports:
+      - 7740:7740
+      - 9870:9870
+    environment:
+      POSTGRES_HOST: postgres

@@ -12,16 +12,15 @@ import {
   withStyles,
   WithStyles
 } from "@material-ui/core";
-import Countdown from "react-countdown-now";
 import {
+  blocksUntilElectionWrapsUp, blocksUntilNextElection,
   getElectionCandidates,
   getElectionVoteForUser,
   getNextElectionTimestamp,
   signUpForElection,
   voteForCandidate
 } from "../../../blockchain/ElectionService";
-import { getUser, isGod } from "../../../util/user-util";
-import DictatorActions from "./dictator/DictatorActions";
+import { getUser } from "../../../util/user-util";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import { ChromunityUser } from "../../../types";
 import { pageView } from "../../../GoogleAnalytics";
@@ -31,6 +30,10 @@ const styles = createStyles({
   electionCard: {
     textAlign: "center",
     marginTop: "28px"
+  },
+  actionBtn: {
+    textAlign: "center",
+    margin: "0 auto"
   }
 });
 
@@ -39,6 +42,8 @@ interface Props extends WithStyles<typeof styles> {}
 export interface ElectionState {
   timestamp: number;
   activeElection: boolean;
+  blocksUntilElectionWrapsUp: number;
+  blocksUntilNextElection: number;
   electionId: string;
   votedFor: string;
   isACandidate: boolean;
@@ -46,39 +51,21 @@ export interface ElectionState {
   user: ChromunityUser;
 }
 
-// Renderer callback with condition
-// @ts-ignore
-const renderer = ({ days, hours, minutes, seconds, completed }) => {
-  if (completed) {
-    // Render a completed state
-    window.location.href = "/";
-    return <div />;
-  } else {
-    // Render a countdown
-    return (
-      <div>
-        <Typography gutterBottom variant="h5" component="h5">
-          {days}:{hours}:{minutes}.{seconds}
-        </Typography>
-      </div>
-    );
-  }
-};
-
 const Election = withStyles(styles)(
   class extends React.Component<Props, ElectionState> {
     constructor(props: Props) {
       super(props);
       this.state = {
         activeElection: false,
+        blocksUntilElectionWrapsUp: -1,
+        blocksUntilNextElection: -1,
         electionId: "",
         timestamp: Date.now(),
         votedFor: "",
-        isACandidate: true,
+        isACandidate: false,
         electionCandidates: [],
         user: getUser()
       };
-      this.renderElection = this.renderElection.bind(this);
       this.voteForCandidate = this.voteForCandidate.bind(this);
     }
 
@@ -105,6 +92,10 @@ const Election = withStyles(styles)(
               }
             });
           }
+
+          blocksUntilElectionWrapsUp().then(blocks => this.setState({ blocksUntilElectionWrapsUp: blocks }));
+        } else {
+          blocksUntilNextElection().then(blocks => this.setState({ blocksUntilNextElection: blocks }));
         }
       });
 
@@ -112,37 +103,36 @@ const Election = withStyles(styles)(
     }
 
     renderElectionVoteStatus() {
+      let text = this.state.blocksUntilElectionWrapsUp !== -1
+        ? "An election is in progress and will finish in " + this.state.blocksUntilElectionWrapsUp + " blocks."
+        : "An election is in progress.";
+
       if (!this.state.activeElection) {
-        return (
-          <div>
-            <Typography gutterBottom variant="h6" component="h6">
-              No election is currently in progress
-            </Typography>
-          </div>
-        );
+        text = this.state.blocksUntilNextElection !== -1
+          ? "No election is currently in progress, next one is in " + this.state.blocksUntilNextElection + " blocks."
+          : "No election is currently in progress.";
       } else if (this.state.votedFor !== "") {
-        return (
-          <div>
-            <Typography variant="body2" component="p">
-              You have done your duty as a citizen!
-            </Typography>
-          </div>
-        );
-      } else {
-        return (
-          <div>
-            <Typography variant="body2" component="p">
-              Until the election, cast your vote!
-            </Typography>
-          </div>
-        );
+        text = "Thanks for doing your duty as a Chromian!";
+      } else if (this.state.user == null) {
+        text = "Login to be able to vote in the election.";
       }
+
+      return (
+        <Typography variant="body2" component="p">
+          {text}
+        </Typography>
+      );
     }
 
     renderParticipateButton() {
       if (this.state.user != null && this.state.user.name != null && !this.state.isACandidate) {
         return (
-          <Button fullWidth variant="contained" color="primary" onClick={() => this.registerForElection()}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => this.registerForElection()}
+            className={this.props.classes.actionBtn}
+          >
             Participate
           </Button>
         );
@@ -150,15 +140,7 @@ const Election = withStyles(styles)(
     }
 
     registerForElection() {
-      signUpForElection(this.state.user).then(() => this.setState({ isACandidate: true }));
-    }
-
-    renderElection() {
-      if (this.state.activeElection) {
-        return <Countdown date={this.state.timestamp} renderer={renderer} />;
-      } else if (isGod()) {
-        return <DictatorActions />;
-      }
+      signUpForElection(this.state.user).then(() => window.location.reload());
     }
 
     voteForCandidate(name: string) {
@@ -170,13 +152,10 @@ const Election = withStyles(styles)(
         <Container fixed>
           <ChromiaPageHeader text="Election" />
           <Card raised={false} key={"next-election"} className={this.props.classes.electionCard}>
-            <CardContent>
-              {this.renderElection()}
-              {this.renderElectionVoteStatus()}
-            </CardContent>
+            <CardContent>{this.renderElectionVoteStatus()}</CardContent>
             <CardActions>{this.renderParticipateButton()}</CardActions>
           </Card>
-          <br/>
+          <br />
           <Grid container spacing={1}>
             {this.state.electionCandidates.map(candidate => (
               <ElectionCandidateCard

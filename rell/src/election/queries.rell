@@ -1,27 +1,24 @@
 import user;
 
-query get_election_votes() {
-    return representative_election_vote@*{
-        representative_election_candidate@{
-            representative_election @ { .completed == false }
-        }
-    } ( .representative_election_candidate.user.name );
-}
-
 query get_election_candidates() {
-    return representative_election_candidate@*{
-        representative_election @ { .completed == false }
-    } ( .user.name );
+	val next_election = representative_election@{ .completed == false };
+	
+    return temp_votes_counter@*{
+        .representative_election_candidate.representative_election == next_election
+    } ( 
+    	@omit @sort_desc .votes,
+    	.representative_election_candidate.user.name
+    );
 }
 
-query get_next_election(timestamp) {
-    return representative_election@?{ .timestamp > timestamp } ( .id, -sort .timestamp ) limit 1;
+query get_next_election() {
+    return representative_election@?{ .completed == false } ( .id, @sort_desc .timestamp ) limit 1;
 }
 
 query get_uncompleted_election() {
     return representative_election@?{
         .completed == false
-    } ( .id );
+    } ( .id ) limit 1;
 }
 
 query get_user_vote_in_election(name) {
@@ -32,5 +29,43 @@ query get_user_vote_in_election(name) {
 }
 
 query get_current_representative_period(timestamp) {
-    return representative_election @? { .timestamp <= timestamp, .completed == true } ( .id, -sort .timestamp ) limit 1;
+    return representative_election @? { .timestamp <= timestamp, .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
+}
+
+query blocks_until_next_election() {
+	val recent_election_finished = election_block_details@{} ( 
+		@omit @sort_desc .started_height, 
+		.finished_height
+	) limit 1;
+	
+	require(recent_election_finished != -1, "There is an ongoing election");
+	
+	val next_election_block = recent_election_finished + 4000;
+	
+	val current_block = block@{ 
+		.block_height > recent_election_finished
+	} (
+		@sort_desc .block_height
+	) limit 1;
+	
+	return next_election_block - current_block;
+}
+
+query blocks_until_election_wraps_up() {
+	val recent_election = election_block_details@{} ( 
+		@sort_desc .started_height, 
+		.finished_height
+	) limit 1;
+	
+	require(recent_election.finished_height == -1, "There is no ongoing election");
+	
+	val election_finishing_block = recent_election.started_height + 4000;
+	
+	val current_block = block@{ 
+		.block_height > recent_election.started_height
+	} (
+		@sort_desc .block_height
+	) limit 1;
+	
+	return election_finishing_block - current_block;
 }

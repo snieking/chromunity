@@ -5,6 +5,10 @@ entity representative {
     key user.user, election.representative_election;
 }
 
+entity representative_distrust {
+	key distruster: representative, distrusted: representative;
+}
+
 entity representative_action {
     key id: byte_array;
     index representative;

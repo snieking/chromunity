@@ -9,6 +9,7 @@ import {
   getCurrentRepresentatives,
   retrieveUnhandledReports
 } from "../../../src/redux/sagas/GovernmentSagas";
+import { CREATE_LOGGED_IN_USER } from "../../users";
 
 describe("Representatives sagas tests", () => {
 
@@ -27,18 +28,6 @@ describe("Representatives sagas tests", () => {
     expect(action.type).toBe(GovernmentActionTypes.UPDATE_REPRESENTATIVES);
     return action as UpdateRepresentativesAction;
   };
-
-  it("admin is representative", async () => {
-    const dispatchedActions: GovernmentActions[] = [];
-    const fakeStore = createFakeStore(dispatchedActions, {
-      representativesLastUpdated: 0
-    });
-
-    await runSaga(fakeStore, getCurrentRepresentatives).toPromise();
-    const action = getUpdateRepresentativesAction(dispatchedActions);
-
-    expect(action.representatives).toContain("admin");
-  });
 
   it("representatives cache not expired yet", async () => {
     const dispatchedActions: GovernmentActions[] = [];
@@ -76,7 +65,9 @@ describe("Representatives sagas tests", () => {
       activeElectionLastUpdated: 0
     });
 
-    await runSaga(fakeStore, checkActiveElection).toPromise();
+    const user = await CREATE_LOGGED_IN_USER();
+
+    await runSaga(fakeStore, checkActiveElection, { type: GovernmentActionTypes.CHECK_ACTIVE_ELECTION, user }).toPromise();
     expect(dispatchedActions.length).toBe(1);
   });
 
@@ -86,7 +77,9 @@ describe("Representatives sagas tests", () => {
       activeElectionLastUpdated: Date.now()
     });
 
-    await runSaga(fakeStore, checkActiveElection).toPromise();
+    const user = await CREATE_LOGGED_IN_USER();
+
+    await runSaga(fakeStore, checkActiveElection, { type: GovernmentActionTypes.CHECK_ACTIVE_ELECTION, user }).toPromise();
     expect(dispatchedActions.length).toBe(0);
   });
 

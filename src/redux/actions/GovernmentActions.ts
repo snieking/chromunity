@@ -8,6 +8,7 @@ import {
   CheckActiveElectionAction,
   UpdateActiveElectionAction
 } from "../GovernmentTypes";
+import { ChromunityUser } from "../../types";
 
 export const loadRepresentatives: ActionCreator<LoadRepresentativesAction> = () => ({
   type: GovernmentActionTypes.LOAD_REPRESENTATIVES
@@ -27,8 +28,9 @@ export const updateUnhandledReports: ActionCreator<UpdateUnhandledReportsAction>
   unhandledReports: unhandledReports
 });
 
-export const checkActiveElection: ActionCreator<CheckActiveElectionAction> = () => ({
-  type: GovernmentActionTypes.CHECK_ACTIVE_ELECTION
+export const checkActiveElection: ActionCreator<CheckActiveElectionAction> = (user: ChromunityUser) => ({
+  type: GovernmentActionTypes.CHECK_ACTIVE_ELECTION,
+  user
 });
 
 export const updateActiveElection: ActionCreator<UpdateActiveElectionAction> = (activeElection: boolean) => ({

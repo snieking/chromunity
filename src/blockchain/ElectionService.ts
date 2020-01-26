@@ -1,56 +1,42 @@
 import { Election, ChromunityUser } from "../types";
 import { BLOCKCHAIN, GTX } from "./Postchain";
-import { sortByFrequency, uniqueId } from "../util/util";
+import { uniqueId } from "../util/util";
 
-export function triggerElection(user: ChromunityUser, completionTimestamp: number) {
+export function processElection(user: ChromunityUser) {
   return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
-      "trigger_election",
-      user.name.toLocaleLowerCase(),
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      uniqueId(),
-      completionTimestamp
-    )
-  );
-}
-
-export function getElectionVotes() {
-  return GTX.query("get_election_votes", {}).then((candidates: string[]) => sortByFrequency(candidates));
-}
-
-export function completeElection(user: ChromunityUser, sortedCandidates: string[]) {
-  return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
-      "complete_election",
-      user.name.toLocaleLowerCase(),
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      sortedCandidates
-    )
+    bc.transactionBuilder()
+      .addOperation("process_election")
+      .addOperation("nop", uniqueId())
+      .build(user.ft3User.authDescriptor.signers)
+      .sign(user.ft3User.keyPair)
+      .post()
   );
 }
 
 export function signUpForElection(user: ChromunityUser): Promise<any> {
   return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
-      "sign_up_for_election",
-      user.name.toLocaleLowerCase(),
-      user.ft3User.authDescriptor.hash().toString("hex")
-    )
+    bc.transactionBuilder()
+      .addOperation("sign_up_for_election", user.name.toLocaleLowerCase(), user.ft3User.authDescriptor.hash().toString("hex"))
+      .addOperation("nop", uniqueId())
+      .build(user.ft3User.authDescriptor.signers)
+      .sign(user.ft3User.keyPair)
+      .post()
   );
 }
 
 export function voteForCandidate(user: ChromunityUser, candidate: string): Promise<any> {
   return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
-      "vote_for_candidate",
-      user.name.toLocaleLowerCase(),
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      candidate
-    )
+    bc.transactionBuilder()
+      .addOperation(
+        "vote_for_candidate",
+        user.name.toLocaleLowerCase(),
+        user.ft3User.authDescriptor.hash().toString("hex"),
+        candidate
+      )
+      .addOperation("nop", uniqueId())
+      .build(user.ft3User.authDescriptor.signers)
+      .sign(user.ft3User.keyPair)
+      .post()
   );
 }
 
@@ -61,7 +47,12 @@ export function getElectionVoteForUser(name: string): Promise<string> {
 }
 
 export function getElectionCandidates(): Promise<string[]> {
-  return GTX.query("get_election_candidates", {});
+  console.log("** GETTING CANDIDATES");
+  return GTX.query("get_election_candidates", {})
+    .then((canditates: string[]) => {
+      console.log("*** FOUND CANDIDATES: ", canditates);
+      return canditates;
+    });
 }
 
 export function getUncompletedElection(): Promise<string> {
@@ -69,5 +60,13 @@ export function getUncompletedElection(): Promise<string> {
 }
 
 export function getNextElectionTimestamp(): Promise<Election> {
-  return GTX.query("get_next_election", { timestamp: Date.now() });
+  return GTX.query("get_next_election", {});
+}
+
+export function blocksUntilElectionWrapsUp(): Promise<number> {
+  return GTX.query("blocks_until_election_wraps_up", {});
+}
+
+export function blocksUntilNextElection(): Promise<number> {
+  return GTX.query("blocks_until_next_election", {});
 }

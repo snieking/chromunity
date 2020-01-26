@@ -1,11 +1,10 @@
 import election;
 
-query get_representatives() {
+query get_representatives(): list<name> {
     val election = election.representative_election@?{ .completed == true } ( .id, -sort .timestamp ) limit 1;
 
-    // If no election yes, then admin is technically the only representative
     if (election == null) {
-        return ["admin"];
+        return list<name>();
     }
 
     return representative@*{
@@ -26,4 +25,14 @@ query get_all_representative_actions(timestamp, page_size: integer) {
 
 query get_number_of_times_representative(name) {
     return representative@*{ .user.name == name } ( .representative_election.id ).size();
+}
+
+query is_rep_distrusted_by_me(me: name, rep: name) {
+    val recent_election = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
+
+	return representative_distrust@?{
+		.distruster.user.name == me,
+		.distrusted.user.name == rep,
+		.distrusted.representative_election.id == recent_election.id
+	} != null;
 }

@@ -12,7 +12,7 @@ import {
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
-import { ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
+import { getUsername, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import Avatar, { AVATAR_SIZE } from "../../common/Avatar";
 import { ChatBubble, Face, Favorite, Star } from "@material-ui/icons";
 import Badge from "@material-ui/core/Badge";
@@ -38,13 +38,8 @@ const useStyles = makeStyles(theme =>
     },
     statsDescr: {
       position: "relative",
-      [theme.breakpoints.down("sm")]: {
-        marginTop: "5px"
-      },
-      [theme.breakpoints.up("md")]: {
-        display: "inline",
-        marginLeft: "15px"
-      }
+      marginTop: "5px",
+      marginBottom: "10px"
     }
   })
 );
@@ -67,6 +62,8 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
 
   const [snackbarOpen, setSnackBarOpen] = useState(false);
 
+  const username = getUsername();
+
   useEffect(() => {
     getUserSettingsCached(props.candidate, 1440).then(settings =>
       setAvatar(ifEmptyAvatarThenPlaceholder(settings.avatar, props.candidate))
@@ -85,14 +82,14 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
 
   return (
     <div>
-      <Grid item xs={6} sm={6} md={3}>
+      <Grid item xs={6} sm={6} md={6}>
         <Card
           raised={true}
           key={"candidate-" + props.candidate}
           className={`${classes.candidateCard} ${votedFor() ? classes.votedFor : ""}`}
         >
           <CardContent>
-            <Avatar src={avatar} size={AVATAR_SIZE.LARGE} name={props.candidate}/>
+            <Avatar src={avatar} size={AVATAR_SIZE.LARGE} name={props.candidate} />
             <Typography gutterBottom variant="h6" component="h5">
               <Link to={"/u/" + props.candidate}>@{props.candidate}</Link>
             </Typography>
@@ -108,9 +105,10 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
               </Grid>
 
               <Grid item xs={6}>
-                <Badge badgeContent={topicRating + replyRating} color="secondary" showZero> max={99999}
+                <Badge badgeContent={topicRating + replyRating} color="secondary" showZero max={99999}>
                   <Star fontSize="large" />
                 </Badge>
+                <br />
                 <Typography variant="body2" component="span" className={classes.statsDescr}>
                   Ratings
                 </Typography>
@@ -176,15 +174,19 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
     } else {
       return (
         <div>
-          <Button
-            fullWidth
-            size="small"
-            variant="outlined"
-            color="primary"
-            onClick={() => props.voteForCandidate(name)}
-          >
-            Vote
-          </Button>
+          {username != null && username.toLocaleUpperCase() !== name.toLocaleUpperCase() ? (
+            <Button
+              fullWidth
+              size="small"
+              variant="outlined"
+              color="primary"
+              onClick={() => props.voteForCandidate(name)}
+            >
+              Vote
+            </Button>
+          ) : (
+            <div></div>
+          )}
           <CopyToClipboard
             text={
               window.location.protocol +

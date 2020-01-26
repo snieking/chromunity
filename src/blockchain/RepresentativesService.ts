@@ -19,7 +19,7 @@ export function getRepresentatives(): Promise<string[]> {
   return GTX.query("get_representatives", {});
 }
 
-export function getTimesRepresentative(name: string) : Promise<number> {
+export function getTimesRepresentative(name: string): Promise<number> {
   return GTX.query("get_number_of_times_representative", { name: name });
 }
 
@@ -63,6 +63,27 @@ export function suspendUser(user: ChromunityUser, userToBeSuspended: string) {
       userToBeSuspended.toLocaleLowerCase()
     )
   );
+}
+
+export function distrustAnotherRepresentative(user: ChromunityUser, distrusted: string) {
+  return BLOCKCHAIN.then(bc =>
+    bc
+      .transactionBuilder()
+      .addOperation(
+        "distrust_representative",
+        user.ft3User.authDescriptor.hash().toString("hex"),
+        user.name,
+        distrusted
+      )
+      .addOperation("nop", uniqueId())
+      .build(user.ft3User.authDescriptor.signers)
+      .sign(user.ft3User.keyPair)
+      .post()
+  );
+}
+
+export function isRepresentativeDistrustedByMe(user: ChromunityUser, distrusted: string): Promise<boolean> {
+  return BLOCKCHAIN.then(bc => bc.query("is_rep_distrusted_by_me", { me: user.name, rep: distrusted }));
 }
 
 export function reportTopic(user: ChromunityUser, topicId: string) {

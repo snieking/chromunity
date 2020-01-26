@@ -1,9 +1,8 @@
 import React from "react";
 
-import { Button, Card, CardContent, Container, Grid, TextField } from "@material-ui/core";
+import { Container, Grid } from "@material-ui/core";
 import RepresentativeCard from "./RepresentativeCard";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
-import { adminAddRepresentative, adminRemoveRepresentative } from "../../../blockchain/AdminService";
 import { ChromunityUser } from "../../../types";
 import { getUser } from "../../../util/user-util";
 import { pageView } from "../../../GoogleAnalytics";
@@ -46,50 +45,8 @@ class Representatives extends React.Component<Props, State> {
             <RepresentativeCard name={name} key={name} />
           ))}
         </Grid>
-        {this.renderAdminFunctions()}
       </Container>
     );
-  }
-
-  renderAdminFunctions() {
-    const user: ChromunityUser = this.state.user;
-    if (user != null && user.name === "admin") {
-      return (
-        <div>
-          <br />
-          <Card>
-            <CardContent>
-              <TextField
-                autoFocus
-                margin="dense"
-                id="username"
-                label="Username"
-                onChange={this.handleUsernameChange}
-                value={this.state.targetUsername}
-                variant="outlined"
-              />
-              <br />
-              <Button
-                onClick={() =>
-                  adminRemoveRepresentative(user, this.state.targetUsername).then(() => window.location.reload())
-                }
-                variant="outlined"
-              >
-                Remove representative
-              </Button>
-              <Button
-                onClick={() =>
-                  adminAddRepresentative(user, this.state.targetUsername).then(() => window.location.reload())
-                }
-                variant="outlined"
-              >
-                Add representative
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      );
-    }
   }
 
   handleUsernameChange(event: React.ChangeEvent<HTMLInputElement>) {

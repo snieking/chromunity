@@ -7,10 +7,21 @@ entity representative_election {
     index completed;
 }
 
+entity election_block_details {
+	key started_height: integer;
+	mutable finished_height: integer = -1;
+	representative_election;
+}
+
 entity representative_election_candidate {
   key representative_election, user.user;
 }
 
 entity representative_election_vote {
     key user.user, representative_election_candidate;
+}
+
+entity temp_votes_counter {
+	key representative_election_candidate;
+	mutable votes: integer;
 }

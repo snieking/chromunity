@@ -1,10 +1,10 @@
-import { GovernmentActionTypes } from "../GovernmentTypes";
+import { CheckActiveElectionAction, GovernmentActionTypes } from "../GovernmentTypes";
 import { put, select, takeLatest } from "redux-saga/effects";
 import { ApplicationState } from "../Store";
 import { getRepresentatives, getUnhandledReports } from "../../blockchain/RepresentativesService";
 import { RepresentativeReport } from "../../types";
 import { updateActiveElection, updateRepresentatives, updateUnhandledReports } from "../actions/GovernmentActions";
-import { getUncompletedElection } from "../../blockchain/ElectionService";
+import { getUncompletedElection, processElection } from "../../blockchain/ElectionService";
 
 export function* governmentWatcher() {
   yield takeLatest(GovernmentActionTypes.LOAD_REPRESENTATIVES, getCurrentRepresentatives);
@@ -26,8 +26,14 @@ export function* getCurrentRepresentatives() {
   const lastUpdated = yield select(getRepresentativesLastUpdated);
 
   if (cacheExpired(lastUpdated)) {
+    console.log("Getting current representatives");
     const representatives: string[] = yield getRepresentatives();
-    yield put(updateRepresentatives(representatives));
+    console.log("Retrieved representatives", representatives);
+    if (representatives != null) {
+      yield put(updateRepresentatives(representatives));
+    }
+    console.log("UPDATED!");
+
   }
 
 }
@@ -41,10 +47,14 @@ export function* retrieveUnhandledReports() {
   }
 }
 
-export function* checkActiveElection() {
+export function* checkActiveElection(action: CheckActiveElectionAction) {
   const lastUpdated = yield select(getActiveElectionLastUpdated);
 
   if (cacheExpired(lastUpdated)) {
+    console.log("Checking election for user: ", action.user.name);
+    if (action.user != null) {
+      yield processElection(action.user).catch(error => console.log(error));
+    }
     const electionId = yield getUncompletedElection();
     yield put(updateActiveElection(electionId != null));
   }

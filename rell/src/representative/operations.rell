@@ -7,7 +7,7 @@ import util;
 operation remove_topic(username: text, descriptor_id: byte_array, topic_id: text) {
     val user = user.get_verified_user(username, descriptor_id);
 
-    val recentElection = election.representative_election@{ .completed == true } ( .id, sort .timestamp );
+    val recentElection = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
     val representative = representative @{ user, .representative_election.id == recentElection.id };
 
     val topic = topic.topic @{ .id == topic_id };
@@ -24,7 +24,7 @@ operation remove_topic(username: text, descriptor_id: byte_array, topic_id: text
 operation remove_topic_reply(username: text, descriptor_id: byte_array, topic_reply_id: text) {
     val user = user.get_verified_user(username, descriptor_id);
 
-    val recentElection = election.representative_election@{ .completed == true } ( .id, sort .timestamp );
+    val recentElection = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
     val representative = representative @{ user, .representative_election.id == recentElection.id };
 
     val reply = topic.topic_reply @{ .id == topic_reply_id };
@@ -41,7 +41,7 @@ operation remove_topic_reply(username: text, descriptor_id: byte_array, topic_re
 operation suspend_user(username: text, descriptor_id: byte_array, user_to_be_suspended: text) {
     val user = user.get_verified_user(username, descriptor_id);
 
-    val recentElection = election.representative_election@{ .completed == true } ( .id, sort .timestamp );
+    val recentElection = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
     val representative = representative @{ user, .representative_election.id == recentElection.id };
 
     val suspendee = user.user@{ .name == user_to_be_suspended };
@@ -75,26 +75,31 @@ operation suspend_user(username: text, descriptor_id: byte_array, user_to_be_sus
     );
 }
 
-operation tmp_add_representative(admin_name: name, descriptor_id: byte_array, name) {
-    val admin_user = user.get_verified_user(admin_name, descriptor_id);
-    user.admin@{ admin_user };
+operation distrust_representative(descriptor_id: byte_array, distruster: name, distrusted: name) {
+	require(distruster != distrusted, "You can't distrust yourself");
+	
+	val user = user.get_verified_user(distruster, descriptor_id);
+	val distruster_rep = representative@{ user };
+	val distrusted_rep = representative@{ user.name == distrusted };
 
-    val currentElection = election.representative_election @ { .timestamp <= op_context.last_block_time, .completed == true } (
-        .id,
-        -sort .timestamp
-    ) limit 1;
-
-    create representative(user.user@{ .name == name }, election.representative_election@{ .id == currentElection.id });
+    val recent_election = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
+    val representative = representative @{ user, .representative_election.id == recent_election.id };
+    
+    create representative_distrust(distruster = distruster_rep, distrusted = distrusted_rep);
+    
+    val nr_of_representatives = representative@*{ 
+    	.representative_election.id == recent_election.id
+    } ( .user ).size();
+    
+    val nr_of_distrusts = representative_distrust@*{ 
+    	.distrusted == distrusted_rep
+    }( .distruster ).size();
+    
+    val required_distrusts = integer((nr_of_representatives * 0.5).ceil());
+    
+    log("Required distrusts left: ", required_distrusts);
+    if (nr_of_distrusts > 1 and nr_of_distrusts >= required_distrusts) {
+    	delete distrusted_rep;
+    }
 }
 
-operation tmp_remove_representative(admin_name: name, descriptor_id: byte_array, name) {
-    val admin_user = user.get_verified_user(admin_name, descriptor_id);
-    user.admin@{ admin_user };
-
-    val currentElection = election.representative_election @ { .timestamp <= op_context.last_block_time, .completed == true } (
-        .id,
-        -sort .timestamp
-    ) limit 1;
-
-    delete representative @?{ user.user@{ .name == name }, election.representative_election@{ .id == currentElection.id }};
-}

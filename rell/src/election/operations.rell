@@ -1,38 +1,76 @@
 import user;
 import representative;
 
-operation trigger_election(admin_user: text, descriptor_id: byte_array, id: text, timestamp) {
-    val u = user.get_verified_user(admin_user, descriptor_id);
-    user.assert_admin(u);
-
-    val currentElection = representative_election @? { .completed == false };
-
-    if (currentElection == null) {
-        create representative_election(id, timestamp, false);
-    }
+operation process_election() {
+	var something_done = false;
+	
+	val current_block = op_context.block_height;
+	val election_period_in_blocks = 4000;
+	val governing_period_in_blocks = 4000;
+	
+	val election_block_details = election_block_details@?{} ( @sort_desc .started_height, .finished_height ) limit 1;
+	
+	if (election_block_details == null) {
+		log("No election held yet, triggering new one");
+		create_election_at_height(current_block);
+		something_done = true;
+	} else if (election_block_details.finished_height >= 0 and election_block_details.started_height + governing_period_in_blocks < current_block) {
+		log("Triggering a new election");
+		create_election_at_height(current_block);
+		something_done = true;
+	} else if (election_block_details.finished_height == -1 
+		and election_block_details.started_height + election_period_in_blocks < current_block
+	) {
+		log("Wrapping up election");
+		complete_election();
+		something_done = true;
+	}
+	
+	require(something_done, "Expected error since nothing was done");
 }
 
-operation complete_election(admin_user: text, descriptor_id: byte_array, representatives: set<text>) {
-    val op_user = user.get_verified_user(admin_user, descriptor_id);
-    user.assert_admin(op_user);
+function create_election_at_height(height: integer) {
+	val election = create representative_election(
+			"" + height, 
+			op_context.last_block_time, 
+			false
+		);
+		create election_block_details(started_height = height, election);
+}
 
-    val currentElection = representative_election @ { .completed == false };
-    update currentElection ( completed = true );
+function complete_election() {
+    val current_election = representative_election @ { .completed == false };
+    update current_election ( completed = true );
+    update election_block_details@{ current_election } ( finished_height = op_context.block_height );
+    val nr_of_participants = temp_votes_counter@*{} ( 
+    	.representative_election_candidate.user.name
+    ).size();
+    
+    val new_representatives = temp_votes_counter@*{ 
+    	.representative_election_candidate.representative_election == current_election
+    } (
+    	@sort_desc @omit .votes,
+    	.representative_election_candidate.user
+    ) limit integer((nr_of_participants * 0.1).ceil());
 
-    for (representative in representatives) {
-        val user = user.user@{ .name == representative };
-        create representative.representative(user, currentElection);
+    for (user in new_representatives) {
+        create representative.representative(user, current_election);
     }
 }
 
 operation vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: name) {
+	require(voter != candidate, "You can't vote for yourself");
     val user = user.get_verified_user(voter, descriptor_id);
 
     val currentElection = representative_election @ { .completed == false };
-    create representative_election_vote(
+    val vote = create representative_election_vote(
         user,
         representative_election_candidate@{ user.user@{ .name == candidate }, currentElection }
     );
+    
+    update temp_votes_counter@ {
+    	vote.representative_election_candidate
+    } ( votes += 1 );
 }
 
 operation update_vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: name) {
@@ -48,14 +86,22 @@ operation update_vote_for_candidate(voter: name, descriptor_id: byte_array, cand
         .user == user,
         election_candidate
     };
+    
+    update temp_votes_counter@ {
+    	election_candidate
+    } ( votes -= 1 );
 
-    create representative_election_vote(
+    val new_vote = create representative_election_vote(
         user,
         representative_election_candidate@{
             .user.name == candidate,
             currentElection
         }
     );
+    
+    update temp_votes_counter@ {
+    	new_vote.representative_election_candidate
+    } ( votes += 1 );
 }
 
 operation sign_up_for_election(name, descriptor_id: byte_array) {
@@ -63,5 +109,6 @@ operation sign_up_for_election(name, descriptor_id: byte_array) {
 
     val currentElection = representative_election @ { .completed == false };
 
-    create representative_election_candidate(currentElection, user);
+    val candidate = create representative_election_candidate(currentElection, user);
+    create temp_votes_counter(candidate, 0);
 }

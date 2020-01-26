@@ -109,12 +109,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
     }
   });
 
-  function clearInterval(interval: any) {
-
-  }
-
   props.loadRepresentatives();
-  props.checkActiveElection();
 
   if (isRepresentative()) {
     props.loadUnhandledReports();
@@ -122,6 +117,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
 
   if (user != null) {
     interval = setInterval(() => props.countUnreadChats(user), 30000);
+    props.checkActiveElection(user);
   }
 
   function handleProfileClick(event: React.MouseEvent<HTMLButtonElement>) {
@@ -410,7 +406,7 @@ const mapDispatchToProps = (dispatch: any) => {
   return {
     loadRepresentatives: () => dispatch(loadRepresentatives()),
     loadUnhandledReports: () => dispatch(loadUnhandledReports()),
-    checkActiveElection: () => dispatch(checkActiveElection()),
+    checkActiveElection: (user: ChromunityUser) => dispatch(checkActiveElection(user)),
     countUnreadChats: (user: ChromunityUser) => dispatch(countUnreadChatsAction(user))
   };
 };

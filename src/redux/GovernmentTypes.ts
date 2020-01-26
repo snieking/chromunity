@@ -1,3 +1,5 @@
+import { ChromunityUser } from "../types";
+
 export enum GovernmentActionTypes {
   LOAD_REPRESENTATIVES = "GOVERNMENT/REPRESENTATIVES/LOAD",
   UPDATE_REPRESENTATIVES = "GOVERNMENT/REPRESENTATIVES/UPDATE",
@@ -27,6 +29,7 @@ export interface UpdateUnhandledReportsAction {
 
 export interface CheckActiveElectionAction {
   type: GovernmentActionTypes.CHECK_ACTIVE_ELECTION;
+  user: ChromunityUser;
 }
 
 export interface UpdateActiveElectionAction {
