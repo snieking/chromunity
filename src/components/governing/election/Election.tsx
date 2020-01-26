@@ -113,7 +113,7 @@ const Election = withStyles(styles)(
           : "No election is currently in progress.";
       } else if (this.state.votedFor !== "") {
         text = "Thanks for doing your duty as a Chromian!";
-        if (this.state.blocksUntilNextElection !== -1) {
+        if (this.state.blocksUntilElectionWrapsUp !== -1) {
           text = text + " The election will finish in " + this.state.blocksUntilElectionWrapsUp + " blocks.";
         }
       } else if (this.state.user == null) {
