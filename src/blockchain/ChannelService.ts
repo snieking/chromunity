@@ -4,11 +4,11 @@ import {
   createStopwatchStarted,
   handleException,
   sortByFrequency,
-  stopStopwatch,
-  uniqueId
+  stopStopwatch
 } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 import { gaRellOperationTiming, gaRellQueryTiming, gaSocialEvent } from "../GoogleAnalytics";
+import { nop, op } from "ft3-lib";
 
 const channelsCache = BoomerangCache.create("channels-bucket", {
   storage: "session",
@@ -45,15 +45,15 @@ function modifyChannelollowing(user: ChromunityUser, channel: string, rellOperat
   return BLOCKCHAIN.then(bc =>
     bc
       .transactionBuilder()
-      .addOperation(
+      .add(op(
         rellOperation,
         user.name.toLocaleLowerCase(),
-        user.ft3User.authDescriptor.hash().toString("hex"),
+        user.ft3User.authDescriptor.id,
         channel.toLocaleLowerCase()
+        )
       )
-      .addOperation("nop", uniqueId())
-      .build(user.ft3User.authDescriptor.signers)
-      .sign(user.ft3User.keyPair)
+      .add(nop())
+      .buildAndSign(user.ft3User)
       .post()
   )
     .then(value => {

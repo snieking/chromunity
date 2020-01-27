@@ -23,9 +23,8 @@ function deduct_balance (acc.account, asset, d_amount: integer) {
 
 function consume_input (i: xfer_input, idx: integer, assets: map<asset, integer>): payment_history_entry {
       val asset = asset @ { .id == i.asset_id };
-      val account = acc.account @ {.id == i.account_id };
-      acc.require_auth( account, i.auth_descriptor_id, ["T"] );
-      require( i.amount >= 0, "Amount should be positive." );
+      val account = acc.auth_and_log(i.account_id, i.auth_descriptor_id, ["T"]);
+      require( i.amount > 0, "Amount should be non 0 positive." );
 
       deduct_balance(account, asset, i.amount);
       assets[asset] = i.amount + if (asset in assets) assets[asset] else 0;
@@ -48,6 +47,7 @@ function process_transfer_output (o: xfer_output, idx: integer, available_assets
 
       val target_account = acc.account @ { .id == o.account_id };
       val asset = asset @ { .id == o.asset_id };
+      require(o.amount > 0, "You cannot tx output negative numbers");
       require( available_assets[asset] >= o.amount );
       available_assets[asset] -= o.amount;
       require(available_assets[asset] >= 0);
@@ -78,8 +78,4 @@ function _transfer (inputs: list<xfer_input>, outputs: list<xfer_output>) {
       process_transfer_output(o, idx, sum_inputs);
       idx += 1;
    }
-}
-
-operation transfer (inputs: list<xfer_input>, outputs: list<xfer_output>) {
-    _transfer(inputs, outputs);
 }

@@ -3,7 +3,7 @@ import acc: ^.account;
 entity asset {
     id: byte_array;
     key id;
-    key name;
+    name;
     issuing_chain_rid: byte_array;
 }
 
@@ -56,4 +56,24 @@ query get_asset_by_name(name) {
         .name,
         .issuing_chain_rid
     );
+    
+}
+
+query get_asset_by_id(asset_id: byte_array) {
+	return asset@{
+		.id == asset_id
+	}(
+		id = .id,
+		name = .name,
+		issuing_chain_rid = .issuing_chain_rid
+		
+	);
+}
+
+query get_all_assets() {
+	return asset@*{}(
+		id = .id,
+		name = .name,
+		issuing_chain_rid = .issuing_chain_rid	
+	);
 }

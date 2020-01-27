@@ -1,7 +1,0 @@
-module;
-
-object ft3_config {
-  blockchain_name: text = "Chromunity";
-  blockchain_website: text = "chromunity.com";
-  blockchain_description: text = "Decentralized Reddit";
-}

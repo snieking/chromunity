@@ -1,9 +1,10 @@
-import { BLOCKCHAIN, GTX } from "./Postchain";
-import { createStopwatchStarted, handleException, stopStopwatch, uniqueId } from "../util/util";
+import { BLOCKCHAIN, executeOperations, GTX } from "./Postchain";
+import { createStopwatchStarted, handleException, stopStopwatch, toLowerCase, uniqueId } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 import { Topic, TopicReply, ChromunityUser } from "../types";
 import { sendNotifications } from "./NotificationService";
 import { gaRellOperationTiming, gaRellQueryTiming } from "../GoogleAnalytics";
+import { op } from "ft3-lib";
 
 const topicsCache = BoomerangCache.create("topic-bucket", {
   storage: "session",
@@ -21,19 +22,19 @@ export function createTopic(user: ChromunityUser, channelName: string, title: st
   const operation = "create_topic";
   const sw = createStopwatchStarted();
 
-  return BLOCKCHAIN.then(bc => {
-    return bc.call(
-      user.ft3User,
+  return executeOperations(
+    user.ft3User,
+    op(
       operation,
       topicId,
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      user.name.toLocaleLowerCase(),
-      channelName.toLocaleLowerCase(),
+      user.ft3User.authDescriptor.id,
+      toLowerCase(user.name),
+      toLowerCase(channelName),
       channelName,
       title,
       message
-    );
-  })
+    )
+  )
     .then((promise: unknown) => {
       gaRellOperationTiming("create_topic", stopStopwatch(sw));
 
@@ -55,14 +56,10 @@ export function modifyReply(user: ChromunityUser, replyId: string, updatedText: 
 export function deleteReply(user: ChromunityUser, replyId: string) {
   const rellOperation = "delete_reply";
   const sw = createStopwatchStarted();
-  return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
-      rellOperation,
-      replyId,
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      user.name.toLocaleLowerCase()
-    )
+
+  return executeOperations(
+    user.ft3User,
+    op(rellOperation, replyId, user.ft3User.authDescriptor.id, toLowerCase(user.name))
   )
     .then(value => {
       gaRellOperationTiming(rellOperation, stopStopwatch(sw));
@@ -73,15 +70,10 @@ export function deleteReply(user: ChromunityUser, replyId: string) {
 
 function modifyText(user: ChromunityUser, id: string, updatedText: string, rellOperation: string) {
   const sw = createStopwatchStarted();
-  return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
-      rellOperation,
-      id,
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      user.name.toLocaleLowerCase(),
-      updatedText
-    )
+
+  return executeOperations(
+    user.ft3User,
+    op(rellOperation, id, user.ft3User.authDescriptor.id, toLowerCase(user.name), updatedText)
   )
     .then(value => {
       gaRellOperationTiming(rellOperation, stopStopwatch(sw));
@@ -94,15 +86,8 @@ export function deleteTopic(user: ChromunityUser, id: string) {
   topicsCache.remove(id);
   const rellOperation = "delete_topic";
   const sw = createStopwatchStarted();
-  return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
-      rellOperation,
-      id,
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      user.name.toLocaleLowerCase()
-    )
-  )
+
+  return executeOperations(user.ft3User, op(rellOperation, id, user.ft3User.authDescriptor.id, toLowerCase(user.name)))
     .then(value => {
       gaRellOperationTiming(rellOperation, stopStopwatch(sw));
       return value;
@@ -116,16 +101,9 @@ export function createTopicReply(user: ChromunityUser, topicId: string, message:
   const rellOperation = "create_reply";
   const sw = createStopwatchStarted();
 
-  return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
-      rellOperation,
-      topicId,
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      replyId,
-      user.name.toLocaleLowerCase(),
-      message
-    )
+  return executeOperations(
+    user.ft3User,
+    op(rellOperation, topicId, user.ft3User.authDescriptor.id, replyId, toLowerCase(user.name), message)
   )
     .then((promise: unknown) => {
       gaRellOperationTiming("create_reply", stopStopwatch(sw));
@@ -155,15 +133,15 @@ export function createTopicSubReply(
   const operation = "create_sub_reply";
   const sw = createStopwatchStarted();
 
-  return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
+  return executeOperations(
+    user.ft3User,
+    op(
       operation,
       topicId,
-      user.ft3User.authDescriptor.hash().toString("hex"),
+      user.ft3User.authDescriptor.id,
       replyId,
       subReplyId,
-      user.name.toLocaleLowerCase(),
+      toLowerCase(user.name),
       message
     )
   )
@@ -197,12 +175,12 @@ export function removeTopic(user: ChromunityUser, topicId: string) {
   const operation = "remove_topic";
   const sw = createStopwatchStarted();
 
-  return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
+  return executeOperations(
+    user.ft3User,
+    op(
       operation,
-      user.name.toLocaleLowerCase(),
-      user.ft3User.authDescriptor.hash().toString("hex"),
+      toLowerCase(user.name),
+      user.ft3User.authDescriptor.id,
       topicId
     )
   )
@@ -216,12 +194,13 @@ export function removeTopic(user: ChromunityUser, topicId: string) {
 export function removeTopicReply(user: ChromunityUser, topicReplyId: string) {
   const operation = "remove_topic_reply";
   const sw = createStopwatchStarted();
-  return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
+
+  return executeOperations(
+    user.ft3User,
+    op(
       operation,
-      user.name.toLocaleLowerCase(),
-      user.ft3User.authDescriptor.hash().toString("hex"),
+      toLowerCase(user.name),
+      user.ft3User.authDescriptor.id,
       topicReplyId
     )
   )
@@ -251,12 +230,7 @@ export function getTopicRepliesAfterTimestamp(
 function getTopicRepliesForTimestamp(topicId: string, timestamp: number, pageSize: number, rellOperation: string) {
   const sw = createStopwatchStarted();
   return BLOCKCHAIN.then(bc =>
-    bc.query(rellOperation, {
-      topic_id: topicId,
-      timestamp: timestamp,
-      page_size: pageSize
-    })
-  )
+    bc.query(rellOperation, { topic_id: topicId, timestamp, page_size: pageSize }))
     .then(value => {
       gaRellQueryTiming(rellOperation, stopStopwatch(sw));
       return value;
@@ -271,11 +245,7 @@ export function getTopicRepliesByUserPriorToTimestamp(
 ): Promise<TopicReply[]> {
   const query = "get_topic_replies_by_user_prior_to_timestamp";
   const sw = createStopwatchStarted();
-  return GTX.query(query, {
-    name: name.toLocaleLowerCase(),
-    timestamp: timestamp,
-    page_size: pageSize
-  })
+  return GTX.query(query, { name: toLowerCase(name), timestamp, page_size: pageSize })
     .then((replies: TopicReply[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       return replies;
@@ -294,11 +264,7 @@ export function getTopicsByUserPriorToTimestamp(
 ): Promise<Topic[]> {
   const query = "get_topics_by_user_id_prior_to_timestamp";
   const sw = createStopwatchStarted();
-  return GTX.query(query, {
-    name: username.toLocaleLowerCase(),
-    timestamp: timestamp,
-    page_size: pageSize
-  })
+  return GTX.query(query, { name: toLowerCase(username), timestamp, page_size: pageSize })
     .then((topics: Topic[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       topics.forEach(topic => topicsCache.set(topic.id, topic));
@@ -315,11 +281,7 @@ export function getTopicsByChannelPriorToTimestamp(
   const query = "get_topics_by_channel_prior_to_timestamp";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, {
-    name: channelName.toLocaleLowerCase(),
-    timestamp: timestamp,
-    page_size: pageSize
-  })
+  return GTX.query(query, { name: toLowerCase(channelName), timestamp, page_size: pageSize })
     .then((topics: Topic[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       topics.forEach(topic => topicsCache.set(topic.id, topic));
@@ -332,10 +294,7 @@ export function getTopicsByChannelAfterTimestamp(channelName: string, timestamp:
   const query = "get_topics_by_channel_after_timestamp";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, {
-    name: channelName.toLocaleLowerCase(),
-    timestamp: timestamp
-  })
+  return GTX.query(query, { name: toLowerCase(channelName), timestamp })
     .then((topics: Topic[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       topics.forEach(topic => topicsCache.set(topic.id, topic));
@@ -348,9 +307,7 @@ export function countTopicsInChannel(channelName: string): Promise<number> {
   const query = "count_topics_by_channel";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, {
-    name: channelName.toLocaleLowerCase()
-  })
+  return GTX.query(query, { name: toLowerCase(channelName) })
     .then((value: number) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       return value;
@@ -407,17 +364,18 @@ export function unsubscribeFromTopic(user: ChromunityUser, id: string) {
 function modifyRatingAndSubscription(user: ChromunityUser, id: string, rellOperation: string) {
   starRatingCache.remove(id);
   const sw = createStopwatchStarted();
-  return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
+
+  return executeOperations(
+    user.ft3User,
+    op(
       rellOperation,
-      user.name.toLocaleLowerCase(),
-      user.ft3User.authDescriptor.hash().toString("hex"),
+      toLowerCase(user.name),
+      user.ft3User.authDescriptor.id,
       id,
       uniqueId()
     )
   )
-    .then(value => {
+  .then(value => {
       gaRellOperationTiming(rellOperation, stopStopwatch(sw));
       return value;
     })
@@ -436,7 +394,6 @@ export function getReplyStarRaters(topicId: string): Promise<string[]> {
 export function countTopicReplies(topicId: string): Promise<number> {
   const count: number = topicsCache.get(topicId + "-reply_count");
 
-    console.log("Count was: ", count);
   if (count != null) {
     return new Promise<number>(resolve => resolve(count));
   }
@@ -445,7 +402,6 @@ export function countTopicReplies(topicId: string): Promise<number> {
   const sw = createStopwatchStarted();
   return GTX.query(query, { topic_id: topicId }).then((count: number) => {
     gaRellQueryTiming(query, stopStopwatch(sw));
-
     topicsCache.set(topicId + "-reply_count", count, 600);
     return count;
   });
@@ -472,7 +428,7 @@ export function getTopicById(id: string): Promise<Topic> {
   const query = "get_topic_by_id";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, { id: id })
+  return GTX.query(query, { id })
     .then((topic: Topic) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       topicsCache.set(id, topic, 300);
@@ -492,10 +448,7 @@ export function getTopicsAfterTimestamp(timestamp: number, pageSize: number): Pr
 function getTopicsForTimestamp(timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
   const sw = createStopwatchStarted();
 
-  return GTX.query(rellOperation, {
-    timestamp: timestamp,
-    page_size: pageSize
-  })
+  return GTX.query(rellOperation, { timestamp, page_size: pageSize })
     .then((topics: Topic[]) => {
       gaRellQueryTiming(rellOperation, stopStopwatch(sw));
       topics.forEach(topic => topicsCache.set(topic.id, topic));
@@ -528,11 +481,7 @@ function getTopicsFromFollowsForTimestamp(
 ): Promise<Topic[]> {
   const sw = createStopwatchStarted();
 
-  return GTX.query(rellOperation, {
-    name: user.toLocaleLowerCase(),
-    timestamp: timestamp,
-    page_size: pageSize
-  })
+  return GTX.query(rellOperation, { name: toLowerCase(user), timestamp, page_size: pageSize })
     .then((topics: Topic[]) => {
       gaRellQueryTiming(rellOperation, stopStopwatch(sw));
       return topics;
@@ -558,7 +507,7 @@ export function countReplyStarRatingForUser(name: string) {
 
 function countByUser(name: string, rellOperation: string): Promise<number> {
   const sw = createStopwatchStarted();
-  return GTX.query(rellOperation, { name: name.toLocaleLowerCase() })
+  return GTX.query(rellOperation, { name: toLowerCase(name) })
     .then((count: number) => {
       gaRellQueryTiming(rellOperation, stopStopwatch(sw));
       return count;
@@ -591,11 +540,7 @@ export function getTopicsFromFollowedChannels(
   rellOperation: string
 ): Promise<Topic[]> {
   const sw = createStopwatchStarted();
-  return GTX.query(rellOperation, {
-    username: username.toLocaleLowerCase(),
-    timestamp: timestamp,
-    page_size: pageSize
-  })
+  return GTX.query(rellOperation, { username: toLowerCase(username), timestamp, page_size: pageSize })
     .then((topics: Topic[]) => {
       gaRellQueryTiming(rellOperation, stopStopwatch(sw));
       var seen: Set<string> = new Set<string>();
@@ -610,10 +555,7 @@ export function getTopicsFromFollowedChannels(
 export function getAllTopicsByPopularityAfterTimestamp(timestamp: number, pageSize: number): Promise<Topic[]> {
   const query = "get_all_topics_by_stars_since_timestamp";
   const sw = createStopwatchStarted();
-  return GTX.query(query, {
-    timestamp: timestamp,
-    page_size: pageSize
-  })
+  return GTX.query(query, { timestamp, page_size: pageSize })
     .then((topics: Topic[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       return topics;
@@ -667,11 +609,7 @@ function getTopicsByPopularityAfterTimestamp(
   rellOperation: string
 ): Promise<Topic[]> {
   const sw = createStopwatchStarted();
-  return GTX.query(rellOperation, {
-    name: name.toLocaleLowerCase(),
-    timestamp: timestamp,
-    page_size: pageSize
-  })
+  return GTX.query(rellOperation, { name: toLowerCase(name), timestamp, page_size: pageSize })
     .then((topics: Topic[]) => {
       gaRellQueryTiming(rellOperation, stopStopwatch(sw));
       return topics;

@@ -1,8 +1,9 @@
 import { BLOCKCHAIN, GTX } from "./Postchain";
 import { Chat, ChatMessage, ChromunityUser } from "../types";
 import { gaRellOperationTiming } from "../GoogleAnalytics";
-import { createStopwatchStarted, handleException, stopStopwatch, uniqueId } from "../util/util";
+import { createStopwatchStarted, handleException, stopStopwatch, toLowerCase } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
+import { nop, op } from "ft3-lib";
 
 const UNREAD_CHATS_KEY = "unreadChats";
 
@@ -22,10 +23,9 @@ export function createChatUser(user: ChromunityUser, pubKey: Buffer) {
   return BLOCKCHAIN.then(bc =>
     bc
       .transactionBuilder()
-      .addOperation(operation, user.ft3User.authDescriptor.hash().toString("hex"), user.name, pubKey)
-      .addOperation("nop", uniqueId())
-      .build(user.ft3User.authDescriptor.signers)
-      .sign(user.ft3User.keyPair)
+      .add(op(operation, user.ft3User.authDescriptor.id, toLowerCase(user.name), pubKey))
+      .add(nop())
+      .buildAndSign(user.ft3User)
       .post()
   )
     .then((promise: unknown) => {
@@ -42,10 +42,9 @@ export function deleteChatUser(user: ChromunityUser) {
   return BLOCKCHAIN.then(bc =>
     bc
       .transactionBuilder()
-      .addOperation(operation, user.ft3User.authDescriptor.hash().toString("hex"), user.name)
-      .addOperation("nop", uniqueId())
-      .build(user.ft3User.authDescriptor.signers)
-      .sign(user.ft3User.keyPair)
+      .add(op(operation, user.ft3User.authDescriptor.id, toLowerCase(user.name)))
+      .add(nop())
+      .buildAndSign(user.ft3User)
       .post()
   )
     .then((promise: unknown) => {
@@ -61,13 +60,8 @@ export function createNewChat(user: ChromunityUser, chatId: string, encryptedCha
   const sw = createStopwatchStarted();
   return BLOCKCHAIN.then(bc => {
     return bc.call(
-      user.ft3User,
-      operation,
-      chatId,
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      user.name,
-      "Untitled",
-      encryptedChatKey
+      op(operation, chatId, user.ft3User.authDescriptor.id, user.name, "Untitled", encryptedChatKey),
+      user.ft3User
     );
   })
     .then((promise: unknown) => {
@@ -84,10 +78,9 @@ export function sendChatMessage(user: ChromunityUser, chatId: string, message: s
   return BLOCKCHAIN.then(bc =>
     bc
       .transactionBuilder()
-      .addOperation(operation, chatId, user.ft3User.authDescriptor.hash().toString("hex"), user.name, message)
-      .addOperation("nop", uniqueId())
-      .build(user.ft3User.authDescriptor.signers)
-      .sign(user.ft3User.keyPair)
+      .add(op(operation, chatId, user.ft3User.authDescriptor.id, user.name, message))
+      .add(nop())
+      .buildAndSign(user.ft3User)
       .post()
   )
     .then((promise: unknown) => {
@@ -103,13 +96,8 @@ export function addUserToChat(user: ChromunityUser, chatId: string, targetUser: 
   const sw = createStopwatchStarted();
   return BLOCKCHAIN.then(bc => {
     return bc.call(
-      user.ft3User,
-      operation,
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      user.name,
-      chatId,
-      targetUser,
-      encryptedChatKey
+      op(operation, user.ft3User.authDescriptor.id, user.name, chatId, targetUser, encryptedChatKey),
+      user.ft3User
     );
   })
     .then((promise: unknown) => {
@@ -124,7 +112,7 @@ export function leaveChat(user: ChromunityUser, chatId: string) {
 
   const sw = createStopwatchStarted();
   return BLOCKCHAIN.then(bc => {
-    return bc.call(user.ft3User, operation, user.ft3User.authDescriptor.hash().toString("hex"), user.name, chatId);
+    return bc.call(op(operation, user.ft3User.authDescriptor.id, toLowerCase(user.name), chatId), user.ft3User);
   })
     .then((promise: unknown) => {
       gaRellOperationTiming(operation, stopStopwatch(sw));
@@ -140,10 +128,9 @@ export function markChatAsRead(user: ChromunityUser, chatId: string) {
   return BLOCKCHAIN.then(bc =>
     bc
       .transactionBuilder()
-      .addOperation(operation, chatId, user.ft3User.authDescriptor.hash().toString("hex"), user.name)
-      .addOperation("nop", uniqueId())
-      .build(user.ft3User.authDescriptor.signers)
-      .sign(user.ft3User.keyPair)
+      .add(op(operation, chatId, user.ft3User.authDescriptor.id, toLowerCase(user.name)))
+      .add(nop())
+      .buildAndSign(user.ft3User)
       .post()
   )
     .then((promise: unknown) => {
@@ -159,12 +146,8 @@ export function modifyTitle(user: ChromunityUser, chatId: string, updatedTitle: 
   const sw = createStopwatchStarted();
   return BLOCKCHAIN.then(bc => {
     return bc.call(
-      user.ft3User,
-      operation,
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      user.name,
-      chatId,
-      updatedTitle
+      op(operation, user.ft3User.authDescriptor.id, toLowerCase(user.name), chatId, updatedTitle),
+      user.ft3User
     );
   })
     .then((promise: unknown) => {

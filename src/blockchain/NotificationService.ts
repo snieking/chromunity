@@ -1,8 +1,9 @@
-import { BLOCKCHAIN, GTX } from "./Postchain";
+import { executeOperations, GTX } from "./Postchain";
 import * as BoomerangCache from "boomerang-cache";
 import { ChromunityUser, UserNotification } from "../types";
-import { createStopwatchStarted, handleException, stopStopwatch, uniqueId } from "../util/util";
+import { createStopwatchStarted, handleException, stopStopwatch, toLowerCase, uniqueId } from "../util/util";
 import { gaRellOperationTiming, gaRellQueryTiming } from "../GoogleAnalytics";
+import { nop, op } from "ft3-lib";
 
 const boomerang = BoomerangCache.create("notification-bucket", {
   storage: "session",
@@ -27,20 +28,16 @@ export function removeNotificationsForId(fromUser: ChromunityUser, id: string, u
   const operation = "remove_notifications_for_users";
   const sw = createStopwatchStarted();
 
-  return BLOCKCHAIN.then(bc =>
-    bc
-      .transactionBuilder()
-      .addOperation(
-        operation,
-        fromUser.name.toLocaleLowerCase(),
-        fromUser.ft3User.authDescriptor.hash().toString("hex"),
-        id,
-        usernames.map(name => name.toLocaleLowerCase())
-      )
-      .addOperation("nop", uniqueId())
-      .build(fromUser.ft3User.authDescriptor.signers)
-      .sign(fromUser.ft3User.keyPair)
-      .post()
+  return executeOperations(
+    fromUser.ft3User,
+    op(
+      operation,
+      toLowerCase(fromUser.name),
+      fromUser.ft3User.authDescriptor.id,
+      id,
+      usernames.map(name => toLowerCase(name))
+    ),
+    nop()
   )
     .then(value => {
       gaRellOperationTiming(operation, stopStopwatch(sw));
@@ -59,22 +56,18 @@ function sendNotificationsInternal(
   const operation = "create_notifications_for_users";
   const sw = createStopwatchStarted();
 
-  return BLOCKCHAIN.then(bc =>
-    bc
-      .transactionBuilder()
-      .addOperation(
-        operation,
-        fromUser.name.toLocaleLowerCase(),
-        fromUser.ft3User.authDescriptor.hash().toString("hex"),
-        id,
-        trigger,
-        content,
-        usernames.map(name => name.toLocaleLowerCase()).filter(name => name !== fromUser.name)
-      )
-      .addOperation("nop", uniqueId())
-      .build(fromUser.ft3User.authDescriptor.signers)
-      .sign(fromUser.ft3User.keyPair)
-      .post()
+  return executeOperations(
+    fromUser.ft3User,
+    op(
+      operation,
+      toLowerCase(fromUser.name),
+      fromUser.ft3User.authDescriptor.id,
+      id,
+      trigger,
+      content,
+      usernames.map(name => toLowerCase(name)).filter(name => name !== fromUser.name)
+    ),
+    nop()
   )
     .then(value => {
       gaRellOperationTiming(operation, stopStopwatch(sw));
@@ -90,19 +83,10 @@ export function markNotificationsRead(user: ChromunityUser) {
   const operation = "mark_notifications_since_timestamp_read";
   const sw = createStopwatchStarted();
 
-  return BLOCKCHAIN.then(bc =>
-    bc
-      .transactionBuilder()
-      .addOperation(
-        operation,
-        user.name.toLocaleLowerCase(),
-        user.ft3User.authDescriptor.hash().toString("hex"),
-        epochSeconds
-      )
-      .addOperation("nop", uniqueId())
-      .build(user.ft3User.authDescriptor.signers)
-      .sign(user.ft3User.keyPair)
-      .post()
+  return executeOperations(
+    user.ft3User,
+    op(operation, toLowerCase(user.name), user.ft3User.authDescriptor.id, epochSeconds),
+    nop()
   )
     .then(value => {
       gaRellOperationTiming(operation, stopStopwatch(sw));
@@ -119,11 +103,7 @@ export function getUserNotificationsPriorToTimestamp(
   const query = "get_user_notifications_prior_to_timestamp";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, {
-    name: user.toLocaleLowerCase(),
-    timestamp: timestamp,
-    page_size: pageSize
-  })
+  return GTX.query(query, { name: toLowerCase(user), timestamp, page_size: pageSize })
     .then((userNotifications: UserNotification[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       return userNotifications;
@@ -137,9 +117,7 @@ export function countUnreadUserNotifications(user: string): Promise<number> {
   if (count == null) {
     const query = "count_unread_user_notifications";
     const sw = createStopwatchStarted();
-    return GTX.query(query, {
-      name: user.toLocaleLowerCase()
-    })
+    return GTX.query(query, { name: toLowerCase(user) })
       .then((arr: unknown[]) => {
         gaRellQueryTiming(query, stopStopwatch(sw));
         boomerang.set("notis-" + user, arr.length, 60);

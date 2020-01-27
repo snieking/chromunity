@@ -1,0 +1,46 @@
+import ^.core;
+
+
+function rate_limit (account) {
+    val max_counter = core.blockchain.request_max_count;
+    val recovery_time = core.blockchain.request_recovery_time; 
+    val stat = rl_state@{account} (.points, .last_update);
+    val delta = op_context.last_block_time - stat.last_update;
+    var got_points = 0;
+    var update_time = stat.last_update;
+
+    if (delta > recovery_time)
+    {
+        got_points = delta / recovery_time;
+        update_time = stat.last_update + got_points * recovery_time;
+        if (got_points + stat.points > max_counter) {
+            got_points = max_counter - stat.points;
+            // if user is at maximum reset his 
+            // timer
+            update_time = op_context.last_block_time;
+        }
+    }
+    
+    require(stat.points + got_points > 0);
+    
+    update rl_state@{account} (
+        .points += got_points - 1,
+        .last_update = update_time
+    );
+}
+
+
+query get_account_rate_limit(account_id: byte_array) {
+	
+	val t= rl_state@{.account.id == account_id}
+	(
+		.points, 
+		.last_update
+	);
+	
+	return t;
+}
+
+query get_last_timestamp(): integer {
+	return (block@{.timestamp>0}(@sort_desc .timestamp) limit 1);
+}

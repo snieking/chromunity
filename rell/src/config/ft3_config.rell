@@ -1,0 +1,9 @@
+module;
+
+object ft3_config {
+	blockchain_name: text = "Chromunity";
+	blockchain_website: text = "chromunity.com";
+	blockchain_description: text = "Decentralized reddit";
+	request_max_count: integer = 5000;
+	request_recovery_time: integer = 5000;
+}

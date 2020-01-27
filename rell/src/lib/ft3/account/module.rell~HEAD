@@ -92,13 +92,39 @@ function create_account_with_auth (auth_descriptor): byte_array {
      return id;
 }
 
+<<<<<<< HEAD:rell/src/lib/ft3/account/module.rell
 function auth_and_log(account_id: byte_array, auth_descriptor_id: byte_array, required_flags: list<text>): account {
 	val account = account @ { .id == account_id };
+	print("RATE LIMIT");
 	rate_limit(account);
 	require_auth(account, auth_descriptor_id, required_flags);
 	return account;
 }
 
+=======
+operation delete_auth_descriptor (account_id: byte_array, auth_descriptor_id: byte_array, delete_descriptor_id: byte_array) {
+      val account = account @ { .id == account_id };
+      require_auth(account, auth_descriptor_id, ["A"]);
+
+      _delete_auth_descriptor(account_auth_descriptor @ {
+         .account == account,
+         .descriptor_id == delete_descriptor_id
+      });
+}
+
+operation delete_all_auth_descriptors_exclude(account_id: byte_array, auth_descriptor_id: byte_array) {
+    val account = account @ { .id == account_id };
+    require_auth(account, auth_descriptor_id, ["A"]);
+
+	_delete_all_auth_descriptors_exclude(account, auth_descriptor_id);
+}
+
+operation add_auth_descriptor (account_id: byte_array, auth_id: byte_array, new_desc: auth_descriptor) {
+      val account = account @ { .id == account_id };
+      require_auth(account, auth_id, ["A"]);
+      _add_auth_descriptor(account, new_desc);
+}
+>>>>>>> development:rell/ft3/account/module.rell
 
 query get_account_auth_descriptors(id: byte_array) {
     return account_auth_descriptor @* {

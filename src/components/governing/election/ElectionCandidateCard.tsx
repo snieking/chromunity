@@ -26,6 +26,7 @@ import {
 import { countUserFollowers } from "../../../blockchain/FollowingService";
 import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
 import { CopyToClipboard } from "react-copy-to-clipboard";
+import { toLowerCase } from "../../../util/util";
 
 const useStyles = makeStyles(theme =>
   createStyles({
@@ -153,7 +154,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
   );
 
   function renderCandidateCardActions(name: string) {
-    if (name === props.votedFor) {
+    if (toLowerCase(name) === toLowerCase(props.votedFor)) {
       return (
         <div>
           <CopyToClipboard
@@ -176,7 +177,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
     } else {
       return (
         <div>
-          {username != null && username.toLocaleUpperCase() !== name.toLocaleUpperCase() ? (
+          {username != null && toLowerCase(username) !== toLowerCase(name) ? (
             <Button
               fullWidth
               size="small"
@@ -187,7 +188,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
               Vote
             </Button>
           ) : (
-            <div></div>
+            <div/>
           )}
           <CopyToClipboard
             text={

@@ -1,0 +1,313 @@
+
+enum rule_variable {
+	block_height,
+	block_time,
+	op_count
+}
+
+enum rule_operator {
+	lt,
+	le,
+	eq,
+	ge,
+	gt
+}
+
+struct rule_expression {
+	variable: text;
+	operator: text;
+	value: gtv;
+}
+
+entity auth_descriptor_rule_variable {
+	key account_auth_descriptor, name;
+	mutable value: byte_array;
+}
+
+function is_valid(auth_descriptor: account_auth_descriptor): boolean {
+	// check if rules is null (encoded null is equal to 0xa0020500)
+	if (auth_descriptor.rules == x'a0020500') {
+		return true;
+	}
+	
+	return is_rule_valid(
+		gtv.from_bytes(auth_descriptor.rules), 
+		load_variables(auth_descriptor)
+	);
+}
+
+function is_rule_valid(rule: gtv, variables: map<text, gtv>): boolean {
+	val parameters = list<gtv>.from_gtv(rule);
+	val operator = text.from_gtv(parameters[1]);
+	
+	if (operator == "and") {
+		return handle_composed_rule(rule, variables);
+	} else {
+		return handle_single_rule(rule, variables);
+	}
+}
+
+function handle_single_rule(rule: gtv, variables: map<text, gtv>): boolean {
+	return evaluate_int_variable_rule(
+		rule_expression.from_gtv(rule), 
+		variables
+	);	
+}
+
+ 
+function handle_composed_rule(rule: gtv, variables: map<text, gtv>): boolean {
+	val parameters = list<gtv>.from_gtv(rule);
+	val operator = text.from_gtv(parameters[1]);
+	if (operator == "and") {
+		return is_rule_valid(parameters[0], variables) and is_rule_valid(parameters[2], variables);
+	} else {
+		return false;
+	}
+}
+
+
+
+function is_active(account_auth_descriptor): boolean {
+	if (account_auth_descriptor.rules == x'a0020500') {
+		return true;
+	}
+	
+	return is_rule_active(gtv.from_bytes(account_auth_descriptor.rules), map<text, gtv>());
+}
+
+
+function is_rule_active(r: gtv, variables: map<text, gtv>): boolean {
+	val parameters = list<gtv>.from_gtv(r);
+	val operator = text.from_gtv(parameters[1]);
+	when (operator) {
+		"and" -> {
+			return is_rule_active(parameters[0], variables) and is_rule_active(parameters[2], variables);
+		}
+		else -> {
+			return is_simple_rule_active(r, variables);
+		}
+	}
+}
+
+function is_simple_rule_active(rule: gtv, variables: map<text, gtv>): boolean {
+	val parameters = list<gtv>.from_gtv(rule);
+	val variable_name = text.from_gtv(parameters[0]);
+	when (rule_variable.value(variable_name)) {
+		rule_variable.block_height -> {
+			return is_block_height_rule_active(rule);
+		}
+		rule_variable.block_time -> {
+			return is_block_time_rule_active(rule);
+		}		
+		rule_variable.op_count -> {
+			return is_op_count_rule_active(rule);
+		}
+	}
+}
+
+/*
+ *  Variables
+ */
+
+function evaluate_int_variable_rule(rule: rule_expression, variables: map<text, gtv>): boolean {
+	val variable = rule_variable.value(rule.variable);
+	val operator = rule_operator.value(rule.operator);
+	val current_value = variable_value(variable, variables);
+	val defined_value = integer.from_gtv(rule.value);
+
+	when (operator) {
+		rule_operator.lt -> {
+			return current_value < defined_value;
+		}
+		rule_operator.le -> {
+			return current_value <= defined_value;
+		}
+		rule_operator.eq -> {
+			return current_value == defined_value;
+		}
+		rule_operator.ge -> {
+			return current_value >= defined_value;
+		}
+		rule_operator.gt -> {
+			return current_value > defined_value;
+		}
+	}
+}
+
+
+/*
+ * Called from _add_auth_descriptor function
+ */
+function setup_auth_descriptor_variables(account_auth_descriptor) {
+	
+	if (account_auth_descriptor.rules == x'a0020500') {
+		return;
+	} 
+	
+	val variables = get_variable_names_set(gtv.from_bytes(account_auth_descriptor.rules));
+	
+	for (variable in variables) {
+		when (variable) {
+			rule_variable.op_count.name -> {
+				create auth_descriptor_rule_variable(
+					account_auth_descriptor,
+					name = variable,
+					value = op_count_variable_initial_value().to_bytes()
+				);
+			}
+		}
+	}
+}
+ 
+function update_variables(account_auth_descriptor, variables: map<text, gtv>) {
+	for ((name, value) in variables) {
+		val variable = auth_descriptor_rule_variable @ { account_auth_descriptor, name };
+		val int_value = integer.from_gtv(value);
+		
+		when (name) {
+			rule_variable.op_count.name -> {
+				variable.value = (int_value + 1).to_gtv().to_bytes();
+			}
+		}
+	}
+}
+ 
+function variable_value(variable: rule_variable, variables: map<text, gtv>): integer {
+	when (variable) {
+		rule_variable.block_height -> {
+			return op_context.block_height;
+		}
+		rule_variable.block_time -> {
+			return op_context.last_block_time;
+		}
+		rule_variable.op_count -> {
+			return integer.from_gtv(variables[rule_variable.op_count.name]);
+		}
+	}
+}
+
+/*
+ * Analyze the rules before assigning them to an authenticator descriptor
+ */
+ function analyze_auth_descriptor_rules(rules: gtv, hop: integer) {
+ 	require(hop<3, "too many rules");
+ 	val rules_bytes = rules.to_bytes(); 
+ 	if (rules_bytes == x'a0020500') {
+		return;
+	}
+	
+ 	val params = list<gtv>.from_gtv(rules);
+ 	require(params.size() <=3);
+ 	
+ 	val operator = text.from_gtv(params[1]);
+ 	if(operator == "and") {
+ 		analyze_auth_descriptor_rules(params[0], hop+1); 
+ 		analyze_auth_descriptor_rules(params[2], hop+1);
+ 	} 	
+ 	
+	return;
+ }
+
+/*
+ * Returns set of variable names used in a rule
+ */
+function get_variable_names_set(rules: gtv): set<text> {
+	val parameters = list<gtv>.from_gtv(rules);
+	val operator = text.from_gtv(parameters[1]);
+	var vars = set<text>();
+	if (operator == "and") {
+		vars.add_all(get_variable_names_set(parameters[0]));
+		vars.add_all(get_variable_names_set(parameters[2]));
+	} else {
+		vars.add(text.from_gtv(parameters[0]));
+	}
+	return vars;
+} 
+
+function load_variables(account_auth_descriptor): map<text, gtv> {
+	val variables = auth_descriptor_rule_variable @* { account_auth_descriptor };
+	
+	val variables_map = map<text, gtv>();
+	for (variable in variables) {
+		variables_map[variable.name] = gtv.from_bytes(variable.value);
+	}
+	
+	return variables_map;
+}
+
+function update_auth_descriptor_rule_variables(account_auth_descriptor) {
+	val variables = load_variables(account_auth_descriptor);
+	update_variables(account_auth_descriptor, variables);
+}
+
+/*
+ * auth descriptor cleanup
+ */
+
+function delete_expired_auth_descriptors(account) {
+	val auth_descriptors = account_auth_descriptor @* { account };
+	
+	for (auth_descriptor in auth_descriptors) {
+		if (not (is_active(auth_descriptor) and is_valid(auth_descriptor))) {
+			_delete_auth_descriptor(auth_descriptor);
+		}
+	}
+}
+
+/****************************************************************************************
+ *                                     block_time                                       *
+ ****************************************************************************************/
+
+function is_block_time_rule_active(r: gtv): boolean {
+	val parameters = list<gtv>.from_gtv(r);
+	val operator = rule_operator.value(text.from_gtv(parameters[1]));
+	val value = integer.from_gtv(parameters[2]);
+	when (operator) {
+		rule_operator.gt -> {
+			return op_context.last_block_time > value;
+		}
+		rule_operator.ge,
+		rule_operator.eq -> {
+			return op_context.last_block_time >= value;
+		}
+		else -> {
+			return true;
+		}
+	}
+}
+
+
+/****************************************************************************************
+ *                                  block_height                                        *
+ ****************************************************************************************/
+
+function is_block_height_rule_active(r: gtv): boolean {
+	val parameters = list<gtv>.from_gtv(r);
+	val operator = rule_operator.value(text.from_gtv(parameters[1]));
+	val value = integer.from_gtv(parameters[2]);
+	when (operator) {
+		rule_operator.gt -> {
+			return op_context.block_height > value;
+		}
+		rule_operator.ge,
+		rule_operator.eq -> {
+			return op_context.block_height >= value;
+		}
+		else -> {
+			return true;
+		}
+	}
+}
+
+
+/****************************************************************************************
+ *                                     op_count                                         *
+ ****************************************************************************************/
+ 
+ function op_count_variable_initial_value(): gtv {
+ 	return (1).to_gtv();
+ }
+ 
+ function is_op_count_rule_active(rule: gtv): boolean {
+ 	return true;
+ }

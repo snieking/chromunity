@@ -45,17 +45,24 @@ function check_auth_args (a_t: text, args: byte_array, participants: list<byte_a
 }
 
 
+
 function require_auth (account, descriptor_id: byte_array, required_flags: list<text>) {
    val account_auth_descriptor = account_auth_descriptor @ {
      account,
      .descriptor_id == descriptor_id
    };
-   require(
-      check_auth_args(
-       account_auth_descriptor.auth_type,
-       account_auth_descriptor.args,
-       auth_descriptor_participant @* { account_auth_descriptor } ( .id ),
-       required_flags
-       )
+	
+	require(is_valid(account_auth_descriptor));
+	
+   	require(
+		check_auth_args(
+       		account_auth_descriptor.auth_type,
+       		account_auth_descriptor.args,
+       		auth_descriptor_participant @* { account_auth_descriptor } ( .id ),
+       		required_flags
+		)
    );
+   
+   update_auth_descriptor_rule_variables(account_auth_descriptor);
+   delete_expired_auth_descriptors(account);
 }

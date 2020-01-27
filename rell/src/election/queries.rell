@@ -7,7 +7,7 @@ query get_election_candidates() {
         .representative_election_candidate.representative_election == next_election
     } ( 
     	@omit @sort_desc .votes,
-    	.representative_election_candidate.user.name
+    	.representative_election_candidate.user.display_name
     );
 }
 

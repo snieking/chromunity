@@ -1,9 +1,10 @@
-import { BLOCKCHAIN, GTX } from "./Postchain";
+import { BLOCKCHAIN, executeOperations, GTX } from "./Postchain";
 import { Election, RepresentativeAction, RepresentativeReport, ChromunityUser } from "../types";
-import { createStopwatchStarted, handleException, stopStopwatch, uniqueId } from "../util/util";
+import { createStopwatchStarted, handleException, stopStopwatch, toLowerCase, uniqueId } from "../util/util";
 
 import * as BoomerangCache from "boomerang-cache";
 import { gaRellOperationTiming, gaSocialEvent } from "../GoogleAnalytics";
+import { nop, op } from "ft3-lib";
 
 const representativesCache = BoomerangCache.create("rep-bucket", { storage: "session", encrypt: true });
 
@@ -20,14 +21,14 @@ export function getRepresentatives(): Promise<string[]> {
 }
 
 export function getTimesRepresentative(name: string): Promise<number> {
-  return GTX.query("get_number_of_times_representative", { name: name });
+  return GTX.query("get_number_of_times_representative", { name });
 }
 
 export function getAllRepresentativeActionsPriorToTimestamp(
   timestamp: number,
   pageSize: number
 ): Promise<RepresentativeAction[]> {
-  return GTX.query("get_all_representative_actions", { timestamp: timestamp, page_size: pageSize });
+  return GTX.query("get_all_representative_actions", { timestamp, page_size: pageSize });
 }
 
 export function handleReport(user: ChromunityUser, reportId: string) {
@@ -35,14 +36,10 @@ export function handleReport(user: ChromunityUser, reportId: string) {
   gaSocialEvent(rellOperation, user.name);
 
   const sw = createStopwatchStarted();
-  return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
-      rellOperation,
-      user.name.toLocaleLowerCase(),
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      reportId
-    )
+
+  return executeOperations(
+    user.ft3User,
+    op(rellOperation, toLowerCase(user.name), user.ft3User.authDescriptor.id, reportId)
   )
     .then(value => {
       gaRellOperationTiming(rellOperation, stopStopwatch(sw));
@@ -54,31 +51,18 @@ export function handleReport(user: ChromunityUser, reportId: string) {
 export function suspendUser(user: ChromunityUser, userToBeSuspended: string) {
   const rellOperation = "suspend_user";
   gaSocialEvent(rellOperation, userToBeSuspended);
-  return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
-      rellOperation,
-      user.name.toLocaleLowerCase(),
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      userToBeSuspended.toLocaleLowerCase()
-    )
+
+  return executeOperations(
+    user.ft3User,
+    op(rellOperation, toLowerCase(user.name), user.ft3User.authDescriptor.id, toLowerCase(userToBeSuspended))
   );
 }
 
 export function distrustAnotherRepresentative(user: ChromunityUser, distrusted: string) {
-  return BLOCKCHAIN.then(bc =>
-    bc
-      .transactionBuilder()
-      .addOperation(
-        "distrust_representative",
-        user.ft3User.authDescriptor.hash().toString("hex"),
-        user.name,
-        distrusted
-      )
-      .addOperation("nop", uniqueId())
-      .build(user.ft3User.authDescriptor.signers)
-      .sign(user.ft3User.keyPair)
-      .post()
+  return executeOperations(
+    user.ft3User,
+    op("distrust_representative", user.ft3User.authDescriptor.id, user.name, toLowerCase(distrusted)),
+    nop()
   );
 }
 
@@ -99,15 +83,9 @@ function report(user: ChromunityUser, text: string) {
   gaSocialEvent(rellOperation, text);
   const sw = createStopwatchStarted();
 
-  return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
-      rellOperation,
-      user.name.toLocaleLowerCase(),
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      uniqueId(),
-      text
-    )
+  return executeOperations(
+    user.ft3User,
+    op(rellOperation, toLowerCase(user.name), user.ft3User.authDescriptor.id, uniqueId(), text)
   )
     .then(value => {
       gaRellOperationTiming(rellOperation, stopStopwatch(sw));
