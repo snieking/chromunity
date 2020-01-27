@@ -136,7 +136,7 @@ const Election = withStyles(styles)(
             onClick={() => this.registerForElection()}
             className={this.props.classes.actionBtn}
           >
-            Participate
+            Participate in the election
           </Button>
         );
       }

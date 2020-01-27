@@ -40,11 +40,15 @@ const CREATE_LOGGED_IN_USER = async () => {
   return loginUser(user);
 };
 
+/**
+ * Creates a user with mnemonic phrase:
+ * 'return feel swing spell crack issue cousin child winter process marble arctic safe jacket color'
+ */
 const GET_LOGGED_IN_ADMIN_USER = async (): Promise<ChromunityUser> => {
   if (adminUser == null) {
     adminUser = await loginUser({
-      name: "admin",
-      keyPair: new KeyPair("3132333435363738393031323334353637383930313233343536373839303131")
+      name: "snieking",
+      keyPair: new KeyPair("039a02bc551528e23ddcd6f9557ef1773b253f3b4dc7b60fdcf0af58ebbcdff7d7")
     });
   }
   return new Promise<ChromunityUser>(resolve => resolve(adminUser));

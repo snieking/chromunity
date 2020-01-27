@@ -39,7 +39,8 @@ const useStyles = makeStyles(theme =>
     statsDescr: {
       position: "relative",
       [theme.breakpoints.down("sm")]: {
-        marginTop: "5px"
+        marginTop: "5px",
+        display: "block"
       },
       [theme.breakpoints.up("md")]: {
         display: "inline",
@@ -167,7 +168,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
             onCopy={() => setSnackBarOpen(true)}
           >
             <Button fullWidth size="small" variant="outlined" color="secondary">
-              Share
+              Copy Vote Link
             </Button>
           </CopyToClipboard>
         </div>
@@ -200,7 +201,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
             onCopy={() => setSnackBarOpen(true)}
           >
             <Button fullWidth size="small" variant="outlined" color="secondary">
-              Share
+              Copy Vote Link
             </Button>
           </CopyToClipboard>
         </div>

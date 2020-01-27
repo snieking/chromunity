@@ -333,6 +333,9 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
           </MenuItem>
         </Link>
       </Menu>
+      <IconButton className={classes.menuButton} onClick={handleGovClick} aria-controls="gov-menu" aria-haspopup="true">
+        <Tooltip title="Governing">{renderGovernmentIcon()}</Tooltip>
+      </IconButton>
     </div>
   );
 
