@@ -1,7 +1,7 @@
 import election;
 
 query get_representatives(): list<name> {
-    val election = election.representative_election@?{ .completed == true } ( .id, -sort .timestamp ) limit 1;
+    val election = election.representative_election@?{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
 
     if (election == null) {
         return list<name>();
@@ -18,7 +18,7 @@ query get_all_representative_actions(timestamp, page_size: integer) {
     } (
         .id,
         representative = .representative.user.name,
-        -sort .timestamp,
+        @sort_desc .timestamp,
         .action
     ) limit page_size;
 }

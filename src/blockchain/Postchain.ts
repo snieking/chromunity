@@ -1,7 +1,7 @@
 import * as pcl from "postchain-client";
 import config from "../config.js";
 import DirectoryService from "./DirectoryService";
-import { Blockchain, op, Operation } from "ft3-lib";
+import { Blockchain, Operation } from "ft3-lib";
 import User from "ft3-lib/dist/ft3/user";
 
 const NODE_API_URL = config.nodeApiUrl;

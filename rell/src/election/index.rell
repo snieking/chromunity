@@ -1,7 +1,7 @@
 import user;
 
 entity representative_election {
-    key id: text;
+    key id: integer;
     index timestamp;
     mutable completed: boolean;
     index completed;
@@ -24,4 +24,20 @@ entity representative_election_vote {
 entity temp_votes_counter {
 	key representative_election_candidate;
 	mutable votes: integer;
+}
+
+function governing_period_in_blocks(): integer {
+	return 4000;
+}
+
+function election_duration_in_blocks(): integer {
+	return 4000;
+}
+
+function get_current_election_id(): integer {
+	return representative_election@{ .completed == false } ( @omit @sort_desc .timestamp, .id ) limit 1;
+}
+
+function get_latest_completed_election_id(): integer {
+	return representative_election@{ .completed == true } ( .id, @omit @sort_desc .timestamp ) limit 1;
 }

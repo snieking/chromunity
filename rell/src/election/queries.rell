@@ -1,10 +1,8 @@
 import user;
 
-query get_election_candidates() {
-	val next_election = representative_election@{ .completed == false };
-	
+query get_election_candidates() {	
     return temp_votes_counter@*{
-        .representative_election_candidate.representative_election == next_election
+        .representative_election_candidate.representative_election.id == get_current_election_id()
     } ( 
     	@omit @sort_desc .votes,
     	.representative_election_candidate.user.display_name
@@ -16,15 +14,13 @@ query get_next_election() {
 }
 
 query get_uncompleted_election() {
-    return representative_election@?{
-        .completed == false
-    } ( .id ) limit 1;
+    return get_current_election_id();
 }
 
 query get_user_vote_in_election(name) {
     return representative_election_vote@?{
         .user == user.user@{ .name == name },
-        .representative_election_candidate.representative_election == representative_election @ { .completed == false }
+        .representative_election_candidate.representative_election.id == get_current_election_id()
     } ( .representative_election_candidate.user.name ) limit 1;
 }
 

@@ -8,7 +8,6 @@ import { LinearProgress } from "@material-ui/core";
 
 interface MatchParams {
   username: string;
-  accountId: string;
 }
 
 interface Props extends RouteComponentProps<MatchParams> {
@@ -21,7 +20,6 @@ const RegisterAccount: React.FunctionComponent<Props> = props => {
   const vaultPubKey: string = query.pubKey as string;
   const username: string = props.match.params.username;
   props.accountRegister(accountId, username, vaultPubKey);
-
   return <LinearProgress variant="query" />;
 };
 

@@ -7,8 +7,8 @@ import util;
 operation remove_topic(username: text, descriptor_id: byte_array, topic_id: text) {
     val user = user.get_verified_user(username, descriptor_id);
 
-    val recentElection = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
-    val representative = representative @{ user, .representative_election.id == recentElection.id };
+    val recent_election = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
+    val representative = representative @{ user, .representative_election.id == recent_election.id };
 
     val topic = topic.topic @{ .id == topic_id };
     update topic ( title = "[Removed]", message = "Removed by @" + user.name, removed = true );
@@ -24,8 +24,8 @@ operation remove_topic(username: text, descriptor_id: byte_array, topic_id: text
 operation remove_topic_reply(username: text, descriptor_id: byte_array, topic_reply_id: text) {
     val user = user.get_verified_user(username, descriptor_id);
 
-    val recentElection = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
-    val representative = representative @{ user, .representative_election.id == recentElection.id };
+    val recent_election_id = election.get_latest_completed_election_id();
+    val representative = representative @{ user, .representative_election.id == recent_election_id };
 
     val reply = topic.topic_reply @{ .id == topic_reply_id };
     update reply ( message = "Removed by @" + user.name, removed = true );
@@ -41,8 +41,8 @@ operation remove_topic_reply(username: text, descriptor_id: byte_array, topic_re
 operation suspend_user(username: text, descriptor_id: byte_array, user_to_be_suspended: text) {
     val user = user.get_verified_user(username, descriptor_id);
 
-    val recentElection = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
-    val representative = representative @{ user, .representative_election.id == recentElection.id };
+    val recent_election_id = election.get_latest_completed_election_id();
+    val representative = representative @{ user, .representative_election.id == recent_election_id };
 
     val suspendee = user.user@{ .name == user_to_be_suspended };
     val suspendee_meta = meta.user_meta@{ suspendee };
@@ -76,19 +76,22 @@ operation suspend_user(username: text, descriptor_id: byte_array, user_to_be_sus
 }
 
 operation distrust_representative(descriptor_id: byte_array, distruster: name, distrusted: name) {
-	require(distruster != distrusted, "You can't distrust yourself");
+	require(
+		distruster != distrusted, 
+		util.app_error(util.error_type.ILLEGAL_ACTION, "You can't distrust yourself")
+	);
 	
 	val user = user.get_verified_user(distruster, descriptor_id);
 	val distruster_rep = representative@{ user };
 	val distrusted_rep = representative@{ user.name == distrusted };
 
-    val recent_election = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
-    val representative = representative @{ user, .representative_election.id == recent_election.id };
+    val recent_election_id = election.get_latest_completed_election_id();
+    val representative = representative @{ user, .representative_election.id == recent_election_id };
     
     create representative_distrust(distruster = distruster_rep, distrusted = distrusted_rep);
     
     val nr_of_representatives = representative@*{ 
-    	.representative_election.id == recent_election.id
+    	.representative_election.id == recent_election_id
     } ( .user ).size();
     
     val nr_of_distrusts = representative_distrust@*{ 

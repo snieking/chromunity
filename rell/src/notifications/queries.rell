@@ -12,6 +12,6 @@ query get_user_notifications_prior_to_timestamp(name, timestamp, page_size: inte
         .trigger,
         .content,
         .read,
-        -sort .timestamp
+        @sort_desc .timestamp
     ) limit page_size;
 }

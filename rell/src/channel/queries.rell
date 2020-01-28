@@ -7,12 +7,12 @@ query get_topics_by_channel_prior_to_timestamp(name, timestamp, page_size: integ
         .topic.last_modified < timestamp,
         .topic.removed == false
     } (
-        id=.topic.id,
-        author=.topic.author.display_name,
-        title=.topic.title,
-        message=.topic.message,
-        timestamp=.topic.timestamp,
-        -sort last_modified=.topic.last_modified,
+        id = .topic.id,
+        author = .topic.author.display_name,
+        title = .topic.title,
+        message = .topic.message,
+        timestamp = .topic.timestamp,
+        @sort_desc last_modified = .topic.last_modified,
         removed=.topic.removed
     ) limit page_size;
     
@@ -40,12 +40,12 @@ query get_topics_by_channel_after_timestamp(name, timestamp) {
         .topic.last_modified > timestamp,
         .topic.removed == false
     } (
-        id=.topic.id,
-        author=.topic.author.display_name,
-        title=.topic.title,
-        message=.topic.message,
-        timestamp=.topic.timestamp,
-        -sort last_modified=.topic.last_modified,
+        id = .topic.id,
+        author = .topic.author.display_name,
+        title = .topic.title,
+        message = .topic.message,
+        timestamp = .topic.timestamp,
+        @sort_desc last_modified = .topic.last_modified,
         removed=.topic.removed
     );
     
@@ -77,20 +77,20 @@ query count_channel_followers(name) {
 
 query get_topics_by_followed_channels_prior_to_timestamp(username: text, timestamp, page_size: integer) {
     val user = user.user@{ .name == username};
-    val topics = (channel, channel_following) @* {
+    val topics = (channel, channel_following)@*{
         channel_following.user == user,
         channel_following.name == channel.name,
         channel.topic.last_modified < timestamp,
         channel.topic.removed == false
     }
     (
-        id=channel.topic.id,
-        author=channel.topic.author.display_name,
-        title=channel.topic.title,
-        message=channel.topic.message,
-        timestamp=channel.topic.timestamp,
-        -sort last_modified=channel.topic.last_modified,
-        removed=channel.topic.removed
+        id = channel.topic.id,
+        author = channel.topic.author.display_name,
+        title = channel.topic.title,
+        message = channel.topic.message,
+        timestamp = channel.topic.timestamp,
+        @sort_desc last_modified = channel.topic.last_modified,
+        removed = channel.topic.removed
     ) limit page_size;
     
     val ext_topics = list<topic.ext_topic>();
@@ -113,20 +113,20 @@ query get_topics_by_followed_channels_prior_to_timestamp(username: text, timesta
 
 query get_topics_by_followed_channels_after_timestamp(username: text, timestamp, page_size: integer) {
     val user = user.user@{ .name == username};
-    val topics = (channel, channel_following) @* {
+    val topics = (channel, channel_following)@*{
         channel_following.user == user,
         channel_following.name == channel.name,
         channel.topic.last_modified > timestamp,
         channel.topic.removed == false
     }
     (
-        id=channel.topic.id,
-        author=channel.topic.author.display_name,
-        title=channel.topic.title,
-        message=channel.topic.message,
-        timestamp=channel.topic.timestamp,
-        -sort last_modified=channel.topic.last_modified,
-        removed=channel.topic.removed
+        id = channel.topic.id,
+        author = channel.topic.author.display_name,
+        title = channel.topic.title,
+        message = channel.topic.message,
+        timestamp = channel.topic.timestamp,
+        @sort_desc last_modified = channel.topic.last_modified,
+        removed = channel.topic.removed
     ) limit page_size;
     
     val ext_topics = list<topic.ext_topic>();

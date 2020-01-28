@@ -5,7 +5,7 @@ import {
   AccountRegisteredCheckAction
 } from "../AccountTypes";
 import { takeLatest } from "redux-saga/effects";
-import { SingleSignatureAuthDescriptor, FlagsType, User, Account } from "ft3-lib";
+import { SingleSignatureAuthDescriptor, FlagsType, User, Account, op } from "ft3-lib";
 import { KeyPair } from "ft3-lib";
 import config from "../../config.js";
 import { getAccountId } from "../../blockchain/UserService";
@@ -45,7 +45,11 @@ function* registerAccount(action: AccountRegisterAction) {
 
   const user = new User(keyPair, authDescriptor);
   const bc = yield BLOCKCHAIN;
-  yield bc.call(user, "register_user", action.username, authDescriptor.toGTV(), walletAuthDescriptor.toGTV());
+  yield bc.transactionBuilder()
+    .add(op("register_user", action.username, authDescriptor.toGTV(), walletAuthDescriptor.toGTV()))
+    .buildAndSign(user)
+    .post();
+
   gaSocialEvent("Register", action.username);
   authorizeUser(action.username);
 }

@@ -4,7 +4,7 @@ import topic.rating;
 import user;
 
 query get_topics_after_timestamp(timestamp, page_size: integer) {
-    val topics = topic @* {
+    val topics = topic@*{
         .last_modified > timestamp,
         .removed == false
     }(
@@ -12,7 +12,7 @@ query get_topics_after_timestamp(timestamp, page_size: integer) {
         author=.author.display_name,
         .title,
         .message,
-        -sort .last_modified,
+        @sort_desc .last_modified,
         .removed,
         .timestamp
     ) limit page_size;
@@ -36,15 +36,15 @@ query get_topics_after_timestamp(timestamp, page_size: integer) {
 }
 
 query get_topics_prior_to_timestamp(timestamp, page_size: integer): list<ext_topic> {
-    val topics = topic @* {
+    val topics = topic@*{
         .last_modified < timestamp,
         .removed == false
     }(
         .id,
-        author=.author.display_name,
+        author = .author.display_name,
         .title,
         .message,
-        -sort .last_modified,
+        @sort_desc .last_modified,
         .removed,
         .timestamp
     ) limit page_size;
@@ -75,11 +75,11 @@ query get_topic_replies_prior_to_timestamp(topic_id: text, timestamp, page_size:
     }(
         .id,
         topic_id = .topic.id,
-        author=.author.display_name,
+        author= .author.display_name,
         .message,
         .is_sub_reply,
         .removed,
-        -sort .timestamp
+        @sort_desc .timestamp
     ) limit page_size;
 }
 
@@ -95,11 +95,11 @@ query get_topic_replies_after_timestamp(topic_id: text, timestamp, page_size: in
     }(
         .id,
         topic_id = .topic.id,
-        author=.author.display_name,
+        author= .author.display_name,
         .message,
         .is_sub_reply,
         .removed,
-        -sort .timestamp
+        @sort_desc .timestamp
     ) limit page_size;
 }
 
@@ -111,7 +111,7 @@ query get_topic_replies_by_user_prior_to_timestamp(name, timestamp, page_size: i
         .message,
         .is_sub_reply,
         .removed,
-        -sort .timestamp
+        @sort_desc .timestamp
     ) limit page_size;
 }
 
@@ -125,12 +125,12 @@ query count_replies_by_user(name): integer {
 
 query get_sub_replies(parent_reply_id: text) {
     return sub_reply@*{ .parent_reply.id == parent_reply_id } (
-        id=.child_reply.id,
-        author=.child_reply.author.display_name,
-        message=.child_reply.message,
-        is_sub_reply=.child_reply.is_sub_reply,
+        id= .child_reply.id,
+        author= .child_reply.author.display_name,
+        message= .child_reply.message,
+        is_sub_reply= .child_reply.is_sub_reply,
         removed = .child_reply.removed,
-        sort timestamp=.child_reply.timestamp
+        @sort timestamp= .child_reply.timestamp
     );
 }
 
@@ -140,10 +140,10 @@ query get_topics_by_user_id_prior_to_timestamp(name, timestamp, page_size: integ
         .last_modified < timestamp
     }(
         .id,
-        author=.author.display_name,
+        author= .author.display_name,
         .title,
         .message,
-        -sort .last_modified,
+        @sort_desc .last_modified,
         .removed,
         .timestamp
     ) limit page_size;
@@ -167,7 +167,7 @@ query get_topics_by_user_id_prior_to_timestamp(name, timestamp, page_size: integ
 }
 
 query get_topics_from_follows_after_timestamp(name, timestamp, page_size: integer) {
-    val topics = (topic, follow.follow) @* {
+    val topics = (topic, follow.follow)@*{
             follow.follower.name == name.lower_case(),
             follow.follows == topic.author,
             topic.last_modified > timestamp,
@@ -178,7 +178,7 @@ query get_topics_from_follows_after_timestamp(name, timestamp, page_size: intege
         topic.title,
         topic.message,
         topic.removed,
-        -sort topic.last_modified,
+        @sort_desc topic.last_modified,
         topic.timestamp
     ) limit page_size;
     
@@ -208,11 +208,11 @@ query get_topics_from_follows_prior_to_timestamp(name, timestamp, page_size: int
         topic.removed == false
     }(
         topic.id,
-        author=topic.author.display_name,
+        author = topic.author.display_name,
         topic.title,
         topic.message,
         topic.removed,
-        -sort topic.last_modified,
+        @sort_desc topic.last_modified,
         topic.timestamp
     ) limit page_size;
     
@@ -239,11 +239,11 @@ query get_topic_by_id(id: text) {
         .id == id
     }(
         .id,
-        author=.author.display_name,
+        author = .author.display_name,
         .title,
         .message,
         .removed,
-        -sort .last_modified,
+        @sort_desc .last_modified,
         .timestamp
     );
 }
@@ -253,7 +253,7 @@ query get_all_topics_by_stars_since_timestamp(timestamp, page_size: integer) {
         .topic.last_modified > timestamp,
         .topic.removed == false
     } (
-        -sort .stars,
+        @sort_desc .stars,
         id = .topic.id,
         author=.topic.author.display_name,
         title=.topic.title,
@@ -288,14 +288,14 @@ query get_topics_by_follows_and_stars_since_timestamp(name, timestamp, page_size
             tmp_topic_rating.topic.last_modified > timestamp,
             tmp_topic_rating.topic.removed == false
         } (
-        -sort tmp_topic_rating.stars,
+        @sort_desc tmp_topic_rating.stars,
         id = tmp_topic_rating.topic.id,
-        author=tmp_topic_rating.topic.author.display_name,
-        title=tmp_topic_rating.topic.title,
-        message=tmp_topic_rating.topic.message,
-        last_modified=tmp_topic_rating.topic.last_modified,
-        timestamp=tmp_topic_rating.topic.timestamp,
-        removed=tmp_topic_rating.topic.removed
+        author = tmp_topic_rating.topic.author.display_name,
+        title = tmp_topic_rating.topic.title,
+        message = tmp_topic_rating.topic.message,
+        last_modified = tmp_topic_rating.topic.last_modified,
+        timestamp = tmp_topic_rating.topic.timestamp,
+        removed = tmp_topic_rating.topic.removed
     ) limit page_size;
     
     val ext_topics = list<ext_topic>();
@@ -323,14 +323,14 @@ query get_topics_by_channel_after_timestamp_sorted_by_popularity(name, timestamp
         tmp_topic_rating.topic.last_modified > timestamp,
         tmp_topic_rating.topic.removed == false
     } (
-        -sort .stars,
+        @sort_desc .stars,
         id = channel.topic.id,
-        author=channel.topic.author.display_name,
-        title=channel.topic.title,
-        message=channel.topic.message,
-        last_modified=channel.topic.last_modified,
-        timestamp=channel.topic.timestamp,
-        removed=channel.topic.removed
+        author = channel.topic.author.display_name,
+        title = channel.topic.title,
+        message = channel.topic.message,
+        last_modified = channel.topic.last_modified,
+        timestamp = channel.topic.timestamp,
+        removed = channel.topic.removed
     ) limit page_size;
     
     val ext_topics = list<ext_topic>();
@@ -359,14 +359,14 @@ query get_topics_by_followed_channels_after_timestamp_sorted_by_popularity(name,
         tmp_topic_rating.topic.last_modified > timestamp,
         tmp_topic_rating.topic.removed == false
     } (
-        -sort .stars,
+        @sort_desc .stars,
         id = channel.topic.id,
-        author=channel.topic.author.display_name,
-        title=channel.topic.title,
-        message=channel.topic.message,
-        last_modified=channel.topic.last_modified,
-        timestamp=channel.topic.timestamp,
-        removed=channel.topic.removed
+        author = channel.topic.author.display_name,
+        title = channel.topic.title,
+        message = channel.topic.message,
+        last_modified = channel.topic.last_modified,
+        timestamp = channel.topic.timestamp,
+        removed = channel.topic.removed
     ) limit page_size;
     
     val ext_topics = list<ext_topic>();

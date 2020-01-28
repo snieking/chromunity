@@ -1,12 +1,13 @@
 import user;
+import util;
 import representative;
 
 operation process_election() {
 	var something_done = false;
 	
 	val current_block = op_context.block_height;
-	val election_period_in_blocks = 4000;
-	val governing_period_in_blocks = 4000;
+	val election_period_in_blocks = election_duration_in_blocks();
+	val governing_period_in_blocks = governing_period_in_blocks();
 	
 	val election_block_details = election_block_details@?{} ( @sort_desc .started_height, .finished_height ) limit 1;
 	
@@ -14,7 +15,7 @@ operation process_election() {
 		log("No election held yet, triggering new one");
 		create_election_at_height(current_block);
 		something_done = true;
-	} else if (election_block_details.finished_height >= 0 and election_block_details.started_height + governing_period_in_blocks < current_block) {
+	} else if (election_block_details.finished_height >= 0 and election_block_details.finished_height + governing_period_in_blocks < current_block) {
 		log("Triggering a new election");
 		create_election_at_height(current_block);
 		something_done = true;
@@ -26,22 +27,23 @@ operation process_election() {
 		something_done = true;
 	}
 	
-	require(something_done, "Expected error since nothing was done");
+	require(something_done, util.app_error(util.error_type.EXPECTED_ERROR, "Nothing done while processing of elections"));
 }
 
 function create_election_at_height(height: integer) {
 	val election = create representative_election(
-			"" + height, 
-			op_context.last_block_time, 
+			id = height,
+			timestamp = op_context.last_block_time, 
 			false
 		);
 		create election_block_details(started_height = height, election);
 }
 
 function complete_election() {
-    val current_election = representative_election @ { .completed == false };
+    val current_election = representative_election@{ .id == get_current_election_id() };
     update current_election ( completed = true );
     update election_block_details@{ current_election } ( finished_height = op_context.block_height );
+    
     val nr_of_participants = temp_votes_counter@*{} ( 
     	.representative_election_candidate.user.name
     ).size();
@@ -59,30 +61,19 @@ function complete_election() {
 }
 
 operation vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: name) {
-	require(voter != candidate, "You can't vote for yourself");
+	require(voter != candidate, util.app_error(util.error_type.ILLEGAL_ACTION, "You can't vote for yourself"));
     val user = user.get_verified_user(voter, descriptor_id);
 
-    val current_election = representative_election @ { .completed == false };
+    val current_election_id = get_current_election_id();
     
-    // Clean up older votes in-case the user already voted
-    val old_candidate_votes = representative_election_vote@*{ 
-    	user,
-    	.representative_election_candidate.representative_election == current_election
-    };
-	for (old_candidate_vote in old_candidate_votes) {
-	    
-	    update temp_votes_counter@ {
-	    	old_candidate_vote.representative_election_candidate
-	    } ( votes -= 1 );
-	    
-	   	delete old_candidate_vote;
-	    
-	}
-    
+    clean_up_votes(user, current_election_id);
     
     val vote = create representative_election_vote(
         user,
-        representative_election_candidate@{ user.user@{ .name == candidate }, current_election }
+        representative_election_candidate@{ 
+        	user.user@{ .name == candidate }, 
+        	.representative_election.id == current_election_id
+        }
     );
     
     update temp_votes_counter@ {
@@ -93,8 +84,25 @@ operation vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: 
 operation sign_up_for_election(name, descriptor_id: byte_array) {
     val user = user.get_verified_user(name, descriptor_id);
 
-    val currentElection = representative_election @ { .completed == false };
-
-    val candidate = create representative_election_candidate(currentElection, user);
+    val candidate = create representative_election_candidate(
+    	representative_election@{ .id == get_current_election_id() }, 
+    	user
+    );
+    
     create temp_votes_counter(candidate, 0);
+}
+
+function clean_up_votes(user.user, id: integer) {
+	val old_candidate_votes = representative_election_vote@*{ 
+    	user,
+    	.representative_election_candidate.representative_election.id == id
+    };
+	for (old_candidate_vote in old_candidate_votes) {
+	    
+	    update temp_votes_counter@ {
+	    	old_candidate_vote.representative_election_candidate
+	    } ( votes -= 1 );
+	    
+	   	delete old_candidate_vote;
+	}
 }
