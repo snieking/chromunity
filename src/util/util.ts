@@ -157,3 +157,7 @@ export function removeDuplicateTopicsFromFirst(firstArr: Topic[], secondArr: Top
 
   return filteredArr;
 }
+
+export const toLowerCase = (text: string) => {
+  return text.toLocaleLowerCase();
+};
