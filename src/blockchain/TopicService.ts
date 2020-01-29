@@ -1,4 +1,4 @@
-import { BLOCKCHAIN, executeOperations, GTX } from "./Postchain";
+import { BLOCKCHAIN, executeQuery, executeOperations } from "./Postchain";
 import { createStopwatchStarted, handleException, stopStopwatch, toLowerCase, uniqueId } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 import { Topic, TopicReply, ChromunityUser } from "../types";
@@ -245,7 +245,7 @@ export function getTopicRepliesByUserPriorToTimestamp(
 ): Promise<TopicReply[]> {
   const query = "get_topic_replies_by_user_prior_to_timestamp";
   const sw = createStopwatchStarted();
-  return GTX.query(query, { name: toLowerCase(name), timestamp, page_size: pageSize })
+  return executeQuery(query, { name: toLowerCase(name), timestamp, page_size: pageSize })
     .then((replies: TopicReply[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       return replies;
@@ -254,7 +254,7 @@ export function getTopicRepliesByUserPriorToTimestamp(
 }
 
 export function getTopicSubReplies(replyId: string): Promise<TopicReply[]> {
-  return GTX.query("get_sub_replies", { parent_reply_id: replyId });
+  return executeQuery("get_sub_replies", { parent_reply_id: replyId });
 }
 
 export function getTopicsByUserPriorToTimestamp(
@@ -264,7 +264,7 @@ export function getTopicsByUserPriorToTimestamp(
 ): Promise<Topic[]> {
   const query = "get_topics_by_user_id_prior_to_timestamp";
   const sw = createStopwatchStarted();
-  return GTX.query(query, { name: toLowerCase(username), timestamp, page_size: pageSize })
+  return executeQuery(query, { name: toLowerCase(username), timestamp, page_size: pageSize })
     .then((topics: Topic[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       topics.forEach(topic => topicsCache.set(topic.id, topic));
@@ -281,7 +281,7 @@ export function getTopicsByChannelPriorToTimestamp(
   const query = "get_topics_by_channel_prior_to_timestamp";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, { name: toLowerCase(channelName), timestamp, page_size: pageSize })
+  return executeQuery(query, { name: toLowerCase(channelName), timestamp, page_size: pageSize })
     .then((topics: Topic[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       topics.forEach(topic => topicsCache.set(topic.id, topic));
@@ -294,7 +294,7 @@ export function getTopicsByChannelAfterTimestamp(channelName: string, timestamp:
   const query = "get_topics_by_channel_after_timestamp";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, { name: toLowerCase(channelName), timestamp })
+  return executeQuery(query, { name: toLowerCase(channelName), timestamp })
     .then((topics: Topic[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       topics.forEach(topic => topicsCache.set(topic.id, topic));
@@ -307,7 +307,7 @@ export function countTopicsInChannel(channelName: string): Promise<number> {
   const query = "count_topics_by_channel";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, { name: toLowerCase(channelName) })
+  return executeQuery(query, { name: toLowerCase(channelName) })
     .then((value: number) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       return value;
@@ -328,7 +328,7 @@ export function getTopicStarRaters(topicId: string, clearCache = false): Promise
 
   const query = "get_star_rating_for_topic";
   const sw = createStopwatchStarted();
-  return GTX.query(query, { id: topicId })
+  return executeQuery(query, { id: topicId })
     .then((raters: string[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       starRatingCache.set(topicId, raters, 600);
@@ -385,7 +385,7 @@ function modifyRatingAndSubscription(user: ChromunityUser, id: string, rellOpera
 export function getReplyStarRaters(topicId: string): Promise<string[]> {
   const query = "get_star_rating_for_reply";
   const sw = createStopwatchStarted();
-  return GTX.query(query, { id: topicId }).then((raters: string[]) => {
+  return executeQuery(query, { id: topicId }).then((raters: string[]) => {
     gaRellQueryTiming(query, stopStopwatch(sw));
     return raters;
   });
@@ -400,7 +400,7 @@ export function countTopicReplies(topicId: string): Promise<number> {
 
   const query = "count_topic_replies";
   const sw = createStopwatchStarted();
-  return GTX.query(query, { topic_id: topicId }).then((count: number) => {
+  return executeQuery(query, { topic_id: topicId }).then((count: number) => {
     gaRellQueryTiming(query, stopStopwatch(sw));
     topicsCache.set(topicId + "-reply_count", count, 600);
     return count;
@@ -410,7 +410,7 @@ export function countTopicReplies(topicId: string): Promise<number> {
 export function getTopicSubscribers(topicId: string): Promise<string[]> {
   const query = "get_subscribers_for_topic";
   const sw = createStopwatchStarted();
-  return GTX.query(query, { id: topicId })
+  return executeQuery(query, { id: topicId })
     .then((subs: string[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       return subs;
@@ -428,7 +428,7 @@ export function getTopicById(id: string): Promise<Topic> {
   const query = "get_topic_by_id";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, { id })
+  return executeQuery(query, { id })
     .then((topic: Topic) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       topicsCache.set(id, topic, 300);
@@ -448,7 +448,7 @@ export function getTopicsAfterTimestamp(timestamp: number, pageSize: number): Pr
 function getTopicsForTimestamp(timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
   const sw = createStopwatchStarted();
 
-  return GTX.query(rellOperation, { timestamp, page_size: pageSize })
+  return executeQuery(rellOperation, { timestamp, page_size: pageSize })
     .then((topics: Topic[]) => {
       gaRellQueryTiming(rellOperation, stopStopwatch(sw));
       topics.forEach(topic => topicsCache.set(topic.id, topic));
@@ -481,7 +481,7 @@ function getTopicsFromFollowsForTimestamp(
 ): Promise<Topic[]> {
   const sw = createStopwatchStarted();
 
-  return GTX.query(rellOperation, { name: toLowerCase(user), timestamp, page_size: pageSize })
+  return executeQuery(rellOperation, { name: toLowerCase(user), timestamp, page_size: pageSize })
     .then((topics: Topic[]) => {
       gaRellQueryTiming(rellOperation, stopStopwatch(sw));
       return topics;
@@ -507,7 +507,7 @@ export function countReplyStarRatingForUser(name: string) {
 
 function countByUser(name: string, rellOperation: string): Promise<number> {
   const sw = createStopwatchStarted();
-  return GTX.query(rellOperation, { name: toLowerCase(name) })
+  return executeQuery(rellOperation, { name: toLowerCase(name) })
     .then((count: number) => {
       gaRellQueryTiming(rellOperation, stopStopwatch(sw));
       return count;
@@ -540,7 +540,7 @@ export function getTopicsFromFollowedChannels(
   rellOperation: string
 ): Promise<Topic[]> {
   const sw = createStopwatchStarted();
-  return GTX.query(rellOperation, { username: toLowerCase(username), timestamp, page_size: pageSize })
+  return executeQuery(rellOperation, { username: toLowerCase(username), timestamp, page_size: pageSize })
     .then((topics: Topic[]) => {
       gaRellQueryTiming(rellOperation, stopStopwatch(sw));
       var seen: Set<string> = new Set<string>();
@@ -555,7 +555,7 @@ export function getTopicsFromFollowedChannels(
 export function getAllTopicsByPopularityAfterTimestamp(timestamp: number, pageSize: number): Promise<Topic[]> {
   const query = "get_all_topics_by_stars_since_timestamp";
   const sw = createStopwatchStarted();
-  return GTX.query(query, { timestamp, page_size: pageSize })
+  return executeQuery(query, { timestamp, page_size: pageSize })
     .then((topics: Topic[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       return topics;
@@ -609,7 +609,7 @@ function getTopicsByPopularityAfterTimestamp(
   rellOperation: string
 ): Promise<Topic[]> {
   const sw = createStopwatchStarted();
-  return GTX.query(rellOperation, { name: toLowerCase(name), timestamp, page_size: pageSize })
+  return executeQuery(rellOperation, { name: toLowerCase(name), timestamp, page_size: pageSize })
     .then((topics: Topic[]) => {
       gaRellQueryTiming(rellOperation, stopStopwatch(sw));
       return topics;

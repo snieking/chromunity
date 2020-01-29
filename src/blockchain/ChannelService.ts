@@ -1,11 +1,6 @@
 import { ChromunityUser } from "../types";
-import { BLOCKCHAIN, GTX } from "./Postchain";
-import {
-  createStopwatchStarted,
-  handleException,
-  sortByFrequency,
-  stopStopwatch
-} from "../util/util";
+import { executeOperations, executeQuery } from "./Postchain";
+import { createStopwatchStarted, handleException, sortByFrequency, stopStopwatch, toLowerCase } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 import { gaRellOperationTiming, gaRellQueryTiming, gaSocialEvent } from "../GoogleAnalytics";
 import { nop, op } from "ft3-lib";
@@ -27,8 +22,8 @@ export function getFollowedChannels(user: string): Promise<string[]> {
   const query = "get_followed_channels";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, {
-    username: user.toLocaleLowerCase()
+  return executeQuery(query, {
+    username: toLowerCase(user)
   })
     .then((values: string[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
@@ -42,19 +37,10 @@ function modifyChannelollowing(user: ChromunityUser, channel: string, rellOperat
   gaSocialEvent(rellOperation, channel);
   const sw = createStopwatchStarted();
 
-  return BLOCKCHAIN.then(bc =>
-    bc
-      .transactionBuilder()
-      .add(op(
-        rellOperation,
-        user.name.toLocaleLowerCase(),
-        user.ft3User.authDescriptor.id,
-        channel.toLocaleLowerCase()
-        )
-      )
-      .add(nop())
-      .buildAndSign(user.ft3User)
-      .post()
+  return executeOperations(
+    user.ft3User,
+    op(rellOperation, user.name.toLocaleLowerCase(), user.ft3User.authDescriptor.id, channel.toLocaleLowerCase()),
+    nop()
   )
     .then(value => {
       gaRellOperationTiming(rellOperation, stopStopwatch(sw));
@@ -73,7 +59,7 @@ export function getTopicChannelBelongings(topicId: string): Promise<string[]> {
   const query = "get_topic_channels_belongings";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, { topic_id: topicId })
+  return executeQuery(query, { topic_id: topicId })
     .then((belongings: string[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       channelsCache.set(topicId, belongings, 3600);
@@ -96,9 +82,7 @@ export function getTrendingChannels(sinceDaysAgo: number): Promise<string[]> {
   const query = "get_channels_since";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, {
-    timestamp: date.getTime() / 1000
-  })
+  return executeQuery(query, { timestamp: date.getTime() / 1000 })
     .then((tags: string[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       trending = sortByFrequency(tags).slice(0, 10);
@@ -119,9 +103,7 @@ export function countChannelFollowers(channelName: string): Promise<number> {
   const query = "count_channel_followers";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, {
-    name: channelName.toLocaleLowerCase()
-  })
+  return executeQuery(query, { name: toLowerCase(channelName) })
     .then((count: number) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       channelsCache.set(key, count, 600);

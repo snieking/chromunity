@@ -1,5 +1,5 @@
 import { ChromunityUser } from "../types";
-import { executeOperations, GTX } from "./Postchain";
+import { executeOperations, executeQuery } from "./Postchain";
 import * as BoomerangCache from "boomerang-cache";
 import { removeNotificationsForId, sendNotificationWithDeterministicId } from "./NotificationService";
 import { gaRellOperationTiming, gaRellQueryTiming, gaSocialEvent } from "../GoogleAnalytics";
@@ -58,7 +58,7 @@ export function countUserFollowers(name: string): Promise<number> {
   const query = "get_user_followers";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, { name: toLowerCase(name) })
+  return executeQuery(query, { name: toLowerCase(name) })
     .then((arr: string[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       return arr.length;
@@ -70,7 +70,7 @@ export function countUserFollowings(name: string): Promise<number> {
   const query = "get_user_follows";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, { name: toLowerCase(name) }).then((arr: string[]) => {
+  return executeQuery(query, { name: toLowerCase(name) }).then((arr: string[]) => {
     gaRellQueryTiming(query, stopStopwatch(sw));
     return arr.length;
   });
@@ -86,7 +86,7 @@ export function amIAFollowerOf(user: ChromunityUser, name: string): Promise<bool
   const query = "get_user_follows";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, { name: toLowerCase(user.name) })
+  return executeQuery(query, { name: toLowerCase(user.name) })
     .then((userFollows: string[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       boomerang.set("user-" + toLowerCase(user.name), userFollows.map(name => toLowerCase(name)));

@@ -1,4 +1,4 @@
-import { BLOCKCHAIN, executeOperations, GTX } from "./Postchain";
+import { executeOperations, executeQuery } from "./Postchain";
 import { Election, RepresentativeAction, RepresentativeReport, ChromunityUser } from "../types";
 import { createStopwatchStarted, handleException, stopStopwatch, toLowerCase, uniqueId } from "../util/util";
 
@@ -9,7 +9,7 @@ import { nop, op } from "ft3-lib";
 const representativesCache = BoomerangCache.create("rep-bucket", { storage: "session", encrypt: true });
 
 export function getCurrentRepresentativePeriod(): Promise<Election> {
-  return GTX.query("get_current_representative_period", { timestamp: Date.now() });
+  return executeQuery("get_current_representative_period", { timestamp: Date.now() });
 }
 
 export function clearRepresentativesCache() {
@@ -17,18 +17,18 @@ export function clearRepresentativesCache() {
 }
 
 export function getRepresentatives(): Promise<string[]> {
-  return GTX.query("get_representatives", {});
+  return executeQuery("get_representatives", {});
 }
 
 export function getTimesRepresentative(name: string): Promise<number> {
-  return GTX.query("get_number_of_times_representative", { name });
+  return executeQuery("get_number_of_times_representative", { name });
 }
 
 export function getAllRepresentativeActionsPriorToTimestamp(
   timestamp: number,
   pageSize: number
 ): Promise<RepresentativeAction[]> {
-  return GTX.query("get_all_representative_actions", { timestamp, page_size: pageSize });
+  return executeQuery("get_all_representative_actions", { timestamp, page_size: pageSize });
 }
 
 export function handleReport(user: ChromunityUser, reportId: string) {
@@ -67,7 +67,7 @@ export function distrustAnotherRepresentative(user: ChromunityUser, distrusted: 
 }
 
 export function isRepresentativeDistrustedByMe(user: ChromunityUser, distrusted: string): Promise<boolean> {
-  return BLOCKCHAIN.then(bc => bc.query("is_rep_distrusted_by_me", { me: user.name, rep: distrusted }));
+  return executeQuery("is_rep_distrusted_by_me", { me: user.name, rep: distrusted });
 }
 
 export function reportTopic(user: ChromunityUser, topicId: string) {
@@ -95,5 +95,5 @@ function report(user: ChromunityUser, text: string) {
 }
 
 export function getUnhandledReports(): Promise<RepresentativeReport[]> {
-  return GTX.query("get_unhandled_representative_reports", {});
+  return executeQuery("get_unhandled_representative_reports", {});
 }

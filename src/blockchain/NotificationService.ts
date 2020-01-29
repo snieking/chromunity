@@ -1,4 +1,4 @@
-import { executeOperations, GTX } from "./Postchain";
+import { executeOperations, executeQuery } from "./Postchain";
 import * as BoomerangCache from "boomerang-cache";
 import { ChromunityUser, UserNotification } from "../types";
 import { createStopwatchStarted, handleException, stopStopwatch, toLowerCase, uniqueId } from "../util/util";
@@ -103,7 +103,7 @@ export function getUserNotificationsPriorToTimestamp(
   const query = "get_user_notifications_prior_to_timestamp";
   const sw = createStopwatchStarted();
 
-  return GTX.query(query, { name: toLowerCase(user), timestamp, page_size: pageSize })
+  return executeQuery(query, { name: toLowerCase(user), timestamp, page_size: pageSize })
     .then((userNotifications: UserNotification[]) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       return userNotifications;
@@ -117,7 +117,7 @@ export function countUnreadUserNotifications(user: string): Promise<number> {
   if (count == null) {
     const query = "count_unread_user_notifications";
     const sw = createStopwatchStarted();
-    return GTX.query(query, { name: toLowerCase(user) })
+    return executeQuery(query, { name: toLowerCase(user) })
       .then((arr: unknown[]) => {
         gaRellQueryTiming(query, stopStopwatch(sw));
         boomerang.set("notis-" + user, arr.length, 60);
