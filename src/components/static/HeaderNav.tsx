@@ -251,7 +251,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
       return (
         <AppBar position="static" color="secondary">
           <Typography variant="body2" component="p" className={classes.testInfo}>
-            <b>Development or Test</b>
+            <b>Development / Testing</b>
           </Typography>
         </AppBar>
       );
