@@ -56,6 +56,7 @@ import { NotFound } from "../static/NotFound";
 import { ApplicationState } from "../../redux/Store";
 import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
 import { connect } from "react-redux";
+import { toLowerCase } from "../../util/util";
 
 const styles = createStyles({
   iconRed: {
@@ -133,10 +134,13 @@ const ProfileCard = withStyles(styles)(
 
       props.loadRepresentatives();
 
-      if (this.props.representatives.includes(this.props.username)
-        && this.props.representatives.includes(this.state.user.name)) {
-        isRepresentativeDistrustedByMe(this.state.user, this.props.username)
-          .then(distrusted => this.setState({ isDistrusted: distrusted }));
+      if (
+        this.props.representatives.includes(this.props.username) &&
+        this.props.representatives.includes(this.state.user.name)
+      ) {
+        isRepresentativeDistrustedByMe(this.state.user, this.props.username).then(distrusted =>
+          this.setState({ isDistrusted: distrusted })
+        );
       }
 
       this.renderUserPage = this.renderUserPage.bind(this);
@@ -204,41 +208,40 @@ const ProfileCard = withStyles(styles)(
 
     renderRepresentativeActions() {
       const user = getUser();
-      if (user != null && this.props.representatives.includes(user.name.toLocaleLowerCase())) {
-        if (this.props.representatives.includes(this.props.username)) {
+      console.log("About to render representative actions", user, this.props.representatives);
+      if (user != null && this.props.representatives.includes(toLowerCase(user.name))) {
+        if (this.props.representatives.includes(toLowerCase(this.props.username))) {
+          console.log("About to render distrust button");
           this.renderDistrustButton();
         } else {
+          console.log("About to render suspension button");
           this.renderSuspensionButton();
         }
       }
     }
 
     renderDistrustButton() {
-      if (this.props.representatives.includes(this.props.username)) {
-        return (
-          <div style={{ display: "inline" }}>
-            <IconButton onClick={() => this.setState({ suspendUserDialogOpen: true })}>
-              <Tooltip title="Suspend user">
-                <VoiceOverOff fontSize="large" className={this.props.classes.iconRed} />
-              </Tooltip>
-            </IconButton>
-          </div>
-        );
-      }
+      return (
+        <div style={{ display: "inline" }}>
+          <IconButton onClick={() => this.setState({ suspendUserDialogOpen: true })}>
+            <Tooltip title="Suspend user">
+              <VoiceOverOff fontSize="large" className={this.props.classes.iconRed} />
+            </Tooltip>
+          </IconButton>
+        </div>
+      );
     }
 
     renderSuspensionButton() {
-      if (!this.props.representatives.includes(this.props.username)) {
-        return (
-          <div style={{ display: "inline" }}>
-            <IconButton onClick={() => this.setState({ suspendUserDialogOpen: true })}>
-              <Tooltip title="Suspend user">
-                <VoiceOverOff fontSize="large" className={this.props.classes.iconRed} />
-              </Tooltip>
-            </IconButton>
-          </div>
-        );
-      }
+      return (
+        <div style={{ display: "inline" }}>
+          <IconButton onClick={() => this.setState({ suspendUserDialogOpen: true })}>
+            <Tooltip title="Suspend user">
+              <VoiceOverOff fontSize="large" className={this.props.classes.iconRed} />
+            </Tooltip>
+          </IconButton>
+        </div>
+      );
     }
 
     suspendUser() {
