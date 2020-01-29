@@ -97,3 +97,11 @@ function report(user: ChromunityUser, text: string) {
 export function getUnhandledReports(): Promise<RepresentativeReport[]> {
   return executeQuery("get_unhandled_representative_reports", {});
 }
+
+export function getTimesUserWasDistrusted(name: string) {
+  return executeQuery("times_user_was_distrusted", { name });
+}
+
+export function getTimesUserDistrustedSomeone(name: string) {
+  return executeQuery("times_user_distrusted_someone", { name });
+}

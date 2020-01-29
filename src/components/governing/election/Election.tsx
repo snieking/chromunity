@@ -104,24 +104,24 @@ const Election = withStyles(styles)(
 
     renderElectionVoteStatus() {
       let text = this.state.blocksUntilElectionWrapsUp !== -1
-        ? "An election is in progress and will finish in " + this.state.blocksUntilElectionWrapsUp + " blocks."
-        : "An election is in progress.";
+        ? "An election is in progress and will finish in " + this.state.blocksUntilElectionWrapsUp + " blocks"
+        : "An election is in progress";
 
       if (!this.state.activeElection) {
         text = this.state.blocksUntilNextElection !== -1
-          ? "No election is currently in progress, next one is in " + this.state.blocksUntilNextElection + " blocks."
+          ? "No election is currently in progress, next one is in " + this.state.blocksUntilNextElection + " blocks"
           : "No election is currently in progress.";
       } else if (this.state.votedFor !== "") {
         text = "Thanks for doing your duty as a Chromian!";
         if (this.state.blocksUntilElectionWrapsUp !== -1) {
-          text = text + " The election will finish in " + this.state.blocksUntilElectionWrapsUp + " blocks.";
+          text = text + " The election will finish in " + this.state.blocksUntilElectionWrapsUp + " blocks";
         }
       } else if (this.state.user == null) {
-        text = "Login to be able to vote in the election.";
+        text = "Login to be able to vote in the election";
       }
 
       return (
-        <Typography variant="body2" component="p">
+        <Typography variant="subtitle1" component="p">
           {text}
         </Typography>
       );
