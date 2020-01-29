@@ -23,7 +23,8 @@ import {
   SupervisedUserCircle,
   VoiceOverOff,
   VolumeOff,
-  VolumeUp
+  VolumeUp,
+  SentimentVeryDissatisfiedSharp
 } from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
 import {
@@ -208,13 +209,10 @@ const ProfileCard = withStyles(styles)(
 
     renderRepresentativeActions() {
       const user = getUser();
-      console.log("About to render representative actions", user, this.props.representatives);
       if (user != null && this.props.representatives.includes(toLowerCase(user.name))) {
         if (this.props.representatives.includes(toLowerCase(this.props.username))) {
-          console.log("About to render distrust button");
           return this.renderDistrustButton();
         } else {
-          console.log("About to render suspension button");
           return this.renderSuspensionButton();
         }
       }
@@ -223,9 +221,9 @@ const ProfileCard = withStyles(styles)(
     renderDistrustButton() {
       return (
         <div style={{ display: "inline" }}>
-          <IconButton onClick={() => this.setState({ suspendUserDialogOpen: true })}>
-            <Tooltip title="Suspend user">
-              <VoiceOverOff fontSize="large" className={this.props.classes.iconRed} />
+          <IconButton onClick={() => this.setState({ distrustDialogOpen: true })}>
+            <Tooltip title="Distrust the representative">
+              <SentimentVeryDissatisfiedSharp fontSize="large" className={this.props.classes.iconRed} />
             </Tooltip>
           </IconButton>
         </div>
