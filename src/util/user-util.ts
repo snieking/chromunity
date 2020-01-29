@@ -53,7 +53,7 @@ export function getChatPassphrase(): any {
 export function getUsername(): string {
   const username = LOCAL_CACHE.get(USER_KEY);
 
-  if (username != null && !debugUserSet) {
+  if (Sentry !== undefined && ReactPiwik !== undefined && username != null && !debugUserSet) {
     try {
       Sentry.configureScope(scope => scope.setUser({"username": username}));
       ReactPiwik.push(['setUserId', username]);

@@ -32,6 +32,7 @@ import { connect } from "react-redux";
 import Badge from "@material-ui/core/Badge";
 import { countUnreadChatsAction } from "../../redux/actions/ChatActions";
 import { ChromunityUser } from "../../types";
+import { toLowerCase } from "../../util/util";
 
 interface Props {
   representatives: string[];
@@ -397,7 +398,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    representatives: store.government.representatives,
+    representatives: store.government.representatives.map(rep => toLowerCase(rep)),
     unhandledReports: store.government.unhandledReports,
     loadUnhandledReports: store.government.unhandledReports,
     activeElection: store.government.activeElection,

@@ -56,7 +56,7 @@ import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import { pageViewPath } from "../../GoogleAnalytics";
-import { prepareUrlPath } from "../../util/util";
+import { prepareUrlPath, toLowerCase } from "../../util/util";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { ApplicationState } from "../../redux/Store";
 import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
@@ -627,7 +627,7 @@ const FullTopic = withStyles(styles)(
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    representatives: store.government.representatives
+    representatives: store.government.representatives.map(rep => toLowerCase(rep))
   };
 };
 

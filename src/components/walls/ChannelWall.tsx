@@ -29,6 +29,7 @@ import {
 import { ApplicationState } from "../../redux/Store";
 import { pageView } from "../../GoogleAnalytics";
 import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
+import { toLowerCase } from "../../util/util";
 
 interface MatchParams {
   channel: string;
@@ -277,7 +278,7 @@ const mapStateToProps = (store: ApplicationState) => {
     loading: store.channel.loading,
     topics: store.channel.topics,
     couldExistOlder: store.channel.couldExistOlder,
-    representatives: store.government.representatives
+    representatives: store.government.representatives.map(rep => toLowerCase(rep))
   };
 };
 

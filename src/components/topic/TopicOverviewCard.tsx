@@ -13,7 +13,7 @@ import {
   withStyles,
   WithStyles
 } from "@material-ui/core";
-import { prepareUrlPath, stringToHexColor } from "../../util/util";
+import { prepareUrlPath, stringToHexColor, toLowerCase } from "../../util/util";
 import { getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { StarBorder, StarRate } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
@@ -240,7 +240,7 @@ const TopicOverviewCard = withStyles(styles)(
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    representatives: store.government.representatives
+    representatives: store.government.representatives.map(rep => toLowerCase(rep))
   };
 };
 

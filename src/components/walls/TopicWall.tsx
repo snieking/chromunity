@@ -25,6 +25,7 @@ import {
 import { connect } from "react-redux";
 import { pageView } from "../../GoogleAnalytics";
 import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
+import { toLowerCase } from "../../util/util";
 
 interface Props {
   type: string;
@@ -244,7 +245,7 @@ const mapStateToProps = (store: ApplicationState) => {
     topics: store.topicWall.topics,
     loading: store.topicWall.loading,
     couldExistOlderTopics: store.topicWall.couldExistOlder,
-    representatives: store.government.representatives
+    representatives: store.government.representatives.map(rep => toLowerCase(rep))
   };
 };
 

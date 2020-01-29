@@ -11,7 +11,7 @@ import {
   withStyles,
   WithStyles
 } from "@material-ui/core";
-import { timeAgoReadable } from "../../util/util";
+import { timeAgoReadable, toLowerCase } from "../../util/util";
 import { getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { StarBorder, StarRate } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
@@ -178,7 +178,7 @@ const TopicReplyOverviewCard = withStyles(styles)(
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    representatives: store.government.representatives
+    representatives: store.government.representatives.map(rep => toLowerCase(rep))
   }
 };
 

@@ -11,6 +11,7 @@ import { COLOR_RED } from "../../../theme";
 import { ApplicationState } from "../../../redux/Store";
 import { loadRepresentatives } from "../../../redux/actions/GovernmentActions";
 import { connect } from "react-redux";
+import { toLowerCase } from "../../../util/util";
 
 export interface ReportCardProps {
   report: RepresentativeReport;
@@ -58,7 +59,7 @@ const ReportCard: React.FunctionComponent<ReportCardProps> = (props: ReportCardP
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    representatives: store.government.representatives
+    representatives: store.government.representatives.map(rep => toLowerCase(rep))
   }
 };
 
