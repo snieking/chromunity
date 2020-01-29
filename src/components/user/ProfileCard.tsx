@@ -448,7 +448,7 @@ const ProfileCard = withStyles(styles)(
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    representatives: store.government.representatives
+    representatives: store.government.representatives.map(rep => toLowerCase(rep))
   };
 };
 
