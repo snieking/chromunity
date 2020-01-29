@@ -8,18 +8,13 @@ import {
 } from "../../src/blockchain/UserService";
 
 import { ChromunityUser } from "../../src/types";
-import { CREATE_LOGGED_IN_USER, GET_LOGGED_IN_ADMIN_USER } from "../users";
+import { CREATE_LOGGED_IN_USER } from "../users";
 
 jest.setTimeout(30000);
 
 describe("User tests", () => {
   let loggedInUser: ChromunityUser;
   let secondUser: ChromunityUser;
-
-  it("Create user with expected mnemonic phrase", async () => {
-    const user = await GET_LOGGED_IN_ADMIN_USER();
-    expect(user.name).toBe("snieking");
-  });
 
   it("account users", async () => {
     loggedInUser = await CREATE_LOGGED_IN_USER();
