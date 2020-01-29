@@ -36,3 +36,11 @@ query is_rep_distrusted_by_me(me: name, rep: name) {
 		.distrusted.representative_election.id == recent_election.id
 	} != null;
 }
+
+query times_user_was_distrusted(name): integer {
+	return representative_distrust@*{ .distrusted.user.name == name } ( .distruster.user ).size();
+}
+
+query times_user_distrusted_someone(name): integer {
+	return representative_distrust@*{ .distruster.user.name == name } ( .distrusted.user ).size();
+}

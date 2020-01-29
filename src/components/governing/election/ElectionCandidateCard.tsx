@@ -47,6 +47,9 @@ const useStyles = makeStyles(theme =>
         display: "inline",
         marginLeft: "15px"
       }
+    },
+    voteBtn: {
+      marginBottom: "2px"
     }
   })
 );
@@ -184,6 +187,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
               variant="outlined"
               color="primary"
               onClick={() => props.voteForCandidate(name)}
+              className={classes.voteBtn}
             >
               Vote
             </Button>

@@ -26,14 +26,10 @@ export function* getCurrentRepresentatives() {
   const lastUpdated = yield select(getRepresentativesLastUpdated);
 
   if (cacheExpired(lastUpdated)) {
-    console.log("Getting current representatives");
     const representatives: string[] = yield getRepresentatives();
-    console.log("Retrieved representatives", representatives);
     if (representatives != null) {
       yield put(updateRepresentatives(representatives));
     }
-    console.log("UPDATED!");
-
   }
 
 }
@@ -51,7 +47,6 @@ export function* checkActiveElection(action: CheckActiveElectionAction) {
   const lastUpdated = yield select(getActiveElectionLastUpdated);
 
   if (cacheExpired(lastUpdated)) {
-    console.log("Checking election for user: ", action.user.name);
     if (action.user != null) {
       yield processElection(action.user).catch(error => console.log(error));
     }
