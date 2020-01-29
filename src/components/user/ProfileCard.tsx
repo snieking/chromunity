@@ -212,10 +212,10 @@ const ProfileCard = withStyles(styles)(
       if (user != null && this.props.representatives.includes(toLowerCase(user.name))) {
         if (this.props.representatives.includes(toLowerCase(this.props.username))) {
           console.log("About to render distrust button");
-          this.renderDistrustButton();
+          return this.renderDistrustButton();
         } else {
           console.log("About to render suspension button");
-          this.renderSuspensionButton();
+          return this.renderSuspensionButton();
         }
       }
     }
