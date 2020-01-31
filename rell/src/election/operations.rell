@@ -40,7 +40,9 @@ function create_election_at_height(height: integer) {
 }
 
 function complete_election() {
-    val current_election = representative_election@{ .id == get_current_election_id() };
+	val current_election_id = require(get_current_election_id(), util.app_error(util.error_type.ILLEGAL_ACTION, "No on-going election"));
+	
+    val current_election = representative_election@{ .id == current_election_id };
     update current_election ( completed = true );
     update election_block_details@{ current_election } ( finished_height = op_context.block_height );
     
@@ -64,7 +66,7 @@ operation vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: 
 	require(voter != candidate, util.app_error(util.error_type.ILLEGAL_ACTION, "You can't vote for yourself"));
     val user = user.get_verified_user(voter, descriptor_id);
 
-    val current_election_id = get_current_election_id();
+    val current_election_id = require(get_current_election_id(), util.app_error(util.error_type.ILLEGAL_ACTION, "No on-going election"));
     
     clean_up_votes(user, current_election_id);
     
@@ -83,9 +85,10 @@ operation vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: 
 
 operation sign_up_for_election(name, descriptor_id: byte_array) {
     val user = user.get_verified_user(name, descriptor_id);
+	val election_id = require(get_current_election_id(), util.app_error(util.error_type.ILLEGAL_ACTION, "No on-going election"));
 
     val candidate = create representative_election_candidate(
-    	representative_election@{ .id == get_current_election_id() }, 
+    	representative_election@{ .id == election_id }, 
     	user
     );
     

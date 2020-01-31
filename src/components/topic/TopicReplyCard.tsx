@@ -30,11 +30,15 @@ import {
   getTopicSubReplies,
   giveReplyStarRating,
   modifyReply,
-  removeReplyStarRating,
-  removeTopicReply
+  removeReplyStarRating
 } from "../../blockchain/TopicService";
 
-import { reportReply } from "../../blockchain/RepresentativesService";
+import {
+  reportReply,
+  removeTopicReply,
+  hasReportId,
+  REMOVE_TOPIC_REPLY_OP_ID
+} from "../../blockchain/RepresentativesService";
 import EditMessageButton from "../buttons/EditMessageButton";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import Timestamp from "../common/Timestamp";
@@ -47,7 +51,7 @@ import EmojiPicker from "../common/EmojiPicker";
 const styles = (theme: Theme) =>
   createStyles({
     removed: {
-      opacity: 0.5
+      opacity: 0.25
     },
     authorName: {
       display: "block",
@@ -230,7 +234,7 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     componentDidMount() {
-      const user: ChromunityUser = this.state.user;
+      const user: ChromunityUser = getUser();
 
       getUserSettingsCached(this.props.reply.author, 1440).then(settings => {
         this.setState({
@@ -243,7 +247,7 @@ const TopicReplyCard = withStyles(styles)(
           ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase())
         })
       );
-      getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies }));
+      getTopicSubReplies(this.props.reply.id, user).then(replies => this.setState({ subReplies: replies }));
       getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
 
       const modifiableUntil = this.props.reply.timestamp + allowedEditTimeMillis;
@@ -330,7 +334,9 @@ const TopicReplyCard = withStyles(styles)(
           {this.renderAuthor()}
           <div>
             <Timestamp milliseconds={this.props.reply.timestamp} />
-            <MarkdownRenderer text={this.props.reply.message} />
+            <MarkdownRenderer text={this.props.reply.overridden_original !== "" && this.props.reply.removed
+              ? this.props.reply.overridden_original
+              : this.props.reply.message} />
           </div>
           <div className={this.props.classes.bottomBar}>
             <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
@@ -436,7 +442,8 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     renderAdminActions() {
-      if (this.isRepresentative() && !this.props.reply.removed) {
+      if (this.isRepresentative() && !this.props.reply.removed
+        && !hasReportId(REMOVE_TOPIC_REPLY_OP_ID + ":" + this.props.reply.id)) {
         return (
           <div style={{ display: "inline-block" }}>
             <IconButton aria-label="Remove reply" onClick={() => this.setState({ removeReplyDialogOpen: true })}>

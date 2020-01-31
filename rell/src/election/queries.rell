@@ -1,8 +1,11 @@
 import user;
+import util;
 
-query get_election_candidates() {	
+query get_election_candidates() {
+	val current_election_id = require(get_current_election_id(), util.app_error(util.error_type.ILLEGAL_ACTION, "No on-going election"));
+	
     return temp_votes_counter@*{
-        .representative_election_candidate.representative_election.id == get_current_election_id()
+        .representative_election_candidate.representative_election.id == current_election_id
     } ( 
     	@omit @sort_desc .votes,
     	.representative_election_candidate.user.display_name
@@ -18,9 +21,11 @@ query get_uncompleted_election() {
 }
 
 query get_user_vote_in_election(name) {
+	val current_election_id = require(get_current_election_id(), util.app_error(util.error_type.ILLEGAL_ACTION, "No on-going election"));
+	
     return representative_election_vote@?{
         .user == user.user@{ .name == name },
-        .representative_election_candidate.representative_election.id == get_current_election_id()
+        .representative_election_candidate.representative_election.id == current_election_id
     } ( .representative_election_candidate.user.name ) limit 1;
 }
 
@@ -36,7 +41,7 @@ query blocks_until_next_election() {
 	
 	require(recent_election_finished != -1, "There is an ongoing election");
 	
-	val next_election_block = recent_election_finished + 4000;
+	val next_election_block = recent_election_finished + governing_period_in_blocks();
 	
 	val current_block = block@{ 
 		.block_height > recent_election_finished
@@ -55,7 +60,7 @@ query blocks_until_election_wraps_up() {
 	
 	require(recent_election.finished_height == -1, "There is no ongoing election");
 	
-	val election_finishing_block = recent_election.started_height + 4000;
+	val election_finishing_block = recent_election.started_height + election_duration_in_blocks();
 	
 	val current_block = block@{ 
 		.block_height > recent_election.started_height

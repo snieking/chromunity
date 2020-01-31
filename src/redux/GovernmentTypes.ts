@@ -6,7 +6,9 @@ export enum GovernmentActionTypes {
   LOAD_UNHANDLED_REPORTS = "GOVERNMENT/REPRESENTATIVE/UNHANDLED_REPORTS/LOAD",
   UPDATE_UNHANDLED_REPORTS = "GOVERNMENT/REPRESENTATIVES/UNHANDLED_REPORTS/UPDATE",
   CHECK_ACTIVE_ELECTION = "GOVERNMENT/ACTIVE_ELECTION/CHECK",
-  UPDATE_ACTIVE_ELECTION = "GOVERNMENT/ACTIVE_ELECTION/UPDATE"
+  UPDATE_ACTIVE_ELECTION = "GOVERNMENT/ACTIVE_ELECTION/UPDATE",
+  CHECK_LOGBOOK_ENTRIES = "GOVERNMENT/LOGBOOK/CHECK",
+  UPDATE_LOGBOOK_RECENT_ENTRY_TIMESTAMP = "GOVERNMENT/LOGBOOK/RECENT_ENTRY_TIMESTAMP"
 }
 
 export interface LoadRepresentativesAction {
@@ -27,6 +29,16 @@ export interface UpdateUnhandledReportsAction {
   unhandledReports: number;
 }
 
+export interface CheckNewLogbookEntriesAction {
+  type: GovernmentActionTypes.CHECK_LOGBOOK_ENTRIES;
+  user: ChromunityUser;
+}
+
+export interface UpdateLogbookRecentEntryTimestampAction {
+  type: GovernmentActionTypes.UPDATE_LOGBOOK_RECENT_ENTRY_TIMESTAMP;
+  timestamp: number;
+}
+
 export interface CheckActiveElectionAction {
   type: GovernmentActionTypes.CHECK_ACTIVE_ELECTION;
   user: ChromunityUser;
@@ -43,7 +55,9 @@ export type GovernmentActions =
   | LoadUnhandledReportsAction
   | UpdateUnhandledReportsAction
   | CheckActiveElectionAction
-  | UpdateActiveElectionAction;
+  | UpdateActiveElectionAction
+  | CheckNewLogbookEntriesAction
+  | UpdateLogbookRecentEntryTimestampAction;
 
 export interface GovernmentState {
   representatives: string[];
@@ -52,4 +66,6 @@ export interface GovernmentState {
   unhandledReportsLastUpdated: number;
   activeElection: boolean;
   activeElectionLastUpdated: number;
+  recentLogbookEntryTimestamp: number;
+  lastNewLogbookCheck: number;
 }

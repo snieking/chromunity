@@ -27,22 +27,30 @@ import { getUser } from "../../util/user-util";
 import ThemeSwitcher from "./ThemeSwitcher";
 import config from "../../config";
 import { ApplicationState } from "../../redux/Store";
-import { checkActiveElection, loadRepresentatives, loadUnhandledReports } from "../../redux/actions/GovernmentActions";
+import {
+  checkActiveElection,
+  checkNewLogbookEntries,
+  loadRepresentatives,
+  loadUnhandledReports
+} from "../../redux/actions/GovernmentActions";
 import { connect } from "react-redux";
 import Badge from "@material-ui/core/Badge";
 import { countUnreadChatsAction } from "../../redux/actions/ChatActions";
 import { ChromunityUser } from "../../types";
 import { toLowerCase } from "../../util/util";
+import { retrieveLogbookLastRead } from "../../blockchain/RepresentativesService";
 
 interface Props {
   representatives: string[];
   unhandledReports: number;
   activeElection: boolean;
   unreadChats: number;
+  recentLogbookEntryTimestamp: number;
   loadRepresentatives: typeof loadRepresentatives;
   loadUnhandledReports: typeof loadUnhandledReports;
   checkActiveElection: typeof checkActiveElection;
   countUnreadChats: typeof countUnreadChatsAction;
+  checkNewLogbookEntries: typeof checkNewLogbookEntries;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -114,6 +122,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
 
   if (isRepresentative()) {
     props.loadUnhandledReports();
+    props.checkNewLogbookEntries(user);
   }
 
   if (user != null) {
@@ -259,9 +268,9 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function renderGovernmentIcon() {
-    if (isRepresentative() && props.unhandledReports > 0) {
+    if (isRepresentative()) {
       return (
-        <Badge badgeContent={props.unhandledReports} color="secondary">
+        <Badge invisible={props.unhandledReports < 1 || props.recentLogbookEntryTimestamp <= retrieveLogbookLastRead()} color="secondary">
           <LocationCity className={classes.navIcon} />
         </Badge>
       );
@@ -370,7 +379,9 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
             <Link style={{ width: "100%" }} to="/gov/log">
               <MenuItem onClick={handleGovClose}>
                 <ListItemIcon>
-                  <Gavel className="menu-item-button" />
+                  <Badge variant="dot" invisible={props.recentLogbookEntryTimestamp <= retrieveLogbookLastRead()} color="secondary">
+                    <Gavel className="menu-item-button" />
+                  </Badge>
                 </ListItemIcon>
                 <Typography className="menu-item-text">Log</Typography>
               </MenuItem>
@@ -401,7 +412,8 @@ const mapStateToProps = (store: ApplicationState) => {
     unhandledReports: store.government.unhandledReports,
     loadUnhandledReports: store.government.unhandledReports,
     activeElection: store.government.activeElection,
-    unreadChats: store.chat.unreadChats
+    unreadChats: store.chat.unreadChats,
+    recentLogbookEntryTimestamp: store.government.recentLogbookEntryTimestamp
   };
 };
 
@@ -410,7 +422,8 @@ const mapDispatchToProps = (dispatch: any) => {
     loadRepresentatives: () => dispatch(loadRepresentatives()),
     loadUnhandledReports: () => dispatch(loadUnhandledReports()),
     checkActiveElection: (user: ChromunityUser) => dispatch(checkActiveElection(user)),
-    countUnreadChats: (user: ChromunityUser) => dispatch(countUnreadChatsAction(user))
+    countUnreadChats: (user: ChromunityUser) => dispatch(countUnreadChatsAction(user)),
+    checkNewLogbookEntries: (user: ChromunityUser) => dispatch(checkNewLogbookEntries(user))
   };
 };
 

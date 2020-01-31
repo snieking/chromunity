@@ -1,7 +1,10 @@
 import React from 'react';
 import ChromiaPageHeader from '../common/ChromiaPageHeader';
 import {RepresentativeAction} from '../../types';
-import {getAllRepresentativeActionsPriorToTimestamp} from '../../blockchain/RepresentativesService';
+import {
+    getAllRepresentativeActionsPriorToTimestamp,
+    updateLogbookLastRead
+} from "../../blockchain/RepresentativesService";
 import {Card, CardContent, Container, LinearProgress, Typography} from '@material-ui/core';
 import LoadMoreButton from "../buttons/LoadMoreButton";
 import {parseContent} from '../../util/text-parsing';
@@ -32,6 +35,7 @@ export class GovLog extends React.Component<{}, GovLogState> {
     componentDidMount() {
         this.retrieveActions();
         pageView();
+        updateLogbookLastRead(Date.now());
     }
 
     render() {

@@ -16,6 +16,8 @@ const starRatingCache = BoomerangCache.create("rating-bucket", {
   encrypt: false
 });
 
+export const removeTopicIdFromCache = (id: string) => topicsCache.remove(id);
+
 export function createTopic(user: ChromunityUser, channelName: string, title: string, message: string) {
   const topicId = uniqueId();
 
@@ -135,15 +137,7 @@ export function createTopicSubReply(
 
   return executeOperations(
     user.ft3User,
-    op(
-      operation,
-      topicId,
-      user.ft3User.authDescriptor.id,
-      replyId,
-      subReplyId,
-      toLowerCase(user.name),
-      message
-    )
+    op(operation, topicId, user.ft3User.authDescriptor.id, replyId, subReplyId, toLowerCase(user.name), message)
   )
     .then((promise: unknown) => {
       gaRellOperationTiming("create_sub_reply", stopStopwatch(sw));
@@ -169,68 +163,40 @@ function createReplyTriggerString(name: string, id: string, replyId: string): st
   return "@" + name + " replied to '" + topic.title + "' /t/" + id + "#" + replyId;
 }
 
-export function removeTopic(user: ChromunityUser, topicId: string) {
-  topicsCache.remove(topicId);
-
-  const operation = "remove_topic";
-  const sw = createStopwatchStarted();
-
-  return executeOperations(
-    user.ft3User,
-    op(
-      operation,
-      toLowerCase(user.name),
-      user.ft3User.authDescriptor.id,
-      topicId
-    )
-  )
-    .then(value => {
-      gaRellOperationTiming("remove_topic", stopStopwatch(sw));
-      return value;
-    })
-    .catch(error => handleException(operation, sw, error));
-}
-
-export function removeTopicReply(user: ChromunityUser, topicReplyId: string) {
-  const operation = "remove_topic_reply";
-  const sw = createStopwatchStarted();
-
-  return executeOperations(
-    user.ft3User,
-    op(
-      operation,
-      toLowerCase(user.name),
-      user.ft3User.authDescriptor.id,
-      topicReplyId
-    )
-  )
-    .then(value => {
-      gaRellOperationTiming("remove_topic_reply", stopStopwatch(sw));
-      return value;
-    })
-    .catch(error => handleException(operation, sw, error));
-}
-
 export function getTopicRepliesPriorToTimestamp(
   topicId: string,
   timestamp: number,
-  pageSize: number
+  pageSize: number,
+  user?: ChromunityUser
 ): Promise<TopicReply[]> {
-  return getTopicRepliesForTimestamp(topicId, timestamp, pageSize, "get_topic_replies_prior_to_timestamp");
+  return getTopicRepliesForTimestamp(topicId, timestamp, pageSize, "get_topic_replies_prior_to_timestamp", user);
 }
 
 export function getTopicRepliesAfterTimestamp(
   topicId: string,
   timestamp: number,
-  pageSize: number
+  pageSize: number,
+  user?: ChromunityUser
 ): Promise<TopicReply[]> {
-  return getTopicRepliesForTimestamp(topicId, timestamp, pageSize, "get_topic_replies_after_timestamp");
+  return getTopicRepliesForTimestamp(topicId, timestamp, pageSize, "get_topic_replies_after_timestamp", user);
 }
 
-function getTopicRepliesForTimestamp(topicId: string, timestamp: number, pageSize: number, rellOperation: string) {
+function getTopicRepliesForTimestamp(
+  topicId: string,
+  timestamp: number,
+  pageSize: number,
+  rellOperation: string,
+  user?: ChromunityUser
+) {
   const sw = createStopwatchStarted();
   return BLOCKCHAIN.then(bc =>
-    bc.query(rellOperation, { topic_id: topicId, timestamp, page_size: pageSize }))
+    bc.query(rellOperation, {
+      username: user !== undefined ? toLowerCase(user.name) : "",
+      topic_id: topicId,
+      timestamp,
+      page_size: pageSize
+    })
+  )
     .then(value => {
       gaRellQueryTiming(rellOperation, stopStopwatch(sw));
       return value;
@@ -253,8 +219,11 @@ export function getTopicRepliesByUserPriorToTimestamp(
     .catch((error: Error) => handleException(query, sw, error));
 }
 
-export function getTopicSubReplies(replyId: string): Promise<TopicReply[]> {
-  return executeQuery("get_sub_replies", { parent_reply_id: replyId });
+export function getTopicSubReplies(replyId: string, user?: ChromunityUser): Promise<TopicReply[]> {
+  return executeQuery("get_sub_replies", {
+    username: user !== undefined ? toLowerCase(user.name) : "",
+    parent_reply_id: replyId
+  });
 }
 
 export function getTopicsByUserPriorToTimestamp(
@@ -367,15 +336,9 @@ function modifyRatingAndSubscription(user: ChromunityUser, id: string, rellOpera
 
   return executeOperations(
     user.ft3User,
-    op(
-      rellOperation,
-      toLowerCase(user.name),
-      user.ft3User.authDescriptor.id,
-      id,
-      uniqueId()
-    )
+    op(rellOperation, toLowerCase(user.name), user.ft3User.authDescriptor.id, id, uniqueId())
   )
-  .then(value => {
+    .then(value => {
       gaRellOperationTiming(rellOperation, stopStopwatch(sw));
       return value;
     })
@@ -418,7 +381,7 @@ export function getTopicSubscribers(topicId: string): Promise<string[]> {
     .catch((error: Error) => handleException(query, sw, error));
 }
 
-export function getTopicById(id: string): Promise<Topic> {
+export function getTopicById(id: string, user?: ChromunityUser): Promise<Topic> {
   const cachedTopic: Topic = topicsCache.get(id);
 
   if (cachedTopic != null) {
@@ -428,7 +391,7 @@ export function getTopicById(id: string): Promise<Topic> {
   const query = "get_topic_by_id";
   const sw = createStopwatchStarted();
 
-  return executeQuery(query, { id })
+  return executeQuery(query, { username: user !== undefined ? toLowerCase(user.name) : "", id })
     .then((topic: Topic) => {
       gaRellQueryTiming(query, stopStopwatch(sw));
       topicsCache.set(id, topic, 300);

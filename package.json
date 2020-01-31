@@ -81,6 +81,7 @@
     "coveralls": "^3.0.9",
     "prettier": "^1.19.1",
     "redux-logger": "^3.0.6",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "ts-jest": "^25.1.0"
   }
 }

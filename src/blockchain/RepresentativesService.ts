@@ -5,8 +5,22 @@ import { createStopwatchStarted, handleException, stopStopwatch, toLowerCase, un
 import * as BoomerangCache from "boomerang-cache";
 import { gaRellOperationTiming, gaSocialEvent } from "../GoogleAnalytics";
 import { nop, op } from "ft3-lib";
+import { removeTopicIdFromCache } from "./TopicService";
 
-const representativesCache = BoomerangCache.create("rep-bucket", { storage: "session", encrypt: true });
+const representativesCache = BoomerangCache.create("rep-bucket", { storage: "session", encrypt: false });
+const localCache = BoomerangCache.create("rep-local", { storage: "local", encrypt: false });
+
+const LOGBOOK_LAST_READ_KEY = "logbookLastRead";
+
+export const updateLogbookLastRead = (timestamp: number) => localCache.set(LOGBOOK_LAST_READ_KEY, timestamp);
+
+export const retrieveLogbookLastRead = (): number => {
+  const lastRead = localCache.get(LOGBOOK_LAST_READ_KEY);
+  return lastRead != null ? lastRead : 0
+};
+
+export const hasReportId = (id: string) => representativesCache.get(id) != null;
+const addReportId = (id: string) => representativesCache.set(id, true);
 
 export function getCurrentRepresentativePeriod(): Promise<Election> {
   return executeQuery("get_current_representative_period", { timestamp: Date.now() });
@@ -48,14 +62,80 @@ export function handleReport(user: ChromunityUser, reportId: string) {
     .catch((error: Error) => handleException(rellOperation, sw, error));
 }
 
-export function suspendUser(user: ChromunityUser, userToBeSuspended: string) {
-  const rellOperation = "suspend_user";
-  gaSocialEvent(rellOperation, userToBeSuspended);
+export const REMOVE_TOPIC_OP_ID = "remove_topic";
+
+export function removeTopic(user: ChromunityUser, topicId: string) {
+  const reportId = REMOVE_TOPIC_OP_ID + ":" + topicId;
+  if (hasReportId(reportId)) {
+    return;
+  }
+
+  const sw = createStopwatchStarted();
 
   return executeOperations(
     user.ft3User,
-    op(rellOperation, toLowerCase(user.name), user.ft3User.authDescriptor.id, toLowerCase(userToBeSuspended))
-  );
+    op(
+      REMOVE_TOPIC_OP_ID,
+      toLowerCase(user.name),
+      user.ft3User.authDescriptor.id,
+      topicId
+    )
+  )
+    .then(value => {
+      gaRellOperationTiming(REMOVE_TOPIC_OP_ID, stopStopwatch(sw));
+      return value;
+    })
+    .catch(error => handleException(REMOVE_TOPIC_OP_ID, sw, error))
+    .then(() => {
+      addReportId(reportId);
+      removeTopicIdFromCache(topicId);
+    });
+}
+
+export const REMOVE_TOPIC_REPLY_OP_ID = "remove_topic_reply";
+
+export function removeTopicReply(user: ChromunityUser, topicReplyId: string) {
+
+  const reportId = REMOVE_TOPIC_REPLY_OP_ID + ":" + topicReplyId;
+  if (hasReportId(reportId)) {
+    return;
+  }
+
+  const sw = createStopwatchStarted();
+
+  return executeOperations(
+    user.ft3User,
+    op(
+      REMOVE_TOPIC_REPLY_OP_ID,
+      toLowerCase(user.name),
+      user.ft3User.authDescriptor.id,
+      topicReplyId
+    )
+  )
+    .then(value => {
+      gaRellOperationTiming(REMOVE_TOPIC_REPLY_OP_ID, stopStopwatch(sw));
+      return value;
+    })
+    .catch(error => handleException(REMOVE_TOPIC_REPLY_OP_ID, sw, error))
+    .then(() => addReportId(reportId));
+}
+
+export const SUSPEND_USER_OP_ID = "suspend_user";
+
+export function suspendUser(user: ChromunityUser, userToBeSuspended: string) {
+  const reportId = SUSPEND_USER_OP_ID + ":" + userToBeSuspended;
+  if (hasReportId(reportId)) {
+    return;
+  }
+
+  gaSocialEvent(SUSPEND_USER_OP_ID, userToBeSuspended);
+
+  return executeOperations(
+    user.ft3User,
+    op(SUSPEND_USER_OP_ID, toLowerCase(user.name), user.ft3User.authDescriptor.id, toLowerCase(userToBeSuspended))
+  )
+    .catch()
+    .then(() => addReportId(SUSPEND_USER_OP_ID + ":" + userToBeSuspended));
 }
 
 export function distrustAnotherRepresentative(user: ChromunityUser, distrusted: string) {

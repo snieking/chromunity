@@ -30,7 +30,6 @@ import {
   getTopicSubscribers,
   giveTopicStarRating,
   modifyTopic,
-  removeTopic,
   removeTopicStarRating,
   subscribeToTopic,
   unsubscribeFromTopic
@@ -50,7 +49,7 @@ import {
 import { getMutedUsers, getUserSettingsCached } from "../../blockchain/UserService";
 import TopicReplyCard from "./TopicReplyCard";
 import LoadMoreButton from "../buttons/LoadMoreButton";
-import { reportTopic } from "../../blockchain/RepresentativesService";
+import { reportTopic, removeTopic, hasReportId, REMOVE_TOPIC_OP_ID } from "../../blockchain/RepresentativesService";
 import Timestamp from "../common/Timestamp";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
@@ -65,6 +64,9 @@ import EmojiPicker from "../common/EmojiPicker";
 
 const styles = (theme: Theme) =>
   createStyles({
+    removed: {
+      opacity: 0.25
+    },
     authorName: {
       display: "block",
       paddingTop: "2px",
@@ -141,8 +143,10 @@ const FullTopic = withStyles(styles)(
       const initialTopic: Topic = {
         id: "",
         title: "",
+        overridden_original_title: "",
         author: "",
         message: "",
+        overridden_original_message: "",
         timestamp: 0,
         last_modified: 0,
         removed: true,
@@ -190,7 +194,7 @@ const FullTopic = withStyles(styles)(
         getMutedUsers(user).then(users => this.setState({ mutedUsers: users }));
       }
 
-      getTopicById(id).then(topic => this.consumeTopicData(topic));
+      getTopicById(id, user).then(topic => this.consumeTopicData(topic));
       this.retrieveLatestReplies();
       getTopicStarRaters(id, true).then(usersWhoStarRated =>
         this.setState({
@@ -234,9 +238,14 @@ const FullTopic = withStyles(styles)(
       this.setState({ isLoading: true });
       let replies: Promise<TopicReply[]>;
       if (this.state.topicReplies.length === 0) {
-        replies = getTopicRepliesPriorToTimestamp(topicId, Date.now(), repliesPageSize);
+        replies = getTopicRepliesPriorToTimestamp(topicId, Date.now(), repliesPageSize, this.state.user);
       } else {
-        replies = getTopicRepliesAfterTimestamp(topicId, this.state.topicReplies[0].timestamp, repliesPageSize);
+        replies = getTopicRepliesAfterTimestamp(
+          topicId,
+          this.state.topicReplies[0].timestamp,
+          repliesPageSize,
+          this.state.user
+        );
       }
 
       replies
@@ -258,19 +267,22 @@ const FullTopic = withStyles(styles)(
       if (this.state.topicReplies.length > 0) {
         this.setState({ isLoading: true });
         const oldestTimestamp: number = this.state.topicReplies[this.state.topicReplies.length - 1].timestamp;
-        getTopicRepliesPriorToTimestamp(this.state.topic.id, oldestTimestamp - 1, repliesPageSize).then(
-          retrievedReplies => {
-            if (retrievedReplies.length > 0) {
-              this.setState(prevState => ({
-                topicReplies: Array.from(new Set(prevState.topicReplies.concat(retrievedReplies))),
-                isLoading: false,
-                couldExistOlderReplies: retrievedReplies.length >= repliesPageSize
-              }));
-            } else {
-              this.setState({ isLoading: false, couldExistOlderReplies: false });
-            }
+        getTopicRepliesPriorToTimestamp(
+          this.state.topic.id,
+          oldestTimestamp - 1,
+          repliesPageSize,
+          this.state.user
+        ).then(retrievedReplies => {
+          if (retrievedReplies.length > 0) {
+            this.setState(prevState => ({
+              topicReplies: Array.from(new Set(prevState.topicReplies.concat(retrievedReplies))),
+              isLoading: false,
+              couldExistOlderReplies: retrievedReplies.length >= repliesPageSize
+            }));
+          } else {
+            this.setState({ isLoading: false, couldExistOlderReplies: false });
           }
-        );
+        });
       }
     }
 
@@ -360,7 +372,9 @@ const FullTopic = withStyles(styles)(
           <div className={this.props.classes.content}>
             <Timestamp milliseconds={this.state.topic.timestamp} />
             <Typography gutterBottom variant="h6" component="h6">
-              {this.state.topic.title}
+              {this.state.topic.overridden_original_title !== "" && this.state.topic.removed
+                ? this.state.topic.overridden_original_title
+                : this.state.topic.title}
             </Typography>
             <MarkdownRenderer text={content} />
           </div>
@@ -437,7 +451,9 @@ const FullTopic = withStyles(styles)(
               id: prevState.topic.id,
               author: prevState.topic.author,
               title: prevState.topic.title,
+              overridden_original_title: prevState.topic.overridden_original_title,
               message: text,
+              overridden_original_message: prevState.topic.overridden_original_message,
               timestamp: prevState.topic.timestamp,
               last_modified: prevState.topic.last_modified,
               removed: prevState.topic.removed,
@@ -475,7 +491,11 @@ const FullTopic = withStyles(styles)(
     }
 
     renderAdminActions() {
-      if (this.isRepresentative() && !this.state.topic.removed) {
+      if (
+        this.isRepresentative() &&
+        !this.state.topic.removed &&
+        !hasReportId(REMOVE_TOPIC_OP_ID + ":" + this.state.topic.id)
+      ) {
         return (
           <div style={{ display: "inline-block" }}>
             <IconButton aria-label="Remove topic" onClick={() => this.setState({ removeTopicDialogOpen: true })}>
@@ -506,9 +526,13 @@ const FullTopic = withStyles(styles)(
 
     renderTopic() {
       return (
-        <div className={this.state.topic.removed ? "removed" : ""}>
+        <div className={this.state.topic.removed ? this.props.classes.removed : ""}>
           <Card raised={true} key={this.state.topic.id}>
-            {this.renderCardContent(this.state.topic.message)}
+            {this.renderCardContent(
+              this.state.topic.overridden_original_message !== "" && this.state.topic.removed
+                ? this.state.topic.overridden_original_message
+                : this.state.topic.message
+            )}
             {this.renderCardActions()}
             {this.state.replyBoxOpen ? this.renderReplyForm() : <div />}
           </Card>
@@ -583,11 +607,10 @@ const FullTopic = withStyles(styles)(
       const user = getUser();
       if (user != null) {
         this.setState({ isLoading: true, replyBoxOpen: false });
-        createTopicReply(user, this.state.topic.id, this.state.replyMessage)
-          .then(() => {
-            this.retrieveLatestReplies();
-            this.setState({ replyMessage: "" });
-          });
+        createTopicReply(user, this.state.topic.id, this.state.replyMessage).then(() => {
+          this.retrieveLatestReplies();
+          this.setState({ replyMessage: "" });
+        });
       }
     }
 

@@ -2,6 +2,7 @@ import channel;
 import follow;
 import topic.rating;
 import user;
+import representative;
 
 query get_topics_after_timestamp(timestamp, page_size: integer) {
     val topics = topic@*{
@@ -18,6 +19,7 @@ query get_topics_after_timestamp(timestamp, page_size: integer) {
     ) limit page_size;
     
     val ext_topics = list<ext_topic>();
+    
     for (topic in topics) {
     	val ext_topic = ext_topic (
 			id = topic.id,
@@ -67,40 +69,90 @@ query get_topics_prior_to_timestamp(timestamp, page_size: integer): list<ext_top
     return ext_topics;
 }
 
-query get_topic_replies_prior_to_timestamp(topic_id: text, timestamp, page_size: integer) {
-    return topic_reply@*{
-        topic@{ .id == topic_id },
-        .timestamp < timestamp,
-        .is_sub_reply == false
-    }(
-        .id,
-        topic_id = .topic.id,
-        author= .author.display_name,
-        .message,
-        .is_sub_reply,
-        .removed,
-        @sort_desc .timestamp
-    ) limit page_size;
+query get_topic_replies_prior_to_timestamp(username: name, topic_id: text, timestamp, page_size: integer) {
+	val is_rep = representative.is_username_representative(username);
+	
+	if (is_rep) {
+		
+		return topic_reply@*{
+	        topic@{ .id == topic_id },
+	        .timestamp < timestamp,
+	        .is_sub_reply == false
+	    }(
+	        .id,
+	        topic_id = .topic.id,
+	        author= .author.display_name,
+	        .message,
+	        .overridden_original,
+	        .is_sub_reply,
+	        .removed,
+	        @sort_desc .timestamp
+	    ) limit page_size;
+	
+	} else {
+			
+	    return topic_reply@*{
+	        topic@{ .id == topic_id },
+	        .timestamp < timestamp,
+	        .is_sub_reply == false
+	    }(
+	        .id,
+	        topic_id = .topic.id,
+	        author= .author.display_name,
+	        .message,
+	        overridden_original = "",
+	        .is_sub_reply,
+	        .removed,
+	        @sort_desc .timestamp
+	    ) limit page_size;
+    
+    }
 }
 
 query count_topic_replies(topic_id: text) {
 	return topic_reply@*{ .topic.id == topic_id }( .id ).size();
 }
 
-query get_topic_replies_after_timestamp(topic_id: text, timestamp, page_size: integer) {
-    return topic_reply@*{
-        topic@{ .id == topic_id },
-        .timestamp > timestamp,
-        .is_sub_reply == false
-    }(
-        .id,
-        topic_id = .topic.id,
-        author= .author.display_name,
-        .message,
-        .is_sub_reply,
-        .removed,
-        @sort_desc .timestamp
-    ) limit page_size;
+query get_topic_replies_after_timestamp(username: name, topic_id: text, timestamp, page_size: integer) {
+	val is_rep = representative.is_username_representative(username);
+	
+	if (is_rep) {
+		
+		return topic_reply@*{
+	        topic@{ .id == topic_id },
+	        .timestamp > timestamp,
+	        .is_sub_reply == false
+	    }(
+	        .id,
+	        topic_id = .topic.id,
+	        author= .author.display_name,
+	        .message,
+	        .overridden_original,
+	        .is_sub_reply,
+	        .removed,
+	        @sort_desc .timestamp
+	    ) limit page_size;
+		
+	} else {
+		
+		return topic_reply@*{
+	        topic@{ .id == topic_id },
+	        .timestamp > timestamp,
+	        .is_sub_reply == false
+	    }(
+	        .id,
+	        topic_id = .topic.id,
+	        author= .author.display_name,
+	        .message,
+	        overridden_original = "",
+	        .is_sub_reply,
+	        .removed,
+	        @sort_desc .timestamp
+	    ) limit page_size;
+		
+	}
+	
+    
 }
 
 query get_topic_replies_by_user_prior_to_timestamp(name, timestamp, page_size: integer) {
@@ -123,15 +175,34 @@ query count_replies_by_user(name): integer {
     return topic_reply@*{ .author.name == name }( .id ).size();
 }
 
-query get_sub_replies(parent_reply_id: text) {
-    return sub_reply@*{ .parent_reply.id == parent_reply_id } (
-        id= .child_reply.id,
-        author= .child_reply.author.display_name,
-        message= .child_reply.message,
-        is_sub_reply= .child_reply.is_sub_reply,
-        removed = .child_reply.removed,
-        @sort timestamp= .child_reply.timestamp
-    );
+query get_sub_replies(username: name, parent_reply_id: text) {
+	val is_rep = representative.is_username_representative(username);
+	
+	if (is_rep) {
+		
+		return sub_reply@*{ .parent_reply.id == parent_reply_id } (
+	        id= .child_reply.id,
+	        author= .child_reply.author.display_name,
+	        message= .child_reply.message,
+	        overridden_original = .child_reply.overridden_original,
+	        is_sub_reply= .child_reply.is_sub_reply,
+	        removed = .child_reply.removed,
+	        @sort timestamp= .child_reply.timestamp
+	    );
+		
+	} else {
+	
+	    return sub_reply@*{ .parent_reply.id == parent_reply_id } (
+	        id= .child_reply.id,
+	        author= .child_reply.author.display_name,
+	        message= .child_reply.message,
+	        overridden_original = "",
+	        is_sub_reply= .child_reply.is_sub_reply,
+	        removed = .child_reply.removed,
+	        @sort timestamp= .child_reply.timestamp
+	    );
+    
+    }
 }
 
 query get_topics_by_user_id_prior_to_timestamp(name, timestamp, page_size: integer) {
@@ -234,18 +305,38 @@ query get_topics_from_follows_prior_to_timestamp(name, timestamp, page_size: int
     return ext_topics;
 }
 
-query get_topic_by_id(id: text) {
-    return topic@{
-        .id == id
-    }(
-        .id,
-        author = .author.display_name,
-        .title,
-        .message,
-        .removed,
-        @sort_desc .last_modified,
-        .timestamp
-    );
+query get_topic_by_id(username: name, id: text) {
+	val is_rep = representative.is_username_representative(username);
+	
+	if (is_rep) {
+		
+		return topic@{ .id == id }(
+	        .id,
+	        author = .author.display_name,
+	        .title,
+	        .overridden_original_title,
+	        .message,
+	        .overridden_original_message,
+	        .removed,
+	        @sort_desc .last_modified,
+	        .timestamp
+	    );
+		
+	} else {
+	
+	    return topic@{ .id == id }(
+	        .id,
+	        author = .author.display_name,
+	        .title,
+	        overridden_original_title = "",
+	        .message,
+	        overridden_original_message = "",
+	        .removed,
+	        @sort_desc .last_modified,
+	        .timestamp
+	    );
+	    
+    }
 }
 
 query get_all_topics_by_stars_since_timestamp(timestamp, page_size: integer) {
