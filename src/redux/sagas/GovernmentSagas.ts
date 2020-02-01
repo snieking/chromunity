@@ -60,7 +60,7 @@ export function* checkActiveElection(action: CheckActiveElectionAction) {
 
   if (cacheExpired(lastUpdated)) {
     if (action.user != null) {
-      yield processElection(action.user).catch(error => console.log(error));
+      yield processElection(action.user).catch();
     }
     const electionId = yield getUncompletedElection();
     yield put(updateActiveElection(electionId != null));
