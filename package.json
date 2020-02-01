@@ -42,6 +42,7 @@
     "secp256k1": "3.7.1",
     "ts-stopwatch": "0.0.4",
     "typescript": "3.5.3",
+    "winston": "^3.2.1",
     "yarn": "^1.16.0"
   },
   "scripts": {
