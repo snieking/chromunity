@@ -43,11 +43,11 @@ query blocks_until_next_election() {
 	
 	val next_election_block = recent_election_finished + governing_period_in_blocks();
 	
-	val current_block = block@{ 
-		.block_height > recent_election_finished
-	} (
-		@sort_desc .block_height
-	) limit 1;
+	var current_block = block@?{} ( @sort_desc .block_height ) limit 1;
+	
+	if (current_block == null) {
+		current_block = 0;
+	}
 	
 	return next_election_block - current_block;
 }
@@ -62,11 +62,11 @@ query blocks_until_election_wraps_up() {
 	
 	val election_finishing_block = recent_election.started_height + election_duration_in_blocks();
 	
-	val current_block = block@{ 
-		.block_height > recent_election.started_height
-	} (
-		@sort_desc .block_height
-	) limit 1;
+	var current_block = block@?{} ( @sort_desc .block_height ) limit 1;
+	
+	if (current_block == null) {
+		current_block = 0;
+	}
 	
 	return election_finishing_block - current_block;
 }
