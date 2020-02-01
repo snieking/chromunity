@@ -33,4 +33,4 @@ const mapDispatchToProps = (dispatch: any) => {
   };
 };
 
-export default connect(mapDispatchToProps)(RegisterAccount);
+export default connect(null, mapDispatchToProps)(RegisterAccount);
