@@ -16,6 +16,7 @@ import {
 } from "../../../src/redux/sagas/TopicWallSagas";
 import { followChannel } from "../../../src/blockchain/ChannelService";
 import { getANumber } from "../../helper";
+import logger from "../../../src/util/logger";
 
 describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
   const testPrefix = "load followed channels topics wall";
@@ -61,7 +62,7 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
   };
 
   const getUpdateTopicsFromCacheAction = (dispatchedActions: TopicWallActions[]): UpdateTopicWallFromCacheAction => {
-    console.log("Actions: ", dispatchedActions);
+    logger.debug("Actions: ", dispatchedActions);
     expect(dispatchedActions.length).toBe(1);
     const action = dispatchedActions[0];
     expect(action.type).toBe(WallActionTypes.UPDATE_TOPICS_WALL_FROM_CACHE);
@@ -146,7 +147,7 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
 
     const updateTopicsAction = getUpdateTopicAction(dispatchedActions);
 
-    console.log("topics: ", updateTopicsAction.topics);
+    logger.debug("topics: ", updateTopicsAction.topics);
 
     expect(updateTopicsAction.topics.length).toBe(pageSize + 1);
     expect(updateTopicsAction.couldExistOlder).toBe(true);

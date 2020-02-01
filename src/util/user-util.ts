@@ -4,6 +4,7 @@ import { getUserMeta } from "../blockchain/UserService";
 import { FlagsType, KeyPair, SingleSignatureAuthDescriptor, User } from "ft3-lib";
 import ReactPiwik from "react-piwik";
 import * as Sentry from '@sentry/browser';
+import logger from "./logger";
 
 const LOCAL_CACHE = BoomerangCache.create("local-bucket", {
   storage: "local",
@@ -59,7 +60,7 @@ export function getUsername(): string {
       ReactPiwik.push(['setUserId', username]);
       debugUserSet = true;
     } catch(error) {
-      console.log("Error adding username for debug", username, error);
+      logger.error("Error adding username [%s] for debug", username, error);
     }
   }
 

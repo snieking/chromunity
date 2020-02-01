@@ -1,12 +1,14 @@
 import {
   AddUserToChatAction,
-  ChatActionTypes, CountUnreadChatsAction,
+  ChatActionTypes,
+  CountUnreadChatsAction,
   CreateChatKeyPairAction,
-  CreateNewChatAction, DeleteChatUserAction,
+  CreateNewChatAction,
+  DeleteChatUserAction,
   LeaveChatAction,
   LoadChatUsersAction,
-  LoadOlderMessagesAction,
-  LoadUserChatsAction, MarkChatAsReadAction,
+  LoadUserChatsAction,
+  MarkChatAsReadAction,
   ModifyTitleAction,
   OpenChatAction,
   RefreshOpenChatAction,
@@ -23,9 +25,11 @@ import {
   rsaKeyToPubKey
 } from "../../blockchain/CryptoService";
 import {
-  addUserToChat, countUnreadChats,
+  addUserToChat,
+  countUnreadChats,
   createChatUser,
-  createNewChat, deleteChatUser,
+  createNewChat,
+  deleteChatUser,
   getChatMessages,
   getChatMessagesAfterTimestamp,
   getChatParticipants,
@@ -33,7 +37,8 @@ import {
   getFollowedChatUsers,
   getUserChats,
   getUserPubKey,
-  leaveChat, markChatAsRead,
+  leaveChat,
+  markChatAsRead,
   modifyTitle,
   sendChatMessage
 } from "../../blockchain/ChatService";
@@ -46,13 +51,16 @@ import {
   storeChatKeyPair,
   storeChatParticipants,
   storeChatUsersAction,
-  storeDecryptedChat, storeErrorMessage, storeUnreadChatsCountAction,
+  storeDecryptedChat,
+  storeErrorMessage,
+  storeUnreadChatsCountAction,
   storeUserChats
 } from "../actions/ChatActions";
 import { uniqueId } from "../../util/util";
 import { ApplicationState } from "../Store";
 import { Chat, ChatMessage, ChatMessageDecrypted } from "../../types";
 import { getChatPassphrase, storeChatPassphrase } from "../../util/user-util";
+import logger from "../../util/logger";
 
 export function* chatWatcher() {
   yield takeLatest(ChatActionTypes.CHECK_CHAT_AUTH_ACTION, checkChatAuthenticationSaga);
@@ -109,7 +117,7 @@ export function* createChatKeyPairSaga(action: CreateChatKeyPairAction) {
   const rsaPubKey = rsaKeyToPubKey(rsaKey);
 
   if (pubKey != null && pubKey !== rsaPubKey) {
-    console.log("New pubkey didn't match old one");
+    logger.info("New pubkey didn't match old one");
     yield put(storeErrorMessage("Incorrect passphrase"));
     return;
   } else if (pubKey == null) {
@@ -149,7 +157,7 @@ export function* addUserToChatSaga(action: AddUserToChatAction) {
       yield addUserToChat(action.user, chat.id, action.username, encryptedSharedChatKey.cipher);
       yield put(sendMessage(action.user, chat, "I invited '" + action.username + "' to join us."));
     } else {
-      console.log("User hasn't created a chat key yet", action.username);
+      logger.info("User [%s] hasn't created a chat key yet", action.username);
     }
   }
 }
@@ -293,7 +301,7 @@ export function* deleteChatUserSaga(action: DeleteChatUserAction) {
   yield deleteChatUser(action.user);
 }
 
-export function* loadOlderMessagesSaga(action: LoadOlderMessagesAction) {
+export function* loadOlderMessagesSaga() {
   const messages: ChatMessageDecrypted[] = yield select(getActiveChatMessages);
 
   if (messages != null && messages.length >= PAGE_SIZE) {
@@ -313,14 +321,17 @@ export function* loadOlderMessagesSaga(action: LoadOlderMessagesAction) {
         determineCouldExistOlderMessages(decryptedMessages.length, couldExistOlder)
       )
     );
-
   } else {
-    console.log("Messages are less than pageSize, there shouldn't be any older messages", PAGE_SIZE);
+    logger.debug(
+      "Messages [%s] are less than pageSize [%s], there shouldn't be any older messages",
+      messages.length,
+      PAGE_SIZE
+    );
   }
 }
 
 export function* countUnreadChatsSaga(action: CountUnreadChatsAction) {
-  const count = yield countUnreadChats(action.user.name).catch(() => window.location.href = "/user/logout");
+  const count = yield countUnreadChats(action.user.name).catch(() => (window.location.href = "/user/logout"));
   yield put(storeUnreadChatsCountAction(count));
 }
 

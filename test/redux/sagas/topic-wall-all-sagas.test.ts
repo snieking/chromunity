@@ -11,6 +11,7 @@ import { runSaga } from "redux-saga";
 import { loadAllTopics, loadAllTopicsByPopularity, loadOlderAllTopics } from "../../../src/redux/sagas/TopicWallSagas";
 import { ChromunityUser, Topic } from "../../../src/types";
 import { getANumber } from "../../helper";
+import logger from "../../../src/util/logger";
 
 describe("Topic wall [ALL] saga tests", () => {
   const pageSize = 2;
@@ -65,7 +66,7 @@ describe("Topic wall [ALL] saga tests", () => {
   };
 
   const getUpdateTopicsFromCacheAction = (dispatchedActions: TopicWallActions[]): UpdateTopicWallFromCacheAction => {
-    console.log("Actions: ", dispatchedActions);
+    logger.debug("Actions: ", dispatchedActions);
     expect(dispatchedActions.length).toBe(1);
     const action = dispatchedActions[0];
     expect(action.type).toBe(WallActionTypes.UPDATE_TOPICS_WALL_FROM_CACHE);

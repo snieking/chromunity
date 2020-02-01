@@ -12,13 +12,14 @@ import ReactPiwik from "react-piwik";
 import history from "./history";
 import * as Sentry from '@sentry/browser';
 import * as config from "./config";
+import logger from "./util/logger";
 
 interface Props {
   store: Store<ApplicationState>;
 }
 
 if (config.sentry.environment !== "local") {
-  console.log("Initializing Sentry with dsn: ", config.sentry.dsn, " for env: ", config.sentry.environment);
+  logger.debug("Initializing Sentry with dsn: %s for env: %s", config.sentry.dsn, config.sentry.environment);
   Sentry.init({
     dsn: config.sentry.dsn,
     environment: config.sentry.environment,

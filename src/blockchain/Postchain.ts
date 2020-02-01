@@ -31,7 +31,7 @@ export const BLOCKCHAIN = Blockchain.initialize(
 );
 
 export const executeOperations = async (user: User, ...operations: Operation[]) => {
-  logger.debug("Executing operations %O", operations)
+  logger.debug("Executing operations: ", operations)
   // const lockId = JSON.stringify(user);
 
   // const ongoing = OP_LOCK.get(lockId) != null;
@@ -60,7 +60,7 @@ export const executeOperations = async (user: User, ...operations: Operation[]) 
 };
 
 export const executeQuery = async (name: string, params: unknown) => {
-  logger.debug("Executing query: [%s] with data: %O", name, params);
+  logger.debug("Executing query: %s with data: ", name, params);
   if (QUERY_CACHE.get(IF_NULL_CLEAR_CACHE) == null && !test) {
     removeSessionObjects();
     QUERY_CACHE.set(IF_NULL_CLEAR_CACHE, false, 10);

@@ -13,6 +13,7 @@ import { BLOCKCHAIN, executeOperations } from "../../blockchain/Postchain";
 import { accountAddAccountId } from "../actions/AccountActions";
 import { getKeyPair, setUsername, storeKeyPair } from "../../util/user-util";
 import { makeKeyPair } from "../../blockchain/CryptoService";
+import logger from "../../util/logger";
 
 export function* accountWatcher() {
   yield takeLatest(AccountActionTypes.ACCOUNT_REGISTER_CHECK, checkIfRegistered);
@@ -23,11 +24,11 @@ export function* accountWatcher() {
 function* checkIfRegistered(action: AccountRegisteredCheckAction) {
   const accountId = yield getAccountId(action.username);
   if (!accountId) {
-    console.log("Account didn't exist, registering with wallet");
+    logger.debug("Account [%s] didn't exist, registering with wallet", action.username);
     const returnUrl = encodeURIComponent(`${config.vault.callbackBaseUrl}/user/register/${action.username}`);
     window.location.replace(`${config.vault.url}/?route=/link-account&returnUrl=${returnUrl}`);
   } else {
-    console.log("Account existed, logging in with wallet");
+    logger.debug("Account [%s] existed, logging in with wallet", action.username);
     accountAddAccountId(accountId);
     yield walletLogin(action.username);
   }
@@ -46,18 +47,18 @@ function* registerAccount(action: AccountRegisterAction) {
 
   const user = new User(keyPair, authDescriptor);
 
-  console.log("Registering user");
+  logger.debug("Registering user");
   yield executeOperations(
     user,
     op("register_user", action.username, authDescriptor.toGTV(), walletAuthDescriptor.toGTV())
   );
-  console.log("Logged in user with username", action.username);
+  logger.debug("Logged in user with username: ", action.username);
 
   authorizeUser(action.username);
 }
 
 function* walletLogin(username: string) {
-  console.log("Logging in with wallet");
+  logger.debug("Logging in with wallet");
   let keyPair: KeyPair = new KeyPair(makeKeyPair().privKey.toString("hex"));
   storeKeyPair(keyPair);
 
