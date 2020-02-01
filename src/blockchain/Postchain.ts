@@ -8,10 +8,10 @@ import logger from "../util/logger";
 
 const IF_NULL_CLEAR_CACHE = "clear-cache";
 
-// const OP_LOCK = BoomerangCache.create("op-lock", {
-//   storage: "session",
-//   encrypt: false
-// });
+const OP_LOCK = BoomerangCache.create("op-lock", {
+  storage: "session",
+  encrypt: false
+});
 
 const QUERY_CACHE_NAME = "query-cache";
 const QUERY_CACHE = BoomerangCache.create(QUERY_CACHE_NAME, {
@@ -32,25 +32,25 @@ export const BLOCKCHAIN = Blockchain.initialize(
 
 export const executeOperations = async (user: User, ...operations: Operation[]) => {
   operations.every(op => logger.debug("Executing operations [%s]: ", op.name, op.args));
-  // const lockId = JSON.stringify(user);
+  const lockId = JSON.stringify(user);
 
-  // const ongoing = OP_LOCK.get(lockId) != null;
-  //
-  // if (ongoing) {
-  //   console.log("An operation is already in progress for user");
-  //   return new Promise<unknown>(resolve => resolve());
-  // } else {
-  //   if (!test) {
-  //     OP_LOCK.set(lockId, operations, 0);
-  //   }
-  // }
+  const ongoing = OP_LOCK.get(lockId) != null;
+
+  if (ongoing) {
+    console.log("An operation is already in progress for user");
+    return new Promise<unknown>(resolve => resolve());
+  } else {
+    if (!test) {
+      OP_LOCK.set(lockId, operations, 2);
+    }
+  }
 
   const BC = await BLOCKCHAIN;
   const trxBuilder = BC.transactionBuilder();
   operations.every(value => trxBuilder.add(value));
   return trxBuilder.buildAndSign(user).post()
     .then(result => {
-      // OP_LOCK.remove(lockId);
+      OP_LOCK.remove(lockId);
       return result;
     });
 };

@@ -14,6 +14,7 @@ import {
 } from "../actions/GovernmentActions";
 import { getUncompletedElection, processElection } from "../../blockchain/ElectionService";
 import { toLowerCase } from "../../util/util";
+import logger from "../../util/logger";
 
 export function* governmentWatcher() {
   yield takeLatest(GovernmentActionTypes.LOAD_REPRESENTATIVES, getCurrentRepresentatives);
@@ -60,7 +61,8 @@ export function* checkActiveElection(action: CheckActiveElectionAction) {
 
   if (cacheExpired(lastUpdated)) {
     if (action.user != null) {
-      yield processElection(action.user).catch();
+      yield processElection(action.user)
+        .catch(error => logger.debug("Error while processing election, probably expected", error));
     }
     const electionId = yield getUncompletedElection();
     yield put(updateActiveElection(electionId != null));
