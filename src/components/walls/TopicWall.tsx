@@ -23,7 +23,6 @@ import {
   loadOlderFollowedUsersTopics
 } from "../../redux/actions/WallActions";
 import { connect } from "react-redux";
-import { pageView } from "../../GoogleAnalytics";
 import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
 import { toLowerCase } from "../../util/util";
 
@@ -162,8 +161,6 @@ class TopicWall extends React.Component<Props, State> {
       getMutedUsers(this.state.user).then(users => this.setState({ mutedUsers: users }));
     }
     this.retrieveLatestTopics(false);
-
-    pageView();
   }
 
   retrieveLatestTopics(ignoreCache: boolean) {

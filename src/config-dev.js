@@ -1,17 +1,25 @@
-// @ts-ignore
-const config = {};
-
-config.nodeApiUrl = "https://cg7tt9fhch.execute-api.eu-central-1.amazonaws.com/dev/";
-config.blockchainRID = "88967baa4768cbcef11c508326ffb13a956689fcb6dc3ba17f4b895cbb1577a3";
-
-config.chromunityUrl = "https://dev.chromunity.com";
-config.vaultUrl = "https://wallet-v2.chromia.dev";
-
-config.gaTrackingId = "UA-122482523-5";
-
-config.sentryDsn = "https://9fcd3766732c4665b89f08e2d58b286f@sentry.io/1870353";
-config.sentryEnvironment = "dev";
-
-config.testMode = true;
-
-module.exports = config;
+module.exports = {
+  blockchain: {
+    nodeApiUrl: "https://cg7tt9fhch.execute-api.eu-central-1.amazonaws.com/dev/",
+    rid: process.env.REACT_APP_BRID
+  },
+  vault: {
+    url: "https://wallet-v2.chromia.dev",
+    callbackBaseUrl: "https://dev.chromunity.com"
+  },
+  sentry: {
+    dsn: "https://9fcd3766732c4665b89f08e2d58b286f@sentry.io/1870353",
+    environment: "dev"
+  },
+  matomo: {
+    url: "https://matomo.chromia.dev/",
+    siteId: 3,
+    trackErrors: true,
+    jsFileName: "js/",
+    phpFilename: "js/"
+  },
+  topBar: {
+    message: "Development"
+  },
+  test: true
+};

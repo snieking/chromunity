@@ -13,7 +13,8 @@ import {
   WithStyles
 } from "@material-ui/core";
 import {
-  blocksUntilElectionWrapsUp, blocksUntilNextElection,
+  blocksUntilElectionWrapsUp,
+  blocksUntilNextElection,
   getElectionCandidates,
   getElectionVoteForUser,
   getNextElectionTimestamp,
@@ -23,7 +24,6 @@ import {
 import { getUser } from "../../../util/user-util";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import { ChromunityUser } from "../../../types";
-import { pageView } from "../../../GoogleAnalytics";
 import ElectionCandidateCard from "./ElectionCandidateCard";
 
 const styles = createStyles({
@@ -98,19 +98,19 @@ const Election = withStyles(styles)(
           blocksUntilNextElection().then(blocks => this.setState({ blocksUntilNextElection: blocks }));
         }
       });
-
-      pageView();
     }
 
     renderElectionVoteStatus() {
-      let text = this.state.blocksUntilElectionWrapsUp !== -1
-        ? "An election is in progress and will finish in " + this.state.blocksUntilElectionWrapsUp + " blocks"
-        : "An election is in progress";
+      let text =
+        this.state.blocksUntilElectionWrapsUp !== -1
+          ? "An election is in progress and will finish in " + this.state.blocksUntilElectionWrapsUp + " blocks"
+          : "An election is in progress";
 
       if (!this.state.activeElection) {
-        text = this.state.blocksUntilNextElection !== -1
-          ? "No election is currently in progress, next one is in " + this.state.blocksUntilNextElection + " blocks"
-          : "No election is currently in progress.";
+        text =
+          this.state.blocksUntilNextElection !== -1
+            ? "No election is currently in progress, next one is in " + this.state.blocksUntilNextElection + " blocks"
+            : "No election is currently in progress.";
       } else if (this.state.votedFor !== "") {
         text = "Thanks for doing your duty as a Chromian!";
         if (this.state.blocksUntilElectionWrapsUp !== -1) {
@@ -128,7 +128,12 @@ const Election = withStyles(styles)(
     }
 
     renderParticipateButton() {
-      if (this.state.user != null && this.state.user.name != null && !this.state.isACandidate) {
+      if (
+        this.state.activeElection &&
+        this.state.user != null &&
+        this.state.user.name != null &&
+        !this.state.isACandidate
+      ) {
         return (
           <Button
             variant="contained"

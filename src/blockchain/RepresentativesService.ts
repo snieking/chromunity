@@ -1,9 +1,8 @@
 import { executeOperations, executeQuery } from "./Postchain";
 import { Election, RepresentativeAction, RepresentativeReport, ChromunityUser } from "../types";
-import { createStopwatchStarted, handleException, stopStopwatch, toLowerCase, uniqueId } from "../util/util";
+import { toLowerCase, uniqueId } from "../util/util";
 
 import * as BoomerangCache from "boomerang-cache";
-import { gaRellOperationTiming, gaSocialEvent } from "../GoogleAnalytics";
 import { nop, op } from "ft3-lib";
 import { removeTopicIdFromCache } from "./TopicService";
 
@@ -16,7 +15,7 @@ export const updateLogbookLastRead = (timestamp: number) => localCache.set(LOGBO
 
 export const retrieveLogbookLastRead = (): number => {
   const lastRead = localCache.get(LOGBOOK_LAST_READ_KEY);
-  return lastRead != null ? lastRead : 0
+  return lastRead != null ? lastRead : 0;
 };
 
 export const hasReportId = (id: string) => representativesCache.get(id) != null;
@@ -47,19 +46,11 @@ export function getAllRepresentativeActionsPriorToTimestamp(
 
 export function handleReport(user: ChromunityUser, reportId: string) {
   const rellOperation = "handle_representative_report";
-  gaSocialEvent(rellOperation, user.name);
-
-  const sw = createStopwatchStarted();
 
   return executeOperations(
     user.ft3User,
     op(rellOperation, toLowerCase(user.name), user.ft3User.authDescriptor.id, reportId)
-  )
-    .then(value => {
-      gaRellOperationTiming(rellOperation, stopStopwatch(sw));
-      return value;
-    })
-    .catch((error: Error) => handleException(rellOperation, sw, error));
+  );
 }
 
 export const REMOVE_TOPIC_OP_ID = "remove_topic";
@@ -70,54 +61,27 @@ export function removeTopic(user: ChromunityUser, topicId: string) {
     return;
   }
 
-  const sw = createStopwatchStarted();
-
   return executeOperations(
     user.ft3User,
-    op(
-      REMOVE_TOPIC_OP_ID,
-      toLowerCase(user.name),
-      user.ft3User.authDescriptor.id,
-      topicId
-    )
-  )
-    .then(value => {
-      gaRellOperationTiming(REMOVE_TOPIC_OP_ID, stopStopwatch(sw));
-      return value;
-    })
-    .catch(error => handleException(REMOVE_TOPIC_OP_ID, sw, error))
-    .then(() => {
-      addReportId(reportId);
-      removeTopicIdFromCache(topicId);
-    });
+    op(REMOVE_TOPIC_OP_ID, toLowerCase(user.name), user.ft3User.authDescriptor.id, topicId)
+  ).then(() => {
+    addReportId(reportId);
+    removeTopicIdFromCache(topicId);
+  });
 }
 
 export const REMOVE_TOPIC_REPLY_OP_ID = "remove_topic_reply";
 
 export function removeTopicReply(user: ChromunityUser, topicReplyId: string) {
-
   const reportId = REMOVE_TOPIC_REPLY_OP_ID + ":" + topicReplyId;
   if (hasReportId(reportId)) {
     return;
   }
 
-  const sw = createStopwatchStarted();
-
   return executeOperations(
     user.ft3User,
-    op(
-      REMOVE_TOPIC_REPLY_OP_ID,
-      toLowerCase(user.name),
-      user.ft3User.authDescriptor.id,
-      topicReplyId
-    )
-  )
-    .then(value => {
-      gaRellOperationTiming(REMOVE_TOPIC_REPLY_OP_ID, stopStopwatch(sw));
-      return value;
-    })
-    .catch(error => handleException(REMOVE_TOPIC_REPLY_OP_ID, sw, error))
-    .then(() => addReportId(reportId));
+    op(REMOVE_TOPIC_REPLY_OP_ID, toLowerCase(user.name), user.ft3User.authDescriptor.id, topicReplyId)
+  ).then(() => addReportId(reportId));
 }
 
 export const SUSPEND_USER_OP_ID = "suspend_user";
@@ -127,8 +91,6 @@ export function suspendUser(user: ChromunityUser, userToBeSuspended: string) {
   if (hasReportId(reportId)) {
     return;
   }
-
-  gaSocialEvent(SUSPEND_USER_OP_ID, userToBeSuspended);
 
   return executeOperations(
     user.ft3User,
@@ -160,18 +122,11 @@ export function reportReply(user: ChromunityUser, topicId: string, replyId: stri
 
 function report(user: ChromunityUser, text: string) {
   const rellOperation = "create_representative_report";
-  gaSocialEvent(rellOperation, text);
-  const sw = createStopwatchStarted();
 
   return executeOperations(
     user.ft3User,
     op(rellOperation, toLowerCase(user.name), user.ft3User.authDescriptor.id, uniqueId(), text)
-  )
-    .then(value => {
-      gaRellOperationTiming(rellOperation, stopStopwatch(sw));
-      return value;
-    })
-    .catch((error: Error) => handleException(rellOperation, sw, error));
+  );
 }
 
 export function getUnhandledReports(): Promise<RepresentativeReport[]> {

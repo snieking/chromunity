@@ -12,13 +12,14 @@ const OP_LOCK = BoomerangCache.create("op-lock", {
   encrypt: false
 });
 
-const QUERY_CACHE = BoomerangCache.create("query-cache", {
+const QUERY_CACHE_NAME = "query-cache";
+const QUERY_CACHE = BoomerangCache.create(QUERY_CACHE_NAME, {
   storage: "session",
   encrypt: false
 });
 
-const NODE_API_URL = config.nodeApiUrl;
-const BLOCKCHAIN_RID = config.blockchainRID;
+const NODE_API_URL = config.blockchain.nodeApiUrl;
+const BLOCKCHAIN_RID = config.blockchain.rid;
 
 export const REST_CLIENT = pcl.restClient.createRestClient(NODE_API_URL, BLOCKCHAIN_RID, 10);
 export const GTX = pcl.gtxClient.createClient(REST_CLIENT, Buffer.from(BLOCKCHAIN_RID, "hex"), []);
@@ -54,7 +55,6 @@ export const executeOperations = async (user: User, ...operations: Operation[]) 
 
 export const executeQuery = async (name: string, params: unknown) => {
   if (QUERY_CACHE.get(IF_NULL_CLEAR_CACHE) == null && !test) {
-    console.log("Clearing cache");
     removeSessionObjects();
     QUERY_CACHE.set(IF_NULL_CLEAR_CACHE, false, 10);
   }
@@ -63,7 +63,6 @@ export const executeQuery = async (name: string, params: unknown) => {
 
   const cachedResult = QUERY_CACHE.get(cacheId);
   if (cachedResult != null) {
-    console.log("Using cached result for query", name);
     return new Promise<any>(resolve => resolve(cachedResult));
   }
 
@@ -84,7 +83,7 @@ const removeSessionObjects = () => {
   for (let i = 0; i < items; i++) {
     const keySplit = keys[i].split(":");
 
-    if ("query-cache" === keySplit[0]) {
+    if (QUERY_CACHE_NAME === keySplit[0]) {
       sessionStorage.removeItem(keys[i]);
     }
   }

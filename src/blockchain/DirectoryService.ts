@@ -3,8 +3,8 @@ import config from "../config.js";
 
 const chainList = [
   new ChainConnectionInfo(
-    Buffer.from(config.blockchainRID, "hex"),
-    config.nodeApiUrl
+    Buffer.from(config.blockchain.rid, "hex"),
+    config.blockchain.nodeApiUrl
   )
 ];
 

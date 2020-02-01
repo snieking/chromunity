@@ -1,12 +1,5 @@
 import { Topic } from "../types";
 import { Stopwatch } from "ts-stopwatch";
-import { gaException } from "../GoogleAnalytics";
-
-export const handleException = (identifier: string, sw: Stopwatch, error: Error) => {
-  sw.stop();
-  gaException(identifier + ": " + error.message);
-  throw error;
-};
 
 export const createStopwatchStarted = (): Stopwatch => {
   const sw = new Stopwatch();

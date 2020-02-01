@@ -54,8 +54,7 @@ import Timestamp from "../common/Timestamp";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
-import { pageViewPath } from "../../GoogleAnalytics";
-import { prepareUrlPath, toLowerCase } from "../../util/util";
+import { toLowerCase } from "../../util/util";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { ApplicationState } from "../../redux/Store";
 import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
@@ -224,8 +223,6 @@ const FullTopic = withStyles(styles)(
       setInterval(() => {
         this.setState({ timeLeftUntilNoLongerModifiable: this.getTimeLeft(modifiableUntil) });
       }, 1000);
-
-      pageViewPath("/t/" + topic.id + "/" + prepareUrlPath(topic.title));
     }
 
     getTimeLeft(until: number): number {

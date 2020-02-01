@@ -2,8 +2,7 @@ import { ChromunityUser } from "../types";
 import { executeOperations, executeQuery } from "./Postchain";
 import * as BoomerangCache from "boomerang-cache";
 import { removeNotificationsForId, sendNotificationWithDeterministicId } from "./NotificationService";
-import { gaRellOperationTiming, gaRellQueryTiming, gaSocialEvent } from "../GoogleAnalytics";
-import { createStopwatchStarted, handleException, stopStopwatch, toLowerCase } from "../util/util";
+import { toLowerCase } from "../util/util";
 import { nop, op } from "ft3-lib";
 
 const boomerang = BoomerangCache.create("following-bucket", {
@@ -39,41 +38,24 @@ function createDeterministicId(follower: string, following: string) {
 
 function updateFollowing(user: ChromunityUser, following: string, rellOperation: string) {
   boomerang.remove("user-" + user.name.toLocaleLowerCase());
-  gaSocialEvent(rellOperation, following);
-  const sw = createStopwatchStarted();
 
   return executeOperations(
     user.ft3User,
     op(rellOperation, toLowerCase(user.name), user.ft3User.authDescriptor.id, toLowerCase(following)),
     nop()
-  )
-    .then(value => {
-      gaRellOperationTiming(rellOperation, stopStopwatch(sw));
-      return value;
-    })
-    .catch((error: Error) => handleException(rellOperation, sw, error));
+  );
 }
 
 export function countUserFollowers(name: string): Promise<number> {
   const query = "get_user_followers";
-  const sw = createStopwatchStarted();
 
-  return executeQuery(query, { name: toLowerCase(name) })
-    .then((arr: string[]) => {
-      gaRellQueryTiming(query, stopStopwatch(sw));
-      return arr.length;
-    })
-    .catch((error: Error) => handleException(query, sw, error));
+  return executeQuery(query, { name: toLowerCase(name) }).then((arr: string[]) => arr.length);
 }
 
 export function countUserFollowings(name: string): Promise<number> {
   const query = "get_user_follows";
-  const sw = createStopwatchStarted();
 
-  return executeQuery(query, { name: toLowerCase(name) }).then((arr: string[]) => {
-    gaRellQueryTiming(query, stopStopwatch(sw));
-    return arr.length;
-  });
+  return executeQuery(query, { name: toLowerCase(name) }).then((arr: string[]) => arr.length);
 }
 
 export function amIAFollowerOf(user: ChromunityUser, name: string): Promise<boolean> {
@@ -84,13 +66,9 @@ export function amIAFollowerOf(user: ChromunityUser, name: string): Promise<bool
   }
 
   const query = "get_user_follows";
-  const sw = createStopwatchStarted();
 
-  return executeQuery(query, { name: toLowerCase(user.name) })
-    .then((userFollows: string[]) => {
-      gaRellQueryTiming(query, stopStopwatch(sw));
-      boomerang.set("user-" + toLowerCase(user.name), userFollows.map(name => toLowerCase(name)));
-      return userFollows.includes(toLowerCase(name));
-    })
-    .catch((error: Error) => handleException(query, sw, error));
+  return executeQuery(query, { name: toLowerCase(user.name) }).then((userFollows: string[]) => {
+    boomerang.set("user-" + toLowerCase(user.name), userFollows.map(name => toLowerCase(name)));
+    return userFollows.includes(toLowerCase(name));
+  });
 }

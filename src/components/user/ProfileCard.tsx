@@ -46,8 +46,10 @@ import { getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { ChromunityUser } from "../../types";
 import { getMutedUsers, getUserSettingsCached, isRegistered, toggleUserMute } from "../../blockchain/UserService";
 import {
-  distrustAnotherRepresentative, hasReportId,
-  isRepresentativeDistrustedByMe, SUSPEND_USER_OP_ID,
+  distrustAnotherRepresentative,
+  hasReportId,
+  isRepresentativeDistrustedByMe,
+  SUSPEND_USER_OP_ID,
   suspendUser
 } from "../../blockchain/RepresentativesService";
 import ChromiaPageHeader from "../common/ChromiaPageHeader";
@@ -136,6 +138,7 @@ const ProfileCard = withStyles(styles)(
       props.loadRepresentatives();
 
       if (
+        this.state.user !== undefined &&
         this.props.representatives.includes(this.props.username) &&
         this.props.representatives.includes(this.state.user.name)
       ) {
@@ -236,7 +239,7 @@ const ProfileCard = withStyles(styles)(
           <div style={{ display: "inline" }}>
             <IconButton onClick={() => this.setState({ suspendUserDialogOpen: true })}>
               <Tooltip title="Suspend user">
-                <VoiceOverOff fontSize="large" className={this.props.classes.iconRed}/>
+                <VoiceOverOff fontSize="large" className={this.props.classes.iconRed} />
               </Tooltip>
             </IconButton>
           </div>

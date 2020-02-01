@@ -256,11 +256,11 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function renderTestInfoBar() {
-    if (config.testMode) {
+    if (config.test) {
       return (
         <AppBar position="static" color="secondary">
           <Typography variant="body2" component="p" className={classes.testInfo}>
-            <b>Development / Testing</b>
+            <b>{config.topBar.message}</b>
           </Typography>
         </AppBar>
       );

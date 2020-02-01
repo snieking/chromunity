@@ -5,7 +5,6 @@ import RepresentativeCard from "./RepresentativeCard";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import { ChromunityUser } from "../../../types";
 import { getUser } from "../../../util/user-util";
-import { pageView } from "../../../GoogleAnalytics";
 import { ApplicationState } from "../../../redux/Store";
 import { loadRepresentatives } from "../../../redux/actions/GovernmentActions";
 import { connect } from "react-redux";
@@ -30,10 +29,6 @@ class Representatives extends React.Component<Props, State> {
 
     this.props.loadRepresentatives();
     this.handleUsernameChange = this.handleUsernameChange.bind(this);
-  }
-
-  componentDidMount(): void {
-    pageView();
   }
 
   render() {
