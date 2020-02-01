@@ -35,7 +35,9 @@ describe("Channel saga tests", () => {
         id: "id-" + getANumber(),
         author: "author",
         title: "title",
+        overridden_original_title: "",
         message: "message",
+        overridden_original_message: "",
         timestamp: timestamp,
         last_modified: timestamp,
         removed: false,
@@ -106,7 +108,7 @@ describe("Channel saga tests", () => {
 
     const action = getUpdateChannelAction(dispatchedActions);
 
-    expect(action.topics.length).toBe(pageSize + 1);
+    expect(action.topics.length).toBeGreaterThanOrEqual(pageSize + 1);
     expect(action.couldExistOlder).toBe(true);
     expect(action.name).toBe(channel);
   });

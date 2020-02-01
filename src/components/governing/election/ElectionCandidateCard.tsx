@@ -8,15 +8,20 @@ import {
   Grid,
   makeStyles,
   Snackbar,
+  Tooltip,
   Typography
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
 import { getUsername, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import Avatar, { AVATAR_SIZE } from "../../common/Avatar";
-import { ChatBubble, Face, Favorite, Star } from "@material-ui/icons";
+import { ChatBubble, Face, Favorite, SentimentVeryDissatisfiedSharp, Star, Report } from "@material-ui/icons";
 import Badge from "@material-ui/core/Badge";
-import { getTimesRepresentative } from "../../../blockchain/RepresentativesService";
+import {
+  getTimesRepresentative,
+  getTimesUserDistrustedSomeone,
+  getTimesUserWasDistrusted
+} from "../../../blockchain/RepresentativesService";
 import {
   countRepliesByUser,
   countReplyStarRatingForUser,
@@ -26,6 +31,7 @@ import {
 import { countUserFollowers } from "../../../blockchain/FollowingService";
 import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
 import { CopyToClipboard } from "react-copy-to-clipboard";
+import { toLowerCase } from "../../../util/util";
 
 const useStyles = makeStyles(theme =>
   createStyles({
@@ -46,6 +52,9 @@ const useStyles = makeStyles(theme =>
         display: "inline",
         marginLeft: "15px"
       }
+    },
+    voteBtn: {
+      marginBottom: "2px"
     }
   })
 );
@@ -65,6 +74,8 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
   const [followers, setFollowers] = useState(0);
   const [topics, setTopics] = useState(0);
   const [replies, setReplies] = useState(0);
+  const [distrusters, setDistrusters] = useState(0);
+  const [distrusted, setDistrusted] = useState(0);
 
   const [snackbarOpen, setSnackBarOpen] = useState(false);
 
@@ -80,6 +91,8 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
     countUserFollowers(props.candidate).then(count => setFollowers(count));
     countTopicsByUser(props.candidate).then(count => setTopics(count));
     countRepliesByUser(props.candidate).then(count => setReplies(count));
+    getTimesUserWasDistrusted(props.candidate).then(count => setDistrusters(count));
+    getTimesUserDistrustedSomeone(props.candidate).then(count => setDistrusted(count));
   }, [props.candidate]);
 
   function votedFor(): boolean {
@@ -100,39 +113,81 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
           <br />
           <Grid container spacing={2}>
             <Grid item xs={6}>
-              <Badge badgeContent={timesRepresentative} color="secondary" showZero max={99999}>
-                <Face fontSize="large" />
-              </Badge>
-              <Typography variant="body2" component="span" className={classes.statsDescr}>
-                Elected
-              </Typography>
+              <Tooltip title={"Number of times @" + props.candidate + " has won elections"}>
+                <div>
+                  <Badge badgeContent={timesRepresentative} color="secondary" showZero max={99999}>
+                    <Face fontSize="large" />
+                  </Badge>
+                  <Typography variant="body2" component="span" className={classes.statsDescr}>
+                    Elected
+                  </Typography>
+                </div>
+              </Tooltip>
             </Grid>
 
             <Grid item xs={6}>
-              <Badge badgeContent={topicRating + replyRating} color="secondary" showZero max={99999}>
-                <Star fontSize="large" />
-              </Badge>
-              <Typography variant="body2" component="span" className={classes.statsDescr}>
-                Ratings
-              </Typography>
+              <Tooltip title={"Number of star ratings that @" + props.candidate + " received"}>
+                <div>
+                  <Badge badgeContent={topicRating + replyRating} color="secondary" showZero max={99999}>
+                    <Star fontSize="large" />
+                  </Badge>
+                  <Typography variant="body2" component="span" className={classes.statsDescr}>
+                    Ratings
+                  </Typography>
+                </div>
+              </Tooltip>
             </Grid>
 
             <Grid item xs={6}>
-              <Badge badgeContent={followers} color="secondary" showZero max={99999}>
-                <Favorite fontSize="large" />
-              </Badge>
-              <Typography variant="body2" component="span" className={classes.statsDescr}>
-                Followers
-              </Typography>
+              <Tooltip title={"Number of users who follow @" + props.candidate}>
+                <div>
+                  <Badge badgeContent={followers} color="secondary" showZero max={99999}>
+                    <Favorite fontSize="large" />
+                  </Badge>
+                  <Typography variant="body2" component="span" className={classes.statsDescr}>
+                    Followers
+                  </Typography>
+                </div>
+              </Tooltip>
             </Grid>
 
             <Grid item xs={6}>
-              <Badge badgeContent={topics + replies} color="secondary" showZero max={99999}>
-                <ChatBubble fontSize="large" />
-              </Badge>
-              <Typography variant="body2" component="span" className={classes.statsDescr}>
-                Messages
-              </Typography>
+              <Tooltip title={"Messages sent by @" + props.candidate}>
+                <div>
+                  <Badge badgeContent={topics + replies} color="secondary" showZero max={99999}>
+                    <ChatBubble fontSize="large" />
+                  </Badge>
+                  <Typography variant="body2" component="span" className={classes.statsDescr}>
+                    Messages
+                  </Typography>
+                </div>
+              </Tooltip>
+            </Grid>
+
+            <Grid item xs={6}>
+              <Tooltip title={"Users who doesn't trust @" + props.candidate + " as a representative"}>
+                <div>
+                  <Badge badgeContent={distrusters} color="secondary" showZero max={99999}>
+                    <SentimentVeryDissatisfiedSharp fontSize="large" />
+                  </Badge>
+                  <Typography variant="body2" component="span" className={classes.statsDescr}>
+                    Distrusts
+                  </Typography>
+                </div>
+              </Tooltip>
+            </Grid>
+
+            <Grid item xs={6}>
+              <Tooltip title={"Number of users that @" + props.candidate + " have distrusted"}>
+                <div>
+                  <Badge badgeContent={distrusted} color="secondary" showZero max={99999}>
+                    <Report fontSize="large" />
+                  </Badge>
+                  <Typography variant="body2" component="span" className={classes.statsDescr}>
+                    Distrusted
+                  </Typography>
+                </div>
+              </Tooltip>
             </Grid>
           </Grid>
           <Snackbar
@@ -153,7 +208,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
   );
 
   function renderCandidateCardActions(name: string) {
-    if (name === props.votedFor) {
+    if (toLowerCase(name) === toLowerCase(props.votedFor)) {
       return (
         <div>
           <CopyToClipboard
@@ -176,18 +231,19 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
     } else {
       return (
         <div>
-          {username != null && username.toLocaleUpperCase() !== name.toLocaleUpperCase() ? (
+          {username != null && toLowerCase(username) !== toLowerCase(name) ? (
             <Button
               fullWidth
               size="small"
               variant="outlined"
               color="primary"
               onClick={() => props.voteForCandidate(name)}
+              className={classes.voteBtn}
             >
               Vote
             </Button>
           ) : (
-            <div></div>
+            <div />
           )}
           <CopyToClipboard
             text={

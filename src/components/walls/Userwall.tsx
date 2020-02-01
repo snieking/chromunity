@@ -28,7 +28,6 @@ import {
   loadUserReplies,
   loadUserFollowedChannels
 } from "../../redux/actions/UserPageActions";
-import { pageView } from "../../GoogleAnalytics";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -84,8 +83,6 @@ const UserWall = withStyles(styles)(
       this.props.loadUserTopics(topicsPageSize);
       this.props.loadUserReplies(topicsPageSize);
       this.props.loadUserFollowedChannels();
-
-      pageView();
     }
 
     renderUserPageIntro() {

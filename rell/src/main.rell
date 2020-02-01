@@ -1,5 +1,9 @@
-import ft3_config;
 import lib.ft3.ft3_xc_basic_dev;
+
+// Remove for production
+import lib.ft3.operations.dev_op;
+import lib.ft3.crosschain.operations;
+// ---
 
 import user;
 import topic;

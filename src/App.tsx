@@ -1,5 +1,5 @@
 import * as React from "react";
-import { BrowserRouter as Router } from "react-router-dom";
+import { Router } from "react-router-dom";
 import { Provider } from "react-redux";
 import { Store } from "redux";
 import { ApplicationState } from "./redux/Store";
@@ -17,13 +17,13 @@ interface Props {
   store: Store<ApplicationState>;
 }
 
-if (config.sentryEnvironment !== "local") {
+if (config.sentry.environment !== "local") {
   Sentry.init({
-    dsn: config.sentryDsn,
-    environment: config.sentryEnvironment,
-    beforeSend(event, hint) {
+    dsn: config.sentry.dsn,
+    environment: config.sentry.environment,
+    beforeSend(event) {
       // Check if it is an exception, and if so, show the report dialog
-      if (event.exception && config.testMode) {
+      if (event.exception && config.test) {
         Sentry.showReportDialog({ eventId: event.event_id });
       }
       return event;
@@ -32,11 +32,11 @@ if (config.sentryEnvironment !== "local") {
 }
 
 const piwik = new ReactPiwik({
-  url: 'https://matomo.chromia.dev/',
-  siteId: 3,
-  trackErrors: true,
-  jsFilename: "js/",
-  phpFilename: "js/"
+  url: config.matomo.url,
+  siteId: config.matomo.siteId,
+  trackErrors: config.matomo.trackErrors,
+  jsFilename: config.matomo.jsFileName,
+  phpFilename: config.matomo.phpFilename
 });
 
 ReactPiwik.push(['enableHeartBeatTimer']);

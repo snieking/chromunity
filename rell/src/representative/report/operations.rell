@@ -2,19 +2,23 @@ import election;
 import user;
 import user.meta;
 import representative;
+import util;
 
 operation create_representative_report(username: text, descriptor_id: byte_array, id: text, text) {
     val user = user.get_verified_user(username, descriptor_id);
-    require(meta.user_meta@{ user }.suspended_until < op_context.last_block_time);
+    require(
+    	meta.user_meta@{ user }.suspended_until < op_context.last_block_time,
+    	util.app_error(util.error_type.USER_SUSPENDED, "User already suspended")
+    );
 
-    create representative_report(id= id, user, op_context.last_block_time, false, text = text);
+    create representative_report(id = id, user, op_context.last_block_time, false, text = text);
 }
 
 operation handle_representative_report(username: text, descriptor_id: byte_array, id: text) {
     val user = user.get_verified_user(username, descriptor_id);
 
-    val recentElection = election.representative_election@{ .completed == true } ( .id, sort .timestamp );
-    val representative = representative.representative @{ user, .representative_election.id == recentElection.id };
+    val recent_election_id = election.get_latest_completed_election_id();
+    val representative = representative.representative @{ user, .representative_election.id == recent_election_id };
 
     val report = representative_report@{ .id == id };
     update report ( handled = true );

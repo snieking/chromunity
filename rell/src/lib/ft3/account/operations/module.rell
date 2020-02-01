@@ -1,0 +1,26 @@
+@mount('ft3')
+module;
+
+import acc: ^;
+import core: ^^.core;
+
+
+operation delete_auth_descriptor (account_id: byte_array, auth_descriptor_id: byte_array, delete_descriptor_id: byte_array) {
+      val account = acc.auth_and_log(account_id, auth_descriptor_id, ["A"]);
+
+      acc._delete_auth_descriptor(acc.account_auth_descriptor @ {
+         .account == account,
+         .descriptor_id == delete_descriptor_id
+      });
+}
+
+operation delete_all_auth_descriptors_exclude(account_id: byte_array, auth_descriptor_id: byte_array) {
+    val account = acc.auth_and_log(account_id, auth_descriptor_id, ["A"]);
+
+	acc._delete_all_auth_descriptors_exclude(account, auth_descriptor_id);
+}
+
+operation add_auth_descriptor (account_id: byte_array, auth_id: byte_array, new_desc: acc.auth_descriptor) {
+      val account = acc.auth_and_log(account_id, auth_id, ["A"]);
+      acc._add_auth_descriptor(account, new_desc);
+}

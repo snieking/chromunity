@@ -16,4 +16,8 @@ entity representative_action {
     action: text;
 }
 
+entity representative_action_vote {
+	key id: text, representative;
+}
+
 import representative.report;

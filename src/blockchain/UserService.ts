@@ -1,9 +1,9 @@
 import { UserMeta, UserSettings } from "../types";
-import { BLOCKCHAIN, GTX } from "./Postchain";
+import { executeOperations, executeQuery } from "./Postchain";
 import { ChromunityUser } from "../types";
 import * as BoomerangCache from "boomerang-cache";
-import { createStopwatchStarted, stopStopwatch } from "../util/util";
-import { gaRellOperationTiming, gaRellQueryTiming } from "../GoogleAnalytics";
+import { toLowerCase } from "../util/util";
+import { op } from "ft3-lib";
 
 const boomerang = BoomerangCache.create("users-bucket", {
   storage: "session",
@@ -12,46 +12,33 @@ const boomerang = BoomerangCache.create("users-bucket", {
 
 export function isRegistered(name: string): Promise<boolean> {
   const query = "get_user";
-  const sw = createStopwatchStarted();
 
-  return GTX.query(query, { name: name.toLocaleLowerCase() })
+  return executeQuery(query, { name: toLowerCase(name) })
     .then((any: unknown) => {
-      gaRellQueryTiming(query, stopStopwatch(sw));
       return any != null;
     })
     .catch(() => {
-      gaRellQueryTiming(query, stopStopwatch(sw));
       return false;
     });
 }
 
 export function getAccountId(username: string): Promise<string> {
-  return BLOCKCHAIN.then(bc => bc.query("get_account_id", { name: username }));
+  return executeQuery("get_account_id", { name: toLowerCase(username) });
 }
 
 export function getUserMeta(username: string): Promise<UserMeta> {
   const query = "get_user_meta";
-  const sw = createStopwatchStarted();
-  return GTX.query(query, { name: username.toLocaleLowerCase() }).then((meta: UserMeta) => {
-    gaRellQueryTiming(query, stopStopwatch(sw));
-    return meta;
-  });
+  return executeQuery(query, { name: toLowerCase(username) });
 }
 
 export function getUserSettings(user: ChromunityUser): Promise<UserSettings> {
   const query = "get_user_settings";
-  const sw = createStopwatchStarted();
 
-  return GTX.query(query, {
-    name: user.name.toLocaleLowerCase()
-  }).then((settings: UserSettings) => {
-    gaRellQueryTiming(query, stopStopwatch(sw));
-    return settings;
-  });
+  return executeQuery(query, { name: toLowerCase(user.name) });
 }
 
 export function getUserSettingsCached(name: string, cacheDuration: number): Promise<UserSettings> {
-  const userLC: string = name.toLocaleLowerCase();
+  const userLC: string = toLowerCase(name);
   const cachedAvatar: UserSettings = boomerang.get(userLC);
 
   if (cachedAvatar != null) {
@@ -59,49 +46,34 @@ export function getUserSettingsCached(name: string, cacheDuration: number): Prom
   }
 
   const query = "get_user_settings";
-  const sw = createStopwatchStarted();
 
-  return GTX.query(query, { name: userLC }).then((settings: UserSettings) => {
-    gaRellQueryTiming(query, stopStopwatch(sw));
+  return executeQuery(query, { name: userLC }).then((settings: UserSettings) => {
     boomerang.set(userLC, settings, cacheDuration);
     return settings;
   });
 }
 
 export function updateUserSettings(user: ChromunityUser, avatar: string, description: string) {
-  const userLC: string = user.name.toLocaleLowerCase();
+  const userLC: string = toLowerCase(user.name);
   boomerang.remove(userLC);
 
   const operation = "update_user_settings";
-  const sw = createStopwatchStarted();
 
-  return BLOCKCHAIN.then(bc =>
-    bc.call(user.ft3User, operation, userLC, user.ft3User.authDescriptor.hash().toString("hex"), avatar, description)
-  ).then(value => {
-    gaRellOperationTiming(operation, stopStopwatch(sw));
-    return value;
-  });
+  return executeOperations(
+    user.ft3User,
+    op(operation, userLC, user.ft3User.authDescriptor.id, avatar, description)
+  );
 }
 
 export function toggleUserMute(user: ChromunityUser, name: string, muted: boolean) {
   boomerang.remove("muted-users");
 
   const operation = "toggle_mute";
-  const sw = createStopwatchStarted();
 
-  return BLOCKCHAIN.then(bc =>
-    bc.call(
-      user.ft3User,
-      operation,
-      user.name.toLocaleLowerCase(),
-      user.ft3User.authDescriptor.hash().toString("hex"),
-      name.toLocaleLowerCase(),
-      muted ? 1 : 0
-    )
-  ).then(value => {
-    gaRellOperationTiming(operation, stopStopwatch(sw));
-    return value;
-  });
+  return executeOperations(
+    user.ft3User,
+    op(operation, toLowerCase(user.name), user.ft3User.authDescriptor.id, toLowerCase(name), muted ? 1 : 0)
+  );
 }
 
 export function getMutedUsers(user: ChromunityUser): Promise<string[]> {
@@ -112,12 +84,8 @@ export function getMutedUsers(user: ChromunityUser): Promise<string[]> {
   }
 
   const query = "get_muted_users";
-  const sw = createStopwatchStarted();
 
-  return GTX.query(query, {
-    username: user.name.toLocaleLowerCase()
-  }).then((users: string[]) => {
-    gaRellQueryTiming(query, stopStopwatch(sw));
+  return executeQuery(query, { username: toLowerCase(user.name) }).then((users: string[]) => {
     boomerang.set("muted-users", users, 86000);
     return users;
   });

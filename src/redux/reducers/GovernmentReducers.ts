@@ -7,7 +7,9 @@ const initialGovernmentState: GovernmentState = {
   unhandledReports: 0,
   unhandledReportsLastUpdated: 0,
   activeElection: false,
-  activeElectionLastUpdated: 0
+  activeElectionLastUpdated: 0,
+  recentLogbookEntryTimestamp: 0,
+  lastNewLogbookCheck: 0
 };
 
 export const governmentReducer: Reducer<GovernmentState, GovernmentActions> = (state = initialGovernmentState, action) => {
@@ -31,6 +33,13 @@ export const governmentReducer: Reducer<GovernmentState, GovernmentActions> = (s
         ...state,
         activeElection: action.activeElection,
         activeElectionLastUpdated: Date.now()
+      }
+    }
+    case GovernmentActionTypes.UPDATE_LOGBOOK_RECENT_ENTRY_TIMESTAMP: {
+      return {
+        ...state,
+        recentLogbookEntryTimestamp: action.timestamp,
+        lastNewLogbookCheck: Date.now()
       }
     }
   }

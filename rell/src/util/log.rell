@@ -3,7 +3,8 @@ enum error_type {
 	USER_SUSPENDED,
 	TOPIC_IMMUTABLE,
 	REPRESENTATIVE_ALREADY_SUSPENDED,
-	ILLEGAL_ACTION
+	ILLEGAL_ACTION,
+	EXPECTED_ERROR
 }
 
 function app_error(error_type, action: text): text {
@@ -13,6 +14,7 @@ function app_error(error_type, action: text): text {
 		TOPIC_IMMUTABLE -> message_with_code("CERR_20", "Topic is no longer mutable", action);
 		REPRESENTATIVE_ALREADY_SUSPENDED -> message_with_code("CERR_30", "User was already suspended", action);
 		ILLEGAL_ACTION -> message_with_code("CERR_40", "The attempted action was illegal", action);
+		EXPECTED_ERROR -> message_with_code("CERR_50", "Expected error", action);
 	};
 	
 	log(msg);

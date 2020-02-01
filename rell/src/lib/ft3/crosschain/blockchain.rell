@@ -1,9 +1,14 @@
 import ft3: ^.core;
 import acc: ^.account;
 
+
 entity asset_origin {
     key ft3.asset;
     origin_chain_rid: byte_array;
+}
+
+entity linked_chain {
+    key chain_rid: byte_array;
 }
 
 function blockchain_account_id (blockchain_rid: byte_array): byte_array {
@@ -19,4 +24,13 @@ function ensure_blockchain_account (blockchain_rid: byte_array): acc.account {
 
 function get_blockchain_account (blockchain_rid: byte_array): acc.account {
    return acc.account @ { .id == blockchain_account_id(blockchain_rid) };
+}
+
+
+query get_linked_chains() {
+    return linked_chain @* {} ( .chain_rid );
+}
+
+query is_linked_with_chain(chain_rid: byte_array) {
+    return linked_chain @? { chain_rid } != null;
 }

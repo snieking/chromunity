@@ -1,0 +1,9 @@
+@mount('ft3')
+module;
+
+import ft3: ^^;
+
+
+operation transfer (inputs: list<ft3.xfer_input>, outputs: list<ft3.xfer_output>) {
+    ft3._transfer(inputs, outputs);
+}

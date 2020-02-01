@@ -27,7 +27,6 @@ import {
   loadOlderTopicsInChannel
 } from "../../redux/actions/ChannelActions";
 import { ApplicationState } from "../../redux/Store";
-import { pageView } from "../../GoogleAnalytics";
 import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
 import { toLowerCase } from "../../util/util";
 
@@ -108,8 +107,6 @@ class ChannelWall extends React.Component<Props, State> {
 
     countChannelFollowers(channel).then(count => this.setState({ countOfFollowers: count }));
     countTopicsInChannel(channel).then(count => this.setState({ countOfTopics: count }));
-
-    pageView();
   }
 
   retrieveTopics() {

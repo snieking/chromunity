@@ -43,7 +43,9 @@ describe("User page saga tests", () => {
         id: "id-" + getANumber(),
         author: "author",
         title: "title",
+        overridden_original_title: "",
         message: "message",
+        overridden_original_message: "",
         timestamp: timestamp,
         last_modified: timestamp,
         removed: false,
@@ -59,6 +61,7 @@ describe("User page saga tests", () => {
         topic_id: "id-" + getANumber(),
         author: "author",
         message: "message",
+        overridden_original: "",
         timestamp: timestamp,
         isSubReply: false,
         removed: false

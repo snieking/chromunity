@@ -1,6 +1,6 @@
 import { getANumber } from "./helper";
 import { makeKeyPair } from "../src/blockchain/CryptoService";
-import { FlagsType, KeyPair, SingleSignatureAuthDescriptor, User } from "ft3-lib";
+import { FlagsType, KeyPair, op, SingleSignatureAuthDescriptor, User } from "ft3-lib";
 import { BLOCKCHAIN } from "../src/blockchain/Postchain";
 import { ChromunityUser } from "../src/types";
 
@@ -70,7 +70,7 @@ const loginUser = async (user: TestUser): Promise<ChromunityUser> => {
 
   const bc = await BLOCKCHAIN;
   const account = await bc.registerAccount(walletAuthDescriptor, walletUser);
-  await bc.call(ft3User, "register_user", user.name, authDescriptor.toGTV(), walletAuthDescriptor.toGTV());
+  await bc.call(op("register_user", user.name, authDescriptor.toGTV(), walletAuthDescriptor.toGTV()), ft3User);
 
   return new Promise<ChromunityUser>(resolve => resolve({ name: user.name, ft3User: ft3User }));
 };

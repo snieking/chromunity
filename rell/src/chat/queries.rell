@@ -10,7 +10,7 @@ query get_user_chats(username: name): list<chat_record> {
 	val chat_records = list<chat_record>();
 
 	for (member_chat in member_chats) {
-		val latest_message = chat_message@?{ .chat == member_chat.chat } ( .sender, -sort .timestamp, .encrypted_msg, -sort .chat.timestamp ) limit 1;
+		val latest_message = chat_message@?{ .chat == member_chat.chat } ( .sender, @sort_desc .timestamp, .encrypted_msg, @sort_desc .chat.timestamp ) limit 1;
 
 		if (latest_message != null) {
 			val message = message_record(sender = latest_message.sender.user.display_name, timestamp = latest_message.timestamp, encrypted_msg = latest_message.encrypted_msg);
@@ -41,7 +41,7 @@ query get_user_chats(username: name): list<chat_record> {
 query get_chat_messages(id: text, prior_to: timestamp, page_size: integer) {
 	return chat_message@*{ .chat.id == id, .timestamp < prior_to } (
 		sender = chat_message.sender.user.display_name,
-		-sort timestamp = chat_message.timestamp,
+		@sort_desc timestamp = chat_message.timestamp,
 		encrypted_msg = chat_message.encrypted_msg
 	) limit page_size;
 }
@@ -49,7 +49,7 @@ query get_chat_messages(id: text, prior_to: timestamp, page_size: integer) {
 query get_chat_messages_after(id: text, after_timestamp: timestamp, page_size: integer) {
 	return chat_message@*{ .chat.id == id, .timestamp > after_timestamp } (
 		sender = chat_message.sender.user.display_name,
-		sort timestamp = chat_message.timestamp,
+		@sort timestamp = chat_message.timestamp,
 		encrypted_msg = chat_message.encrypted_msg
 	) limit page_size;
 }
@@ -59,14 +59,14 @@ query get_chat_participants(id: text) {
 }
 
 query get_followed_chat_users(username: name) {
-	return (chat_user, follow.follow) @* {
+	return (chat_user, follow.follow)@*{
 		follow.follower.name == username.lower_case(),
 		follow.follows == chat_user.user
 	} ( chat_user.user.display_name );
 }
 
 query get_chat_users() {
-	return chat_user @* {} ( chat_user.user.display_name );
+	return chat_user@*{} ( chat_user.user.display_name );
 }
 
 query count_unread_chats(username: name) {

@@ -1,3 +1,9 @@
 query get_unhandled_representative_reports() {
-    return representative_report@*{ .handled == false } ( .id, user = .user.name, -sort .timestamp, .handled, .text );
+    return representative_report@*{ .handled == false } ( 
+    	.id, 
+    	user = .user.name, 
+    	@sort_desc .timestamp, 
+    	.handled, 
+    	.text
+    );
 }

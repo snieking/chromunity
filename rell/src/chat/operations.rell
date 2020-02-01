@@ -28,7 +28,7 @@ operation add_user_to_chat(descriptor_id: byte_array, username: text, chat_id: t
 	val user_already_in_chat = user.get_verified_user(username, descriptor_id);
 	val chat = chat@{ .id == chat_id };
 
-	if (chat_membership @? { chat, .member.user.name == target_user.lower_case() } == null) {
+	if (chat_membership@?{ chat, .member.user.name == target_user.lower_case() } == null) {
 		create chat_membership(chat, chat_user@{ .user.name == target_user.lower_case() }, encrypted_chat_key);
 	}
 }
@@ -49,7 +49,7 @@ operation modify_chat_title(descriptor_id: byte_array, username: text, chat_id: 
 	val user = user.get_verified_user(username, descriptor_id);
 	val chat = chat@{ .id == chat_id };
 	chat_membership@{ chat, chat_user@{ user }};
-	update chat ( title = title );
+	update chat(title = title);
 }
 
 operation send_chat_message(chat_id: text, descriptor_id: byte_array, username: name, encrypted_msg: text) {

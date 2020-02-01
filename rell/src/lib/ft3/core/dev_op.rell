@@ -1,4 +1,3 @@
-@mount('ft3')
 module;
 
 import ft3: ^^.core;
@@ -12,18 +11,3 @@ function require_dev() {
     require(dev_state.allow_dev_ops);
 }
 
-operation dev_register_asset (name, issuing_chain_rid: byte_array, origin_chain_rid: byte_array) {
-    require_dev();
-    ft3.register_asset(name, issuing_chain_rid);
-}
-
-operation dev_give_balance (asset_id: byte_array, account_id: byte_array, amount: integer) {
-    require_dev();
-    require(amount >= 0);
-    ft3.ensure_balance( acc.account @ { account_id }, ft3.asset @ { .id == asset_id } ).amount += amount;
-}
-
-operation dev_register_account (acc.auth_descriptor) {
-    require_dev();
-    acc.create_account_with_auth( auth_descriptor );
-}

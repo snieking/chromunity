@@ -15,7 +15,9 @@ export interface Topic {
   id: string;
   author: string;
   title: string;
+  overridden_original_title: string;
   message: string;
+  overridden_original_message: string;
   timestamp: number;
   last_modified: number;
   removed: boolean;
@@ -27,6 +29,7 @@ export interface TopicReply {
   topic_id: string;
   author: string;
   message: string;
+  overridden_original: string;
   isSubReply: boolean;
   timestamp: number;
   removed: boolean;

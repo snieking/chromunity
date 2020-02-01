@@ -1,0 +1,12 @@
+import user;
+import election;
+
+function is_username_representative(name): boolean {
+	val user = user.user@?{ .name == name};
+	
+	if (user == null) {
+		return false;
+	}
+	
+	return representative@?{ .user == user, .representative_election.id == election.get_latest_completed_election_id() } != null;
+}

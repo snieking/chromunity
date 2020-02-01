@@ -1,14 +1,8 @@
 import { ChromunityUser } from "../types";
-import { BLOCKCHAIN, GTX } from "./Postchain";
-import {
-  createStopwatchStarted,
-  handleException,
-  sortByFrequency,
-  stopStopwatch,
-  uniqueId
-} from "../util/util";
+import { executeOperations, executeQuery } from "./Postchain";
+import { sortByFrequency, toLowerCase } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
-import { gaRellOperationTiming, gaRellQueryTiming, gaSocialEvent } from "../GoogleAnalytics";
+import { nop, op } from "ft3-lib";
 
 const channelsCache = BoomerangCache.create("channels-bucket", {
   storage: "session",
@@ -25,42 +19,20 @@ export function unfollowChannel(user: ChromunityUser, name: string) {
 
 export function getFollowedChannels(user: string): Promise<string[]> {
   const query = "get_followed_channels";
-  const sw = createStopwatchStarted();
 
-  return GTX.query(query, {
-    username: user.toLocaleLowerCase()
-  })
-    .then((values: string[]) => {
-      gaRellQueryTiming(query, stopStopwatch(sw));
-      return values;
-    })
-    .catch((error: Error) => handleException(query, sw, error));
+  return executeQuery(query, {
+    username: toLowerCase(user)
+  });
 }
 
 function modifyChannelollowing(user: ChromunityUser, channel: string, rellOperation: string) {
   channelsCache.remove(channel + ":followers");
-  gaSocialEvent(rellOperation, channel);
-  const sw = createStopwatchStarted();
 
-  return BLOCKCHAIN.then(bc =>
-    bc
-      .transactionBuilder()
-      .addOperation(
-        rellOperation,
-        user.name.toLocaleLowerCase(),
-        user.ft3User.authDescriptor.hash().toString("hex"),
-        channel.toLocaleLowerCase()
-      )
-      .addOperation("nop", uniqueId())
-      .build(user.ft3User.authDescriptor.signers)
-      .sign(user.ft3User.keyPair)
-      .post()
-  )
-    .then(value => {
-      gaRellOperationTiming(rellOperation, stopStopwatch(sw));
-      return value;
-    })
-    .catch((error: Error) => handleException(rellOperation, sw, error));
+  return executeOperations(
+    user.ft3User,
+    op(rellOperation, toLowerCase(user.name), user.ft3User.authDescriptor.id, toLowerCase(channel)),
+    nop()
+  );
 }
 
 export function getTopicChannelBelongings(topicId: string): Promise<string[]> {
@@ -71,15 +43,12 @@ export function getTopicChannelBelongings(topicId: string): Promise<string[]> {
   }
 
   const query = "get_topic_channels_belongings";
-  const sw = createStopwatchStarted();
 
-  return GTX.query(query, { topic_id: topicId })
+  return executeQuery(query, { topic_id: topicId })
     .then((belongings: string[]) => {
-      gaRellQueryTiming(query, stopStopwatch(sw));
       channelsCache.set(topicId, belongings, 3600);
       return belongings;
-    })
-    .catch((error: Error) => handleException(query, sw, error));
+    });
 }
 
 export function getTrendingChannels(sinceDaysAgo: number): Promise<string[]> {
@@ -94,18 +63,13 @@ export function getTrendingChannels(sinceDaysAgo: number): Promise<string[]> {
   date.setDate(pastDate);
 
   const query = "get_channels_since";
-  const sw = createStopwatchStarted();
 
-  return GTX.query(query, {
-    timestamp: date.getTime() / 1000
-  })
+  return executeQuery(query, { timestamp: date.getTime() / 1000 })
     .then((tags: string[]) => {
-      gaRellQueryTiming(query, stopStopwatch(sw));
       trending = sortByFrequency(tags).slice(0, 10);
       channelsCache.set("trending", trending, 3600);
       return trending;
-    })
-    .catch((error: Error) => handleException(query, sw, error));
+    });
 }
 
 export function countChannelFollowers(channelName: string): Promise<number> {
@@ -117,15 +81,10 @@ export function countChannelFollowers(channelName: string): Promise<number> {
   }
 
   const query = "count_channel_followers";
-  const sw = createStopwatchStarted();
 
-  return GTX.query(query, {
-    name: channelName.toLocaleLowerCase()
-  })
+  return executeQuery(query, { name: toLowerCase(channelName) })
     .then((count: number) => {
-      gaRellQueryTiming(query, stopStopwatch(sw));
       channelsCache.set(key, count, 600);
       return count;
-    })
-    .catch((error: Error) => handleException(query, sw, error));
+    });
 }

@@ -1,8 +1,7 @@
 import { runSaga } from "redux-saga";
 import {
   GovernmentActions,
-  GovernmentActionTypes,
-  UpdateRepresentativesAction
+  GovernmentActionTypes
 } from "../../../src/redux/GovernmentTypes";
 import {
   checkActiveElection,
@@ -20,13 +19,6 @@ describe("Representatives sagas tests", () => {
       dispatch: (action: GovernmentActions) => dispatchedActions.push(action),
       getState: () => ({ government: state })
     };
-  };
-
-  const getUpdateRepresentativesAction = (dispatchedActions: GovernmentActions[]): UpdateRepresentativesAction => {
-    expect(dispatchedActions.length).toBe(1);
-    const action = dispatchedActions[0];
-    expect(action.type).toBe(GovernmentActionTypes.UPDATE_REPRESENTATIVES);
-    return action as UpdateRepresentativesAction;
   };
 
   it("representatives cache not expired yet", async () => {

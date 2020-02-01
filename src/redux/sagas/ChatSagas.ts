@@ -218,7 +218,6 @@ export function* openChatSaga(action: OpenChatAction) {
 
 export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
   const chat = yield select(getActiveChat);
-  console.log("Refreshing open chats: ", action.user);
 
   if (chat != null) {
     const previousMessages: ChatMessageDecrypted[] = yield select(getActiveChatMessages);

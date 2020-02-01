@@ -7,42 +7,112 @@ import util;
 operation remove_topic(username: text, descriptor_id: byte_array, topic_id: text) {
     val user = user.get_verified_user(username, descriptor_id);
 
-    val recentElection = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
-    val representative = representative @{ user, .representative_election.id == recentElection.id };
+    val recent_election = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
+    val representative = representative @{ user, .representative_election.id == recent_election.id };
 
-    val topic = topic.topic @{ .id == topic_id };
-    update topic ( title = "[Removed]", message = "Removed by @" + user.name, removed = true );
-
-    create representative_action(
-        id = op_context.transaction.tx_rid,
-        representative,
-        op_context.last_block_time,
-        action = "Topic /t/" + topic.id + " was removed by @" + user.name
-    );
+    val the_topic = topic.topic @{ .id == topic_id };
+    
+    val one_day_millis = 86400000;
+    val timestamp_1_day_ago = op_context.last_block_time - one_day_millis;
+    if (the_topic.timestamp > timestamp_1_day_ago) {
+	    update the_topic(
+	    	title = "[Removed]",
+	    	overridden_original_title = the_topic.title,
+	    	message = "Removed by @" + user.display_name,
+	    	overridden_original_message = the_topic.message,
+	    	removed = true
+	    );
+	
+	    create representative_action(
+	        id = op_context.transaction.tx_rid,
+	        representative,
+	        op_context.last_block_time,
+	        action = "Topic /t/" + the_topic.id + " was removed by @" + user.display_name
+	    );
+    } else {
+    	val action_id = "remove_topic:" + the_topic.id;
+    	val other_action_vote = representative_action_vote@?{ 
+    		action_id,
+    		.representative.user.name != username.lower_case()
+    	};
+    	create representative_action_vote(action_id, representative);
+    	
+    	if (other_action_vote != null) {
+    		update the_topic(
+    			title = "[Removed]",
+    			overridden_original_title = the_topic.title,
+    			message = "Removed by @" + user.display_name + " and @" + other_action_vote.representative.user.name,
+    			overridden_original_message = the_topic.message,
+    			removed = true
+    		);
+	
+		    create representative_action(
+		        id = op_context.transaction.tx_rid,
+		        representative,
+		        op_context.last_block_time,
+		        action = "Topic /t/" + the_topic.id + " was removed by @" + user.name + " and @" + other_action_vote.representative.user.display_name
+		    );	
+    	}
+    }
 }
 
 operation remove_topic_reply(username: text, descriptor_id: byte_array, topic_reply_id: text) {
     val user = user.get_verified_user(username, descriptor_id);
 
-    val recentElection = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
-    val representative = representative @{ user, .representative_election.id == recentElection.id };
+    val recent_election_id = election.get_latest_completed_election_id();
+    val representative = representative @{ user, .representative_election.id == recent_election_id };
 
-    val reply = topic.topic_reply @{ .id == topic_reply_id };
-    update reply ( message = "Removed by @" + user.name, removed = true );
-
-    create representative_action(
-        id = op_context.transaction.tx_rid,
-        representative,
-        op_context.last_block_time,
-        action = "Reply in topic /t/" + reply.topic.id + " was removed by @" + user.name
-    );
+    val the_reply = topic.topic_reply @{ .id == topic_reply_id };
+    
+    val one_day_millis = 86400000;
+    val timestamp_1_day_ago = op_context.last_block_time - one_day_millis;
+    if (the_reply.timestamp > timestamp_1_day_ago) {
+    	
+	    update the_reply(
+	    	message = "Removed by @" + user.display_name,
+	    	overridden_original = the_reply.message,
+	    	removed = true
+	    );
+	
+	    create representative_action(
+	        id = op_context.transaction.tx_rid,
+	        representative,
+	        op_context.last_block_time,
+	        action = "Reply in topic /t/" + the_reply.topic.id + " was removed by @" + user.display_name
+	    );
+	    
+    } else {
+    	
+    	val action_id = "remove_reply:" + the_reply.id;
+    	val other_action_vote = representative_action_vote@?{ 
+    		action_id,
+    		.representative.user.name != username.lower_case()
+    	};
+    	create representative_action_vote(action_id, representative);
+    	
+    	if (other_action_vote != null) {
+    		update the_reply(
+    			message = "Removed by @" + user.name + " and @" + other_action_vote.representative.user.display_name,
+    			overridden_original = the_reply.message,
+    			removed = true
+    		);
+	
+		    create representative_action(
+		        id = op_context.transaction.tx_rid,
+		        representative,
+		        op_context.last_block_time,
+		        action = "Reply in topic /t/" + the_reply.topic.id + " was removed by @" + user.display_name + " and @" + other_action_vote.representative.user.display_name
+		    );
+		    
+    	}
+    }
 }
 
 operation suspend_user(username: text, descriptor_id: byte_array, user_to_be_suspended: text) {
     val user = user.get_verified_user(username, descriptor_id);
 
-    val recentElection = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
-    val representative = representative @{ user, .representative_election.id == recentElection.id };
+    val recent_election_id = election.get_latest_completed_election_id();
+    val representative = representative @{ user, .representative_election.id == recent_election_id };
 
     val suspendee = user.user@{ .name == user_to_be_suspended };
     val suspendee_meta = meta.user_meta@{ suspendee };
@@ -51,44 +121,62 @@ operation suspend_user(username: text, descriptor_id: byte_array, user_to_be_sus
     	suspendee_meta.suspended_until < op_context.last_block_time,
     	util.app_error(util.error_type.REPRESENTATIVE_ALREADY_SUSPENDED, "Suspend user")
     );
+    
+    val action_id = "suspend_user:" + user_to_be_suspended;
+	val other_action_vote = representative_action_vote@?{ 
+		action_id,
+		.representative.user.name != username.lower_case()
+	};
+	
+	if (other_action_vote != null) {
 
-    val updatedTimesSuspended = suspendee_meta.times_suspended + 1;
-    val oneDayMillis = 86400000;
-    val daysSuspended = updatedTimesSuspended * updatedTimesSuspended;
-    val suspensionTimeMillis = daysSuspended * oneDayMillis;
-
-    update suspendee_meta (
-        suspended_until = op_context.last_block_time + suspensionTimeMillis,
-        times_suspended = updatedTimesSuspended
-    );
-
-    var daysString = " days ";
-    if (daysSuspended == 1) {
-        daysString = " day ";
+	    val updated_times_suspended = suspendee_meta.times_suspended + 1;
+	    val one_day_millis = 86400000;
+	    val days_suspended = updated_times_suspended * updated_times_suspended;
+	    val suspension_time_millis = days_suspended * one_day_millis;
+	
+	
+	    update suspendee_meta (
+	        suspended_until = op_context.last_block_time + suspension_time_millis,
+	        times_suspended = updated_times_suspended
+	    );
+	
+	    var daysString = " days ";
+	    if (days_suspended == 1) {
+	        daysString = " day ";
+	    }
+	
+	    create representative_action(
+	        id = op_context.transaction.tx_rid,
+	        representative,
+	        op_context.last_block_time,
+	        action = "@" + suspendee.display_name + " was suspended for " + days_suspended + daysString +  "by @" + user.display_name
+	    );
+	    
+	    delete other_action_vote;
+    
+    } else {
+    	create representative_action_vote(action_id, representative);
     }
-
-    create representative_action(
-        id = op_context.transaction.tx_rid,
-        representative,
-        op_context.last_block_time,
-        action = "@" + suspendee.display_name + " was suspended for " + daysSuspended + daysString +  "by @" + user.display_name
-    );
 }
 
 operation distrust_representative(descriptor_id: byte_array, distruster: name, distrusted: name) {
-	require(distruster != distrusted, "You can't distrust yourself");
+	require(
+		distruster != distrusted, 
+		util.app_error(util.error_type.ILLEGAL_ACTION, "You can't distrust yourself")
+	);
 	
 	val user = user.get_verified_user(distruster, descriptor_id);
 	val distruster_rep = representative@{ user };
 	val distrusted_rep = representative@{ user.name == distrusted };
 
-    val recent_election = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
-    val representative = representative @{ user, .representative_election.id == recent_election.id };
+    val recent_election_id = election.get_latest_completed_election_id();
+    val representative = representative @{ user, .representative_election.id == recent_election_id };
     
     create representative_distrust(distruster = distruster_rep, distrusted = distrusted_rep);
     
     val nr_of_representatives = representative@*{ 
-    	.representative_election.id == recent_election.id
+    	.representative_election.id == recent_election_id
     } ( .user ).size();
     
     val nr_of_distrusts = representative_distrust@*{ 
