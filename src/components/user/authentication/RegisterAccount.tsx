@@ -19,9 +19,7 @@ const RegisterAccount: React.FunctionComponent<Props> = props => {
   const vaultPubKey: string = query.pubKey as string;
   const username: string = props.match.params.username;
 
-  if (accountId && username && vaultPubKey) {
-    props.accountRegister(accountId, username, vaultPubKey);
-  }
+  props.accountRegister(accountId, username, vaultPubKey);
 
   return <LinearProgress variant="query" />;
 };
