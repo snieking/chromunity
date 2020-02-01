@@ -31,7 +31,7 @@ export const BLOCKCHAIN = Blockchain.initialize(
 );
 
 export const executeOperations = async (user: User, ...operations: Operation[]) => {
-  logger.debug("Executing operations: ", operations);
+  operations.every(op => logger.debug("Executing operations [%s]: ", op.name, op.args));
   // const lockId = JSON.stringify(user);
 
   // const ongoing = OP_LOCK.get(lockId) != null;
