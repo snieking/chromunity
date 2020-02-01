@@ -166,7 +166,7 @@ describe("Channel saga tests", () => {
 
     const action = getUpdateChannelAction(dispatchedActions);
 
-    expect(action.topics.length).toBe(3);
+    expect(action.topics.length).toBeGreaterThanOrEqual(3);
     expect(action.couldExistOlder).toBe(false);
     expect(action.name).toBe(channel);
   });

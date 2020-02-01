@@ -52,10 +52,6 @@ export const executeOperations = async (user: User, ...operations: Operation[]) 
     .then(result => {
       // OP_LOCK.remove(lockId);
       return result;
-    })
-    .catch(error => {
-      // OP_LOCK.remove(lockId);
-      throw error;
     });
 };
 
