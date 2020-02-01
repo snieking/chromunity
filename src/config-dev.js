@@ -1,5 +1,5 @@
 // @ts-ignore
-const config = {
+module.exports = {
   blockchain: {
     nodeApiUrl: "https://cg7tt9fhch.execute-api.eu-central-1.amazonaws.com/dev/",
     rid: "E4FD911A54E96F2858174C1BC50739C4F5D3B75C9F5F2EDCD26DA18CF2B67E37"
@@ -24,5 +24,3 @@ const config = {
   },
   test: true
 };
-
-module.exports = config;

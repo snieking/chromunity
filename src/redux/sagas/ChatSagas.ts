@@ -320,7 +320,7 @@ export function* loadOlderMessagesSaga(action: LoadOlderMessagesAction) {
 }
 
 export function* countUnreadChatsSaga(action: CountUnreadChatsAction) {
-  const count = yield countUnreadChats(action.user.name);
+  const count = yield countUnreadChats(action.user.name).catch(() => window.location.href = "/user/logout");
   yield put(storeUnreadChatsCountAction(count));
 }
 

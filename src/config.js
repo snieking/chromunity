@@ -1,5 +1,5 @@
 // @ts-ignore
-const config = {
+module.exports = {
   blockchain: {
     nodeApiUrl: "http://localhost:7740",
     rid: process.env.REACT_APP_BRID
@@ -24,5 +24,3 @@ const config = {
   },
   test: true
 };
-
-module.exports = config;

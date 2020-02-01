@@ -26,7 +26,7 @@ const NotificationsButton: React.FunctionComponent<NotificationsButtonProps> = p
   useEffect(() => {
     countUnreadUserNotifications(props.username)
       .then(count => setCounter(count))
-      .catch(() => setCounter(0));
+      .catch(() => window.location.href = "/user/logout");
     // eslint-disable-next-line
   }, []);
 
