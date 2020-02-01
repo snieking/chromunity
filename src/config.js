@@ -1,3 +1,4 @@
+// @ts-ignore
 const config = {
   blockchain: {
     nodeApiUrl: "http://localhost:7740",

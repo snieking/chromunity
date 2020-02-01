@@ -51,6 +51,7 @@ function* registerAccount(action: AccountRegisterAction) {
     user,
     op("register_user", action.username, authDescriptor.toGTV(), walletAuthDescriptor.toGTV())
   );
+  console.log("Logged in user with username", action.username);
 
   authorizeUser(action.username);
 }
