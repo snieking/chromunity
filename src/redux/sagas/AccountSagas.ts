@@ -35,12 +35,13 @@ function* checkIfRegistered(action: AccountRegisteredCheckAction) {
 }
 
 function* registerAccount(action: AccountRegisterAction) {
+  logger.debug("Registering new account for username [%s]", action.username);
   const walletAuthDescriptor = new SingleSignatureAuthDescriptor(Buffer.from(action.vaultPubKey, "hex"), [
     FlagsType.Account,
     FlagsType.Transfer
   ]);
 
-  const keyPair = retrieveKeyPair();
+  const keyPair = new KeyPair(makeKeyPair().privKey.toString("hex"));
   storeKeyPair(keyPair);
 
   const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
@@ -58,7 +59,7 @@ function* registerAccount(action: AccountRegisterAction) {
 }
 
 function* walletLogin(username: string) {
-  logger.debug("Logging in with wallet");
+  logger.debug("Logging in [%s] with wallet", username);
   let keyPair: KeyPair = new KeyPair(makeKeyPair().privKey.toString("hex"));
   storeKeyPair(keyPair);
 
@@ -73,6 +74,7 @@ function* walletLogin(username: string) {
 }
 
 function* loginAccount(action: AccountLoginAction) {
+  logger.debug("Logging in account [%s] by checking for auth descriptor", action.username);
   let keyPair: KeyPair = retrieveKeyPair();
 
   const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
@@ -85,6 +87,7 @@ function* loginAccount(action: AccountLoginAction) {
 }
 
 async function checkIfAuthDescriptorAdded(blockchain: any, user: User, accountId: string, username: string) {
+  logger.debug("Checking auth descriptor for username [%s]", username);
   const accounts = await blockchain.getAccountsByAuthDescriptorId(user.authDescriptor.hash(), user);
 
   const isAdded = accounts.some((account: Account) => {
