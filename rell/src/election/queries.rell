@@ -34,10 +34,14 @@ query get_current_representative_period(timestamp) {
 }
 
 query blocks_until_next_election() {
-	val recent_election_finished = election_block_details@{} ( 
+	val recent_election_finished = election_block_details@?{} ( 
 		@omit @sort_desc .started_height, 
 		.finished_height
 	) limit 1;
+	
+	if (recent_election_finished == null) {
+		return 0;
+	}
 	
 	require(recent_election_finished != -1, "There is an ongoing election");
 	

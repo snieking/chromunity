@@ -1,7 +1,7 @@
 const config = {
   blockchain: {
     nodeApiUrl: "https://cg7tt9fhch.execute-api.eu-central-1.amazonaws.com/dev/",
-    rid: "117C407B3A727EC5DE2DAD4E5C472A289FA79961A5565DFD1E7EFC60897045B9"
+    rid: "E4FD911A54E96F2858174C1BC50739C4F5D3B75C9F5F2EDCD26DA18CF2B67E37"
   },
   vault: {
     url: "https://wallet-v2.chromia.dev",

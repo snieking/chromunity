@@ -23,9 +23,11 @@ export function* accountWatcher() {
 function* checkIfRegistered(action: AccountRegisteredCheckAction) {
   const accountId = yield getAccountId(action.username);
   if (!accountId) {
+    console.log("Account didn't exist, registering with wallet");
     const returnUrl = encodeURIComponent(`${config.vault.callbackBaseUrl}/user/register/${action.username}`);
     window.location.replace(`${config.vault.url}/?route=/link-account&returnUrl=${returnUrl}`);
   } else {
+    console.log("Account existed, logging in with wallet");
     accountAddAccountId(accountId);
     yield walletLogin(action.username);
   }
@@ -43,6 +45,8 @@ function* registerAccount(action: AccountRegisterAction) {
   const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
 
   const user = new User(keyPair, authDescriptor);
+
+  console.log("Registering user");
   yield executeOperations(
     user,
     op("register_user", action.username, authDescriptor.toGTV(), walletAuthDescriptor.toGTV())
@@ -52,6 +56,7 @@ function* registerAccount(action: AccountRegisterAction) {
 }
 
 function* walletLogin(username: string) {
+  console.log("Logging in with wallet");
   let keyPair: KeyPair = new KeyPair(makeKeyPair().privKey.toString("hex"));
   storeKeyPair(keyPair);
 
