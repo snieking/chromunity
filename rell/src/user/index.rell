@@ -1,7 +1,8 @@
 import ft3_acc: lib.ft3.account;
 
 entity user {
-    key ft3_acc.account, name;
+    key name;
+    ft3_acc.account;
     display_name: name;
 }
 

@@ -31,7 +31,7 @@ export const BLOCKCHAIN = Blockchain.initialize(
 );
 
 export const executeOperations = async (user: User, ...operations: Operation[]) => {
-  logger.debug("Executing operations: [%o]", operations);
+  logger.debug("Executing operations: ", operations);
   // const lockId = JSON.stringify(user);
 
   // const ongoing = OP_LOCK.get(lockId) != null;
@@ -60,7 +60,7 @@ export const executeOperations = async (user: User, ...operations: Operation[]) 
 };
 
 export const executeQuery = async (name: string, params: unknown) => {
-  logger.debug("Executing query: [%s] with data: [%o]", name, params);
+  logger.debug("Executing query: [%s] with data: ", name, params);
   if (QUERY_CACHE.get(IF_NULL_CLEAR_CACHE) == null && !test) {
     removeSessionObjects();
     QUERY_CACHE.set(IF_NULL_CLEAR_CACHE, false, 10);
@@ -70,7 +70,7 @@ export const executeQuery = async (name: string, params: unknown) => {
 
   const cachedResult = QUERY_CACHE.get(cacheId);
   if (cachedResult != null) {
-    logger.debug("Returning cached result: [%o]", cachedResult);
+    logger.debug("Returning cached result: ", cachedResult);
     return new Promise<any>(resolve => resolve(cachedResult));
   }
 
@@ -81,7 +81,7 @@ export const executeQuery = async (name: string, params: unknown) => {
         QUERY_CACHE.set(cacheId, result, 3);
       }
 
-      logger.debug("Returning result: [%o]", result);
+      logger.debug("Returning result: ", result);
       return result;
     })
 };

@@ -2,7 +2,7 @@
 module.exports = {
   blockchain: {
     nodeApiUrl: "https://cg7tt9fhch.execute-api.eu-central-1.amazonaws.com/dev/",
-    rid: "E4FD911A54E96F2858174C1BC50739C4F5D3B75C9F5F2EDCD26DA18CF2B67E37"
+    rid: "143CD07CE35CE39321200BFE7BD194585CEA5AAC20AED9066590AF2A1F508CD6"
   },
   vault: {
     url: "https://wallet-v2.chromia.dev",
