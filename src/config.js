@@ -1,4 +1,4 @@
-module.exports = {
+const config = {
   blockchain: {
     nodeApiUrl: "http://localhost:7740",
     rid: process.env.REACT_APP_BRID
@@ -23,3 +23,5 @@ module.exports = {
   },
   test: true
 };
+
+module.exports = config;
