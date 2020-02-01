@@ -18,6 +18,7 @@ interface Props {
 }
 
 if (config.sentry.environment !== "local") {
+  console.log("Initializing Sentry with dsn: ", config.sentry.dsn, " for env: ", config.sentry.environment);
   Sentry.init({
     dsn: config.sentry.dsn,
     environment: config.sentry.environment,
