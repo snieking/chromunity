@@ -1,7 +1,7 @@
 @mount('ft3')
 module;
 
-import acc: ^;
+import acc: ^^.account;
 import core: ^^.core;
 
 

@@ -1,2 +1,10 @@
 @mount('ft3')
 module;
+
+struct module_args {
+	my_blockchain_name: text;
+	my_blockchain_website: text;
+	my_blockchain_description: text;
+	request_max_count: integer;
+    request_recovery_time: integer;    
+}

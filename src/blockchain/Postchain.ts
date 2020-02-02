@@ -31,7 +31,7 @@ export const BLOCKCHAIN = Blockchain.initialize(
 );
 
 export const executeOperations = async (user: User, ...operations: Operation[]) => {
-  operations.every(op => logger.debug("Executing operations [%s]: ", op.name, op.args));
+  operations.every(op => logger.debug("Executing operation [%s]", op.name));
   const lockId = JSON.stringify(user);
 
   const ongoing = OP_LOCK.get(lockId) != null;
@@ -41,7 +41,7 @@ export const executeOperations = async (user: User, ...operations: Operation[]) 
     return new Promise<unknown>(resolve => resolve());
   } else {
     if (!test) {
-      OP_LOCK.set(lockId, operations, 2);
+      OP_LOCK.set(lockId, operations, 3);
     }
   }
 

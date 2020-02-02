@@ -11,3 +11,7 @@ function require_dev() {
     require(dev_state.allow_dev_ops);
 }
 
+function dev_give_points_(account: acc.account, amount: integer) {
+	require_dev();
+	update acc.rl_state@{account}(.points += amount);
+}

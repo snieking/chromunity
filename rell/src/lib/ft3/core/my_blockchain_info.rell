@@ -1,0 +1,26 @@
+
+object my_blockchain_info {
+    mutable name: text = chain_context.args.my_blockchain_name;
+    mutable website: text = chain_context.args.my_blockchain_website;
+    mutable description: text = chain_context.args.my_blockchain_description;
+    mutable request_max_count: integer = chain_context.args.request_max_count;
+    mutable request_recovery_time: integer = chain_context.args.request_recovery_time;
+}
+
+
+//operation update_blockchain(name, website: text, description: text) {
+//    blockchain.name = name;
+//    blockchain.website = website;
+//    blockchain.description = description;
+//}
+
+query get_blockchain_info() {
+    return (
+        name = my_blockchain_info.name,
+        website = my_blockchain_info.website,
+        description = my_blockchain_info.description,
+        request_max_count = my_blockchain_info.request_max_count,
+        request_recovery_time = my_blockchain_info.request_recovery_time
+    );
+}
+

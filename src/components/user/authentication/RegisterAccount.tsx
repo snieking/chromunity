@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { RouteComponentProps } from "react-router";
 import { parse } from "query-string";
 import { accountRegister } from "../../../redux/actions/AccountActions";
@@ -19,8 +19,10 @@ const RegisterAccount: React.FunctionComponent<Props> = props => {
   const vaultPubKey: string = query.pubKey as string;
   const username: string = props.match.params.username;
 
-  props.accountRegister(accountId, username, vaultPubKey);
-
+  useEffect(() => {
+    props.accountRegister(accountId, username, vaultPubKey);
+    // eslint-disable-next-line
+  }, [accountId, username, vaultPubKey]);
   return <LinearProgress variant="query" />;
 };
 

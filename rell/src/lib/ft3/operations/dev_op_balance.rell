@@ -1,0 +1,13 @@
+@mount('ft3')
+module;
+
+import dev_op: ^^.core.dev_op;
+import ft3: ^^.core;
+import acc: ^^.account;
+
+
+operation dev_give_balance (asset_id: byte_array, account_id: byte_array, amount: integer) {
+    dev_op.require_dev();
+    require(amount >= 0);
+    ft3.ensure_balance( acc.account @ { account_id }, ft3.asset @ { .id == asset_id } ).amount += amount;
+}

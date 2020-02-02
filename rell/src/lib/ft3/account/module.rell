@@ -40,6 +40,8 @@ entity rl_state {
     key account;
     mutable points: integer;
     mutable last_update: timestamp;
+    mutable max_points: integer;
+    mutable recovery_time: timestamp;
 }
 
 function _add_auth_descriptor (account, auth_descriptor) {
@@ -88,7 +90,10 @@ function create_account_with_auth (auth_descriptor): byte_array {
      _add_auth_descriptor(
         acc, auth_descriptor
      );
-     create rl_state(acc, .points = 0, .last_update = op_context.last_block_time);
+     val max_points = core.my_blockchain_info.request_max_count;
+     val recovery_time = core.my_blockchain_info.request_recovery_time;
+     
+     create rl_state(acc, .points = 0, .last_update = op_context.last_block_time, max_points, recovery_time);
      return id;
 }
 

@@ -1,0 +1,18 @@
+@mount('ft3')
+module;
+
+import dev_op: ^^.core.dev_op;
+import ft3: ^^.core;
+
+import xft3: ^^.crosschain; 
+
+operation dev_register_asset (name, issuing_chain_rid: byte_array) {
+    dev_op.require_dev();
+    ft3.register_asset(name, issuing_chain_rid);
+}
+
+operation dev_register_xc_asset (name, issuing_chain_rid: byte_array, origin_chain_rid: byte_array) {
+    dev_op.require_dev();   
+    val asset = ft3.register_asset(name, issuing_chain_rid);
+    create xft3.asset_origin (asset, origin_chain_rid);
+}
