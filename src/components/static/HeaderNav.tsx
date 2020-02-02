@@ -156,7 +156,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function isRepresentative() {
-    return user != null && props.representatives.includes(user.name.toLocaleLowerCase());
+    return user != null && props.representatives.includes(toLowerCase(user.name));
   }
 
   function profileSpecificNavigation() {

@@ -331,13 +331,17 @@ export function* loadOlderMessagesSaga() {
 }
 
 export function* countUnreadChatsSaga(action: CountUnreadChatsAction) {
-  const count = yield countUnreadChats(action.user.name).catch(() => (window.location.href = "/user/logout"));
-  yield put(storeUnreadChatsCountAction(count));
+  if (action.user !== undefined) {
+    const count = yield countUnreadChats(action.user.name).catch(() => (window.location.href = "/user/logout"));
+    yield put(storeUnreadChatsCountAction(count));
+  }
 }
 
 export function* markChatAsReadSaga(action: MarkChatAsReadAction) {
-  yield markChatAsRead(action.user, action.chat.id);
-  yield put(countUnreadChatsAction(action.user));
+  if (action.user !== undefined) {
+    yield markChatAsRead(action.user, action.chat.id);
+    yield put(countUnreadChatsAction(action.user));
+  }
 }
 
 function decryptMessages(rsaKey: any, sharedChatKey: any, chatMessages: ChatMessage[]): ChatMessageDecrypted[] {
