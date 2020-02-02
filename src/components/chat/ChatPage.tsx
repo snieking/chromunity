@@ -22,7 +22,6 @@ import { Container, createStyles, LinearProgress, makeStyles, Snackbar, Theme } 
 import ChromiaPageHeader from "../common/ChromiaPageHeader";
 import Typography from "@material-ui/core/Typography";
 import { getUser } from "../../util/user-util";
-import { Redirect } from "react-router";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import { Chat, ChatMessageDecrypted, ChromunityUser } from "../../types";
@@ -288,6 +287,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     } else if (!props.successfullyAuthorized) {
       props.checkChatAuthentication();
     }
+    // eslint-disable-next-line
   }, []);
 
   function handleScroll() {
