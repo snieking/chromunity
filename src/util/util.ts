@@ -1,5 +1,6 @@
 import { Topic } from "../types";
 import { Stopwatch } from "ts-stopwatch";
+import { useEffect, useRef } from "react";
 
 export const createStopwatchStarted = (): Stopwatch => {
   const sw = new Stopwatch();
@@ -75,6 +76,27 @@ export function printableMinutes(seconds: number): string {
 
     return m + "m " + s + "s";
   }
+}
+
+export function useInterval(callback: any, delay: number) {
+  const savedCallback = useRef();
+
+  // Remember the latest callback.
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  // Set up the interval.
+  useEffect(() => {
+    function tick() {
+      // @ts-ignore
+      savedCallback.current();
+    }
+    if (delay !== null) {
+      let id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
 }
 
 export function needsToBeSliced(message: string): boolean {

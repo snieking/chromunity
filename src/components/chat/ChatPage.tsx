@@ -10,7 +10,8 @@ import {
   leaveChatAction,
   loadChatUsersAction,
   loadOlderMessagesAction,
-  loadUserChats, markChatAsReadAction,
+  loadUserChats,
+  markChatAsReadAction,
   modifyTitleAction,
   openChat,
   refreshOpenChat,
@@ -55,6 +56,7 @@ import useTheme from "@material-ui/core/styles/useTheme";
 import LoadMoreButton from "../buttons/LoadMoreButton";
 import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import EmojiPicker from "../common/EmojiPicker";
+import { useInterval } from "../../util/util";
 
 interface OptionType {
   label: string;
@@ -262,7 +264,6 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   const newMessages: boolean = useCompare(props.activeChatMessages.length);
 
-  let interval: any;
   useEffect(() => {
     const el: HTMLDivElement = scrollRef.current;
     if (el != null && newMessages) {
@@ -270,25 +271,24 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     }
   }, [props.activeChatMessages, newMessages]);
 
-  useEffect(() => {
-    if (interval != null) {
-      clearInterval(interval);
-    }
-  });
-
   const user = getUser();
 
-  if (user == null) {
-    return <Redirect to={"/user/login"} />;
-  } else if (props.successfullyAuthorized && props.activeChat == null) {
-    props.loadUserChats(user);
-  } else if (props.successfullyAuthorized && props.activeChat != null) {
-    interval = setInterval(updateChats, 5000);
-    props.loadChatUsers(user);
-    props.markChatAsRead(user, props.activeChat);
-  } else if (!props.successfullyAuthorized) {
-    props.checkChatAuthentication();
-  }
+  useInterval(() => {
+    updateChats();
+  }, 5000);
+
+  useEffect(() => {
+    if (user == null) {
+      window.location.href = "/user/login";
+    } else if (props.successfullyAuthorized && props.activeChat == null) {
+      props.loadUserChats(user);
+    } else if (props.successfullyAuthorized && props.activeChat != null) {
+      props.loadChatUsers(user);
+      props.markChatAsRead(user, props.activeChat);
+    } else if (!props.successfullyAuthorized) {
+      props.checkChatAuthentication();
+    }
+  }, []);
 
   function handleScroll() {
     const scrollDiv = scrollRef.current;
@@ -306,11 +306,9 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function updateChats() {
-    if (!window.location.href.includes("chat")) {
-      clearInterval(interval);
+    if (window.location.href.includes("chat")) {
+      props.refreshOpenChat(user);
     }
-
-    props.refreshOpenChat(user);
   }
 
   const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
@@ -499,8 +497,6 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function leaveChat() {
-    clearInterval(interval);
-
     const chat = props.chats.find(value => value.id !== props.activeChat.id);
     props.openChat(chat, user);
 

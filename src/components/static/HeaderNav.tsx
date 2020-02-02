@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
@@ -37,7 +37,7 @@ import { connect } from "react-redux";
 import Badge from "@material-ui/core/Badge";
 import { countUnreadChatsAction } from "../../redux/actions/ChatActions";
 import { ChromunityUser } from "../../types";
-import { toLowerCase } from "../../util/util";
+import { toLowerCase, useInterval } from "../../util/util";
 import { retrieveLogbookLastRead } from "../../blockchain/RepresentativesService";
 
 interface Props {
@@ -111,24 +111,25 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   const [govAnchorEl, setGovAnchorEl] = React.useState<null | HTMLElement>(null);
   const [wallAnchorEl, setWallAnchorEl] = React.useState<null | HTMLElement>(null);
 
-  let interval: any;
+  useInterval(() => {
+    props.countUnreadChats(user);
+  }, 30000);
+
   useEffect(() => {
-    if (interval != null) {
-      clearInterval(interval);
+    props.loadRepresentatives();
+
+    if (user != null) {
+      props.checkActiveElection(user);
     }
-  });
+  }, [user, props]);
 
-  props.loadRepresentatives();
-
-  if (isRepresentative()) {
-    props.loadUnhandledReports();
-    props.checkNewLogbookEntries(user);
-  }
-
-  if (user != null) {
-    interval = setInterval(() => props.countUnreadChats(user), 30000);
-    props.checkActiveElection(user);
-  }
+  useEffect(() => {
+    if (isRepresentative()) {
+      props.loadUnhandledReports();
+      props.checkNewLogbookEntries(user);
+    }
+    // eslint-disable-next-line
+  }, [props.representatives, props, user]);
 
   function handleProfileClick(event: React.MouseEvent<HTMLButtonElement>) {
     setProfileAnchorEl(event.currentTarget);
@@ -270,14 +271,17 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   function renderGovernmentIcon() {
     if (isRepresentative()) {
       return (
-        <Badge invisible={props.unhandledReports < 1 || props.recentLogbookEntryTimestamp <= retrieveLogbookLastRead()} color="secondary">
-          <LocationCity className={classes.navIcon} />
+        <Badge
+          invisible={props.unhandledReports < 1 || props.recentLogbookEntryTimestamp <= retrieveLogbookLastRead()}
+          color="secondary"
+        >
+          <LocationCity className={classes.navIcon}/>
         </Badge>
       );
     } else {
       return (
         <Badge invisible={!props.activeElection} color="secondary">
-          <LocationCity className={classes.navIcon} />
+          <LocationCity className={classes.navIcon}/>
         </Badge>
       );
     }
@@ -379,7 +383,11 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
             <Link style={{ width: "100%" }} to="/gov/log">
               <MenuItem onClick={handleGovClose}>
                 <ListItemIcon>
-                  <Badge variant="dot" invisible={props.recentLogbookEntryTimestamp <= retrieveLogbookLastRead()} color="secondary">
+                  <Badge
+                    variant="dot"
+                    invisible={props.recentLogbookEntryTimestamp <= retrieveLogbookLastRead()}
+                    color="secondary"
+                  >
                     <Gavel className="menu-item-button" />
                   </Badge>
                 </ListItemIcon>
