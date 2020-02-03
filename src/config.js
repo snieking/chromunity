@@ -20,7 +20,7 @@ module.exports = {
     phpFilename: "js/"
   },
   topBar: {
-    message: "Local"
+    message: "Local Environment"
   },
   test: true
 };

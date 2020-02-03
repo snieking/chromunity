@@ -20,7 +20,7 @@ module.exports = {
     phpFilename: "js/"
   },
   topBar: {
-    message: "Development"
+    message: "Development Environment"
   },
   test: true
 };

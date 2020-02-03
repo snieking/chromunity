@@ -39,7 +39,6 @@ import { countUnreadChatsAction } from "../../redux/actions/ChatActions";
 import { ChromunityUser } from "../../types";
 import { toLowerCase, useInterval } from "../../util/util";
 import { retrieveLogbookLastRead } from "../../blockchain/RepresentativesService";
-import LogoIcon from "./graphics/logo";
 
 interface Props {
   representatives: string[];
@@ -113,18 +112,9 @@ const useStyles = makeStyles((theme: Theme) =>
     leftGroup: {
       float: "left",
       display: "flex",
-      width: "40%"
-    },
-    middleGroup: {
-      float: "none",
-      marginLeft: "auto",
-      marginRight: "auto"
     },
     rightGroup: {
-      position: "relative",
-      right: "0",
-      display: "inline",
-      width: "40%"
+      display: "flex"
     },
     profileMenu: {
       float: "right"
@@ -445,9 +435,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
               </Link>
             </Menu>
           </div>
-          <div className={classes.middleGroup}>
-            <LogoIcon width={80} height={24} />
-          </div>
+          <div className={classes.grow} />
           <div className={classes.rightGroup}>{profileSpecificNavigation()}</div>
         </Toolbar>
       </AppBar>

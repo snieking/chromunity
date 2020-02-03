@@ -35,6 +35,7 @@ class Representatives extends React.Component<Props, State> {
     return (
       <Container fixed>
         <ChromiaPageHeader text="Representatives" />
+        <br />
         <Grid container spacing={1}>
           {this.props.representatives.map(name => (
             <RepresentativeCard name={name} key={name} />
