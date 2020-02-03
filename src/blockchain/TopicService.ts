@@ -165,7 +165,7 @@ function getTopicRepliesForTimestamp(
 ) {
   return BLOCKCHAIN.then(bc =>
     bc.query(rellOperation, {
-      username: user !== undefined ? toLowerCase(user.name) : "",
+      username: user != null ? toLowerCase(user.name) : "",
       topic_id: topicId,
       timestamp,
       page_size: pageSize
@@ -184,7 +184,7 @@ export function getTopicRepliesByUserPriorToTimestamp(
 
 export function getTopicSubReplies(replyId: string, user?: ChromunityUser): Promise<TopicReply[]> {
   return executeQuery("get_sub_replies", {
-    username: user !== undefined ? toLowerCase(user.name) : "",
+    username: user != null ? toLowerCase(user.name) : "",
     parent_reply_id: replyId
   });
 }
@@ -317,7 +317,7 @@ export function getTopicById(id: string, user?: ChromunityUser): Promise<Topic> 
 
   const query = "get_topic_by_id";
 
-  return executeQuery(query, { username: user !== undefined ? toLowerCase(user.name) : "", id })
+  return executeQuery(query, { username: user != null ? toLowerCase(user.name) : "", id })
     .then((topic: Topic) => {
       topicsCache.set(id, topic, 300);
       return topic;

@@ -36,6 +36,7 @@ const cacheExpired = (updated: number): boolean => {
 };
 
 export function* getCurrentRepresentatives() {
+  logger.silly("[SAGA - STARTED]: Get current representatives");
   const lastUpdated = yield select(getRepresentativesLastUpdated);
 
   if (cacheExpired(lastUpdated)) {
@@ -45,18 +46,23 @@ export function* getCurrentRepresentatives() {
     }
   }
 
+  logger.silly("[SAGA - FINISHED]: Get current representatives");
 }
 
 export function* retrieveUnhandledReports() {
+  logger.silly("[SAGA - STARTED]: Retrieving unhandled reports");
   const lastUpdated = yield select(getUnhandledReportsLastUpdated);
 
   if (cacheExpired(lastUpdated)) {
     const reports: RepresentativeReport[] = yield getUnhandledReports();
     yield put(updateUnhandledReports(reports.length));
   }
+
+  logger.silly("[SAGA - FINISHED]: Retrieving unhandled reports");
 }
 
 export function* checkActiveElection(action: CheckActiveElectionAction) {
+  logger.silly("[SAGA - STARTED]: Checking active election");
   const lastUpdated = yield select(getActiveElectionLastUpdated);
 
   if (cacheExpired(lastUpdated)) {
@@ -67,9 +73,12 @@ export function* checkActiveElection(action: CheckActiveElectionAction) {
     const electionId = yield getUncompletedElection();
     yield put(updateActiveElection(electionId != null));
   }
+
+  logger.silly("[SAGA - FINISHED]: Checking active election");
 }
 
 export function* checkLogbookEntries(action: CheckNewLogbookEntriesAction) {
+  logger.silly("[SAGA - STARTED]: Checking logbook entries", action);
   const lastRead = yield select(getLogbookLastUpdated);
   const representatives: Array<string> = yield select(getRepresentativesCached);
 
@@ -78,4 +87,6 @@ export function* checkLogbookEntries(action: CheckNewLogbookEntriesAction) {
     const logs = yield getAllRepresentativeActionsPriorToTimestamp(Date.now(), 1);
     yield put(updateLogbookRecentEntryTimestamp(logs.length > 0 ? logs[0].timestamp : Date.now()));
   }
+
+  logger.silly("[SAGA - FINISHED]: Checking logbook entries");
 }

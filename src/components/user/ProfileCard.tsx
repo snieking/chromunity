@@ -138,7 +138,7 @@ const ProfileCard = withStyles(styles)(
       props.loadRepresentatives();
 
       if (
-        this.state.user !== undefined &&
+        this.state.user != null &&
         this.props.representatives.includes(this.props.username) &&
         this.props.representatives.includes(this.state.user.name)
       ) {

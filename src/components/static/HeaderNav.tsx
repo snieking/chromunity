@@ -22,7 +22,7 @@ import {
 import { Menu as MenuIcon } from "@material-ui/icons/";
 
 import NotificationsButton from "../buttons/NotificationsButton";
-import { Button, ListItemIcon, Menu, MenuItem, Tooltip, Typography } from "@material-ui/core";
+import { ListItemIcon, Menu, MenuItem, Tooltip, Typography } from "@material-ui/core";
 import { getUser } from "../../util/user-util";
 import ThemeSwitcher from "./ThemeSwitcher";
 import config from "../../config";
@@ -39,6 +39,7 @@ import { countUnreadChatsAction } from "../../redux/actions/ChatActions";
 import { ChromunityUser } from "../../types";
 import { toLowerCase, useInterval } from "../../util/util";
 import { retrieveLogbookLastRead } from "../../blockchain/RepresentativesService";
+import LogoIcon from "./graphics/logo";
 
 interface Props {
   representatives: string[];
@@ -76,7 +77,7 @@ const useStyles = makeStyles((theme: Theme) =>
     grow: {
       flexGrow: 1
     },
-    menuButton: {
+    leftMenuButton: {
       [theme.breakpoints.up("sm")]: {
         marginRight: theme.spacing(1)
       },
@@ -85,6 +86,17 @@ const useStyles = makeStyles((theme: Theme) =>
       },
       [theme.breakpoints.up("lg")]: {
         marginRight: theme.spacing(3)
+      }
+    },
+    rightMenuButton: {
+      [theme.breakpoints.up("sm")]: {
+        marginLeft: theme.spacing(1)
+      },
+      [theme.breakpoints.up("md")]: {
+        marginLeft: theme.spacing(2)
+      },
+      [theme.breakpoints.up("lg")]: {
+        marginLeft: theme.spacing(3)
       }
     },
     inputRoot: {
@@ -98,8 +110,24 @@ const useStyles = makeStyles((theme: Theme) =>
         width: 200
       }
     },
-    sectionDesktop: {
-      display: "flex"
+    leftGroup: {
+      float: "left",
+      display: "flex",
+      width: "40%"
+    },
+    middleGroup: {
+      float: "none",
+      marginLeft: "auto",
+      marginRight: "auto"
+    },
+    rightGroup: {
+      position: "relative",
+      right: "0",
+      display: "inline",
+      width: "40%"
+    },
+    profileMenu: {
+      float: "right"
     }
   })
 );
@@ -162,25 +190,32 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   function profileSpecificNavigation() {
     if (user != null) {
       return (
-        <div>
-          <Tooltip title="Chat">
-            <Link to="/chat">
-              <IconButton>
+        <div className={classes.profileMenu}>
+          <Link to="/chat">
+            <IconButton className={classes.rightMenuButton}>
+              <Tooltip title="Chat">
                 <Badge badgeContent={props.unreadChats} color="secondary">
                   <Chat />
                 </Badge>
-              </IconButton>
-            </Link>
-          </Tooltip>
+              </Tooltip>
+            </IconButton>
+          </Link>
           <Link to={"/notifications/" + user.name}>
-            <NotificationsButton username={user.name} />
+            <div className={classes.rightMenuButton}>
+              <NotificationsButton username={user.name} />
+            </div>
           </Link>
 
-          <Button aria-controls="profile-menu" aria-haspopup="true" onClick={handleProfileClick}>
+          <IconButton
+            className={classes.rightMenuButton}
+            aria-controls="profile-menu"
+            aria-haspopup="true"
+            onClick={handleProfileClick}
+          >
             <Tooltip title="Profile">
-              <AccountCircle className={classes.navIcon} />
+              <AccountCircle />
             </Tooltip>
-          </Button>
+          </IconButton>
 
           <Menu
             id="profile-menu"
@@ -221,13 +256,15 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
       );
     } else {
       return (
-        <Tooltip title="account">
-          <Link to="/user/login">
-            <IconButton>
-              <AccountCircle className={classes.navIcon} />
-            </IconButton>
-          </Link>
-        </Tooltip>
+        <div style={{ float: "right" }}>
+          <Tooltip title="account">
+            <Link to="/user/login">
+              <IconButton>
+                <AccountCircle className={classes.navIcon} />
+              </IconButton>
+            </Link>
+          </Tooltip>
+        </div>
       );
     }
   }
@@ -237,7 +274,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
       return (
         <div>
           <Link to="/channels">
-            <IconButton edge="start" className={classes.menuButton} aria-label="Open drawer">
+            <IconButton edge="start" className={classes.leftMenuButton} aria-label="Open drawer">
               <Tooltip title="Channels">
                 <RssFeed className={classes.navIcon} />
               </Tooltip>
@@ -245,7 +282,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
           </Link>
 
           <Link to="/followings">
-            <IconButton edge="start" className={classes.menuButton} aria-label="Open drawer">
+            <IconButton edge="start" className={classes.leftMenuButton} aria-label="Open drawer">
               <Tooltip title="Followed Users">
                 <People className={classes.navIcon} />
               </Tooltip>
@@ -275,13 +312,13 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
           invisible={props.unhandledReports < 1 || props.recentLogbookEntryTimestamp <= retrieveLogbookLastRead()}
           color="secondary"
         >
-          <LocationCity className={classes.navIcon}/>
+          <LocationCity className={classes.navIcon} />
         </Badge>
       );
     } else {
       return (
         <Badge invisible={!props.activeElection} color="secondary">
-          <LocationCity className={classes.navIcon}/>
+          <LocationCity className={classes.navIcon} />
         </Badge>
       );
     }
@@ -290,14 +327,14 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   const desktopWallNav = () => (
     <div className={classes.desktopWallNav}>
       <Link to="/">
-        <IconButton edge="start" className={classes.menuButton} aria-label="Open drawer">
+        <IconButton edge="start" className={classes.leftMenuButton} aria-label="Open drawer">
           <Tooltip title="All">
-            <Home className={classes.navIcon} />
+            <Home />
           </Tooltip>
         </IconButton>
       </Link>
       {renderFavoriteWalls()}
-      <IconButton className={classes.menuButton} onClick={handleGovClick} aria-controls="gov-menu" aria-haspopup="true">
+      <IconButton className={classes.leftMenuButton} onClick={handleGovClick} aria-controls="gov-menu" aria-haspopup="true">
         <Tooltip title="Governing">{renderGovernmentIcon()}</Tooltip>
       </IconButton>
     </div>
@@ -306,7 +343,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   const mobileWallNav = () => (
     <div className={classes.mobileWallNav}>
       <IconButton
-        className={classes.menuButton}
+        className={classes.leftMenuButton}
         onClick={handleWallMenuClick}
         aria-controls="wall-menu"
         aria-haspopup="true"
@@ -346,7 +383,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
           </MenuItem>
         </Link>
       </Menu>
-      <IconButton className={classes.menuButton} onClick={handleGovClick} aria-controls="gov-menu" aria-haspopup="true">
+      <IconButton className={classes.leftMenuButton} onClick={handleGovClick} aria-controls="gov-menu" aria-haspopup="true">
         <Tooltip title="Governing">{renderGovernmentIcon()}</Tooltip>
       </IconButton>
     </div>
@@ -357,57 +394,61 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
       {renderTestInfoBar()}
       <AppBar position="static">
         <Toolbar>
-          {desktopWallNav()}
-          {mobileWallNav()}
-          <Menu id="gov-menu" anchorEl={govAnchorEl} keepMounted open={Boolean(govAnchorEl)} onClose={handleGovClose}>
-            <Link style={{ width: "100%" }} to="/gov/representatives">
-              <MenuItem onClick={handleGovClose}>
-                <ListItemIcon>
-                  <Face className="menu-item-button" />
-                </ListItemIcon>
-                <Typography className="menu-item-text">Representatives</Typography>
-              </MenuItem>
-            </Link>
-            <br />
-            <Link style={{ width: "100%" }} to="/gov/election">
-              <MenuItem onClick={handleGovClose}>
-                <ListItemIcon>
-                  <Badge variant="dot" invisible={!props.activeElection} color="secondary">
-                    <HowToVote className="menu-item-button" />
-                  </Badge>
-                </ListItemIcon>
-                <Typography className="menu-item-text">Election</Typography>
-              </MenuItem>
-            </Link>
-            <br />
-            <Link style={{ width: "100%" }} to="/gov/log">
-              <MenuItem onClick={handleGovClose}>
-                <ListItemIcon>
-                  <Badge
-                    variant="dot"
-                    invisible={props.recentLogbookEntryTimestamp <= retrieveLogbookLastRead()}
-                    color="secondary"
-                  >
-                    <Gavel className="menu-item-button" />
-                  </Badge>
-                </ListItemIcon>
-                <Typography className="menu-item-text">Log</Typography>
-              </MenuItem>
-            </Link>
-            <br />
-            <Link style={{ width: "100%" }} to="/gov/reports">
-              <MenuItem onClick={handleGovClose}>
-                <ListItemIcon>
-                  <Badge badgeContent={isRepresentative() ? props.unhandledReports : 0} color="secondary">
-                    <Report className="menu-item-button" />
-                  </Badge>
-                </ListItemIcon>
-                <Typography className="menu-item-text">Reports</Typography>
-              </MenuItem>
-            </Link>
-          </Menu>
-          <div className={classes.grow} />
-          <div className={classes.sectionDesktop}>{profileSpecificNavigation()}</div>
+          <div className={classes.leftGroup}>
+            {desktopWallNav()}
+            {mobileWallNav()}
+            <Menu id="gov-menu" anchorEl={govAnchorEl} keepMounted open={Boolean(govAnchorEl)} onClose={handleGovClose}>
+              <Link style={{ width: "100%" }} to="/gov/representatives">
+                <MenuItem onClick={handleGovClose}>
+                  <ListItemIcon>
+                    <Face className="menu-item-button" />
+                  </ListItemIcon>
+                  <Typography className="menu-item-text">Representatives</Typography>
+                </MenuItem>
+              </Link>
+              <br />
+              <Link style={{ width: "100%" }} to="/gov/election">
+                <MenuItem onClick={handleGovClose}>
+                  <ListItemIcon>
+                    <Badge variant="dot" invisible={!props.activeElection} color="secondary">
+                      <HowToVote className="menu-item-button" />
+                    </Badge>
+                  </ListItemIcon>
+                  <Typography className="menu-item-text">Election</Typography>
+                </MenuItem>
+              </Link>
+              <br />
+              <Link style={{ width: "100%" }} to="/gov/log">
+                <MenuItem onClick={handleGovClose}>
+                  <ListItemIcon>
+                    <Badge
+                      variant="dot"
+                      invisible={props.recentLogbookEntryTimestamp <= retrieveLogbookLastRead()}
+                      color="secondary"
+                    >
+                      <Gavel className="menu-item-button" />
+                    </Badge>
+                  </ListItemIcon>
+                  <Typography className="menu-item-text">Log</Typography>
+                </MenuItem>
+              </Link>
+              <br />
+              <Link style={{ width: "100%" }} to="/gov/reports">
+                <MenuItem onClick={handleGovClose}>
+                  <ListItemIcon>
+                    <Badge badgeContent={isRepresentative() ? props.unhandledReports : 0} color="secondary">
+                      <Report className="menu-item-button" />
+                    </Badge>
+                  </ListItemIcon>
+                  <Typography className="menu-item-text">Reports</Typography>
+                </MenuItem>
+              </Link>
+            </Menu>
+          </div>
+          <div className={classes.middleGroup}>
+            <LogoIcon width={80} height={24} />
+          </div>
+          <div className={classes.rightGroup}>{profileSpecificNavigation()}</div>
         </Toolbar>
       </AppBar>
     </div>
@@ -435,7 +476,4 @@ const mapDispatchToProps = (dispatch: any) => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(HeaderNav);
+export default connect(mapStateToProps, mapDispatchToProps)(HeaderNav);

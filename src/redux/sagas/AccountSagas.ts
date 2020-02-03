@@ -22,6 +22,8 @@ export function* accountWatcher() {
 }
 
 function* checkIfRegistered(action: AccountRegisteredCheckAction) {
+  logger.silly("[SAGA - STARTED]: Checking if account registered");
+
   const accountId = yield getAccountId(action.username);
   if (!accountId) {
     logger.debug("Account [%s] didn't exist, registering with wallet", action.username);
@@ -32,10 +34,14 @@ function* checkIfRegistered(action: AccountRegisteredCheckAction) {
     accountAddAccountId(accountId);
     yield walletLogin(action.username);
   }
+
+  logger.silly("[SAGA - FINISHED]: Checking if account registered");
 }
 
 function* registerAccount(action: AccountRegisterAction) {
+  logger.silly("[SAGA - STARTED]: Registering account");
   logger.debug("Registering new account for username [%s]", action.username);
+
   const walletAuthDescriptor = new SingleSignatureAuthDescriptor(Buffer.from(action.vaultPubKey, "hex"), [
     FlagsType.Account,
     FlagsType.Transfer
@@ -56,10 +62,13 @@ function* registerAccount(action: AccountRegisterAction) {
   logger.debug("Logged in user with username: ", action.username);
 
   authorizeUser(action.username);
+  logger.silly("[SAGA - FINISHED]: Registering account");
 }
 
 function* walletLogin(username: string) {
+  logger.silly("[SAGA - STARTED]: Logging in with wallet");
   logger.debug("Logging in [%s] with wallet", username);
+
   let keyPair: KeyPair = new KeyPair(makeKeyPair().privKey.toString("hex"));
   storeKeyPair(keyPair);
 
@@ -71,9 +80,12 @@ function* walletLogin(username: string) {
       config.blockchain.rid
     }&accountId=${accountId}&pubkey=${keyPair.pubKey.toString("hex")}&successAction=${returnUrl}`
   );
+
+  logger.silly("[SAGA - FINISHED]: Logging in with wallet");
 }
 
 function* loginAccount(action: AccountLoginAction) {
+  logger.silly("[SAGA - STARTED]: Login account");
   logger.debug("Logging in account [%s] by checking for auth descriptor", action.username);
   let keyPair: KeyPair = retrieveKeyPair();
 
@@ -84,6 +96,7 @@ function* loginAccount(action: AccountLoginAction) {
   const blockchain = yield BLOCKCHAIN;
 
   checkIfAuthDescriptorAdded(blockchain, user, action.accountId, action.username);
+  logger.silly("[SAGA - FINISHED]: Login account");
 }
 
 async function checkIfAuthDescriptorAdded(blockchain: any, user: User, accountId: string, username: string) {

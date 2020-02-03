@@ -98,6 +98,7 @@ const shouldUpdate = (updated: number): boolean => {
 };
 
 export function* checkChatAuthenticationSaga() {
+  logger.silly("[SAGA - STARTED]: Check chat authentication");
   const rsaKey = yield select(getRsaKey);
 
   if (rsaKey == null) {
@@ -108,9 +109,12 @@ export function* checkChatAuthenticationSaga() {
       yield put(storeChatKeyPair(reconstructedRSAKey, true));
     }
   }
+
+  logger.silly("[SAGA - FINISHED]: Check chat authentication");
 }
 
 export function* createChatKeyPairSaga(action: CreateChatKeyPairAction) {
+  logger.silly("[SAGA - STARTED]: Creating chat key pair");
   const pubKey: string = yield getUserPubKey(action.user.name);
 
   const rsaKey = generateRSAKey(action.password);
@@ -126,9 +130,11 @@ export function* createChatKeyPairSaga(action: CreateChatKeyPairAction) {
 
   storeChatPassphrase(action.password);
   yield put(storeChatKeyPair(rsaKey, true));
+  logger.silly("[SAGA - FINISHED]: Creating chat key pair");
 }
 
 export function* createNewChatSaga(action: CreateNewChatAction) {
+  logger.silly("[SAGA - STARTED]: Create new chat");
   const id = uniqueId();
 
   const sharedChatKey = makeKeyPair().privKey;
@@ -139,9 +145,11 @@ export function* createNewChatSaga(action: CreateNewChatAction) {
 
   yield createNewChat(action.user, id, encryptedSharedChatKey.cipher);
   yield put(loadUserChats(action.user, true));
+  logger.silly("[SAGA - FINISHED]: Create new chat");
 }
 
 export function* addUserToChatSaga(action: AddUserToChatAction) {
+  logger.silly("[SAGA - STARTED]: Add user to chat");
   const chatParticipants = yield select(getActiveChatParticipants);
 
   if (chatParticipants == null || !chatParticipants.includes(action.username)) {
@@ -160,16 +168,20 @@ export function* addUserToChatSaga(action: AddUserToChatAction) {
       logger.info("User [%s] hasn't created a chat key yet", action.username);
     }
   }
+  logger.silly("[SAGA - FINISHED]: Add user to chat");
 }
 
 export function* leaveChatSaga(action: LeaveChatAction) {
+  logger.silly("[SAGA - STARTED]: Leave chat");
   const chat = yield select(getActiveChat);
 
   yield leaveChat(action.user, chat.id);
   yield put(loadUserChats(action.user, true));
+  logger.silly("[SAGA - FINISHED]: Leave chat");
 }
 
 export function* loadUserChatsSaga(action: LoadUserChatsAction) {
+  logger.silly("[SAGA - STARTED]: Load user chats");
   const lastUpdate = yield select(getLastUpdate);
 
   if (action.force || shouldUpdate(lastUpdate)) {
@@ -195,9 +207,12 @@ export function* loadUserChatsSaga(action: LoadUserChatsAction) {
       }
     }
   }
+
+  logger.silly("[SAGA - FINISHED]: Load user chats");
 }
 
 export function* openChatSaga(action: OpenChatAction) {
+  logger.silly("[SAGA - STARTED]: Open chat");
   if (action.chat != null) {
     const chatMessages = yield getChatMessages(action.chat.id, Date.now(), PAGE_SIZE);
     const rsaKey = yield select(getRsaKey);
@@ -222,9 +237,12 @@ export function* openChatSaga(action: OpenChatAction) {
   } else {
     yield put(storeDecryptedChat(null, []));
   }
+
+  logger.silly("[SAGA - FINISHED]: Open chat");
 }
 
 export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
+  logger.silly("[SAGA - STARTED]: Refresh open chat");
   const chat = yield select(getActiveChat);
 
   if (chat != null) {
@@ -262,17 +280,23 @@ export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
       yield put(countUnreadChatsAction(action.user));
     }
   }
+
+  logger.silly("[SAGA - FINISHED]: Refresh open chat");
 }
 
 export function* sendMessageSaga(action: SendMessageAction) {
+  logger.silly("[SAGA - STARTED]: Send message");
   const rsaKey = yield select(getRsaKey);
   const sharedChatKey: any = yield rsaDecrypt(action.chat.encrypted_chat_key, rsaKey);
 
   yield sendChatMessage(action.user, action.chat.id, encrypt(action.message, sharedChatKey.plaintext));
   yield put(refreshOpenChat(action.user));
+
+  logger.silly("[SAGA - FINISHED]: Send message");
 }
 
 export function* modifyTitleSaga(action: ModifyTitleAction) {
+  logger.silly("[SAGA - STARTED]: Modify title");
   yield modifyTitle(action.user, action.chat.id, action.title);
   const updatedChat: Chat = {
     id: action.chat.id,
@@ -284,9 +308,12 @@ export function* modifyTitleSaga(action: ModifyTitleAction) {
   };
   yield put(openChat(updatedChat, action.user));
   yield put(loadUserChats(action.user, true));
+
+  logger.silly("[SAGA - FINISHED]: Modify title");
 }
 
 export function* loadChatUsersSaga(action: LoadChatUsersAction) {
+  logger.silly("[SAGA - STARTED]: Load chat users");
   const lastUpdated = yield select(getChatUsersLastUpdate);
 
   if (shouldUpdate(lastUpdated)) {
@@ -295,13 +322,18 @@ export function* loadChatUsersSaga(action: LoadChatUsersAction) {
 
     yield put(storeChatUsersAction(followedChatUsers, chatUsers));
   }
+
+  logger.silly("[SAGA - FINISHED]: Load chat users");
 }
 
 export function* deleteChatUserSaga(action: DeleteChatUserAction) {
+  logger.silly("[SAGA - STARTED]: Delete chat user");
   yield deleteChatUser(action.user);
+  logger.silly("[SAGA - FINISHED]: Delete chat user");
 }
 
 export function* loadOlderMessagesSaga() {
+  logger.silly("[SAGA - STARTED]: Load older messages");
   const messages: ChatMessageDecrypted[] = yield select(getActiveChatMessages);
 
   if (messages != null && messages.length >= PAGE_SIZE) {
@@ -328,20 +360,28 @@ export function* loadOlderMessagesSaga() {
       PAGE_SIZE
     );
   }
+
+  logger.silly("[SAGA - FINISHED]: Load older messages");
 }
 
 export function* countUnreadChatsSaga(action: CountUnreadChatsAction) {
-  if (action.user !== undefined) {
+  logger.silly("[SAGA - STARTED]: Count unread chats: " + action);
+  if (action.user != null) {
     const count = yield countUnreadChats(action.user.name).catch(() => (window.location.href = "/user/logout"));
     yield put(storeUnreadChatsCountAction(count));
   }
+
+  logger.silly("[SAGA - FINISHED]: Count unread chats");
 }
 
 export function* markChatAsReadSaga(action: MarkChatAsReadAction) {
-  if (action.user !== undefined) {
+  logger.silly("[SAGA - STARTED]: Mark chat as read");
+  if (action.user != null) {
     yield markChatAsRead(action.user, action.chat.id);
     yield put(countUnreadChatsAction(action.user));
   }
+
+  logger.silly("[SAGA - FINISHED]: Mark chat as read");
 }
 
 function decryptMessages(rsaKey: any, sharedChatKey: any, chatMessages: ChatMessage[]): ChatMessageDecrypted[] {
@@ -364,5 +404,4 @@ function arraysEqual(arr1: Chat[], arr2: Chat[]) {
     if (arr1[i].id !== arr2[i].id) return false;
   }
 
-  return true;
 }

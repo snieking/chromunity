@@ -7,11 +7,11 @@ const logger = createLogger({
     timestamp(),
     colorize(),
     splat(),
-    printf(log => `${log.timestamp} [${log.level}]: ${log.message}`)
+    printf(log => `${log.timestamp} [ ${log.level}]: ${log.message}`)
   ),
   transports: [
     new transports.Console({
-      level: process.env.NODE_ENV === "production" ? "debug" : "debug"
+      level: process.env.NODE_ENV === "production" ? "debug" : "silly"
     })
   ]
 });
