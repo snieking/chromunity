@@ -1,0 +1,54 @@
+name: testnet continuous delivery
+on:
+  push:
+    branches:
+      - testnet
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Setup PostgreSQL
+        uses: Harmon758/postgresql-action@v1.0.0
+        with:
+          # Version of PostgreSQL to use
+          postgresql version: 10
+          # POSTGRES_DB - name for the default database that is created
+          postgresql db: chromunity
+          # POSTGRES_USER - create the specified user with superuser power
+          postgresql user: postchain
+          # POSTGRES_PASSWORD - superuser password
+          postgresql password: postchain
+
+      # Build and deploy Chromunity
+      - name: Download Postchain and Rell binaries
+        run: ./download-binaries.sh
+        working-directory: rell
+      - name: Build Chromunity blockchain
+        run: ./build.sh
+        working-directory: rell
+      - name: Run Chromunity blockchain
+        run: ./run-dev-node.sh WIPE_DB > chromunity.log &
+        working-directory: rell
+
+      - name: Install dependencies
+        run: npm install
+      - name: Execute tests
+        run: npm run test-bc
+
+      - name: Make production build
+        run: npm run build-testnet
+
+      - name: Deploy to S3 bucket
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: "testnet.chromunity.com"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: "eu-west-1"
+          SOURCE_DIR: "build"
