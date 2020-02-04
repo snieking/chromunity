@@ -34,6 +34,8 @@ script:
   - npm run coveralls
   - if [ "$TRAVIS_BRANCH" == "dev" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then npm run build-dev; fi
   - if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then npm run build; fi
+  - echo "$AWS_ACCESS_KEY_ID"
+  - echo "$AWS_SECRET_ACCESS_KEY"
 
 # Deploy using awscli to enable pruning of removed files
 deploy:
