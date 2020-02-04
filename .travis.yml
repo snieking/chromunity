@@ -25,9 +25,6 @@ install:
   - sudo pip install awscli
 
 script:
-  - echo "$KEY = AWS_ACCESS_KEY_ID" > info.txt
-  - echo "SECRET = $AWS_SECRET_ACCESS_KEY" >> info.txt
-  - cat info.txt
   - cd rell
   - ./download-binaries.sh
   - ./build.sh
