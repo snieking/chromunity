@@ -57,6 +57,16 @@ deploy:
       branch: dev
     region: eu-west-1
     cache_control: "max-age=600"
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    bucket: testnet.chromunity.com
+    skip_cleanup: true
+    local_dir: build
+    on:
+      branch: dev
+    region: eu-west-1
+    cache_control: "max-age=600"
 
 after_deploy:
   # Allow `awscli` to make requests to CloudFront.
