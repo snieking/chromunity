@@ -4,7 +4,7 @@ import {
   AccountRegisterAction,
   AccountRegisteredCheckAction
 } from "../AccountTypes";
-import { takeLatest } from "redux-saga/effects";
+import { takeLatest, put, select } from "redux-saga/effects";
 import { SingleSignatureAuthDescriptor, FlagsType, User, Account, op } from "ft3-lib";
 import { KeyPair } from "ft3-lib";
 import config from "../../config.js";
@@ -14,6 +14,7 @@ import { accountAddAccountId } from "../actions/AccountActions";
 import { getKeyPair, setUsername, storeKeyPair } from "../../util/user-util";
 import { makeKeyPair } from "../../blockchain/CryptoService";
 import logger from "../../util/logger";
+import { ApplicationState } from "../Store";
 
 export function* accountWatcher() {
   yield takeLatest(AccountActionTypes.ACCOUNT_REGISTER_CHECK, checkIfRegistered);
@@ -21,17 +22,20 @@ export function* accountWatcher() {
   yield takeLatest(AccountActionTypes.ACCOUNT_LOGIN, loginAccount);
 }
 
+const getAccountIdFromState = (state: ApplicationState) => state.account.accountId;
+
 function* checkIfRegistered(action: AccountRegisteredCheckAction) {
   logger.silly("[SAGA - STARTED]: Checking if account registered");
 
   const accountId = yield getAccountId(action.username);
+
   if (!accountId) {
     logger.debug("Account [%s] didn't exist, registering with wallet", action.username);
     const returnUrl = encodeURIComponent(`${config.vault.callbackBaseUrl}/user/register/${action.username}`);
     window.location.replace(`${config.vault.url}/?route=/link-account&returnUrl=${returnUrl}`);
   } else {
-    logger.debug("Account [%s] existed, logging in with wallet", action.username);
-    accountAddAccountId(accountId);
+    logger.debug("Account [%s] existed, logging in accountId [%s] with wallet", action.username, accountId);
+    yield put(accountAddAccountId(accountId));
     yield walletLogin(action.username);
   }
 
@@ -72,7 +76,7 @@ function* walletLogin(username: string) {
   let keyPair: KeyPair = new KeyPair(makeKeyPair().privKey.toString("hex"));
   storeKeyPair(keyPair);
 
-  let accountId = yield getAccountId(username);
+  let accountId = yield select(getAccountIdFromState);
 
   const returnUrl = encodeURIComponent(`${config.vault.callbackBaseUrl}/user/authorize/${username}/${accountId}`);
   window.location.replace(
