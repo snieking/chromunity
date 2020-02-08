@@ -53,9 +53,6 @@
     "eject": "react-scripts eject",
     "coveralls": "jest --coverage --setupFiles dotenv/config && cat ./coverage/lcov.info | coveralls"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
   "browserslist": {
     "production": [
       ">0.2%",
