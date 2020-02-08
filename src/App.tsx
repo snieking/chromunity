@@ -10,7 +10,7 @@ import Content from "./Content";
 import DynamicTheme from "./components/dynamicTheme/DynamicTheme";
 import ReactPiwik from "react-piwik";
 import history from "./history";
-import * as Sentry from '@sentry/browser';
+import * as Sentry from "@sentry/browser";
 import * as config from "./config";
 import logger from "./util/logger";
 
@@ -41,8 +41,8 @@ const piwik = new ReactPiwik({
   phpFilename: config.matomo.phpFilename
 });
 
-ReactPiwik.push(['enableHeartBeatTimer']);
-ReactPiwik.push(['trackPageView']);
+ReactPiwik.push(["enableHeartBeatTimer"]);
+ReactPiwik.push(["trackPageView"]);
 
 const App: React.FunctionComponent<Props> = props => {
   return (

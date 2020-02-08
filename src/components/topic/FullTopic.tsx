@@ -195,7 +195,7 @@ const FullTopic = withStyles(styles)(
 
       getTopicById(id, user)
         .catch((error: Error) => {
-          if (error.message.includes("")) {
+          if (error.message.includes("No records found")) {
             return null;
           } else {
             throw error;
