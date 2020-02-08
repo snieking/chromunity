@@ -3,7 +3,7 @@ import { Router } from "react-router-dom";
 import { Provider } from "react-redux";
 import { Store } from "redux";
 import { ApplicationState } from "./store";
-import HeaderNav from "./components/static/HeaderNav";
+import HeaderNav from "./components/static/header/HeaderNav";
 import Footer from "./components/static/Footer";
 import { CssBaseline } from "@material-ui/core";
 import Content from "./Content";
