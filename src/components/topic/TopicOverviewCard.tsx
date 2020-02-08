@@ -76,6 +76,8 @@ interface State {
 
 const TopicOverviewCard = withStyles(styles)(
   class extends React.Component<Props, State> {
+    displayName = "TopicOverviewCard";
+
     constructor(props: Props) {
       super(props);
 
@@ -107,7 +109,7 @@ const TopicOverviewCard = withStyles(styles)(
       countTopicReplies(this.props.topic.id).then(count => this.setState({ numberOfReplies: count }));
     }
 
-    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
+    componentDidUpdate(prevProps: Readonly<Props>): void {
       if (this.props.topic.latest_poster !== prevProps.topic.latest_poster) {
         this.setAvatar();
       }

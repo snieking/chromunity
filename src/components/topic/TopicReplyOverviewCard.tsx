@@ -67,6 +67,8 @@ interface State {
 
 const TopicReplyOverviewCard = withStyles(styles)(
   class extends React.Component<Props, State> {
+    displayName = "TopicReplyOverviewCard";
+
     constructor(props: Props) {
       super(props);
 

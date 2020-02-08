@@ -112,6 +112,8 @@ const MAX_BADGE_NR = 9999999;
 
 const ProfileCard = withStyles(styles)(
   class extends React.Component<ProfileCardProps, ProfileCardState> {
+    displayName = "ProfileCard";
+
     constructor(props: ProfileCardProps) {
       super(props);
 

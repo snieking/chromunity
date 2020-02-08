@@ -59,6 +59,7 @@ import ConfirmDialog from "../common/ConfirmDialog";
 import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
 import EmojiPicker from "../common/EmojiPicker";
+import { NotFound } from "../static/NotFound";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -132,6 +133,8 @@ const allowedEditTimeMillis: number = 300000;
 
 const FullTopic = withStyles(styles)(
   class extends React.Component<FullTopicProps, FullTopicState> {
+    displayName = "FullTopic";
+
     private readonly textInput: React.RefObject<HTMLInputElement>;
 
     constructor(props: FullTopicProps) {
@@ -191,23 +194,23 @@ const FullTopic = withStyles(styles)(
         getMutedUsers(user).then(users => this.setState({ mutedUsers: users }));
       }
 
-      getTopicById(id, user).then(topic => this.consumeTopicData(topic));
-      this.retrieveLatestReplies();
-      getTopicStarRaters(id, true).then(usersWhoStarRated =>
-        this.setState({
-          stars: usersWhoStarRated.length,
-          ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase())
+      getTopicById(id, user)
+        .catch((error: Error) => {
+          if (error.message.includes("")) {
+            return null;
+          } else {
+            throw error;
+          }
         })
-      );
-      getTopicSubscribers(id).then(subscribers =>
-        this.setState({
-          subscribed: user != null && subscribers.includes(user.name)
-        })
-      );
+        .then(topic => {
+          if (topic != null) {
+            this.consumeTopicData(topic);
+          }
+        });
     }
 
     render() {
-      if (!this.state.mutedUsers.includes(this.state.topic.author)) {
+      if (!this.state.mutedUsers.includes(this.state.topic.author) && this.state.topic.id !== "") {
         return (
           <Container fixed>
             <br />
@@ -228,12 +231,30 @@ const FullTopic = withStyles(styles)(
           </Container>
         );
       } else {
-        return <div />;
+        return (
+          <div style={{ textAlign: "center" }}>
+            <NotFound />
+          </div>
+        );
       }
     }
 
     consumeTopicData(topic: Topic): void {
       this.setState({ topic: topic });
+
+      this.retrieveLatestReplies();
+      getTopicStarRaters(topic.id, true).then(usersWhoStarRated =>
+        this.setState({
+          stars: usersWhoStarRated.length,
+          ratedByMe: usersWhoStarRated.includes(this.state.user != null && this.state.user.name.toLocaleLowerCase())
+        })
+      );
+      getTopicSubscribers(topic.id).then(subscribers =>
+        this.setState({
+          subscribed: this.state.user != null && subscribers.includes(this.state.user.name)
+        })
+      );
+
       getUserSettingsCached(topic.author, 86400).then(settings =>
         this.setState({
           avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, topic.author)
@@ -638,7 +659,6 @@ const FullTopic = withStyles(styles)(
         return <LoadMoreButton onClick={this.retrieveOlderReplies} />;
       }
     }
-
   }
 );
 
