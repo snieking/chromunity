@@ -133,7 +133,6 @@ const allowedEditTimeMillis: number = 300000;
 
 const FullTopic = withStyles(styles)(
   class extends React.Component<FullTopicProps, FullTopicState> {
-    displayName = "FullTopic";
 
     private readonly textInput: React.RefObject<HTMLInputElement>;
 

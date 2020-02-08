@@ -135,7 +135,6 @@ const replyUnfoldCache = BoomerangCache.create("reply-unfold-bucket", {
 
 const TopicReplyCard = withStyles(styles)(
   class extends React.Component<Props, State> {
-    displayName = "TopicReplyCard";
 
     private readonly textInput: React.RefObject<HTMLInputElement>;
     private readonly cardRef: React.RefObject<HTMLDivElement>;
