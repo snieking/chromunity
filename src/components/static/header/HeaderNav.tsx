@@ -98,12 +98,18 @@ const useStyles = makeStyles((theme: Theme) =>
     leftGroup: {
       float: "left",
       display: "flex",
-      width: "40%"
+      width: "40%",
+      [theme.breakpoints.down("sm")]: {
+        width: "50%"
+      }
     },
     middleGroup: {
       textAlign: "center",
       float: "none",
-      width: "20%"
+      width: "0%",
+      [theme.breakpoints.up("md")]: {
+        width: "20%"
+      }
     },
     logo: {
       display: "none",
@@ -113,7 +119,10 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     rightGroup: {
       width: "40%",
-      float: "right"
+      float: "right",
+      [theme.breakpoints.down("sm")]: {
+        width: "50%"
+      }
     },
     profileMenu: {
       float: "right"
