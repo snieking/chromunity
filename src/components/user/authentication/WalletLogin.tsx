@@ -4,19 +4,14 @@ import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import Container from "@material-ui/core/Container";
 import Button from "@material-ui/core/Button";
 import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
-import { accountRegisteredCheck } from "../../../redux/actions/AccountActions";
-import { ApplicationState } from "../../../redux/Store";
+import { accountRegisteredCheck } from "../redux/accountActions";
+import { ApplicationState } from "../../../store";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { connect } from "react-redux";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import { ReactComponent as LeftShapes } from "../../static/graphics/left-shapes.svg";
 import { ReactComponent as RightShapes } from "../../static/graphics/right-shapes.svg";
-
-enum Step {
-  INIT,
-  LOGIN_IN_PROGRESS
-}
 
 const useStyles = makeStyles(theme =>
   createStyles({
@@ -52,6 +47,11 @@ const useStyles = makeStyles(theme =>
   })
 );
 
+enum Step {
+  INIT,
+  LOGIN_IN_PROGRESS
+}
+
 interface Props {
   loading: boolean;
   success: boolean;
@@ -74,7 +74,9 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
       setErrorOpen(true);
       setName("");
     } else if (!/[a-zA-Z0-9]{3,16}/.test(name)) {
-      setErrorMsg("Username must start with a a-z, A-Z or 0-9 character. Username should have a size between 3-16 characters.");
+      setErrorMsg(
+        "Username must start with a a-z, A-Z or 0-9 character. Username should have a size between 3-16 characters."
+      );
       setErrorOpen(true);
       setName("");
     } else {
@@ -143,7 +145,4 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(WalletLogin);
+export default connect(mapStateToProps, mapDispatchToProps)(WalletLogin);

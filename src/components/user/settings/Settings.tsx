@@ -80,6 +80,20 @@ const Settings = withStyles(styles)(
       this.handleClose = this.handleClose.bind(this);
     }
 
+    componentDidMount() {
+      const user: ChromunityUser = this.state.user;
+      if (user == null) {
+        window.location.href = "/user/login";
+      } else {
+        getUserSettings(user).then((settings: UserSettings) => {
+          this.setState({
+            avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, user.name),
+            description: settings.description
+          });
+        });
+      }
+    }
+
     render() {
       return (
         <div>
@@ -150,20 +164,6 @@ const Settings = withStyles(styles)(
           </Snackbar>
         </div>
       );
-    }
-
-    componentDidMount() {
-      const user: ChromunityUser = this.state.user;
-      if (user == null) {
-        window.location.href = "/user/login";
-      } else {
-        getUserSettings(user).then((settings: UserSettings) => {
-          this.setState({
-            avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, user.name),
-            description: settings.description
-          });
-        });
-      }
     }
 
     handleDescriptionChange(event: React.ChangeEvent<HTMLInputElement>) {

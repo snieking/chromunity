@@ -5,14 +5,14 @@ import {
   ChatActionTypes,
   OpenChatAction,
   StoreChatKeyPairAction
-} from "../../../src/redux/ChatTypes";
+} from "../../../src/components/chat/redux/chatTypes";
 import { runSaga } from "redux-saga";
 import {
   addUserToChatSaga,
   createChatKeyPairSaga,
   createNewChatSaga, leaveChatSaga,
   loadUserChatsSaga
-} from "../../../src/redux/sagas/ChatSagas";
+} from "../../../src/components/chat/redux/chatSagas";
 
 describe("Chat Sagas test", () => {
   jest.setTimeout(30000);

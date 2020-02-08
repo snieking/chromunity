@@ -4,7 +4,7 @@ import {
   UpdateTopicWallFromCacheAction,
   WallActionTypes,
   WallType
-} from "../../../src/redux/WallTypes";
+} from "../../../src/components/walls/redux/wallTypes";
 import { ChromunityUser, Topic } from "../../../src/types";
 import { CREATE_LOGGED_IN_USER } from "../../users";
 import { CREATE_RANDOM_TOPIC } from "../../topics";
@@ -14,7 +14,7 @@ import {
   loadFollowedUsersTopics,
   loadFollowedUsersTopicsByPopularity,
   loadOlderFollowedUsersTopics
-} from "../../../src/redux/sagas/TopicWallSagas";
+} from "../../../src/components/walls/redux/wallSagas";
 import { getANumber } from "../../helper";
 import logger from "../../../src/util/logger";
 

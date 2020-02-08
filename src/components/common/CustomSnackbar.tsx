@@ -9,13 +9,6 @@ import SnackbarContent from "@material-ui/core/SnackbarContent";
 import WarningIcon from "@material-ui/icons/Warning";
 import { makeStyles, Theme } from "@material-ui/core/styles";
 
-const variantIcon = {
-  success: CheckCircleIcon,
-  warning: WarningIcon,
-  error: ErrorIcon,
-  info: InfoIcon
-};
-
 const useStyles = makeStyles((theme: Theme) => ({
   success: {
     backgroundColor: green[600]
@@ -42,7 +35,14 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
-export interface Props {
+const variantIcon = {
+  success: CheckCircleIcon,
+  warning: WarningIcon,
+  error: ErrorIcon,
+  info: InfoIcon
+};
+
+interface Props {
   className?: string;
   message?: string;
   isOpen?: () => false;

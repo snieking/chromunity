@@ -8,22 +8,20 @@ import { handleReport } from "../../../blockchain/RepresentativesService";
 import { getUser } from "../../../util/user-util";
 import Timestamp from "../../common/Timestamp";
 import { COLOR_RED } from "../../../theme";
-import { ApplicationState } from "../../../redux/Store";
-import { loadRepresentatives } from "../../../redux/actions/GovernmentActions";
+import { ApplicationState } from "../../../store";
 import { connect } from "react-redux";
 import { toLowerCase } from "../../../util/util";
-
-export interface ReportCardProps {
-  report: RepresentativeReport;
-  representatives: string[];
-  loadRepresentatives: typeof loadRepresentatives;
-}
 
 const useStyles = makeStyles(
   createStyles({
     iconRed: { color: COLOR_RED }
   })
 );
+
+interface ReportCardProps {
+  report: RepresentativeReport;
+  representatives: string[];
+}
 
 const ReportCard: React.FunctionComponent<ReportCardProps> = (props: ReportCardProps) => {
   const classes = useStyles(props);
@@ -60,13 +58,7 @@ const ReportCard: React.FunctionComponent<ReportCardProps> = (props: ReportCardP
 const mapStateToProps = (store: ApplicationState) => {
   return {
     representatives: store.government.representatives.map(rep => toLowerCase(rep))
-  }
+  };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    loadRepresentatives: () => dispatch(loadRepresentatives())
-  }
-};
-
-export default connect(mapStateToProps, mapDispatchToProps) (ReportCard);
+export default connect(mapStateToProps, null)(ReportCard);

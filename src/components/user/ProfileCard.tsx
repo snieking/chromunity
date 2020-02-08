@@ -56,8 +56,7 @@ import ChromiaPageHeader from "../common/ChromiaPageHeader";
 import { COLOR_RED, COLOR_STEEL_BLUE } from "../../theme";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import { NotFound } from "../static/NotFound";
-import { ApplicationState } from "../../redux/Store";
-import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
+import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
 import { toLowerCase } from "../../util/util";
 
@@ -86,13 +85,12 @@ const styles = createStyles({
   }
 });
 
-export interface ProfileCardProps extends WithStyles<typeof styles> {
+interface ProfileCardProps extends WithStyles<typeof styles> {
   username: string;
   representatives: string[];
-  loadRepresentatives: typeof loadRepresentatives;
 }
 
-export interface ProfileCardState {
+interface ProfileCardState {
   registered: boolean;
   following: boolean;
   followers: number;
@@ -135,8 +133,6 @@ const ProfileCard = withStyles(styles)(
         isDistrusted: false
       };
 
-      props.loadRepresentatives();
-
       if (
         this.state.user != null &&
         this.props.representatives.includes(this.props.username) &&
@@ -147,7 +143,6 @@ const ProfileCard = withStyles(styles)(
         );
       }
 
-      this.renderUserPage = this.renderUserPage.bind(this);
       this.toggleFollowing = this.toggleFollowing.bind(this);
       this.renderIcons = this.renderIcons.bind(this);
       this.renderActions = this.renderActions.bind(this);
@@ -188,6 +183,29 @@ const ProfileCard = withStyles(styles)(
           countReplyStarRatingForUser(this.props.username).then(count => this.setState({ replyStars: count }));
         }
       });
+    }
+
+    render() {
+      if (this.state.registered) {
+        return (
+          <div>
+            <ChromiaPageHeader text={"@" + this.props.username} />
+            <Card key={"user-card"}>
+              {this.renderActions()}
+              <div className={this.props.classes.contentWrapper}>
+                <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} name={this.props.username} />
+              </div>
+              <Typography variant="subtitle1" component="p" className={this.props.classes.description}>
+                {this.state.description !== "" ? this.state.description : "I haven't written any description yet..."}
+              </Typography>
+              <div style={{ clear: "left" }} />
+              {this.renderIcons()}
+            </Card>
+          </div>
+        );
+      } else {
+        return <NotFound />;
+      }
     }
 
     toggleFollowing() {
@@ -397,29 +415,6 @@ const ProfileCard = withStyles(styles)(
       );
     }
 
-    renderUserPage() {
-      if (this.state.registered) {
-        return (
-          <div>
-            <ChromiaPageHeader text={"@" + this.props.username} />
-            <Card key={"user-card"}>
-              {this.renderActions()}
-              <div className={this.props.classes.contentWrapper}>
-                <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} name={this.props.username} />
-              </div>
-              <Typography variant="subtitle1" component="p" className={this.props.classes.description}>
-                {this.state.description !== "" ? this.state.description : "I haven't written any description yet..."}
-              </Typography>
-              <div style={{ clear: "left" }} />
-              {this.renderIcons()}
-            </Card>
-          </div>
-        );
-      } else {
-        return <NotFound />;
-      }
-    }
-
     renderFollowButton() {
       const user: ChromunityUser = this.state.user;
       if (user != null && user.name === this.props.username) {
@@ -442,10 +437,6 @@ const ProfileCard = withStyles(styles)(
         );
       }
     }
-
-    render() {
-      return <div>{this.renderUserPage()}</div>;
-    }
   }
 );
 
@@ -455,13 +446,4 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    loadRepresentatives: () => dispatch(loadRepresentatives())
-  };
-};
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ProfileCard);
+export default connect(mapStateToProps, null)(ProfileCard);

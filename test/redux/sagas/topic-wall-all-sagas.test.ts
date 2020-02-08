@@ -6,9 +6,9 @@ import {
   UpdateTopicWallFromCacheAction,
   WallActionTypes,
   WallType
-} from "../../../src/redux/WallTypes";
+} from "../../../src/components/walls/redux/wallTypes";
 import { runSaga } from "redux-saga";
-import { loadAllTopics, loadAllTopicsByPopularity, loadOlderAllTopics } from "../../../src/redux/sagas/TopicWallSagas";
+import { loadAllTopics, loadAllTopicsByPopularity, loadOlderAllTopics } from "../../../src/components/walls/redux/wallSagas";
 import { ChromunityUser, Topic } from "../../../src/types";
 import { getANumber } from "../../helper";
 import logger from "../../../src/util/logger";

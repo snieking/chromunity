@@ -15,7 +15,7 @@ const useStyles = makeStyles(
   })
 );
 
-export interface NotificationCardProps {
+interface NotificationCardProps {
   notification: UserNotification;
 }
 

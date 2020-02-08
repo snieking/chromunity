@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ApplicationState } from "../../redux/Store";
+import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
 import {
   addUserToChatAction,
@@ -17,8 +17,8 @@ import {
   refreshOpenChat,
   sendMessage,
   storeErrorMessage
-} from "../../redux/actions/ChatActions";
-import { Container, createStyles, LinearProgress, makeStyles, Snackbar, Theme } from "@material-ui/core";
+} from "./redux/chatActions";
+import { Container, LinearProgress, Snackbar, Theme } from "@material-ui/core";
 import ChromiaPageHeader from "../common/ChromiaPageHeader";
 import Typography from "@material-ui/core/Typography";
 import { getUser } from "../../util/user-util";
@@ -56,125 +56,12 @@ import LoadMoreButton from "../buttons/LoadMoreButton";
 import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import EmojiPicker from "../common/EmojiPicker";
 import { useInterval } from "../../util/util";
+import { chatPageStyles } from "./styles";
 
 interface OptionType {
   label: string;
   value: string;
 }
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    content: {
-      textAlign: "center"
-    },
-    textField: {
-      width: "350px",
-      maxWidth: "80%"
-    },
-    wrapper: {
-      paddingTop: "15px"
-    },
-    desktopSidePanel: {
-      [theme.breakpoints.down("md")]: {
-        display: "none"
-      },
-      marginTop: "15px",
-      height: "100%",
-      borderRightColor: theme.palette.secondary.main,
-      borderRight: "solid 2px"
-    },
-    mobileSidePanel: {
-      [theme.breakpoints.up("lg")]: {
-        display: "none"
-      },
-      float: "left",
-      position: "relative"
-    },
-    chatWrapper: {
-      margin: "0 auto",
-      maxWidth: "100%",
-      height: "100%"
-    },
-    chatActions: {
-      paddingBottom: "10px"
-    },
-    chatMessages: {
-      overflowY: "auto",
-      width: "100%",
-      maxWidth: "100%",
-      height: "50vh",
-      [theme.breakpoints.up("lg")]: {
-        height: "62vh"
-      },
-      borderTopColor: theme.palette.primary.main,
-      borderTop: "outset 1px",
-      borderBottomColor: theme.palette.primary.main,
-      borderBottom: "outset 1px"
-    },
-    messageWrapper: {
-      paddingTop: "20px",
-      bottom: 0,
-      textAlign: "center"
-    },
-    submitMessage: {
-      top: "15px",
-      marginLeft: "3%",
-      width: "10%"
-    },
-    messageField: {
-      width: "70%"
-    },
-    title: {
-      cursor: "pointer",
-      [theme.breakpoints.down("xs")]: {
-        fontSize: "24px"
-      }
-    },
-    chatActionBtn: {
-      fontSize: "28px",
-      [theme.breakpoints.down("xs")]: {
-        fontSize: "20px"
-      }
-    },
-    drawerOpenerBtn: {
-      position: "fixed",
-      top: "40vh",
-      left: "0",
-      width: "12px",
-      height: "80px",
-      borderRadius: "0px 25px 25px 0px",
-      backgroundColor: theme.palette.secondary.main,
-      "&:hover": {
-        cursor: "pointer"
-      }
-    },
-    addUserDialog: {
-      position: "relative",
-      height: "auto",
-      overflow: "visible"
-    },
-    dialogStyle: {
-      overflow: "visible"
-    },
-    dropDownMenu: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      height: "100%",
-      overflow: "visible"
-    },
-    editorWrapper: {
-      position: "relative"
-    },
-    emojiWrapper: {
-      position: "absolute",
-      top: -8,
-      left: "78.7%"
-    }
-  })
-);
 
 interface Props {
   loading: boolean;
@@ -225,7 +112,7 @@ interface State {
 }
 
 const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
-  const classes = useStyles(props);
+  const classes = chatPageStyles(props);
   const theme = useTheme();
   const textInput = useRef<HTMLInputElement>(null);
 
@@ -542,11 +429,10 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       const color = theme.palette.primary.main;
       return { ...provided, color, opacity, transition };
     },
-    input: (provided: any, state: any) => {
-      const color = textColor;
-      return { ...provided, color };
+    input: (provided: any) => {
+      return { ...provided, textColor };
     },
-    noOptionsMessage: (provided: any, state: any) => {
+    noOptionsMessage: (provided: any) => {
       const color = theme.palette.primary.main;
       return { ...provided, color };
     }
@@ -812,7 +698,4 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ChatPage);
+export default connect(mapStateToProps, mapDispatchToProps)(ChatPage);

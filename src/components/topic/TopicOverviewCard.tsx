@@ -23,8 +23,7 @@ import { getTopicChannelBelongings } from "../../blockchain/ChannelService";
 import { COLOR_ORANGE, COLOR_YELLOW } from "../../theme";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import Timestamp from "../common/Timestamp";
-import { ApplicationState } from "../../redux/Store";
-import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
+import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
 
 const styles = (theme: Theme) =>
@@ -63,7 +62,6 @@ const styles = (theme: Theme) =>
 interface Props extends WithStyles<typeof styles> {
   topic: Topic;
   representatives: string[];
-  loadRepresentatives: typeof loadRepresentatives;
 }
 
 interface State {
@@ -81,8 +79,6 @@ const TopicOverviewCard = withStyles(styles)(
     constructor(props: Props) {
       super(props);
 
-      this.props.loadRepresentatives();
-
       this.state = {
         stars: 0,
         channels: [],
@@ -95,22 +91,6 @@ const TopicOverviewCard = withStyles(styles)(
 
       this.authorIsRepresentative = this.authorIsRepresentative.bind(this);
       this.setAvatar = this.setAvatar.bind(this);
-    }
-
-    render() {
-      if (this.state.redirectToFullCard) {
-        return <Redirect to={"/t/" + this.props.topic.id + "/" + prepareUrlPath(this.props.topic.title)} push />;
-      } else {
-        return (
-          <div className={this.props.topic.removed ? this.props.classes.removed : ""}>
-            <Card raised={true} key={this.props.topic.id}>
-              <CardActionArea onClick={() => this.setState({ redirectToFullCard: true })}>
-                {this.renderCardContent()}
-              </CardActionArea>
-            </Card>
-          </div>
-        );
-      }
     }
 
     componentDidMount() {
@@ -130,6 +110,22 @@ const TopicOverviewCard = withStyles(styles)(
     componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<State>, snapshot?: any): void {
       if (this.props.topic.latest_poster !== prevProps.topic.latest_poster) {
         this.setAvatar();
+      }
+    }
+
+    render() {
+      if (this.state.redirectToFullCard) {
+        return <Redirect to={"/t/" + this.props.topic.id + "/" + prepareUrlPath(this.props.topic.title)} push />;
+      } else {
+        return (
+          <div className={this.props.topic.removed ? this.props.classes.removed : ""}>
+            <Card raised={true} key={this.props.topic.id}>
+              <CardActionArea onClick={() => this.setState({ redirectToFullCard: true })}>
+                {this.renderCardContent()}
+              </CardActionArea>
+            </Card>
+          </div>
+        );
       }
     }
 
@@ -244,13 +240,4 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    loadRepresentatives: () => dispatch(loadRepresentatives())
-  };
-};
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TopicOverviewCard);
+export default connect(mapStateToProps, null)(TopicOverviewCard);

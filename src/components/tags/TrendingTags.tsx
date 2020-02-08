@@ -1,51 +1,47 @@
-import * as React from 'react';
-import {Link} from "react-router-dom";
+import * as React from "react";
+import { Link } from "react-router-dom";
 
-import {Card, CardContent, Chip} from '@material-ui/core';
-import {getTrendingChannels} from '../../blockchain/ChannelService';
-import {stringToHexColor} from '../../util/util';
+import { Card, CardContent, Chip } from "@material-ui/core";
+import { getTrendingChannels } from "../../blockchain/ChannelService";
+import { stringToHexColor } from "../../util/util";
 
 type State = {
-    channels: string[];
+  channels: string[];
 };
 
 export class TrendingChannels extends React.Component<{}, State> {
+  constructor(props: unknown) {
+    super(props);
+    this.state = { channels: [] };
+  }
 
-    constructor(props: unknown) {
-        super(props);
-        this.state = {channels: []};
-    }
+  componentDidMount() {
+    getTrendingChannels(7).then(channels => this.setState({ channels: channels }));
+  }
 
-    componentDidMount() {
-        getTrendingChannels(7).then(channels => this.setState({channels: channels}));
-    }
-
-    render() {
-        return (
-            <div>
-                <Card>
-                    <CardContent>
-                        {this.state.channels.map((channel: string) => {
-                            return (
-                                <Link key={channel} to={"/c/" + channel}>
-                                    <Chip
-                                        size="small"
-                                        label={"#" + channel}
-                                        style={{
-                                            marginLeft: "1px",
-                                            marginRight: "1px",
-                                            marginTop: "3px",
-                                            backgroundColor: stringToHexColor(channel),
-                                            cursor: "pointer"
-                                        }}
-                                    />
-                                </Link>
-                            )
-                        })}
-                    </CardContent>
-                </Card>
-            </div>
-        )
-    }
-
+  render() {
+    return (
+      <Card>
+        <CardContent>
+          {this.state.channels.map((channel: string) => {
+            return (
+              <Link key={channel} to={"/c/" + channel}>
+                <Chip
+                  size="small"
+                  label={"#" + channel}
+                  style={{
+                    marginLeft: "1px",
+                    marginRight: "1px",
+                    marginTop: "3px",
+                    backgroundColor: stringToHexColor(channel),
+                    cursor: "pointer"
+                  }}
+                />
+              </Link>
+            );
+          })}
+        </CardContent>
+      </Card>
+    );
+  }
 }

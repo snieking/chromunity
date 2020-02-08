@@ -13,7 +13,7 @@ interface MatchParams {
   userId: string;
 }
 
-export interface UserNotificationsProps extends RouteComponentProps<MatchParams> {}
+interface UserNotificationsProps extends RouteComponentProps<MatchParams> {}
 
 const notificationsPageSize: number = 25;
 
@@ -40,7 +40,10 @@ const UserNotifications: React.FunctionComponent<UserNotificationsProps> = props
       .then(retrievedNotifications => {
         setLoading(false);
 
-        if (retrievedNotifications.length > 0 && (notifications.length < 1 || retrievedNotifications[0].id !== notifications[0].id)) {
+        if (
+          retrievedNotifications.length > 0 &&
+          (notifications.length < 1 || retrievedNotifications[0].id !== notifications[0].id)
+        ) {
           setNotifications(Array.from(new Set(notifications.concat(retrievedNotifications))));
           setCouldExistOlderNotifications(retrievedNotifications.length >= notificationsPageSize);
 
@@ -68,6 +71,7 @@ const UserNotifications: React.FunctionComponent<UserNotificationsProps> = props
       {renderLoadMoreButton()}
     </Container>
   );
+
 };
 
 export default UserNotifications;

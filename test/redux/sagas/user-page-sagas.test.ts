@@ -8,8 +8,8 @@ import {
   UpdateUserTopicsAction,
   UserPageActions,
   UserPageActionTypes
-} from "../../../src/redux/UserTypes";
-import { loadUserTopics, loadUserReplies, loadUserFollowedChannels } from "../../../src/redux/sagas/UserPageSagas";
+} from "../../../src/components/user/redux/userTypes";
+import { loadUserTopics, loadUserReplies, loadUserFollowedChannels } from "../../../src/components/user/redux/userPageSagas";
 import { runSaga } from "redux-saga";
 import { getANumber } from "../../helper";
 import { followChannel } from "../../../src/blockchain/ChannelService";

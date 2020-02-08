@@ -21,13 +21,13 @@ import LoadMoreButton from "../buttons/LoadMoreButton";
 import TopicReplyOverviewCard from "../topic/TopicReplyOverviewCard";
 import { stringToHexColor } from "../../util/util";
 import { connect } from "react-redux";
-import { ApplicationState } from "../../redux/Store";
+import { ApplicationState } from "../../store";
 import {
   userPageInit,
   loadUserTopics,
   loadUserReplies,
   loadUserFollowedChannels
-} from "../../redux/actions/UserPageActions";
+} from "../user/redux/userPageActions";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -40,7 +40,7 @@ interface MatchParams {
   userId: string;
 }
 
-export interface UserWallProps extends RouteComponentProps<MatchParams>, WithStyles<typeof styles> {
+interface UserWallProps extends RouteComponentProps<MatchParams>, WithStyles<typeof styles> {
   loading: boolean;
   userPageInit: typeof userPageInit;
   loadUserTopics: typeof loadUserTopics;
@@ -53,7 +53,7 @@ export interface UserWallProps extends RouteComponentProps<MatchParams>, WithSty
   userFollowedChannels: string[];
 }
 
-export interface UserWallState {
+interface UserWallState {
   representatives: string[];
   couldExistOlderTopics: boolean;
   couldExistOlderTopicReplies: boolean;
@@ -83,6 +83,24 @@ const UserWall = withStyles(styles)(
       this.props.loadUserTopics(topicsPageSize);
       this.props.loadUserReplies(topicsPageSize);
       this.props.loadUserFollowedChannels();
+    }
+
+    render() {
+      return (
+        <div>
+          <Container fixed>
+            {this.props.loading ? <LinearProgress variant="query" /> : <div />}
+            {this.renderUserPageIntro()}
+            <Tabs value={this.state.activeTab} onChange={this.handleChange} aria-label="User activity">
+              <Tab label="Topics" {...this.a11yProps(0)} className={this.props.classes.text} />
+              <Tab label="Replies" {...this.a11yProps(1)} className={this.props.classes.text} />
+              <Tab label="Channels" {...this.a11yProps(2)} className={this.props.classes.text} />
+            </Tabs>
+            {this.renderUserContent()}
+            {this.renderLoadMoreButton()}
+          </Container>
+        </div>
+      );
     }
 
     renderUserPageIntro() {
@@ -140,24 +158,6 @@ const UserWall = withStyles(styles)(
       } else {
         return <div />;
       }
-    }
-
-    render() {
-      return (
-        <div>
-          <Container fixed>
-            {this.props.loading ? <LinearProgress variant="query" /> : <div />}
-            {this.renderUserPageIntro()}
-            <Tabs value={this.state.activeTab} onChange={this.handleChange} aria-label="User activity">
-              <Tab label="Topics" {...this.a11yProps(0)} className={this.props.classes.text} />
-              <Tab label="Replies" {...this.a11yProps(1)} className={this.props.classes.text} />
-              <Tab label="Channels" {...this.a11yProps(2)} className={this.props.classes.text} />
-            </Tabs>
-            {this.renderUserContent()}
-            {this.renderLoadMoreButton()}
-          </Container>
-        </div>
-      );
     }
   }
 );

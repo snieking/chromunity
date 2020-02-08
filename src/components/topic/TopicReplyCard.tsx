@@ -184,55 +184,6 @@ const TopicReplyCard = withStyles(styles)(
       this.openSubReplies = this.openSubReplies.bind(this);
     }
 
-    scrollToReply = () => window.scrollTo(0, this.cardRef.current.offsetTop);
-
-    render() {
-      if (!this.props.mutedUsers.includes(this.props.reply.author)) {
-        return (
-          <div>
-            <div className={this.props.reply.removed ? this.props.classes.removed : ""}>
-              <Card
-                key={this.props.reply.id}
-                ref={this.cardRef}
-                style={{ marginLeft: this.props.indention + "px" }}
-                className={this.isReplyHighlighted() ? this.props.classes.highlighted : ""}
-              >
-                {this.state.isLoading ? <LinearProgress /> : <div />}
-                {this.renderCardContent()}
-              </Card>
-            </div>
-            <div className={!this.state.renderSubReplies ? this.props.classes.hidden : ""}>
-              {this.renderSubReplies()}
-            </div>
-          </div>
-        );
-      } else {
-        return <div />;
-      }
-    }
-
-    openSubReplies() {
-      this.setState({ renderSubReplies: true });
-      replyUnfoldCache.set(this.props.reply.id, true, replyMaxRenderAgeMillis * 7);
-      if (this.props.cascadeOpenSubReplies != null) {
-        this.props.cascadeOpenSubReplies();
-      }
-    }
-
-    renderSubReplies() {
-      return this.state.subReplies.map(reply => (
-        <TopicReplyCard
-          key={"reply-" + reply.id}
-          reply={reply}
-          indention={this.props.indention + 10}
-          topicId={this.props.topicId}
-          representatives={this.props.representatives}
-          mutedUsers={this.props.mutedUsers}
-          cascadeOpenSubReplies={this.openSubReplies}
-        />
-      ));
-    }
-
     componentDidMount() {
       const user: ChromunityUser = getUser();
 
@@ -259,6 +210,55 @@ const TopicReplyCard = withStyles(styles)(
         this.openSubReplies();
         this.scrollToReply();
       }
+    }
+
+    render() {
+      if (!this.props.mutedUsers.includes(this.props.reply.author)) {
+        return (
+          <>
+            <div className={this.props.reply.removed ? this.props.classes.removed : ""}>
+              <Card
+                key={this.props.reply.id}
+                ref={this.cardRef}
+                style={{ marginLeft: this.props.indention + "px" }}
+                className={this.isReplyHighlighted() ? this.props.classes.highlighted : ""}
+              >
+                {this.state.isLoading ? <LinearProgress /> : <div />}
+                {this.renderCardContent()}
+              </Card>
+            </div>
+            <div className={!this.state.renderSubReplies ? this.props.classes.hidden : ""}>
+              {this.renderSubReplies()}
+            </div>
+          </>
+        );
+      } else {
+        return <div />;
+      }
+    }
+
+    scrollToReply = () => window.scrollTo(0, this.cardRef.current.offsetTop);
+
+    openSubReplies() {
+      this.setState({ renderSubReplies: true });
+      replyUnfoldCache.set(this.props.reply.id, true, replyMaxRenderAgeMillis * 7);
+      if (this.props.cascadeOpenSubReplies != null) {
+        this.props.cascadeOpenSubReplies();
+      }
+    }
+
+    renderSubReplies() {
+      return this.state.subReplies.map(reply => (
+        <TopicReplyCard
+          key={"reply-" + reply.id}
+          reply={reply}
+          indention={this.props.indention + 10}
+          topicId={this.props.topicId}
+          representatives={this.props.representatives}
+          mutedUsers={this.props.mutedUsers}
+          cascadeOpenSubReplies={this.openSubReplies}
+        />
+      ));
     }
 
     getTimeLeft(until: number): number {

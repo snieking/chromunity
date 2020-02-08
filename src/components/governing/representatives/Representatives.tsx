@@ -5,13 +5,11 @@ import RepresentativeCard from "./RepresentativeCard";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import { ChromunityUser } from "../../../types";
 import { getUser } from "../../../util/user-util";
-import { ApplicationState } from "../../../redux/Store";
-import { loadRepresentatives } from "../../../redux/actions/GovernmentActions";
+import { ApplicationState } from "../../../store";
 import { connect } from "react-redux";
 
 interface Props {
   representatives: string[];
-  loadRepresentatives: typeof loadRepresentatives;
 }
 
 interface State {
@@ -27,7 +25,6 @@ class Representatives extends React.Component<Props, State> {
       user: getUser()
     };
 
-    this.props.loadRepresentatives();
     this.handleUsernameChange = this.handleUsernameChange.bind(this);
   }
 
@@ -55,13 +52,7 @@ class Representatives extends React.Component<Props, State> {
 const mapStateToProps = (store: ApplicationState) => {
   return {
     representatives: store.government.representatives
-  }
+  };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    loadRepresentatives: () => dispatch(loadRepresentatives())
-  }
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Representatives);
+export default connect(mapStateToProps, null)(Representatives);

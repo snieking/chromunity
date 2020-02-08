@@ -4,9 +4,7 @@ import {
   Card,
   CardActions,
   CardContent,
-  createStyles,
   Grid,
-  makeStyles,
   Snackbar,
   Tooltip,
   Typography
@@ -32,32 +30,8 @@ import { countUserFollowers } from "../../../blockchain/FollowingService";
 import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { toLowerCase } from "../../../util/util";
+import { electionCandidateCardStyles } from "../sharedStyles";
 
-const useStyles = makeStyles(theme =>
-  createStyles({
-    votedFor: {
-      border: "solid 3px",
-      borderColor: theme.palette.secondary.main
-    },
-    candidateCard: {
-      textAlign: "center"
-    },
-    statsDescr: {
-      position: "relative",
-      [theme.breakpoints.down("sm")]: {
-        marginTop: "5px",
-        display: "block"
-      },
-      [theme.breakpoints.up("md")]: {
-        display: "inline",
-        marginLeft: "15px"
-      }
-    },
-    voteBtn: {
-      marginBottom: "2px"
-    }
-  })
-);
 
 interface Props {
   candidate: string;
@@ -66,7 +40,7 @@ interface Props {
 }
 
 const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => {
-  const classes = useStyles(props);
+  const classes = electionCandidateCardStyles(props);
   const [avatar, setAvatar] = useState<string>(null);
   const [timesRepresentative, setTimesRepresentative] = useState(0);
   const [topicRating, setTopicRating] = useState(0);

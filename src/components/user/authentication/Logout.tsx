@@ -1,16 +1,14 @@
 import React from "react";
-import {clearSession} from "../../../util/user-util";
+import { clearSession } from "../../../util/user-util";
 
 const Logout: React.FC = () => {
-    logout();
-    window.location.href = "/";
-    return (
-        <div></div>
-    );
+  logout();
+  window.location.href = "/";
+  return <div />;
 };
 
 function logout() {
-    clearSession();
+  clearSession();
 }
 
 export default Logout;

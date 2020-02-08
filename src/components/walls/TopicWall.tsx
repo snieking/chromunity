@@ -10,7 +10,7 @@ import ChromiaPageHeader from "../common/ChromiaPageHeader";
 import { getMutedUsers } from "../../blockchain/UserService";
 import { TOPIC_VIEW_SELECTOR_OPTION } from "./WallCommon";
 import { getUser } from "../../util/user-util";
-import { ApplicationState } from "../../redux/Store";
+import { ApplicationState } from "../../store";
 import {
   loadAllTopicsByPopularity,
   loadAllTopicWall,
@@ -21,9 +21,8 @@ import {
   loadOlderAllTopics,
   loadOlderFollowedChannelsTopics,
   loadOlderFollowedUsersTopics
-} from "../../redux/actions/WallActions";
+} from "./redux/wallActions";
 import { connect } from "react-redux";
-import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
 import { toLowerCase } from "../../util/util";
 
 interface Props {
@@ -41,7 +40,6 @@ interface Props {
   loadFollowedChannelsTopics: typeof loadFollowedChannelsTopicWall;
   loadOlderFollowedChannelsTopics: typeof loadOlderFollowedChannelsTopics;
   loadFollowedChannelsTopicsByPopularity: typeof loadFollowedChannelsTopicsByPopularity;
-  loadRepresentatives: typeof loadRepresentatives;
 }
 
 interface State {
@@ -75,43 +73,11 @@ class TopicWall extends React.Component<Props, State> {
     this.handlePopularChange = this.handlePopularChange.bind(this);
   }
 
-  renderLoadMoreButton() {
-    if (this.props.couldExistOlderTopics) {
-      return <LoadMoreButton onClick={this.retrieveOlderTopics} />;
+  componentDidMount() {
+    if (this.state.user != null) {
+      getMutedUsers(this.state.user).then(users => this.setState({ mutedUsers: users }));
     }
-  }
-
-  getHeader() {
-    if (this.props.type === "userFollowings") {
-      return "Followed Users";
-    } else if (this.props.type === "tagFollowings") {
-      return "Trending Channels";
-    } else {
-      return "All Topics";
-    }
-  }
-
-  handleSelectorChange(event: React.ChangeEvent<{ value: unknown }>) {
-    const selected = event.target.value as TOPIC_VIEW_SELECTOR_OPTION;
-
-    if (this.state.selector !== selected) {
-      this.setState({ selector: selected });
-
-      if (selected === TOPIC_VIEW_SELECTOR_OPTION.RECENT) {
-        this.retrieveLatestTopics(false);
-      } else if (selected === TOPIC_VIEW_SELECTOR_OPTION.POPULAR) {
-        this.retrievePopularTopics(selected);
-      }
-    }
-  }
-
-  handlePopularChange(event: React.ChangeEvent<{ value: unknown }>) {
-    const selected = event.target.value as TOPIC_VIEW_SELECTOR_OPTION;
-
-    if (this.state.popularSelector !== selected) {
-      this.setState({ popularSelector: selected });
-      this.retrievePopularTopics(selected);
-    }
+    this.retrieveLatestTopics(false);
   }
 
   render() {
@@ -156,11 +122,43 @@ class TopicWall extends React.Component<Props, State> {
     );
   }
 
-  componentDidMount() {
-    if (this.state.user != null) {
-      getMutedUsers(this.state.user).then(users => this.setState({ mutedUsers: users }));
+  renderLoadMoreButton() {
+    if (this.props.couldExistOlderTopics) {
+      return <LoadMoreButton onClick={this.retrieveOlderTopics} />;
     }
-    this.retrieveLatestTopics(false);
+  }
+
+  getHeader() {
+    if (this.props.type === "userFollowings") {
+      return "Followed Users";
+    } else if (this.props.type === "tagFollowings") {
+      return "Trending Channels";
+    } else {
+      return "All Topics";
+    }
+  }
+
+  handleSelectorChange(event: React.ChangeEvent<{ value: unknown }>) {
+    const selected = event.target.value as TOPIC_VIEW_SELECTOR_OPTION;
+
+    if (this.state.selector !== selected) {
+      this.setState({ selector: selected });
+
+      if (selected === TOPIC_VIEW_SELECTOR_OPTION.RECENT) {
+        this.retrieveLatestTopics(false);
+      } else if (selected === TOPIC_VIEW_SELECTOR_OPTION.POPULAR) {
+        this.retrievePopularTopics(selected);
+      }
+    }
+  }
+
+  handlePopularChange(event: React.ChangeEvent<{ value: unknown }>) {
+    const selected = event.target.value as TOPIC_VIEW_SELECTOR_OPTION;
+
+    if (this.state.popularSelector !== selected) {
+      this.setState({ popularSelector: selected });
+      this.retrievePopularTopics(selected);
+    }
   }
 
   retrieveLatestTopics(ignoreCache: boolean) {
@@ -232,8 +230,7 @@ const mapDispatchToProps = (dispatch: any) => {
     loadOlderFollowedChannelsTopics: (username: string, pageSize: number) =>
       dispatch(loadOlderFollowedChannelsTopics(username, pageSize)),
     loadFollowedChannelsTopicsByPopularity: (username: string, timestamp: number, pageSize: number) =>
-      dispatch(loadFollowedChannelsTopicsByPopularity(username, timestamp, pageSize)),
-    loadRepresentatives: () => dispatch(loadRepresentatives())
+      dispatch(loadFollowedChannelsTopicsByPopularity(username, timestamp, pageSize))
   };
 };
 
@@ -246,7 +243,4 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TopicWall);
+export default connect(mapStateToProps, mapDispatchToProps)(TopicWall);

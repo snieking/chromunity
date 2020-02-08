@@ -5,11 +5,6 @@ import { Picker } from "emoji-mart";
 import { createStyles, Popover, Theme } from "@material-ui/core";
 import emojiIcon from './emoji.png';
 
-interface Props {
-  emojiAppender: Function;
-  btnSize?: string;
-}
-
 const useStyles =  makeStyles((theme: Theme) => createStyles({
   emojiBoxOpener: {
     cursor: "pointer",
@@ -31,6 +26,11 @@ const useStyles =  makeStyles((theme: Theme) => createStyles({
     width: "18px"
   }
 }));
+
+interface Props {
+  emojiAppender: Function;
+  btnSize?: string;
+}
 
 const EmojiPicker: React.FunctionComponent<Props> = (props: Props) => {
   const classes = useStyles(props);

@@ -1,25 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { createStyles, ListItem, makeStyles, Theme } from "@material-ui/core";
+import { ListItem } from "@material-ui/core";
 import ListItemText from "@material-ui/core/ListItemText";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
+import { chatParticipantsListItemStyles } from "./styles";
 
 interface Props {
   name: string
 }
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    name: {
-      color: theme.palette.primary.main
-    }
-  })
-);
-
 const ChatParticipantListItem: React.FunctionComponent<Props> = (props: Props) => {
-  const classes = useStyles(props);
+  const classes = chatParticipantsListItemStyles(props);
   const [avatar, setAvatar] = useState("");
 
   useEffect(() => {

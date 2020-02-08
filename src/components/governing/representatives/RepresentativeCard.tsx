@@ -3,9 +3,7 @@ import { Link } from "react-router-dom";
 import {
   Card,
   CardContent,
-  createStyles,
   Grid,
-  Theme,
   Tooltip,
   Typography,
   withStyles,
@@ -14,7 +12,6 @@ import {
 import { getUserSettingsCached } from "../../../blockchain/UserService";
 import { ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import Avatar, { AVATAR_SIZE } from "../../common/Avatar";
-import { COLOR_ORANGE } from "../../../theme";
 import { ChatBubble, Face, Favorite, Report, SentimentVeryDissatisfiedSharp, Star } from "@material-ui/icons";
 import Badge from "@material-ui/core/Badge";
 import { getTimesRepresentative } from "../../../blockchain/RepresentativesService";
@@ -25,28 +22,11 @@ import {
   countTopicStarRatingForUser
 } from "../../../blockchain/TopicService";
 import { countUserFollowers } from "../../../blockchain/FollowingService";
+import { representativeCardStyles } from "../sharedStyles";
 
-const styles = (theme: Theme) =>
-  createStyles({
-    representativeCard: {
-      textAlign: "center"
-    },
-    link: {
-      color: COLOR_ORANGE
-    },
-    statsDescr: {
-      position: "relative",
-      [theme.breakpoints.down("sm")]: {
-        marginTop: "5px"
-      },
-      [theme.breakpoints.up("md")]: {
-        display: "inline",
-        marginLeft: "15px"
-      }
-    }
-  });
 
-export interface RepresentativeCardProps extends WithStyles<typeof styles> {
+
+export interface RepresentativeCardProps extends WithStyles<typeof representativeCardStyles> {
   name: string;
 }
 
@@ -60,7 +40,7 @@ export interface RepresentativeCardState {
   replies: number;
 }
 
-const RepresentativeCard = withStyles(styles)(
+const RepresentativeCard = withStyles(representativeCardStyles)(
   class extends React.Component<RepresentativeCardProps, RepresentativeCardState> {
     constructor(props: RepresentativeCardProps) {
       super(props);

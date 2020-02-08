@@ -21,8 +21,7 @@ import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import Timestamp from "../common/Timestamp";
 import { COLOR_ORANGE, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
-import { ApplicationState } from "../../redux/Store";
-import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
+import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
 
 const styles = createStyles({
@@ -30,7 +29,7 @@ const styles = createStyles({
     display: "block",
     marginTop: "10px",
     marginRight: "10px",
-    marginLeft: "10px",
+    marginLeft: "10px"
   },
   rating: {
     marginTop: "10px"
@@ -56,7 +55,6 @@ const styles = createStyles({
 interface Props extends WithStyles<typeof styles> {
   reply: TopicReply;
   representatives: string[];
-  loadRepresentatives: typeof loadRepresentatives;
 }
 
 interface State {
@@ -80,7 +78,6 @@ const TopicReplyOverviewCard = withStyles(styles)(
         user: getUser()
       };
 
-      props.loadRepresentatives();
       this.authorIsRepresentative = this.authorIsRepresentative.bind(this);
     }
 
@@ -134,7 +131,7 @@ const TopicReplyOverviewCard = withStyles(styles)(
             </Typography>
           </Link>
           <div style={{ float: "right" }}>
-            <Avatar src={this.state.avatar} size={AVATAR_SIZE.SMALL} name={this.props.reply.author}/>
+            <Avatar src={this.state.avatar} size={AVATAR_SIZE.SMALL} name={this.props.reply.author} />
           </div>
         </div>
       );
@@ -179,13 +176,7 @@ const TopicReplyOverviewCard = withStyles(styles)(
 const mapStateToProps = (store: ApplicationState) => {
   return {
     representatives: store.government.representatives.map(rep => toLowerCase(rep))
-  }
+  };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    loadRepresentatives: () => dispatch(loadRepresentatives())
-  }
-};
-
-export default connect(mapStateToProps, mapDispatchToProps) (TopicReplyOverviewCard);
+export default connect(mapStateToProps, null)(TopicReplyOverviewCard);

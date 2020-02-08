@@ -20,14 +20,8 @@ import { getMutedUsers } from "../../blockchain/UserService";
 import { TOPIC_VIEW_SELECTOR_OPTION } from "./WallCommon";
 import { getUser } from "../../util/user-util";
 import { connect } from "react-redux";
-import {
-  channelInit,
-  loadChannel,
-  loadChannelByPopularity,
-  loadOlderTopicsInChannel
-} from "../../redux/actions/ChannelActions";
-import { ApplicationState } from "../../redux/Store";
-import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
+import { channelInit, loadChannel, loadChannelByPopularity, loadOlderTopicsInChannel } from "./redux/channelActions";
+import { ApplicationState } from "../../store";
 import { toLowerCase } from "../../util/util";
 
 interface MatchParams {
@@ -43,7 +37,6 @@ interface Props extends RouteComponentProps<MatchParams> {
   loadChannel: typeof loadChannel;
   loadOlderTopicsInChannel: typeof loadOlderTopicsInChannel;
   loadChannelByPopularity: typeof loadChannelByPopularity;
-  loadRepresentatives: typeof loadRepresentatives;
 }
 
 interface State {
@@ -81,8 +74,6 @@ class ChannelWall extends React.Component<Props, State> {
       user: getUser()
     };
 
-    this.props.loadRepresentatives();
-
     this.retrieveTopics = this.retrieveTopics.bind(this);
     this.retrieveOlderTopics = this.retrieveOlderTopics.bind(this);
     this.retrievePopularTopics = this.retrievePopularTopics.bind(this);
@@ -107,6 +98,62 @@ class ChannelWall extends React.Component<Props, State> {
 
     countChannelFollowers(channel).then(count => this.setState({ countOfFollowers: count }));
     countTopicsInChannel(channel).then(count => this.setState({ countOfTopics: count }));
+  }
+
+  render() {
+    return (
+      <Container>
+        <div style={{ textAlign: "center" }}>
+          <ChromiaPageHeader text={"#" + this.props.match.params.channel} />
+          <Typography component="span" variant="subtitle1" className="pink-typography" style={{ display: "inline" }}>
+            Topics: {this.state.countOfTopics}
+          </Typography>
+        </div>
+
+        <IconButton onClick={() => this.toggleChannelFollow()}>
+          <Badge badgeContent={this.state.countOfFollowers} color="primary">
+            <Tooltip title={this.state.channelFollowed ? "Unfollow channel" : "Follow channel"}>
+              {this.state.channelFollowed ? (
+                <Favorite className="red-color" fontSize="large" />
+              ) : (
+                <FavoriteBorder className="pink-color" fontSize="large" />
+              )}
+            </Tooltip>
+          </Badge>
+        </IconButton>
+
+        {this.state.isLoading || this.props.loading ? <LinearProgress variant="query" /> : <div />}
+        <StyledSelect value={this.state.selector} onChange={this.handleSelectorChange}>
+          <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.RECENT}>Recent</MenuItem>
+          <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR}>Popular</MenuItem>
+        </StyledSelect>
+        {this.state.selector === TOPIC_VIEW_SELECTOR_OPTION.POPULAR ? (
+          <StyledSelect value={this.state.popularSelector} onChange={this.handlePopularChange}>
+            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_DAY}>Last day</MenuItem>
+            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK}>Last week</MenuItem>
+            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_MONTH}>Last month</MenuItem>
+            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_ALL_TIME}>All time</MenuItem>
+          </StyledSelect>
+        ) : (
+          <div />
+        )}
+        <br />
+        <br />
+        {this.props.topics.map(topic => {
+          if (!this.state.mutedUsers.includes(topic.author) && !topic.removed) {
+            return <TopicOverviewCard key={topic.id} topic={topic} />;
+          } else {
+            return <div />;
+          }
+        })}
+        {this.renderLoadMoreButton()}
+        {this.state.user != null ? (
+          <NewTopicButton channel={this.props.match.params.channel} updateFunction={this.retrieveTopics} />
+        ) : (
+          <div />
+        )}
+      </Container>
+    );
   }
 
   retrieveTopics() {
@@ -199,64 +246,6 @@ class ChannelWall extends React.Component<Props, State> {
       this.retrievePopularTopics(selected);
     }
   }
-
-  render() {
-    return (
-      <div>
-        <Container>
-          <div style={{ textAlign: "center" }}>
-            <ChromiaPageHeader text={"#" + this.props.match.params.channel} />
-            <Typography component="span" variant="subtitle1" className="pink-typography" style={{ display: "inline" }}>
-              Topics: {this.state.countOfTopics}
-            </Typography>
-          </div>
-
-          <IconButton onClick={() => this.toggleChannelFollow()}>
-            <Badge badgeContent={this.state.countOfFollowers} color="primary">
-              <Tooltip title={this.state.channelFollowed ? "Unfollow channel" : "Follow channel"}>
-                {this.state.channelFollowed ? (
-                  <Favorite className="red-color" fontSize="large" />
-                ) : (
-                  <FavoriteBorder className="pink-color" fontSize="large" />
-                )}
-              </Tooltip>
-            </Badge>
-          </IconButton>
-
-          {this.state.isLoading || this.props.loading ? <LinearProgress variant="query" /> : <div />}
-          <StyledSelect value={this.state.selector} onChange={this.handleSelectorChange}>
-            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.RECENT}>Recent</MenuItem>
-            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR}>Popular</MenuItem>
-          </StyledSelect>
-          {this.state.selector === TOPIC_VIEW_SELECTOR_OPTION.POPULAR ? (
-            <StyledSelect value={this.state.popularSelector} onChange={this.handlePopularChange}>
-              <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_DAY}>Last day</MenuItem>
-              <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK}>Last week</MenuItem>
-              <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_MONTH}>Last month</MenuItem>
-              <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_ALL_TIME}>All time</MenuItem>
-            </StyledSelect>
-          ) : (
-            <div />
-          )}
-          <br />
-          <br />
-          {this.props.topics.map(topic => {
-            if (!this.state.mutedUsers.includes(topic.author) && !topic.removed) {
-              return <TopicOverviewCard key={topic.id} topic={topic} />;
-            } else {
-              return <div />;
-            }
-          })}
-          {this.renderLoadMoreButton()}
-          {this.state.user != null ? (
-            <NewTopicButton channel={this.props.match.params.channel} updateFunction={this.retrieveTopics} />
-          ) : (
-            <div />
-          )}
-        </Container>
-      </div>
-    );
-  }
 }
 
 const mapDispatchToProps = (dispatch: any) => {
@@ -265,8 +254,7 @@ const mapDispatchToProps = (dispatch: any) => {
     loadChannel: (name: string, pageSize: number) => dispatch(loadChannel(name, pageSize)),
     loadOlderTopicsInChannel: (pageSize: number) => dispatch(loadOlderTopicsInChannel(pageSize)),
     loadChannelByPopularity: (name: string, timestamp: number, pageSize: number) =>
-      dispatch(loadChannelByPopularity(name, timestamp, pageSize)),
-    loadRepresentatives: () => dispatch(loadRepresentatives())
+      dispatch(loadChannelByPopularity(name, timestamp, pageSize))
   };
 };
 
@@ -279,7 +267,4 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ChannelWall);
+export default connect(mapStateToProps, mapDispatchToProps)(ChannelWall);

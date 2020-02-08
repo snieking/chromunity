@@ -3,9 +3,9 @@ import { CREATE_LOGGED_IN_USER } from "../../users";
 import { ChromunityUser, Topic } from "../../../src/types";
 import { CREATE_RANDOM_TOPIC } from "../../topics";
 import { getANumber } from "../../helper";
-import { ChannelActions, ChannelActionTypes, UpdateChannelAction } from "../../../src/redux/ChannelTypes";
+import { ChannelActions, ChannelActionTypes, UpdateChannelAction } from "../../../src/components/walls/redux/channelTypes";
 import { runSaga } from "redux-saga";
-import { loadChannel, loadChannelByPopularity, loadOlderTopicsInChannel } from "../../../src/redux/sagas/ChannelSagas";
+import { loadChannel, loadChannelByPopularity, loadOlderTopicsInChannel } from "../../../src/components/walls/redux/channelSagas";
 
 
 describe("Channel saga tests", () => {

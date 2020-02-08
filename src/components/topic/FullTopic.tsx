@@ -56,8 +56,7 @@ import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import { toLowerCase } from "../../util/util";
 import ConfirmDialog from "../common/ConfirmDialog";
-import { ApplicationState } from "../../redux/Store";
-import { loadRepresentatives } from "../../redux/actions/GovernmentActions";
+import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
 import EmojiPicker from "../common/EmojiPicker";
 
@@ -108,7 +107,6 @@ interface MatchParams {
 export interface FullTopicProps extends RouteComponentProps<MatchParams>, WithStyles<typeof styles> {
   pathName: string;
   representatives: string[];
-  loadRepresentatives: typeof loadRepresentatives;
 }
 
 export interface FullTopicState {
@@ -206,8 +204,32 @@ const FullTopic = withStyles(styles)(
           subscribed: user != null && subscribers.includes(user.name)
         })
       );
+    }
 
-      this.props.loadRepresentatives();
+    render() {
+      if (!this.state.mutedUsers.includes(this.state.topic.author)) {
+        return (
+          <Container fixed>
+            <br />
+            {this.state.isLoading ? <LinearProgress variant="query" /> : <div />}
+            {this.renderTopic()}
+            {this.state.topicReplies.length > 0 ? <SubdirectoryArrowRight /> : <div />}
+            {this.state.topicReplies.map(reply => (
+              <TopicReplyCard
+                key={"reply-" + reply.id}
+                reply={reply}
+                indention={0}
+                topicId={this.state.topic.id}
+                representatives={this.props.representatives}
+                mutedUsers={this.state.mutedUsers}
+              />
+            ))}
+            {this.renderLoadMoreButton()}
+          </Container>
+        );
+      } else {
+        return <div />;
+      }
     }
 
     consumeTopicData(topic: Topic): void {
@@ -617,31 +639,6 @@ const FullTopic = withStyles(styles)(
       }
     }
 
-    render() {
-      if (!this.state.mutedUsers.includes(this.state.topic.author)) {
-        return (
-          <Container fixed>
-            <br />
-            {this.state.isLoading ? <LinearProgress variant="query" /> : <div />}
-            {this.renderTopic()}
-            {this.state.topicReplies.length > 0 ? <SubdirectoryArrowRight /> : <div />}
-            {this.state.topicReplies.map(reply => (
-              <TopicReplyCard
-                key={"reply-" + reply.id}
-                reply={reply}
-                indention={0}
-                topicId={this.state.topic.id}
-                representatives={this.props.representatives}
-                mutedUsers={this.state.mutedUsers}
-              />
-            ))}
-            {this.renderLoadMoreButton()}
-          </Container>
-        );
-      } else {
-        return <div />;
-      }
-    }
   }
 );
 
@@ -651,13 +648,4 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    loadRepresentatives: () => dispatch(loadRepresentatives())
-  };
-};
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(FullTopic);
+export default connect(mapStateToProps, null)(FullTopic);

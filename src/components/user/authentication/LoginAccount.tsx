@@ -1,8 +1,7 @@
 import React from "react";
 import { RouteComponentProps } from "react-router";
-import { accountLogin } from "../../../redux/actions/AccountActions";
+import { accountLogin } from "../redux/accountActions";
 import { LinearProgress } from "@material-ui/core";
-import { ApplicationState } from "../../../redux/Store";
 import { connect } from "react-redux";
 
 interface MatchParams {
@@ -25,11 +24,4 @@ const mapDispatchToProps = (dispatch: any) => {
   };
 };
 
-const mapStateToProps = (store: ApplicationState) => {
-  return {};
-};
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(LoginAccount);
+export default connect(null, mapDispatchToProps)(LoginAccount);

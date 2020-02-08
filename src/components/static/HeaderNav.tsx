@@ -26,19 +26,19 @@ import { ListItemIcon, Menu, MenuItem, Tooltip, Typography } from "@material-ui/
 import { getUser } from "../../util/user-util";
 import ThemeSwitcher from "./ThemeSwitcher";
 import config from "../../config";
-import { ApplicationState } from "../../redux/Store";
+import { ApplicationState } from "../../store";
+import { connect } from "react-redux";
+import Badge from "@material-ui/core/Badge";
+import { countUnreadChatsAction } from "../chat/redux/chatActions";
+import { ChromunityUser } from "../../types";
+import { toLowerCase, useInterval } from "../../util/util";
+import { retrieveLogbookLastRead } from "../../blockchain/RepresentativesService";
 import {
   checkActiveElection,
   checkNewLogbookEntries,
   loadRepresentatives,
   loadUnhandledReports
-} from "../../redux/actions/GovernmentActions";
-import { connect } from "react-redux";
-import Badge from "@material-ui/core/Badge";
-import { countUnreadChatsAction } from "../../redux/actions/ChatActions";
-import { ChromunityUser } from "../../types";
-import { toLowerCase, useInterval } from "../../util/util";
-import { retrieveLogbookLastRead } from "../../blockchain/RepresentativesService";
+} from "../governing/redux/govActions";
 
 interface Props {
   representatives: string[];
@@ -111,7 +111,7 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     leftGroup: {
       float: "left",
-      display: "flex",
+      display: "flex"
     },
     rightGroup: {
       display: "flex"
@@ -324,7 +324,12 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
         </IconButton>
       </Link>
       {renderFavoriteWalls()}
-      <IconButton className={classes.leftMenuButton} onClick={handleGovClick} aria-controls="gov-menu" aria-haspopup="true">
+      <IconButton
+        className={classes.leftMenuButton}
+        onClick={handleGovClick}
+        aria-controls="gov-menu"
+        aria-haspopup="true"
+      >
         <Tooltip title="Governing">{renderGovernmentIcon()}</Tooltip>
       </IconButton>
     </div>
@@ -373,7 +378,12 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
           </MenuItem>
         </Link>
       </Menu>
-      <IconButton className={classes.leftMenuButton} onClick={handleGovClick} aria-controls="gov-menu" aria-haspopup="true">
+      <IconButton
+        className={classes.leftMenuButton}
+        onClick={handleGovClick}
+        aria-controls="gov-menu"
+        aria-haspopup="true"
+      >
         <Tooltip title="Governing">{renderGovernmentIcon()}</Tooltip>
       </IconButton>
     </div>
@@ -456,11 +466,11 @@ const mapStateToProps = (store: ApplicationState) => {
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
-    loadRepresentatives: () => dispatch(loadRepresentatives()),
-    loadUnhandledReports: () => dispatch(loadUnhandledReports()),
     checkActiveElection: (user: ChromunityUser) => dispatch(checkActiveElection(user)),
+    checkNewLogbookEntries: (user: ChromunityUser) => dispatch(checkNewLogbookEntries(user)),
     countUnreadChats: (user: ChromunityUser) => dispatch(countUnreadChatsAction(user)),
-    checkNewLogbookEntries: (user: ChromunityUser) => dispatch(checkNewLogbookEntries(user))
+    loadRepresentatives: () => dispatch(loadRepresentatives()),
+    loadUnhandledReports: () => dispatch(loadUnhandledReports())
   };
 };
 

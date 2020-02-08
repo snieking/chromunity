@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ChatMessageDecrypted } from "../../types";
-import { createStyles, ListItem, makeStyles, Theme, Typography } from "@material-ui/core";
+import { ListItem, Typography } from "@material-ui/core";
 import ListItemText from "@material-ui/core/ListItemText";
 import { timeAgoReadable } from "../../util/util";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
@@ -8,32 +8,14 @@ import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import { Link } from "react-router-dom";
 import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { getUserSettingsCached } from "../../blockchain/UserService";
+import { chatMessageStyles } from "./styles";
 
 interface Props {
   message: ChatMessageDecrypted;
 }
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    message: {
-      background: "none",
-      maxWidth: "100%",
-      overflowWrap: "break-word",
-      wordWrap: "break-word",
-      wordBreak: "break-word"
-    },
-    author: {
-      margin: "0 auto"
-    },
-    authorName: {
-      marginTop: "2px",
-      textAlign: "center"
-    }
-  })
-);
-
 const ChatMessage: React.FunctionComponent<Props> = (props: Props) => {
-  const classes = useStyles(props);
+  const classes = chatMessageStyles(props);
   const [avatar, setAvatar] = useState("");
 
   useEffect(() => {

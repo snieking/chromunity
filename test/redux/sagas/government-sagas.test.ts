@@ -2,12 +2,12 @@ import { runSaga } from "redux-saga";
 import {
   GovernmentActions,
   GovernmentActionTypes
-} from "../../../src/redux/GovernmentTypes";
+} from "../../../src/components/governing/redux/GovernmentTypes";
 import {
   checkActiveElection,
   getCurrentRepresentatives,
   retrieveUnhandledReports
-} from "../../../src/redux/sagas/GovernmentSagas";
+} from "../../../src/components/governing/redux/govSagas";
 import { CREATE_LOGGED_IN_USER } from "../../users";
 
 describe("Representatives sagas tests", () => {

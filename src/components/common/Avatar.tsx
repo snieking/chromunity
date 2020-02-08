@@ -1,6 +1,28 @@
 import React from "react";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 
+const useStyles = makeStyles({
+  avatar: {
+    borderRadius: "50%"
+  },
+  xSmall: {
+    width: "30px",
+    height: "30px"
+  },
+  small: {
+    width: "40px",
+    height: "40px"
+  },
+  medium: {
+    width: "60px",
+    height: "60px"
+  },
+  large: {
+    width: "70px",
+    height: "70px"
+  }
+});
+
 export enum AVATAR_SIZE {
   X_SMALL,
   SMALL,
@@ -35,27 +57,5 @@ const Avatar: React.FunctionComponent<Props> = props => {
 
   return props.name != null ? <a href={"/u/" + props.name}>{avatar()}</a> : avatar();
 };
-
-const useStyles = makeStyles({
-  avatar: {
-    borderRadius: "50%"
-  },
-  xSmall: {
-    width: "30px",
-    height: "30px"
-  },
-  small: {
-    width: "40px",
-    height: "40px"
-  },
-  medium: {
-    width: "60px",
-    height: "60px"
-  },
-  large: {
-    width: "70px",
-    height: "70px"
-  }
-});
 
 export default Avatar;

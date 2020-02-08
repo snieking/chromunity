@@ -1,8 +1,8 @@
 import React from "react";
 import { Theme } from "@material-ui/core";
 import { connect } from "react-redux";
-import { ApplicationState } from "../../redux/Store";
-import { toggleTheme } from "../../redux/actions/StylingActions";
+import { ApplicationState } from "../../store";
+import { toggleTheme } from "../dynamicTheme/redux/stylingActions";
 import MenuItem from "@material-ui/core/MenuItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import Typography from "@material-ui/core/Typography";
@@ -36,7 +36,4 @@ const mapDispatchToProps = (dispatch: any) => {
   };
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ThemeSwitcher);
+export default connect(mapStateToProps, mapDispatchToProps)(ThemeSwitcher);

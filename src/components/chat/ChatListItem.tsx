@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Chat } from "../../types";
-import { createStyles, ListItem, makeStyles, Theme } from "@material-ui/core";
+import { ListItem } from "@material-ui/core";
 import ListItemText from "@material-ui/core/ListItemText";
 import { timeAgoReadable } from "../../util/util";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
+import { chatListItemStyles } from "./styles";
 
 interface Props {
   chat: Chat;
@@ -14,17 +15,8 @@ interface Props {
   onClick: Function;
 }
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    selected: {
-      borderBottom: "2px solid",
-      borderBottomColor: theme.palette.secondary.main
-    }
-  })
-);
-
 const ChatListItem: React.FunctionComponent<Props> = (props: Props) => {
-  const classes = useStyles(props);
+  const classes = chatListItemStyles(props);
   const [avatar, setAvatar] = useState("");
 
   useEffect(() => {

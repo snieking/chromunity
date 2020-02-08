@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { RouteComponentProps } from "react-router";
 import { parse } from "query-string";
-import { accountRegister } from "../../../redux/actions/AccountActions";
+import { accountRegister } from "../redux/accountActions";
 import { connect } from "react-redux";
 import { LinearProgress } from "@material-ui/core";
 
