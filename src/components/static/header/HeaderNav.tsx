@@ -24,6 +24,7 @@ import MobileWallNavigation from "./MobileWallNavigation";
 import DesktopWallNavigation from "./DesktopWallNavigation";
 import TestInfoBar from "./TestInfoBar";
 import GovMenu from "./GovMenu";
+import ChromiaLogo from "./ChromiaLogo";
 
 interface Props {
   representatives: string[];
@@ -96,10 +97,23 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     leftGroup: {
       float: "left",
-      display: "flex"
+      display: "flex",
+      width: "40%"
+    },
+    middleGroup: {
+      textAlign: "center",
+      float: "none",
+      width: "20%"
+    },
+    logo: {
+      display: "none",
+      [theme.breakpoints.up("md")]: {
+        display: "block"
+      }
     },
     rightGroup: {
-      display: "flex"
+      width: "40%",
+      float: "right"
     },
     profileMenu: {
       float: "right"
@@ -190,7 +204,11 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
               unhandledReports={props.unhandledReports}
             />
           </div>
-          <div className={classes.grow} />
+          <div className={classes.middleGroup}>
+            <div className={classes.logo}>
+              <ChromiaLogo />
+            </div>
+          </div>
           <div className={classes.rightGroup}>
             <ProfileNavigation user={user} classes={classes} unreadChats={props.unreadChats} />
           </div>
