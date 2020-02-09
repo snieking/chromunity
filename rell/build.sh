@@ -13,4 +13,4 @@ echo "Successfully compiled Chromunity blockchain"
 
 BRID=$(cat target/blockchains/1/brid.txt)
 echo "Creating .env file with brid: ${BRID}"
-echo "REACT_APP_BRID=${BRID}" > ../.env
+#echo "REACT_APP_BRID=${BRID}" > ../.env

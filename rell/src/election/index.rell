@@ -27,12 +27,11 @@ entity temp_votes_counter {
 }
 
 function governing_period_in_blocks(): integer {
-	return 4000;
+	return 75000;
 }
 
 function election_duration_in_blocks(): integer {
-	//return 4000;
-	return 20;
+	return 25000;
 }
 
 function get_current_election_id(): integer? {

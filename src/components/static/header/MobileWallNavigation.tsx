@@ -1,9 +1,8 @@
 import React from "react";
 import IconButton from "@material-ui/core/IconButton";
-import { Menu as MenuIcon, People, RssFeed } from "@material-ui/icons";
+import { Home, Menu as MenuIcon, People, RssFeed } from "@material-ui/icons";
 import { ListItemIcon, Menu, MenuItem, Tooltip, Typography } from "@material-ui/core";
 import { Link } from "react-router-dom";
-import Home from "@material-ui/core/SvgIcon/SvgIcon";
 
 interface Props {
   classes: Record<string, string>;

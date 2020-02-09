@@ -8,7 +8,7 @@
                 <app module="">
                 	<args module="lib.ft3.core">
                 		<arg key="my_blockchain_name"><string>Chromunity</string></arg>
-                		<arg key="my_blockchain_website"><string>dev.chromunity.com</string></arg>
+                		<arg key="my_blockchain_website"><string>testnet.chromunity.com</string></arg>
                 		<arg key="my_blockchain_description"><string>Decentralized reddit</string></arg>
                   		<arg key="request_max_count"><int>10</int></arg> <!-- maximum amount of request credit that is possible to keep -->
                   		<arg key="request_recovery_time"><int>5000</int></arg> 
