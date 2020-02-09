@@ -4,7 +4,6 @@ import * as BoomerangCache from "boomerang-cache";
 import { Topic, TopicReply, ChromunityUser } from "../types";
 import { sendNotifications } from "./NotificationService";
 import { op } from "ft3-lib";
-import logger from "../util/logger";
 
 const topicsCache = BoomerangCache.create("topic-bucket", {
   storage: "session",
