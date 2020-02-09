@@ -4,7 +4,7 @@ import { Provider } from "react-redux";
 import { Store } from "redux";
 import { ApplicationState } from "./store";
 import HeaderNav from "./components/static/header/HeaderNav";
-import Footer from "./components/static/Footer";
+import Footer from "./components/static/footer/Footer";
 import { CssBaseline } from "@material-ui/core";
 import Content from "./Content";
 import DynamicTheme from "./components/dynamicTheme/DynamicTheme";

@@ -1,6 +1,9 @@
 import React from "react";
-import { Typography } from "@material-ui/core";
+import { Tooltip, Typography } from "@material-ui/core";
 import makeStyles from "@material-ui/core/styles/makeStyles";
+import GitHubLogo from "./GitHubLogo";
+import TwitterLogo from "./TwitterLogo";
+import TelegramLogo from "./TelegramLogo";
 
 const useStyles = makeStyles(theme => ({
   footer: {
@@ -11,7 +14,8 @@ const useStyles = makeStyles(theme => ({
   },
   link: {
     textDecoration: "none",
-    color: "inherit"
+    color: "inherit",
+    margin: "3px"
   },
   text: {
     fontSize: "12px",
@@ -24,16 +28,21 @@ const Footer: React.FunctionComponent = props => {
   const classes = useStyles(props);
   return (
     <footer className={classes.footer}>
-      <Typography className={classes.text}>
-        Powered by{" "}
-        <a className={classes.link} href="https://chromia.com">
-          <b>Chromia</b>
-        </a>{" "}
-        - Source code at{" "}
-        <a className={classes.link} href="https://github.com/snieking/chromunity">
-          <b>GitHub</b>
+      <Tooltip title="Chromia Twitter">
+        <a className={classes.link} href="https://twitter.com/Chromia">
+          <TwitterLogo />
         </a>
-      </Typography>
+      </Tooltip>
+      <Tooltip title="Chromia Telegram">
+        <a className={classes.link} href="https://t.me/hellochromia">
+          <TelegramLogo />
+        </a>
+      </Tooltip>
+      <Tooltip title="GitHub Repository">
+        <a className={classes.link} href="https://github.com/snieking/chromunity">
+          <GitHubLogo />
+        </a>
+      </Tooltip>
     </footer>
   );
 };

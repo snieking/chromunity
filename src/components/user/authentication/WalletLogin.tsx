@@ -95,10 +95,10 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
           <RightShapes className={classes.rightShapes} />
           <div className={classes.innerWrapper}>
             <Typography variant="subtitle1" component="p" className={classes.textField}>
-              User authentication is provided by Chromia Wallet.
+              User authentication is provided by the Chromia Vault
             </Typography>
             <TextField
-              label="Account name"
+              label="Username"
               name="name"
               type="text"
               fullWidth
@@ -108,7 +108,7 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
             />
             <br />
             <Button color="primary" variant="contained" fullWidth className={classes.input} onClick={walletLogin}>
-              Register & Sign in
+              Sign In with Vault
             </Button>
           </div>
         </div>

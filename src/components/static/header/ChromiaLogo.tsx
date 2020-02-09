@@ -11,7 +11,7 @@ interface Props {
 const ChromiaLogo: React.FunctionComponent<Props> = (props: React.PropsWithChildren<Props>) => {
   return (
     <a href="https://chromia.com">
-      <svg width={93} height={24} viewBox="0 0 130 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width={81} height={21} viewBox="0 0 130 34" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
           d="M35.846 29.001v-9.33c0-2.203-.853-3.457-2.713-3.457-1.92 0-2.834 1.132-2.834 3.243V29h-5.058V6.363h5.058v7.281c.731-1.376 2.377-2.202 4.389-2.202 3.87 0 6.216 2.447 6.216 6.883V29h-5.059zM55.284 14.497a3.048 3.048 0 0 0-3.042-3.054 3.048 3.048 0 0 0-3.042 3.054 3.048 3.048 0 0 0 3.042 3.054 3.048 3.048 0 0 0 3.042-3.054zM43.617 12.005h4.754v16.977h-4.754V12.006z"
           fill="#FFB0C2"
