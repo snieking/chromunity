@@ -19,6 +19,7 @@ import {
 } from "@material-ui/core";
 
 import { RouteComponentProps } from "react-router";
+import { Redirect } from "react-router-dom";
 import EditMessageButton from "../buttons/EditMessageButton";
 import {
   createTopicReply,
@@ -59,7 +60,7 @@ import ConfirmDialog from "../common/ConfirmDialog";
 import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
 import EmojiPicker from "../common/EmojiPicker";
-import { NotFound } from "../static/NotFound";
+import logger from "../../util/logger";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -112,6 +113,7 @@ export interface FullTopicProps extends RouteComponentProps<MatchParams>, WithSt
 
 export interface FullTopicState {
   topic: Topic;
+  notFound: boolean;
   avatar: string;
   stars: number;
   ratedByMe: boolean;
@@ -133,7 +135,6 @@ const allowedEditTimeMillis: number = 300000;
 
 const FullTopic = withStyles(styles)(
   class extends React.Component<FullTopicProps, FullTopicState> {
-
     private readonly textInput: React.RefObject<HTMLInputElement>;
 
     constructor(props: FullTopicProps) {
@@ -154,6 +155,7 @@ const FullTopic = withStyles(styles)(
 
       this.state = {
         topic: initialTopic,
+        notFound: false,
         avatar: "",
         ratedByMe: false,
         subscribed: false,
@@ -193,23 +195,18 @@ const FullTopic = withStyles(styles)(
         getMutedUsers(user).then(users => this.setState({ mutedUsers: users }));
       }
 
-      getTopicById(id, user)
-        .catch((error: Error) => {
-          if (error.message.includes("No records found")) {
-            return null;
-          } else {
-            throw error;
-          }
-        })
-        .then(topic => {
-          if (topic != null) {
-            this.consumeTopicData(topic);
-          }
-        });
+      getTopicById(id, user).then(topic => {
+        logger.info("Topic returned: ", topic);
+        if (topic != null) {
+          this.consumeTopicData(topic);
+        } else {
+          this.setState({ notFound: true });
+        }
+      });
     }
 
     render() {
-      if (!this.state.mutedUsers.includes(this.state.topic.author) && this.state.topic.id !== "") {
+      if (!this.state.mutedUsers.includes(this.state.topic.author) && !this.state.notFound) {
         return (
           <Container fixed>
             <br />
@@ -230,11 +227,7 @@ const FullTopic = withStyles(styles)(
           </Container>
         );
       } else {
-        return (
-          <div style={{ textAlign: "center" }}>
-            <NotFound />
-          </div>
-        );
+        return <Redirect to={"/"} />;
       }
     }
 

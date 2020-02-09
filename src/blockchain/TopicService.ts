@@ -4,6 +4,7 @@ import * as BoomerangCache from "boomerang-cache";
 import { Topic, TopicReply, ChromunityUser } from "../types";
 import { sendNotifications } from "./NotificationService";
 import { op } from "ft3-lib";
+import logger from "../util/logger";
 
 const topicsCache = BoomerangCache.create("topic-bucket", {
   storage: "session",
@@ -318,6 +319,7 @@ export function getTopicById(id: string, user?: ChromunityUser): Promise<Topic> 
   const query = "get_topic_by_id";
 
   return executeQuery(query, { username: user != null ? toLowerCase(user.name) : "", id })
+    .catch(() => null)
     .then((topic: Topic) => {
       topicsCache.set(id, topic, 300);
       return topic;
