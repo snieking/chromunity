@@ -2,7 +2,7 @@ import { Theme } from "@material-ui/core";
 import React from "react";
 import { ApplicationState } from "../../../store";
 import { connect } from "react-redux";
-import { COLOR_CHROMIA_DARK, COLOR_CHROMIA_LIGHT, COLOR_STEEL_BLUE } from "../../../theme";
+import { COLOR_CHROMIA_LIGHT, COLOR_STEEL_BLUE } from "../../../theme";
 
 interface Props {
   theme: Theme;
