@@ -16,18 +16,26 @@ const statsDescrStyle = (theme: Theme): CreateCSSProperties => ({
   }
 });
 
+const linkStyle: CreateCSSProperties = {
+  color: COLOR_ORANGE,
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  width: "100%",
+  textOverflow: "ellipsis",
+  fontSize: "16px"
+};
+
 export const representativeCardStyles = (theme: Theme) =>
   createStyles({
     representativeCard: cardStyle,
-    link: {
-      color: COLOR_ORANGE
-    },
+    link: linkStyle,
     statsDescr: statsDescrStyle(theme)
   });
 
 export const electionCandidateCardStyles = makeStyles(theme =>
   createStyles({
     candidateCard: cardStyle,
+    link: linkStyle,
     statsDescr: statsDescrStyle(theme),
     votedFor: {
       border: "solid 3px",

@@ -82,7 +82,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
         <CardContent>
           <Avatar src={avatar} size={AVATAR_SIZE.LARGE} name={props.candidate} />
           <Typography gutterBottom variant="h6" component="p">
-            <Link to={"/u/" + props.candidate}>@{props.candidate}</Link>
+            <Link className={classes.link} to={"/u/" + props.candidate}>@{props.candidate}</Link>
           </Typography>
           <br />
           <Grid container spacing={2}>

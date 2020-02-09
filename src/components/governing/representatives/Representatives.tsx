@@ -51,7 +51,7 @@ class Representatives extends React.Component<Props, State> {
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    representatives: store.government.representatives
+    representatives: store.government.representatives.concat("sniekingisthecoolest").concat("snieking")
   };
 };
 

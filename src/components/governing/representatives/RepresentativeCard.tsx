@@ -14,7 +14,11 @@ import { ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import Avatar, { AVATAR_SIZE } from "../../common/Avatar";
 import { ChatBubble, Face, Favorite, Report, SentimentVeryDissatisfiedSharp, Star } from "@material-ui/icons";
 import Badge from "@material-ui/core/Badge";
-import { getTimesRepresentative } from "../../../blockchain/RepresentativesService";
+import {
+  getTimesRepresentative,
+  getTimesUserDistrustedSomeone,
+  getTimesUserWasDistrusted
+} from "../../../blockchain/RepresentativesService";
 import {
   countRepliesByUser,
   countReplyStarRatingForUser,
@@ -38,6 +42,8 @@ export interface RepresentativeCardState {
   followers: number;
   topics: number;
   replies: number;
+  distrusters: number;
+  distrusted: number;
 }
 
 const RepresentativeCard = withStyles(representativeCardStyles)(
@@ -51,8 +57,25 @@ const RepresentativeCard = withStyles(representativeCardStyles)(
         replyRating: 0,
         followers: 0,
         topics: 0,
-        replies: 0
+        replies: 0,
+        distrusters: 0,
+        distrusted: 0
       };
+    }
+
+    componentDidMount() {
+      getUserSettingsCached(this.props.name, 1440).then(settings =>
+        this.setState({ avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.name) })
+      );
+
+      getTimesRepresentative(this.props.name).then(count => this.setState({ timesRepresentative: count }));
+      countUserFollowers(this.props.name).then(count => this.setState({ followers: count }));
+      countTopicStarRatingForUser(this.props.name).then(count => this.setState({ topicRating: count }));
+      countReplyStarRatingForUser(this.props.name).then(count => this.setState({ replyRating: count }));
+      countTopicsByUser(this.props.name).then(count => this.setState({ topics: count }));
+      countRepliesByUser(this.props.name).then(count => this.setState({ replies: count }));
+      getTimesUserWasDistrusted(this.props.name).then(count => this.setState({ distrusters: count }));
+      getTimesUserDistrustedSomeone(this.props.name).then(count => this.setState({ distrusted: count }));
     }
 
     render() {
@@ -128,7 +151,7 @@ const RepresentativeCard = withStyles(representativeCardStyles)(
                   <Grid item xs={6}>
                     <Tooltip title={"Users who doesn't trust @" + this.props.name + " as a representative"}>
                       <div>
-                        <Badge badgeContent={1} color="secondary" showZero max={99999}>
+                        <Badge badgeContent={this.state.distrusters} color="secondary" showZero max={99999}>
                           <SentimentVeryDissatisfiedSharp fontSize="large" />
                         </Badge>
                         <Typography variant="body2" component="span" className={this.props.classes.statsDescr}>
@@ -141,7 +164,7 @@ const RepresentativeCard = withStyles(representativeCardStyles)(
                   <Grid item xs={6}>
                     <Tooltip title={"Number of users that @" + this.props.name + " have distrusted"}>
                       <div>
-                        <Badge badgeContent={1} color="secondary" showZero max={99999}>
+                        <Badge badgeContent={this.state.distrusted} color="secondary" showZero max={99999}>
                           <Report fontSize="large" />
                         </Badge>
                         <Typography variant="body2" component="span" className={this.props.classes.statsDescr}>
@@ -158,19 +181,6 @@ const RepresentativeCard = withStyles(representativeCardStyles)(
       } else {
         return <div />;
       }
-    }
-
-    componentDidMount() {
-      getUserSettingsCached(this.props.name, 1440).then(settings =>
-        this.setState({ avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.name) })
-      );
-
-      getTimesRepresentative(this.props.name).then(count => this.setState({ timesRepresentative: count }));
-      countUserFollowers(this.props.name).then(count => this.setState({ followers: count }));
-      countTopicStarRatingForUser(this.props.name).then(count => this.setState({ topicRating: count }));
-      countReplyStarRatingForUser(this.props.name).then(count => this.setState({ replyRating: count }));
-      countTopicsByUser(this.props.name).then(count => this.setState({ topics: count }));
-      countRepliesByUser(this.props.name).then(count => this.setState({ replies: count }));
     }
   }
 );
