@@ -29,17 +29,22 @@ const Footer: React.FunctionComponent = props => {
   return (
     <footer className={classes.footer}>
       <Tooltip title="Chromia Twitter">
-        <a className={classes.link} href="https://twitter.com/Chromia" target="_blank">
+        <a className={classes.link} href="https://twitter.com/Chromia" target="_blank" rel="noopener noreferrer">
           <TwitterLogo />
         </a>
       </Tooltip>
       <Tooltip title="Chromia Telegram">
-        <a className={classes.link} href="https://t.me/hellochromia" target="_blank">
+        <a className={classes.link} href="https://t.me/hellochromia" target="_blank" rel="noopener noreferrer">
           <TelegramLogo />
         </a>
       </Tooltip>
       <Tooltip title="GitHub Repository">
-        <a className={classes.link} href="https://github.com/snieking/chromunity" target="_blank">
+        <a
+          className={classes.link}
+          href="https://github.com/snieking/chromunity"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <GitHubLogo />
         </a>
       </Tooltip>
