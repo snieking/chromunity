@@ -2,6 +2,7 @@ import React from "react";
 import * as ReactMarkdown from "react-markdown";
 import { makeStyles } from "@material-ui/core";
 import { COLOR_CHROMIA_DARK, COLOR_OFF_WHITE } from "../../theme";
+import { parseMarkdownContent } from "../../util/text-parsing";
 
 const useStyles = makeStyles(theme => ({
   text: {
@@ -31,7 +32,7 @@ const MarkdownRenderer: React.FunctionComponent<Props> = props => {
   return (
     <ReactMarkdown
       className={classes.text}
-      source={props.text}
+      source={parseMarkdownContent(props.text)}
       disallowedTypes={["heading"]}
       linkTarget="_blank"
     />

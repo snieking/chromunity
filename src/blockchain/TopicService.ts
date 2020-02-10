@@ -4,6 +4,7 @@ import * as BoomerangCache from "boomerang-cache";
 import { Topic, TopicReply, ChromunityUser } from "../types";
 import { sendNotifications } from "./NotificationService";
 import { op } from "ft3-lib";
+import { getUsers } from "../util/text-parsing";
 
 const topicsCache = BoomerangCache.create("topic-bucket", {
   storage: "session",
@@ -16,6 +17,9 @@ const starRatingCache = BoomerangCache.create("rating-bucket", {
 });
 
 export const removeTopicIdFromCache = (id: string) => topicsCache.remove(id);
+
+const sendUserMentionNotifications = (user: ChromunityUser, topicId: string, message: string) =>
+  sendNotifications(user, "@" + user.name + " mentioned you in /t/" + topicId, message, getUsers(message));
 
 export function createTopic(user: ChromunityUser, channelName: string, title: string, message: string) {
   const topicId = uniqueId();
@@ -35,7 +39,14 @@ export function createTopic(user: ChromunityUser, channelName: string, title: st
       message
     )
   ).then((promise: unknown) => {
-    subscribeToTopic(user, topicId).then();
+    subscribeToTopic(user, topicId)
+      .catch()
+      .then(() =>
+        sendUserMentionNotifications(user, topicId, message)
+          .catch()
+          .then()
+      );
+
     return promise;
   });
 }
@@ -81,16 +92,25 @@ export function createTopicReply(user: ChromunityUser, topicId: string, message:
     user.ft3User,
     op(rellOperation, topicId, user.ft3User.authDescriptor.id, replyId, toLowerCase(user.name), message)
   ).then((promise: unknown) => {
-    getTopicSubscribers(topicId).then(users =>
-      createReplyTriggerString(user, topicId, replyId).then(s =>
-        sendNotifications(
-          user,
-          s,
-          message,
-          users.map(name => name.toLocaleLowerCase()).filter(item => item !== user.name)
+    getTopicSubscribers(topicId)
+      .then(users =>
+        createReplyTriggerString(user, topicId, replyId).then(s =>
+          sendNotifications(
+            user,
+            s,
+            message,
+            users.map(name => name.toLocaleLowerCase()).filter(item => item !== user.name)
+          )
+            .catch()
+            .then()
         )
       )
-    );
+      .then(() =>
+        sendUserMentionNotifications(user, topicId, message)
+          .catch()
+          .then()
+      );
+
     return promise;
   });
 }
@@ -110,20 +130,27 @@ export function createTopicSubReply(
     user.ft3User,
     op(operation, topicId, user.ft3User.authDescriptor.id, replyId, subReplyId, toLowerCase(user.name), message)
   ).then((promise: unknown) => {
-    getTopicSubscribers(topicId).then(users => {
-      if (!users.includes(replyTo.toLocaleLowerCase())) {
-        users.push(replyTo);
-      }
+    getTopicSubscribers(topicId)
+      .then(users => {
+        if (!users.includes(replyTo.toLocaleLowerCase())) {
+          users.push(replyTo);
+        }
 
-      createReplyTriggerString(user, topicId, subReplyId).then(s =>
-        sendNotifications(
-          user,
-          s,
-          message,
-          users.map(name => name.toLocaleLowerCase()).filter(item => item !== user.name)
-        )
+        createReplyTriggerString(user, topicId, subReplyId).then(s =>
+          sendNotifications(
+            user,
+            s,
+            message,
+            users.map(name => name.toLocaleLowerCase()).filter(item => item !== user.name)
+          )
+        );
+      })
+      .then(() =>
+        sendUserMentionNotifications(user, topicId, message)
+          .catch()
+          .then()
       );
-    });
+
     return promise;
   });
 }
@@ -220,11 +247,10 @@ export function getTopicsByChannelPriorToTimestamp(
 
 export function getTopicsByChannelAfterTimestamp(channelName: string, timestamp: number): Promise<Topic[]> {
   const query = "get_topics_by_channel_after_timestamp";
-  return executeQuery(query, { name: toLowerCase(channelName), timestamp })
-    .then((topics: Topic[]) => {
-      topics.forEach(topic => topicsCache.set(topic.id, topic, 300));
-      return topics;
-    });
+  return executeQuery(query, { name: toLowerCase(channelName), timestamp }).then((topics: Topic[]) => {
+    topics.forEach(topic => topicsCache.set(topic.id, topic, 300));
+    return topics;
+  });
 }
 
 export function countTopicsInChannel(channelName: string): Promise<number> {
@@ -244,11 +270,10 @@ export function getTopicStarRaters(topicId: string, clearCache = false): Promise
   }
 
   const query = "get_star_rating_for_topic";
-  return executeQuery(query, { id: topicId })
-    .then((raters: string[]) => {
-      starRatingCache.set(topicId, raters, 600);
-      return raters;
-    });
+  return executeQuery(query, { id: topicId }).then((raters: string[]) => {
+    starRatingCache.set(topicId, raters, 600);
+    return raters;
+  });
 }
 
 export function giveTopicStarRating(user: ChromunityUser, topicId: string) {
@@ -334,11 +359,10 @@ export function getTopicsAfterTimestamp(timestamp: number, pageSize: number): Pr
 }
 
 function getTopicsForTimestamp(timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
-  return executeQuery(rellOperation, { timestamp, page_size: pageSize })
-    .then((topics: Topic[]) => {
-      topics.forEach(topic => topicsCache.set(topic.id, topic, 300));
-      return topics;
-    });
+  return executeQuery(rellOperation, { timestamp, page_size: pageSize }).then((topics: Topic[]) => {
+    topics.forEach(topic => topicsCache.set(topic.id, topic, 300));
+    return topics;
+  });
 }
 
 export function getTopicsFromFollowsAfterTimestamp(
@@ -410,14 +434,15 @@ export function getTopicsFromFollowedChannels(
   pageSize: number,
   rellOperation: string
 ): Promise<Topic[]> {
-  return executeQuery(rellOperation, { username: toLowerCase(username), timestamp, page_size: pageSize })
-    .then((topics: Topic[]) => {
-      var seen: Set<string> = new Set<string>();
+  return executeQuery(rellOperation, { username: toLowerCase(username), timestamp, page_size: pageSize }).then(
+    (topics: Topic[]) => {
+      const seen: Set<string> = new Set<string>();
       return topics.filter(item => {
         let k = item.id;
         return seen.has(k) ? false : seen.add(k);
       });
-    });
+    }
+  );
 }
 
 export function getAllTopicsByPopularityAfterTimestamp(timestamp: number, pageSize: number): Promise<Topic[]> {
