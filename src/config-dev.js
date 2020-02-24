@@ -2,10 +2,10 @@
 module.exports = {
   blockchain: {
     nodeApiUrl: "https://cg7tt9fhch.execute-api.eu-central-1.amazonaws.com/dev/",
-    rid: "7ED3148E3F74230CC4CD90CDC33B55C2DC50CD878A238E61BB0CC28A84C10068"
+    rid: "A806991E072A0018049CDEB66E745035CCD160912C9053C056CAB719F23577B1"
   },
   vault: {
-    url: "https://wallet-v2.chromia.dev",
+    url: "https://dev.vault.chromia-development.com",
     callbackBaseUrl: "https://dev.chromunity.com"
   },
   sentry: {
