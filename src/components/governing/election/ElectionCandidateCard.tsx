@@ -197,7 +197,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
             }
             onCopy={() => setSnackBarOpen(true)}
           >
-            <Button fullWidth size="small" variant="outlined" color="secondary">
+            <Button fullWidth size="small" variant="contained" color="secondary">
               Copy Vote Link
             </Button>
           </CopyToClipboard>
@@ -210,7 +210,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
             <Button
               fullWidth
               size="small"
-              variant="outlined"
+              variant="contained"
               color="primary"
               onClick={() => props.voteForCandidate(name)}
               className={classes.voteBtn}
@@ -231,7 +231,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
             }
             onCopy={() => setSnackBarOpen(true)}
           >
-            <Button fullWidth size="small" variant="outlined" color="secondary">
+            <Button fullWidth size="small" variant="contained" color="secondary">
               Copy Vote Link
             </Button>
           </CopyToClipboard>
