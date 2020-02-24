@@ -2,8 +2,9 @@ import ^.core;
 
 
 function rate_limit (account) {
-    val max_counter = core.my_blockchain_info.request_max_count;
-    val recovery_time = core.my_blockchain_info.request_recovery_time;
+	if(core.my_blockchain_info.rate_limit_active == false ) return;
+    val max_counter = core.my_blockchain_info.rate_limit_max_points;
+    val recovery_time = core.my_blockchain_info.rate_limit_recovery_time;
     val stat = rl_state@{account} (.points, .last_update);
     val delta = op_context.last_block_time - stat.last_update;
     var got_points = 0;
@@ -30,8 +31,8 @@ function rate_limit (account) {
 }
 
 
-query get_account_rate_limit(account_id: byte_array) {
-	
+query get_account_rate_limit_last_update(account_id: byte_array) {
+	if(core.my_blockchain_info.rate_limit_active == false ) return (points = 0, last_update = 0);
 	val t= rl_state@{.account.id == account_id}
 	(
 		.points, 

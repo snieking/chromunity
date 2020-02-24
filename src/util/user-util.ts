@@ -1,7 +1,6 @@
-import { ChromunityUser, UserMeta } from "../types";
+import { UserMeta } from "../types";
 import * as BoomerangCache from "boomerang-cache";
 import { getUserMeta } from "../blockchain/UserService";
-import { FlagsType, KeyPair, SingleSignatureAuthDescriptor, User } from "ft3-lib";
 import ReactPiwik from "react-piwik";
 import * as Sentry from '@sentry/browser';
 import logger from "./logger";
@@ -21,7 +20,6 @@ const SESSION_CACHE = BoomerangCache.create("session-bucket", {
 
 const USER_KEY = "user";
 const USER_META_KEY = "user_meta";
-const KEYPAIR_KEY = "keyPair";
 const RSA_PASS = "rsaPassPhrase";
 
 let debugUserSet: boolean = false;
@@ -29,18 +27,7 @@ let debugUserSet: boolean = false;
 export function clearSession(): void {
   ENCRYPTED_LOCAL_CACHE.clear();
   LOCAL_CACHE.remove(USER_KEY);
-  LOCAL_CACHE.remove(KEYPAIR_KEY);
   SESSION_CACHE.remove(USER_META_KEY);
-}
-
-export function storeKeyPair(keyPair: KeyPair): void {
-  LOCAL_CACHE.set(KEYPAIR_KEY, keyPair);
-}
-
-export function getKeyPair(): KeyPair {
-  const keyPair = LOCAL_CACHE.get("keyPair");
-  if (keyPair == null) return null;
-  return new KeyPair(keyPair.privKey);
 }
 
 export function storeChatPassphrase(passphrase: string) {
@@ -71,19 +58,6 @@ export function setUsername(username: string): void {
   LOCAL_CACHE.set(USER_KEY, username);
 }
 
-export function getUser(): ChromunityUser {
-  const keyPair = getKeyPair();
-  const username: string = getUsername();
-
-  if (keyPair == null) return null;
-  if (username == null) return null;
-
-  const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
-  const ft3User = new User(keyPair, authDescriptor);
-
-  return { name: username, ft3User: ft3User };
-}
-
 export function setUserMeta(meta: UserMeta): void {
   SESSION_CACHE.set(USER_META_KEY, meta, 600);
 }
@@ -105,15 +79,6 @@ export function getCachedUserMeta(): Promise<UserMeta> {
   } else {
     return new Promise<UserMeta>(resolve => resolve(null));
   }
-}
-
-export function godAlias(): string {
-  return "admin";
-}
-
-export function isGod(): boolean {
-  const username = getUsername();
-  return username != null && username === godAlias();
 }
 
 export function ifEmptyAvatarThenPlaceholder(avatar: string, seed: string) {

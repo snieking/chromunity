@@ -7,7 +7,7 @@ import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
-import { getCachedUserMeta, getUser } from "../../util/user-util";
+import { getCachedUserMeta } from "../../util/user-util";
 import IconButton from "@material-ui/core/IconButton";
 import { Forum } from "@material-ui/icons";
 import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
@@ -29,6 +29,8 @@ import { parseEmojis } from "../../util/text-parsing";
 import "emoji-mart/css/emoji-mart.css";
 import EmojiPicker from "../common/EmojiPicker";
 import Tooltip from "@material-ui/core/Tooltip";
+import { ApplicationState } from "../../store";
+import { connect } from "react-redux";
 
 interface OptionType {
   label: string;
@@ -39,6 +41,7 @@ export interface NewTopicButtonProps extends WithStyles<typeof largeButtonStyles
   updateFunction: Function;
   channel: string;
   theme: Theme;
+  user: ChromunityUser;
 }
 
 export interface NewTopicButtonState {
@@ -53,7 +56,6 @@ export interface NewTopicButtonState {
   suggestions: OptionType[];
   channel: ValueType<OptionType>;
   activeTab: number;
-  user: ChromunityUser;
 }
 
 const maxTitleLength: number = 40;
@@ -82,8 +84,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
             times_suspended: 0
           },
           suggestions: [],
-          activeTab: 0,
-          user: getUser()
+          activeTab: 0
         };
 
         this.textInput = React.createRef();
@@ -161,7 +162,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
             const topicMessage = this.state.topicMessage;
             this.setState({ topicTitle: "", topicMessage: "" });
 
-            createTopic(this.state.user, topicChannel, topicTitle, topicMessage)
+            createTopic(this.props.user, topicChannel, topicTitle, topicMessage)
               .then(() => {
                 this.setState({
                   newTopicStatusMessage: "Topic created",
@@ -181,7 +182,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       }
 
       createTopicButton() {
-        if (this.state.user != null && this.state.userMeta.suspended_until < Date.now()) {
+        if (this.props.user != null && this.state.userMeta.suspended_until < Date.now()) {
           return (
             <div className={this.props.classes.buttonWrapper}>
               <Tooltip title="Create new topic">
@@ -418,4 +419,10 @@ const NewTopicButton = withStyles(largeButtonStyles)(
   )
 );
 
-export default NewTopicButton;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    user: store.account.user
+  };
+};
+
+export default connect(mapStateToProps, null)(NewTopicButton);

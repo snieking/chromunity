@@ -1,4 +1,6 @@
 import user;
+import user.meta;
+import topic;
 
 entity representative_election {
     key id: integer;
@@ -10,7 +12,7 @@ entity representative_election {
 entity election_block_details {
 	key started_height: integer;
 	mutable finished_height: integer = -1;
-	representative_election;
+	index representative_election;
 }
 
 entity representative_election_candidate {
@@ -26,6 +28,57 @@ entity temp_votes_counter {
 	mutable votes: integer;
 }
 
+function is_eligible_to_vote(user.user): boolean {
+	val current_election_id = get_current_election_id();
+	
+	if (current_election_id == null) {
+		return false;
+	}
+	
+	val current_election_start = election_block_details@{ 
+		.representative_election.id == current_election_id
+	} ( 
+		.started_height
+	);
+	
+	if (user.registered > current_election_start) {
+		log("Not elgible for voting: User registered after election start");
+		return false; 
+	}
+	
+	if (meta.user_meta@{ user }.suspended_until > current_election_start) {
+		log("Not eligible for voting: User had a suspension until after election start");
+		return false;
+	}
+	
+	val previous_election_completed = (representative_election, election_block_details)@?{
+		representative_election == election_block_details.representative_election,
+		representative_election.completed == true
+	} ( 
+		election_block_details.finished_height, 
+		@omit @sort_desc representative_election.timestamp
+	) limit 1;
+	
+	if (previous_election_completed != null) {
+		log("A previous election was held, so verifying correct number of posts");
+		val number_of_topics = topic.topic@*{ 
+			.author == user,
+			.last_modified > previous_election_completed,
+			.last_modified < current_election_start
+		}( .id ).size();
+		
+		val number_of_replies = topic.topic_reply@*{
+			.author == user,
+			.timestamp > previous_election_completed,
+			.timestamp < current_election_start
+		}( .id ).size();
+		
+		return number_of_topics + number_of_replies >= 5;
+	}
+	
+	return true;
+}
+
 function governing_period_in_blocks(): integer {
 	return 75000;
 }
@@ -38,6 +91,6 @@ function get_current_election_id(): integer? {
 	return representative_election@?{ .completed == false } ( @omit @sort_desc .timestamp, .id ) limit 1;
 }
 
-function get_latest_completed_election_id(): integer {
-	return representative_election@{ .completed == true } ( .id, @omit @sort_desc .timestamp ) limit 1;
+function get_latest_completed_election_id(): integer? {
+	return representative_election@?{ .completed == true } ( .id, @omit @sort_desc .timestamp ) limit 1;
 }

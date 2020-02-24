@@ -14,7 +14,7 @@ import {
   WithStyles
 } from "@material-ui/core";
 import { prepareUrlPath, stringToHexColor, toLowerCase } from "../../util/util";
-import { getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
+import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { StarBorder, StarRate } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import { Redirect } from "react-router";
@@ -62,6 +62,7 @@ const styles = (theme: Theme) =>
 interface Props extends WithStyles<typeof styles> {
   topic: Topic;
   representatives: string[];
+  user: ChromunityUser;
 }
 
 interface State {
@@ -70,7 +71,6 @@ interface State {
   redirectToFullCard: boolean;
   avatar: string;
   channels: string[];
-  user: ChromunityUser;
   numberOfReplies: number;
 }
 
@@ -86,7 +86,6 @@ const TopicOverviewCard = withStyles(styles)(
         ratedByMe: false,
         redirectToFullCard: false,
         avatar: "",
-        user: getUser(),
         numberOfReplies: 0
       };
 
@@ -97,7 +96,7 @@ const TopicOverviewCard = withStyles(styles)(
     componentDidMount() {
       getTopicChannelBelongings(this.props.topic.id).then(channels => this.setState({ channels: channels }));
 
-      const user: ChromunityUser = this.state.user;
+      const user: ChromunityUser = this.props.user;
       this.setAvatar();
       getTopicStarRaters(this.props.topic.id).then(usersWhoStarRated =>
         this.setState({
@@ -237,6 +236,7 @@ const TopicOverviewCard = withStyles(styles)(
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
+    user: store.account.user,
     representatives: store.government.representatives.map(rep => toLowerCase(rep))
   };
 };

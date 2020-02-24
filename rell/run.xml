@@ -10,8 +10,11 @@
                 		<arg key="my_blockchain_name"><string>Chromunity</string></arg>
                 		<arg key="my_blockchain_website"><string>testnet.chromunity.com</string></arg>
                 		<arg key="my_blockchain_description"><string>Decentralized reddit</string></arg>
-                  		<arg key="request_max_count"><int>10</int></arg> <!-- maximum amount of request credit that is possible to keep -->
-                  		<arg key="request_recovery_time"><int>5000</int></arg> 
+                		
+                		<arg key="rate_limit_active"><int>1</int></arg>
+                  		<arg key="rate_limit_max_points"><int>10</int></arg>
+                  		<arg key="rate_limit_recovery_time"><int>5000</int></arg>
+                  		<arg key="rate_limit_points_at_account_creation"><int>10</int></arg>
                 	</args>
                 </app>
             </config>

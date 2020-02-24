@@ -17,7 +17,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
 import IconButton from "@material-ui/core/IconButton";
-import { getCachedUserMeta, getUser } from "../../util/user-util";
+import { getCachedUserMeta } from "../../util/user-util";
 import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import { ChromunityUser, UserMeta } from "../../types";
 import { Delete, Edit, MoreHoriz } from "@material-ui/icons";
@@ -25,6 +25,8 @@ import { parseEmojis } from "../../util/text-parsing";
 import EmojiPicker from "../common/EmojiPicker";
 import withStyles from "@material-ui/core/styles/withStyles";
 import ConfirmDialog from "../common/ConfirmDialog";
+import { ApplicationState } from "../../store";
+import { connect } from "react-redux";
 
 const styles = createStyles({
   editorWrapper: {
@@ -37,6 +39,7 @@ export interface EditMessageButtonProps extends WithStyles<typeof styles> {
   deleteFunction: Function;
   value: string;
   modifiableUntil: number;
+  user: ChromunityUser;
 }
 
 export interface EditMessageButtonState {
@@ -48,7 +51,6 @@ export interface EditMessageButtonState {
   replyStatusErrorOpen: boolean;
   replySentStatus: string;
   userMeta: UserMeta;
-  user: ChromunityUser;
 }
 
 const EditMessageButton = withStyles(styles)(
@@ -70,8 +72,7 @@ const EditMessageButton = withStyles(styles)(
           name: "",
           suspended_until: Date.now() + 10000,
           times_suspended: 0
-        },
-        user: getUser()
+        }
       };
 
       this.textInput = React.createRef();
@@ -232,7 +233,7 @@ const EditMessageButton = withStyles(styles)(
     }
 
     render() {
-      if (this.state.user != null && this.state.userMeta.suspended_until < Date.now()) {
+      if (this.props.user != null && this.state.userMeta.suspended_until < Date.now()) {
         return (
           <div style={{ display: "inline-block" }}>
             <Tooltip title="Edit">
@@ -274,4 +275,10 @@ const EditMessageButton = withStyles(styles)(
   }
 );
 
-export default EditMessageButton;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    user: store.account.user
+  };
+};
+
+export default connect(mapStateToProps, null)(EditMessageButton);

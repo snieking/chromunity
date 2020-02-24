@@ -21,11 +21,12 @@ import {
   withStyles,
   WithStyles
 } from "@material-ui/core";
-import { getCachedUserMeta, getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
+import { getCachedUserMeta, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { Delete, Reply, Report, StarBorder, StarRate, UnfoldMore } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import {
-  createTopicSubReply, deleteReply,
+  createTopicSubReply,
+  deleteReply,
   getReplyStarRaters,
   getTopicSubReplies,
   giveReplyStarRating,
@@ -47,6 +48,8 @@ import MarkdownRenderer from "../common/MarkdownRenderer";
 import ConfirmDialog from "../common/ConfirmDialog";
 import * as BoomerangCache from "boomerang-cache";
 import EmojiPicker from "../common/EmojiPicker";
+import { ApplicationState } from "../../store";
+import { connect } from "react-redux";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -100,6 +103,7 @@ const styles = (theme: Theme) =>
   });
 
 interface Props extends WithStyles<typeof styles> {
+  user: ChromunityUser;
   topicId: string;
   reply: TopicReply;
   indention: number;
@@ -120,7 +124,6 @@ interface State {
   removeReplyDialogOpen: boolean;
   reportReplyDialogOpen: boolean;
   isLoading: boolean;
-  user: ChromunityUser;
   timeLeftUntilNoLongerModifiable: number;
   renderSubReplies: boolean;
 }
@@ -135,7 +138,6 @@ const replyUnfoldCache = BoomerangCache.create("reply-unfold-bucket", {
 
 const TopicReplyCard = withStyles(styles)(
   class extends React.Component<Props, State> {
-
     private readonly textInput: React.RefObject<HTMLInputElement>;
     private readonly cardRef: React.RefObject<HTMLDivElement>;
 
@@ -162,7 +164,6 @@ const TopicReplyCard = withStyles(styles)(
         removeReplyDialogOpen: false,
         reportReplyDialogOpen: false,
         isLoading: false,
-        user: getUser(),
         timeLeftUntilNoLongerModifiable: 0,
         renderSubReplies: previouslyFoldedSubReplies ? decisionToRenderSubReplies : shouldRenderDueToTimestamp
       };
@@ -186,7 +187,7 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     componentDidMount() {
-      const user: ChromunityUser = getUser();
+      const user: ChromunityUser = this.props.user;
 
       getUserSettingsCached(this.props.reply.author, 1440).then(settings => {
         this.setState({
@@ -258,6 +259,7 @@ const TopicReplyCard = withStyles(styles)(
           representatives={this.props.representatives}
           mutedUsers={this.props.mutedUsers}
           cascadeOpenSubReplies={this.openSubReplies}
+          user={this.props.user}
         />
       ));
     }
@@ -271,11 +273,11 @@ const TopicReplyCard = withStyles(styles)(
       if (!this.state.isLoading) {
         this.setState({ isLoading: true });
         const id = this.props.reply.id;
-        const user = this.state.user;
+        const user = this.props.user;
 
         if (user != null) {
           if (this.state.ratedByMe) {
-            removeReplyStarRating(this.state.user, id)
+            removeReplyStarRating(this.props.user, id)
               .then(() =>
                 this.setState(prevState => ({
                   ratedByMe: false,
@@ -285,7 +287,7 @@ const TopicReplyCard = withStyles(styles)(
               )
               .catch(() => this.setState({ isLoading: false }));
           } else {
-            giveReplyStarRating(this.state.user, id)
+            giveReplyStarRating(this.props.user, id)
               .then(() =>
                 this.setState(prevState => ({
                   ratedByMe: true,
@@ -318,7 +320,7 @@ const TopicReplyCard = withStyles(styles)(
           </Link>
           <br />
           <div style={{ float: "right" }}>
-            <Avatar src={this.state.avatar} size={AVATAR_SIZE.MEDIUM} name={this.props.reply.author}/>
+            <Avatar src={this.state.avatar} size={AVATAR_SIZE.MEDIUM} name={this.props.reply.author} />
           </div>
         </div>
       );
@@ -329,15 +331,19 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     renderCardContent() {
-      const user: ChromunityUser = this.state.user;
+      const user: ChromunityUser = this.props.user;
       return (
         <CardContent>
           {this.renderAuthor()}
           <div>
             <Timestamp milliseconds={this.props.reply.timestamp} />
-            <MarkdownRenderer text={this.props.reply.overridden_original !== "" && this.props.reply.removed
-              ? this.props.reply.overridden_original
-              : this.props.reply.message} />
+            <MarkdownRenderer
+              text={
+                this.props.reply.overridden_original !== "" && this.props.reply.removed
+                  ? this.props.reply.overridden_original
+                  : this.props.reply.message
+              }
+            />
           </div>
           <div className={this.props.classes.bottomBar}>
             <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
@@ -410,14 +416,14 @@ const TopicReplyCard = withStyles(styles)(
 
     editReplyMessage(text: string) {
       this.setState({ isLoading: true });
-      modifyReply(this.state.user, this.props.reply.id, text)
+      modifyReply(this.props.user, this.props.reply.id, text)
         .then(() => window.location.reload())
         .catch(() => this.setState({ isLoading: false }));
     }
 
     deleteReplyMessage() {
       this.setState({ isLoading: true });
-      deleteReply(this.state.user, this.props.reply.id)
+      deleteReply(this.props.user, this.props.reply.id)
         .then(() => window.location.reload())
         .catch(() => this.setState({ isLoading: false }));
     }
@@ -428,23 +434,25 @@ const TopicReplyCard = withStyles(styles)(
 
     reportReply() {
       this.closeReportReply();
-      const user: ChromunityUser = getUser();
 
-      if (user != null) {
-        reportReply(user, this.props.topicId, this.props.reply.id).then(() => window.location.reload());
+      if (this.props.user != null) {
+        reportReply(this.props.user, this.props.topicId, this.props.reply.id).then(() => window.location.reload());
       } else {
         window.location.href = "/user/login";
       }
     }
 
     isRepresentative() {
-      const user: ChromunityUser = this.state.user;
+      const user: ChromunityUser = this.props.user;
       return user != null && this.props.representatives.includes(user.name.toLocaleLowerCase());
     }
 
     renderAdminActions() {
-      if (this.isRepresentative() && !this.props.reply.removed
-        && !hasReportId(REMOVE_TOPIC_REPLY_OP_ID + ":" + this.props.reply.id)) {
+      if (
+        this.isRepresentative() &&
+        !this.props.reply.removed &&
+        !hasReportId(REMOVE_TOPIC_REPLY_OP_ID + ":" + this.props.reply.id)
+      ) {
         return (
           <div style={{ display: "inline-block" }}>
             <IconButton aria-label="Remove reply" onClick={() => this.setState({ removeReplyDialogOpen: true })}>
@@ -475,7 +483,7 @@ const TopicReplyCard = withStyles(styles)(
                       {
                         removeReplyDialogOpen: false
                       },
-                      () => removeTopicReply(this.state.user, this.props.reply.id).then(() => window.location.reload())
+                      () => removeTopicReply(this.props.user, this.props.reply.id).then(() => window.location.reload())
                     )
                   }
                   color="primary"
@@ -490,7 +498,7 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     renderReplyBox() {
-      const user: ChromunityUser = this.state.user;
+      const user: ChromunityUser = this.props.user;
       if (this.state.replyBoxOpen && user == null) {
         window.location.href = "/user/login";
       } else if (this.state.replyBoxOpen && this.state.userMeta.suspended_until > Date.now()) {
@@ -563,7 +571,7 @@ const TopicReplyCard = withStyles(styles)(
       const message: string = this.state.replyMessage;
       this.setState({ replyBoxOpen: false, replyMessage: "" });
       createTopicSubReply(
-        this.state.user,
+        this.props.user,
         this.props.topicId,
         this.props.reply.id,
         message,
@@ -576,4 +584,10 @@ const TopicReplyCard = withStyles(styles)(
   }
 );
 
-export default TopicReplyCard;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    user: store.account.user
+  };
+};
+
+export default connect(mapStateToProps, null)(TopicReplyCard);

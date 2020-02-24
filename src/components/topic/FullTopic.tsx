@@ -36,7 +36,7 @@ import {
   unsubscribeFromTopic
 } from "../../blockchain/TopicService";
 import { Topic, TopicReply, ChromunityUser } from "../../types";
-import { getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
+import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import {
   Delete,
   Notifications,
@@ -106,9 +106,10 @@ interface MatchParams {
   id: string;
 }
 
-export interface FullTopicProps extends RouteComponentProps<MatchParams>, WithStyles<typeof styles> {
+interface FullTopicProps extends RouteComponentProps<MatchParams>, WithStyles<typeof styles> {
   pathName: string;
   representatives: string[];
+  user: ChromunityUser;
 }
 
 export interface FullTopicState {
@@ -126,7 +127,6 @@ export interface FullTopicState {
   removeTopicDialogOpen: boolean;
   reportTopicDialogOpen: boolean;
   mutedUsers: string[];
-  user: ChromunityUser;
   timeLeftUntilNoLongerModifiable: number;
 }
 
@@ -168,7 +168,6 @@ const FullTopic = withStyles(styles)(
         removeTopicDialogOpen: false,
         reportTopicDialogOpen: false,
         mutedUsers: [],
-        user: getUser(),
         timeLeftUntilNoLongerModifiable: 0
       };
 
@@ -189,7 +188,7 @@ const FullTopic = withStyles(styles)(
 
     componentDidMount(): void {
       const id = this.props.match.params.id;
-      const user: ChromunityUser = this.state.user;
+      const user: ChromunityUser = this.props.user;
 
       if (user != null) {
         getMutedUsers(user).then(users => this.setState({ mutedUsers: users }));
@@ -203,6 +202,12 @@ const FullTopic = withStyles(styles)(
           this.setState({ notFound: true });
         }
       });
+    }
+
+    componentWillUnmount(): void {
+      this.setState = () => {
+        return;
+      };
     }
 
     render() {
@@ -238,12 +243,12 @@ const FullTopic = withStyles(styles)(
       getTopicStarRaters(topic.id, true).then(usersWhoStarRated =>
         this.setState({
           stars: usersWhoStarRated.length,
-          ratedByMe: usersWhoStarRated.includes(this.state.user != null && this.state.user.name.toLocaleLowerCase())
+          ratedByMe: usersWhoStarRated.includes(this.props.user != null && this.props.user.name.toLocaleLowerCase())
         })
       );
       getTopicSubscribers(topic.id).then(subscribers =>
         this.setState({
-          subscribed: this.state.user != null && subscribers.includes(this.state.user.name)
+          subscribed: this.props.user != null && subscribers.includes(this.props.user.name)
         })
       );
 
@@ -270,13 +275,13 @@ const FullTopic = withStyles(styles)(
       this.setState({ isLoading: true });
       let replies: Promise<TopicReply[]>;
       if (this.state.topicReplies.length === 0) {
-        replies = getTopicRepliesPriorToTimestamp(topicId, Date.now(), repliesPageSize, this.state.user);
+        replies = getTopicRepliesPriorToTimestamp(topicId, Date.now(), repliesPageSize, this.props.user);
       } else {
         replies = getTopicRepliesAfterTimestamp(
           topicId,
           this.state.topicReplies[0].timestamp,
           repliesPageSize,
-          this.state.user
+          this.props.user
         );
       }
 
@@ -303,7 +308,7 @@ const FullTopic = withStyles(styles)(
           this.state.topic.id,
           oldestTimestamp - 1,
           repliesPageSize,
-          this.state.user
+          this.props.user
         ).then(retrievedReplies => {
           if (retrievedReplies.length > 0) {
             this.setState(prevState => ({
@@ -322,7 +327,7 @@ const FullTopic = withStyles(styles)(
       if (!this.state.isLoading) {
         this.setState({ isLoading: true });
         const id: string = this.state.topic.id;
-        const user: ChromunityUser = this.state.user;
+        const user: ChromunityUser = this.props.user;
 
         if (user != null) {
           if (this.state.ratedByMe) {
@@ -356,7 +361,7 @@ const FullTopic = withStyles(styles)(
       if (!this.state.isLoading) {
         this.setState({ isLoading: true });
         const id: string = this.state.topic.id;
-        const user: ChromunityUser = this.state.user;
+        const user: ChromunityUser = this.props.user;
 
         if (user != null) {
           if (this.state.subscribed) {
@@ -415,7 +420,7 @@ const FullTopic = withStyles(styles)(
     }
 
     renderCardActions() {
-      const user: ChromunityUser = this.state.user;
+      const user: ChromunityUser = this.props.user;
       return (
         <CardActions style={{ marginTop: "-20px" }}>
           <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
@@ -476,7 +481,7 @@ const FullTopic = withStyles(styles)(
 
     editTopicMessage(text: string) {
       this.setState({ isLoading: true });
-      modifyTopic(this.state.user, this.state.topic.id, text)
+      modifyTopic(this.props.user, this.state.topic.id, text)
         .then(() =>
           this.setState(prevState => ({
             topic: {
@@ -503,7 +508,7 @@ const FullTopic = withStyles(styles)(
 
     reportTopic() {
       this.closeReportTopic();
-      const user: ChromunityUser = this.state.user;
+      const user: ChromunityUser = this.props.user;
 
       if (user != null) {
         reportTopic(user, this.state.topic.id).then();
@@ -514,11 +519,11 @@ const FullTopic = withStyles(styles)(
     }
 
     deleteTopic() {
-      deleteTopic(this.state.user, this.state.topic.id).then(() => (window.location.href = "/"));
+      deleteTopic(this.props.user, this.state.topic.id).then(() => (window.location.href = "/"));
     }
 
     isRepresentative() {
-      const user: ChromunityUser = this.state.user;
+      const user: ChromunityUser = this.props.user;
       return user != null && this.props.representatives.includes(user.name.toLocaleLowerCase());
     }
 
@@ -547,7 +552,7 @@ const FullTopic = withStyles(styles)(
                   {
                     removeTopicDialogOpen: false
                   },
-                  () => removeTopic(this.state.user, this.props.match.params.id).then(() => window.location.reload())
+                  () => removeTopic(this.props.user, this.props.match.params.id).then(() => window.location.reload())
                 )
               }
             />
@@ -636,10 +641,9 @@ const FullTopic = withStyles(styles)(
     }
 
     handleReplySubmit(): void {
-      const user = getUser();
-      if (user != null) {
+      if (this.props.user != null) {
         this.setState({ isLoading: true, replyBoxOpen: false });
-        createTopicReply(user, this.state.topic.id, this.state.replyMessage).then(() => {
+        createTopicReply(this.props.user, this.state.topic.id, this.state.replyMessage).then(() => {
           this.retrieveLatestReplies();
           this.setState({ replyMessage: "" });
         });
@@ -656,6 +660,7 @@ const FullTopic = withStyles(styles)(
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
+    user: store.account.user,
     representatives: store.government.representatives.map(rep => toLowerCase(rep))
   };
 };

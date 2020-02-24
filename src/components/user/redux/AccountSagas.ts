@@ -1,134 +1,109 @@
-import {
-  AccountActionTypes,
-  AccountLoginAction,
-  AccountRegisterAction,
-  AccountRegisteredCheckAction
-} from "./accountTypes";
+import { AccountActionTypes, ILoginAccount, IVaultSuccess } from "./accountTypes";
 import { takeLatest, put, select } from "redux-saga/effects";
-import { SingleSignatureAuthDescriptor, FlagsType, User, Account, op } from "ft3-lib";
-import { KeyPair } from "ft3-lib";
+import { op, SSOStoreLocalStorage } from "ft3-lib";
 import config from "../../../config.js";
-import { getAccountId } from "../../../blockchain/UserService";
+import { getUsernameByAccountId } from "../../../blockchain/UserService";
 import { BLOCKCHAIN, executeOperations } from "../../../blockchain/Postchain";
-import { accountAddAccountId } from "./accountActions";
-import { getKeyPair, setUsername, storeKeyPair } from "../../../util/user-util";
-import { makeKeyPair } from "../../../blockchain/CryptoService";
+import { clearSession, getUsername, setUsername } from "../../../util/user-util";
 import logger from "../../../util/logger";
+import { toLowerCase } from "../../../util/util";
+import SSO from "ft3-lib/dist/ft3/user/sso/sso";
+import User from "ft3-lib/dist/ft3/user/user";
+import { setUser, vaultCancel } from "./accountActions";
+import { ChromunityUser } from "../../../types";
 import { ApplicationState } from "../../../store";
 
+SSO.vaultUrl = config.vault.url;
+
+const getUser = (state: ApplicationState) => state.account.user;
+
 export function* accountWatcher() {
-  yield takeLatest(AccountActionTypes.ACCOUNT_REGISTER_CHECK, checkIfRegistered);
-  yield takeLatest(AccountActionTypes.ACCOUNT_REGISTER, registerAccount);
-  yield takeLatest(AccountActionTypes.ACCOUNT_LOGIN, loginAccount);
+  yield takeLatest(AccountActionTypes.LOGIN_ACCOUNT, loginSaga);
+  yield takeLatest(AccountActionTypes.VAULT_SUCCESS, vaultSuccessSaga);
+  yield takeLatest(AccountActionTypes.AUTO_LOGIN, autoLoginSaga);
+  yield takeLatest(AccountActionTypes.LOGOUT_ACCOUNT, logoutSaga);
 }
 
-const getAccountIdFromState = (state: ApplicationState) => state.account.accountId;
+function* loginSaga(action: ILoginAccount) {
+  logger.silly("[SAGA - STARTED]: Login process started for username: [%s]", action.username);
+  const successUrl = encodeURI(`${config.vault.callbackBaseUrl}/user/success/${action.username}`);
+  const cancelUrl = encodeURI(`${config.vault.callbackBaseUrl}/user/cancel`);
 
-function* checkIfRegistered(action: AccountRegisteredCheckAction) {
-  logger.silly("[SAGA - STARTED]: Checking if account registered");
+  const BC = yield BLOCKCHAIN;
+  new SSO(BC, new SSOStoreLocalStorage()).initiateLogin(successUrl, cancelUrl);
+}
 
-  const accountId = yield getAccountId(action.username);
+function* logoutSaga() {
+  const BC = yield BLOCKCHAIN;
+  const sso = new SSO(BC, new SSOStoreLocalStorage());
 
-  if (!accountId) {
-    logger.debug("Account [%s] didn't exist, registering with wallet", action.username);
-    const returnUrl = encodeURIComponent(`${config.vault.callbackBaseUrl}/user/register/${action.username}`);
-    window.location.replace(`${config.vault.url}/?route=/link-account&returnUrl=${returnUrl}`);
-  } else {
-    logger.debug("Account [%s] existed, logging in accountId [%s] with wallet", action.username, accountId);
-    yield put(accountAddAccountId(accountId));
-    yield walletLogin(action.username);
+  yield sso.logout;
+
+  clearSession();
+  yield put(setUser(null));
+}
+
+function* vaultSuccessSaga(action: IVaultSuccess) {
+  logger.silly("[SAGA - STARTED] Received success from vault for username: [%s]", action.username);
+  const BC = yield BLOCKCHAIN;
+
+  try {
+    const sso = new SSO(BC, new SSOStoreLocalStorage());
+    logger.silly("RawTx: [%s]", action.rawTx);
+    const [account, user] = yield sso.finalizeLogin(action.rawTx);
+    logger.silly("Account [%s], user [%s]", JSON.stringify(account), JSON.stringify(user));
+
+    const username = yield getUsernameByAccountId(account.id);
+    logger.silly("Username linked to accountId: %s", username);
+
+    if (username == null) {
+      yield executeOperations(user, op("register_user", action.username, account.id));
+      yield authorizeUser(username, user);
+    } else if (toLowerCase(username) === toLowerCase(action.username)) {
+      yield authorizeUser(username, user);
+    } else {
+      yield put(vaultCancel("Vault account is already linked with another user"));
+    }
+  } catch (error) {
+    yield put(vaultCancel("Error signing in: " + error.message));
   }
-
-  logger.silly("[SAGA - FINISHED]: Checking if account registered");
 }
 
-function* registerAccount(action: AccountRegisterAction) {
-  logger.silly("[SAGA - STARTED]: Registering account");
-  logger.debug("Registering new account for username [%s]", action.username);
+function* autoLoginSaga() {
+  const foundUser = yield select(getUser);
+  const username = getUsername();
 
-  const walletAuthDescriptor = new SingleSignatureAuthDescriptor(Buffer.from(action.vaultPubKey, "hex"), [
-    FlagsType.Account,
-    FlagsType.Transfer
-  ]);
-
-  const keyPair = new KeyPair(makeKeyPair().privKey.toString("hex"));
-  storeKeyPair(keyPair);
-
-  const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
-
-  const user = new User(keyPair, authDescriptor);
-
-  logger.debug("Registering user");
-  yield executeOperations(
-    user,
-    op("register_user", action.username, authDescriptor.toGTV(), walletAuthDescriptor.toGTV())
-  );
-  logger.debug("Logged in user with username: ", action.username);
-
-  authorizeUser(action.username);
-  logger.silly("[SAGA - FINISHED]: Registering account");
-}
-
-function* walletLogin(username: string) {
-  logger.silly("[SAGA - STARTED]: Logging in with wallet");
-  logger.debug("Logging in [%s] with wallet", username);
-
-  let keyPair: KeyPair = new KeyPair(makeKeyPair().privKey.toString("hex"));
-  storeKeyPair(keyPair);
-
-  let accountId = yield select(getAccountIdFromState);
-
-  const returnUrl = encodeURIComponent(`${config.vault.callbackBaseUrl}/user/authorize/${username}/${accountId}`);
-  window.location.replace(
-    `${config.vault.url}/?route=/authorize&dappId=${
-      config.blockchain.rid
-    }&accountId=${accountId}&pubkey=${keyPair.pubKey.toString("hex")}&successAction=${returnUrl}`
+  logger.silly(
+    "[SAGA - STARTED] Attempting auto-login for username: [%s] and user [%s]",
+    username,
+    JSON.stringify(foundUser)
   );
 
-  logger.silly("[SAGA - FINISHED]: Logging in with wallet");
+  if (username && foundUser == null) {
+    const BC = yield BLOCKCHAIN;
+    const sso = new SSO(BC, new SSOStoreLocalStorage());
+    const [account, user] = yield sso.autoLogin();
+
+    logger.silly("Account [%s] and user [%s] found", JSON.stringify(account), JSON.stringify(user));
+    if (account && user) {
+      const usernameLinkedToAccount = yield getUsernameByAccountId(account.id);
+      if (username === usernameLinkedToAccount) {
+        yield authorizeUser(username, user);
+      } else {
+        yield sso.logout();
+      }
+    }
+  }
 }
 
-function* loginAccount(action: AccountLoginAction) {
-  logger.silly("[SAGA - STARTED]: Login account");
-  logger.debug("Logging in account [%s] by checking for auth descriptor", action.username);
-  let keyPair: KeyPair = retrieveKeyPair();
+function* authorizeUser(username: string, user: User) {
+  if (username && user) {
+    setUsername(username);
 
-  const authDescriptor = new SingleSignatureAuthDescriptor(keyPair.pubKey, [FlagsType.Account, FlagsType.Transfer]);
-
-  const user = new User(keyPair, authDescriptor);
-
-  const blockchain = yield BLOCKCHAIN;
-
-  checkIfAuthDescriptorAdded(blockchain, user, action.accountId, action.username);
-  logger.silly("[SAGA - FINISHED]: Login account");
-}
-
-async function checkIfAuthDescriptorAdded(blockchain: any, user: User, accountId: string, username: string) {
-  logger.debug("Checking auth descriptor for username [%s]", username);
-  const accounts = await blockchain.getAccountsByAuthDescriptorId(user.authDescriptor.hash(), user);
-
-  const isAdded = accounts.some((account: Account) => {
-    return account.id_.toString("hex").toUpperCase() === accountId.toUpperCase();
-  });
-
-  if (isAdded) {
-    authorizeUser(username);
+    logger.silly("Authorizing user: [%s]", username);
+    const chromunityUser: ChromunityUser = { name: username, ft3User: user };
+    yield put(setUser(chromunityUser));
   } else {
-    setTimeout(() => checkIfAuthDescriptorAdded(blockchain, user, accountId, username), 3000);
+    logger.info("Username [%s], or [%s] was null", username, JSON.stringify(user));
   }
-}
-
-function retrieveKeyPair(): KeyPair {
-  let keyPair: KeyPair = getKeyPair();
-  if (!keyPair) {
-    const kp = makeKeyPair();
-    keyPair = new KeyPair(kp.privKey.toString("hex"));
-  }
-
-  return keyPair;
-}
-
-function authorizeUser(username: string) {
-  setUsername(username);
-  window.location.href = "/";
 }

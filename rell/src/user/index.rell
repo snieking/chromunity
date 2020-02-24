@@ -2,8 +2,9 @@ import ft3_acc: lib.ft3.account;
 
 entity user {
     key name;
-    ft3_acc.account;
+    index ft3_acc.account;
     display_name: name;
+    registered: integer = 0;
 }
 
 import user.settings;

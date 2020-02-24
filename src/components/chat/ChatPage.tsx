@@ -21,7 +21,6 @@ import {
 import { Container, LinearProgress, Snackbar, Theme } from "@material-ui/core";
 import ChromiaPageHeader from "../common/ChromiaPageHeader";
 import Typography from "@material-ui/core/Typography";
-import { getUser } from "../../util/user-util";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import { Chat, ChatMessageDecrypted, ChromunityUser } from "../../types";
@@ -64,6 +63,7 @@ interface OptionType {
 }
 
 interface Props {
+  user: ChromunityUser;
   loading: boolean;
   rsaKey: any;
   successfullyAuthorized: boolean;
@@ -157,20 +157,18 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     }
   }, [props.activeChatMessages, newMessages]);
 
-  const user = getUser();
-
   useInterval(() => {
     updateChats();
   }, 5000);
 
   useEffect(() => {
-    if (user == null) {
+    if (props.user == null) {
       window.location.href = "/user/login";
     } else if (props.successfullyAuthorized && props.activeChat == null) {
-      props.loadUserChats(user);
+      props.loadUserChats(props.user);
     } else if (props.successfullyAuthorized && props.activeChat != null) {
-      props.loadChatUsers(user);
-      props.markChatAsRead(user, props.activeChat);
+      props.loadChatUsers(props.user);
+      props.markChatAsRead(props.user, props.activeChat);
     } else if (!props.successfullyAuthorized) {
       props.checkChatAuthentication();
     }
@@ -194,7 +192,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function updateChats() {
     if (window.location.href.includes("chat")) {
-      props.refreshOpenChat(user);
+      props.refreshOpenChat(props.user);
     }
   }
 
@@ -251,7 +249,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   function renderChatCreationActions() {
     return (
       <div style={{ textAlign: "center", marginTop: "15px" }}>
-        <Button type="button" color="secondary" variant="contained" onClick={() => props.createNewChat(user)}>
+        <Button type="button" color="secondary" variant="contained" onClick={() => props.createNewChat(props.user)}>
           New Chat
         </Button>
       </div>
@@ -270,7 +268,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function selectChat(chat: Chat) {
     setValues({ ...values, selectedChatId: chat.id, drawerOpen: false });
-    props.openChat(chat, user);
+    props.openChat(chat, props.user);
   }
 
   function renderOpenChat() {
@@ -365,7 +363,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function confirmUpdatedTitle() {
     setValues({ ...values, modifyTitle: false });
-    props.modifyTitle(user, props.activeChat, values.updatedTitle);
+    props.modifyTitle(props.user, props.activeChat, values.updatedTitle);
   }
 
   function leaveChatDialog() {
@@ -385,10 +383,10 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function leaveChat() {
     const chat = props.chats.find(value => value.id !== props.activeChat.id);
-    props.openChat(chat, user);
+    props.openChat(chat, props.user);
 
     setValues({ ...values, showLeaveChatDialog: false, selectedChatId: chat.id });
-    props.leaveChat(user);
+    props.leaveChat(props.user);
   }
 
   const suggestions = () => {
@@ -480,7 +478,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function confirmAddUser() {
-    props.addUserToChat((values.userToAdd as OptionType).value, user);
+    props.addUserToChat((values.userToAdd as OptionType).value, props.user);
     setValues({ ...values, userToAdd: null, showAddDialog: false });
   }
 
@@ -553,7 +551,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function sendMessage() {
     if (values.message.length > 0) {
-      props.sendMessage(user, props.activeChat, values.message.trim());
+      props.sendMessage(props.user, props.activeChat, values.message.trim());
       setValues({ ...values, message: "" });
     }
   }
@@ -614,7 +612,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function resetChatUser() {
-    props.deleteChatUser(user);
+    props.deleteChatUser(props.user);
     setValues({
       ...values,
       snackbarMessage: "Chat account resetted",
@@ -626,7 +624,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function proceed(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    props.createChatKeyPair(user, values.password);
+    props.createChatKeyPair(props.user, values.password);
     setValues({ ...values, password: "" });
   }
 
@@ -684,6 +682,7 @@ const mapDispatchToProps = (dispatch: any) => {
 const mapStateToProps = (store: ApplicationState) => {
   return {
     loading: store.chat.loading,
+    user: store.account.user,
     rsaKey: store.chat.rsaKey,
     successfullyAuthorized: store.chat.successfullyAuthorized,
     chats: store.chat.chats,

@@ -17,7 +17,7 @@ operation create_representative_report(username: text, descriptor_id: byte_array
 operation handle_representative_report(username: text, descriptor_id: byte_array, id: text) {
     val user = user.get_verified_user(username, descriptor_id);
 
-    val recent_election_id = election.get_latest_completed_election_id();
+    val recent_election_id = require(election.get_latest_completed_election_id(), "No election has been held yet");
     val representative = representative.representative @{ user, .representative_election.id == recent_election_id };
 
     val report = representative_report@{ .id == id };

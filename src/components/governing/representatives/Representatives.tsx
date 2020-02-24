@@ -4,25 +4,23 @@ import { Container, Grid } from "@material-ui/core";
 import RepresentativeCard from "./RepresentativeCard";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import { ChromunityUser } from "../../../types";
-import { getUser } from "../../../util/user-util";
 import { ApplicationState } from "../../../store";
 import { connect } from "react-redux";
 
 interface Props {
   representatives: string[];
+  user: ChromunityUser;
 }
 
 interface State {
   targetUsername: string;
-  user: ChromunityUser;
 }
 
 class Representatives extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      targetUsername: "",
-      user: getUser()
+      targetUsername: ""
     };
 
     this.handleUsernameChange = this.handleUsernameChange.bind(this);
@@ -51,7 +49,8 @@ class Representatives extends React.Component<Props, State> {
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    representatives: store.government.representatives
+    representatives: store.government.representatives,
+    user: store.account.user
   };
 };
 

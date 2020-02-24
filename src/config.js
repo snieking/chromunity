@@ -5,7 +5,7 @@ module.exports = {
     rid: process.env.REACT_APP_BRID
   },
   vault: {
-    url: "http://localhost:3001",
+    url: "https://dev.vault.chromia-development.com",
     callbackBaseUrl: "http://localhost:3000"
   },
   sentry: {

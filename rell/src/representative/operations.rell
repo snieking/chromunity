@@ -59,7 +59,7 @@ operation remove_topic(username: text, descriptor_id: byte_array, topic_id: text
 operation remove_topic_reply(username: text, descriptor_id: byte_array, topic_reply_id: text) {
     val user = user.get_verified_user(username, descriptor_id);
 
-    val recent_election_id = election.get_latest_completed_election_id();
+    val recent_election_id = require(election.get_latest_completed_election_id(), "No election has been held yet");
     val representative = representative @{ user, .representative_election.id == recent_election_id };
 
     val the_reply = topic.topic_reply @{ .id == topic_reply_id };
@@ -111,7 +111,7 @@ operation remove_topic_reply(username: text, descriptor_id: byte_array, topic_re
 operation suspend_user(username: text, descriptor_id: byte_array, user_to_be_suspended: text) {
     val user = user.get_verified_user(username, descriptor_id);
 
-    val recent_election_id = election.get_latest_completed_election_id();
+    val recent_election_id = require(election.get_latest_completed_election_id(), "No election has been held yet");
     val representative = representative @{ user, .representative_election.id == recent_election_id };
 
     val suspendee = user.user@{ .name == user_to_be_suspended };
@@ -170,7 +170,7 @@ operation distrust_representative(descriptor_id: byte_array, distruster: name, d
 	val distruster_rep = representative@{ user };
 	val distrusted_rep = representative@{ user.name == distrusted };
 
-    val recent_election_id = election.get_latest_completed_election_id();
+    val recent_election_id = require(election.get_latest_completed_election_id(), "No election has been held yet");
     val representative = representative @{ user, .representative_election.id == recent_election_id };
     
     create representative_distrust(distruster = distruster_rep, distrusted = distrusted_rep);

@@ -18,13 +18,15 @@ import {
   getElectionCandidates,
   getElectionVoteForUser,
   getNextElectionTimestamp,
+  isEligibleForVoting,
   signUpForElection,
   voteForCandidate
 } from "../../../blockchain/ElectionService";
-import { getUser } from "../../../util/user-util";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import { ChromunityUser } from "../../../types";
 import ElectionCandidateCard from "./ElectionCandidateCard";
+import { ApplicationState } from "../../../store";
+import { connect } from "react-redux";
 
 const styles = createStyles({
   electionCard: {
@@ -37,7 +39,9 @@ const styles = createStyles({
   }
 });
 
-interface Props extends WithStyles<typeof styles> {}
+interface Props extends WithStyles<typeof styles> {
+  user: ChromunityUser
+}
 
 export interface ElectionState {
   timestamp: number;
@@ -48,7 +52,7 @@ export interface ElectionState {
   votedFor: string;
   isACandidate: boolean;
   electionCandidates: string[];
-  user: ChromunityUser;
+  isEligibleForVoting: boolean;
 }
 
 const Election = withStyles(styles)(
@@ -64,7 +68,7 @@ const Election = withStyles(styles)(
         votedFor: "",
         isACandidate: false,
         electionCandidates: [],
-        user: getUser()
+        isEligibleForVoting: false
       };
       this.voteForCandidate = this.voteForCandidate.bind(this);
     }
@@ -78,15 +82,21 @@ const Election = withStyles(styles)(
             electionId: election.id
           });
 
+          if (this.props.user != null) {
+            isEligibleForVoting(this.props.user.name).then(eligible =>
+              this.setState({ isEligibleForVoting: eligible })
+            );
+          }
+
           getElectionCandidates().then(candidates =>
             this.setState({
               electionCandidates: candidates,
-              isACandidate: this.state.user != null && candidates.includes(this.state.user.name)
+              isACandidate: this.props.user != null && candidates.includes(this.props.user.name)
             })
           );
 
-          if (this.state.user != null) {
-            getElectionVoteForUser(this.state.user.name).then(candidate => {
+          if (this.props.user != null) {
+            getElectionVoteForUser(this.props.user.name).then(candidate => {
               if (candidate != null) {
                 this.setState({ votedFor: candidate });
               }
@@ -116,8 +126,8 @@ const Election = withStyles(styles)(
         if (this.state.blocksUntilElectionWrapsUp !== -1) {
           text = text + " The election will finish in " + this.state.blocksUntilElectionWrapsUp + " blocks";
         }
-      } else if (this.state.user == null) {
-        text = "Login to be able to vote in the election";
+      } else if (this.props.user == null) {
+        text = "Sign-in to be able to vote & participate in the election";
       }
 
       return (
@@ -130,9 +140,10 @@ const Election = withStyles(styles)(
     renderParticipateButton() {
       if (
         this.state.activeElection &&
-        this.state.user != null &&
-        this.state.user.name != null &&
-        !this.state.isACandidate
+        this.props.user != null &&
+        this.props.user.name != null &&
+        !this.state.isACandidate &&
+        this.state.isEligibleForVoting
       ) {
         return (
           <Button
@@ -148,11 +159,11 @@ const Election = withStyles(styles)(
     }
 
     registerForElection() {
-      signUpForElection(this.state.user).then(() => window.location.reload());
+      signUpForElection(this.props.user).then(() => window.location.reload());
     }
 
     voteForCandidate(name: string) {
-      voteForCandidate(this.state.user, name).then(() => this.setState({ votedFor: name }));
+      voteForCandidate(this.props.user, name).then(() => this.setState({ votedFor: name }));
     }
 
     render() {
@@ -171,6 +182,7 @@ const Election = withStyles(styles)(
                 votedFor={this.state.votedFor}
                 voteForCandidate={this.voteForCandidate}
                 key={"candiate-" + candidate}
+                userIsEligibleToVote={this.state.isEligibleForVoting}
               />
             ))}
           </Grid>
@@ -180,4 +192,10 @@ const Election = withStyles(styles)(
   }
 );
 
-export default Election;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    user: store.account.user
+  };
+};
+
+export default connect(mapStateToProps, null)(Election);

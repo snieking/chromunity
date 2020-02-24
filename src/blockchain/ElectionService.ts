@@ -51,3 +51,7 @@ export function blocksUntilElectionWrapsUp(): Promise<number> {
 export function blocksUntilNextElection(): Promise<number> {
   return executeQuery("blocks_until_next_election", {});
 }
+
+export function isEligibleForVoting(name: string): Promise<boolean> {
+  return executeQuery("eligible_for_voting", { name });
+}

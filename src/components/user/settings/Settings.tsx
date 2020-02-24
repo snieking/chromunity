@@ -1,5 +1,5 @@
 import React from "react";
-import { getUser, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
+import { ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import { ChromunityUser, UserSettings } from "../../../types";
 import {
   Button,
@@ -21,6 +21,8 @@ import { getUserSettings, updateUserSettings } from "../../../blockchain/UserSer
 import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import Avatar, { AVATAR_SIZE } from "../../common/Avatar";
+import { ApplicationState } from "../../../store";
+import { connect } from "react-redux";
 
 const styles = createStyles({
   avatarWrapper: {
@@ -44,7 +46,9 @@ const styles = createStyles({
   }
 });
 
-interface Props extends WithStyles<typeof styles> {}
+interface Props extends WithStyles<typeof styles> {
+  user: ChromunityUser;
+}
 
 interface SettingsState {
   avatar: string;
@@ -54,7 +58,6 @@ interface SettingsState {
   updateSuccessOpen: boolean;
   updateErrorOpen: boolean;
   settingsUpdateStatus: string;
-  user: ChromunityUser;
 }
 
 const Settings = withStyles(styles)(
@@ -68,8 +71,7 @@ const Settings = withStyles(styles)(
         description: "",
         updateSuccessOpen: false,
         updateErrorOpen: false,
-        settingsUpdateStatus: "",
-        user: getUser()
+        settingsUpdateStatus: ""
       };
 
       this.updateAvatar = this.updateAvatar.bind(this);
@@ -81,7 +83,7 @@ const Settings = withStyles(styles)(
     }
 
     componentDidMount() {
-      const user: ChromunityUser = this.state.user;
+      const user: ChromunityUser = this.props.user;
       if (user == null) {
         window.location.href = "/user/login";
       } else {
@@ -188,7 +190,7 @@ const Settings = withStyles(styles)(
     }
 
     saveSettings() {
-      updateUserSettings(this.state.user, this.state.avatar, this.state.description)
+      updateUserSettings(this.props.user, this.state.avatar, this.state.description)
         .then(() =>
           this.setState({
             settingsUpdateStatus: "Settings saved",
@@ -213,4 +215,10 @@ const Settings = withStyles(styles)(
   }
 );
 
-export default Settings;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    user: store.account.user
+  };
+};
+
+export default connect(mapStateToProps, null) (Settings);

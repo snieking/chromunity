@@ -5,13 +5,15 @@ import acc: ^^.account;
 import core: ^^.core;
 
 
-operation delete_auth_descriptor (account_id: byte_array, auth_descriptor_id: byte_array, delete_descriptor_id: byte_array) {
-      val account = acc.auth_and_log(account_id, auth_descriptor_id, ["A"]);
+operation delete_auth_descriptor(account_id: byte_array, auth_descriptor_id: byte_array, delete_descriptor_id: byte_array) {
+    val flags = if (auth_descriptor_id == delete_descriptor_id) list<text>() else ["A"];
 
-      acc._delete_auth_descriptor(acc.account_auth_descriptor @ {
-         .account == account,
-         .descriptor_id == delete_descriptor_id
-      });
+    val account = acc.auth_and_log(account_id, auth_descriptor_id, flags);
+
+    acc._delete_auth_descriptor(acc.account_auth_descriptor @ {
+        .account == account,
+        .descriptor_id == delete_descriptor_id
+    });
 }
 
 operation delete_all_auth_descriptors_exclude(account_id: byte_array, auth_descriptor_id: byte_array) {

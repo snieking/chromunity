@@ -10,7 +10,6 @@ const boomerang = BoomerangCache.create("notification-bucket", {
 });
 
 export function sendNotifications(fromUser: ChromunityUser, trigger: string, content: string, usernames: string[]) {
-  console.log("SENDING NOTIFICATIONS FOR: " + usernames);
   return sendNotificationsInternal(fromUser, uniqueId(), trigger, content, usernames);
 }
 

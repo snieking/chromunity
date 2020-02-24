@@ -8,5 +8,11 @@ function is_username_representative(name): boolean {
 		return false;
 	}
 	
-	return representative@?{ .user == user, .representative_election.id == election.get_latest_completed_election_id() } != null;
+	val prev_election = election.get_latest_completed_election_id();
+	
+	if (prev_election == null) {
+		return false;
+	}
+	
+	return representative@?{ .user == user, .representative_election.id == prev_election } != null;
 }

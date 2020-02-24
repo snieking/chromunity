@@ -42,7 +42,7 @@ import {
   countTopicStarRatingForUser
 } from "../../blockchain/TopicService";
 
-import { getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
+import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { ChromunityUser } from "../../types";
 import { getMutedUsers, getUserSettingsCached, isRegistered, toggleUserMute } from "../../blockchain/UserService";
 import {
@@ -88,6 +88,7 @@ const styles = createStyles({
 interface ProfileCardProps extends WithStyles<typeof styles> {
   username: string;
   representatives: string[];
+  user: ChromunityUser;
 }
 
 interface ProfileCardState {
@@ -104,7 +105,6 @@ interface ProfileCardState {
   suspendUserDialogOpen: boolean;
   distrustDialogOpen: boolean;
   muted: boolean;
-  user: ChromunityUser;
   isDistrusted: boolean;
 }
 
@@ -130,16 +130,15 @@ const ProfileCard = withStyles(styles)(
         suspendUserDialogOpen: false,
         distrustDialogOpen: false,
         muted: false,
-        user: getUser(),
         isDistrusted: false
       };
 
       if (
-        this.state.user != null &&
+        this.props.user != null &&
         this.props.representatives.includes(this.props.username) &&
-        this.props.representatives.includes(this.state.user.name)
+        this.props.representatives.includes(this.props.user.name)
       ) {
-        isRepresentativeDistrustedByMe(this.state.user, this.props.username).then(distrusted =>
+        isRepresentativeDistrustedByMe(this.props.user, this.props.username).then(distrusted =>
           this.setState({ isDistrusted: distrusted })
         );
       }
@@ -158,9 +157,9 @@ const ProfileCard = withStyles(styles)(
         this.setState({ registered: isRegistered });
 
         if (isRegistered) {
-          const user: ChromunityUser = this.state.user;
+          const user: ChromunityUser = this.props.user;
           if (user != null && user.name != null) {
-            amIAFollowerOf(this.state.user, this.props.username).then(isAFollower =>
+            amIAFollowerOf(this.props.user, this.props.username).then(isAFollower =>
               this.setState({ following: isAFollower })
             );
             getMutedUsers(user).then(users =>
@@ -211,7 +210,7 @@ const ProfileCard = withStyles(styles)(
 
     toggleFollowing() {
       if (this.state.following) {
-        removeFollowing(this.state.user, this.props.username).then(() => {
+        removeFollowing(this.props.user, this.props.username).then(() => {
           this.setState(prevState => ({
             following: false,
             followers: prevState.followers - 1,
@@ -219,7 +218,7 @@ const ProfileCard = withStyles(styles)(
           }));
         });
       } else {
-        createFollowing(this.state.user, this.props.username).then(() => {
+        createFollowing(this.props.user, this.props.username).then(() => {
           this.setState(prevState => ({
             following: true,
             followers: prevState.followers + 1,
@@ -230,8 +229,7 @@ const ProfileCard = withStyles(styles)(
     }
 
     renderRepresentativeActions() {
-      const user = getUser();
-      if (user != null && this.props.representatives.includes(toLowerCase(user.name))) {
+      if (this.props.user != null && this.props.representatives.includes(toLowerCase(this.props.user.name))) {
         if (this.props.representatives.includes(toLowerCase(this.props.username))) {
           return this.renderDistrustButton();
         } else {
@@ -268,13 +266,12 @@ const ProfileCard = withStyles(styles)(
 
     suspendUser() {
       this.setState({ suspendUserDialogOpen: false });
-      suspendUser(this.state.user, this.props.username);
+      suspendUser(this.props.user, this.props.username);
     }
 
     distrustRepresentative() {
       this.setState({ distrustDialogOpen: false, isDistrusted: true });
-      const user = getUser();
-      distrustAnotherRepresentative(user, this.props.username);
+      distrustAnotherRepresentative(this.props.user, this.props.username);
     }
 
     handleSuspendUserClose() {
@@ -291,11 +288,11 @@ const ProfileCard = withStyles(styles)(
 
     toggleMuteUser() {
       const muted: boolean = !this.state.muted;
-      this.setState({ muted: muted }, () => toggleUserMute(this.state.user, this.props.username, muted));
+      this.setState({ muted: muted }, () => toggleUserMute(this.props.user, this.props.username, muted));
     }
 
     renderIcons() {
-      const user: ChromunityUser = this.state.user;
+      const user: ChromunityUser = this.props.user;
       return (
         <div className={this.props.classes.bottomBar}>
           {user != null && this.props.username === user.name && (
@@ -341,7 +338,7 @@ const ProfileCard = withStyles(styles)(
     }
 
     renderActions() {
-      const user: ChromunityUser = this.state.user;
+      const user: ChromunityUser = this.props.user;
       if (user != null && this.props.username !== user.name) {
         return (
           <div style={{ float: "right" }}>
@@ -417,7 +414,7 @@ const ProfileCard = withStyles(styles)(
     }
 
     renderFollowButton() {
-      const user: ChromunityUser = this.state.user;
+      const user: ChromunityUser = this.props.user;
       if (user != null && user.name === this.props.username) {
         return (
           <Badge badgeContent={this.state.followers} showZero={true} color="secondary" max={MAX_BADGE_NR}>
@@ -443,6 +440,7 @@ const ProfileCard = withStyles(styles)(
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
+    user: store.account.user,
     representatives: store.government.representatives.map(rep => toLowerCase(rep))
   };
 };

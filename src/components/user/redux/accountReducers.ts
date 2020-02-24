@@ -1,39 +1,34 @@
 import { Reducer } from "redux";
-import { AccountActionTypes, AccountState, AccountActions } from "./accountTypes";
+import { AccountActions, AccountActionTypes, AccountState } from "./accountTypes";
 
 const initialAccountState: AccountState = {
   loading: false,
-  success: false,
-  failure: false,
-  error: "",
-  accountId: "",
-  username: "",
-  keyPair: null,
-  vaultPubKey: null
+  error: null,
+  user: null
 };
 
 export const loginReducer: Reducer<AccountState, AccountActions> = (state = initialAccountState, action) => {
-  switch (action.type) {
-    case AccountActionTypes.ACCOUNT_REGISTER_CHECK: {
-      return {
-        ...state,
-        loading: true,
-        username: action.username
-      };
+  if (action.type === AccountActionTypes.VAULT_CANCEL) {
+    return {
+      ...state,
+      error: action.error,
+      loading: false
+    };
+  } else if (action.type === AccountActionTypes.SET_USER) {
+    return {
+      ...state,
+      user: action.user,
+      loading: false
     }
-    case AccountActionTypes.ACCOUNT_ADD_ACCOUNT_ID: {
-      return {
-        ...state,
-        accountId: action.accountId
-      };
+  } else if (action.type === AccountActionTypes.LOGIN_ACCOUNT) {
+    return {
+      ...state,
+      loading: true
     }
-    case AccountActionTypes.ACCOUNT_REGISTER: {
-      return {
-        ...state,
-        username: action.username,
-        vaultPubKey: action.vaultPubKey,
-        accountId: action.accountId
-      };
+  } else if (action.type === AccountActionTypes.RESET_LOGIN_STATE) {
+    return {
+      ...state,
+      error: null
     }
   }
 

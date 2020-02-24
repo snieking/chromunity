@@ -1,6 +1,11 @@
 import user;
 import util;
 
+query eligible_for_voting(name): boolean {
+	val user = user.user@{ .name == name.lower_case() };
+	return is_eligible_to_vote(user);
+}
+
 query get_election_candidates() {
 	val current_election_id = require(get_current_election_id(), util.app_error(util.error_type.ILLEGAL_ACTION, "No on-going election"));
 	

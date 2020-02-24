@@ -9,7 +9,6 @@ import { TrendingChannels } from "../tags/TrendingTags";
 import ChromiaPageHeader from "../common/ChromiaPageHeader";
 import { getMutedUsers } from "../../blockchain/UserService";
 import { TOPIC_VIEW_SELECTOR_OPTION } from "./WallCommon";
-import { getUser } from "../../util/user-util";
 import { ApplicationState } from "../../store";
 import {
   loadAllTopicsByPopularity,
@@ -31,6 +30,7 @@ interface Props {
   topics: Topic[];
   couldExistOlderTopics: boolean;
   representatives: string[];
+  user: ChromunityUser;
   loadAllTopics: typeof loadAllTopicWall;
   loadOlderTopics: typeof loadOlderAllTopics;
   loadAllTopicsByPopularity: typeof loadAllTopicsByPopularity;
@@ -46,7 +46,6 @@ interface State {
   selector: TOPIC_VIEW_SELECTOR_OPTION;
   popularSelector: TOPIC_VIEW_SELECTOR_OPTION;
   mutedUsers: string[];
-  user: ChromunityUser;
 }
 
 const StyledSelector = styled(Select)(style => ({
@@ -63,8 +62,7 @@ class TopicWall extends React.Component<Props, State> {
     this.state = {
       selector: TOPIC_VIEW_SELECTOR_OPTION.RECENT,
       popularSelector: TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK,
-      mutedUsers: [],
-      user: getUser()
+      mutedUsers: []
     };
 
     this.retrieveLatestTopics = this.retrieveLatestTopics.bind(this);
@@ -74,8 +72,8 @@ class TopicWall extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    if (this.state.user != null) {
-      getMutedUsers(this.state.user).then(users => this.setState({ mutedUsers: users }));
+    if (this.props.user != null) {
+      getMutedUsers(this.props.user).then(users => this.setState({ mutedUsers: users }));
     }
     this.retrieveLatestTopics(false);
   }
@@ -113,7 +111,7 @@ class TopicWall extends React.Component<Props, State> {
           })}
           {this.renderLoadMoreButton()}
         </Container>
-        {this.state.user != null ? (
+        {this.props.user != null ? (
           <NewTopicButton channel="" updateFunction={() => this.retrieveLatestTopics(true)} />
         ) : (
           <div />
@@ -162,10 +160,10 @@ class TopicWall extends React.Component<Props, State> {
   }
 
   retrieveLatestTopics(ignoreCache: boolean) {
-    if (this.props.type === "userFollowings" && this.state.user) {
-      this.props.loadFollowedUsersTopics(this.state.user.name, topicsPageSize);
-    } else if (this.props.type === "tagFollowings" && this.state.user) {
-      this.props.loadFollowedChannelsTopics(this.state.user.name, topicsPageSize, ignoreCache);
+    if (this.props.type === "userFollowings" && this.props.user) {
+      this.props.loadFollowedUsersTopics(this.props.user.name, topicsPageSize);
+    } else if (this.props.type === "tagFollowings" && this.props.user) {
+      this.props.loadFollowedChannelsTopics(this.props.user.name, topicsPageSize, ignoreCache);
     } else {
       this.props.loadAllTopics(topicsPageSize, ignoreCache);
     }
@@ -192,9 +190,9 @@ class TopicWall extends React.Component<Props, State> {
     }
 
     if (this.props.type === "userFollowings") {
-      this.props.loadFollowedUsersTopicsByPopularity(this.state.user.name, timestamp, topicsPageSize);
+      this.props.loadFollowedUsersTopicsByPopularity(this.props.user.name, timestamp, topicsPageSize);
     } else if (this.props.type === "tagFollowings") {
-      this.props.loadFollowedChannelsTopicsByPopularity(this.state.user.name, timestamp, topicsPageSize);
+      this.props.loadFollowedChannelsTopicsByPopularity(this.props.user.name, timestamp, topicsPageSize);
     } else {
       this.props.loadAllTopicsByPopularity(timestamp, topicsPageSize);
     }
@@ -203,9 +201,9 @@ class TopicWall extends React.Component<Props, State> {
   retrieveOlderTopics() {
     if (this.props.topics.length > 0) {
       if (this.props.type === "userFollowings") {
-        this.props.loadOlderFollowedUsersTopics(this.state.user.name, topicsPageSize);
+        this.props.loadOlderFollowedUsersTopics(this.props.user.name, topicsPageSize);
       } else if (this.props.type === "tagFollowings") {
-        this.props.loadOlderFollowedChannelsTopics(this.state.user.name, topicsPageSize);
+        this.props.loadOlderFollowedChannelsTopics(this.props.user.name, topicsPageSize);
       } else {
         this.props.loadOlderTopics(topicsPageSize);
       }
@@ -236,6 +234,7 @@ const mapDispatchToProps = (dispatch: any) => {
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
+    user: store.account.user,
     topics: store.topicWall.topics,
     loading: store.topicWall.loading,
     couldExistOlderTopics: store.topicWall.couldExistOlder,

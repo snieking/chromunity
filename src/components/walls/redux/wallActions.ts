@@ -12,7 +12,7 @@ import {
   LoadAllTopicsByPopularityAction,
   LoadFollowedUsersTopicsByPopularityAction,
   LoadFollowedChannelsTopicsByPopularityAction,
-  UpdateTopicWallFromCacheAction
+  UpdateTopicWallFromCacheAction, IClearChannelsCache
 } from "./wallTypes";
 import { Topic } from "../../../types";
 
@@ -110,4 +110,8 @@ export const loadFollowedChannelsTopicsByPopularity: ActionCreator<LoadFollowedC
   username: username,
   timestamp: timestamp,
   pageSize: pageSize
+});
+
+export const clearChannelsCache: ActionCreator<IClearChannelsCache> = () => ({
+  type: WallActionTypes.CLEAR_CHANNELS_CACHE
 });

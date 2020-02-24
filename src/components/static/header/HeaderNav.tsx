@@ -5,7 +5,6 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import { LocationCity } from "@material-ui/icons";
 
-import { getUser } from "../../../util/user-util";
 import { ApplicationState } from "../../../store";
 import { connect } from "react-redux";
 import Badge from "@material-ui/core/Badge";
@@ -25,6 +24,7 @@ import DesktopWallNavigation from "./DesktopWallNavigation";
 import TestInfoBar from "./TestInfoBar";
 import GovMenu from "./GovMenu";
 import ChromiaLogo from "./ChromiaLogo";
+import { autoLogin } from "../../user/redux/accountActions";
 
 interface Props {
   representatives: string[];
@@ -32,6 +32,8 @@ interface Props {
   activeElection: boolean;
   unreadChats: number;
   recentLogbookEntryTimestamp: number;
+  user: ChromunityUser;
+  autoLogin: typeof autoLogin;
   loadRepresentatives: typeof loadRepresentatives;
   loadUnhandledReports: typeof loadUnhandledReports;
   checkActiveElection: typeof checkActiveElection;
@@ -132,29 +134,32 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   const classes = useStyles(props);
-  const user = getUser();
 
   const [govAnchorEl, setGovAnchorEl] = React.useState<null | HTMLElement>(null);
 
   useInterval(() => {
-    props.countUnreadChats(user);
+    props.countUnreadChats(props.user);
   }, 30000);
 
   useEffect(() => {
+    if (!props.user) {
+      props.autoLogin();
+    }
+
     props.loadRepresentatives();
 
-    if (user != null) {
-      props.checkActiveElection(user);
+    if (props.user != null) {
+      props.checkActiveElection(props.user);
     }
-  }, [user, props]);
+  }, [props]);
 
   useEffect(() => {
     if (isRepresentative()) {
       props.loadUnhandledReports();
-      props.checkNewLogbookEntries(user);
+      props.checkNewLogbookEntries(props.user);
     }
     // eslint-disable-next-line
-  }, [props.representatives, props, user]);
+  }, [props.representatives, props]);
 
   function handleGovClick(event: React.MouseEvent<HTMLButtonElement>) {
     setGovAnchorEl(event.currentTarget);
@@ -165,7 +170,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function isRepresentative() {
-    return user != null && props.representatives.includes(toLowerCase(user.name));
+    return props.user != null && props.user.name != null && props.representatives.includes(toLowerCase(props.user.name));
   }
 
   function renderGovernmentIcon() {
@@ -194,7 +199,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
         <Toolbar>
           <div className={classes.leftGroup}>
             <DesktopWallNavigation
-              user={user}
+              user={props.user}
               classes={classes}
               handleGovClick={handleGovClick}
               renderGovernmentIcon={renderGovernmentIcon}
@@ -219,7 +224,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
             </div>
           </div>
           <div className={classes.rightGroup}>
-            <ProfileNavigation user={user} classes={classes} unreadChats={props.unreadChats} />
+            <ProfileNavigation user={props.user} classes={classes} unreadChats={props.unreadChats} />
           </div>
         </Toolbar>
       </AppBar>
@@ -234,7 +239,8 @@ const mapStateToProps = (store: ApplicationState) => {
     loadUnhandledReports: store.government.unhandledReports,
     activeElection: store.government.activeElection,
     unreadChats: store.chat.unreadChats,
-    recentLogbookEntryTimestamp: store.government.recentLogbookEntryTimestamp
+    recentLogbookEntryTimestamp: store.government.recentLogbookEntryTimestamp,
+    user: store.account.user
   };
 };
 
@@ -244,7 +250,8 @@ const mapDispatchToProps = (dispatch: any) => {
     checkNewLogbookEntries: (user: ChromunityUser) => dispatch(checkNewLogbookEntries(user)),
     countUnreadChats: (user: ChromunityUser) => dispatch(countUnreadChatsAction(user)),
     loadRepresentatives: () => dispatch(loadRepresentatives()),
-    loadUnhandledReports: () => dispatch(loadUnhandledReports())
+    loadUnhandledReports: () => dispatch(loadUnhandledReports()),
+    autoLogin: () => dispatch(autoLogin())
   };
 };
 

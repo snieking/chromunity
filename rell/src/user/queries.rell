@@ -1,7 +1,22 @@
+import ft3_acc: lib.ft3.account;
+
 query get_user(name) {
     return user@?{ .name == name.lower_case() } ( name = .display_name );
 }
 
 query get_account_id(name) {
     return user@?{ .name == name.lower_case() } ( .account.id );
+}
+
+query get_registered_at(name) {
+	return user@{ .name == name.lower_case() } ( .registered );
+}
+
+query username_by_account_id(id: byte_array): name? {
+	val account = ft3_acc.account@? { id };
+	if (account != null) {
+		return user@?{ .account == account } ( .name );
+	}
+	
+	return null;
 }

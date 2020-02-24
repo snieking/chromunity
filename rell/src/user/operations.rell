@@ -3,12 +3,10 @@ import ft3_acc: lib.ft3.account;
 import user.settings;
 import user.meta;
 
-operation register_user(name, auth_descriptor: ft3_acc.auth_descriptor, vault_auth_descriptor: ft3_acc.auth_descriptor) {
-    val account_id = ft3_acc.create_account_with_auth(auth_descriptor);
+operation register_user(name, account_id: byte_array) {
     val account = ft3_acc.account @ { account_id };
-    ft3_acc._add_auth_descriptor(account, vault_auth_descriptor);
 
-    val user = create user(name = name.lower_case(), display_name = name, account);
+    val user = create user(name = name.lower_case(), display_name = name, account, op_context.block_height);
     create settings.user_settings(user, avatar = "" , description = "");
     create meta.user_meta(user, times_suspended = 0, suspended_until = 0);
 }

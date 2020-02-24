@@ -4,7 +4,7 @@ import util;
 
 function get_verified_user(name, descriptor_id: byte_array): user {
     val user = user@{ .name == name.lower_case() };
-    ft3_acc.require_auth(user.account, descriptor_id, ["A"]);
+    ft3_acc.require_auth(user.account, descriptor_id, list<text>());
     require(
     	meta.user_meta@{ user }.suspended_until < op_context.last_block_time,
     	util.app_error(util.error_type.USER_SUSPENDED, "Get verified user")

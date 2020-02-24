@@ -66,6 +66,8 @@ operation vote_for_candidate(voter: name, descriptor_id: byte_array, candidate: 
 	require(voter != candidate, util.app_error(util.error_type.ILLEGAL_ACTION, "You can't vote for yourself"));
     val user = user.get_verified_user(voter, descriptor_id);
 
+	require(is_eligible_to_vote(user), util.app_error(util.error_type.ILLEGAL_ACTION, "Not eligible for voting in the election"));
+
     val current_election_id = require(get_current_election_id(), util.app_error(util.error_type.ILLEGAL_ACTION, "No on-going election"));
     
     clean_up_votes(user, current_election_id);

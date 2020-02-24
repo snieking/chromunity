@@ -1,8 +1,7 @@
 import * as pcl from "postchain-client";
 import config from "../config.js";
 import DirectoryService from "./DirectoryService";
-import { Blockchain, Operation } from "ft3-lib";
-import User from "ft3-lib/dist/ft3/user";
+import { Blockchain, Operation, User } from "ft3-lib";
 import * as BoomerangCache from "boomerang-cache";
 import logger from "../util/logger";
 
@@ -25,19 +24,16 @@ const BLOCKCHAIN_RID = config.blockchain.rid;
 export const REST_CLIENT = pcl.restClient.createRestClient(NODE_API_URL, BLOCKCHAIN_RID, 10);
 export const GTX = pcl.gtxClient.createClient(REST_CLIENT, Buffer.from(BLOCKCHAIN_RID, "hex"), []);
 
-export const BLOCKCHAIN = Blockchain.initialize(
-  Buffer.from(BLOCKCHAIN_RID, "hex"),
-  new DirectoryService()
-);
+export const BLOCKCHAIN = Blockchain.initialize(Buffer.from(BLOCKCHAIN_RID, "hex"), new DirectoryService());
 
 export const executeOperations = async (user: User, ...operations: Operation[]) => {
-  operations.every(op => logger.debug("Executing operation [%s]", op.name));
+  operations.every(op => logger.debug("Executing operation [%s] for user [%o]", op.name, JSON.stringify(user)));
   const lockId = JSON.stringify(user);
 
   const ongoing = OP_LOCK.get(lockId) != null;
 
   if (ongoing) {
-    console.log("An operation is already in progress for user");
+    logger.info("An operation is already in progress for user");
     return new Promise<unknown>(resolve => resolve());
   } else {
     if (!test) {
@@ -48,15 +44,18 @@ export const executeOperations = async (user: User, ...operations: Operation[]) 
   const BC = await BLOCKCHAIN;
   const trxBuilder = BC.transactionBuilder();
   operations.every(value => trxBuilder.add(value));
-  return trxBuilder.buildAndSign(user).post()
-    .then(result => {
+
+  return trxBuilder
+    .buildAndSign(user)
+    .post()
+    .then((result: unknown) => {
       OP_LOCK.remove(lockId);
       return result;
     });
 };
 
-export const executeQuery = async (name: string, params: unknown) => {
-  logger.debug("Executing query: [%s] with data: ", name, params);
+export const executeQuery = async (name: string, params: any) => {
+  logger.debug(`Executing query: ${name} with data: ${JSON.stringify(params)}`);
   if (QUERY_CACHE.get(IF_NULL_CLEAR_CACHE) == null && !test) {
     removeSessionObjects();
     QUERY_CACHE.set(IF_NULL_CLEAR_CACHE, false, 10);
@@ -66,20 +65,19 @@ export const executeQuery = async (name: string, params: unknown) => {
 
   const cachedResult = QUERY_CACHE.get(cacheId);
   if (cachedResult != null) {
-    logger.debug("Returning cached result: ", cachedResult);
+    logger.debug(`Returning cached result: ${JSON.stringify(cachedResult)}`);
     return new Promise<any>(resolve => resolve(cachedResult));
   }
 
   const BC = await BLOCKCHAIN;
-  return BC.query(name, params)
-    .then(result => {
-      if (!test) {
-        QUERY_CACHE.set(cacheId, result, 3);
-      }
+  return BC.query(name, params).then((result: unknown) => {
+    if (!test) {
+      QUERY_CACHE.set(cacheId, result, 3);
+    }
 
-      logger.debug("Returning result: ", result);
-      return result;
-    })
+    logger.debug(`Returning result: ${JSON.stringify(result)}`);
+    return result;
+  });
 };
 
 const removeSessionObjects = () => {

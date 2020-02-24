@@ -37,6 +37,7 @@ interface Props {
   candidate: string;
   votedFor: string;
   voteForCandidate: Function;
+  userIsEligibleToVote: boolean;
 }
 
 const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => {
@@ -182,7 +183,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
   );
 
   function renderCandidateCardActions(name: string) {
-    if (toLowerCase(name) === toLowerCase(props.votedFor)) {
+    if (toLowerCase(name) === toLowerCase(props.votedFor) || !props.userIsEligibleToVote) {
       return (
         <div>
           <CopyToClipboard

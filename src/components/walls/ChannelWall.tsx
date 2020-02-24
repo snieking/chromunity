@@ -18,7 +18,6 @@ import NewTopicButton from "../buttons/NewTopicButton";
 import { Favorite, FavoriteBorder } from "@material-ui/icons";
 import { getMutedUsers } from "../../blockchain/UserService";
 import { TOPIC_VIEW_SELECTOR_OPTION } from "./WallCommon";
-import { getUser } from "../../util/user-util";
 import { connect } from "react-redux";
 import { channelInit, loadChannel, loadChannelByPopularity, loadOlderTopicsInChannel } from "./redux/channelActions";
 import { ApplicationState } from "../../store";
@@ -33,6 +32,7 @@ interface Props extends RouteComponentProps<MatchParams> {
   topics: Topic[];
   couldExistOlder: boolean;
   representatives: string[];
+  user: ChromunityUser;
   channelInit: typeof channelInit;
   loadChannel: typeof loadChannel;
   loadOlderTopicsInChannel: typeof loadOlderTopicsInChannel;
@@ -48,7 +48,6 @@ interface State {
   selector: TOPIC_VIEW_SELECTOR_OPTION;
   popularSelector: TOPIC_VIEW_SELECTOR_OPTION;
   mutedUsers: string[];
-  user: ChromunityUser;
 }
 
 const StyledSelect = styled(Select)(style => ({
@@ -70,8 +69,7 @@ class ChannelWall extends React.Component<Props, State> {
       countOfFollowers: 0,
       selector: TOPIC_VIEW_SELECTOR_OPTION.RECENT,
       popularSelector: TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK,
-      mutedUsers: [],
-      user: getUser()
+      mutedUsers: []
     };
 
     this.retrieveTopics = this.retrieveTopics.bind(this);
@@ -86,7 +84,7 @@ class ChannelWall extends React.Component<Props, State> {
     this.retrieveTopics();
 
     const channel = this.props.match.params.channel;
-    const user: ChromunityUser = this.state.user;
+    const user: ChromunityUser = this.props.user;
     if (user != null) {
       getFollowedChannels(user.name).then(channels =>
         this.setState({
@@ -147,7 +145,7 @@ class ChannelWall extends React.Component<Props, State> {
           }
         })}
         {this.renderLoadMoreButton()}
-        {this.state.user != null ? (
+        {this.props.user != null ? (
           <NewTopicButton channel={this.props.match.params.channel} updateFunction={this.retrieveTopics} />
         ) : (
           <div />
@@ -169,7 +167,7 @@ class ChannelWall extends React.Component<Props, State> {
       const channel = this.props.match.params.channel;
       this.setState({ isLoading: true });
       if (this.state.channelFollowed) {
-        unfollowChannel(this.state.user, channel)
+        unfollowChannel(this.props.user, channel)
           .then(() =>
             this.setState(prevState => ({
               channelFollowed: false,
@@ -179,7 +177,7 @@ class ChannelWall extends React.Component<Props, State> {
           )
           .catch(() => this.setState({ isLoading: false }));
       } else {
-        followChannel(this.state.user, channel)
+        followChannel(this.props.user, channel)
           .then(() =>
             this.setState(prevState => ({
               channelFollowed: true,
@@ -260,6 +258,7 @@ const mapDispatchToProps = (dispatch: any) => {
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
+    user: store.account.user,
     loading: store.channel.loading,
     topics: store.channel.topics,
     couldExistOlder: store.channel.couldExistOlder,

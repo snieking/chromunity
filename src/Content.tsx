@@ -1,5 +1,5 @@
 import * as React from "react";
-import RegisterAccount from "./components/user/authentication/RegisterAccount";
+import VaultSuccess from "./components/user/authentication/VaultSuccess";
 import Logout from "./components/user/authentication/Logout";
 import Settings from "./components/user/settings/Settings";
 import UserWall from "./components/walls/Userwall";
@@ -16,9 +16,9 @@ import { Route, RouteComponentProps, Switch, withRouter } from "react-router";
 import TopicWall from "./components/walls/TopicWall";
 import WalletLogin from "./components/user/authentication/WalletLogin";
 import { ErrorPage } from "./components/static/ErrorPage";
-import LoginAccount from "./components/user/authentication/LoginAccount";
 import CandidateElectionVoteLink from "./components/governing/election/CandidateElectionVoteLink";
 import ChatPage from "./components/chat/ChatPage";
+import VaultCancel from "./components/user/authentication/VaultCancel";
 
 const Content: React.FunctionComponent<RouteComponentProps> = ({ location }) => {
   return (
@@ -29,8 +29,8 @@ const Content: React.FunctionComponent<RouteComponentProps> = ({ location }) => 
             <Route exact path="/" component={() => <TopicWall key="topic-wall" type="all" />} />
             <Route path="/followings" component={() => <TopicWall type="userFollowings" />} />
             <Route path="/channels" component={() => <TopicWall type="tagFollowings" />} />
-            <Route path="/user/register/:username" component={RegisterAccount} />
-            <Route path="/user/authorize/:username/:accountId" component={LoginAccount} />
+            <Route path="/user/success/:username" component={VaultSuccess} />
+            <Route path="/user/cancel" component={VaultCancel} />
             <Route path="/user/login" component={WalletLogin} />
             <Route path="/user/logout" component={Logout} />
             <Route path="/user/settings" component={Settings} />

@@ -12,7 +12,7 @@ import {
   WithStyles
 } from "@material-ui/core";
 import { timeAgoReadable, toLowerCase } from "../../util/util";
-import { getUser, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
+import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { StarBorder, StarRate } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import { Redirect } from "react-router";
@@ -55,6 +55,7 @@ const styles = createStyles({
 interface Props extends WithStyles<typeof styles> {
   reply: TopicReply;
   representatives: string[];
+  user: ChromunityUser;
 }
 
 interface State {
@@ -62,7 +63,6 @@ interface State {
   ratedByMe: boolean;
   redirectToTopic: boolean;
   avatar: string;
-  user: ChromunityUser;
 }
 
 const TopicReplyOverviewCard = withStyles(styles)(
@@ -75,8 +75,7 @@ const TopicReplyOverviewCard = withStyles(styles)(
         stars: 0,
         ratedByMe: false,
         redirectToTopic: false,
-        avatar: "",
-        user: getUser()
+        avatar: ""
       };
 
       this.authorIsRepresentative = this.authorIsRepresentative.bind(this);
@@ -99,7 +98,7 @@ const TopicReplyOverviewCard = withStyles(styles)(
     }
 
     componentDidMount() {
-      const user: ChromunityUser = this.state.user;
+      const user: ChromunityUser = this.props.user;
       getUserSettingsCached(this.props.reply.author, 1440).then(settings => {
         this.setState({
           avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.reply.author)
@@ -176,6 +175,7 @@ const TopicReplyOverviewCard = withStyles(styles)(
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
+    user: store.account.user,
     representatives: store.government.representatives.map(rep => toLowerCase(rep))
   };
 };

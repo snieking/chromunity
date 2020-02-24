@@ -4,7 +4,6 @@ import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import Container from "@material-ui/core/Container";
 import Button from "@material-ui/core/Button";
 import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
-import { accountRegisteredCheck } from "../redux/accountActions";
 import { ApplicationState } from "../../../store";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { connect } from "react-redux";
@@ -12,6 +11,7 @@ import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import { ReactComponent as LeftShapes } from "../../static/graphics/left-shapes.svg";
 import { ReactComponent as RightShapes } from "../../static/graphics/right-shapes.svg";
+import { loginAccount, resetLoginState } from "../redux/accountActions";
 
 const useStyles = makeStyles(theme =>
   createStyles({
@@ -57,7 +57,8 @@ interface Props {
   success: boolean;
   failure: boolean;
   error: string;
-  accountRegisteredCheck: typeof accountRegisteredCheck;
+  loginAccount: typeof loginAccount;
+  resetLoginState: typeof resetLoginState;
 }
 
 const WalletLogin: React.FunctionComponent<Props> = props => {
@@ -81,7 +82,7 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
       setName("");
     } else {
       setStep(Step.LOGIN_IN_PROGRESS);
-      props.accountRegisteredCheck(name);
+      props.loginAccount(name);
     }
   };
 
@@ -126,22 +127,30 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
       >
         <CustomSnackbarContentWrapper variant="error" message={errorMsg} />
       </Snackbar>
+
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        open={props.error != null}
+        autoHideDuration={6000}
+        onClose={props.resetLoginState}
+      >
+        <CustomSnackbarContentWrapper variant="error" message={props.error} />
+      </Snackbar>
     </Container>
   );
 };
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
-    accountRegisteredCheck: (username: string) => dispatch(accountRegisteredCheck(username))
+    loginAccount: (username: string) => dispatch(loginAccount(username)),
+    resetLoginState: () => dispatch(resetLoginState())
   };
 };
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
     loading: store.account.loading,
-    success: store.account.success,
-    error: store.account.error,
-    failure: store.account.failure
+    error: store.account.error
   };
 };
 

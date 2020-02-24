@@ -1,11 +1,10 @@
 import * as React from "react";
 
-import { RepresentativeReport } from "../../../types";
+import { ChromunityUser, RepresentativeReport } from "../../../types";
 import { Card, CardContent, createStyles, IconButton, makeStyles, Tooltip, Typography } from "@material-ui/core";
 import { parseContent } from "../../../util/text-parsing";
 import { ReportOff } from "@material-ui/icons";
 import { handleReport } from "../../../blockchain/RepresentativesService";
-import { getUser } from "../../../util/user-util";
 import Timestamp from "../../common/Timestamp";
 import { COLOR_RED } from "../../../theme";
 import { ApplicationState } from "../../../store";
@@ -21,20 +20,20 @@ const useStyles = makeStyles(
 interface ReportCardProps {
   report: RepresentativeReport;
   representatives: string[];
+  user: ChromunityUser;
 }
 
 const ReportCard: React.FunctionComponent<ReportCardProps> = (props: ReportCardProps) => {
   const classes = useStyles(props);
-  const user = getUser();
 
   return (
     <Card key={props.report.id}>
       <CardContent>
         <Timestamp milliseconds={props.report.timestamp} />
-        {user != null && props.representatives.includes(user.name.toLocaleLowerCase()) ? (
+        {props.user != null && props.representatives.includes(props.user.name.toLocaleLowerCase()) ? (
           <IconButton
             aria-label="Report"
-            onClick={() => handleReport(user, props.report.id).then(() => window.location.reload())}
+            onClick={() => handleReport(props.user, props.report.id).then(() => window.location.reload())}
           >
             <Tooltip title="Remove report">
               <ReportOff className={classes.iconRed} />
@@ -57,7 +56,8 @@ const ReportCard: React.FunctionComponent<ReportCardProps> = (props: ReportCardP
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    representatives: store.government.representatives.map(rep => toLowerCase(rep))
+    representatives: store.government.representatives.map(rep => toLowerCase(rep)),
+    user: store.account.user
   };
 };
 

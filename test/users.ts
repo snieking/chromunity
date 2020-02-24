@@ -1,8 +1,9 @@
 import { getANumber } from "./helper";
 import { makeKeyPair } from "../src/blockchain/CryptoService";
-import { FlagsType, KeyPair, op, SingleSignatureAuthDescriptor, User } from "ft3-lib";
+import { Account, FlagsType, KeyPair, op, SingleSignatureAuthDescriptor, User } from "ft3-lib";
 import { BLOCKCHAIN } from "../src/blockchain/Postchain";
 import { ChromunityUser } from "../src/types";
+import Transaction from "ft3-lib/dist/ft3/core/transaction";
 
 interface TestUser {
   name: string;
@@ -21,10 +22,9 @@ const names: string[] = [
   "Todd",
   "Olle",
   "Alisa",
-  "Or"
+  "Or",
+  "Joso"
 ];
-
-let adminUser: ChromunityUser;
 
 const CREATE_RANDOM_USER = (): TestUser => {
   const randomNumber = Math.floor(Math.random() * names.length);
@@ -37,24 +37,10 @@ const CREATE_RANDOM_USER = (): TestUser => {
 
 const CREATE_LOGGED_IN_USER = async () => {
   const user = CREATE_RANDOM_USER();
-  return loginUser(user);
+  return loginDappUser(user);
 };
 
-/**
- * Creates a user with mnemonic phrase:
- * 'return feel swing spell crack issue cousin child winter process marble arctic safe jacket color'
- */
-const GET_LOGGED_IN_ADMIN_USER = async (): Promise<ChromunityUser> => {
-  if (adminUser == null) {
-    adminUser = await loginUser({
-      name: "snieking",
-      keyPair: new KeyPair("039a02bc551528e23ddcd6f9557ef1773b253f3b4dc7b60fdcf0af58ebbcdff7d7")
-    });
-  }
-  return new Promise<ChromunityUser>(resolve => resolve(adminUser));
-};
-
-const loginUser = async (user: TestUser): Promise<ChromunityUser> => {
+const loginDappUser = async (user: TestUser): Promise<ChromunityUser> => {
   const walletKeyPair = new KeyPair(makeKeyPair().privKey.toString("hex"));
   const walletAuthDescriptor = new SingleSignatureAuthDescriptor(walletKeyPair.pubKey, [
     FlagsType.Account,
@@ -62,17 +48,23 @@ const loginUser = async (user: TestUser): Promise<ChromunityUser> => {
   ]);
   const walletUser = new User(walletKeyPair, walletAuthDescriptor);
 
-  const authDescriptor = new SingleSignatureAuthDescriptor(user.keyPair.pubKey, [
-    FlagsType.Account,
-    FlagsType.Transfer
-  ]);
+  const authDescriptor = new SingleSignatureAuthDescriptor(user.keyPair.pubKey, []);
   const ft3User = new User(user.keyPair, authDescriptor);
 
   const bc = await BLOCKCHAIN;
   const account = await bc.registerAccount(walletAuthDescriptor, walletUser);
-  await bc.call(op("register_user", user.name, authDescriptor.toGTV(), walletAuthDescriptor.toGTV()), ft3User);
+
+  const rawTx = Account.rawTransactionAddAuthDescriptor(
+    account.id, walletUser, authDescriptor, bc
+  );
+
+  await Transaction.fromRawTransaction(rawTx, bc)
+    .sign(ft3User.keyPair)
+    .post();
+
+  await bc.call(op("register_user", user.name, account.id), ft3User);
 
   return new Promise<ChromunityUser>(resolve => resolve({ name: user.name, ft3User: ft3User }));
 };
 
-export { GET_LOGGED_IN_ADMIN_USER, CREATE_LOGGED_IN_USER };
+export { CREATE_LOGGED_IN_USER };

@@ -26,6 +26,14 @@ export function getAccountId(username: string): Promise<string> {
   return executeQuery("get_account_id", { name: toLowerCase(username) });
 }
 
+export function getUsernameByAccountId(id: string): Promise<string> {
+  return executeQuery("username_by_account_id", { id });
+}
+
+export function getAccountIdByAuthDescriptor(auth_descriptor: any[]): Promise<string> {
+  return executeQuery("ft3.get_account_by_auth_descriptor", { auth_descriptor });
+}
+
 export function getUserMeta(username: string): Promise<UserMeta> {
   const query = "get_user_meta";
   return executeQuery(query, { name: toLowerCase(username) });
@@ -58,7 +66,6 @@ export function updateUserSettings(user: ChromunityUser, avatar: string, descrip
   boomerang.remove(userLC);
 
   const operation = "update_user_settings";
-
   return executeOperations(
     user.ft3User,
     op(operation, userLC, user.ft3User.authDescriptor.id, avatar, description)

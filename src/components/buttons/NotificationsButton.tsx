@@ -4,10 +4,13 @@ import { Badge, createStyles, makeStyles, Tooltip } from "@material-ui/core";
 import { Notifications, NotificationsActive } from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
 import { countUnreadUserNotifications } from "../../blockchain/NotificationService";
-import { getUser } from "../../util/user-util";
+import { ChromunityUser } from "../../types";
+import { ApplicationState } from "../../store";
+import { connect } from "react-redux";
 
 export interface NotificationsButtonProps {
   username: string;
+  user: ChromunityUser;
 }
 
 const useStyles = makeStyles(theme =>
@@ -21,17 +24,16 @@ const useStyles = makeStyles(theme =>
 const NotificationsButton: React.FunctionComponent<NotificationsButtonProps> = props => {
   const classes = useStyles(props);
   const [counter, setCounter] = useState<number>(0);
-  const user = getUser();
 
   useEffect(() => {
     countUnreadUserNotifications(props.username)
       .then(count => setCounter(count))
-      .catch(() => window.location.href = "/user/logout");
+      .catch(() => (window.location.href = "/user/logout"));
     // eslint-disable-next-line
   }, []);
 
   function render() {
-    if (user != null) {
+    if (props.user != null) {
       return (
         <IconButton aria-label="Notifications" onClick={() => setCounter(0)}>
           <Badge color="secondary" badgeContent={counter}>
@@ -53,4 +55,10 @@ const NotificationsButton: React.FunctionComponent<NotificationsButtonProps> = p
   return render();
 };
 
-export default NotificationsButton;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    user: store.account.user
+  };
+};
+
+export default connect(mapStateToProps, null)(NotificationsButton);

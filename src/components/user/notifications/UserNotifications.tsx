@@ -3,17 +3,20 @@ import { Container, LinearProgress } from "@material-ui/core";
 
 import { RouteComponentProps } from "react-router";
 import { getUserNotificationsPriorToTimestamp, markNotificationsRead } from "../../../blockchain/NotificationService";
-import { UserNotification } from "../../../types";
+import { ChromunityUser, UserNotification } from "../../../types";
 import NotificationCard from "./NotificationCard";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import LoadMoreButton from "../../buttons/LoadMoreButton";
-import { getUser } from "../../../util/user-util";
+import { ApplicationState } from "../../../store";
+import { connect } from "react-redux";
 
 interface MatchParams {
   userId: string;
 }
 
-interface UserNotificationsProps extends RouteComponentProps<MatchParams> {}
+interface UserNotificationsProps extends RouteComponentProps<MatchParams> {
+  user: ChromunityUser;
+}
 
 const notificationsPageSize: number = 25;
 
@@ -21,8 +24,6 @@ const UserNotifications: React.FunctionComponent<UserNotificationsProps> = props
   const [notifications, setNotifications] = useState<UserNotification[]>([]);
   const [isLoading, setLoading] = useState<boolean>(false);
   const [couldExistOlderNotifications, setCouldExistOlderNotifications] = useState<boolean>(false);
-
-  const user = getUser();
 
   useEffect(() => {
     retrieveNotifications();
@@ -47,8 +48,8 @@ const UserNotifications: React.FunctionComponent<UserNotificationsProps> = props
           setNotifications(Array.from(new Set(notifications.concat(retrievedNotifications))));
           setCouldExistOlderNotifications(retrievedNotifications.length >= notificationsPageSize);
 
-          if (user != null && user.name === userId) {
-            markNotificationsRead(user).then();
+          if (props.user != null && props.user.name === userId) {
+            markNotificationsRead(props.user).then();
           }
         }
       })
@@ -71,7 +72,12 @@ const UserNotifications: React.FunctionComponent<UserNotificationsProps> = props
       {renderLoadMoreButton()}
     </Container>
   );
-
 };
 
-export default UserNotifications;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    user: store.account.user
+  };
+};
+
+export default connect(mapStateToProps, null)(UserNotifications);
