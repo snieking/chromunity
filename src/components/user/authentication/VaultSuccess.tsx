@@ -24,9 +24,10 @@ const VaultSuccess: React.FunctionComponent<Props> = props => {
   const username: string = props.match.params.username;
 
   useEffect(() => {
-    props.vaultSuccess(rawTx, username);
-    // eslint-disable-next-line
-  }, []);
+    if (rawTx && username) {
+      props.vaultSuccess(rawTx, username);
+    }
+  }, [rawTx, username]);
 
   if (props.error != null) {
     return <Redirect to={"/user/login"} />;
