@@ -26,7 +26,7 @@ When new features are stable enough in the `dev` branch, they are merged to the 
 **Chromunity** can be run with a local blockchain which is useful during development.
 
 #### Requirements
-1. Node.js 9.8+
+1. Node.js 12+
 2. Npm 65.6.0
 3. PostgresSQL 10.5+
 
