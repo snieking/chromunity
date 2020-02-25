@@ -22,6 +22,7 @@ import { connect } from "react-redux";
 import { channelInit, loadChannel, loadChannelByPopularity, loadOlderTopicsInChannel } from "./redux/channelActions";
 import { ApplicationState } from "../../store";
 import { toLowerCase } from "../../util/util";
+import { clearTopicsCache } from "./redux/wallActions";
 
 interface MatchParams {
   channel: string;
@@ -37,6 +38,7 @@ interface Props extends RouteComponentProps<MatchParams> {
   loadChannel: typeof loadChannel;
   loadOlderTopicsInChannel: typeof loadOlderTopicsInChannel;
   loadChannelByPopularity: typeof loadChannelByPopularity;
+  clearTopicsCache: typeof clearTopicsCache;
 }
 
 interface State {
@@ -163,6 +165,7 @@ class ChannelWall extends React.Component<Props, State> {
   }
 
   toggleChannelFollow() {
+    this.props.clearTopicsCache();
     if (!this.state.isLoading) {
       const channel = this.props.match.params.channel;
       this.setState({ isLoading: true });
@@ -252,7 +255,8 @@ const mapDispatchToProps = (dispatch: any) => {
     loadChannel: (name: string, pageSize: number) => dispatch(loadChannel(name, pageSize)),
     loadOlderTopicsInChannel: (pageSize: number) => dispatch(loadOlderTopicsInChannel(pageSize)),
     loadChannelByPopularity: (name: string, timestamp: number, pageSize: number) =>
-      dispatch(loadChannelByPopularity(name, timestamp, pageSize))
+      dispatch(loadChannelByPopularity(name, timestamp, pageSize)),
+    clearTopicsCache: () => dispatch(clearTopicsCache())
   };
 };
 

@@ -58,7 +58,7 @@ const getFollowedUsersCouldExistOlder = (state: ApplicationState) => state.topic
 const CACHE_DURATION_MILLIS = 1000 * 60;
 
 const cacheExpired = (updated: number): boolean => {
-  return Date.now() - updated > CACHE_DURATION_MILLIS;
+  return Date.now() - updated >= CACHE_DURATION_MILLIS;
 };
 
 export function* loadAllTopics(action: LoadAllTopicWallAction) {

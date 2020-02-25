@@ -12,7 +12,7 @@ import {
   LoadAllTopicsByPopularityAction,
   LoadFollowedUsersTopicsByPopularityAction,
   LoadFollowedChannelsTopicsByPopularityAction,
-  UpdateTopicWallFromCacheAction, IClearChannelsCache
+  UpdateTopicWallFromCacheAction, IClearTopicsCache
 } from "./wallTypes";
 import { Topic } from "../../../types";
 
@@ -112,6 +112,6 @@ export const loadFollowedChannelsTopicsByPopularity: ActionCreator<LoadFollowedC
   pageSize: pageSize
 });
 
-export const clearChannelsCache: ActionCreator<IClearChannelsCache> = () => ({
-  type: WallActionTypes.CLEAR_CHANNELS_CACHE
+export const clearTopicsCache: ActionCreator<IClearTopicsCache> = () => ({
+  type: WallActionTypes.CLEAR_TOPICS_CACHE
 });

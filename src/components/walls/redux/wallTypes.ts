@@ -12,7 +12,7 @@ export enum WallActionTypes {
   LOAD_FOLLOWED_CHANNELS_TOPIC_WALL = "WALL/TOPIC/CHANNEL/LOAD",
   LOAD_OLDER_FOLLOWED_CHANNELS_TOPICS = "WALL/TOPIC/CHANNEL/OLDER",
   LOAD_FOLLOWED_CHANNELS_TOPICS_BY_POPULARITY = "WALL/TOPIC/FOLLOWED/CHANNELS/POPULARITY",
-  CLEAR_CHANNELS_CACHE = "WALL/TOPIC/CHANNELS/CLEAR"
+  CLEAR_TOPICS_CACHE = "WALL/TOPIC/CHANNELS/CLEAR"
 }
 
 export enum WallType {
@@ -90,8 +90,8 @@ export interface LoadFollowedChannelsTopicsByPopularityAction {
   pageSize: number;
 }
 
-export interface IClearChannelsCache {
-  type: WallActionTypes.CLEAR_CHANNELS_CACHE
+export interface IClearTopicsCache {
+  type: WallActionTypes.CLEAR_TOPICS_CACHE
 }
 
 export type TopicWallActions =
@@ -106,7 +106,7 @@ export type TopicWallActions =
   | LoadFollowedChannelsTopicWallAction
   | LoadOlderFollowedChannelsTopicsAction
   | LoadFollowedChannelsTopicsByPopularityAction
-  | IClearChannelsCache;
+  | IClearTopicsCache;
 
 export interface TopicWallState {
   loading: boolean;

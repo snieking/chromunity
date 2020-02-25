@@ -37,6 +37,21 @@ export const topicWallReducer: Reducer<TopicWallState, TopicWallActions> = (stat
     case WallActionTypes.UPDATE_TOPICS_WALL: {
       return updateTopicsWall(state, action);
     }
+    case WallActionTypes.CLEAR_TOPICS_CACHE: {
+      return {
+        ...state,
+        followedUsers: {
+          topics: [],
+          updated: 0,
+          couldExistOlder: false
+        },
+        followedChannels: {
+          topics: [],
+          updated: 0,
+          couldExistOlder: false
+        }
+      }
+    }
     case WallActionTypes.LOAD_ALL_TOPIC_WALL:
     case WallActionTypes.LOAD_OLDER_ALL_TOPICS:
     case WallActionTypes.LOAD_ALL_TOPICS_BY_POPULARITY:

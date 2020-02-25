@@ -59,6 +59,7 @@ import { NotFound } from "../static/NotFound";
 import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
 import { toLowerCase } from "../../util/util";
+import { clearTopicsCache } from "../walls/redux/wallActions";
 
 const styles = createStyles({
   iconRed: {
@@ -89,6 +90,7 @@ interface ProfileCardProps extends WithStyles<typeof styles> {
   username: string;
   representatives: string[];
   user: ChromunityUser;
+  clearTopicsCache: typeof clearTopicsCache;
 }
 
 interface ProfileCardState {
@@ -209,6 +211,7 @@ const ProfileCard = withStyles(styles)(
     }
 
     toggleFollowing() {
+      this.props.clearTopicsCache();
       if (this.state.following) {
         removeFollowing(this.props.user, this.props.username).then(() => {
           this.setState(prevState => ({
@@ -271,7 +274,7 @@ const ProfileCard = withStyles(styles)(
 
     distrustRepresentative() {
       this.setState({ distrustDialogOpen: false, isDistrusted: true });
-      distrustAnotherRepresentative(this.props.user, this.props.username);
+      distrustAnotherRepresentative(this.props.user, this.props.username).then();
     }
 
     handleSuspendUserClose() {
@@ -445,4 +448,10 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ProfileCard);
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    clearTopicsCache: () => dispatch(clearTopicsCache())
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(ProfileCard);
