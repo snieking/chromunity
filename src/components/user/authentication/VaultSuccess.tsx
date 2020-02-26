@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Redirect, RouteComponentProps } from "react-router";
 import { parse } from "query-string";
 import { connect } from "react-redux";
-import { LinearProgress, Snackbar } from "@material-ui/core";
+import { createStyles, LinearProgress, Snackbar } from "@material-ui/core";
 import { registerUser, resetLoginState, vaultCancel, vaultSuccess } from "../redux/accountActions";
 import { ApplicationState } from "../../../store";
 import { ChromunityUser } from "../../../types";
@@ -13,6 +13,8 @@ import TextField from "@material-ui/core/TextField";
 import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
 import { AuthenticationStep } from "../redux/accountTypes";
 import Button from "@material-ui/core/Button";
+import { ReactComponent as LeftShapes } from "../../static/graphics/left-shapes.svg";
+import { ReactComponent as RightShapes } from "../../static/graphics/right-shapes.svg";
 
 interface Props extends RouteComponentProps {
   vaultSuccess: typeof vaultSuccess;
@@ -25,14 +27,30 @@ interface Props extends RouteComponentProps {
   error: string;
 }
 
-const useStyles = makeStyles({
-  contentWrapper: {
-    textAlign: "center"
-  },
-  input: {
-    marginTop: "10px"
-  }
-});
+const useStyles = makeStyles(theme =>
+  createStyles({
+    contentWrapper: {
+      textAlign: "center"
+    },
+    input: {
+      marginTop: "10px",
+      marginBottom: "20px",
+      width: "180px"
+    },
+    leftShapes: {
+      [theme.breakpoints.down("sm")]: {
+        display: "none"
+      },
+      float: "left"
+    },
+    rightShapes: {
+      [theme.breakpoints.down("sm")]: {
+        display: "none"
+      },
+      float: "right"
+    }
+  })
+);
 
 const VaultSuccess: React.FunctionComponent<Props> = props => {
   const classes = useStyles();
@@ -70,7 +88,7 @@ const VaultSuccess: React.FunctionComponent<Props> = props => {
 
   const body = () => {
     return (
-      <>
+      <Container maxWidth="md" className={classes.contentWrapper}>
         {authentication()}
         <Snackbar
           anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
@@ -80,19 +98,19 @@ const VaultSuccess: React.FunctionComponent<Props> = props => {
         >
           <CustomSnackbarContentWrapper variant="error" message={errorMsg} />
         </Snackbar>
-      </>
+      </Container>
     );
   };
 
   const authentication = () => {
     if (props.error != null) {
-      console.log("ERROR!!!: " + props.error);
       return <Redirect to={"/user/login"} />;
     } else if (
+      props.authenticationStep == null ||
       props.authenticationStep === AuthenticationStep.CONFIRMING_VAULT_TRANSACTION ||
       props.authenticationStep === AuthenticationStep.VAULT_IN_PROGRESS
     ) {
-      return waitingForConfirmation("Almost there!", "Please give us a second to authenticate you...");
+      return waitingForConfirmation("Almost there!", "Give us a second to authenticate you...");
     } else if (props.authenticationStep === AuthenticationStep.USERNAME_INPUT_REQUIRED) {
       return registerNewUser();
     } else if (props.authenticationStep === AuthenticationStep.REGISTERING_USER) {
@@ -108,10 +126,10 @@ const VaultSuccess: React.FunctionComponent<Props> = props => {
     return (
       <>
         <LinearProgress variant="query" />
-        <Container maxWidth="md" className={classes.contentWrapper}>
-          <ChromiaPageHeader text={title} />
-          <p>{message}</p>
-        </Container>
+        <ChromiaPageHeader text={title} />
+        <LeftShapes className={classes.leftShapes} />
+        <RightShapes className={classes.rightShapes} />
+        <p>{message}</p>
       </>
     );
   };
@@ -119,22 +137,21 @@ const VaultSuccess: React.FunctionComponent<Props> = props => {
   const registerNewUser = () => {
     return (
       <Container maxWidth="md" className={classes.contentWrapper}>
-        <ChromiaPageHeader text={"You must be new here!"} />
-        <p>
-          We are super excited that you would like to join our <b>CHR</b>omunity. By which name would you like to be
-          referred to as?
-        </p>
+        <ChromiaPageHeader text={"It looks like you're new here!"} />
+        <LeftShapes className={classes.leftShapes} />
+        <RightShapes className={classes.rightShapes} />
+        <p>By which name would you like to be referred to as?</p>
         <TextField
           label="Username"
           name="name"
           type="text"
-          fullWidth
           variant="outlined"
           onChange={(event: React.ChangeEvent<HTMLInputElement>) => setName(event.target.value)}
           className={classes.input}
         />
-        <Button color="primary" variant="contained" fullWidth className={classes.input} onClick={selectUsername}>
-          Let's get going
+        <br />
+        <Button color="primary" variant="contained" className={classes.input} onClick={selectUsername}>
+          Continue
         </Button>
       </Container>
     );

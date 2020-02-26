@@ -44,6 +44,7 @@ function* logoutSaga() {
 
   clearSession();
   yield put(setUser(null));
+  yield put(setAuthenticationStep(null));
 }
 
 function* vaultSuccessSaga(action: IVaultSuccess) {
@@ -63,15 +64,10 @@ function* vaultSuccessSaga(action: IVaultSuccess) {
     if (username) {
       yield authorizeUser(username, user);
     } else {
-      // Need to register, must ask for input username
-      console.log("Saving vault account");
       yield put(saveVaultAccount(account.id, user));
-      console.log("Moving auth step");
       yield put(setAuthenticationStep(AuthenticationStep.USERNAME_INPUT_REQUIRED));
-      console.log("Moved step");
     }
   } catch (error) {
-    console.log("Error during sign-in", error);
     yield put(vaultCancel("Error signing in: " + error.message));
   }
 }
