@@ -29,8 +29,8 @@ const Content: React.FunctionComponent<RouteComponentProps> = ({ location }) => 
             <Route exact path="/" component={() => <TopicWall key="topic-wall" type="all" />} />
             <Route path="/followings" component={() => <TopicWall type="userFollowings" />} />
             <Route path="/channels" component={() => <TopicWall type="tagFollowings" />} />
-            <Route path="/user/success/:username" component={VaultSuccess} />
-            <Route path="/user/cancel" component={VaultCancel} />
+            <Route path="/vault/success" component={VaultSuccess} />
+            <Route path="/vault/cancel" component={VaultCancel} />
             <Route path="/user/login" component={WalletLogin} />
             <Route path="/user/logout" component={Logout} />
             <Route path="/user/settings" component={Settings} />

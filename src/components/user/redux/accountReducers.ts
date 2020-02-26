@@ -2,8 +2,11 @@ import { Reducer } from "redux";
 import { AccountActions, AccountActionTypes, AccountState } from "./accountTypes";
 
 const initialAccountState: AccountState = {
+  authenticationStep: null,
   loading: false,
   error: null,
+  accountId: null,
+  ft3User: null,
   user: null
 };
 
@@ -12,7 +15,8 @@ export const loginReducer: Reducer<AccountState, AccountActions> = (state = init
     return {
       ...state,
       error: action.error,
-      loading: false
+      loading: false,
+      authenticationStep: null
     };
   } else if (action.type === AccountActionTypes.SET_USER) {
     return {
@@ -29,6 +33,17 @@ export const loginReducer: Reducer<AccountState, AccountActions> = (state = init
     return {
       ...state,
       error: null
+    }
+  } else if (action.type === AccountActionTypes.SAVE_VAULT_ACCOUNT) {
+    return {
+      ...state,
+      accountId: action.accountId,
+      ft3User: action.ft3User
+    }
+  } else if (action.type === AccountActionTypes.SET_AUTHENTICATION_STEP) {
+    return {
+      ...state,
+      authenticationStep: action.authenticationStep
     }
   }
 
