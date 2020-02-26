@@ -1,4 +1,4 @@
-import { AccountActionTypes, ILoginAccount, IVaultSuccess } from "./accountTypes";
+import { AccountActionTypes, AuthenticationStep, IRegisterUser, IVaultSuccess } from "./accountTypes";
 import { takeLatest, put, select } from "redux-saga/effects";
 import { op, SSOStoreLocalStorage } from "ft3-lib";
 import config from "../../../config.js";
@@ -9,25 +9,28 @@ import logger from "../../../util/logger";
 import { toLowerCase } from "../../../util/util";
 import SSO from "ft3-lib/dist/ft3/user/sso/sso";
 import User from "ft3-lib/dist/ft3/user/user";
-import { setUser, vaultCancel } from "./accountActions";
+import { saveVaultAccount, setAuthenticationStep, setUser, vaultCancel } from "./accountActions";
 import { ChromunityUser } from "../../../types";
 import { ApplicationState } from "../../../store";
 
 SSO.vaultUrl = config.vault.url;
 
+const getAccountId = (state: ApplicationState) => state.account.accountId;
+const getFt3User = (state: ApplicationState) => state.account.ft3User;
 const getUser = (state: ApplicationState) => state.account.user;
 
 export function* accountWatcher() {
   yield takeLatest(AccountActionTypes.LOGIN_ACCOUNT, loginSaga);
   yield takeLatest(AccountActionTypes.VAULT_SUCCESS, vaultSuccessSaga);
+  yield takeLatest(AccountActionTypes.REGISTER_USER, registerUserSaga);
   yield takeLatest(AccountActionTypes.AUTO_LOGIN, autoLoginSaga);
   yield takeLatest(AccountActionTypes.LOGOUT_ACCOUNT, logoutSaga);
 }
 
-function* loginSaga(action: ILoginAccount) {
-  logger.silly("[SAGA - STARTED]: Login process started for username: [%s]", action.username);
-  const successUrl = encodeURI(`${config.vault.callbackBaseUrl}/user/success/${action.username}`);
-  const cancelUrl = encodeURI(`${config.vault.callbackBaseUrl}/user/cancel`);
+function* loginSaga() {
+  logger.silly("[SAGA - STARTED]: Login process started");
+  const successUrl = encodeURI(`${config.vault.callbackBaseUrl}/vault/success/`);
+  const cancelUrl = encodeURI(`${config.vault.callbackBaseUrl}/vault/cancel`);
 
   const BC = yield BLOCKCHAIN;
   new SSO(BC, new SSOStoreLocalStorage()).initiateLogin(successUrl, cancelUrl);
@@ -44,7 +47,8 @@ function* logoutSaga() {
 }
 
 function* vaultSuccessSaga(action: IVaultSuccess) {
-  logger.silly("[SAGA - STARTED] Received success from vault for username: [%s]", action.username);
+  logger.silly("[SAGA - STARTED] Received success from vault");
+  yield put(setAuthenticationStep(AuthenticationStep.CONFIRMING_VAULT_TRANSACTION));
   const BC = yield BLOCKCHAIN;
 
   try {
@@ -56,14 +60,35 @@ function* vaultSuccessSaga(action: IVaultSuccess) {
     const username = yield getUsernameByAccountId(account.id);
     logger.silly("Username linked to accountId: %s", username);
 
-    if (username == null) {
-      yield executeOperations(user, op("register_user", action.username, account.id));
-      yield authorizeUser(username, user);
-    } else if (toLowerCase(username) === toLowerCase(action.username)) {
+    if (username) {
       yield authorizeUser(username, user);
     } else {
-      yield put(vaultCancel("Vault account is already linked with another user"));
+      // Need to register, must ask for input username
+      console.log("Saving vault account");
+      yield put(saveVaultAccount(account.id, user));
+      console.log("Moving auth step");
+      yield put(setAuthenticationStep(AuthenticationStep.USERNAME_INPUT_REQUIRED));
+      console.log("Moved step");
     }
+  } catch (error) {
+    console.log("Error during sign-in", error);
+    yield put(vaultCancel("Error signing in: " + error.message));
+  }
+}
+
+function* registerUserSaga(action: IRegisterUser) {
+  yield put(setAuthenticationStep(AuthenticationStep.REGISTERING_USER));
+  const accountId = yield select(getAccountId);
+  const user = yield select(getFt3User);
+
+  if (!accountId || !user) {
+    yield put(vaultCancel("Login session was interrupted"));
+    return;
+  }
+
+  try {
+    yield executeOperations(user, op("register_user", toLowerCase(action.username), accountId));
+    yield authorizeUser(action.username, user);
   } catch (error) {
     yield put(vaultCancel("Error signing in: " + error.message));
   }
@@ -98,11 +123,12 @@ function* autoLoginSaga() {
 
 function* authorizeUser(username: string, user: User) {
   if (username && user) {
-    setUsername(username);
+    setUsername(toLowerCase(username));
 
     logger.silly("Authorizing user: [%s]", username);
-    const chromunityUser: ChromunityUser = { name: username, ft3User: user };
+    const chromunityUser: ChromunityUser = { name: toLowerCase(username), ft3User: user };
     yield put(setUser(chromunityUser));
+    yield put(setAuthenticationStep(AuthenticationStep.AUTHENTICATED));
   } else {
     logger.info("Username [%s], or [%s] was null", username, JSON.stringify(user));
   }
