@@ -455,11 +455,13 @@ const FullTopic = withStyles(styles)(
             <div />
           )}
 
-          <IconButton onClick={this.toggleReplyBox}>
-            <Tooltip title="Reply">
-              <Reply className={this.state.replyBoxOpen ? this.props.classes.iconOrange : ""} />
-            </Tooltip>
-          </IconButton>
+          {this.props.user && (
+            <IconButton onClick={this.toggleReplyBox}>
+              <Tooltip title="Reply">
+                <Reply className={this.state.replyBoxOpen ? this.props.classes.iconOrange : ""} />
+              </Tooltip>
+            </IconButton>
+          )}
 
           <ConfirmDialog
             text="This action will report the topic"
