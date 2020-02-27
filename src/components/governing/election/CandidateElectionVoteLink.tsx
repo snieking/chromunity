@@ -6,6 +6,7 @@ import { toLowerCase } from "../../../util/util";
 import { ChromunityUser } from "../../../types";
 import { ApplicationState } from "../../../store";
 import { connect } from "react-redux";
+import { getUsername } from "../../../util/user-util";
 
 interface Params {
   candidate: string;
@@ -20,6 +21,10 @@ const CandidateElectionVoteLink: React.FunctionComponent<Props> = props => {
   const [eligible, setEligible] = useState(false);
 
   useEffect(() => {
+
+  }, []);
+
+  useEffect(() => {
     if (props.user != null) {
       isEligibleForVoting(props.user.name).then(isEligible => {
         setEligible(isEligible);
@@ -29,7 +34,7 @@ const CandidateElectionVoteLink: React.FunctionComponent<Props> = props => {
   }, [props]);
 
   setTimeout(() => {
-    if (props.user == null) {
+    if (getUsername() == null && props.user == null) {
       window.location.href = "/user/login";
     } else if (props.user.name === toLowerCase(props.match.params.candidate) || (eligbilityChecked && !eligible)) {
       window.location.href = "/";
