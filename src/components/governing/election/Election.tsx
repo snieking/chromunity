@@ -27,6 +27,7 @@ import { ChromunityUser } from "../../../types";
 import ElectionCandidateCard from "./ElectionCandidateCard";
 import { ApplicationState } from "../../../store";
 import { connect } from "react-redux";
+import { toLowerCase } from "../../../util/util";
 
 const styles = createStyles({
   electionCard: {
@@ -40,7 +41,7 @@ const styles = createStyles({
 });
 
 interface Props extends WithStyles<typeof styles> {
-  user: ChromunityUser
+  user: ChromunityUser;
 }
 
 export interface ElectionState {
@@ -91,7 +92,8 @@ const Election = withStyles(styles)(
           getElectionCandidates().then(candidates =>
             this.setState({
               electionCandidates: candidates,
-              isACandidate: this.props.user != null && candidates.includes(this.props.user.name)
+              isACandidate:
+                this.props.user != null && candidates.map(name => toLowerCase(name)).includes(this.props.user.name)
             })
           );
 

@@ -11,7 +11,7 @@ import {
 } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
-import { getUsername, ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
+import { ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import Avatar, { AVATAR_SIZE } from "../../common/Avatar";
 import { ChatBubble, Face, Favorite, SentimentVeryDissatisfiedSharp, Star, Report } from "@material-ui/icons";
 import Badge from "@material-ui/core/Badge";
@@ -31,6 +31,9 @@ import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { toLowerCase } from "../../../util/util";
 import { electionCandidateCardStyles } from "../sharedStyles";
+import { ApplicationState } from "../../../store";
+import { connect } from "react-redux";
+import { ChromunityUser } from "../../../types";
 
 
 interface Props {
@@ -38,6 +41,7 @@ interface Props {
   votedFor: string;
   voteForCandidate: Function;
   userIsEligibleToVote: boolean;
+  user: ChromunityUser;
 }
 
 const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => {
@@ -53,8 +57,6 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
   const [distrusted, setDistrusted] = useState(0);
 
   const [snackbarOpen, setSnackBarOpen] = useState(false);
-
-  const username = getUsername();
 
   useEffect(() => {
     getUserSettingsCached(props.candidate, 1440).then(settings =>
@@ -206,7 +208,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
     } else {
       return (
         <div>
-          {username != null && toLowerCase(username) !== toLowerCase(name) ? (
+          {props.user != null && toLowerCase(props.user.name) !== toLowerCase(name) ? (
             <Button
               fullWidth
               size="small"
@@ -241,4 +243,10 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
   }
 };
 
-export default ElectionCandidateCard;
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    user: store.account.user
+  };
+};
+
+export default connect(mapStateToProps, null) (ElectionCandidateCard);
