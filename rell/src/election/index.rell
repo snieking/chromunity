@@ -29,10 +29,14 @@ entity temp_votes_counter {
 }
 
 function is_eligible_to_vote(user.user): boolean {
+	val prev_election_id = get_latest_completed_election_id();
+	
 	val current_election_id = get_current_election_id();
 	
 	if (current_election_id == null) {
 		return false;
+	} else if (prev_election_id == null) {
+		return true;
 	}
 	
 	val current_election_start = election_block_details@{ 
