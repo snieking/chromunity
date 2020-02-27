@@ -6,7 +6,6 @@ import { getUsernameByAccountId } from "../../../blockchain/UserService";
 import { BLOCKCHAIN, executeOperations } from "../../../blockchain/Postchain";
 import { clearSession, getUsername, setUsername } from "../../../util/user-util";
 import logger from "../../../util/logger";
-import { toLowerCase } from "../../../util/util";
 import SSO from "ft3-lib/dist/ft3/user/sso/sso";
 import User from "ft3-lib/dist/ft3/user/user";
 import { saveVaultAccount, setAuthenticationStep, setUser, vaultCancel } from "./accountActions";
