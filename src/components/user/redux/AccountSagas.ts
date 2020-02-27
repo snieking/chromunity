@@ -11,6 +11,7 @@ import User from "ft3-lib/dist/ft3/user/user";
 import { saveVaultAccount, setAuthenticationStep, setUser, vaultCancel } from "./accountActions";
 import { ChromunityUser } from "../../../types";
 import { ApplicationState } from "../../../store";
+import { toLowerCase } from "../../../util/util";
 
 SSO.vaultUrl = config.vault.url;
 
@@ -107,7 +108,7 @@ function* autoLoginSaga() {
     logger.silly("Account [%s] and user [%s] found", JSON.stringify(account), JSON.stringify(user));
     if (account && user) {
       const usernameLinkedToAccount = yield getUsernameByAccountId(account.id);
-      if (username === usernameLinkedToAccount) {
+      if (usernameLinkedToAccount && toLowerCase(username) === toLowerCase(usernameLinkedToAccount)) {
         yield authorizeUser(username, user);
       } else {
         yield sso.logout();
