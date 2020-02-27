@@ -83,7 +83,7 @@ function* registerUserSaga(action: IRegisterUser) {
   }
 
   try {
-    yield executeOperations(user, op("register_user", toLowerCase(action.username), accountId));
+    yield executeOperations(user, op("register_user", action.username, accountId));
     yield authorizeUser(action.username, user);
   } catch (error) {
     yield put(vaultCancel("Error signing in: " + error.message));
