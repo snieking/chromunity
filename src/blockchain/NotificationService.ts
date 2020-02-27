@@ -57,7 +57,7 @@ function sendNotificationsInternal(
       id,
       trigger,
       content,
-      usernames.map(name => toLowerCase(name)).filter(name => name !== fromUser.name)
+      usernames.map(name => toLowerCase(name)).filter(name => name !== toLowerCase(fromUser.name))
     ),
     nop()
   );
