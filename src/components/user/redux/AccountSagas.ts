@@ -119,10 +119,10 @@ function* autoLoginSaga() {
 
 function* authorizeUser(username: string, user: User) {
   if (username && user) {
-    setUsername(toLowerCase(username));
+    setUsername(username);
 
     logger.silly("Authorizing user: [%s]", username);
-    const chromunityUser: ChromunityUser = { name: toLowerCase(username), ft3User: user };
+    const chromunityUser: ChromunityUser = { name: username, ft3User: user };
     yield put(setUser(chromunityUser));
     yield put(setAuthenticationStep(AuthenticationStep.AUTHENTICATED));
   } else {
