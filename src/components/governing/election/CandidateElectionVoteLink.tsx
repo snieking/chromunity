@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { RouteComponentProps } from "react-router";
+import { Redirect, RouteComponentProps } from "react-router";
 import ConfirmDialog from "../../common/ConfirmDialog";
 import { isEligibleForVoting, voteForCandidate } from "../../../blockchain/ElectionService";
 import { toLowerCase } from "../../../util/util";
 import { ChromunityUser } from "../../../types";
 import { ApplicationState } from "../../../store";
 import { connect } from "react-redux";
+import { getUsername } from "../../../util/user-util";
 
 interface Params {
   candidate: string;
@@ -38,10 +39,10 @@ const CandidateElectionVoteLink: React.FunctionComponent<Props> = props => {
     window.location.href = "/gov/election";
   }
 
-  if (props.user == null) {
-    window.location.href = "/user/login";
+  if (getUsername() != null) {
+    return <Redirect to={"/user/login"} />
   } else if (props.user.name === toLowerCase(props.match.params.candidate) || (eligbilityChecked && !eligible)) {
-    window.location.href = "/";
+    return <Redirect to={"/"} />
   } else {
     return (
       <ConfirmDialog

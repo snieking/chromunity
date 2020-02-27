@@ -225,7 +225,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
               window.location.protocol +
               "//" +
               window.location.hostname +
-              (window.location.port != null ? ":" + window.location.port : "") +
+              ((window.location.port != null && window.location.port !== "") ? ":" + window.location.port : "") +
               "/gov/vote/" +
               name
             }
