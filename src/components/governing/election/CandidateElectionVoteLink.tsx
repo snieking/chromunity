@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Redirect, RouteComponentProps } from "react-router";
+import { RouteComponentProps } from "react-router";
 import ConfirmDialog from "../../common/ConfirmDialog";
 import { isEligibleForVoting, voteForCandidate } from "../../../blockchain/ElectionService";
 import { toLowerCase } from "../../../util/util";
 import { ChromunityUser } from "../../../types";
 import { ApplicationState } from "../../../store";
 import { connect } from "react-redux";
-import { getUsername } from "../../../util/user-util";
 
 interface Params {
   candidate: string;
@@ -29,6 +28,14 @@ const CandidateElectionVoteLink: React.FunctionComponent<Props> = props => {
     }
   }, [props]);
 
+  setTimeout(() => {
+    if (props.user == null) {
+      window.location.href = "/user/login";
+    } else if (props.user.name === toLowerCase(props.match.params.candidate) || (eligbilityChecked && !eligible)) {
+      window.location.href = "/";
+    }
+  }, 5000);
+
   function onConfirm() {
     voteForCandidate(props.user, props.match.params.candidate)
       .then(() => navigateToElection())
@@ -39,10 +46,10 @@ const CandidateElectionVoteLink: React.FunctionComponent<Props> = props => {
     window.location.href = "/gov/election";
   }
 
-  if (getUsername() != null) {
-    return <Redirect to={"/user/login"} />
+  if (props.user == null) {
+    return null;
   } else if (props.user.name === toLowerCase(props.match.params.candidate) || (eligbilityChecked && !eligible)) {
-    return <Redirect to={"/"} />
+    return null;
   } else {
     return (
       <ConfirmDialog
