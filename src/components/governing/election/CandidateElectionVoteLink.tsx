@@ -13,16 +13,14 @@ interface Params {
 }
 
 interface Props extends RouteComponentProps<Params> {
-  user: ChromunityUser
+  user: ChromunityUser;
 }
 
 const CandidateElectionVoteLink: React.FunctionComponent<Props> = props => {
   const [eligbilityChecked, setEligibilityChecked] = useState(false);
   const [eligible, setEligible] = useState(false);
 
-  useEffect(() => {
-
-  }, []);
+  useEffect(() => {}, []);
 
   useEffect(() => {
     if (props.user != null) {
@@ -36,7 +34,10 @@ const CandidateElectionVoteLink: React.FunctionComponent<Props> = props => {
   setTimeout(() => {
     if (getUsername() == null && props.user == null) {
       window.location.href = "/user/login";
-    } else if (props.user.name === toLowerCase(props.match.params.candidate) || (eligbilityChecked && !eligible)) {
+    } else if (
+      (props.user != null && props.user.name === toLowerCase(props.match.params.candidate)) ||
+      (eligbilityChecked && !eligible)
+    ) {
       window.location.href = "/";
     }
   }, 5000);
@@ -73,4 +74,4 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-export default connect(mapStateToProps, null) (CandidateElectionVoteLink);
+export default connect(mapStateToProps, null)(CandidateElectionVoteLink);
