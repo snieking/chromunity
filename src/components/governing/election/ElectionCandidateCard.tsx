@@ -73,7 +73,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
   }, [props.candidate]);
 
   function votedFor(): boolean {
-    return props.candidate === props.votedFor;
+    return toLowerCase(props.candidate) === toLowerCase(props.votedFor);
   }
 
   return (
@@ -185,7 +185,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
   );
 
   function renderCandidateCardActions(name: string) {
-    if (toLowerCase(name) === toLowerCase(props.votedFor) || !props.userIsEligibleToVote) {
+    if (props.user === null || toLowerCase(props.user.name) === toLowerCase(name) || !props.userIsEligibleToVote) {
       return (
         <div>
           <CopyToClipboard
