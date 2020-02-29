@@ -177,6 +177,10 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
   );
 
   function renderCandidateCardActions(name: string) {
+    console.log("props.user == ", props.user != null ? props.user.name : null);
+    console.log("name == ", name);
+    console.log("props.votedFor == ", props.votedFor);
+    console.log("UserIsEligible == " , props.userIsEligibleToVote);
     if (
       props.user == null ||
       toLowerCase(props.user.name) === toLowerCase(name) ||
