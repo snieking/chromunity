@@ -180,7 +180,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
     if (
       props.user == null ||
       toLowerCase(props.user.name) === toLowerCase(name) ||
-      toLowerCase(name) !== toLowerCase(props.votedFor) ||
+      toLowerCase(name) === toLowerCase(props.votedFor) ||
       !props.userIsEligibleToVote
     ) {
       return (
