@@ -25,6 +25,7 @@ import { connect } from "react-redux";
 import { toLowerCase } from "../../util/util";
 import { COLOR_CHROMIA_DARK } from "../../theme";
 import Tutorial from "../common/Tutorial";
+import TutorialButton from "../buttons/TutorialButton";
 
 interface Props {
   type: string;
@@ -158,6 +159,7 @@ class TopicWall extends React.Component<Props, State> {
             }
           ]}
         />
+        <TutorialButton />
       </>
     );
   }

@@ -4,7 +4,7 @@ import Tour from 'reactour'
 import { connect } from "react-redux";
 import { ApplicationState } from "../../store";
 import { Theme } from "@material-ui/core";
-import { COLOR_PURPLE, COLOR_STEEL_BLUE } from "../../theme";
+import { COLOR_SOFT_PINK, COLOR_STEEL_BLUE } from "../../theme";
 import { ChromunityUser } from "../../types";
 
 
@@ -22,7 +22,7 @@ const Tutorial: React.FunctionComponent<Props> = (props: React.PropsWithChildren
     <Tour steps={props.steps}
           isOpen={props.user && props.tutorial}
           onRequestClose={props.toggleTutorial}
-          accentColor={props.theme.palette.type === "dark" ? COLOR_PURPLE : COLOR_STEEL_BLUE}
+          accentColor={props.theme.palette.type === "dark" ? COLOR_SOFT_PINK : COLOR_STEEL_BLUE}
     />
   )
 };
