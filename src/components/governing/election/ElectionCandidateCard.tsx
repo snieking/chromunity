@@ -185,7 +185,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
   );
 
   function renderCandidateCardActions(name: string) {
-    if (props.user === null || toLowerCase(props.user.name) === toLowerCase(name) || !props.userIsEligibleToVote) {
+    if (props.user == null || toLowerCase(props.user.name) === toLowerCase(name) || !props.userIsEligibleToVote) {
       return (
         <div>
           <CopyToClipboard
