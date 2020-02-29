@@ -74,7 +74,7 @@ const Election = withStyles(styles)(
       this.voteForCandidate = this.voteForCandidate.bind(this);
     }
 
-    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<ElectionState>, snapshot?: any): void {
+    componentDidUpdate(prevProps: Readonly<Props>): void {
       if (prevProps.user !== this.props.user) {
         getNextElectionTimestamp().then(election => {
           if (election != null) {
