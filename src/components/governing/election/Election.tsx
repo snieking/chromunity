@@ -74,42 +74,45 @@ const Election = withStyles(styles)(
       this.voteForCandidate = this.voteForCandidate.bind(this);
     }
 
-    componentDidUpdate(prevProps: Readonly<Props>): void {
-      if (prevProps.user !== this.props.user) {
-        getNextElectionTimestamp().then(election => {
-          if (election != null) {
+    componentDidMount(): void {
+      getNextElectionTimestamp().then(election => {
+        if (election != null) {
+          this.setState({
+            timestamp: election.timestamp,
+            activeElection: true,
+            electionId: election.id
+          });
+
+          getElectionCandidates().then(candidates =>
             this.setState({
-              timestamp: election.timestamp,
-              activeElection: true,
-              electionId: election.id
-            });
+              electionCandidates: candidates,
+              isACandidate:
+                this.props.user != null &&
+                candidates.map(name => toLowerCase(name)).includes(toLowerCase(this.props.user.name))
+            })
+          );
 
-            if (this.props.user != null) {
-              isEligibleForVoting(this.props.user.name).then(eligible =>
-                this.setState({ isEligibleForVoting: eligible })
-              );
-            }
+          blocksUntilElectionWrapsUp().then(blocks => this.setState({ blocksUntilElectionWrapsUp: blocks }));
+        } else {
+          blocksUntilNextElection().then(blocks => this.setState({ blocksUntilNextElection: blocks }));
+        }
+      });
+    }
 
-            getElectionCandidates().then(candidates =>
-              this.setState({
-                electionCandidates: candidates,
-                isACandidate:
-                  this.props.user != null && candidates.map(name => toLowerCase(name)).includes(this.props.user.name)
-              })
-            );
+    componentDidUpdate(prevProps: Readonly<Props>): void {
+      if (this.props.user != null && prevProps.user !== this.props.user) {
+        isEligibleForVoting(this.props.user.name).then(eligible => this.setState({ isEligibleForVoting: eligible }));
 
-            if (this.props.user != null) {
-              getElectionVoteForUser(this.props.user.name).then(candidate => {
-                if (candidate != null) {
-                  this.setState({ votedFor: candidate });
-                }
-              });
-            }
-
-            blocksUntilElectionWrapsUp().then(blocks => this.setState({ blocksUntilElectionWrapsUp: blocks }));
-          } else {
-            blocksUntilNextElection().then(blocks => this.setState({ blocksUntilNextElection: blocks }));
+        getElectionVoteForUser(this.props.user.name).then(candidate => {
+          if (candidate != null) {
+            this.setState({ votedFor: candidate });
           }
+        });
+
+        this.setState({
+          isACandidate: this.state.electionCandidates
+            .map(name => toLowerCase(name))
+            .includes(toLowerCase(this.props.user.name))
         });
       }
     }
