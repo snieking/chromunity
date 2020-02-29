@@ -71,7 +71,9 @@ const Election = withStyles(styles)(
         electionCandidates: [],
         isEligibleForVoting: false
       };
+
       this.voteForCandidate = this.voteForCandidate.bind(this);
+      this.handleUserExists = this.handleUserExists.bind(this);
     }
 
     componentDidMount(): void {
@@ -83,14 +85,21 @@ const Election = withStyles(styles)(
             electionId: election.id
           });
 
-          getElectionCandidates().then(candidates =>
-            this.setState({
-              electionCandidates: candidates,
-              isACandidate:
-                this.props.user != null &&
-                candidates.map(name => toLowerCase(name)).includes(toLowerCase(this.props.user.name))
-            })
-          );
+          getElectionCandidates()
+            .then(candidates => this.setState({ electionCandidates: candidates }))
+            .then(() => {
+              if (this.props.user != null) {
+                this.setState({
+                  isACandidate: this.state.electionCandidates
+                    .map(name => toLowerCase(name))
+                    .includes(toLowerCase(this.props.user.name))
+                });
+              }
+            });
+
+          if (this.props.user != null) {
+            this.handleUserExists();
+          }
 
           blocksUntilElectionWrapsUp().then(blocks => this.setState({ blocksUntilElectionWrapsUp: blocks }));
         } else {
@@ -99,22 +108,25 @@ const Election = withStyles(styles)(
       });
     }
 
-    componentDidUpdate(prevProps: Readonly<Props>): void {
+    componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<ElectionState>): void {
       if (this.props.user != null && prevProps.user !== this.props.user) {
-        isEligibleForVoting(this.props.user.name).then(eligible => this.setState({ isEligibleForVoting: eligible }));
-
-        getElectionVoteForUser(this.props.user.name).then(candidate => {
-          if (candidate != null) {
-            this.setState({ votedFor: candidate });
-          }
-        });
-
+        this.handleUserExists();
         this.setState({
           isACandidate: this.state.electionCandidates
             .map(name => toLowerCase(name))
             .includes(toLowerCase(this.props.user.name))
         });
       }
+    }
+
+    handleUserExists() {
+      isEligibleForVoting(this.props.user.name).then(eligible => this.setState({ isEligibleForVoting: eligible }));
+
+      getElectionVoteForUser(this.props.user.name).then(candidate => {
+        if (candidate != null) {
+          this.setState({ votedFor: candidate });
+        }
+      });
     }
 
     renderElectionVoteStatus() {
