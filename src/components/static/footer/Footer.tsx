@@ -30,7 +30,7 @@ const useStyles = makeStyles(theme => ({
   },
   helpBtn: {
     position: "fixed",
-    right: "0"
+    left: "0"
   },
   helpIcon: {
     color: theme.palette.type === "dark" ? COLOR_CHROMIA_LIGHT : COLOR_STEEL_BLUE
