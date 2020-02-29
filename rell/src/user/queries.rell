@@ -15,7 +15,7 @@ query get_registered_at(name) {
 query username_by_account_id(id: byte_array): name? {
 	val account = ft3_acc.account@? { id };
 	if (account != null) {
-		return user@?{ .account == account } ( .name );
+		return user@?{ .account == account } ( .display_name );
 	}
 	
 	return null;

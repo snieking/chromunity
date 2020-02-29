@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Grid,
-  Snackbar,
-  Tooltip,
-  Typography
-} from "@material-ui/core";
+import { Button, Card, CardActions, CardContent, Grid, Snackbar, Tooltip, Typography } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import { getUserSettingsCached } from "../../../blockchain/UserService";
 import { ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
@@ -34,7 +25,6 @@ import { electionCandidateCardStyles } from "../sharedStyles";
 import { ApplicationState } from "../../../store";
 import { connect } from "react-redux";
 import { ChromunityUser } from "../../../types";
-
 
 interface Props {
   candidate: string;
@@ -85,7 +75,9 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
         <CardContent>
           <Avatar src={avatar} size={AVATAR_SIZE.LARGE} name={props.candidate} />
           <Typography gutterBottom variant="h6" component="p">
-            <Link className={classes.link} to={"/u/" + props.candidate}>@{props.candidate}</Link>
+            <Link className={classes.link} to={"/u/" + props.candidate}>
+              @{props.candidate}
+            </Link>
           </Typography>
           <br />
           <Grid container spacing={2}>
@@ -185,7 +177,12 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
   );
 
   function renderCandidateCardActions(name: string) {
-    if (props.user == null || toLowerCase(props.user.name) === toLowerCase(name) || !props.userIsEligibleToVote) {
+    if (
+      props.user == null ||
+      toLowerCase(props.user.name) === toLowerCase(name) ||
+      toLowerCase(name) !== toLowerCase(props.votedFor) ||
+      !props.userIsEligibleToVote
+    ) {
       return (
         <div>
           <CopyToClipboard
@@ -227,7 +224,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
               window.location.protocol +
               "//" +
               window.location.hostname +
-              ((window.location.port != null && window.location.port !== "") ? ":" + window.location.port : "") +
+              (window.location.port != null && window.location.port !== "" ? ":" + window.location.port : "") +
               "/gov/vote/" +
               name
             }
@@ -249,4 +246,4 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-export default connect(mapStateToProps, null) (ElectionCandidateCard);
+export default connect(mapStateToProps, null)(ElectionCandidateCard);
