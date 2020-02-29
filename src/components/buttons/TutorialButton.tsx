@@ -1,12 +1,12 @@
 import React from "react";
 
 import { createStyles, makeStyles, Tooltip } from "@material-ui/core";
-import { HelpOutline } from "@material-ui/icons";
+import { Help } from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
 import { ChromunityUser } from "../../types";
 import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
-import { COLOR_CHROMIA_DARK, COLOR_OFF_WHITE } from "../../theme";
+import { COLOR_OFF_WHITE, COLOR_STEEL_BLUE } from "../../theme";
 import { toggleTutorial } from "../common/redux/CommonActions";
 
 export interface Props {
@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme =>
       left: "1px"
     },
     helpIcon: {
-      color: theme.palette.type === "dark" ? COLOR_OFF_WHITE : COLOR_CHROMIA_DARK,
+      color: theme.palette.type === "dark" ? COLOR_OFF_WHITE : COLOR_STEEL_BLUE,
       height: "32px",
       width: "32px"
     }
@@ -40,7 +40,7 @@ const TutorialButton: React.FunctionComponent<Props> = props => {
       {props.user && (
         <Tooltip title={"Tutorial"}>
           <IconButton className={classes.helpBtn} onClick={props.toggleTutorial}>
-            <HelpOutline fontSize="inherit" className={classes.helpIcon} />
+            <Help fontSize="inherit" className={classes.helpIcon} />
           </IconButton>
         </Tooltip>
       )}
