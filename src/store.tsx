@@ -21,6 +21,8 @@ import { channelWatcher } from "./components/walls/redux/channelSagas";
 import { userPageWatcher } from "./components/user/redux/userPageSagas";
 import { governmentWatcher } from "./components/governing/redux/govSagas";
 import { chatWatcher } from "./components/chat/redux/chatSagas";
+import { CommonState } from "./components/common/redux/CommonTypes";
+import { commonReducer } from "./components/common/redux/CommonReducers";
 
 export interface ApplicationState {
   account: AccountState;
@@ -30,6 +32,7 @@ export interface ApplicationState {
   styling: StylingState;
   government: GovernmentState;
   chat: ChatState;
+  common: CommonState;
 }
 
 const rootReducer = combineReducers<ApplicationState>({
@@ -39,7 +42,8 @@ const rootReducer = combineReducers<ApplicationState>({
   userPage: userPageReducer,
   styling: stylingReducer,
   government: governmentReducer,
-  chat: chatReducer
+  chat: chatReducer,
+  common: commonReducer
 });
 
 // Create Redux Store

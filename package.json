@@ -34,10 +34,12 @@
     "react-scripts": "3.0.1",
     "react-select": "^3.0.8",
     "react-transition-group": "^4.3.0",
+    "reactour": "^1.16.1",
     "redux": "^4.0.5",
     "redux-saga": "^1.0.5",
     "scrypt-async": "^2.0.1",
     "secp256k1": "4.0.0",
+    "styled-components": "^5.0.1",
     "ts-stopwatch": "0.0.4",
     "typescript": "3.7.5",
     "winston": "^3.2.1"

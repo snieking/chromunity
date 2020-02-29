@@ -23,6 +23,8 @@ import {
 } from "./redux/wallActions";
 import { connect } from "react-redux";
 import { toLowerCase } from "../../util/util";
+import { COLOR_CHROMIA_DARK } from "../../theme";
+import Tutorial from "../common/Tutorial";
 
 interface Props {
   type: string;
@@ -86,7 +88,7 @@ class TopicWall extends React.Component<Props, State> {
           {this.props.loading ? <LinearProgress variant="query" /> : <div />}
           {this.props.type === "tagFollowings" ? <TrendingChannels /> : <div />}
           {this.props.type === "tagFollowings" ? <ChromiaPageHeader text="Followed Channels" /> : <div />}
-          <StyledSelector value={this.state.selector} onChange={this.handleSelectorChange}>
+          <StyledSelector data-tut="main_selector" value={this.state.selector} onChange={this.handleSelectorChange}>
             <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.RECENT}>Recent</MenuItem>
             <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR}>Popular</MenuItem>
           </StyledSelector>
@@ -116,7 +118,47 @@ class TopicWall extends React.Component<Props, State> {
         ) : (
           <div />
         )}
+        {this.renderTour()}
       </div>
+    );
+  }
+
+  renderTour() {
+    return (
+      <>
+        <Tutorial
+          steps={[
+            {
+              selector: ".first-step",
+              content: () => (
+                <div style={{ color: COLOR_CHROMIA_DARK }}>
+                  <p>This page displays a wall of summarized topics.</p>
+                  <p>Click on a topic in order to read it.</p>
+                </div>
+              )
+            },
+            {
+              selector: '[data-tut="main_selector"]',
+              content: () => (
+                <div style={{ color: COLOR_CHROMIA_DARK }}>
+                  <p>Click on the selector to change in which order topics are viewed.</p>
+                </div>
+              )
+            },
+            {
+              selector: '[data-tut="new_topic"]',
+              content: () => (
+                <div style={{ color: COLOR_CHROMIA_DARK }}>
+                  <p>A new topic can be created by using this button.</p>
+                  <p>
+                    You will have to give the topic an appropriate title, as well as which channel it should belong to.
+                  </p>
+                </div>
+              )
+            }
+          ]}
+        />
+      </>
     );
   }
 

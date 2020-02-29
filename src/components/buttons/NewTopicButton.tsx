@@ -184,7 +184,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       createTopicButton() {
         if (this.props.user != null && this.state.userMeta.suspended_until < Date.now()) {
           return (
-            <div className={this.props.classes.buttonWrapper}>
+            <div className={this.props.classes.buttonWrapper} data-tut="new_topic">
               <Tooltip title="Create new topic">
                 <IconButton
                   aria-label="New topic"
