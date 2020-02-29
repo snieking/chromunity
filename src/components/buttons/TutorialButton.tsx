@@ -1,7 +1,7 @@
 import React from "react";
 
 import { createStyles, makeStyles, Tooltip } from "@material-ui/core";
-import { Help } from "@material-ui/icons";
+import { HelpOutline } from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
 import { ChromunityUser } from "../../types";
 import { ApplicationState } from "../../store";
@@ -16,6 +16,11 @@ export interface Props {
 
 const useStyles = makeStyles(theme =>
   createStyles({
+    wrapper: {
+      [theme.breakpoints.down("xs")]: {
+        display: "none"
+      }
+    },
     helpBtn: {
       position: "fixed",
       bottom: "1px",
@@ -33,15 +38,15 @@ const TutorialButton: React.FunctionComponent<Props> = props => {
   const classes = useStyles(props);
 
   return (
-    <>
+    <div className={classes.wrapper}>
       {props.user && (
         <Tooltip title={"Tutorial"}>
           <IconButton className={classes.helpBtn} onClick={props.toggleTutorial}>
-            <Help fontSize="inherit" className={classes.helpIcon} />
+            <HelpOutline fontSize="inherit" className={classes.helpIcon} />
           </IconButton>
         </Tooltip>
       )}
-    </>
+    </div>
   );
 };
 
