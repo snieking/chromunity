@@ -60,6 +60,9 @@ import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
 import { toLowerCase } from "../../util/util";
 import { clearTopicsCache } from "../walls/redux/wallActions";
+import Tutorial from "../common/Tutorial";
+import TutorialButton from "../buttons/TutorialButton";
+import { step } from "../common/TutorialStep";
 
 const styles = createStyles({
   iconRed: {
@@ -114,7 +117,6 @@ const MAX_BADGE_NR = 9999999;
 
 const ProfileCard = withStyles(styles)(
   class extends React.Component<ProfileCardProps, ProfileCardState> {
-
     constructor(props: ProfileCardProps) {
       super(props);
 
@@ -203,6 +205,7 @@ const ProfileCard = withStyles(styles)(
               <div style={{ clear: "left" }} />
               {this.renderIcons()}
             </Card>
+            {this.renderTour()}
           </div>
         );
       } else {
@@ -297,7 +300,7 @@ const ProfileCard = withStyles(styles)(
     renderIcons() {
       const user: ChromunityUser = this.props.user;
       return (
-        <div className={this.props.classes.bottomBar}>
+        <div className={this.props.classes.bottomBar} data-tut="bottom_stats">
           {user != null && this.props.username === user.name && (
             <Badge badgeContent={this.state.followers} showZero={true} color="secondary" max={MAX_BADGE_NR}>
               <Tooltip title="Followers">
@@ -341,13 +344,21 @@ const ProfileCard = withStyles(styles)(
     }
 
     renderActions() {
-      const user: ChromunityUser = this.props.user;
-      if (user != null && this.props.username !== user.name) {
+      return (
+        <div style={{ float: "right" }} data-tut="actions_stats">
+          {this.renderUserSuspensionDialog()}
+          {this.renderDistrustDialog()}
+          {this.renderRepresentativeActions()}
+          {this.renderMuteButton()}
+          {this.renderFollowButton()}
+        </div>
+      );
+    }
+
+    renderMuteButton() {
+      if (this.props.user != null && this.props.username !== this.props.user.name) {
         return (
-          <div style={{ float: "right" }}>
-            {this.renderUserSuspensionDialog()}
-            {this.renderDistrustDialog()}
-            {this.renderRepresentativeActions()}
+          <div style={{ display: "inline" }}>
             <IconButton onClick={() => this.toggleMuteUser()}>
               {this.state.muted ? (
                 <Tooltip title={"Unmute user"}>
@@ -359,84 +370,123 @@ const ProfileCard = withStyles(styles)(
                 </Tooltip>
               )}
             </IconButton>
-            {this.renderFollowButton()}
           </div>
         );
       }
     }
 
     renderUserSuspensionDialog() {
-      return (
-        <Dialog
-          open={this.state.suspendUserDialogOpen}
-          onClose={this.handleSuspendUserClose}
-          aria-labelledby="dialog-title"
-        >
-          <DialogTitle id="dialog-title">Are you sure?</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              This action will suspend the user, temporarily preventing them from posting anything.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.handleSuspendUserClose} color="secondary">
-              No
-            </Button>
-            <Button onClick={this.suspendUser} color="primary">
-              Yes
-            </Button>
-          </DialogActions>
-        </Dialog>
-      );
+      if (this.props.user != null && this.props.username !== this.props.user.name) {
+        return (
+          <Dialog
+            open={this.state.suspendUserDialogOpen}
+            onClose={this.handleSuspendUserClose}
+            aria-labelledby="dialog-title"
+          >
+            <DialogTitle id="dialog-title">Are you sure?</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                This action will suspend the user, temporarily preventing them from posting anything.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={this.handleSuspendUserClose} color="secondary">
+                No
+              </Button>
+              <Button onClick={this.suspendUser} color="primary">
+                Yes
+              </Button>
+            </DialogActions>
+          </Dialog>
+        );
+      }
     }
 
     renderDistrustDialog() {
-      return (
-        <Dialog
-          open={this.state.distrustDialogOpen}
-          onClose={this.handleDistrustDialogClose}
-          aria-labelledby="dialog-title"
-        >
-          <DialogTitle id="dialog-title">Are you sure?</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              This action will distrust the representative, if enough of representatives distrusts another
-              representatives, the user will have their representative status removed.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.handleDistrustDialogClose} color="secondary">
-              No
-            </Button>
-            <Button onClick={this.distrustRepresentative} color="primary">
-              Yes
-            </Button>
-          </DialogActions>
-        </Dialog>
-      );
+      if (this.props.user != null && this.props.username !== this.props.user.name) {
+        return (
+          <Dialog
+            open={this.state.distrustDialogOpen}
+            onClose={this.handleDistrustDialogClose}
+            aria-labelledby="dialog-title"
+          >
+            <DialogTitle id="dialog-title">Are you sure?</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                This action will distrust the representative, if enough of representatives distrusts another
+                representatives, the user will have their representative status removed.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={this.handleDistrustDialogClose} color="secondary">
+                No
+              </Button>
+              <Button onClick={this.distrustRepresentative} color="primary">
+                Yes
+              </Button>
+            </DialogActions>
+          </Dialog>
+        );
+      }
     }
 
     renderFollowButton() {
       const user: ChromunityUser = this.props.user;
-      if (user != null && user.name === this.props.username) {
+      if (user == null || toLowerCase(user.name) === toLowerCase(this.props.username)) {
         return (
-          <Badge badgeContent={this.state.followers} showZero={true} color="secondary" max={MAX_BADGE_NR}>
-            <Tooltip title="Followers">
-              <Favorite fontSize="large" />
-            </Tooltip>
-          </Badge>
+          <div style={{ display: "inline" }}>
+            <Badge
+              badgeContent={this.state.followers}
+              showZero={true}
+              color="secondary"
+              max={MAX_BADGE_NR}
+              style={{ marginTop: "12px", marginRight: "12px" }}
+            >
+              <Tooltip title="Followers">
+                <Favorite fontSize="large" />
+              </Tooltip>
+            </Badge>
+          </div>
         );
       } else {
         return (
-          <IconButton onClick={() => this.toggleFollowing()}>
-            <Badge badgeContent={this.state.followers} showZero={true} color="secondary" max={MAX_BADGE_NR}>
-              <Tooltip title={this.state.following ? "Unfollow" : "Follow"}>
-                <Favorite fontSize="large" className={this.state.following ? this.props.classes.iconRed : ""} />
-              </Tooltip>
-            </Badge>
-          </IconButton>
+          <div style={{ display: "inline" }}>
+            <IconButton onClick={() => this.toggleFollowing()}>
+              <Badge badgeContent={this.state.followers} showZero={true} color="secondary" max={MAX_BADGE_NR}>
+                <Tooltip title={this.state.following ? "Unfollow" : "Follow"}>
+                  <Favorite fontSize="large" className={this.state.following ? this.props.classes.iconRed : ""} />
+                </Tooltip>
+              </Badge>
+            </IconButton>
+          </div>
         );
       }
+    }
+
+    renderTour() {
+      return (
+        <>
+          <Tutorial steps={this.steps()} />
+          <TutorialButton />
+        </>
+      );
+    }
+
+    steps() {
+      return [
+        step(".first-step", <p>This is a user page. Here you get an overview of the user and it's recent activity.</p>),
+        step(
+          '[data-tut="actions_stats"]',
+          <p>
+            How many followers the user has is displayed here. If you are logged in, clickable actions is also shown
+            here.
+          </p>
+        ),
+        step('[data-tut="bottom_stats"]', <p>More statistics of the user is displayed here.</p>),
+        step('[data-tut="topics_nav"]', <p>Recent topics created by the user is listed here.</p>),
+        step('[data-tut="replies_nav"]', <p>Recent replies on topics made by the user is listed here.</p>),
+        step('[data-tut="channels_nav"]', <p>Channels that the user is following is listed here.</p>)
+      ];
     }
   }
 );

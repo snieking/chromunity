@@ -92,9 +92,9 @@ const UserWall = withStyles(styles)(
             {this.props.loading ? <LinearProgress variant="query" /> : <div />}
             {this.renderUserPageIntro()}
             <Tabs value={this.state.activeTab} onChange={this.handleChange} aria-label="User activity">
-              <Tab label="Topics" {...this.a11yProps(0)} className={this.props.classes.text} />
-              <Tab label="Replies" {...this.a11yProps(1)} className={this.props.classes.text} />
-              <Tab label="Channels" {...this.a11yProps(2)} className={this.props.classes.text} />
+              <Tab data-tut="topics_nav" label="Topics" {...this.a11yProps(0)} className={this.props.classes.text} />
+              <Tab data-tut="replies_nav" label="Replies" {...this.a11yProps(1)} className={this.props.classes.text} />
+              <Tab data-tut="channels_nav" label="Channels" {...this.a11yProps(2)} className={this.props.classes.text} />
             </Tabs>
             {this.renderUserContent()}
             {this.renderLoadMoreButton()}

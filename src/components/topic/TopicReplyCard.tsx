@@ -331,7 +331,6 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     renderCardContent() {
-      const user: ChromunityUser = this.props.user;
       return (
         <CardContent>
           {this.renderAuthor()}
@@ -345,6 +344,17 @@ const TopicReplyCard = withStyles(styles)(
               }
             />
           </div>
+          {this.bottomBar()}
+          <div>{this.renderReplyBox()}</div>
+        </CardContent>
+      );
+    }
+
+    bottomBar() {
+      const user: ChromunityUser = this.props.user;
+
+      if (user != null) {
+        return (
           <div className={this.props.classes.bottomBar}>
             <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
               <Badge className="star-badge" color="secondary" badgeContent={this.state.stars}>
@@ -404,9 +414,23 @@ const TopicReplyCard = withStyles(styles)(
             )}
             {this.renderAdminActions()}
           </div>
-          <div>{this.renderReplyBox()}</div>
-        </CardContent>
-      );
+        );
+      } else {
+        return (
+          <div className={this.props.classes.bottomBar}>
+            <Badge
+              className="star-badge"
+              color="secondary"
+              badgeContent={this.state.stars}
+              style={{ marginLeft: "5px", marginBottom: "5px" }}
+            >
+              <Tooltip title="Like">
+                <StarBorder />
+              </Tooltip>
+            </Badge>
+          </div>
+        );
+      }
     }
 
     toggleRenderReply() {

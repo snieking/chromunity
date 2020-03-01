@@ -61,6 +61,9 @@ import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
 import EmojiPicker from "../common/EmojiPicker";
 import logger from "../../util/logger";
+import Tutorial from "../common/Tutorial";
+import TutorialButton from "../buttons/TutorialButton";
+import { step } from "../common/TutorialStep";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -229,6 +232,7 @@ const FullTopic = withStyles(styles)(
               />
             ))}
             {this.renderLoadMoreButton()}
+            {this.renderTour()}
           </Container>
         );
       } else {
@@ -421,64 +425,87 @@ const FullTopic = withStyles(styles)(
 
     renderCardActions() {
       const user: ChromunityUser = this.props.user;
-      return (
-        <CardActions style={{ marginTop: "-20px" }}>
-          <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
-            <Badge color="secondary" badgeContent={this.state.stars}>
-              <Tooltip title="Like">
-                {this.state.ratedByMe ? <StarRate className={this.props.classes.iconYellow} /> : <StarBorder />}
-              </Tooltip>
-            </Badge>
-          </IconButton>
-          <IconButton aria-label="Subscribe" onClick={() => this.toggleSubscription()}>
-            {this.state.subscribed ? (
-              <Tooltip title="Unsubscribe">
-                <NotificationsActive className={this.props.classes.iconOrange} />
-              </Tooltip>
+
+      if (user != null) {
+        return (
+          <CardActions style={{ marginTop: "-20px" }}>
+            <IconButton data-tut="star_btn" aria-label="Like" onClick={() => this.toggleStarRate()}>
+              <Badge color="secondary" badgeContent={this.state.stars}>
+                <Tooltip title="Like">
+                  {this.state.ratedByMe ? <StarRate className={this.props.classes.iconYellow} /> : <StarBorder />}
+                </Tooltip>
+              </Badge>
+            </IconButton>
+            <IconButton data-tut="subscribe_btn" aria-label="Subscribe" onClick={() => this.toggleSubscription()}>
+              {this.state.subscribed ? (
+                <Tooltip title="Unsubscribe">
+                  <NotificationsActive className={this.props.classes.iconOrange} />
+                </Tooltip>
+              ) : (
+                <Tooltip title="Subscribe">
+                  <Notifications />
+                </Tooltip>
+              )}
+            </IconButton>
+
+            {this.state.topic.timestamp + allowedEditTimeMillis > Date.now() &&
+            user != null &&
+            this.state.topic.author === user.name ? (
+              <EditMessageButton
+                value={this.state.topic.message}
+                modifiableUntil={this.state.timeLeftUntilNoLongerModifiable}
+                editFunction={this.editTopicMessage}
+                deleteFunction={this.deleteTopic}
+              />
             ) : (
-              <Tooltip title="Subscribe">
-                <Notifications />
-              </Tooltip>
+              <div />
             )}
-          </IconButton>
 
-          {this.state.topic.timestamp + allowedEditTimeMillis > Date.now() &&
-          user != null &&
-          this.state.topic.author === user.name ? (
-            <EditMessageButton
-              value={this.state.topic.message}
-              modifiableUntil={this.state.timeLeftUntilNoLongerModifiable}
-              editFunction={this.editTopicMessage}
-              deleteFunction={this.deleteTopic}
+            {this.props.user && (
+              <IconButton data-tut="reply_btn" onClick={this.toggleReplyBox}>
+                <Tooltip title="Reply">
+                  <Reply className={this.state.replyBoxOpen ? this.props.classes.iconOrange : ""} />
+                </Tooltip>
+              </IconButton>
+            )}
+
+            <ConfirmDialog
+              text="This action will report the topic"
+              open={this.state.reportTopicDialogOpen}
+              onClose={this.closeReportTopic}
+              onConfirm={this.reportTopic}
             />
-          ) : (
-            <div />
-          )}
 
-          {this.props.user && (
-            <IconButton onClick={this.toggleReplyBox}>
-              <Tooltip title="Reply">
-                <Reply className={this.state.replyBoxOpen ? this.props.classes.iconOrange : ""} />
+            <IconButton
+              data-tut="report_btn"
+              aria-label="Report-test"
+              onClick={() => this.setState({ reportTopicDialogOpen: true })}
+            >
+              <Tooltip title="Report">
+                <Report />
               </Tooltip>
             </IconButton>
-          )}
 
-          <ConfirmDialog
-            text="This action will report the topic"
-            open={this.state.reportTopicDialogOpen}
-            onClose={this.closeReportTopic}
-            onConfirm={this.reportTopic}
-          />
-
-          <IconButton aria-label="Report-test" onClick={() => this.setState({ reportTopicDialogOpen: true })}>
-            <Tooltip title="Report">
-              <Report />
-            </Tooltip>
-          </IconButton>
-
-          {this.renderAdminActions()}
-        </CardActions>
-      );
+            {this.renderAdminActions()}
+          </CardActions>
+        );
+      } else {
+        return (
+          <CardActions>
+            <div data-tut="star_btn">
+              <Badge
+                color="secondary"
+                badgeContent={this.state.stars}
+                style={{ marginBottom: "5px", marginLeft: "5px" }}
+              >
+                <Tooltip title="Like">
+                  {this.state.ratedByMe ? <StarRate className={this.props.classes.iconYellow} /> : <StarBorder />}
+                </Tooltip>
+              </Badge>
+            </div>
+          </CardActions>
+        );
+      }
     }
 
     editTopicMessage(text: string) {
@@ -656,6 +683,54 @@ const FullTopic = withStyles(styles)(
       if (this.state.couldExistOlderReplies) {
         return <LoadMoreButton onClick={this.retrieveOlderReplies} />;
       }
+    }
+
+    renderTour() {
+      return (
+        <>
+          <Tutorial steps={this.steps()} />
+          <TutorialButton />
+        </>
+      );
+    }
+
+    steps(): any[] {
+      const steps: any[] = [
+        step(
+          ".first-step",
+          <p>This is a topic. A topic contains hopefully some interesting subject to discuss with the community.</p>
+        ),
+        step(
+          '[data-tut="star_btn"]',
+          <>
+            <p>If you like a topic, and are signed-in in, give it a star rating!</p>
+            <p>Replies can also receive a star rating.</p>
+          </>
+        )
+      ];
+
+      if (this.props.user != null) {
+        steps.push(
+          step(
+            '[data-tut="subscribe_btn"]',
+            <p>Subscribing to a post will keep you updated with notifications when someone replies to it.</p>
+          )
+        );
+
+        steps.push(step('[data-tut="reply_btn"]', <p>Join in the conversation by sending a reply to the topic.</p>));
+
+        steps.push(
+          step(
+            '[data-tut="report_btn"]',
+            <p>
+              If you find the topic inappropriate you can report it, sending a notice to representatives to have a look
+              at it.
+            </p>
+          )
+        );
+      }
+
+      return steps;
     }
   }
 );

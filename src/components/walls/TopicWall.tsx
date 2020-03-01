@@ -128,40 +128,47 @@ class TopicWall extends React.Component<Props, State> {
     return (
       <>
         <Tutorial
-          steps={[
-            {
-              selector: ".first-step",
-              content: () => (
-                <div style={{ color: COLOR_CHROMIA_DARK }}>
-                  <p>This page displays a wall of summarized topics.</p>
-                  <p>Click on a topic in order to read it.</p>
-                </div>
-              )
-            },
-            {
-              selector: '[data-tut="main_selector"]',
-              content: () => (
-                <div style={{ color: COLOR_CHROMIA_DARK }}>
-                  <p>Click on the selector to change in which order topics are viewed.</p>
-                </div>
-              )
-            },
-            {
-              selector: '[data-tut="new_topic"]',
-              content: () => (
-                <div style={{ color: COLOR_CHROMIA_DARK }}>
-                  <p>A new topic can be created by using this button.</p>
-                  <p>
-                    You will have to give the topic an appropriate title, as well as which channel it should belong to.
-                  </p>
-                </div>
-              )
-            }
-          ]}
+          steps={this.steps()}
         />
         <TutorialButton />
       </>
     );
+  }
+
+  steps(): any[] {
+    const steps = [
+      {
+        selector: ".first-step",
+        content: () => (
+          <div style={{ color: COLOR_CHROMIA_DARK }}>
+            <p>This page displays a wall of summarized topics.</p>
+            <p>Click on a topic in order to read it.</p>
+          </div>
+        )
+      },
+      {
+        selector: '[data-tut="main_selector"]',
+        content: () => (
+          <div style={{ color: COLOR_CHROMIA_DARK }}>
+            <p>Click on the selector to change in which order topics are viewed.</p>
+          </div>
+        )
+      }
+    ];
+
+    if (this.props.user != null) {
+      steps.push({
+        selector: '[data-tut="new_topic"]',
+        content: () => (
+          <div style={{ color: COLOR_CHROMIA_DARK }}>
+            <p>A new topic can be created by using this button.</p>
+            <p>You will have to give the topic an appropriate title, as well as which channel it should belong to.</p>
+          </div>
+        )
+      });
+    }
+
+    return steps;
   }
 
   renderLoadMoreButton() {

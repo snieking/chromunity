@@ -56,6 +56,9 @@ import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import EmojiPicker from "../common/EmojiPicker";
 import { useInterval } from "../../util/util";
 import { chatPageStyles } from "./styles";
+import Tutorial from "../common/Tutorial";
+import TutorialButton from "../buttons/TutorialButton";
+import { step } from "../common/TutorialStep";
 
 interface OptionType {
   label: string;
@@ -230,7 +233,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       <>
         {props.loading ? <LinearProgress variant="query" /> : <div />}
         <div className={classes.mobileSidePanel}>
-          <Box className={classes.drawerOpenerBtn} onClick={toggleDrawer(true)} />
+          <Box className={classes.drawerOpenerBtn} onClick={toggleDrawer(true)} data-tut="mobile_drawer_btn" />
           <Drawer open={values.drawerOpen} onClose={toggleDrawer(false)}>
             {mobileDrawerList()}
           </Drawer>
@@ -562,37 +565,40 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function renderLogin() {
     return (
-      <form className={classes.content} onSubmit={proceed}>
-        <ChromiaPageHeader text={"Enter or Create Chat Password"} />
-        <Typography variant="body2" component="p">
-          If you forget your password, resetting it will leave all your chats
-        </Typography>
-        <TextField
-          autoFocus
-          type="password"
-          label="Password"
-          className={classes.textField}
-          value={values.password}
-          onChange={handleChange("password")}
-          variant="outlined"
-          margin="normal"
-        />
-        <br />
-        <br />
-        {resetChatAccountDialog()}
-        <Button
-          type="button"
-          variant="contained"
-          color="secondary"
-          style={{ marginRight: "5px" }}
-          onClick={() => setValues({ ...values, showResetChatAccountDialog: true })}
-        >
-          Reset account
-        </Button>
-        <Button type="submit" variant="contained" color="primary">
-          Proceed
-        </Button>
-      </form>
+      <>
+        <form className={classes.content} onSubmit={proceed}>
+          <ChromiaPageHeader text={"Enter or Create Chat Password"} />
+          <Typography variant="body2" component="p">
+            If you forget your password, resetting it will leave all your chats
+          </Typography>
+          <TextField
+            autoFocus
+            type="password"
+            label="Password"
+            className={classes.textField}
+            value={values.password}
+            onChange={handleChange("password")}
+            variant="outlined"
+            margin="normal"
+          />
+          <br />
+          <br />
+          {resetChatAccountDialog()}
+          <Button
+            type="button"
+            variant="contained"
+            color="secondary"
+            style={{ marginRight: "5px" }}
+            onClick={() => setValues({ ...values, showResetChatAccountDialog: true })}
+          >
+            Reset account
+          </Button>
+          <Button type="submit" variant="contained" color="primary">
+            Proceed
+          </Button>
+        </form>
+        {renderTour()}
+      </>
     );
   }
 
@@ -635,6 +641,30 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       return renderLogin();
     }
   }
+
+  const renderTour = () => {
+    return (
+      <>
+        <Tutorial steps={steps()} />
+        <TutorialButton />
+      </>
+    );
+  };
+
+  const steps = (): any[] => {
+    return [
+      step(
+        ".first-step",
+        <>
+          <p>Chromunity offers an end-to-end encrypted group chat.</p>
+          <p>
+            Messages are encrypted using a shared secret which is stored encrypted for each user by it's chat key. The
+            private chat key is not stored on the blockchain.
+          </p>
+        </>
+      )
+    ];
+  };
 
   return (
     <Container fixed>

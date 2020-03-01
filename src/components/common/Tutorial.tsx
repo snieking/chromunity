@@ -5,13 +5,11 @@ import { connect } from "react-redux";
 import { ApplicationState } from "../../store";
 import { Theme } from "@material-ui/core";
 import { COLOR_SOFT_PINK, COLOR_STEEL_BLUE } from "../../theme";
-import { ChromunityUser } from "../../types";
 
 
 interface Props {
   steps: any[];
   theme: Theme;
-  user: ChromunityUser;
   tutorial: boolean;
   toggleTutorial: typeof toggleTutorial;
 }
@@ -20,7 +18,7 @@ const Tutorial: React.FunctionComponent<Props> = (props: React.PropsWithChildren
 
   return (
     <Tour steps={props.steps}
-          isOpen={props.user && props.tutorial}
+          isOpen={props.tutorial}
           onRequestClose={props.toggleTutorial}
           accentColor={props.theme.palette.type === "dark" ? COLOR_SOFT_PINK : COLOR_STEEL_BLUE}
     />
@@ -30,8 +28,7 @@ const Tutorial: React.FunctionComponent<Props> = (props: React.PropsWithChildren
 const mapStateToProps = (store: ApplicationState) => {
   return {
     tutorial: store.common.tutorial,
-    theme: store.styling.theme,
-    user: store.account.user
+    theme: store.styling.theme
   }
 };
 
