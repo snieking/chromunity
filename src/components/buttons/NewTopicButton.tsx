@@ -20,8 +20,7 @@ import {
   COLOR_CHROMIA_DARK_LIGHTER,
   COLOR_CHROMIA_LIGHT,
   COLOR_CHROMIA_LIGHTER,
-  COLOR_OFF_WHITE,
-  COLOR_STEEL_BLUE
+  COLOR_OFF_WHITE
 } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import withTheme from "@material-ui/core/styles/withTheme";
@@ -211,15 +210,15 @@ const NewTopicButton = withStyles(largeButtonStyles)(
 
         const textColor = darkTheme ? COLOR_OFF_WHITE : COLOR_CHROMIA_DARK;
         const backgroundColor = darkTheme ? COLOR_CHROMIA_DARK : COLOR_CHROMIA_LIGHTER;
-        const borderBottomColor = darkTheme ? COLOR_CHROMIA_DARK_LIGHTER : COLOR_CHROMIA_LIGHT;
+        const borderColor = darkTheme ? COLOR_CHROMIA_DARK_LIGHTER : COLOR_CHROMIA_LIGHT;
 
         const customStyles = {
-          option: (provided: any, state: any) => ({
+          option: (provided: any) => ({
             ...provided,
-            color: state.isSelected ? theme.palette.primary.main : textColor,
+            color: textColor,
             background: backgroundColor,
-            borderBottom: "2px solid",
-            borderBottomColor: borderBottomColor
+            border: "1px solid",
+            borderColor: borderColor
           }),
           menu: (styles: any) => ({
             ...styles,
@@ -230,22 +229,22 @@ const NewTopicButton = withStyles(largeButtonStyles)(
             ...provided,
             background: backgroundColor,
             color: theme.palette.primary.main,
-            borderColor: COLOR_STEEL_BLUE,
+            borderColor: theme.palette.primary.main,
             "&:hover": { borderColor: textColor },
             boxShadow: "none"
           }),
           singleValue: (provided: any, state: any) => {
             const opacity = state.isDisabled ? 1 : 1;
             const transition = "opacity 300ms";
-            const color = theme.palette.primary.main;
+            const color = textColor;
             return { ...provided, color, opacity, transition };
           },
-          input: (provided: any, state: any) => {
+          input: (provided: any) => {
             const color = textColor;
             return { ...provided, color };
           },
-          noOptionsMessage: (provided: any, state: any) => {
-            const color = theme.palette.primary.main;
+          noOptionsMessage: (provided: any) => {
+            const color = textColor;
             return { ...provided, color };
           }
         };
