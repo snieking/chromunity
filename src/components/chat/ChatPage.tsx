@@ -168,7 +168,6 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   useEffect(() => {
     if (props.user) {
-      console.log(" >>> Successfully authorized: ", props.successfullyAuthorized);
       if (props.successfullyAuthorized && props.activeChat == null) {
         props.loadUserChats(props.user);
       } else if (props.successfullyAuthorized && props.activeChat != null) {
@@ -179,7 +178,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       }
     }
     // eslint-disable-next-line
-  }, [props.user]);
+  }, [props.user, props.successfullyAuthorized, props.activeChat]);
 
   function handleScroll() {
     const scrollDiv = scrollRef.current;
