@@ -37,7 +37,7 @@ export const executeOperations = async (user: User, ...operations: Operation[]) 
     return new Promise<unknown>(resolve => resolve());
   } else {
     if (!test) {
-      OP_LOCK.set(lockId, operations, 3);
+      OP_LOCK.set(lockId, operations, 1);
     }
   }
 

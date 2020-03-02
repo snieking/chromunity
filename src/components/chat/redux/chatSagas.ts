@@ -275,8 +275,12 @@ export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
           determineCouldExistOlderMessages(decryptedMessages.length, couldExistOlder)
         )
       );
+
+      if (chatMessages.length > previousMessages.length) {
+        markChatAsRead(action.user, chat.id).catch();
+      }
+
       yield put(loadUserChats(action.user, true));
-      yield markChatAsRead(action.user, chat.id);
       yield put(countUnreadChatsAction(action.user));
     }
   }
