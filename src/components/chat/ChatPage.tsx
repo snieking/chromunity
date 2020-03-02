@@ -11,7 +11,6 @@ import {
   loadChatUsersAction,
   loadOlderMessagesAction,
   loadUserChats,
-  markChatAsReadAction,
   modifyTitleAction,
   openChat,
   refreshOpenChat,
@@ -95,7 +94,6 @@ interface Props {
   loadChatUsers: typeof loadChatUsersAction;
   loadOlderMessages: typeof loadOlderMessagesAction;
   storeErrorMessage: typeof storeErrorMessage;
-  markChatAsRead: typeof markChatAsReadAction;
   theme: Theme;
 }
 
@@ -172,7 +170,6 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
         props.loadUserChats(props.user);
       } else if (props.successfullyAuthorized && props.activeChat != null) {
         props.loadChatUsers(props.user);
-        props.markChatAsRead(props.user, props.activeChat);
       } else if (!props.successfullyAuthorized) {
         props.checkChatAuthentication();
       }
@@ -708,8 +705,7 @@ const mapDispatchToProps = (dispatch: any) => {
     modifyTitle: (user: ChromunityUser, chat: Chat, title: string) => dispatch(modifyTitleAction(user, chat, title)),
     loadChatUsers: (user: ChromunityUser) => dispatch(loadChatUsersAction(user)),
     loadOlderMessages: () => dispatch(loadOlderMessagesAction()),
-    storeErrorMessage: (msg: string) => dispatch(storeErrorMessage(msg)),
-    markChatAsRead: (user: ChromunityUser, chat: Chat) => dispatch(markChatAsReadAction(user, chat))
+    storeErrorMessage: (msg: string) => dispatch(storeErrorMessage(msg))
   };
 };
 
