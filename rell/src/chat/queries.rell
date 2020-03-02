@@ -71,7 +71,7 @@ query get_chat_users() {
 
 query count_unread_chats(username: name) {
 	return set<chat>((chat_membership, chat_message)@*{
-		chat_membership.member.user.name == username,
+		chat_membership.member.user.name == username.lower_case(),
 		chat_message.timestamp > chat_membership.last_opened,
 		chat_membership.chat == chat_message.chat
 	} ( chat_membership.chat )).size();

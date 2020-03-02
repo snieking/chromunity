@@ -53,7 +53,7 @@ import useTheme from "@material-ui/core/styles/useTheme";
 import LoadMoreButton from "../buttons/LoadMoreButton";
 import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import EmojiPicker from "../common/EmojiPicker";
-import { useInterval } from "../../util/util";
+import { toLowerCase, useInterval } from "../../util/util";
 import { chatPageStyles } from "./styles";
 import Tutorial from "../common/Tutorial";
 import TutorialButton from "../buttons/TutorialButton";
@@ -392,7 +392,9 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   const suggestions = () => {
-    return props.chatUsers.map(user => ({ value: user, label: user } as OptionType));
+    return props.chatUsers
+      .filter(user => toLowerCase(user) !== toLowerCase(props.user.name))
+      .map(user => ({ value: user, label: user } as OptionType));
   };
 
   const darkTheme = theme.palette.type === "dark";
@@ -635,7 +637,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function renderContent() {
     if (!props.autoLoginInProgress && !props.user) {
-      return <Redirect to={"/user/login"} />
+      return <Redirect to={"/user/login"} />;
     } else if (props.successfullyAuthorized && props.rsaKey != null) {
       return renderChat();
     } else {
