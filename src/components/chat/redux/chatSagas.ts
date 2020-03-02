@@ -285,6 +285,8 @@ export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
     }
   }
 
+  yield put(loadUserChats(action.user, false));
+
   logger.silly("[SAGA - FINISHED]: Refresh open chat");
 }
 
