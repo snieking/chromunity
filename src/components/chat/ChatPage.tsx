@@ -59,6 +59,7 @@ import { chatPageStyles } from "./styles";
 import Tutorial from "../common/Tutorial";
 import TutorialButton from "../buttons/TutorialButton";
 import { step } from "../common/TutorialStep";
+import { Redirect } from "react-router";
 
 interface OptionType {
   label: string;
@@ -66,6 +67,7 @@ interface OptionType {
 }
 
 interface Props {
+  autoLoginInProgress: boolean;
   user: ChromunityUser;
   loading: boolean;
   rsaKey: any;
@@ -165,18 +167,19 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   }, 5000);
 
   useEffect(() => {
-    if (props.user == null) {
-      window.location.href = "/user/login";
-    } else if (props.successfullyAuthorized && props.activeChat == null) {
-      props.loadUserChats(props.user);
-    } else if (props.successfullyAuthorized && props.activeChat != null) {
-      props.loadChatUsers(props.user);
-      props.markChatAsRead(props.user, props.activeChat);
-    } else if (!props.successfullyAuthorized) {
-      props.checkChatAuthentication();
+    if (props.user) {
+      console.log(" >>> Successfully authorized: ", props.successfullyAuthorized);
+      if (props.successfullyAuthorized && props.activeChat == null) {
+        props.loadUserChats(props.user);
+      } else if (props.successfullyAuthorized && props.activeChat != null) {
+        props.loadChatUsers(props.user);
+        props.markChatAsRead(props.user, props.activeChat);
+      } else if (!props.successfullyAuthorized) {
+        props.checkChatAuthentication();
+      }
     }
     // eslint-disable-next-line
-  }, []);
+  }, [props.user]);
 
   function handleScroll() {
     const scrollDiv = scrollRef.current;
@@ -635,7 +638,9 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function renderContent() {
-    if (props.successfullyAuthorized && props.rsaKey != null) {
+    if (!props.autoLoginInProgress && !props.user) {
+      return <Redirect to={"/user/login"} />
+    } else if (props.successfullyAuthorized && props.rsaKey != null) {
       return renderChat();
     } else {
       return renderLogin();
@@ -711,6 +716,7 @@ const mapDispatchToProps = (dispatch: any) => {
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
+    autoLoginInProgress: store.account.autoLoginInProgress,
     loading: store.chat.loading,
     user: store.account.user,
     rsaKey: store.chat.rsaKey,

@@ -11,7 +11,8 @@ export enum AccountActionTypes {
   AUTO_LOGIN = "AUTO/LOGIN/ACCOUNT",
   LOGOUT_ACCOUNT = "LOGOUT/ACCOUNT",
   RESET_LOGIN_STATE = "ACCOUNT/LOGIN/RESET",
-  REGISTER_USER = "ACCOUNT/REGISTER/USER"
+  REGISTER_USER = "ACCOUNT/REGISTER/USER",
+  AUTO_LOGIN_ATTEMPTED = "ACCOUNT/AUTO/LOGIN/ATTEMPTED"
 }
 
 export interface ILoginAccount {
@@ -61,6 +62,10 @@ export interface IRegisterUser {
   username: string;
 }
 
+export interface IAutoLoginAttempted {
+  type: AccountActionTypes.AUTO_LOGIN_ATTEMPTED;
+}
+
 export type AccountActions =
   | ILoginAccount
   | ISetAuthenticationStep
@@ -69,6 +74,7 @@ export type AccountActions =
   | IVaultCancel
   | ISetUser
   | IAutoLogin
+  | IAutoLoginAttempted
   | ILogoutAccount
   | IResetLoginState
   | IRegisterUser;
@@ -83,6 +89,7 @@ export enum AuthenticationStep {
 
 export interface AccountState {
   loading: boolean;
+  autoLoginInProgress: boolean;
   authenticationStep: AuthenticationStep;
   error: string;
   accountId: string;

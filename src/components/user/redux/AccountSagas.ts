@@ -8,7 +8,7 @@ import { clearSession, getUsername, setUsername } from "../../../util/user-util"
 import logger from "../../../util/logger";
 import SSO from "ft3-lib/dist/ft3/user/sso/sso";
 import User from "ft3-lib/dist/ft3/user/user";
-import { saveVaultAccount, setAuthenticationStep, setUser, vaultCancel } from "./accountActions";
+import { autoLoginAttempted, saveVaultAccount, setAuthenticationStep, setUser, vaultCancel } from "./accountActions";
 import { ChromunityUser } from "../../../types";
 import { ApplicationState } from "../../../store";
 import { toLowerCase } from "../../../util/util";
@@ -115,6 +115,8 @@ function* autoLoginSaga() {
       }
     }
   }
+
+  yield put(autoLoginAttempted());
 }
 
 function* authorizeUser(username: string, user: User) {

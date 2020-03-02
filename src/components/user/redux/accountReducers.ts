@@ -4,6 +4,7 @@ import { AccountActions, AccountActionTypes, AccountState } from "./accountTypes
 const initialAccountState: AccountState = {
   authenticationStep: null,
   loading: false,
+  autoLoginInProgress: true,
   error: null,
   accountId: null,
   ft3User: null,
@@ -44,6 +45,16 @@ export const loginReducer: Reducer<AccountState, AccountActions> = (state = init
     return {
       ...state,
       authenticationStep: action.authenticationStep
+    }
+  } else if (action.type === AccountActionTypes.AUTO_LOGIN) {
+    return {
+      ...state,
+      autoLoginInProgress: true
+    }
+  } else if (action.type === AccountActionTypes.AUTO_LOGIN_ATTEMPTED) {
+    return {
+      ...state,
+      autoLoginInProgress: false
     }
   }
 

@@ -25,8 +25,10 @@ import TestInfoBar from "./TestInfoBar";
 import GovMenu from "./GovMenu";
 import ChromiaLogo from "./ChromiaLogo";
 import { autoLogin } from "../../user/redux/accountActions";
+import { LinearProgress } from "@material-ui/core";
 
 interface Props {
+  autoLoginInProgress: boolean;
   representatives: string[];
   unhandledReports: number;
   activeElection: boolean;
@@ -151,7 +153,8 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
     if (props.user != null) {
       props.checkActiveElection(props.user);
     }
-  }, [props]);
+    // eslint-disable-next-line
+  }, [props.user]);
 
   useEffect(() => {
     if (isRepresentative()) {
@@ -195,6 +198,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   return (
     <div className={classes.grow}>
       <TestInfoBar classes={classes} />
+      {props.autoLoginInProgress && (<LinearProgress variant="query" />)}
       <AppBar position="static">
         <Toolbar>
           <div className={classes.leftGroup}>
@@ -234,6 +238,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
+    autoLoginInProgress: store.account.autoLoginInProgress,
     representatives: store.government.representatives.map(rep => toLowerCase(rep)),
     unhandledReports: store.government.unhandledReports,
     loadUnhandledReports: store.government.unhandledReports,

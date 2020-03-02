@@ -2,7 +2,7 @@ import { ActionCreator } from "redux";
 
 import {
   AccountActionTypes,
-  IAutoLogin,
+  IAutoLogin, IAutoLoginAttempted,
   ILoginAccount,
   ILogoutAccount, IRegisterUser, IResetLoginState, ISaveVaultAccount, ISetAuthenticationStep,
   ISetUser,
@@ -57,4 +57,8 @@ export const resetLoginState: ActionCreator<IResetLoginState> = () => ({
 export const registerUser: ActionCreator<IRegisterUser> = (username: string) => ({
   type: AccountActionTypes.REGISTER_USER,
   username
+});
+
+export const autoLoginAttempted: ActionCreator<IAutoLoginAttempted> = () => ({
+  type: AccountActionTypes.AUTO_LOGIN_ATTEMPTED
 });
