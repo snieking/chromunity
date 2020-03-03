@@ -32,10 +32,15 @@ const useStyles = makeStyles(theme =>
     contentWrapper: {
       textAlign: "center"
     },
-    input: {
+    textInput: {
       marginTop: "10px",
       marginBottom: "20px",
-      width: "180px"
+      width: "250px"
+    },
+    btnInput: {
+      marginTop: "10px",
+      marginBottom: "20px",
+      width: "100px"
     },
     leftShapes: {
       [theme.breakpoints.down("sm")]: {
@@ -147,10 +152,10 @@ const VaultSuccess: React.FunctionComponent<Props> = props => {
           type="text"
           variant="outlined"
           onChange={(event: React.ChangeEvent<HTMLInputElement>) => setName(event.target.value)}
-          className={classes.input}
+          className={classes.textInput}
         />
         <br />
-        <Button color="primary" variant="contained" className={classes.input} onClick={selectUsername}>
+        <Button color="primary" variant="contained" className={classes.btnInput} onClick={selectUsername}>
           Continue
         </Button>
       </Container>
