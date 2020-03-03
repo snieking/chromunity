@@ -425,16 +425,13 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     singleValue: (provided: any, state: any) => {
       const opacity = state.isDisabled ? 1 : 1;
       const transition = "opacity 300ms";
-      const color = textColor;
-      return { ...provided, color, opacity, transition };
+      return { ...provided, textColor, opacity, transition };
     },
     input: (provided: any) => {
-      const color = textColor;
-      return { ...provided, color };
+      return { ...provided, textColor };
     },
     noOptionsMessage: (provided: any) => {
-      const color = textColor;
-      return { ...provided, color };
+      return { ...provided, textColor };
     }
   };
 
@@ -511,7 +508,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       <form className={classes.messageWrapper} onSubmit={submitMessage}>
         <div className={classes.editorWrapper}>
           <TextField
-            autoFocus
+            autoFocus={window.screen.width >= 600}
             className={classes.messageField}
             label="Message"
             value={values.message}
