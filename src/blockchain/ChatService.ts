@@ -1,6 +1,6 @@
 import { executeOperations, executeQuery } from "./Postchain";
 import { Chat, ChatMessage, ChromunityUser } from "../types";
-import { toLowerCase, uniqueId } from "../util/util";
+import { toLowerCase } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 import { nop, op } from "ft3-lib";
 
@@ -71,7 +71,6 @@ export function markChatAsRead(user: ChromunityUser, chatId: string) {
   return executeOperations(
     user.ft3User,
     op(operation, chatId, user.ft3User.authDescriptor.id, toLowerCase(user.name)),
-    op("nop", uniqueId()),
     nop()
   );
 }
