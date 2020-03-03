@@ -17,7 +17,7 @@ import {
   sendMessage,
   storeErrorMessage
 } from "./redux/chatActions";
-import { Container, LinearProgress, Snackbar, Theme } from "@material-ui/core";
+import { CircularProgress, Container, LinearProgress, Snackbar, Theme } from "@material-ui/core";
 import ChromiaPageHeader from "../common/ChromiaPageHeader";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
@@ -631,7 +631,9 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function renderContent() {
-    if (!props.autoLoginInProgress && !props.user) {
+    if (props.autoLoginInProgress) {
+      return <div style={{ textAlign: "center", marginTop: "25px" }}><CircularProgress /></div>;
+    } else if (!props.autoLoginInProgress && !props.user) {
       return <Redirect to={"/user/login"} />;
     } else if (props.successfullyAuthorized && props.rsaKey != null) {
       return renderChat();
