@@ -120,7 +120,7 @@ export function countUnreadChats(username: string): Promise<number> {
   return count != null
     ? new Promise<number>(resolve => resolve(count))
     : executeQuery("count_unread_chats", { username: username }).then((count: number) => {
-        chatCache.set(UNREAD_CHATS_KEY, count, 60);
+        chatCache.set(UNREAD_CHATS_KEY, count, 15);
         return count;
       });
 }
