@@ -160,7 +160,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   useInterval(() => {
     updateChats();
-  }, 5000);
+  }, 3000);
 
   useEffect(() => {
     if (props.user) {
