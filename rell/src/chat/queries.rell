@@ -70,9 +70,11 @@ query get_chat_users() {
 }
 
 query count_unread_chats(username: name) {
+	val my_user = username.lower_case();
 	return set<chat>((chat_membership, chat_message)@*{
-		chat_membership.member.user.name == username.lower_case(),
+		chat_membership.member.user.name == my_user,
 		chat_message.timestamp > chat_membership.last_opened,
-		chat_membership.chat == chat_message.chat
+		chat_membership.chat == chat_message.chat,
+		chat_message.sender.user.name != my_user
 	} ( chat_membership.chat )).size();
 }
