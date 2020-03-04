@@ -477,7 +477,10 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function confirmAddUser() {
-    props.addUserToChat((values.userToAdd as OptionType).value, props.user);
+    const selected = values.userToAdd as OptionType;
+    if (selected != null) {
+      props.addUserToChat(selected.value, props.user);
+    }
     setValues({ ...values, userToAdd: null, showAddDialog: false });
   }
 
