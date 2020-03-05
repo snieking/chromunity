@@ -276,10 +276,7 @@ export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
         )
       );
 
-      if (chatMessages.length > previousMessages.length) {
-        yield markChatAsRead(action.user, chat.id).catch();
-      }
-
+      yield markChatAsRead(action.user, chat.id).catch();
       yield put(loadUserChats(action.user, true));
       yield put(countUnreadChatsAction(action.user));
     }
@@ -409,5 +406,4 @@ function arraysEqual(arr1: Chat[], arr2: Chat[]) {
   for (var i = arr1.length; i--; ) {
     if (arr1[i].id !== arr2[i].id) return false;
   }
-
 }
