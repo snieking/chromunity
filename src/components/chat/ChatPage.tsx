@@ -425,13 +425,16 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     singleValue: (provided: any, state: any) => {
       const opacity = state.isDisabled ? 1 : 1;
       const transition = "opacity 300ms";
-      return { ...provided, textColor, opacity, transition };
+      const color = textColor;
+      return { ...provided, color, opacity, transition };
     },
     input: (provided: any) => {
-      return { ...provided, textColor };
+      const color = textColor;
+      return { ...provided, color };
     },
     noOptionsMessage: (provided: any) => {
-      return { ...provided, textColor };
+      const color = textColor;
+      return { ...provided, color };
     }
   };
 
@@ -568,7 +571,10 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
         <form className={classes.content} onSubmit={proceed}>
           <ChromiaPageHeader text={"Enter or Create Chat Password"} />
           <Typography variant="body2" component="p">
-            If you forget your password, resetting it will leave all your chats
+            If you forget your password, resetting it will leave all your chats.
+          </Typography>
+          <Typography variant="body2" component="p">
+            Please make sure to not lose your chat password!
           </Typography>
           <TextField
             autoFocus
@@ -590,7 +596,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
             style={{ marginRight: "5px" }}
             onClick={() => setValues({ ...values, showResetChatAccountDialog: true })}
           >
-            Reset account
+            Reset chat account
           </Button>
           <Button type="submit" variant="contained" color="primary">
             Proceed
