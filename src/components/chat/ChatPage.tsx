@@ -136,20 +136,20 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const useCompare = (val: number) => {
-    const prevVal = usePrevious(val);
-    return prevVal !== val;
+  const useCompare = (messages: ChatMessageDecrypted[]) => {
+    const prevMessages = usePrevious(messages);
+    return prevMessages != null && prevMessages[prevMessages.length - 1] !== messages[messages.length - 1];
   };
 
-  const usePrevious = (value: number) => {
-    const ref = useRef<number>();
+  const usePrevious = (messages: ChatMessageDecrypted[]) => {
+    const ref = useRef<ChatMessageDecrypted[]>();
     useEffect(() => {
-      ref.current = value;
+      ref.current = messages;
     });
     return ref.current;
   };
 
-  const newMessages: boolean = useCompare(props.activeChatMessages.length);
+  const newMessages: boolean = useCompare(props.activeChatMessages);
 
   useEffect(() => {
     const el: HTMLDivElement = scrollRef.current;
