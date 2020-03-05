@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import { chatMessageStyles } from "./styles";
+import MarkdownRenderer from "../common/MarkdownRenderer";
 
 interface Props {
   message: ChatMessageDecrypted;
@@ -25,10 +26,11 @@ const ChatMessage: React.FunctionComponent<Props> = (props: Props) => {
   }, [props]);
 
   return (
-    <ListItem>
+    <ListItem style={{ marginBottom: "0px"}}>
       <ListItemText
-        primary={props.message.msg}
-        secondary={timeAgoReadable(props.message.timestamp)}
+        disableTypography
+        primary={<MarkdownRenderer text={props.message.msg}/>}
+        secondary={<Typography className={classes.timestamp}>{timeAgoReadable(props.message.timestamp)}</Typography>}
         classes={{ primary: classes.message }}
       />
       <div className={classes.author}>

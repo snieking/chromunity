@@ -32,6 +32,12 @@ export const chatMessageStyles = makeStyles((theme: Theme) =>
     authorName: {
       marginTop: "2px",
       textAlign: "center"
+    },
+    timestamp: {
+      opacity: 0.4,
+      fontSize: "11px",
+      position: "relative",
+      bottom: "5px"
     }
   })
 );

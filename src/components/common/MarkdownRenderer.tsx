@@ -7,6 +7,7 @@ import { parseMarkdownContent } from "../../util/text-parsing";
 const useStyles = makeStyles(theme => ({
   text: {
     color: theme.palette.type === "light" ? COLOR_CHROMIA_DARK : COLOR_OFF_WHITE,
+    marginTop: "-5px",
     overflowWrap: "break-word",
     wordWrap: "break-word",
     '& a': {
