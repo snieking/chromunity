@@ -19,7 +19,8 @@ import {
   checkDistrustedUsers,
   saveVaultAccount,
   setAuthenticationStep,
-  setUser, storeDistrustedUsers,
+  setUser,
+  storeDistrustedUsers,
   vaultCancel
 } from "./accountActions";
 import { ChromunityUser } from "../../../types";
@@ -81,7 +82,6 @@ function* vaultSuccessSaga(action: IVaultSuccess) {
       yield put(saveVaultAccount(account.id, user));
       yield put(setAuthenticationStep(AuthenticationStep.USERNAME_INPUT_REQUIRED));
     }
-
   } catch (error) {
     yield put(vaultCancel("Error signing in: " + error.message));
   }
@@ -115,19 +115,24 @@ function* autoLoginSaga() {
     JSON.stringify(foundUser)
   );
 
-  if (username && foundUser == null) {
-    const BC = yield BLOCKCHAIN;
-    const sso = new SSO(BC, new SSOStoreLocalStorage());
-    const [account, user] = yield sso.autoLogin();
+  const BC = yield BLOCKCHAIN;
+  const sso = new SSO(BC, new SSOStoreLocalStorage());
 
-    logger.silly("Account [%s] and user [%s] found", JSON.stringify(account), JSON.stringify(user));
-    if (account && user) {
-      const usernameLinkedToAccount = yield getUsernameByAccountId(account.id);
-      if (usernameLinkedToAccount && toLowerCase(username) === toLowerCase(usernameLinkedToAccount)) {
-        yield authorizeUser(username, user);
-      } else {
-        yield sso.logout();
+  if (username && foundUser == null) {
+    try {
+      const [account, user] = yield sso.autoLogin();
+
+      logger.silly("Account [%s] and user [%s] found", JSON.stringify(account), JSON.stringify(user));
+      if (account && user) {
+        const usernameLinkedToAccount = yield getUsernameByAccountId(account.id);
+        if (usernameLinkedToAccount && toLowerCase(username) === toLowerCase(usernameLinkedToAccount)) {
+          yield authorizeUser(username, user);
+        } else {
+          yield sso.logout();
+        }
       }
+    } catch (error) {
+      yield sso.logout();
     }
   }
 
