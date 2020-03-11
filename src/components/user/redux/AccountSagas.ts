@@ -132,7 +132,9 @@ function* autoLoginSaga() {
         }
       }
     } catch (error) {
-      yield sso.logout();
+      localStorage.clear();
+      sessionStorage.clear();
+      yield put(autoLoginAttempted());
     }
   }
 
