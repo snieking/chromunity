@@ -7,12 +7,11 @@ import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
-import { getCachedUserMeta } from "../../util/user-util";
 import IconButton from "@material-ui/core/IconButton";
 import { Forum } from "@material-ui/icons";
 import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import { createTopic } from "../../blockchain/TopicService";
-import { ChromunityUser, UserMeta } from "../../types";
+import { ChromunityUser } from "../../types";
 import { getTrendingChannels } from "../../blockchain/ChannelService";
 import { largeButtonStyles } from "./ButtonStyles";
 import {
@@ -51,7 +50,6 @@ export interface NewTopicButtonState {
   newTopicSuccessOpen: boolean;
   newTopicErrorOpen: boolean;
   newTopicStatusMessage: string;
-  userMeta: UserMeta;
   suggestions: OptionType[];
   channel: ValueType<OptionType>;
   activeTab: number;
@@ -77,11 +75,6 @@ const NewTopicButton = withStyles(largeButtonStyles)(
           newTopicSuccessOpen: false,
           newTopicErrorOpen: false,
           newTopicStatusMessage: "",
-          userMeta: {
-            name: "",
-            suspended_until: Date.now() + 10000,
-            times_suspended: 0
-          },
           suggestions: [],
           activeTab: 0
         };
@@ -100,7 +93,6 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       }
 
       componentDidMount() {
-        getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
         getTrendingChannels(7).then(channels =>
           this.setState({
             suggestions: channels.map(channel => ({ value: channel, label: channel } as OptionType))
@@ -181,7 +173,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       }
 
       createTopicButton() {
-        if (this.props.user != null && this.state.userMeta.suspended_until < Date.now()) {
+        if (this.props.user != null) {
           return (
             <div className={this.props.classes.buttonWrapper} data-tut="new_topic">
               <Tooltip title="Create new topic">

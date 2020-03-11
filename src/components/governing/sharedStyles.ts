@@ -29,7 +29,10 @@ export const representativeCardStyles = (theme: Theme) =>
   createStyles({
     representativeCard: cardStyle,
     link: linkStyle,
-    statsDescr: statsDescrStyle(theme)
+    statsDescr: statsDescrStyle(theme),
+    btnTopMargin: {
+      marginTop: "10px"
+    }
   });
 
 export const electionCandidateCardStyles = makeStyles(theme =>

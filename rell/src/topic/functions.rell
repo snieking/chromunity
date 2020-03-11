@@ -13,10 +13,7 @@ function require_mutable(post_timestamp: timestamp, op_timestamp: timestamp, act
 }
 
 function get_latest_poster_in_topic(id: text, topic_author: name): text {
-	val latest_reply = topic_reply@?{ 
-		.topic.id == id,
-		.removed == false
-	} (
+	val latest_reply = topic_reply@?{ .topic.id == id} (
 		@sort_desc .timestamp,
 		.author
 	) limit 1;

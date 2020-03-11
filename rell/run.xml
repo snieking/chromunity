@@ -12,9 +12,9 @@
                 		<arg key="my_blockchain_description"><string>Decentralized reddit</string></arg>
                 		
                 		<arg key="rate_limit_active"><int>1</int></arg>
-                  		<arg key="rate_limit_max_points"><int>10</int></arg>
-                  		<arg key="rate_limit_recovery_time"><int>5000</int></arg>
-                  		<arg key="rate_limit_points_at_account_creation"><int>10</int></arg>
+                  		<arg key="rate_limit_max_points"><int>5</int></arg>
+                  		<arg key="rate_limit_recovery_time"><int>600000</int></arg>
+                  		<arg key="rate_limit_points_at_account_creation"><int>3</int></arg>
                 	</args>
                 </app>
             </config>

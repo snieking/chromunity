@@ -4,8 +4,8 @@ import { Reducer } from "redux";
 const initialGovernmentState: GovernmentState = {
   representatives: [],
   representativesLastUpdated: 0,
-  unhandledReports: 0,
-  unhandledReportsLastUpdated: 0,
+  reports: [],
+  reportsLastUpdated: 0,
   activeElection: false,
   activeElectionLastUpdated: 0,
   recentLogbookEntryTimestamp: 0,
@@ -21,10 +21,10 @@ export const governmentReducer: Reducer<GovernmentState, GovernmentActions> = (s
         representativesLastUpdated: Date.now()
       }
     }
-    case GovernmentActionTypes.UPDATE_UNHANDLED_REPORTS: {
+    case GovernmentActionTypes.UPDATE_REPORTS: {
       return {
         ...state,
-        unhandledReports: action.unhandledReports,
+        reports: action.reports,
         unhandledReportsLastUpdated: Date.now()
       }
     }

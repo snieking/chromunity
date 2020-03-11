@@ -2,9 +2,6 @@ import user;
 
 entity representative_report {
     key id: text;
-    index user.user;
     index timestamp;
-    mutable handled: boolean;
-    index handled;
     text;
 }

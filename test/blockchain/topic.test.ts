@@ -181,15 +181,11 @@ describe("topic tests", () => {
     expect(topics.length).toBe(1);
 
     let topic: Topic = topics[0];
-    expect(topic.removed).toBeFalsy();
 
     await deleteTopic(user, topics[0].id);
 
     topics = await getTopicsByUserPriorToTimestamp(user.name, Date.now(), 10);
-    expect(topics.length).toBe(1);
-
-    topic = topics[0];
-    expect(topic.removed).toBeTruthy();
+    expect(topics.length).toBe(0);
   });
 
   it("count posts", async () => {

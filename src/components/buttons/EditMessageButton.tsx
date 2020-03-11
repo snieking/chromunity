@@ -17,9 +17,8 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
 import IconButton from "@material-ui/core/IconButton";
-import { getCachedUserMeta } from "../../util/user-util";
 import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
-import { ChromunityUser, UserMeta } from "../../types";
+import { ChromunityUser } from "../../types";
 import { Delete, Edit, MoreHoriz } from "@material-ui/icons";
 import { parseEmojis } from "../../util/text-parsing";
 import EmojiPicker from "../common/EmojiPicker";
@@ -50,7 +49,6 @@ export interface EditMessageButtonState {
   replyStatusSuccessOpen: boolean;
   replyStatusErrorOpen: boolean;
   replySentStatus: string;
-  userMeta: UserMeta;
 }
 
 const EditMessageButton = withStyles(styles)(
@@ -67,12 +65,7 @@ const EditMessageButton = withStyles(styles)(
         replyStatusSuccessOpen: false,
         replyStatusErrorOpen: false,
         anchorEl: null,
-        replySentStatus: "",
-        userMeta: {
-          name: "",
-          suspended_until: Date.now() + 10000,
-          times_suspended: 0
-        }
+        replySentStatus: ""
       };
 
       this.textInput = React.createRef();
@@ -86,10 +79,6 @@ const EditMessageButton = withStyles(styles)(
       this.handleClose = this.handleClose.bind(this);
       this.addEmoji = this.addEmoji.bind(this);
       this.renderSnackbars = this.renderSnackbars.bind(this);
-    }
-
-    componentDidMount() {
-      getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
     }
 
     toggleEditDialog() {
@@ -233,7 +222,7 @@ const EditMessageButton = withStyles(styles)(
     }
 
     render() {
-      if (this.props.user != null && this.state.userMeta.suspended_until < Date.now()) {
+      if (this.props.user != null) {
         return (
           <div style={{ display: "inline-block" }}>
             <Tooltip title="Edit">

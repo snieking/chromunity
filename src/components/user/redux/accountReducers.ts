@@ -8,7 +8,8 @@ const initialAccountState: AccountState = {
   error: null,
   accountId: null,
   ft3User: null,
-  user: null
+  user: null,
+  distrustedUsers: []
 };
 
 export const loginReducer: Reducer<AccountState, AccountActions> = (state = initialAccountState, action) => {
@@ -55,6 +56,11 @@ export const loginReducer: Reducer<AccountState, AccountActions> = (state = init
     return {
       ...state,
       autoLoginInProgress: false
+    }
+  } else if (action.type === AccountActionTypes.STORE_DISTRUSTED_USERS) {
+    return {
+      ...state,
+      distrustedUsers: action.distrustedUsers
     }
   }
 

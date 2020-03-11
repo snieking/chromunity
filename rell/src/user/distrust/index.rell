@@ -1,0 +1,5 @@
+import user;
+
+entity user_distrust {
+    key distruster: user.user, distrusted: user.user;
+}

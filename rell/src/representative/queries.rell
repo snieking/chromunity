@@ -1,4 +1,5 @@
 import election;
+import user;
 
 query get_representatives(): list<name> {
     val election = election.representative_election@?{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
@@ -27,20 +28,8 @@ query get_number_of_times_representative(name) {
     return representative@*{ .user.name == name } ( .representative_election.id ).size();
 }
 
-query is_rep_distrusted_by_me(me: name, rep: name) {
-    val recent_election = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
-
-	return representative_distrust@?{
-		.distruster.user.name == me,
-		.distrusted.user.name == rep,
-		.distrusted.representative_election.id == recent_election.id
-	} != null;
-}
-
-query times_user_was_distrusted(name): integer {
-	return representative_distrust@*{ .distrusted.user.name == name } ( .distruster.user ).size();
-}
-
-query times_user_distrusted_someone(name): integer {
-	return representative_distrust@*{ .distruster.user.name == name } ( .distrusted.user ).size();
+query is_user_suspended_by_me(username: name, user_to_be_suspended: name, timestamp) {
+	val user = user.user@{ .name == username.lower_case() };
+	val suspendee = user.user@{ .name == user_to_be_suspended.lower_case() };
+	return is_user_suspended(user, suspendee, timestamp);
 }

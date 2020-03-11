@@ -1,9 +1,8 @@
 import { UserSettings } from "../../src/types";
 import {
-  getMutedUsers,
+  getDistrustedUsers,
   getUserSettings,
-  getUserSettingsCached,
-  toggleUserMute,
+  getUserSettingsCached, toggleUserDistrust,
   updateUserSettings
 } from "../../src/blockchain/UserService";
 
@@ -43,15 +42,15 @@ describe("User tests", () => {
   });
 
   it("mute and unmute user", async () => {
-    let mutedUsers: string[] = await getMutedUsers(loggedInUser);
+    let mutedUsers: string[] = await getDistrustedUsers(loggedInUser);
     expect(mutedUsers.length).toBe(0);
 
-    await toggleUserMute(loggedInUser, secondUser.name, true);
-    mutedUsers = await getMutedUsers(loggedInUser);
+    await toggleUserDistrust(loggedInUser, secondUser.name, true);
+    mutedUsers = await getDistrustedUsers(loggedInUser);
     expect(mutedUsers.length).toBe(1);
 
-    await toggleUserMute(loggedInUser, secondUser.name, false);
-    mutedUsers = await getMutedUsers(loggedInUser);
+    await toggleUserDistrust(loggedInUser, secondUser.name, false);
+    mutedUsers = await getDistrustedUsers(loggedInUser);
     expect(mutedUsers.length).toBe(0);
   });
 });

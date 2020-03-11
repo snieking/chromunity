@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Button, Card, CardActions, CardContent, Grid, Snackbar, Tooltip, Typography } from "@material-ui/core";
 import { Link } from "react-router-dom";
-import { getUserSettingsCached } from "../../../blockchain/UserService";
+import {
+  getTimesUserDistrustedSomeone,
+  getTimesUserWasDistrusted,
+  getUserSettingsCached
+} from "../../../blockchain/UserService";
 import { ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import Avatar, { AVATAR_SIZE } from "../../common/Avatar";
 import { ChatBubble, Face, Favorite, SentimentVeryDissatisfiedSharp, Star, Report } from "@material-ui/icons";
 import Badge from "@material-ui/core/Badge";
-import {
-  getTimesRepresentative,
-  getTimesUserDistrustedSomeone,
-  getTimesUserWasDistrusted
-} from "../../../blockchain/RepresentativesService";
+import { getTimesRepresentative } from "../../../blockchain/RepresentativesService";
 import {
   countRepliesByUser,
   countReplyStarRatingForUser,

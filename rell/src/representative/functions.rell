@@ -16,3 +16,11 @@ function is_username_representative(name): boolean {
 	
 	return representative@?{ .user == user, .representative_election.id == prev_election } != null;
 }
+
+function is_user_suspended(rep: user.user, suspendee: user.user, timestamp): boolean {
+	return user.user_suspension@?{ 
+		.user == suspendee, 
+		.suspended_by == rep,
+		.suspended_until >= timestamp
+	} != null;
+} 

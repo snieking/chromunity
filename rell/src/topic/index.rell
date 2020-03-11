@@ -6,12 +6,12 @@ entity topic {
     timestamp;
     mutable last_modified: timestamp;
     index last_modified;
-    mutable title: name;
-    mutable overridden_original_title: text = "";
+    title: name;
     mutable message: text;
-    mutable overridden_original_message: text = "";
-    mutable removed: boolean = false;
-    index removed;
+}
+
+entity topic_moderation {
+	key user.user, topic;
 }
 
 entity topic_reply {
@@ -22,8 +22,10 @@ entity topic_reply {
     is_sub_reply: boolean = false;
     index is_sub_reply;
     mutable message: text;
-    mutable overridden_original: text = "";
-    mutable removed: boolean = false;
+}
+
+entity topic_reply_moderation {
+	key user.user, topic_reply;
 }
 
 entity sub_reply {
@@ -37,8 +39,17 @@ struct ext_topic {
 	message: text;
 	timestamp;
 	last_modified: timestamp;
-	removed: boolean;
 	latest_poster: name;
+	moderated_by: list<name>;
+}
+
+struct ext_topic_reply {
+	id: text;
+	author: text;
+	message: text;
+	is_sub_reply: boolean;
+	timestamp;
+	moderated_by: list<name>;
 }
 
 import topic.rating;

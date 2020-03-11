@@ -1,10 +1,10 @@
-import { ChromunityUser } from "../../../types";
+import { ChromunityUser, RepresentativeReport } from "../../../types";
 
 export enum GovernmentActionTypes {
   LOAD_REPRESENTATIVES = "GOVERNMENT/REPRESENTATIVES/LOAD",
   UPDATE_REPRESENTATIVES = "GOVERNMENT/REPRESENTATIVES/UPDATE",
-  LOAD_UNHANDLED_REPORTS = "GOVERNMENT/REPRESENTATIVE/UNHANDLED_REPORTS/LOAD",
-  UPDATE_UNHANDLED_REPORTS = "GOVERNMENT/REPRESENTATIVES/UNHANDLED_REPORTS/UPDATE",
+  LOAD_REPORTS = "GOVERNMENT/REPRESENTATIVE/UNHANDLED_REPORTS/LOAD",
+  UPDATE_REPORTS = "GOVERNMENT/REPRESENTATIVES/REPORTS/UPDATE",
   CHECK_ACTIVE_ELECTION = "GOVERNMENT/ACTIVE_ELECTION/CHECK",
   UPDATE_ACTIVE_ELECTION = "GOVERNMENT/ACTIVE_ELECTION/UPDATE",
   CHECK_LOGBOOK_ENTRIES = "GOVERNMENT/LOGBOOK/CHECK",
@@ -20,13 +20,13 @@ export interface IUpdateRepresentatives {
   representatives: string[];
 }
 
-export interface ILoadUnhandledReports {
-  type: GovernmentActionTypes.LOAD_UNHANDLED_REPORTS;
+export interface ILoadReports {
+  type: GovernmentActionTypes.LOAD_REPORTS;
 }
 
-export interface IUpdateUnhandledReports {
-  type: GovernmentActionTypes.UPDATE_UNHANDLED_REPORTS;
-  unhandledReports: number;
+export interface IUpdateReports {
+  type: GovernmentActionTypes.UPDATE_REPORTS;
+  reports: RepresentativeReport[];
 }
 
 export interface ICheckNewLogbookEntries {
@@ -52,8 +52,8 @@ export interface IUpdateActiveElection {
 export type GovernmentActions =
   | ILoadRepresentatives
   | IUpdateRepresentatives
-  | ILoadUnhandledReports
-  | IUpdateUnhandledReports
+  | ILoadReports
+  | IUpdateReports
   | ICheckActiveElection
   | IUpdateActiveElection
   | ICheckNewLogbookEntries
@@ -62,8 +62,8 @@ export type GovernmentActions =
 export interface GovernmentState {
   representatives: string[];
   representativesLastUpdated: number;
-  unhandledReports: number;
-  unhandledReportsLastUpdated: number;
+  reports: RepresentativeReport[];
+  reportsLastUpdated: number;
   activeElection: boolean;
   activeElectionLastUpdated: number;
   recentLogbookEntryTimestamp: number;

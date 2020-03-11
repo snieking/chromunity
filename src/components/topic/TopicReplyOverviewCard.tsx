@@ -11,7 +11,7 @@ import {
   withStyles,
   WithStyles
 } from "@material-ui/core";
-import { timeAgoReadable, toLowerCase } from "../../util/util";
+import { shouldBeFiltered, timeAgoReadable, toLowerCase } from "../../util/util";
 import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { StarBorder, StarRate } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
@@ -55,6 +55,7 @@ const styles = createStyles({
 interface Props extends WithStyles<typeof styles> {
   reply: TopicReply;
   representatives: string[];
+  distrustedUsers: string[];
   user: ChromunityUser;
 }
 
@@ -67,7 +68,6 @@ interface State {
 
 const TopicReplyOverviewCard = withStyles(styles)(
   class extends React.Component<Props, State> {
-
     constructor(props: Props) {
       super(props);
 
@@ -86,7 +86,14 @@ const TopicReplyOverviewCard = withStyles(styles)(
         return <Redirect to={"/t/" + this.props.reply.topic_id + "#" + this.props.reply.id} push />;
       } else {
         return (
-          <div className={this.props.reply.removed ? "removed" : ""}>
+          <div
+            className={
+              !(this.props.user != null && this.props.representatives.includes(toLowerCase(this.props.user.name))) &&
+              shouldBeFiltered(this.props.reply.moderated_by, this.props.distrustedUsers)
+                ? "removed"
+                : ""
+            }
+          >
             <Card key={this.props.reply.id}>
               <CardActionArea onClick={() => this.setState({ redirectToTopic: true })}>
                 {this.renderCardContent()}
@@ -176,7 +183,8 @@ const TopicReplyOverviewCard = withStyles(styles)(
 const mapStateToProps = (store: ApplicationState) => {
   return {
     user: store.account.user,
-    representatives: store.government.representatives.map(rep => toLowerCase(rep))
+    representatives: store.government.representatives.map(rep => toLowerCase(rep)),
+    distrustedUsers: store.account.distrustedUsers
   };
 };
 

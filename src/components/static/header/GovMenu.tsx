@@ -3,14 +3,14 @@ import { Link } from "react-router-dom";
 import { ListItemIcon, Menu, MenuItem, Typography } from "@material-ui/core";
 import { Face, Gavel, HowToVote, Report } from "@material-ui/icons";
 import Badge from "@material-ui/core/Badge/Badge";
-import { retrieveLogbookLastRead } from "../../../blockchain/RepresentativesService";
+import { retrieveLogbookLastRead, retrieveReportsLastRead } from "../../../blockchain/RepresentativesService";
 
 interface Props {
   activeElection: boolean;
   recentLogbookEntryTimestamp: number;
+  recentReportEntryTimestamp: number;
   govAnchorEl: HTMLElement;
   handleGovClose: Function;
-  unhandledReports: number;
   isRepresentative: () => boolean;
 }
 
@@ -48,7 +48,7 @@ const GovMenu: React.FunctionComponent<Props> = (props: Props) => {
           <ListItemIcon>
             <Badge
               variant="dot"
-              invisible={props.recentLogbookEntryTimestamp <= retrieveLogbookLastRead()}
+              invisible={!(props.isRepresentative() && props.recentLogbookEntryTimestamp <= retrieveLogbookLastRead())}
               color="secondary"
             >
               <Gavel className="menu-item-button" />
@@ -61,7 +61,11 @@ const GovMenu: React.FunctionComponent<Props> = (props: Props) => {
       <Link style={{ width: "100%" }} to="/gov/reports">
         <MenuItem onClick={() => props.handleGovClose()}>
           <ListItemIcon>
-            <Badge badgeContent={props.isRepresentative() ? props.unhandledReports : 0} color="secondary">
+            <Badge
+              variant="dot"
+              invisible={!props.isRepresentative() || props.recentReportEntryTimestamp <= retrieveReportsLastRead()}
+              color="secondary"
+            >
               <Report className="menu-item-button" />
             </Badge>
           </ListItemIcon>

@@ -16,12 +16,11 @@ import {
 import ChromiaPageHeader from "../common/ChromiaPageHeader";
 import NewTopicButton from "../buttons/NewTopicButton";
 import { Favorite, FavoriteBorder } from "@material-ui/icons";
-import { getMutedUsers } from "../../blockchain/UserService";
 import { TOPIC_VIEW_SELECTOR_OPTION } from "./WallCommon";
 import { connect } from "react-redux";
 import { channelInit, loadChannel, loadChannelByPopularity, loadOlderTopicsInChannel } from "./redux/channelActions";
 import { ApplicationState } from "../../store";
-import { toLowerCase } from "../../util/util";
+import { shouldBeFiltered, toLowerCase } from "../../util/util";
 import { clearTopicsCache } from "./redux/wallActions";
 
 interface MatchParams {
@@ -33,6 +32,7 @@ interface Props extends RouteComponentProps<MatchParams> {
   topics: Topic[];
   couldExistOlder: boolean;
   representatives: string[];
+  distrustedUsers: string[];
   user: ChromunityUser;
   channelInit: typeof channelInit;
   loadChannel: typeof loadChannel;
@@ -49,7 +49,6 @@ interface State {
   countOfFollowers: number;
   selector: TOPIC_VIEW_SELECTOR_OPTION;
   popularSelector: TOPIC_VIEW_SELECTOR_OPTION;
-  mutedUsers: string[];
 }
 
 const StyledSelect = styled(Select)(style => ({
@@ -70,8 +69,7 @@ class ChannelWall extends React.Component<Props, State> {
       countOfTopics: 0,
       countOfFollowers: 0,
       selector: TOPIC_VIEW_SELECTOR_OPTION.RECENT,
-      popularSelector: TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK,
-      mutedUsers: []
+      popularSelector: TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK
     };
 
     this.retrieveTopics = this.retrieveTopics.bind(this);
@@ -93,7 +91,6 @@ class ChannelWall extends React.Component<Props, State> {
           channelFollowed: channels.includes(channel.toLocaleLowerCase())
         })
       );
-      getMutedUsers(user).then(users => this.setState({ mutedUsers: users }));
     }
 
     countChannelFollowers(channel).then(count => this.setState({ countOfFollowers: count }));
@@ -140,7 +137,12 @@ class ChannelWall extends React.Component<Props, State> {
         <br />
         <br />
         {this.props.topics.map(topic => {
-          if (!this.state.mutedUsers.includes(topic.author) && !topic.removed) {
+          if (
+            (this.props.user != null && this.props.representatives.includes(toLowerCase(this.props.user.name))) ||
+            (this.props.user != null && toLowerCase(topic.author) === toLowerCase(this.props.user.name)) ||
+            (!this.props.distrustedUsers.includes(topic.author) &&
+              !shouldBeFiltered(topic.moderated_by, this.props.distrustedUsers))
+          ) {
             return <TopicOverviewCard key={topic.id} topic={topic} />;
           } else {
             return <div />;
@@ -266,7 +268,8 @@ const mapStateToProps = (store: ApplicationState) => {
     loading: store.channel.loading,
     topics: store.channel.topics,
     couldExistOlder: store.channel.couldExistOlder,
-    representatives: store.government.representatives.map(rep => toLowerCase(rep))
+    representatives: store.government.representatives.map(rep => toLowerCase(rep)),
+    distrustedUsers: store.account.distrustedUsers
   };
 };
 

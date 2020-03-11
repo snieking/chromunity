@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { TopicReply, ChromunityUser, UserMeta } from "../../types";
+import { TopicReply, ChromunityUser } from "../../types";
 import {
   Badge,
   Button,
@@ -21,7 +21,7 @@ import {
   withStyles,
   WithStyles
 } from "@material-ui/core";
-import { getCachedUserMeta, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
+import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { Delete, Reply, Report, StarBorder, StarRate, UnfoldMore } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import {
@@ -37,8 +37,8 @@ import {
 import {
   reportReply,
   removeTopicReply,
-  hasReportId,
-  REMOVE_TOPIC_REPLY_OP_ID
+  hasReportedId,
+  REMOVE_TOPIC_REPLY_OP_ID, hasReportedReply
 } from "../../blockchain/RepresentativesService";
 import EditMessageButton from "../buttons/EditMessageButton";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
@@ -50,6 +50,7 @@ import * as BoomerangCache from "boomerang-cache";
 import EmojiPicker from "../common/EmojiPicker";
 import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
+import { shouldBeFiltered, toLowerCase, uniqueId } from "../../util/util";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -108,7 +109,7 @@ interface Props extends WithStyles<typeof styles> {
   reply: TopicReply;
   indention: number;
   representatives: string[];
-  mutedUsers: string[];
+  distrustedUsers: string[];
   cascadeOpenSubReplies?: Function;
 }
 
@@ -120,7 +121,6 @@ interface State {
   hideThreadConfirmDialogOpen: boolean;
   avatar: string;
   subReplies: TopicReply[];
-  userMeta: UserMeta;
   removeReplyDialogOpen: boolean;
   reportReplyDialogOpen: boolean;
   isLoading: boolean;
@@ -156,11 +156,6 @@ const TopicReplyCard = withStyles(styles)(
         hideThreadConfirmDialogOpen: false,
         avatar: "",
         subReplies: [],
-        userMeta: {
-          name: "",
-          suspended_until: Date.now() + 10000,
-          times_suspended: 0
-        },
         removeReplyDialogOpen: false,
         reportReplyDialogOpen: false,
         isLoading: false,
@@ -201,7 +196,6 @@ const TopicReplyCard = withStyles(styles)(
         })
       );
       getTopicSubReplies(this.props.reply.id, user).then(replies => this.setState({ subReplies: replies }));
-      getCachedUserMeta().then(meta => this.setState({ userMeta: meta }));
 
       const modifiableUntil = this.props.reply.timestamp + allowedEditTimeMillis;
       setInterval(() => {
@@ -215,10 +209,17 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     render() {
-      if (!this.props.mutedUsers.includes(this.props.reply.author)) {
+      const filtered =
+        !(this.props.user != null && toLowerCase(this.props.reply.author) === toLowerCase(this.props.user.name)) &&
+        shouldBeFiltered(this.props.reply.moderated_by, this.props.distrustedUsers);
+      if (
+        !this.props.distrustedUsers.includes(this.props.reply.author) &&
+        ((this.props.user != null && this.props.representatives.includes(toLowerCase(this.props.user.name))) ||
+          !filtered)
+      ) {
         return (
           <>
-            <div className={this.props.reply.removed ? this.props.classes.removed : ""}>
+            <div className={filtered ? this.props.classes.removed : ""}>
               <Card
                 key={this.props.reply.id}
                 ref={this.cardRef}
@@ -235,7 +236,7 @@ const TopicReplyCard = withStyles(styles)(
           </>
         );
       } else {
-        return <div />;
+        return <div key={uniqueId()} />;
       }
     }
 
@@ -257,9 +258,9 @@ const TopicReplyCard = withStyles(styles)(
           indention={this.props.indention + 10}
           topicId={this.props.topicId}
           representatives={this.props.representatives}
-          mutedUsers={this.props.mutedUsers}
           cascadeOpenSubReplies={this.openSubReplies}
           user={this.props.user}
+          distrustedUsers={this.props.distrustedUsers}
         />
       ));
     }
@@ -336,13 +337,7 @@ const TopicReplyCard = withStyles(styles)(
           {this.renderAuthor()}
           <div>
             <Timestamp milliseconds={this.props.reply.timestamp} />
-            <MarkdownRenderer
-              text={
-                this.props.reply.overridden_original !== "" && this.props.reply.removed
-                  ? this.props.reply.overridden_original
-                  : this.props.reply.message
-              }
-            />
+            <MarkdownRenderer text={this.props.reply.message} />
           </div>
           {this.bottomBar()}
           <div>{this.renderReplyBox()}</div>
@@ -393,11 +388,14 @@ const TopicReplyCard = withStyles(styles)(
               onConfirm={this.reportReply}
             />
 
-            <IconButton aria-label="Report" onClick={() => this.setState({ reportReplyDialogOpen: true })}>
-              <Tooltip title="Report">
-                <Report />
-              </Tooltip>
-            </IconButton>
+            {!this.isRepresentative() && !hasReportedReply(user, this.props.reply) && (
+              <IconButton aria-label="Report" onClick={() => this.setState({ reportReplyDialogOpen: true })}>
+                <Tooltip title="Report">
+                  <Report />
+                </Tooltip>
+              </IconButton>
+            )}
+
             {this.state.subReplies.length > 0 ? (
               <IconButton aria-label="Load replies" onClick={() => this.toggleRenderReply()}>
                 <Tooltip title="Toggle replies">
@@ -460,7 +458,7 @@ const TopicReplyCard = withStyles(styles)(
       this.closeReportReply();
 
       if (this.props.user != null) {
-        reportReply(this.props.user, this.props.topicId, this.props.reply.id).then(() => window.location.reload());
+        reportReply(this.props.user, this.props.reply);
       } else {
         window.location.href = "/user/login";
       }
@@ -472,11 +470,7 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     renderAdminActions() {
-      if (
-        this.isRepresentative() &&
-        !this.props.reply.removed &&
-        !hasReportId(REMOVE_TOPIC_REPLY_OP_ID + ":" + this.props.reply.id)
-      ) {
+      if (this.isRepresentative() && !hasReportedId(REMOVE_TOPIC_REPLY_OP_ID + ":" + this.props.reply.id)) {
         return (
           <div style={{ display: "inline-block" }}>
             <IconButton aria-label="Remove reply" onClick={() => this.setState({ removeReplyDialogOpen: true })}>
@@ -525,9 +519,6 @@ const TopicReplyCard = withStyles(styles)(
       const user: ChromunityUser = this.props.user;
       if (this.state.replyBoxOpen && user == null) {
         window.location.href = "/user/login";
-      } else if (this.state.replyBoxOpen && this.state.userMeta.suspended_until > Date.now()) {
-        this.setState({ replyBoxOpen: false });
-        window.alert("User account temporarily suspended");
       } else if (this.state.replyBoxOpen) {
         return (
           <div style={{ marginTop: "20px" }}>
@@ -610,7 +601,8 @@ const TopicReplyCard = withStyles(styles)(
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    user: store.account.user
+    user: store.account.user,
+    distrustedUsers: store.account.distrustedUsers
   };
 };
 

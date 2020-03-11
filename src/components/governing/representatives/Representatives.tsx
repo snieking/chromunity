@@ -15,19 +15,7 @@ interface Props {
   user: ChromunityUser;
 }
 
-interface State {
-  targetUsername: string;
-}
-
-class Representatives extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      targetUsername: ""
-    };
-
-    this.handleUsernameChange = this.handleUsernameChange.bind(this);
-  }
+class Representatives extends React.Component<Props> {
 
   render() {
     return (
@@ -36,18 +24,12 @@ class Representatives extends React.Component<Props, State> {
         <br />
         <Grid container spacing={1}>
           {this.props.representatives.map(name => (
-            <RepresentativeCard name={name} key={name} />
+            <RepresentativeCard user={this.props.user} name={name} key={name} />
           ))}
         </Grid>
         {this.renderTour()}
       </Container>
     );
-  }
-
-  handleUsernameChange(event: React.ChangeEvent<HTMLInputElement>) {
-    event.preventDefault();
-    event.stopPropagation();
-    this.setState({ targetUsername: event.target.value });
   }
 
   renderTour() {

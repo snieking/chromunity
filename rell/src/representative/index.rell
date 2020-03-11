@@ -5,10 +5,6 @@ entity representative {
     key user.user, election.representative_election;
 }
 
-entity representative_distrust {
-	key distruster: representative, distrusted: representative;
-}
-
 entity representative_action {
     key id: byte_array;
     index representative;
@@ -16,8 +12,8 @@ entity representative_action {
     action: text;
 }
 
-entity representative_action_vote {
-	key id: text, representative;
+entity representative_distrust {
+	key distruster: user.user, representative;
 }
 
 import representative.report;

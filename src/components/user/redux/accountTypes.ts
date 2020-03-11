@@ -12,7 +12,9 @@ export enum AccountActionTypes {
   LOGOUT_ACCOUNT = "LOGOUT/ACCOUNT",
   RESET_LOGIN_STATE = "ACCOUNT/LOGIN/RESET",
   REGISTER_USER = "ACCOUNT/REGISTER/USER",
-  AUTO_LOGIN_ATTEMPTED = "ACCOUNT/AUTO/LOGIN/ATTEMPTED"
+  AUTO_LOGIN_ATTEMPTED = "ACCOUNT/AUTO/LOGIN/ATTEMPTED",
+  CHECK_DISTRUSTED_USERS = "ACCOUNT/CHECK/DISTRUSTED_REPS",
+  STORE_DISTRUSTED_USERS = "ACCOUNT/STORE/DISTRUSTED_REPS"
 }
 
 export interface ILoginAccount {
@@ -66,6 +68,16 @@ export interface IAutoLoginAttempted {
   type: AccountActionTypes.AUTO_LOGIN_ATTEMPTED;
 }
 
+export interface ICheckDistrustedUsers {
+  type: AccountActionTypes.CHECK_DISTRUSTED_USERS;
+  user: ChromunityUser;
+}
+
+export interface IStoreDistrustedUsers {
+  type: AccountActionTypes.STORE_DISTRUSTED_USERS;
+  distrustedUsers: string[];
+}
+
 export type AccountActions =
   | ILoginAccount
   | ISetAuthenticationStep
@@ -77,7 +89,9 @@ export type AccountActions =
   | IAutoLoginAttempted
   | ILogoutAccount
   | IResetLoginState
-  | IRegisterUser;
+  | IRegisterUser
+  | ICheckDistrustedUsers
+  | IStoreDistrustedUsers;
 
 export enum AuthenticationStep {
   VAULT_IN_PROGRESS,
@@ -95,4 +109,5 @@ export interface AccountState {
   accountId: string;
   ft3User: User;
   user: ChromunityUser;
+  distrustedUsers: string[];
 }

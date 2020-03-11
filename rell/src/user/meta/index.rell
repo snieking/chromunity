@@ -1,7 +1,0 @@
-import user;
-
-entity user_meta {
-    key user.user;
-    mutable times_suspended: integer;
-    mutable suspended_until: timestamp;
-}

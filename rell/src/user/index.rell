@@ -7,6 +7,11 @@ entity user {
     registered: integer = 0;
 }
 
+entity user_suspension {
+	index user;
+	index suspended_by: user;
+	index suspended_until: timestamp;
+}
+
 import user.settings;
-import user.meta;
-import user.mute;
+import user.distrust;

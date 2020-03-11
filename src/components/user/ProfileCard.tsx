@@ -44,14 +44,13 @@ import {
 
 import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { ChromunityUser } from "../../types";
-import { getMutedUsers, getUserSettingsCached, isRegistered, toggleUserMute } from "../../blockchain/UserService";
 import {
-  distrustAnotherRepresentative,
-  hasReportId,
-  isRepresentativeDistrustedByMe,
-  SUSPEND_USER_OP_ID,
-  suspendUser
-} from "../../blockchain/RepresentativesService";
+  getDistrustedUsers,
+  getUserSettingsCached,
+  isRegistered,
+  toggleUserDistrust
+} from "../../blockchain/UserService";
+import { hasReportedId, SUSPEND_USER_OP_ID, suspendUser } from "../../blockchain/RepresentativesService";
 import ChromiaPageHeader from "../common/ChromiaPageHeader";
 import { COLOR_RED, COLOR_STEEL_BLUE } from "../../theme";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
@@ -63,6 +62,7 @@ import { clearTopicsCache } from "../walls/redux/wallActions";
 import Tutorial from "../common/Tutorial";
 import TutorialButton from "../buttons/TutorialButton";
 import { step } from "../common/TutorialStep";
+import { checkDistrustedUsers } from "./redux/accountActions";
 
 const styles = createStyles({
   iconRed: {
@@ -94,6 +94,7 @@ interface ProfileCardProps extends WithStyles<typeof styles> {
   representatives: string[];
   user: ChromunityUser;
   clearTopicsCache: typeof clearTopicsCache;
+  checkDistrustedUsers: typeof checkDistrustedUsers;
 }
 
 interface ProfileCardState {
@@ -109,8 +110,7 @@ interface ProfileCardState {
   description: string;
   suspendUserDialogOpen: boolean;
   distrustDialogOpen: boolean;
-  muted: boolean;
-  isDistrusted: boolean;
+  distrusted: boolean;
 }
 
 const MAX_BADGE_NR = 9999999;
@@ -133,26 +133,14 @@ const ProfileCard = withStyles(styles)(
         description: "",
         suspendUserDialogOpen: false,
         distrustDialogOpen: false,
-        muted: false,
-        isDistrusted: false
+        distrusted: false
       };
-
-      if (
-        this.props.user != null &&
-        this.props.representatives.includes(this.props.username) &&
-        this.props.representatives.includes(this.props.user.name)
-      ) {
-        isRepresentativeDistrustedByMe(this.props.user, this.props.username).then(distrusted =>
-          this.setState({ isDistrusted: distrusted })
-        );
-      }
 
       this.toggleFollowing = this.toggleFollowing.bind(this);
       this.renderIcons = this.renderIcons.bind(this);
       this.renderActions = this.renderActions.bind(this);
       this.suspendUser = this.suspendUser.bind(this);
       this.handleSuspendUserClose = this.handleSuspendUserClose.bind(this);
-      this.distrustRepresentative = this.distrustRepresentative.bind(this);
       this.handleDistrustDialogClose = this.handleDistrustDialogClose.bind(this);
     }
 
@@ -166,9 +154,9 @@ const ProfileCard = withStyles(styles)(
             amIAFollowerOf(this.props.user, this.props.username).then(isAFollower =>
               this.setState({ following: isAFollower })
             );
-            getMutedUsers(user).then(users =>
+            getDistrustedUsers(user).then(users =>
               this.setState({
-                muted: users.includes(this.props.username.toLocaleLowerCase())
+                distrusted: users.includes(this.props.username.toLocaleLowerCase())
               })
             );
           }
@@ -237,7 +225,9 @@ const ProfileCard = withStyles(styles)(
     renderRepresentativeActions() {
       if (this.props.user != null && this.props.representatives.includes(toLowerCase(this.props.user.name))) {
         if (this.props.representatives.includes(toLowerCase(this.props.username))) {
-          return this.renderDistrustButton();
+          return toLowerCase(this.props.username) !== toLowerCase(this.props.user.name)
+            ? this.renderDistrustButton()
+            : null;
         } else {
           return this.renderSuspensionButton();
         }
@@ -257,7 +247,7 @@ const ProfileCard = withStyles(styles)(
     }
 
     renderSuspensionButton() {
-      if (!hasReportId(SUSPEND_USER_OP_ID + ":" + toLowerCase(this.props.username))) {
+      if (!hasReportedId(SUSPEND_USER_OP_ID + ":" + toLowerCase(this.props.username))) {
         return (
           <div style={{ display: "inline" }}>
             <IconButton onClick={() => this.setState({ suspendUserDialogOpen: true })}>
@@ -275,11 +265,6 @@ const ProfileCard = withStyles(styles)(
       suspendUser(this.props.user, this.props.username);
     }
 
-    distrustRepresentative() {
-      this.setState({ distrustDialogOpen: false, isDistrusted: true });
-      distrustAnotherRepresentative(this.props.user, this.props.username).then();
-    }
-
     handleSuspendUserClose() {
       if (this.state.suspendUserDialogOpen) {
         this.setState({ suspendUserDialogOpen: false });
@@ -292,22 +277,24 @@ const ProfileCard = withStyles(styles)(
       }
     }
 
-    toggleMuteUser() {
-      const muted: boolean = !this.state.muted;
-      this.setState({ muted: muted }, () => toggleUserMute(this.props.user, this.props.username, muted));
+    toggleDistrustUser() {
+      const distrusted: boolean = !this.state.distrusted;
+      this.setState({ distrusted: distrusted }, () =>
+        toggleUserDistrust(this.props.user, this.props.username, distrusted).then(() =>
+          this.props.checkDistrustedUsers()
+        )
+      );
     }
 
     renderIcons() {
-      const user: ChromunityUser = this.props.user;
       return (
         <div className={this.props.classes.bottomBar} data-tut="bottom_stats">
-          {user != null && this.props.username === user.name && (
-            <Badge badgeContent={this.state.followers} showZero={true} color="secondary" max={MAX_BADGE_NR}>
-              <Tooltip title="Followers">
-                <Favorite />
-              </Tooltip>
-            </Badge>
-          )}
+          <Badge badgeContent={this.state.followers} showZero={true} color="secondary" max={MAX_BADGE_NR}>
+            <Tooltip title="Followers">
+              <Favorite />
+            </Tooltip>
+          </Badge>
+
           <Badge badgeContent={this.state.userFollowings} showZero={true} color="secondary" max={MAX_BADGE_NR}>
             <Tooltip title="Following users">
               <SupervisedUserCircle style={{ marginLeft: "10px" }} />
@@ -347,7 +334,6 @@ const ProfileCard = withStyles(styles)(
       return (
         <div style={{ float: "right" }} data-tut="actions_stats">
           {this.renderUserSuspensionDialog()}
-          {this.renderDistrustDialog()}
           {this.renderRepresentativeActions()}
           {this.renderMuteButton()}
           {this.renderFollowButton()}
@@ -359,13 +345,13 @@ const ProfileCard = withStyles(styles)(
       if (this.props.user != null && this.props.username !== this.props.user.name) {
         return (
           <div style={{ display: "inline" }}>
-            <IconButton onClick={() => this.toggleMuteUser()}>
-              {this.state.muted ? (
-                <Tooltip title={"Unmute user"}>
+            <IconButton onClick={() => this.toggleDistrustUser()}>
+              {this.state.distrusted ? (
+                <Tooltip title={"Trust user"}>
                   <VolumeUp fontSize={"large"} className={this.props.classes.iconBlue} />
                 </Tooltip>
               ) : (
-                <Tooltip title="Mute user">
+                <Tooltip title="Distrust user">
                   <VolumeOff fontSize={"large"} />
                 </Tooltip>
               )}
@@ -402,34 +388,6 @@ const ProfileCard = withStyles(styles)(
       }
     }
 
-    renderDistrustDialog() {
-      if (this.props.user != null && this.props.username !== this.props.user.name) {
-        return (
-          <Dialog
-            open={this.state.distrustDialogOpen}
-            onClose={this.handleDistrustDialogClose}
-            aria-labelledby="dialog-title"
-          >
-            <DialogTitle id="dialog-title">Are you sure?</DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                This action will distrust the representative, if enough of representatives distrusts another
-                representatives, the user will have their representative status removed.
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={this.handleDistrustDialogClose} color="secondary">
-                No
-              </Button>
-              <Button onClick={this.distrustRepresentative} color="primary">
-                Yes
-              </Button>
-            </DialogActions>
-          </Dialog>
-        );
-      }
-    }
-
     renderFollowButton() {
       const user: ChromunityUser = this.props.user;
       if (user == null || toLowerCase(user.name) === toLowerCase(this.props.username)) {
@@ -440,7 +398,7 @@ const ProfileCard = withStyles(styles)(
               showZero={true}
               color="secondary"
               max={MAX_BADGE_NR}
-              style={{ marginTop: "12px", marginRight: "12px" }}
+              style={{ marginRight: "12px", marginTop: "12px" }}
             >
               <Tooltip title="Followers">
                 <Favorite fontSize="large" />
@@ -500,7 +458,8 @@ const mapStateToProps = (store: ApplicationState) => {
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
-    clearTopicsCache: () => dispatch(clearTopicsCache())
+    clearTopicsCache: () => dispatch(clearTopicsCache()),
+    checkDistrustedUsers: (user: ChromunityUser) => dispatch(checkDistrustedUsers(user))
   };
 };
 

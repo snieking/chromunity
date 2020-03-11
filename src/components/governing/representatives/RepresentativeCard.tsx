@@ -1,23 +1,19 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { Button, Card, CardContent, Grid, Tooltip, Typography, withStyles, WithStyles } from "@material-ui/core";
 import {
-  Card,
-  CardContent,
-  Grid,
-  Tooltip,
-  Typography,
-  withStyles,
-  WithStyles
-} from "@material-ui/core";
-import { getUserSettingsCached } from "../../../blockchain/UserService";
+  getTimesUserDistrustedSomeone,
+  getTimesUserWasDistrusted,
+  getUserSettingsCached
+} from "../../../blockchain/UserService";
 import { ifEmptyAvatarThenPlaceholder } from "../../../util/user-util";
 import Avatar, { AVATAR_SIZE } from "../../common/Avatar";
 import { ChatBubble, Face, Favorite, Report, SentimentVeryDissatisfiedSharp, Star } from "@material-ui/icons";
 import Badge from "@material-ui/core/Badge";
 import {
+  distrustRepresentative,
   getTimesRepresentative,
-  getTimesUserDistrustedSomeone,
-  getTimesUserWasDistrusted
+  isDistrustedByMe
 } from "../../../blockchain/RepresentativesService";
 import {
   countRepliesByUser,
@@ -27,11 +23,13 @@ import {
 } from "../../../blockchain/TopicService";
 import { countUserFollowers } from "../../../blockchain/FollowingService";
 import { representativeCardStyles } from "../sharedStyles";
-
-
+import ConfirmDialog from "../../common/ConfirmDialog";
+import { ChromunityUser } from "../../../types";
+import { toLowerCase } from "../../../util/util";
 
 export interface RepresentativeCardProps extends WithStyles<typeof representativeCardStyles> {
   name: string;
+  user: ChromunityUser;
 }
 
 export interface RepresentativeCardState {
@@ -44,6 +42,8 @@ export interface RepresentativeCardState {
   replies: number;
   distrusters: number;
   distrusted: number;
+  distrustDialogOpen: boolean;
+  distrustedByMe: boolean;
 }
 
 const RepresentativeCard = withStyles(representativeCardStyles)(
@@ -59,8 +59,13 @@ const RepresentativeCard = withStyles(representativeCardStyles)(
         topics: 0,
         replies: 0,
         distrusters: 0,
-        distrusted: 0
+        distrusted: 0,
+        distrustDialogOpen: false,
+        distrustedByMe: isDistrustedByMe(props.name)
       };
+
+      this.renderDistrustBtn = this.renderDistrustBtn.bind(this);
+      this.distrustUser = this.distrustUser.bind(this);
     }
 
     componentDidMount() {
@@ -174,6 +179,7 @@ const RepresentativeCard = withStyles(representativeCardStyles)(
                     </Tooltip>
                   </Grid>
                 </Grid>
+                {this.renderDistrustBtn()}
               </CardContent>
             </Card>
           </Grid>
@@ -181,6 +187,41 @@ const RepresentativeCard = withStyles(representativeCardStyles)(
       } else {
         return <div />;
       }
+    }
+
+    renderDistrustBtn() {
+      if (
+        this.props.user != null &&
+        toLowerCase(this.props.user.name) !== toLowerCase(this.props.name) &&
+        !this.state.distrustedByMe
+      ) {
+        return (
+          <>
+            <Button
+              fullWidth
+              size="small"
+              variant="contained"
+              color="secondary"
+              className={this.props.classes.btnTopMargin}
+              onClick={() => this.setState({ distrustDialogOpen: true })}
+            >
+              Distrust
+            </Button>
+            <ConfirmDialog
+              text={"Are you sure that you lost your trust in '" + this.props.name + "'?"}
+              open={this.state.distrustDialogOpen}
+              onClose={() => this.setState({ distrustDialogOpen: false })}
+              onConfirm={this.distrustUser}
+            />
+          </>
+        );
+      }
+    }
+
+    distrustUser() {
+      distrustRepresentative(this.props.user, this.props.name).finally(() =>
+        this.setState({ distrustDialogOpen: false, distrustedByMe: true })
+      );
     }
   }
 );

@@ -4,13 +4,12 @@ import logger from "../../../util/logger";
 import {
   getAllRepresentativeActionsPriorToTimestamp,
   getRepresentatives,
-  getUnhandledReports
+  getReports
 } from "../../../blockchain/RepresentativesService";
 import {
   updateActiveElection,
-  updateLogbookRecentEntryTimestamp,
-  updateRepresentatives,
-  updateUnhandledReports
+  updateLogbookRecentEntryTimestamp, updateReports,
+  updateRepresentatives
 } from "./govActions";
 import { RepresentativeReport } from "../../../types";
 import { ICheckActiveElection, ICheckNewLogbookEntries, GovernmentActionTypes } from "./govTypes";
@@ -19,7 +18,7 @@ import { toLowerCase } from "../../../util/util";
 
 export function* governmentWatcher() {
   yield takeLatest(GovernmentActionTypes.LOAD_REPRESENTATIVES, getCurrentRepresentatives);
-  yield takeLatest(GovernmentActionTypes.LOAD_UNHANDLED_REPORTS, retrieveUnhandledReports);
+  yield takeLatest(GovernmentActionTypes.LOAD_REPORTS, retrieveReports);
   yield takeLatest(GovernmentActionTypes.CHECK_ACTIVE_ELECTION, checkActiveElection);
   yield takeLatest(GovernmentActionTypes.CHECK_LOGBOOK_ENTRIES, checkLogbookEntries);
 }
@@ -27,7 +26,7 @@ export function* governmentWatcher() {
 const CACHE_DURATION_MILLIS = 1000 * 60 * 5;
 
 const getRepresentativesLastUpdated = (state: ApplicationState) => state.government.representativesLastUpdated;
-const getUnhandledReportsLastUpdated = (state: ApplicationState) => state.government.unhandledReportsLastUpdated;
+const getUnhandledReportsLastUpdated = (state: ApplicationState) => state.government.reportsLastUpdated;
 const getActiveElectionLastUpdated = (state: ApplicationState) => state.government.activeElectionLastUpdated;
 const getLogbookLastUpdated = (state: ApplicationState) => state.government.lastNewLogbookCheck;
 const getRepresentativesCached = (state: ApplicationState) => state.government.representatives;
@@ -50,13 +49,13 @@ export function* getCurrentRepresentatives() {
   logger.silly("[SAGA - FINISHED]: Get current representatives");
 }
 
-export function* retrieveUnhandledReports() {
+export function* retrieveReports() {
   logger.silly("[SAGA - STARTED]: Retrieving unhandled reports");
   const lastUpdated = yield select(getUnhandledReportsLastUpdated);
 
   if (cacheExpired(lastUpdated)) {
-    const reports: RepresentativeReport[] = yield getUnhandledReports();
-    yield put(updateUnhandledReports(reports.length));
+    const reports: RepresentativeReport[] = yield getReports();
+    yield put(updateReports(reports));
   }
 
   logger.silly("[SAGA - FINISHED]: Retrieving unhandled reports");

@@ -1,4 +1,4 @@
-import { UserMeta, UserSettings } from "../types";
+import { UserSettings } from "../types";
 import { executeOperations, executeQuery } from "./Postchain";
 import { ChromunityUser } from "../types";
 import * as BoomerangCache from "boomerang-cache";
@@ -22,21 +22,8 @@ export function isRegistered(name: string): Promise<boolean> {
     });
 }
 
-export function getAccountId(username: string): Promise<string> {
-  return executeQuery("get_account_id", { name: toLowerCase(username) });
-}
-
 export function getUsernameByAccountId(id: string): Promise<string> {
   return executeQuery("username_by_account_id", { id });
-}
-
-export function getAccountIdByAuthDescriptor(auth_descriptor: any[]): Promise<string> {
-  return executeQuery("ft3.get_account_by_auth_descriptor", { auth_descriptor });
-}
-
-export function getUserMeta(username: string): Promise<UserMeta> {
-  const query = "get_user_meta";
-  return executeQuery(query, { name: toLowerCase(username) });
 }
 
 export function getUserSettings(user: ChromunityUser): Promise<UserSettings> {
@@ -72,10 +59,10 @@ export function updateUserSettings(user: ChromunityUser, avatar: string, descrip
   );
 }
 
-export function toggleUserMute(user: ChromunityUser, name: string, muted: boolean) {
-  boomerang.remove("muted-users");
+export function toggleUserDistrust(user: ChromunityUser, name: string, muted: boolean) {
+  boomerang.remove("distrusted-users");
 
-  const operation = "toggle_mute";
+  const operation = "toggle_distrust";
 
   return executeOperations(
     user.ft3User,
@@ -83,17 +70,26 @@ export function toggleUserMute(user: ChromunityUser, name: string, muted: boolea
   );
 }
 
-export function getMutedUsers(user: ChromunityUser): Promise<string[]> {
-  const mutedUsers: string[] = boomerang.get("muted-users");
+export function getDistrustedUsers(user: ChromunityUser): Promise<string[]> {
+  const distrustedUsers: string[] = boomerang.get("distrusted-users");
 
-  if (mutedUsers != null) {
-    return new Promise<string[]>(resolve => resolve(mutedUsers));
+  if (distrustedUsers != null) {
+    return new Promise<string[]>(resolve => resolve(distrustedUsers));
   }
 
-  const query = "get_muted_users";
+  const query = "get_distrusted_users";
 
-  return executeQuery(query, { username: toLowerCase(user.name) }).then((users: string[]) => {
-    boomerang.set("muted-users", users, 86000);
+  return executeQuery(query, { name: toLowerCase(user.name) }).then((users: string[]) => {
+    boomerang.set("distrusted-users", users, 86000);
     return users;
   });
+}
+
+
+export function getTimesUserWasDistrusted(name: string) {
+  return executeQuery("times_user_was_distrusted", { name });
+}
+
+export function getTimesUserDistrustedSomeone(name: string) {
+  return executeQuery("times_user_distrusted_someone", { name });
 }

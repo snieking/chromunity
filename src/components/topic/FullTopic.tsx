@@ -47,15 +47,21 @@ import {
   StarRate,
   SubdirectoryArrowRight
 } from "@material-ui/icons";
-import { getMutedUsers, getUserSettingsCached } from "../../blockchain/UserService";
+import { getUserSettingsCached } from "../../blockchain/UserService";
 import TopicReplyCard from "./TopicReplyCard";
 import LoadMoreButton from "../buttons/LoadMoreButton";
-import { reportTopic, removeTopic, hasReportId, REMOVE_TOPIC_OP_ID } from "../../blockchain/RepresentativesService";
+import {
+  reportTopic,
+  removeTopic,
+  hasReportedId,
+  REMOVE_TOPIC_OP_ID,
+  hasReportedTopic
+} from "../../blockchain/RepresentativesService";
 import Timestamp from "../common/Timestamp";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
-import { toLowerCase } from "../../util/util";
+import { shouldBeFiltered, toLowerCase } from "../../util/util";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
@@ -112,6 +118,7 @@ interface MatchParams {
 interface FullTopicProps extends RouteComponentProps<MatchParams>, WithStyles<typeof styles> {
   pathName: string;
   representatives: string[];
+  distrustedUsers: string[];
   user: ChromunityUser;
 }
 
@@ -129,7 +136,6 @@ export interface FullTopicState {
   isLoading: boolean;
   removeTopicDialogOpen: boolean;
   reportTopicDialogOpen: boolean;
-  mutedUsers: string[];
   timeLeftUntilNoLongerModifiable: number;
 }
 
@@ -146,14 +152,12 @@ const FullTopic = withStyles(styles)(
       const initialTopic: Topic = {
         id: "",
         title: "",
-        overridden_original_title: "",
         author: "",
         message: "",
-        overridden_original_message: "",
         timestamp: 0,
         last_modified: 0,
-        removed: true,
-        latest_poster: ""
+        latest_poster: "",
+        moderated_by: []
       };
 
       this.state = {
@@ -170,7 +174,6 @@ const FullTopic = withStyles(styles)(
         isLoading: true,
         removeTopicDialogOpen: false,
         reportTopicDialogOpen: false,
-        mutedUsers: [],
         timeLeftUntilNoLongerModifiable: 0
       };
 
@@ -193,10 +196,6 @@ const FullTopic = withStyles(styles)(
       const id = this.props.match.params.id;
       const user: ChromunityUser = this.props.user;
 
-      if (user != null) {
-        getMutedUsers(user).then(users => this.setState({ mutedUsers: users }));
-      }
-
       getTopicById(id, user).then(topic => {
         logger.info("Topic returned: ", topic);
         if (topic != null) {
@@ -214,7 +213,10 @@ const FullTopic = withStyles(styles)(
     }
 
     render() {
-      if (!this.state.mutedUsers.includes(this.state.topic.author) && !this.state.notFound) {
+      if (
+        (this.props.user != null && toLowerCase(this.state.topic.author) === toLowerCase(this.props.user.name)) ||
+        (!this.props.distrustedUsers.includes(this.state.topic.author) && !this.state.notFound)
+      ) {
         return (
           <Container fixed>
             <br />
@@ -228,7 +230,6 @@ const FullTopic = withStyles(styles)(
                 indention={0}
                 topicId={this.state.topic.id}
                 representatives={this.props.representatives}
-                mutedUsers={this.state.mutedUsers}
               />
             ))}
             {this.renderLoadMoreButton()}
@@ -413,9 +414,7 @@ const FullTopic = withStyles(styles)(
           <div className={this.props.classes.content}>
             <Timestamp milliseconds={this.state.topic.timestamp} />
             <Typography gutterBottom variant="h6" component="h6">
-              {this.state.topic.overridden_original_title !== "" && this.state.topic.removed
-                ? this.state.topic.overridden_original_title
-                : this.state.topic.title}
+              {this.state.topic.title}
             </Typography>
             <MarkdownRenderer text={content} />
           </div>
@@ -476,15 +475,17 @@ const FullTopic = withStyles(styles)(
               onConfirm={this.reportTopic}
             />
 
-            <IconButton
-              data-tut="report_btn"
-              aria-label="Report-test"
-              onClick={() => this.setState({ reportTopicDialogOpen: true })}
-            >
-              <Tooltip title="Report">
-                <Report />
-              </Tooltip>
-            </IconButton>
+            {!this.isRepresentative() && !hasReportedTopic(user, this.state.topic) && (
+              <IconButton
+                data-tut="report_btn"
+                aria-label="Report-test"
+                onClick={() => this.setState({ reportTopicDialogOpen: true })}
+              >
+                <Tooltip title="Report">
+                  <Report />
+                </Tooltip>
+              </IconButton>
+            )}
 
             {this.renderAdminActions()}
           </CardActions>
@@ -517,13 +518,11 @@ const FullTopic = withStyles(styles)(
               id: prevState.topic.id,
               author: prevState.topic.author,
               title: prevState.topic.title,
-              overridden_original_title: prevState.topic.overridden_original_title,
               message: text,
-              overridden_original_message: prevState.topic.overridden_original_message,
               timestamp: prevState.topic.timestamp,
               last_modified: prevState.topic.last_modified,
-              removed: prevState.topic.removed,
-              latest_poster: prevState.topic.latest_poster
+              latest_poster: prevState.topic.latest_poster,
+              moderated_by: prevState.topic.moderated_by
             },
             isLoading: false
           }))
@@ -540,8 +539,7 @@ const FullTopic = withStyles(styles)(
       const user: ChromunityUser = this.props.user;
 
       if (user != null) {
-        reportTopic(user, this.state.topic.id).then();
-        window.location.reload();
+        reportTopic(user, this.state.topic).then();
       } else {
         window.location.href = "/user/login";
       }
@@ -557,11 +555,7 @@ const FullTopic = withStyles(styles)(
     }
 
     renderAdminActions() {
-      if (
-        this.isRepresentative() &&
-        !this.state.topic.removed &&
-        !hasReportId(REMOVE_TOPIC_OP_ID + ":" + this.state.topic.id)
-      ) {
+      if (this.isRepresentative() && !hasReportedId(REMOVE_TOPIC_OP_ID + ":" + this.state.topic.id)) {
         return (
           <div style={{ display: "inline-block" }}>
             <IconButton aria-label="Remove topic" onClick={() => this.setState({ removeTopicDialogOpen: true })}>
@@ -591,19 +585,23 @@ const FullTopic = withStyles(styles)(
     }
 
     renderTopic() {
-      return (
-        <div className={this.state.topic.removed ? this.props.classes.removed : ""}>
-          <Card raised={true} key={this.state.topic.id}>
-            {this.renderCardContent(
-              this.state.topic.overridden_original_message !== "" && this.state.topic.removed
-                ? this.state.topic.overridden_original_message
-                : this.state.topic.message
-            )}
-            {this.renderCardActions()}
-            {this.state.replyBoxOpen ? this.renderReplyForm() : <div />}
-          </Card>
-        </div>
-      );
+      const filtered = shouldBeFiltered(this.state.topic.moderated_by, this.props.distrustedUsers);
+      if (
+        !this.props.distrustedUsers.includes(this.state.topic.author) &&
+        ((this.props.user != null && toLowerCase(this.state.topic.author) === toLowerCase(this.props.user.name)) ||
+          (this.props.user != null && this.props.representatives.includes(toLowerCase(this.props.user.name))) ||
+          !filtered)
+      ) {
+        return (
+          <div className={filtered ? this.props.classes.removed : ""}>
+            <Card raised={true} key={this.state.topic.id}>
+              {this.renderCardContent(this.state.topic.message)}
+              {this.renderCardActions()}
+              {this.state.replyBoxOpen ? this.renderReplyForm() : <div />}
+            </Card>
+          </div>
+        );
+      }
     }
 
     toggleReplyBox(): void {
@@ -672,10 +670,12 @@ const FullTopic = withStyles(styles)(
     handleReplySubmit(): void {
       if (this.props.user != null) {
         this.setState({ isLoading: true, replyBoxOpen: false });
-        createTopicReply(this.props.user, this.state.topic.id, this.state.replyMessage).then(() => {
-          this.retrieveLatestReplies();
-          this.setState({ replyMessage: "" });
-        });
+        createTopicReply(this.props.user, this.state.topic.id, this.state.replyMessage)
+          .then(() => {
+            this.retrieveLatestReplies();
+            this.setState({ replyMessage: "" });
+          })
+          .catch(error => this.setState({ isLoading: false, replyBoxOpen: false }));
       }
     }
 
@@ -738,7 +738,8 @@ const FullTopic = withStyles(styles)(
 const mapStateToProps = (store: ApplicationState) => {
   return {
     user: store.account.user,
-    representatives: store.government.representatives.map(rep => toLowerCase(rep))
+    representatives: store.government.representatives.map(rep => toLowerCase(rep)),
+    distrustedUsers: store.account.distrustedUsers
   };
 };
 

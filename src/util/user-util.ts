@@ -1,6 +1,4 @@
-import { UserMeta } from "../types";
 import * as BoomerangCache from "boomerang-cache";
-import { getUserMeta } from "../blockchain/UserService";
 import ReactPiwik from "react-piwik";
 import * as Sentry from '@sentry/browser';
 import logger from "./logger";
@@ -56,29 +54,6 @@ export function getUsername(): string {
 
 export function setUsername(username: string): void {
   LOCAL_CACHE.set(USER_KEY, username);
-}
-
-export function setUserMeta(meta: UserMeta): void {
-  SESSION_CACHE.set(USER_META_KEY, meta, 600);
-}
-
-export function getCachedUserMeta(): Promise<UserMeta> {
-  const meta: UserMeta = SESSION_CACHE.get(USER_META_KEY);
-
-  if (meta != null) {
-    return new Promise<UserMeta>(resolve => resolve(meta));
-  }
-
-  const username = getUsername();
-
-  if (username != null) {
-    return getUserMeta(getUsername()).then(meta => {
-      setUserMeta(meta);
-      return meta;
-    });
-  } else {
-    return new Promise<UserMeta>(resolve => resolve(null));
-  }
 }
 
 export function ifEmptyAvatarThenPlaceholder(avatar: string, seed: string) {

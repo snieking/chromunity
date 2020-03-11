@@ -3,7 +3,7 @@ import { runSaga } from "redux-saga";
 import {
   checkActiveElection,
   getCurrentRepresentatives,
-  retrieveUnhandledReports
+  retrieveReports
 } from "../../../src/components/governing/redux/govSagas";
 import { CREATE_LOGGED_IN_USER } from "../../users";
 import { GovernmentActions, GovernmentActionTypes } from "../../../src/components/governing/redux/govTypes";
@@ -35,7 +35,7 @@ describe("Representatives sagas tests", () => {
       unhandledReportsLastUpdated: 0
     });
 
-    await runSaga(fakeStore, retrieveUnhandledReports).toPromise();
+    await runSaga(fakeStore, retrieveReports).toPromise();
     expect(dispatchedActions.length).toBe(1);
   });
 
@@ -45,7 +45,7 @@ describe("Representatives sagas tests", () => {
       unhandledReportsLastUpdated: Date.now()
     });
 
-    await runSaga(fakeStore, retrieveUnhandledReports).toPromise();
+    await runSaga(fakeStore, retrieveReports).toPromise();
     expect(dispatchedActions.length).toBe(0);
   });
 

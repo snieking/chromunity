@@ -9,14 +9,14 @@ import { ApplicationState } from "../../../store";
 import { connect } from "react-redux";
 import Badge from "@material-ui/core/Badge";
 import { countUnreadChatsAction } from "../../chat/redux/chatActions";
-import { ChromunityUser } from "../../../types";
+import { ChromunityUser, RepresentativeReport } from "../../../types";
 import { toLowerCase, useInterval } from "../../../util/util";
-import { retrieveLogbookLastRead } from "../../../blockchain/RepresentativesService";
+import { retrieveLogbookLastRead, retrieveReportsLastRead } from "../../../blockchain/RepresentativesService";
 import {
   checkActiveElection,
   checkNewLogbookEntries,
   loadRepresentatives,
-  loadUnhandledReports
+  loadReports
 } from "../../governing/redux/govActions";
 import ProfileNavigation from "./ProfileNavigation";
 import MobileWallNavigation from "./MobileWallNavigation";
@@ -30,14 +30,14 @@ import { LinearProgress } from "@material-ui/core";
 interface Props {
   autoLoginInProgress: boolean;
   representatives: string[];
-  unhandledReports: number;
+  reports: RepresentativeReport[];
   activeElection: boolean;
   unreadChats: number;
   recentLogbookEntryTimestamp: number;
   user: ChromunityUser;
   autoLogin: typeof autoLogin;
   loadRepresentatives: typeof loadRepresentatives;
-  loadUnhandledReports: typeof loadUnhandledReports;
+  loadReports: typeof loadReports;
   checkActiveElection: typeof checkActiveElection;
   countUnreadChats: typeof countUnreadChatsAction;
   checkNewLogbookEntries: typeof checkNewLogbookEntries;
@@ -149,6 +149,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
     }
 
     props.loadRepresentatives();
+    props.loadReports();
 
     if (props.user != null) {
       props.checkActiveElection(props.user);
@@ -158,7 +159,6 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
 
   useEffect(() => {
     if (isRepresentative()) {
-      props.loadUnhandledReports();
       props.checkNewLogbookEntries(props.user);
     }
     // eslint-disable-next-line
@@ -173,14 +173,20 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function isRepresentative() {
-    return props.user != null && props.user.name != null && props.representatives.includes(toLowerCase(props.user.name));
+    return (
+      props.user != null && props.user.name != null && props.representatives.includes(toLowerCase(props.user.name))
+    );
   }
 
   function renderGovernmentIcon() {
     if (isRepresentative()) {
       return (
         <Badge
-          invisible={props.unhandledReports < 1 || props.recentLogbookEntryTimestamp <= retrieveLogbookLastRead()}
+          invisible={
+            (props.reports.length > 0 &&
+            props.reports[0].timestamp <= retrieveReportsLastRead()) ||
+            props.recentLogbookEntryTimestamp <= retrieveLogbookLastRead()
+          }
           color="secondary"
         >
           <LocationCity className={classes.navIcon} />
@@ -198,7 +204,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   return (
     <div className={classes.grow}>
       <TestInfoBar classes={classes} />
-      {props.autoLoginInProgress && (<LinearProgress variant="query" />)}
+      {props.autoLoginInProgress && <LinearProgress variant="query" />}
       <AppBar position="static">
         <Toolbar>
           <div className={classes.leftGroup}>
@@ -219,7 +225,9 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
               isRepresentative={isRepresentative}
               activeElection={props.activeElection}
               recentLogbookEntryTimestamp={props.recentLogbookEntryTimestamp}
-              unhandledReports={props.unhandledReports}
+              recentReportEntryTimestamp={
+                props.reports != null && props.reports.length > 0 ? props.reports[0].timestamp : 0
+              }
             />
           </div>
           <div className={classes.middleGroup}>
@@ -240,8 +248,7 @@ const mapStateToProps = (store: ApplicationState) => {
   return {
     autoLoginInProgress: store.account.autoLoginInProgress,
     representatives: store.government.representatives.map(rep => toLowerCase(rep)),
-    unhandledReports: store.government.unhandledReports,
-    loadUnhandledReports: store.government.unhandledReports,
+    reports: store.government.reports,
     activeElection: store.government.activeElection,
     unreadChats: store.chat.unreadChats,
     recentLogbookEntryTimestamp: store.government.recentLogbookEntryTimestamp,
@@ -255,7 +262,7 @@ const mapDispatchToProps = (dispatch: any) => {
     checkNewLogbookEntries: (user: ChromunityUser) => dispatch(checkNewLogbookEntries(user)),
     countUnreadChats: (user: ChromunityUser) => dispatch(countUnreadChatsAction(user)),
     loadRepresentatives: () => dispatch(loadRepresentatives()),
-    loadUnhandledReports: () => dispatch(loadUnhandledReports()),
+    loadReports: () => dispatch(loadReports()),
     autoLogin: () => dispatch(autoLogin())
   };
 };

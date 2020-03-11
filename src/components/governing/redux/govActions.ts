@@ -1,16 +1,16 @@
 import { ActionCreator } from "redux";
 import {
   ILoadRepresentatives,
-  ILoadUnhandledReports,
+  ILoadReports,
   GovernmentActionTypes,
   IUpdateRepresentatives,
-  IUpdateUnhandledReports,
+  IUpdateReports,
   ICheckActiveElection,
   IUpdateActiveElection,
   ICheckNewLogbookEntries,
   IUpdateLogbookRecentEntryTimestamp
 } from "./govTypes";
-import { ChromunityUser } from "../../../types";
+import { ChromunityUser, RepresentativeReport } from "../../../types";
 
 export const loadRepresentatives: ActionCreator<ILoadRepresentatives> = () => ({
   type: GovernmentActionTypes.LOAD_REPRESENTATIVES
@@ -21,13 +21,13 @@ export const updateRepresentatives: ActionCreator<IUpdateRepresentatives> = (rep
   representatives: representatives
 });
 
-export const loadUnhandledReports: ActionCreator<ILoadUnhandledReports> = () => ({
-  type: GovernmentActionTypes.LOAD_UNHANDLED_REPORTS
+export const loadReports: ActionCreator<ILoadReports> = () => ({
+  type: GovernmentActionTypes.LOAD_REPORTS
 });
 
-export const updateUnhandledReports: ActionCreator<IUpdateUnhandledReports> = (unhandledReports: number) => ({
-  type: GovernmentActionTypes.UPDATE_UNHANDLED_REPORTS,
-  unhandledReports: unhandledReports
+export const updateReports: ActionCreator<IUpdateReports> = (reports: RepresentativeReport[]) => ({
+  type: GovernmentActionTypes.UPDATE_REPORTS,
+  reports
 });
 
 export const checkNewLogbookEntries: ActionCreator<ICheckNewLogbookEntries> = (user: ChromunityUser) => ({

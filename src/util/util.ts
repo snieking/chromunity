@@ -176,3 +176,7 @@ export function removeDuplicateTopicsFromFirst(firstArr: Topic[], secondArr: Top
 export const toLowerCase = (text: string) => {
   return text.toLocaleLowerCase();
 };
+
+export const shouldBeFiltered = (moderators: string[], distrusted: string[]) => {
+  return (moderators != null && distrusted != null) && moderators.filter(n => !distrusted.includes(n)).length > 0;
+};

@@ -1,5 +1,4 @@
 import user;
-import user.meta;
 import topic;
 
 entity representative_election {
@@ -50,11 +49,6 @@ function is_eligible_to_vote(user.user): boolean {
 		return false; 
 	}
 	
-	if (meta.user_meta@{ user }.suspended_until > current_election_start) {
-		log("Not eligible for voting: User had a suspension until after election start");
-		return false;
-	}
-	
 	val previous_election_completed = (representative_election, election_block_details)@?{
 		representative_election == election_block_details.representative_election,
 		representative_election.completed == true
@@ -84,11 +78,11 @@ function is_eligible_to_vote(user.user): boolean {
 }
 
 function governing_period_in_blocks(): integer {
-	return 75000;
+	return 2160; //75000;
 }
 
 function election_duration_in_blocks(): integer {
-	return 25000;
+	return 2160; //25000;
 }
 
 function get_current_election_id(): integer? {

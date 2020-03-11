@@ -8,7 +8,6 @@ import ChannelWall from "./components/walls/ChannelWall";
 import Representatives from "./components/governing/representatives/Representatives";
 import Election from "./components/governing/election/Election";
 import { GovLog } from "./components/governing/GovLog";
-import { Reports } from "./components/governing/reports/Reports";
 import FullTopic from "./components/topic/FullTopic";
 import CSSTransition from "react-transition-group/CSSTransition";
 import TransitionGroup from "react-transition-group/TransitionGroup";
@@ -19,6 +18,7 @@ import { ErrorPage } from "./components/static/ErrorPage";
 import CandidateElectionVoteLink from "./components/governing/election/CandidateElectionVoteLink";
 import ChatPage from "./components/chat/ChatPage";
 import VaultCancel from "./components/user/authentication/VaultCancel";
+import Reports from "./components/governing/reports/Reports";
 
 const Content: React.FunctionComponent<RouteComponentProps> = ({ location }) => {
   return (

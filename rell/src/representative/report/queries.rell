@@ -1,9 +1,9 @@
-query get_unhandled_representative_reports() {
-    return representative_report@*{ .handled == false } ( 
+query get_unhandled_representative_reports(timestamp) {
+    return representative_report@*{
+    	.timestamp > timestamp
+    } ( 
     	.id, 
-    	user = .user.name, 
     	@sort_desc .timestamp, 
-    	.handled, 
     	.text
-    );
+    ) limit 25;
 }

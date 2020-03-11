@@ -7,7 +7,6 @@ import NewTopicButton from "../buttons/NewTopicButton";
 import LoadMoreButton from "../buttons/LoadMoreButton";
 import { TrendingChannels } from "../tags/TrendingTags";
 import ChromiaPageHeader from "../common/ChromiaPageHeader";
-import { getMutedUsers } from "../../blockchain/UserService";
 import { TOPIC_VIEW_SELECTOR_OPTION } from "./WallCommon";
 import { ApplicationState } from "../../store";
 import {
@@ -22,7 +21,7 @@ import {
   loadOlderFollowedUsersTopics
 } from "./redux/wallActions";
 import { connect } from "react-redux";
-import { toLowerCase } from "../../util/util";
+import { shouldBeFiltered, toLowerCase, uniqueId } from "../../util/util";
 import { COLOR_CHROMIA_DARK } from "../../theme";
 import Tutorial from "../common/Tutorial";
 import TutorialButton from "../buttons/TutorialButton";
@@ -33,6 +32,7 @@ interface Props {
   topics: Topic[];
   couldExistOlderTopics: boolean;
   representatives: string[];
+  distrustedUsers: string[];
   user: ChromunityUser;
   loadAllTopics: typeof loadAllTopicWall;
   loadOlderTopics: typeof loadOlderAllTopics;
@@ -48,7 +48,6 @@ interface Props {
 interface State {
   selector: TOPIC_VIEW_SELECTOR_OPTION;
   popularSelector: TOPIC_VIEW_SELECTOR_OPTION;
-  mutedUsers: string[];
 }
 
 const StyledSelector = styled(Select)(style => ({
@@ -64,8 +63,7 @@ class TopicWall extends React.Component<Props, State> {
     super(props);
     this.state = {
       selector: TOPIC_VIEW_SELECTOR_OPTION.RECENT,
-      popularSelector: TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK,
-      mutedUsers: []
+      popularSelector: TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK
     };
 
     this.retrieveLatestTopics = this.retrieveLatestTopics.bind(this);
@@ -75,9 +73,6 @@ class TopicWall extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    if (this.props.user != null) {
-      getMutedUsers(this.props.user).then(users => this.setState({ mutedUsers: users }));
-    }
     this.retrieveLatestTopics(false);
   }
 
@@ -106,10 +101,15 @@ class TopicWall extends React.Component<Props, State> {
           <br />
           <br />
           {this.props.topics.map(topic => {
-            if (!this.state.mutedUsers.includes(topic.author) && !topic.removed) {
+            if (
+              (this.props.user != null && this.props.representatives.includes(toLowerCase(this.props.user.name))) ||
+              (this.props.user != null && toLowerCase(topic.author) === toLowerCase(this.props.user.name)) ||
+              (!this.props.distrustedUsers.includes(topic.author) &&
+                !shouldBeFiltered(topic.moderated_by, this.props.distrustedUsers))
+            ) {
               return <TopicOverviewCard key={"card-" + topic.id} topic={topic} />;
             } else {
-              return <div />;
+              return <div key={uniqueId()}/>;
             }
           })}
           {this.renderLoadMoreButton()}
@@ -127,9 +127,7 @@ class TopicWall extends React.Component<Props, State> {
   renderTour() {
     return (
       <>
-        <Tutorial
-          steps={this.steps()}
-        />
+        <Tutorial steps={this.steps()} />
         <TutorialButton />
       </>
     );
@@ -289,7 +287,8 @@ const mapStateToProps = (store: ApplicationState) => {
     topics: store.topicWall.topics,
     loading: store.topicWall.loading,
     couldExistOlderTopics: store.topicWall.couldExistOlder,
-    representatives: store.government.representatives.map(rep => toLowerCase(rep))
+    representatives: store.government.representatives.map(rep => toLowerCase(rep)),
+    distrustedUsers: store.account.distrustedUsers
   };
 };
 

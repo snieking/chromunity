@@ -1,36 +1,38 @@
 import * as React from "react";
 import { RepresentativeReport } from "../../../types";
-import { Container, LinearProgress } from "@material-ui/core";
-import { getUnhandledReports } from "../../../blockchain/RepresentativesService";
+import { Container } from "@material-ui/core";
+import { updateReportsLastRead } from "../../../blockchain/RepresentativesService";
 import ReportCard from "./ReportCard";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
+import { connect } from "react-redux";
+import { ApplicationState } from "../../../store";
 
-type State = {
+interface Props {
   reports: RepresentativeReport[];
-  isLoading: boolean;
-};
+}
 
-export class Reports extends React.Component<{}, State> {
-  constructor(props: unknown) {
-    super(props);
-    this.state = { reports: [], isLoading: true };
-  }
+class Reports extends React.Component<Props> {
 
   componentDidMount() {
-    getUnhandledReports()
-      .then(reports => this.setState({ reports: reports, isLoading: false }))
-      .catch(() => this.setState({ isLoading: false }));
+    updateReportsLastRead(Date.now());
   }
 
   render() {
     return (
       <Container>
         <ChromiaPageHeader text="Reports" />
-        {this.state.isLoading ? <LinearProgress variant="query" /> : <div />}
-        {this.state.reports.map(report => (
+        {this.props.reports.map(report => (
           <ReportCard key={report.id} report={report} />
         ))}
       </Container>
     );
   }
 }
+
+const mapStateToProps = (store: ApplicationState) => {
+  return {
+    reports: store.government.reports
+  };
+};
+
+export default connect(mapStateToProps, null)(Reports);

@@ -1,0 +1,11 @@
+query get_distrusted_users(name) {
+    return user_distrust@*{ .distruster.name == name.lower_case() } ( .distrusted.name );
+}
+
+query times_user_was_distrusted(name): integer {
+	return user_distrust@*{ .distrusted.name == name } ( .distruster ).size();
+}
+
+query times_user_distrusted_someone(name): integer {
+	return user_distrust@*{ .distruster.name == name } ( .distrusted ).size();
+}

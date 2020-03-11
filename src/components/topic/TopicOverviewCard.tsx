@@ -13,7 +13,7 @@ import {
   withStyles,
   WithStyles
 } from "@material-ui/core";
-import { prepareUrlPath, stringToHexColor, toLowerCase } from "../../util/util";
+import { prepareUrlPath, shouldBeFiltered, stringToHexColor, toLowerCase } from "../../util/util";
 import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { StarBorder, StarRate } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
@@ -62,6 +62,7 @@ const styles = (theme: Theme) =>
 interface Props extends WithStyles<typeof styles> {
   topic: Topic;
   representatives: string[];
+  distrustedUsers: string[];
   user: ChromunityUser;
 }
 
@@ -76,7 +77,6 @@ interface State {
 
 const TopicOverviewCard = withStyles(styles)(
   class extends React.Component<Props, State> {
-
     constructor(props: Props) {
       super(props);
 
@@ -118,7 +118,14 @@ const TopicOverviewCard = withStyles(styles)(
         return <Redirect to={"/t/" + this.props.topic.id + "/" + prepareUrlPath(this.props.topic.title)} push />;
       } else {
         return (
-          <div className={this.props.topic.removed ? this.props.classes.removed : ""}>
+          <div
+            className={
+              (this.props.user != null && this.props.representatives.includes(toLowerCase(this.props.user.name)))
+                && shouldBeFiltered(this.props.topic.moderated_by, this.props.distrustedUsers)
+                ? this.props.classes.removed
+                : ""
+            }
+          >
             <Card raised={true} key={this.props.topic.id}>
               <CardActionArea onClick={() => this.setState({ redirectToFullCard: true })}>
                 {this.renderCardContent()}
@@ -237,6 +244,7 @@ const TopicOverviewCard = withStyles(styles)(
 const mapStateToProps = (store: ApplicationState) => {
   return {
     user: store.account.user,
+    distrustedUsers: store.account.distrustedUsers,
     representatives: store.government.representatives.map(rep => toLowerCase(rep))
   };
 };

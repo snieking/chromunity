@@ -1,14 +1,27 @@
-import { AccountActionTypes, AuthenticationStep, IRegisterUser, IVaultSuccess } from "./accountTypes";
+import {
+  AccountActionTypes,
+  AuthenticationStep,
+  ICheckDistrustedUsers,
+  IRegisterUser,
+  IVaultSuccess
+} from "./accountTypes";
 import { takeLatest, put, select } from "redux-saga/effects";
 import { op, SSOStoreLocalStorage } from "ft3-lib";
 import config from "../../../config.js";
-import { getUsernameByAccountId } from "../../../blockchain/UserService";
+import { getDistrustedUsers, getUsernameByAccountId } from "../../../blockchain/UserService";
 import { BLOCKCHAIN, executeOperations } from "../../../blockchain/Postchain";
 import { clearSession, getUsername, setUsername } from "../../../util/user-util";
 import logger from "../../../util/logger";
 import SSO from "ft3-lib/dist/ft3/user/sso/sso";
 import User from "ft3-lib/dist/ft3/user/user";
-import { autoLoginAttempted, saveVaultAccount, setAuthenticationStep, setUser, vaultCancel } from "./accountActions";
+import {
+  autoLoginAttempted,
+  checkDistrustedUsers,
+  saveVaultAccount,
+  setAuthenticationStep,
+  setUser, storeDistrustedUsers,
+  vaultCancel
+} from "./accountActions";
 import { ChromunityUser } from "../../../types";
 import { ApplicationState } from "../../../store";
 import { toLowerCase } from "../../../util/util";
@@ -25,6 +38,7 @@ export function* accountWatcher() {
   yield takeLatest(AccountActionTypes.REGISTER_USER, registerUserSaga);
   yield takeLatest(AccountActionTypes.AUTO_LOGIN, autoLoginSaga);
   yield takeLatest(AccountActionTypes.LOGOUT_ACCOUNT, logoutSaga);
+  yield takeLatest(AccountActionTypes.CHECK_DISTRUSTED_USERS, checkDistrustedUsersSaga);
 }
 
 function* loginSaga() {
@@ -67,6 +81,7 @@ function* vaultSuccessSaga(action: IVaultSuccess) {
       yield put(saveVaultAccount(account.id, user));
       yield put(setAuthenticationStep(AuthenticationStep.USERNAME_INPUT_REQUIRED));
     }
+
   } catch (error) {
     yield put(vaultCancel("Error signing in: " + error.message));
   }
@@ -127,7 +142,15 @@ function* authorizeUser(username: string, user: User) {
     const chromunityUser: ChromunityUser = { name: username, ft3User: user };
     yield put(setUser(chromunityUser));
     yield put(setAuthenticationStep(AuthenticationStep.AUTHENTICATED));
+    yield put(checkDistrustedUsers(chromunityUser));
   } else {
     logger.info("Username [%s], or [%s] was null", username, JSON.stringify(user));
   }
+}
+
+export function* checkDistrustedUsersSaga(action: ICheckDistrustedUsers) {
+  logger.silly("[SAGA - STARTED]: Checking distrusted reps");
+  const distrustedReps = action.user != null ? yield getDistrustedUsers(action.user) : [];
+  yield put(storeDistrustedUsers(distrustedReps));
+  logger.silly("[SAGA - FINISHED]: Checking distrusted reps");
 }

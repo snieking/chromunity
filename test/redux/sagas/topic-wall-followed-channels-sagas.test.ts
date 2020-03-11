@@ -50,12 +50,9 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
         id: "id-" + getANumber(),
         author: "author",
         title: "title",
-        overridden_original_title: "",
         message: "message",
-        overridden_original_message: "",
         timestamp: timestamp,
         last_modified: timestamp,
-        removed: false,
         latest_poster: "author"
       }
     ];

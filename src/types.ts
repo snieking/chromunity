@@ -5,23 +5,15 @@ export interface ChromunityUser {
   ft3User: User;
 }
 
-export interface UserMeta {
-  name: string;
-  times_suspended: number;
-  suspended_until: number;
-}
-
 export interface Topic {
   id: string;
   author: string;
   title: string;
-  overridden_original_title: string;
   message: string;
-  overridden_original_message: string;
   timestamp: number;
   last_modified: number;
-  removed: boolean;
   latest_poster: string;
+  moderated_by: string[];
 }
 
 export interface TopicReply {
@@ -29,10 +21,9 @@ export interface TopicReply {
   topic_id: string;
   author: string;
   message: string;
-  overridden_original: string;
   isSubReply: boolean;
   timestamp: number;
-  removed: boolean;
+  moderated_by: string[];
 }
 
 export interface UserNotification {
@@ -62,9 +53,7 @@ export interface RepresentativeAction {
 
 export interface RepresentativeReport {
   id: string;
-  user: string;
   timestamp: number;
-  handled: boolean;
   text: string;
 }
 
