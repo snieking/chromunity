@@ -284,7 +284,7 @@ const ProfileCard = withStyles(styles)(
       const distrusted: boolean = !this.state.distrusted;
       this.setState({ distrusted: distrusted }, () =>
         toggleUserDistrust(this.props.user, this.props.username, distrusted).then(() =>
-          this.props.checkDistrustedUsers()
+          this.props.checkDistrustedUsers(this.props.user)
         )
       );
     }
@@ -350,11 +350,11 @@ const ProfileCard = withStyles(styles)(
           <div style={{ display: "inline" }}>
             <IconButton onClick={() => this.toggleDistrustUser()}>
               {this.state.distrusted ? (
-                <Tooltip title={"Trust user"}>
+                <Tooltip title={"Unblock/Trust user"}>
                   <CheckCircleOutlineIcon fontSize={"large"} className={this.props.classes.iconYellow} />
                 </Tooltip>
               ) : (
-                <Tooltip title="Block user">
+                <Tooltip title="Block/Distrust user">
                   <BlockIcon fontSize={"large"} className={this.props.classes.iconOrange} />
                 </Tooltip>
               )}
