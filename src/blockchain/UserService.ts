@@ -3,7 +3,7 @@ import { executeOperations, executeQuery } from "./Postchain";
 import { ChromunityUser } from "../types";
 import * as BoomerangCache from "boomerang-cache";
 import { toLowerCase } from "../util/util";
-import { op } from "ft3-lib";
+import { nop, op } from "ft3-lib";
 
 const boomerang = BoomerangCache.create("users-bucket", {
   storage: "session",
@@ -53,10 +53,7 @@ export function updateUserSettings(user: ChromunityUser, avatar: string, descrip
   boomerang.remove(userLC);
 
   const operation = "update_user_settings";
-  return executeOperations(
-    user.ft3User,
-    op(operation, userLC, user.ft3User.authDescriptor.id, avatar, description)
-  );
+  return executeOperations(user.ft3User, op(operation, userLC, user.ft3User.authDescriptor.id, avatar, description));
 }
 
 export function toggleUserDistrust(user: ChromunityUser, name: string, muted: boolean) {
@@ -66,7 +63,8 @@ export function toggleUserDistrust(user: ChromunityUser, name: string, muted: bo
 
   return executeOperations(
     user.ft3User,
-    op(operation, toLowerCase(user.name), user.ft3User.authDescriptor.id, toLowerCase(name), muted ? 1 : 0)
+    op(operation, toLowerCase(user.name), user.ft3User.authDescriptor.id, toLowerCase(name), muted ? 1 : 0),
+    nop()
   );
 }
 
@@ -84,7 +82,6 @@ export function getDistrustedUsers(user: ChromunityUser): Promise<string[]> {
     return users;
   });
 }
-
 
 export function getTimesUserWasDistrusted(name: string) {
   return executeQuery("times_user_was_distrusted", { name });

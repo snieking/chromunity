@@ -39,15 +39,15 @@ function parseUsersMarkdown(message: string) {
 }
 
 function parseHashtags(message: string): string {
-  return message.replace(HASHTAG_REGEX, "$1<a  class='pink-typography' href='/c/$3'>$2$3</a>");
+  return message.replace(HASHTAG_REGEX, "$1<a target='_self' class='pink-typography' href='/c/$3'>$2$3</a>");
 }
 
 function parseUsers(message: string): string {
-  return message.replace(USER_REGEX, "<a  class='purple-typography' href='/u/$2'><b>$1$2</b></a>");
+  return message.replace(USER_REGEX, "<a target='_self' class='purple-typography' href='/u/$2'><b>$1$2</b></a>");
 }
 
 function parseTopics(message: string): string {
-  return message.replace(TOPIC_REGEX, "<a  class='blue-typography' href='$1$2'><b>$1$2</b></a>");
+  return message.replace(TOPIC_REGEX, "<a target='_self' class='blue-typography' href='$1$2'><b>$1$2</b></a>");
 }
 
 export const parseEmojis = (text: string) =>

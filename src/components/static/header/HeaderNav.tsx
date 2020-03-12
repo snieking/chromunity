@@ -183,9 +183,8 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
       return (
         <Badge
           invisible={
-            (props.reports.length > 0 &&
-            props.reports[0].timestamp <= retrieveReportsLastRead()) ||
-            props.recentLogbookEntryTimestamp <= retrieveLogbookLastRead()
+            (props.reports.length > 0 && props.reports[0].timestamp < retrieveReportsLastRead()) ||
+            props.recentLogbookEntryTimestamp < retrieveLogbookLastRead()
           }
           color="secondary"
         >

@@ -205,7 +205,7 @@ const RepresentativeCard = withStyles(representativeCardStyles)(
               className={this.props.classes.btnTopMargin}
               onClick={() => this.setState({ distrustDialogOpen: true })}
             >
-              Distrust
+              Vote to Remove
             </Button>
             <ConfirmDialog
               text={"Are you sure that you lost your trust in '" + this.props.name + "'?"}

@@ -1,7 +1,7 @@
 import user;
 
 operation toggle_distrust(username: name, descriptor_id: byte_array, name, muted: boolean) {
-    val user = user.get_verified_user(username, descriptor_id);
+    val user = user.get_and_charge_verified_user(username, descriptor_id);
 
     if (muted) {
         create user_distrust(distruster = user, distrusted = user.user@{ .name == name });

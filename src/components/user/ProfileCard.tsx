@@ -22,8 +22,6 @@ import {
   StarRate,
   SupervisedUserCircle,
   VoiceOverOff,
-  VolumeOff,
-  VolumeUp,
   SentimentVeryDissatisfiedSharp
 } from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
@@ -50,12 +48,9 @@ import {
   isRegistered,
   toggleUserDistrust
 } from "../../blockchain/UserService";
-import {
-  isUserSuspended,
-  suspendUser
-} from "../../blockchain/RepresentativesService";
+import { isUserSuspended, suspendUser } from "../../blockchain/RepresentativesService";
 import ChromiaPageHeader from "../common/ChromiaPageHeader";
-import { COLOR_RED, COLOR_STEEL_BLUE } from "../../theme";
+import { COLOR_RED, COLOR_STEEL_BLUE, COLOR_YELLOW } from "../../theme";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import { NotFound } from "../static/NotFound";
 import { ApplicationState } from "../../store";
@@ -66,6 +61,8 @@ import Tutorial from "../common/Tutorial";
 import TutorialButton from "../buttons/TutorialButton";
 import { step } from "../common/TutorialStep";
 import { checkDistrustedUsers } from "./redux/accountActions";
+import BlockIcon from "@material-ui/icons/Block";
+import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 
 const styles = createStyles({
   iconRed: {
@@ -73,6 +70,9 @@ const styles = createStyles({
   },
   iconBlue: {
     color: COLOR_STEEL_BLUE
+  },
+  iconGreen: {
+    color: COLOR_YELLOW
   },
   contentWrapper: {
     float: "left",
@@ -351,11 +351,11 @@ const ProfileCard = withStyles(styles)(
             <IconButton onClick={() => this.toggleDistrustUser()}>
               {this.state.distrusted ? (
                 <Tooltip title={"Trust user"}>
-                  <VolumeUp fontSize={"large"} className={this.props.classes.iconBlue} />
+                  <CheckCircleOutlineIcon fontSize={"large"} className={this.props.classes.iconGreen} />
                 </Tooltip>
               ) : (
-                <Tooltip title="Distrust user">
-                  <VolumeOff fontSize={"large"} />
+                <Tooltip title="Block user">
+                  <BlockIcon fontSize={"large"} className={this.props.classes.iconRed} />
                 </Tooltip>
               )}
             </IconButton>
