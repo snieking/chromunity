@@ -38,7 +38,8 @@ import {
   reportReply,
   removeTopicReply,
   hasReportedId,
-  REMOVE_TOPIC_REPLY_OP_ID, hasReportedReply
+  REMOVE_TOPIC_REPLY_OP_ID,
+  hasReportedReply
 } from "../../blockchain/RepresentativesService";
 import EditMessageButton from "../buttons/EditMessageButton";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
@@ -240,7 +241,8 @@ const TopicReplyCard = withStyles(styles)(
       }
     }
 
-    scrollToReply = () => window.scrollTo(0, this.cardRef.current.offsetTop);
+    scrollToReply = () =>
+      this.cardRef && this.cardRef.current ? window.scrollTo(0, this.cardRef.current.offsetTop) : null;
 
     openSubReplies() {
       this.setState({ renderSubReplies: true });
