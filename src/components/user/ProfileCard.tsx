@@ -15,15 +15,7 @@ import {
 } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 
-import {
-  Favorite,
-  Inbox,
-  ReplyAll,
-  StarRate,
-  SupervisedUserCircle,
-  VoiceOverOff,
-  SentimentVeryDissatisfiedSharp
-} from "@material-ui/icons";
+import { Favorite, Inbox, ReplyAll, StarRate, SupervisedUserCircle, VoiceOverOff } from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
 import {
   amIAFollowerOf,
@@ -112,7 +104,6 @@ interface ProfileCardState {
   avatar: string;
   description: string;
   suspendUserDialogOpen: boolean;
-  distrustDialogOpen: boolean;
   distrusted: boolean;
 }
 
@@ -135,7 +126,6 @@ const ProfileCard = withStyles(styles)(
         avatar: "",
         description: "",
         suspendUserDialogOpen: false,
-        distrustDialogOpen: false,
         distrusted: false
       };
 
@@ -144,7 +134,6 @@ const ProfileCard = withStyles(styles)(
       this.renderActions = this.renderActions.bind(this);
       this.suspendUser = this.suspendUser.bind(this);
       this.handleSuspendUserClose = this.handleSuspendUserClose.bind(this);
-      this.handleDistrustDialogClose = this.handleDistrustDialogClose.bind(this);
     }
 
     componentDidMount(): void {
@@ -227,26 +216,10 @@ const ProfileCard = withStyles(styles)(
 
     renderRepresentativeActions() {
       if (this.props.user != null && this.props.representatives.includes(toLowerCase(this.props.user.name))) {
-        if (this.props.representatives.includes(toLowerCase(this.props.username))) {
-          return toLowerCase(this.props.username) !== toLowerCase(this.props.user.name)
-            ? this.renderDistrustButton()
-            : null;
-        } else {
+        if (!this.props.representatives.includes(toLowerCase(this.props.username))) {
           return this.renderSuspensionButton();
         }
       }
-    }
-
-    renderDistrustButton() {
-      return (
-        <div style={{ display: "inline" }}>
-          <IconButton onClick={() => this.setState({ distrustDialogOpen: true })}>
-            <Tooltip title="Distrust the representative">
-              <SentimentVeryDissatisfiedSharp fontSize="large" className={this.props.classes.iconRed} />
-            </Tooltip>
-          </IconButton>
-        </div>
-      );
     }
 
     renderSuspensionButton() {
@@ -271,12 +244,6 @@ const ProfileCard = withStyles(styles)(
     handleSuspendUserClose() {
       if (this.state.suspendUserDialogOpen) {
         this.setState({ suspendUserDialogOpen: false });
-      }
-    }
-
-    handleDistrustDialogClose() {
-      if (this.state.distrustDialogOpen) {
-        this.setState({ distrustDialogOpen: false });
       }
     }
 
