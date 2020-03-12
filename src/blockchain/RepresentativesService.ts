@@ -5,6 +5,7 @@ import { toLowerCase } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 import { op } from "ft3-lib";
 import { removeTopicIdFromCache } from "./TopicService";
+import logger from "../util/logger";
 
 const representativesCache = BoomerangCache.create("rep-bucket", { storage: "session", encrypt: false });
 const localCache = BoomerangCache.create("rep-local", { storage: "local", encrypt: false });
@@ -90,15 +91,19 @@ export const isUserSuspended = (user: string): boolean => hasReportedId(SUSPEND_
 export function suspendUser(user: ChromunityUser, userToBeSuspended: string) {
   const reportId = SUSPEND_USER_OP_ID + ":" + toLowerCase(userToBeSuspended);
   if (hasReportedId(reportId)) {
-    return;
+    return Promise.resolve();
   }
 
-  return executeOperations(
-    user.ft3User,
-    op(SUSPEND_USER_OP_ID, toLowerCase(user.name), user.ft3User.authDescriptor.id, toLowerCase(userToBeSuspended))
-  )
-    .catch()
-    .then(() => addReportId(SUSPEND_USER_OP_ID + ":" + userToBeSuspended));
+  try {
+    return executeOperations(
+      user.ft3User,
+      op(SUSPEND_USER_OP_ID, toLowerCase(user.name), user.ft3User.authDescriptor.id, toLowerCase(userToBeSuspended))
+    )
+  } catch (error) {
+    logger.info("Error suspending user %s", error.message);
+  } finally {
+    addReportId(reportId)
+  }
 }
 
 export function reportTopic(user: ChromunityUser, topic: Topic) {
