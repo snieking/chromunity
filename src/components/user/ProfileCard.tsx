@@ -50,7 +50,10 @@ import {
   isRegistered,
   toggleUserDistrust
 } from "../../blockchain/UserService";
-import { hasReportedId, SUSPEND_USER_OP_ID, suspendUser } from "../../blockchain/RepresentativesService";
+import {
+  isUserSuspended,
+  suspendUser
+} from "../../blockchain/RepresentativesService";
 import ChromiaPageHeader from "../common/ChromiaPageHeader";
 import { COLOR_RED, COLOR_STEEL_BLUE } from "../../theme";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
@@ -247,7 +250,7 @@ const ProfileCard = withStyles(styles)(
     }
 
     renderSuspensionButton() {
-      if (!hasReportedId(SUSPEND_USER_OP_ID + ":" + toLowerCase(this.props.username))) {
+      if (!isUserSuspended(this.props.username)) {
         return (
           <div style={{ display: "inline" }}>
             <IconButton onClick={() => this.setState({ suspendUserDialogOpen: true })}>

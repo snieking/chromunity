@@ -85,8 +85,10 @@ export function removeTopicReply(user: ChromunityUser, topicReplyId: string) {
 
 export const SUSPEND_USER_OP_ID = "suspend_user";
 
+export const isUserSuspended = (user: string): boolean => hasReportedId(SUSPEND_USER_OP_ID + ":" + toLowerCase(user));
+
 export function suspendUser(user: ChromunityUser, userToBeSuspended: string) {
-  const reportId = SUSPEND_USER_OP_ID + ":" + userToBeSuspended;
+  const reportId = SUSPEND_USER_OP_ID + ":" + toLowerCase(userToBeSuspended);
   if (hasReportedId(reportId)) {
     return;
   }
