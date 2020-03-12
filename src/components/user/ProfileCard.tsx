@@ -50,7 +50,7 @@ import {
 } from "../../blockchain/UserService";
 import { isUserSuspended, suspendUser } from "../../blockchain/RepresentativesService";
 import ChromiaPageHeader from "../common/ChromiaPageHeader";
-import { COLOR_RED, COLOR_STEEL_BLUE, COLOR_YELLOW } from "../../theme";
+import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import { NotFound } from "../static/NotFound";
 import { ApplicationState } from "../../store";
@@ -68,11 +68,11 @@ const styles = createStyles({
   iconRed: {
     color: COLOR_RED
   },
-  iconBlue: {
-    color: COLOR_STEEL_BLUE
-  },
-  iconGreen: {
+  iconYellow: {
     color: COLOR_YELLOW
+  },
+  iconOrange: {
+    color: COLOR_ORANGE
   },
   contentWrapper: {
     float: "left",
@@ -351,11 +351,11 @@ const ProfileCard = withStyles(styles)(
             <IconButton onClick={() => this.toggleDistrustUser()}>
               {this.state.distrusted ? (
                 <Tooltip title={"Trust user"}>
-                  <CheckCircleOutlineIcon fontSize={"large"} className={this.props.classes.iconGreen} />
+                  <CheckCircleOutlineIcon fontSize={"large"} className={this.props.classes.iconYellow} />
                 </Tooltip>
               ) : (
                 <Tooltip title="Block user">
-                  <BlockIcon fontSize={"large"} className={this.props.classes.iconRed} />
+                  <BlockIcon fontSize={"large"} className={this.props.classes.iconOrange} />
                 </Tooltip>
               )}
             </IconButton>
