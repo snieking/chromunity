@@ -1,9 +1,9 @@
 import * as pcl from "postchain-client";
 import config from "../config.js";
-import DirectoryService from "./DirectoryService";
-import { Blockchain, Operation, User } from "ft3-lib";
+import { Operation, User } from "ft3-lib";
 import * as BoomerangCache from "boomerang-cache";
 import logger from "../util/logger";
+import Postchain from "ft3-lib/dist/ft3/core/postchain";
 
 const IF_NULL_CLEAR_CACHE = "clear-cache";
 
@@ -24,7 +24,7 @@ const BLOCKCHAIN_RID = config.blockchain.rid;
 export const REST_CLIENT = pcl.restClient.createRestClient(NODE_API_URL, BLOCKCHAIN_RID, 10);
 export const GTX = pcl.gtxClient.createClient(REST_CLIENT, Buffer.from(BLOCKCHAIN_RID, "hex"), []);
 
-export const BLOCKCHAIN = Blockchain.initialize(Buffer.from(BLOCKCHAIN_RID, "hex"), new DirectoryService());
+export const BLOCKCHAIN = new Postchain(NODE_API_URL).blockchain(BLOCKCHAIN_RID);
 
 export const executeOperations = async (user: User, ...operations: Operation[]) => {
   operations.every(op => logger.debug("Executing operation [%s] for user [%o]", op.name, JSON.stringify(user)));
