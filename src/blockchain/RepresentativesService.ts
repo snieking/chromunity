@@ -132,11 +132,15 @@ export function getReports(): Promise<RepresentativeReport[]> {
 }
 
 export function distrustRepresentative(user: ChromunityUser, distrusted: string) {
-  localCache.set("distrusted-" + distrusted, true);
-  return executeOperations(
-    user.ft3User,
-    op("distrust_representative", toLowerCase(user.name), user.ft3User.authDescriptor.id, distrusted)
-  );
+  localCache.set("distrusted-" + distrusted, true, 86400*30);
+  try {
+    return executeOperations(
+      user.ft3User,
+      op("distrust_representative", toLowerCase(user.name), user.ft3User.authDescriptor.id, distrusted)
+    );
+  } catch (error) {
+    logger.info("Error distrusting representative: %s", error.message);
+  }
 }
 
 export const isDistrustedByMe = (distrusted: string) => localCache.get("distrusted-" + distrusted) != null;

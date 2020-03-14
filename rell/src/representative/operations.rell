@@ -83,24 +83,63 @@ operation distrust_representative(name, descriptor_id: byte_array, distrusted: n
 	val user = user.get_verified_user(name, descriptor_id);
 	
 	val recent_election_id = require(election.get_latest_completed_election_id(), "No election has been held yet");
+	
+	require(is_eligible_to_distrust(user, recent_election_id), "User is not eligible to distrust");
+	
     val representative = representative @{ 
     	.user.name == distrusted.lower_case(), 
     	.representative_election.id == recent_election_id
     };
     
-    val election_votes = election.representative_election_vote@*{ 
-    	.representative_election_candidate.representative_election.id == recent_election_id,
-    	.representative_election_candidate.user.name == distrusted.lower_case()
-    } ( .user ).size();
+    val required_votes = election.temp_votes_counter@{
+    	.representative_election_candidate.representative_election.id == recent_election_id
+    } ( @sort_desc .votes ) limit 1;
     
     val distrusts = representative_distrust@*{ 
     	representative
     }( .distruster ).size();
     
-    if (distrusts >= 10 and distrusts >= election_votes) {
+    if (distrusts >= 10 and distrusts > required_votes) {
     	delete representative;
     } else {
     	create representative_distrust(user, representative);
     }
 }
 
+function is_eligible_to_distrust(user.user, prev_election_id: integer): boolean {	
+	val recent_election_start = election.election_block_details@{
+		.representative_election.id == prev_election_id
+	} ( .started_height );
+	
+	if (user.registered > recent_election_start) {
+		log("User must have registered before the previous election started");
+		return false;
+	}
+	
+	val previous_election_completed = (election: election.representative_election, details: election.election_block_details)@?{
+		election.id != prev_election_id,
+		election == details.representative_election,
+		election.completed == true
+	} ( 
+		details.finished_height,
+		@omit @sort_desc election.timestamp
+	) limit 1;
+	
+	if (previous_election_completed == null) {
+		return true;
+	}
+	
+	val number_of_topics = topic.topic@*{ 
+		.author == user,
+		.last_modified > previous_election_completed,
+		.last_modified < recent_election_start
+	}( .id ).size();
+	
+	val number_of_replies = topic.topic_reply@*{
+		.author == user,
+		.timestamp > previous_election_completed,
+		.timestamp < recent_election_start
+	}( .id ).size();
+	
+	return number_of_topics + number_of_replies >= 5;
+}
