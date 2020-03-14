@@ -47,7 +47,7 @@ const AddImageButton: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function addImageToText() {
-    props.addText(`![User inserted image](${url})`);
+    props.addText(`![Image: {url}](${url})`);
     setDialogOpen(false);
     setUrl("");
   }
