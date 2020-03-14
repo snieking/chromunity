@@ -50,13 +50,13 @@ import {
 import useTheme from "@material-ui/core/styles/useTheme";
 import LoadMoreButton from "../buttons/LoadMoreButton";
 import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
-import EmojiPicker from "../common/EmojiPicker";
 import { toLowerCase, useInterval } from "../../util/util";
 import { chatPageStyles } from "./styles";
 import Tutorial from "../common/Tutorial";
 import TutorialButton from "../buttons/TutorialButton";
 import { step } from "../common/TutorialStep";
 import { Redirect } from "react-router";
+import TextToolbar from "../common/textToolbar/TextToolbar";
 
 interface OptionType {
   label: string;
@@ -513,6 +513,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     return (
       <form className={classes.messageWrapper} onSubmit={submitMessage}>
         <div className={classes.editorWrapper}>
+          <TextToolbar addText={addText} />
           <TextField
             autoFocus={window.screen.width >= 600}
             className={classes.messageField}
@@ -521,31 +522,29 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
             onChange={handleChange("message")}
             rowsMax={5}
             multiline
+            fullWidth
             variant="outlined"
             color="secondary"
             onKeyDown={handleKeyDown}
             inputRef={textInput}
           />
-          <div className={classes.emojiWrapper}>
-            <EmojiPicker emojiAppender={addEmoji} />
-          </div>
-          <Button type="submit" size="small" className={classes.submitMessage} variant="contained" color="secondary">
-            Send
-          </Button>
         </div>
+        <Button type="submit" size="small" className={classes.submitMessage} variant="contained" color="secondary">
+          Send
+        </Button>
       </form>
     );
   }
 
-  function addEmoji(emoji: string) {
+  function addText(text: string) {
     const startPosition = textInput.current.selectionStart;
     setValues({
       ...values,
-      message: [values.message.slice(0, startPosition), emoji, values.message.slice(startPosition)].join("")
+      message: [values.message.slice(0, startPosition), text, values.message.slice(startPosition)].join("")
     });
     setTimeout(() => {
-      textInput.current.selectionStart = startPosition + emoji.length;
-      textInput.current.selectionEnd = startPosition + emoji.length;
+      textInput.current.selectionStart = startPosition + text.length;
+      textInput.current.selectionEnd = startPosition + text.length;
     }, 100);
   }
 

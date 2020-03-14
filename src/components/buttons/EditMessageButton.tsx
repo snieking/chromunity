@@ -21,11 +21,11 @@ import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import { ChromunityUser } from "../../types";
 import { Delete, Edit, MoreHoriz } from "@material-ui/icons";
 import { parseEmojis } from "../../util/text-parsing";
-import EmojiPicker from "../common/EmojiPicker";
 import withStyles from "@material-ui/core/styles/withStyles";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
+import TextToolbar from "../common/textToolbar/TextToolbar";
 
 const styles = createStyles({
   editorWrapper: {
@@ -77,7 +77,7 @@ const EditMessageButton = withStyles(styles)(
       this.closeMenu = this.closeMenu.bind(this);
       this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
       this.handleClose = this.handleClose.bind(this);
-      this.addEmoji = this.addEmoji.bind(this);
+      this.addTextFromToolbar = this.addTextFromToolbar.bind(this);
       this.renderSnackbars = this.renderSnackbars.bind(this);
     }
 
@@ -113,6 +113,7 @@ const EditMessageButton = withStyles(styles)(
               <DialogContent>
                 <br />
                 <div className={this.props.classes.editorWrapper}>
+                  <TextToolbar addText={this.addTextFromToolbar}/>
                   <TextField
                     autoFocus
                     margin="dense"
@@ -128,7 +129,6 @@ const EditMessageButton = withStyles(styles)(
                     value={this.state.message}
                     inputRef={this.textInput}
                   />
-                  <EmojiPicker emojiAppender={this.addEmoji} />
                 </div>
               </DialogContent>
               <DialogActions>
@@ -179,16 +179,16 @@ const EditMessageButton = withStyles(styles)(
       );
     }
 
-    addEmoji(emoji: string) {
+    addTextFromToolbar(text: string) {
       const startPosition = this.textInput.current.selectionStart;
 
       this.setState(prevState => ({
-        message: [prevState.message.slice(0, startPosition), emoji, prevState.message.slice(startPosition)].join("")
+        message: [prevState.message.slice(0, startPosition), text, prevState.message.slice(startPosition)].join("")
       }));
 
       setTimeout(() => {
-        this.textInput.current.selectionStart = startPosition + emoji.length;
-        this.textInput.current.selectionEnd = startPosition + emoji.length;
+        this.textInput.current.selectionStart = startPosition + text.length;
+        this.textInput.current.selectionEnd = startPosition + text.length;
       }, 100);
     }
 

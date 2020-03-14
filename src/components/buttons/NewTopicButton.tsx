@@ -25,10 +25,10 @@ import MarkdownRenderer from "../common/MarkdownRenderer";
 import withTheme from "@material-ui/core/styles/withTheme";
 import { parseEmojis } from "../../util/text-parsing";
 import "emoji-mart/css/emoji-mart.css";
-import EmojiPicker from "../common/EmojiPicker";
 import Tooltip from "@material-ui/core/Tooltip";
 import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
+import TextToolbar from "../common/textToolbar/TextToolbar";
 
 interface OptionType {
   label: string;
@@ -89,7 +89,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         this.handleClose = this.handleClose.bind(this);
         this.handleChangeSingle = this.handleChangeSingle.bind(this);
         this.handleTabChange = this.handleTabChange.bind(this);
-        this.addEmoji = this.addEmoji.bind(this);
+        this.addText = this.addText.bind(this);
       }
 
       componentDidMount() {
@@ -335,6 +335,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       renderEditor() {
         return (
           <div className={this.props.classes.editorWrapper}>
+            <TextToolbar addText={this.addText} />
             <TextField
               margin="dense"
               id="message"
@@ -349,25 +350,24 @@ const NewTopicButton = withStyles(largeButtonStyles)(
               variant="outlined"
               inputRef={this.textInput}
             />
-            <EmojiPicker emojiAppender={this.addEmoji} />
           </div>
         );
       }
 
-      addEmoji(emoji: string) {
+      addText(text: string) {
         const startPosition = this.textInput.current.selectionStart;
 
         this.setState(prevState => ({
           topicMessage: [
             prevState.topicMessage.slice(0, startPosition),
-            emoji,
+            text,
             prevState.topicMessage.slice(startPosition)
           ].join("")
         }));
 
         setTimeout(() => {
-          this.textInput.current.selectionStart = startPosition + emoji.length;
-          this.textInput.current.selectionEnd = startPosition + emoji.length;
+          this.textInput.current.selectionStart = startPosition + text.length;
+          this.textInput.current.selectionEnd = startPosition + text.length;
         }, 100);
       }
 

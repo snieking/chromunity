@@ -65,11 +65,11 @@ import { shouldBeFiltered, toLowerCase } from "../../util/util";
 import ConfirmDialog from "../common/ConfirmDialog";
 import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
-import EmojiPicker from "../common/EmojiPicker";
 import logger from "../../util/logger";
 import Tutorial from "../common/Tutorial";
 import TutorialButton from "../buttons/TutorialButton";
 import { step } from "../common/TutorialStep";
+import TextToolbar from "../common/textToolbar/TextToolbar";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -189,7 +189,7 @@ const FullTopic = withStyles(styles)(
       this.deleteTopic = this.deleteTopic.bind(this);
       this.toggleReplyBox = this.toggleReplyBox.bind(this);
       this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
-      this.addEmojiInReply = this.addEmojiInReply.bind(this);
+      this.addTextFromToolbarInReply = this.addTextFromToolbarInReply.bind(this);
     }
 
     componentDidMount(): void {
@@ -615,6 +615,7 @@ const FullTopic = withStyles(styles)(
     renderReplyForm() {
       return (
         <div style={{ margin: "15px", position: "relative" }}>
+          <TextToolbar addText={this.addTextFromToolbarInReply}/>
           <TextField
             label="Reply"
             margin="dense"
@@ -629,7 +630,6 @@ const FullTopic = withStyles(styles)(
             inputRef={this.textInput}
             autoFocus
           />
-          <EmojiPicker emojiAppender={this.addEmojiInReply} btnSize="sm" />
           <div style={{ float: "right" }}>
             <Button type="button" onClick={() => this.toggleReplyBox()} color="secondary" variant="outlined">
               Cancel
@@ -650,20 +650,20 @@ const FullTopic = withStyles(styles)(
       );
     }
 
-    addEmojiInReply(emoji: string) {
+    addTextFromToolbarInReply(text: string) {
       const startPosition = this.textInput.current.selectionStart;
 
       this.setState(prevState => ({
         replyMessage: [
           prevState.replyMessage.slice(0, startPosition),
-          emoji,
+          text,
           prevState.replyMessage.slice(startPosition)
         ].join("")
       }));
 
       setTimeout(() => {
-        this.textInput.current.selectionStart = startPosition + emoji.length;
-        this.textInput.current.selectionEnd = startPosition + emoji.length;
+        this.textInput.current.selectionStart = startPosition + text.length;
+        this.textInput.current.selectionEnd = startPosition + text.length;
       }, 100);
     }
 

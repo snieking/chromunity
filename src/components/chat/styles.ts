@@ -99,10 +99,11 @@ export const chatPageStyles = makeStyles((theme: Theme) =>
     submitMessage: {
       top: "15px",
       marginLeft: "3%",
-      width: "10%"
+      width: "10%",
+      display: "inline"
     },
     messageField: {
-      width: "70%"
+      float: "left"
     },
     title: {
       cursor: "pointer",
@@ -146,12 +147,8 @@ export const chatPageStyles = makeStyles((theme: Theme) =>
       overflow: "visible"
     },
     editorWrapper: {
-      position: "relative"
-    },
-    emojiWrapper: {
-      position: "absolute",
-      top: -8,
-      left: "78.7%"
+      position: "relative",
+      width: "80%"
     }
   })
 );
