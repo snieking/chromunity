@@ -22,5 +22,6 @@ module.exports = {
   topBar: {
     message: "Development Environment"
   },
-  test: true
+  test: true,
+  logLevel: "debug"
 };

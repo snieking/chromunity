@@ -126,6 +126,11 @@ export const darkTheme = createMuiTheme({
                 color: COLOR_SOFT_PINK
             }
         },
+        MuiDivider: {
+            root: {
+                backgroundColor: COLOR_CHROMIA_DARKER
+            }
+        },
         MuiPaper: {
             root: {
                 backgroundColor: COLOR_CHROMIA_DARK_LIGHTER
@@ -282,6 +287,11 @@ export const lightTheme = createMuiTheme({
         MuiIconButton: {
             colorInherit: {
                 color: COLOR_STEEL_BLUE
+            }
+        },
+        MuiDivider: {
+            root: {
+                backgroundColor: COLOR_STEEL_BLUE
             }
         },
         MuiPaper: {

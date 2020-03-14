@@ -22,5 +22,6 @@ module.exports = {
   topBar: {
     message: ""
   },
-  test: false
+  test: false,
+  logLevel: "info"
 };

@@ -52,6 +52,8 @@ import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
 import { shouldBeFiltered, toLowerCase, uniqueId } from "../../util/util";
 import TextToolbar from "../common/textToolbar/TextToolbar";
+import CardActions from "@material-ui/core/CardActions";
+import Divider from "@material-ui/core/Divider";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -335,15 +337,17 @@ const TopicReplyCard = withStyles(styles)(
 
     renderCardContent() {
       return (
-        <CardContent>
-          {this.renderAuthor()}
-          <div>
-            <Timestamp milliseconds={this.props.reply.timestamp} />
-            <MarkdownRenderer text={this.props.reply.message} />
-          </div>
+        <>
+          <CardContent>
+            {this.renderAuthor()}
+            <div>
+              <Timestamp milliseconds={this.props.reply.timestamp} />
+              <MarkdownRenderer text={this.props.reply.message} />
+            </div>
+          </CardContent>
           {this.bottomBar()}
-          <div>{this.renderReplyBox()}</div>
-        </CardContent>
+          {this.renderReplyBox()}
+        </>
       );
     }
 
@@ -352,7 +356,7 @@ const TopicReplyCard = withStyles(styles)(
 
       if (user != null) {
         return (
-          <div className={this.props.classes.bottomBar}>
+          <CardActions style={{ marginTop: "-20px" }}>
             <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
               <Badge className="star-badge" color="secondary" badgeContent={this.state.stars}>
                 <Tooltip title="Like">
@@ -413,11 +417,11 @@ const TopicReplyCard = withStyles(styles)(
               <div style={{ display: "inline-block" }} />
             )}
             {this.renderAdminActions()}
-          </div>
+          </CardActions>
         );
       } else {
         return (
-          <div className={this.props.classes.bottomBar}>
+          <CardActions style={{ marginTop: "-20px" }}>
             <Badge
               className="star-badge"
               color="secondary"
@@ -428,7 +432,7 @@ const TopicReplyCard = withStyles(styles)(
                 <StarBorder />
               </Tooltip>
             </Badge>
-          </div>
+          </CardActions>
         );
       }
     }
@@ -523,9 +527,10 @@ const TopicReplyCard = withStyles(styles)(
         window.location.href = "/user/login";
       } else if (this.state.replyBoxOpen) {
         return (
-          <div style={{ marginTop: "20px" }}>
+          <div style={{ margin: "15px", position: "relative" }}>
+            <Divider />
             <div className={this.props.classes.editorWrapper}>
-              <TextToolbar addText={this.addTextFromToolbarInReply}/>
+              <TextToolbar addText={this.addTextFromToolbarInReply} />
               <TextField
                 autoFocus
                 margin="dense"

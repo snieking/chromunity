@@ -22,5 +22,6 @@ module.exports = {
   topBar: {
     message: "TestNet"
   },
-  test: true
+  test: true,
+  logLevel: "info"
 };

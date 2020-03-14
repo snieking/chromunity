@@ -1,4 +1,5 @@
 import { createLogger, format, transports } from "winston";
+import * as config from "../config";
 
 const { combine, timestamp, colorize, printf, splat } = format;
 const logger = createLogger({
@@ -11,7 +12,7 @@ const logger = createLogger({
   ),
   transports: [
     new transports.Console({
-      level: process.env.NODE_ENV === "production" ? "debug" : "silly"
+      level: process.env.NODE_ENV === "production" ? config.logLevel : "silly"
     })
   ]
 });

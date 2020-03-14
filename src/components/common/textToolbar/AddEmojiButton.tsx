@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { Popover } from "@material-ui/core";
 import { Picker } from "emoji-mart";
 import IconButton from "@material-ui/core/IconButton";
-import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
+import InsertEmoticonIcon from "@material-ui/icons/InsertEmoticon";
+import Tooltip from "@material-ui/core/Tooltip";
 
 interface Props {
   addText: Function;
@@ -29,9 +30,11 @@ const AddEmojiButton: React.FunctionComponent<Props> = (props: Props) => {
 
   return (
     <>
-      <IconButton onClick={handleClick}>
-        <InsertEmoticonIcon />
-      </IconButton>
+      <Tooltip title="Emoji">
+        <IconButton onClick={handleClick}>
+          <InsertEmoticonIcon />
+        </IconButton>
+      </Tooltip>
 
       <Popover
         open={emojiBoxOpen}
@@ -50,7 +53,6 @@ const AddEmojiButton: React.FunctionComponent<Props> = (props: Props) => {
       </Popover>
     </>
   );
-
 };
 
 export default AddEmojiButton;

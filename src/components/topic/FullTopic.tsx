@@ -70,6 +70,7 @@ import Tutorial from "../common/Tutorial";
 import TutorialButton from "../buttons/TutorialButton";
 import { step } from "../common/TutorialStep";
 import TextToolbar from "../common/textToolbar/TextToolbar";
+import Divider from "@material-ui/core/Divider";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -493,7 +494,7 @@ const FullTopic = withStyles(styles)(
       } else {
         return (
           <CardActions>
-            <div data-tut="star_btn">
+            <div data-tut="star_btn">z
               <Badge
                 color="secondary"
                 badgeContent={this.state.stars}
@@ -615,6 +616,7 @@ const FullTopic = withStyles(styles)(
     renderReplyForm() {
       return (
         <div style={{ margin: "15px", position: "relative" }}>
+          <Divider />
           <TextToolbar addText={this.addTextFromToolbarInReply}/>
           <TextField
             label="Reply"

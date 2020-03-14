@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ImageIcon from "@material-ui/icons/Image";
 import IconButton from "@material-ui/core/IconButton";
 import { Button, Dialog, DialogActions, DialogContent, TextField } from "@material-ui/core";
+import Tooltip from "@material-ui/core/Tooltip";
 
 interface Props {
   addText: Function;
@@ -53,9 +54,11 @@ const AddImageButton: React.FunctionComponent<Props> = (props: Props) => {
 
   return (
     <>
-      <IconButton onClick={() => setDialogOpen(!dialogOpen)}>
-        <ImageIcon />
-      </IconButton>
+      <Tooltip title="Image">
+        <IconButton onClick={() => setDialogOpen(!dialogOpen)}>
+          <ImageIcon />
+        </IconButton>
+      </Tooltip>
       {dialog()}
     </>
   );
