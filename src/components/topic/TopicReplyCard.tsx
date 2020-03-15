@@ -73,6 +73,11 @@ const styles = (theme: Theme) =>
       marginBottom: "7px",
       marginRight: "-16px"
     },
+    content: {
+      marginRight: "5px",
+      whiteSpace: "normal",
+      maxWidth: "95%"
+    },
     bottomBar: {
       marginTop: "7px",
       marginBottom: "-22px",
@@ -340,7 +345,7 @@ const TopicReplyCard = withStyles(styles)(
         <>
           <CardContent>
             {this.renderAuthor()}
-            <div>
+            <div className={this.props.classes.content}>
               <Timestamp milliseconds={this.props.reply.timestamp} />
               <MarkdownRenderer text={this.props.reply.message} />
             </div>
