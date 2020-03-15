@@ -1,0 +1,6 @@
+User-agent: *
+
+Disallow: /gov/vote/
+
+Allow: /*.css$
+Allow: /*.js$
