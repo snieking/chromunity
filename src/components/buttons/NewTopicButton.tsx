@@ -149,6 +149,11 @@ const NewTopicButton = withStyles(largeButtonStyles)(
               newTopicStatusMessage: "Channel is too long",
               newTopicErrorOpen: true
             });
+          } else if (topicTitle.length < 3 || topicTitle.startsWith(" ")) {
+            this.setState({
+              newTopicStatusMessage: "Title must be longer than 3 characters, and must not start with a whitespace",
+              newTopicErrorOpen: true
+            });
           } else {
             const topicMessage = this.state.topicMessage;
             this.setState({ topicTitle: "", topicMessage: "" });
