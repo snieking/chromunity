@@ -5,9 +5,9 @@
   "dependencies": {
     "@material-ui/core": "^4.9.7",
     "@material-ui/icons": "^4.9.1",
-    "@sentry/browser": "^5.14.1",
+    "@sentry/browser": "^5.14.2",
     "@types/node": "13.7.0",
-    "@types/react": "16.9.19",
+    "@types/react": "16.9.23",
     "@types/react-dom": "16.9.5",
     "@types/react-router": "^5.1.4",
     "@types/react-select": "^3.0.2",
