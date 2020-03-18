@@ -1,5 +1,5 @@
 # Chromunity
-[![Build Status](https://travis-ci.org/snieking/chromunity.svg?branch=master)](https://travis-ci.org/snieking/chromunity) [![Coverage Status](https://coveralls.io/repos/github/snieking/chromunity/badge.svg?branch=dev)](https://coveralls.io/github/snieking/chromunity?branch=dev)
+[![Build Status](https://travis-ci.org/snieking/chromunity.svg?branch=master)](https://travis-ci.org/snieking/chromunity) [![![Known Vulnerabilities](https://snyk.io/test/github/snieking/chromunity/badge.svg)](https://snyk.io/test/github/snieking/chromunity)
 
 **Chromunity** is a decentralized social media site where the data is stored in a blockchain. It is built with Rell, an easy to learn and powerful language. Rell is used to interact with https://chromia.com
 
