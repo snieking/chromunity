@@ -1,0 +1,15 @@
+import topic;
+import user;
+
+entity poll {
+	key topic.topic;
+}
+
+entity poll_option {
+	key text;
+	mutable votes: integer;
+}
+
+entity poll_vote {
+	key poll, user.user;
+}

@@ -207,12 +207,6 @@ const FullTopic = withStyles(styles)(
       });
     }
 
-    componentWillUnmount(): void {
-      this.setState = () => {
-        return;
-      };
-    }
-
     render() {
       if (
         (this.props.user != null && toLowerCase(this.state.topic.author) === toLowerCase(this.props.user.name)) ||
@@ -586,6 +580,7 @@ const FullTopic = withStyles(styles)(
     }
 
     renderTopic() {
+      console.log("Rendering topic!");
       const filtered = shouldBeFiltered(this.state.topic.moderated_by, this.props.distrustedUsers);
       if (
         !this.props.distrustedUsers.includes(this.state.topic.author) &&
