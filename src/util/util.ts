@@ -15,10 +15,10 @@ export const stopStopwatch = (sw: Stopwatch): number => {
 
 export const uniqueId = function() {
   let dt = new Date().getTime();
-  const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = (dt + Math.random()*16)%16 | 0;
-    dt = Math.floor(dt/16);
-    return (c==='x' ? r :((r&0x3)|0x8)).toString(16);
+  const uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+    const r = (dt + Math.random() * 16) % 16 | 0;
+    dt = Math.floor(dt / 16);
+    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
   });
 
   return uuid.substr(0, 13);
@@ -178,5 +178,11 @@ export const toLowerCase = (text: string) => {
 };
 
 export const shouldBeFiltered = (moderators: string[], distrusted: string[]) => {
-  return (moderators != null && distrusted != null) && moderators.filter(n => !distrusted.includes(n)).length > 0;
+  return (
+    moderators != null &&
+    distrusted != null &&
+    moderators.length > 0 &&
+    distrusted.length > 0 &&
+    moderators.filter(n => !distrusted.includes(n)).length > 0
+  );
 };

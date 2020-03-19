@@ -1,5 +1,7 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { RouteComponentProps } from "react-router";
+import { ChromunityUser, Topic, TopicReply } from "../../types";
+import { shouldBeFiltered, toLowerCase } from "../../util/util";
 import {
   Badge,
   Button,
@@ -11,16 +13,36 @@ import {
   IconButton,
   LinearProgress,
   TextField,
-  Theme,
   Tooltip,
-  Typography,
-  withStyles,
-  WithStyles
+  Typography
 } from "@material-ui/core";
-
-import { RouteComponentProps } from "react-router";
-import { Redirect } from "react-router-dom";
+import {
+  Delete,
+  Notifications,
+  NotificationsActive,
+  Reply,
+  Report,
+  StarBorder,
+  StarRate,
+  SubdirectoryArrowRight
+} from "@material-ui/icons";
+import TopicReplyCard from "./TopicReplyCard";
+import { Link, Redirect } from "react-router-dom";
+import { ApplicationState } from "../../store";
+import { connect } from "react-redux";
+import makeStyles from "@material-ui/core/styles/makeStyles";
+import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
+import Timestamp from "../common/Timestamp";
+import MarkdownRenderer from "../common/MarkdownRenderer";
 import EditMessageButton from "../buttons/EditMessageButton";
+import ConfirmDialog from "../common/ConfirmDialog";
+import {
+  hasReportedId,
+  hasReportedTopic,
+  REMOVE_TOPIC_OP_ID,
+  removeTopic,
+  reportTopic
+} from "../../blockchain/RepresentativesService";
 import {
   createTopicReply,
   deleteTopic,
@@ -35,44 +57,28 @@ import {
   subscribeToTopic,
   unsubscribeFromTopic
 } from "../../blockchain/TopicService";
-import { Topic, TopicReply, ChromunityUser } from "../../types";
-import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
-import {
-  Delete,
-  Notifications,
-  NotificationsActive,
-  Reply,
-  Report,
-  StarBorder,
-  StarRate,
-  SubdirectoryArrowRight
-} from "@material-ui/icons";
-import { getUserSettingsCached } from "../../blockchain/UserService";
-import TopicReplyCard from "./TopicReplyCard";
+import Divider from "@material-ui/core/Divider";
+import TextToolbar from "../common/textToolbar/TextToolbar";
 import LoadMoreButton from "../buttons/LoadMoreButton";
-import {
-  reportTopic,
-  removeTopic,
-  hasReportedId,
-  REMOVE_TOPIC_OP_ID,
-  hasReportedTopic
-} from "../../blockchain/RepresentativesService";
-import Timestamp from "../common/Timestamp";
-import Avatar, { AVATAR_SIZE } from "../common/Avatar";
-import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
-import MarkdownRenderer from "../common/MarkdownRenderer";
-import { shouldBeFiltered, toLowerCase } from "../../util/util";
-import ConfirmDialog from "../common/ConfirmDialog";
-import { ApplicationState } from "../../store";
-import { connect } from "react-redux";
-import logger from "../../util/logger";
 import Tutorial from "../common/Tutorial";
 import TutorialButton from "../buttons/TutorialButton";
 import { step } from "../common/TutorialStep";
-import TextToolbar from "../common/textToolbar/TextToolbar";
-import Divider from "@material-ui/core/Divider";
+import { getUserSettingsCached } from "../../blockchain/UserService";
+import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
+import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 
-const styles = (theme: Theme) =>
+interface MatchParams {
+  id: string;
+}
+
+interface Props extends RouteComponentProps<MatchParams> {
+  pathName: string;
+  representatives: string[];
+  distrustedUsers: string[];
+  user: ChromunityUser;
+}
+
+const useStyles = makeStyles(theme =>
   createStyles({
     removed: {
       opacity: 0.25
@@ -110,627 +116,525 @@ const styles = (theme: Theme) =>
     iconRed: {
       color: COLOR_RED
     }
-  });
+  })
+);
 
-interface MatchParams {
-  id: string;
-}
+const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
+  const classes = useStyles();
 
-interface FullTopicProps extends RouteComponentProps<MatchParams>, WithStyles<typeof styles> {
-  pathName: string;
-  representatives: string[];
-  distrustedUsers: string[];
-  user: ChromunityUser;
-}
+  const [isLoading, setLoading] = useState(true);
+  const [topic, setTopic] = useState<Topic>(null);
+  const [notFound, setNotFound] = useState(false);
+  const [avatar, setAvatar] = useState("");
+  const [stars, setStars] = useState(0);
+  const [ratedByMe, setRatedByMe] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+  const [topicReplies, setTopicReplies] = useState<TopicReply[]>([]);
+  const [replyBoxOpen, setReplyBoxOpen] = useState(false);
+  const [replyMessage, setReplyMessage] = useState("");
+  const [couldExistOlderReplies, setCouldExistOlderReplies] = useState(false);
+  const [removeTopicDialogOpen, setRemoveTopicDialogOpen] = useState(false);
+  const [reportTopicDialogOpen, setReportTopicDialogOpen] = useState(false);
+  const [timeLeftUntilNoLongerModifiable, setTimeLeftUntilNoLongerModifiable] = useState(0);
 
-export interface FullTopicState {
-  topic: Topic;
-  notFound: boolean;
-  avatar: string;
-  stars: number;
-  ratedByMe: boolean;
-  subscribed: boolean;
-  topicReplies: TopicReply[];
-  replyBoxOpen: boolean;
-  replyMessage: string;
-  couldExistOlderReplies: boolean;
-  isLoading: boolean;
-  removeTopicDialogOpen: boolean;
-  reportTopicDialogOpen: boolean;
-  timeLeftUntilNoLongerModifiable: number;
-}
+  const textInput: React.RefObject<HTMLInputElement> = useRef();
 
-const repliesPageSize: number = 25;
-const allowedEditTimeMillis: number = 300000;
+  const repliesPageSize = 25;
+  const allowedEditTimeMillis = 300000;
 
-const FullTopic = withStyles(styles)(
-  class extends React.Component<FullTopicProps, FullTopicState> {
-    private readonly textInput: React.RefObject<HTMLInputElement>;
+  useEffect(() => {
+    const id = props.match.params.id;
+    const user: ChromunityUser = props.user;
 
-    constructor(props: FullTopicProps) {
-      super(props);
-
-      const initialTopic: Topic = {
-        id: "",
-        title: "",
-        author: "",
-        message: "",
-        timestamp: 0,
-        last_modified: 0,
-        latest_poster: "",
-        moderated_by: []
-      };
-
-      this.state = {
-        topic: initialTopic,
-        notFound: false,
-        avatar: "",
-        ratedByMe: false,
-        subscribed: false,
-        stars: 0,
-        topicReplies: [],
-        replyBoxOpen: false,
-        replyMessage: "",
-        couldExistOlderReplies: false,
-        isLoading: true,
-        removeTopicDialogOpen: false,
-        reportTopicDialogOpen: false,
-        timeLeftUntilNoLongerModifiable: 0
-      };
-
-      this.textInput = React.createRef();
-
-      this.retrieveLatestReplies = this.retrieveLatestReplies.bind(this);
-      this.handleReplySubmit = this.handleReplySubmit.bind(this);
-      this.retrieveOlderReplies = this.retrieveOlderReplies.bind(this);
-      this.editTopicMessage = this.editTopicMessage.bind(this);
-      this.closeReportTopic = this.closeReportTopic.bind(this);
-      this.reportTopic = this.reportTopic.bind(this);
-      this.isRepresentative = this.isRepresentative.bind(this);
-      this.deleteTopic = this.deleteTopic.bind(this);
-      this.toggleReplyBox = this.toggleReplyBox.bind(this);
-      this.handleReplyMessageChange = this.handleReplyMessageChange.bind(this);
-      this.addTextFromToolbarInReply = this.addTextFromToolbarInReply.bind(this);
-    }
-
-    componentDidMount(): void {
-      const id = this.props.match.params.id;
-      const user: ChromunityUser = this.props.user;
-
-      getTopicById(id, user).then(topic => {
-        logger.info("Topic returned: ", topic);
-        if (topic != null) {
-          this.consumeTopicData(topic);
-        } else {
-          this.setState({ notFound: true });
-        }
-      });
-    }
-
-    render() {
-      if (
-        (this.props.user != null && toLowerCase(this.state.topic.author) === toLowerCase(this.props.user.name)) ||
-        (!this.props.distrustedUsers.includes(this.state.topic.author) && !this.state.notFound)
-      ) {
-        return (
-          <Container fixed>
-            <br />
-            {this.state.isLoading ? <LinearProgress variant="query" /> : <div />}
-            {this.renderTopic()}
-            {this.state.topicReplies.length > 0 ? <SubdirectoryArrowRight /> : <div />}
-            {this.state.topicReplies.map(reply => (
-              <TopicReplyCard
-                key={"reply-" + reply.id}
-                reply={reply}
-                indention={0}
-                topicId={this.state.topic.id}
-                representatives={this.props.representatives}
-              />
-            ))}
-            {this.renderLoadMoreButton()}
-            {this.renderTour()}
-          </Container>
-        );
+    getTopicById(id, user).then(topic => {
+      if (topic != null) {
+        consumeTopicData(topic);
       } else {
-        return <Redirect to={"/"} />;
+        setNotFound(true);
       }
+    });
+    // eslint-disable-next-line
+  }, [props.match.params.id]);
+
+  function consumeTopicData(t: Topic): void {
+    setTopic(t);
+
+    retrieveLatestReplies();
+    getTopicStarRaters(t.id, true).then(usersWhoStarRated => {
+      setStars(usersWhoStarRated.length);
+      setRatedByMe(usersWhoStarRated.includes(props.user != null && toLowerCase(props.user.name)));
+    });
+    getTopicSubscribers(t.id).then(subscribers =>
+      setSubscribed(props.user != null && subscribers.includes(props.user.name))
+    );
+
+    getUserSettingsCached(t.author, 86400).then(settings =>
+      setAvatar(ifEmptyAvatarThenPlaceholder(settings.avatar, t.author))
+    );
+
+    const modifiableUntil = t.timestamp + allowedEditTimeMillis;
+
+    setInterval(() => {
+      setTimeLeftUntilNoLongerModifiable(getTimeLeft(modifiableUntil));
+    }, 1000);
+  }
+
+  function getTimeLeft(until: number): number {
+    const currentTime = Date.now();
+    return currentTime < until ? Math.floor((until - currentTime) / 1000) : 0;
+  }
+
+  function retrieveLatestReplies(): void {
+    setLoading(true);
+    const topicId: string = props.match.params.id;
+    let replies: Promise<TopicReply[]>;
+    if (topicReplies.length === 0) {
+      replies = getTopicRepliesPriorToTimestamp(topicId, Date.now(), repliesPageSize, props.user);
+    } else {
+      replies = getTopicRepliesAfterTimestamp(topicId, topicReplies[0].timestamp, repliesPageSize, props.user);
     }
 
-    consumeTopicData(topic: Topic): void {
-      this.setState({ topic: topic });
-
-      this.retrieveLatestReplies();
-      getTopicStarRaters(topic.id, true).then(usersWhoStarRated =>
-        this.setState({
-          stars: usersWhoStarRated.length,
-          ratedByMe: usersWhoStarRated.includes(this.props.user != null && this.props.user.name.toLocaleLowerCase())
-        })
-      );
-      getTopicSubscribers(topic.id).then(subscribers =>
-        this.setState({
-          subscribed: this.props.user != null && subscribers.includes(this.props.user.name)
-        })
-      );
-
-      getUserSettingsCached(topic.author, 86400).then(settings =>
-        this.setState({
-          avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, topic.author)
-        })
-      );
-
-      const modifiableUntil = topic.timestamp + allowedEditTimeMillis;
-
-      setInterval(() => {
-        this.setState({ timeLeftUntilNoLongerModifiable: this.getTimeLeft(modifiableUntil) });
-      }, 1000);
-    }
-
-    getTimeLeft(until: number): number {
-      const currentTime = Date.now();
-      return currentTime < until ? Math.floor((until - currentTime) / 1000) : 0;
-    }
-
-    retrieveLatestReplies(): void {
-      const topicId: string = this.props.match.params.id;
-      this.setState({ isLoading: true });
-      let replies: Promise<TopicReply[]>;
-      if (this.state.topicReplies.length === 0) {
-        replies = getTopicRepliesPriorToTimestamp(topicId, Date.now(), repliesPageSize, this.props.user);
-      } else {
-        replies = getTopicRepliesAfterTimestamp(
-          topicId,
-          this.state.topicReplies[0].timestamp,
-          repliesPageSize,
-          this.props.user
-        );
-      }
-
-      replies
-        .then(retrievedReplies => {
-          if (retrievedReplies.length > 0) {
-            this.setState(prevState => ({
-              topicReplies: Array.from(new Set(retrievedReplies.concat(prevState.topicReplies))),
-              isLoading: false,
-              couldExistOlderReplies: retrievedReplies.length >= repliesPageSize
-            }));
-          } else {
-            this.setState({ isLoading: false });
-          }
-        })
-        .catch(() => this.setState({ isLoading: false }));
-    }
-
-    retrieveOlderReplies() {
-      if (this.state.topicReplies.length > 0) {
-        this.setState({ isLoading: true });
-        const oldestTimestamp: number = this.state.topicReplies[this.state.topicReplies.length - 1].timestamp;
-        getTopicRepliesPriorToTimestamp(
-          this.state.topic.id,
-          oldestTimestamp - 1,
-          repliesPageSize,
-          this.props.user
-        ).then(retrievedReplies => {
-          if (retrievedReplies.length > 0) {
-            this.setState(prevState => ({
-              topicReplies: Array.from(new Set(prevState.topicReplies.concat(retrievedReplies))),
-              isLoading: false,
-              couldExistOlderReplies: retrievedReplies.length >= repliesPageSize
-            }));
-          } else {
-            this.setState({ isLoading: false, couldExistOlderReplies: false });
-          }
-        });
-      }
-    }
-
-    toggleStarRate() {
-      if (!this.state.isLoading) {
-        this.setState({ isLoading: true });
-        const id: string = this.state.topic.id;
-        const user: ChromunityUser = this.props.user;
-
-        if (user != null) {
-          if (this.state.ratedByMe) {
-            removeTopicStarRating(user, id)
-              .then(() =>
-                this.setState(prevState => ({
-                  ratedByMe: false,
-                  stars: prevState.stars - 1,
-                  isLoading: false
-                }))
-              )
-              .catch(() => this.setState({ isLoading: false }));
-          } else {
-            giveTopicStarRating(user, id)
-              .then(() =>
-                this.setState(prevState => ({
-                  ratedByMe: true,
-                  stars: prevState.stars + 1,
-                  isLoading: false
-                }))
-              )
-              .catch(() => this.setState({ isLoading: false }));
-          }
-        } else {
-          window.location.href = "/user/login";
+    replies
+      .then(retrievedReplies => {
+        if (retrievedReplies.length > 0) {
+          setTopicReplies(Array.from(new Set(retrievedReplies.concat(topicReplies))));
+          setCouldExistOlderReplies(retrievedReplies.length >= repliesPageSize);
         }
-      }
-    }
+      })
+      .catch()
+      .finally(() => setLoading(false));
+  }
 
-    toggleSubscription() {
-      if (!this.state.isLoading) {
-        this.setState({ isLoading: true });
-        const id: string = this.state.topic.id;
-        const user: ChromunityUser = this.props.user;
-
-        if (user != null) {
-          if (this.state.subscribed) {
-            unsubscribeFromTopic(user, id)
-              .then(() => this.setState({ subscribed: false, isLoading: false }))
-              .catch(() => this.setState({ isLoading: false }));
-          } else {
-            subscribeToTopic(user, id)
-              .then(() => this.setState({ subscribed: true, isLoading: false }))
-              .catch(() => this.setState({ isLoading: false }));
-          }
-        } else {
-          window.location.href = "/user/login";
-        }
-      }
-    }
-
-    renderAuthor() {
+  function renderTopic() {
+    const filtered = shouldBeFiltered(topic.moderated_by, props.distrustedUsers);
+    if (
+      !props.distrustedUsers.includes(topic.author) &&
+      ((props.user != null && toLowerCase(topic.author) === toLowerCase(props.user.name)) ||
+        (props.user != null && props.representatives.includes(toLowerCase(props.user.name))) ||
+        !filtered)
+    ) {
       return (
-        <div style={{ float: "right" }}>
-          <Link
-            className={`${this.props.classes.authorLink} ${
-              this.props.representatives.includes(this.state.topic.author.toLocaleLowerCase())
-                ? this.props.classes.repColor
-                : this.props.classes.userColor
-            }`}
-            to={"/u/" + this.state.topic.author}
-          >
-            <Typography gutterBottom variant="subtitle1" component="span" className="typography">
-              <span className={this.props.classes.authorName}>@{this.state.topic.author}</span>
-            </Typography>
-          </Link>
-          <br />
-          <div style={{ float: "right" }}>
-            <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} name={this.state.topic.author} />
-          </div>
+        <div className={filtered ? classes.removed : ""}>
+          <Card raised={true} key={topic.id}>
+            {renderCardContent()}
+            {renderCardActions()}
+            {replyBoxOpen ? renderReplyForm() : <div />}
+          </Card>
         </div>
       );
     }
+  }
 
-    renderCardContent(content: string) {
+  function renderCardContent() {
+    return (
+      <CardContent>
+        {renderAuthor()}
+        <div className={classes.content}>
+          <Timestamp milliseconds={topic.timestamp} />
+          <Typography gutterBottom variant="h6" component="h6">
+            {topic.title}
+          </Typography>
+          <MarkdownRenderer text={topic.message} />
+        </div>
+      </CardContent>
+    );
+  }
+
+  function renderAuthor() {
+    return (
+      <div style={{ float: "right" }}>
+        <Link
+          className={`${classes.authorLink} ${
+            props.representatives.includes(topic.author.toLocaleLowerCase()) ? classes.repColor : classes.userColor
+          }`}
+          to={"/u/" + topic.author}
+        >
+          <Typography gutterBottom variant="subtitle1" component="span" className="typography">
+            <span className={classes.authorName}>@{topic.author}</span>
+          </Typography>
+        </Link>
+        <br />
+        <div style={{ float: "right" }}>
+          <Avatar src={avatar} size={AVATAR_SIZE.LARGE} name={topic.author} />
+        </div>
+      </div>
+    );
+  }
+
+  function renderCardActions() {
+    const user: ChromunityUser = props.user;
+
+    if (user != null) {
       return (
-        <CardContent>
-          {this.renderAuthor()}
-          <div className={this.props.classes.content}>
-            <Timestamp milliseconds={this.state.topic.timestamp} />
-            <Typography gutterBottom variant="h6" component="h6">
-              {this.state.topic.title}
-            </Typography>
-            <MarkdownRenderer text={content} />
+        <CardActions style={{ marginTop: "-20px" }}>
+          <IconButton data-tut="star_btn" aria-label="Like" onClick={() => toggleStarRate()}>
+            <Badge color="secondary" badgeContent={stars}>
+              <Tooltip title="Like">{ratedByMe ? <StarRate className={classes.iconYellow} /> : <StarBorder />}</Tooltip>
+            </Badge>
+          </IconButton>
+          <IconButton data-tut="subscribe_btn" aria-label="Subscribe" onClick={() => toggleSubscription()}>
+            {subscribed ? (
+              <Tooltip title="Unsubscribe">
+                <NotificationsActive className={classes.iconOrange} />
+              </Tooltip>
+            ) : (
+              <Tooltip title="Subscribe">
+                <Notifications />
+              </Tooltip>
+            )}
+          </IconButton>
+
+          {topic.timestamp + allowedEditTimeMillis > Date.now() &&
+          user != null &&
+          toLowerCase(topic.author) === toLowerCase(user.name) ? (
+            <EditMessageButton
+              value={topic.message}
+              modifiableUntil={timeLeftUntilNoLongerModifiable}
+              editFunction={editTopicMessage}
+              deleteFunction={deleteTheTopic}
+            />
+          ) : (
+            <div />
+          )}
+
+          {user && (
+            <IconButton data-tut="reply_btn" onClick={toggleReplyBox}>
+              <Tooltip title="Reply">
+                <Reply className={replyBoxOpen ? classes.iconOrange : ""} />
+              </Tooltip>
+            </IconButton>
+          )}
+
+          <ConfirmDialog
+            text="This action will report the topic"
+            open={reportTopicDialogOpen}
+            onClose={closeReportTopic}
+            onConfirm={reportTheTopic}
+          />
+
+          {!isRepresentative() && !hasReportedTopic(user, topic) && (
+            <IconButton data-tut="report_btn" aria-label="Report-test" onClick={() => setReportTopicDialogOpen(true)}>
+              <Tooltip title="Report">
+                <Report />
+              </Tooltip>
+            </IconButton>
+          )}
+
+          {renderAdminActions()}
+        </CardActions>
+      );
+    } else {
+      return (
+        <CardActions>
+          <div data-tut="star_btn">
+            z
+            <Badge color="secondary" badgeContent={stars} style={{ marginBottom: "5px", marginLeft: "5px" }}>
+              <Tooltip title="Like">{ratedByMe ? <StarRate className={classes.iconYellow} /> : <StarBorder />}</Tooltip>
+            </Badge>
           </div>
-        </CardContent>
+        </CardActions>
       );
     }
+  }
 
-    renderCardActions() {
-      const user: ChromunityUser = this.props.user;
-
-      if (user != null) {
-        return (
-          <CardActions style={{ marginTop: "-20px" }}>
-            <IconButton data-tut="star_btn" aria-label="Like" onClick={() => this.toggleStarRate()}>
-              <Badge color="secondary" badgeContent={this.state.stars}>
-                <Tooltip title="Like">
-                  {this.state.ratedByMe ? <StarRate className={this.props.classes.iconYellow} /> : <StarBorder />}
-                </Tooltip>
-              </Badge>
-            </IconButton>
-            <IconButton data-tut="subscribe_btn" aria-label="Subscribe" onClick={() => this.toggleSubscription()}>
-              {this.state.subscribed ? (
-                <Tooltip title="Unsubscribe">
-                  <NotificationsActive className={this.props.classes.iconOrange} />
-                </Tooltip>
-              ) : (
-                <Tooltip title="Subscribe">
-                  <Notifications />
-                </Tooltip>
-              )}
-            </IconButton>
-
-            {this.state.topic.timestamp + allowedEditTimeMillis > Date.now() &&
-            user != null &&
-            this.state.topic.author === user.name ? (
-              <EditMessageButton
-                value={this.state.topic.message}
-                modifiableUntil={this.state.timeLeftUntilNoLongerModifiable}
-                editFunction={this.editTopicMessage}
-                deleteFunction={this.deleteTopic}
-              />
-            ) : (
-              <div />
-            )}
-
-            {this.props.user && (
-              <IconButton data-tut="reply_btn" onClick={this.toggleReplyBox}>
-                <Tooltip title="Reply">
-                  <Reply className={this.state.replyBoxOpen ? this.props.classes.iconOrange : ""} />
-                </Tooltip>
-              </IconButton>
-            )}
-
-            <ConfirmDialog
-              text="This action will report the topic"
-              open={this.state.reportTopicDialogOpen}
-              onClose={this.closeReportTopic}
-              onConfirm={this.reportTopic}
-            />
-
-            {!this.isRepresentative() && !hasReportedTopic(user, this.state.topic) && (
-              <IconButton
-                data-tut="report_btn"
-                aria-label="Report-test"
-                onClick={() => this.setState({ reportTopicDialogOpen: true })}
-              >
-                <Tooltip title="Report">
-                  <Report />
-                </Tooltip>
-              </IconButton>
-            )}
-
-            {this.renderAdminActions()}
-          </CardActions>
-        );
-      } else {
-        return (
-          <CardActions>
-            <div data-tut="star_btn">z
-              <Badge
-                color="secondary"
-                badgeContent={this.state.stars}
-                style={{ marginBottom: "5px", marginLeft: "5px" }}
-              >
-                <Tooltip title="Like">
-                  {this.state.ratedByMe ? <StarRate className={this.props.classes.iconYellow} /> : <StarBorder />}
-                </Tooltip>
-              </Badge>
-            </div>
-          </CardActions>
-        );
-      }
-    }
-
-    editTopicMessage(text: string) {
-      this.setState({ isLoading: true });
-      modifyTopic(this.props.user, this.state.topic.id, text)
-        .then(() =>
-          this.setState(prevState => ({
-            topic: {
-              id: prevState.topic.id,
-              author: prevState.topic.author,
-              title: prevState.topic.title,
-              message: text,
-              timestamp: prevState.topic.timestamp,
-              last_modified: prevState.topic.last_modified,
-              latest_poster: prevState.topic.latest_poster,
-              moderated_by: prevState.topic.moderated_by
-            },
-            isLoading: false
-          }))
-        )
-        .catch(() => this.setState({ isLoading: false }));
-    }
-
-    closeReportTopic() {
-      this.setState({ reportTopicDialogOpen: false });
-    }
-
-    reportTopic() {
-      this.closeReportTopic();
-      const user: ChromunityUser = this.props.user;
+  function toggleStarRate() {
+    if (!isLoading) {
+      setLoading(true);
+      const id: string = topic.id;
+      const user: ChromunityUser = props.user;
 
       if (user != null) {
-        reportTopic(user, this.state.topic).then();
+        if (ratedByMe) {
+          removeTopicStarRating(user, id)
+            .then(() => {
+              setRatedByMe(false);
+              setStars(stars - 1);
+            })
+            .catch()
+            .finally(() => setLoading(false));
+        } else {
+          giveTopicStarRating(user, id)
+            .then(() => {
+              setRatedByMe(true);
+              setStars(stars + 1);
+            })
+            .catch()
+            .finally(() => setLoading(false));
+        }
       } else {
         window.location.href = "/user/login";
       }
     }
+  }
 
-    deleteTopic() {
-      deleteTopic(this.props.user, this.state.topic.id).then(() => (window.location.href = "/"));
-    }
+  function toggleSubscription() {
+    if (!isLoading) {
+      setLoading(true);
+      const id: string = topic.id;
+      const user: ChromunityUser = props.user;
 
-    isRepresentative() {
-      const user: ChromunityUser = this.props.user;
-      return user != null && this.props.representatives.includes(user.name.toLocaleLowerCase());
-    }
-
-    renderAdminActions() {
-      if (this.isRepresentative() && !hasReportedId(REMOVE_TOPIC_OP_ID + ":" + this.state.topic.id)) {
-        return (
-          <div style={{ display: "inline-block" }}>
-            <IconButton aria-label="Remove topic" onClick={() => this.setState({ removeTopicDialogOpen: true })}>
-              <Tooltip title="Remove topic">
-                <Delete className={this.props.classes.iconRed} />
-              </Tooltip>
-            </IconButton>
-
-            <ConfirmDialog
-              text={
-                "This action will remove the topic, which makes sure that no one will be able to read the initial message."
-              }
-              open={this.state.removeTopicDialogOpen}
-              onClose={() => this.setState({ removeTopicDialogOpen: false })}
-              onConfirm={() =>
-                this.setState(
-                  {
-                    removeTopicDialogOpen: false
-                  },
-                  () => removeTopic(this.props.user, this.props.match.params.id).then(() => window.location.reload())
-                )
-              }
-            />
-          </div>
-        );
+      if (user != null) {
+        if (subscribed) {
+          unsubscribeFromTopic(user, id)
+            .then(() => setSubscribed(false))
+            .catch()
+            .finally(() => setLoading(false));
+        } else {
+          subscribeToTopic(user, id)
+            .then(() => setSubscribed(true))
+            .catch()
+            .finally(() => setLoading(false));
+        }
+      } else {
+        window.location.href = "/user/login";
       }
     }
+  }
 
-    renderTopic() {
-      console.log("Rendering topic!");
-      const filtered = shouldBeFiltered(this.state.topic.moderated_by, this.props.distrustedUsers);
-      if (
-        !this.props.distrustedUsers.includes(this.state.topic.author) &&
-        ((this.props.user != null && toLowerCase(this.state.topic.author) === toLowerCase(this.props.user.name)) ||
-          (this.props.user != null && this.props.representatives.includes(toLowerCase(this.props.user.name))) ||
-          !filtered)
-      ) {
-        return (
-          <div className={filtered ? this.props.classes.removed : ""}>
-            <Card raised={true} key={this.state.topic.id}>
-              {this.renderCardContent(this.state.topic.message)}
-              {this.renderCardActions()}
-              {this.state.replyBoxOpen ? this.renderReplyForm() : <div />}
-            </Card>
-          </div>
-        );
-      }
+  function editTopicMessage(text: string) {
+    setLoading(true);
+    modifyTopic(props.user, topic.id, text)
+      .then(() => {
+        const updatedTopic: Topic = {
+          id: topic.id,
+          author: topic.author,
+          title: topic.title,
+          message: text,
+          timestamp: topic.timestamp,
+          last_modified: topic.last_modified,
+          latest_poster: topic.latest_poster,
+          moderated_by: topic.moderated_by
+        };
+
+        setTopic(updatedTopic);
+      })
+      .catch()
+      .finally(() => setLoading(false));
+  }
+
+  function deleteTheTopic() {
+    deleteTopic(props.user, topic.id).then(() => (window.location.href = "/"));
+  }
+
+  function closeReportTopic() {
+    setReportTopicDialogOpen(false);
+  }
+
+  function reportTheTopic() {
+    closeReportTopic();
+    const user: ChromunityUser = props.user;
+
+    if (user != null) {
+      reportTopic(user, topic).then();
+    } else {
+      window.location.href = "/user/login";
     }
+  }
 
-    toggleReplyBox(): void {
-      this.setState(prevState => ({ replyBoxOpen: !prevState.replyBoxOpen }));
-    }
+  function isRepresentative() {
+    const user: ChromunityUser = props.user;
+    return user != null && props.representatives.includes(toLowerCase(user.name));
+  }
 
-    handleReplyMessageChange(event: React.ChangeEvent<HTMLInputElement>): void {
-      this.setState({ replyMessage: event.target.value });
-    }
-
-    renderReplyForm() {
+  function renderAdminActions() {
+    if (isRepresentative() && !hasReportedId(REMOVE_TOPIC_OP_ID + ":" + topic.id)) {
       return (
-        <div style={{ margin: "15px", position: "relative" }}>
-          <Divider />
-          <TextToolbar addText={this.addTextFromToolbarInReply}/>
-          <TextField
-            label="Reply"
-            margin="dense"
-            variant="outlined"
-            id="message"
-            multiline
-            type="text"
-            rows="3"
-            fullWidth
-            value={this.state.replyMessage}
-            onChange={this.handleReplyMessageChange}
-            inputRef={this.textInput}
-            autoFocus
+        <div style={{ display: "inline-block" }}>
+          <IconButton aria-label="Remove topic" onClick={() => setRemoveTopicDialogOpen(false)}>
+            <Tooltip title="Remove topic">
+              <Delete className={classes.iconRed} />
+            </Tooltip>
+          </IconButton>
+
+          <ConfirmDialog
+            text={
+              "This action will remove the topic, which makes sure that no one will be able to read the initial message."
+            }
+            open={removeTopicDialogOpen}
+            onClose={() => setRemoveTopicDialogOpen(false)}
+            onConfirm={() => {
+              setRemoveTopicDialogOpen(false);
+              removeTopic(props.user, topic.id).then(() => window.location.reload());
+            }}
           />
-          <div style={{ float: "right" }}>
-            <Button type="button" onClick={() => this.toggleReplyBox()} color="secondary" variant="outlined">
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              onClick={() => this.handleReplySubmit()}
-              color="primary"
-              variant="outlined"
-              style={{ marginLeft: "5px" }}
-            >
-              Reply
-            </Button>
-            <br />
-            <br />
-          </div>
         </div>
       );
     }
+  }
 
-    addTextFromToolbarInReply(text: string) {
-      const startPosition = this.textInput.current.selectionStart;
+  function renderReplyForm() {
+    return (
+      <div style={{ margin: "15px", position: "relative" }}>
+        <Divider />
+        <TextToolbar addText={addTextFromToolbarInReply} />
+        <TextField
+          label="Reply"
+          margin="dense"
+          variant="outlined"
+          id="message"
+          multiline
+          type="text"
+          rows="3"
+          fullWidth
+          value={replyMessage}
+          onChange={handleReplyMessageChange}
+          inputRef={textInput}
+          autoFocus
+        />
+        <div style={{ float: "right" }}>
+          <Button type="button" onClick={() => toggleReplyBox()} color="secondary" variant="outlined">
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            onClick={() => handleReplySubmit()}
+            color="primary"
+            variant="outlined"
+            style={{ marginLeft: "5px" }}
+          >
+            Reply
+          </Button>
+          <br />
+          <br />
+        </div>
+      </div>
+    );
+  }
 
-      this.setState(prevState => ({
-        replyMessage: [
-          prevState.replyMessage.slice(0, startPosition),
-          text,
-          prevState.replyMessage.slice(startPosition)
-        ].join("")
-      }));
+  function toggleReplyBox(): void {
+    setReplyBoxOpen(!replyBoxOpen);
+  }
 
-      setTimeout(() => {
-        this.textInput.current.selectionStart = startPosition + text.length;
-        this.textInput.current.selectionEnd = startPosition + text.length;
-      }, 100);
+  function addTextFromToolbarInReply(text: string) {
+    const startPosition = textInput.current.selectionStart;
+
+    setReplyMessage([replyMessage.slice(0, startPosition), text, replyMessage.slice(startPosition)].join(""));
+
+    setTimeout(() => {
+      textInput.current.selectionStart = startPosition + text.length;
+      textInput.current.selectionEnd = startPosition + text.length;
+    }, 100);
+  }
+
+  function handleReplyMessageChange(event: React.ChangeEvent<HTMLInputElement>): void {
+    setReplyMessage(event.target.value);
+  }
+
+  function handleReplySubmit(): void {
+    if (props.user != null) {
+      setReplyBoxOpen(false);
+      setLoading(true);
+      createTopicReply(props.user, topic.id, replyMessage)
+        .then(() => {
+          retrieveLatestReplies();
+          setReplyMessage("");
+        })
+        .catch()
+        .finally(() => setLoading(false));
     }
+  }
 
-    handleReplySubmit(): void {
-      if (this.props.user != null) {
-        this.setState({ isLoading: true, replyBoxOpen: false });
-        createTopicReply(this.props.user, this.state.topic.id, this.state.replyMessage)
-          .then(() => {
-            this.retrieveLatestReplies();
-            this.setState({ replyMessage: "" });
-          })
-          .catch(error => this.setState({ isLoading: false, replyBoxOpen: false }));
-      }
+  function renderLoadMoreButton() {
+    if (couldExistOlderReplies) {
+      return <LoadMoreButton onClick={retrieveOlderReplies} />;
     }
+  }
 
-    renderLoadMoreButton() {
-      if (this.state.couldExistOlderReplies) {
-        return <LoadMoreButton onClick={this.retrieveOlderReplies} />;
-      }
+  function retrieveOlderReplies() {
+    if (topicReplies.length > 0) {
+      setLoading(true);
+      const oldestTimestamp: number = topicReplies[topicReplies.length - 1].timestamp;
+      getTopicRepliesPriorToTimestamp(topic.id, oldestTimestamp - 1, repliesPageSize, props.user)
+        .then(retrievedReplies => {
+          if (retrievedReplies.length > 0) {
+            setTopicReplies(Array.from(new Set(topicReplies.concat(retrievedReplies))));
+            setCouldExistOlderReplies(retrievedReplies.length >= repliesPageSize);
+          } else {
+            setCouldExistOlderReplies(false);
+          }
+        })
+        .finally(() => setLoading(false));
     }
+  }
 
-    renderTour() {
-      return (
+  function renderTour() {
+    return (
+      <>
+        <Tutorial steps={steps()} />
+        <TutorialButton />
+      </>
+    );
+  }
+
+  function steps(): any[] {
+    const steps: any[] = [
+      step(
+        ".first-step",
+        <p>This is a topic. A topic contains hopefully some interesting subject to discuss with the community.</p>
+      ),
+      step(
+        '[data-tut="star_btn"]',
         <>
-          <Tutorial steps={this.steps()} />
-          <TutorialButton />
+          <p>If you like a topic, and are signed-in in, give it a star rating!</p>
+          <p>Replies can also receive a star rating.</p>
         </>
+      )
+    ];
+
+    if (props.user != null) {
+      steps.push(
+        step(
+          '[data-tut="subscribe_btn"]',
+          <p>Subscribing to a post will keep you updated with notifications when someone replies to it.</p>
+        )
+      );
+
+      steps.push(step('[data-tut="reply_btn"]', <p>Join in the conversation by sending a reply to the topic.</p>));
+
+      steps.push(
+        step(
+          '[data-tut="report_btn"]',
+          <p>
+            If you find the topic inappropriate you can report it, sending a notice to representatives to have a look at
+            it.
+          </p>
+        )
       );
     }
 
-    steps(): any[] {
-      const steps: any[] = [
-        step(
-          ".first-step",
-          <p>This is a topic. A topic contains hopefully some interesting subject to discuss with the community.</p>
-        ),
-        step(
-          '[data-tut="star_btn"]',
-          <>
-            <p>If you like a topic, and are signed-in in, give it a star rating!</p>
-            <p>Replies can also receive a star rating.</p>
-          </>
-        )
-      ];
-
-      if (this.props.user != null) {
-        steps.push(
-          step(
-            '[data-tut="subscribe_btn"]',
-            <p>Subscribing to a post will keep you updated with notifications when someone replies to it.</p>
-          )
-        );
-
-        steps.push(step('[data-tut="reply_btn"]', <p>Join in the conversation by sending a reply to the topic.</p>));
-
-        steps.push(
-          step(
-            '[data-tut="report_btn"]',
-            <p>
-              If you find the topic inappropriate you can report it, sending a notice to representatives to have a look
-              at it.
-            </p>
-          )
-        );
-      }
-
-      return steps;
-    }
+    return steps;
   }
-);
+
+  if (
+    topic != null &&
+    !props.distrustedUsers.map(n => toLowerCase(n)).includes(toLowerCase(topic.author)) &&
+    !notFound
+  ) {
+    return (
+      <Container fixed>
+        <br />
+        {isLoading ? <LinearProgress variant="query" /> : <div />}
+        {renderTopic()}
+        {topicReplies.length > 0 ? <SubdirectoryArrowRight /> : <div />}
+        {topicReplies.map(reply => (
+          <TopicReplyCard
+            key={"reply-" + reply.id}
+            reply={reply}
+            indention={0}
+            topicId={topic.id}
+            representatives={props.representatives}
+          />
+        ))}
+        {renderLoadMoreButton()}
+        {renderTour()}
+      </Container>
+    );
+  } else if (notFound) {
+    return <Redirect to={"/"} />;
+  } else {
+    return <LinearProgress variant="query" />;
+  }
+};
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
