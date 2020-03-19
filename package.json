@@ -6,7 +6,7 @@
     "@material-ui/core": "^4.9.7",
     "@material-ui/icons": "^4.9.1",
     "@sentry/browser": "^5.14.2",
-    "@types/node": "13.9.1",
+    "@types/node": "13.9.2",
     "@types/react": "16.9.23",
     "@types/react-dom": "16.9.5",
     "@types/react-router": "^5.1.4",
@@ -34,9 +34,9 @@
     "react-scripts": "3.4.0",
     "react-select": "^3.0.8",
     "react-transition-group": "^4.3.0",
-    "reactour": "^1.16.1",
+    "reactour": "^1.16.3",
     "redux": "^4.0.5",
-    "redux-saga": "^1.0.5",
+    "redux-saga": "^1.1.3",
     "scrypt-async": "^2.0.1",
     "secp256k1": "4.0.0",
     "styled-components": "^5.0.1",
@@ -69,16 +69,16 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^3.1.43",
-    "@types/jest": "^25.1.2",
+    "@types/jest": "^25.1.4",
     "@types/react-redux": "^7.1.7",
     "@types/react-router-dom": "^5.1.3",
-    "@types/react-transition-group": "^4.2.3",
+    "@types/react-transition-group": "^4.2.4",
     "@types/scrypt-async": "^1.3.0",
-    "@types/secp256k1": "3.5.2",
+    "@types/secp256k1": "3.5.3",
     "coveralls": "^3.0.9",
     "dotenv": "^8.2.0",
     "prettier": "^1.19.1",
     "redux-logger": "^3.0.6",
-    "ts-jest": "^25.2.0"
+    "ts-jest": "^25.2.1"
   }
 }
