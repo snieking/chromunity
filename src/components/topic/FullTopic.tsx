@@ -327,7 +327,6 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
       return (
         <CardActions>
           <div data-tut="star_btn">
-            z
             <Badge color="secondary" badgeContent={stars} style={{ marginBottom: "5px", marginLeft: "5px" }}>
               <Tooltip title="Like">{ratedByMe ? <StarRate className={classes.iconYellow} /> : <StarBorder />}</Tooltip>
             </Badge>
