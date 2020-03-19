@@ -62,7 +62,7 @@ function* logoutSaga() {
   yield put(setAuthenticationStep(null));
 }
 
-function* vaultSuccessSaga(action: IVaultSuccess) {
+function* vaultSuccessSaga(action: IVaultSuccess): Generator<any, any, any> {
   logger.silly("[SAGA - STARTED] Received success from vault");
   yield put(setAuthenticationStep(AuthenticationStep.CONFIRMING_VAULT_TRANSACTION));
   const BC = yield BLOCKCHAIN;
@@ -105,7 +105,7 @@ function* registerUserSaga(action: IRegisterUser) {
   }
 }
 
-function* autoLoginSaga() {
+function* autoLoginSaga(): Generator<any, any, any> {
   const foundUser = yield select(getUser);
   const username = getUsername();
 
