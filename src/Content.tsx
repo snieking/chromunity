@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import VaultSuccess from "./components/user/authentication/VaultSuccess";
 import Logout from "./components/user/authentication/Logout";
 import Settings from "./components/user/settings/Settings";
