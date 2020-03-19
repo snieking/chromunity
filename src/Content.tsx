@@ -9,7 +9,7 @@ import Representatives from "./components/governing/representatives/Representati
 import Election from "./components/governing/election/Election";
 import { GovLog } from "./components/governing/GovLog";
 import FullTopic from "./components/topic/FullTopic";
-import { Route, RouteComponentProps, Switch, withRouter } from "react-router";
+import { Route, Switch, withRouter } from "react-router";
 import TopicWall from "./components/walls/TopicWall";
 import WalletLogin from "./components/user/authentication/WalletLogin";
 import { ErrorPage } from "./components/static/ErrorPage";
@@ -18,7 +18,7 @@ import ChatPage from "./components/chat/ChatPage";
 import VaultCancel from "./components/user/authentication/VaultCancel";
 import Reports from "./components/governing/reports/Reports";
 
-const Content: React.FunctionComponent<RouteComponentProps> = ({ location }) => {
+const Content: React.FunctionComponent = () => {
   return (
     <div className="content">
       <Switch>
