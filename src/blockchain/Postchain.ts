@@ -81,14 +81,16 @@ export const executeQuery = async (name: string, params: any) => {
 };
 
 const removeSessionObjects = () => {
-  const items = sessionStorage.length;
+  if (sessionStorage) {
+    const items = sessionStorage.length;
 
-  const keys = Object.keys(sessionStorage);
-  for (let i = 0; i < items; i++) {
-    const keySplit = keys[i].split(":");
+    const keys = Object.keys(sessionStorage);
+    for (let i = 0; i < items; i++) {
+      const keySplit = keys[i].split(":");
 
-    if (QUERY_CACHE_NAME === keySplit[0]) {
-      sessionStorage.removeItem(keys[i]);
+      if (QUERY_CACHE_NAME === keySplit[0]) {
+        sessionStorage.removeItem(keys[i]);
+      }
     }
   }
 };
