@@ -481,14 +481,14 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           autoFocus
         />
         <div style={{ float: "right" }}>
-          <Button type="button" onClick={() => toggleReplyBox()} color="secondary" variant="outlined">
+          <Button type="button" onClick={() => toggleReplyBox()} color="secondary" variant="contained">
             Cancel
           </Button>
           <Button
             type="submit"
             onClick={() => handleReplySubmit()}
             color="primary"
-            variant="outlined"
+            variant="contained"
             style={{ marginLeft: "5px" }}
           >
             Reply

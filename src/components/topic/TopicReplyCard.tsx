@@ -555,12 +555,12 @@ const TopicReplyCard = withStyles(styles)(
               <Button
                 onClick={() => this.setState({ replyBoxOpen: false })}
                 color="secondary"
-                variant="outlined"
+                variant="contained"
                 style={{ marginRight: "5px" }}
               >
                 Cancel
               </Button>
-              <Button color="primary" variant="outlined" onClick={() => this.sendReply()}>
+              <Button color="primary" variant="contained" onClick={() => this.sendReply()}>
                 Send
               </Button>
               <br />
