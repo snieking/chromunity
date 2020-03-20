@@ -248,7 +248,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function renderChatCreationActions() {
     return (
-      <div style={{ textAlign: "center", marginTop: "15px" }}>
+      <div style={{ textAlign: "center", marginTop: "15px", marginLeft: "10px", marginRight: "10px" }}>
         <Button type="button" color="secondary" variant="contained" onClick={() => props.createNewChat(props.user)}>
           New Chat
         </Button>
@@ -383,10 +383,11 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function leaveChat() {
     const chat = props.chats.find(value => value.id !== props.activeChat.id);
+
+    props.leaveChat(props.user);
     props.openChat(chat, props.user);
 
-    setValues({ ...values, showLeaveChatDialog: false, selectedChatId: chat.id });
-    props.leaveChat(props.user);
+    setValues({ ...values, showLeaveChatDialog: false, selectedChatId: chat != null ? chat.id : "" });
   }
 
   const suggestions = () => {

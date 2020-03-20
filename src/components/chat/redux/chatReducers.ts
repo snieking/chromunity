@@ -50,11 +50,6 @@ export const chatReducer: Reducer<ChatState, ChatActions> = (state = initialChat
         activeChatParticipants: action.chatParticipants
       }
     }
-    case ChatActionTypes.OPEN_CHAT: {
-      return {
-        ...state
-      }
-    }
     case ChatActionTypes.LEAVE_CHAT: {
       return {
         ...state,

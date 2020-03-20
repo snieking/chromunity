@@ -91,6 +91,10 @@ export const chatPageStyles = makeStyles((theme: Theme) =>
       borderBottomColor: theme.palette.primary.main,
       borderBottom: "outset 1px"
     },
+    editorWrapper: {
+      position: "relative",
+      width: "70%"
+    },
     messageWrapper: {
       paddingTop: "20px",
       bottom: 0,
@@ -98,7 +102,7 @@ export const chatPageStyles = makeStyles((theme: Theme) =>
     },
     submitMessage: {
       top: "15px",
-      marginLeft: "3%",
+      marginLeft: "1%",
       width: "10%",
       display: "inline"
     },
@@ -145,10 +149,6 @@ export const chatPageStyles = makeStyles((theme: Theme) =>
       bottom: 0,
       height: "100%",
       overflow: "visible"
-    },
-    editorWrapper: {
-      position: "relative",
-      width: "80%"
     }
   })
 );

@@ -174,7 +174,6 @@ export function* addUserToChatSaga(action: AddUserToChatAction) {
 export function* leaveChatSaga(action: LeaveChatAction) {
   logger.silly("[SAGA - STARTED]: Leave chat");
   const chat = yield select(getActiveChat);
-
   yield leaveChat(action.user, chat.id);
   yield put(loadUserChats(action.user, true));
   logger.silly("[SAGA - FINISHED]: Leave chat");
