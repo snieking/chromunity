@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "es6",
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -15,8 +16,5 @@
     "noEmit": true,
     "jsx": "preserve"
   },
-  "include": [
-    "src",
-    "typings-custom/*.ts"
-  ]
+  "include": ["src", "typings-custom/*.ts"]
 }

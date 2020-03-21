@@ -18,6 +18,8 @@ before_script:
 
 cache:
   pip: true
+  directories:
+    - node_modules
 
 install:
   - sudo pip install awscli

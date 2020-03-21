@@ -1,16 +1,15 @@
-// @ts-ignore
 module.exports = {
   blockchain: {
-    nodeApiUrl: "http://localhost:7740",
-    rid: process.env.REACT_APP_BRID
+    nodeApiUrl: "https://cg7tt9fhch.execute-api.eu-central-1.amazonaws.com/dev/",
+    rid: "58771843CE58B890CF6FDE8C57F3F564DF741F0C05C5444D24D3A48BB3674497"
   },
   vault: {
     url: "https://dev.vault.chromia-development.com",
-    callbackBaseUrl: "http://localhost:3000"
+    callbackBaseUrl: "https://dev.chromunity.com"
   },
   sentry: {
     dsn: "https://9fcd3766732c4665b89f08e2d58b286f@sentry.io/1870353",
-    environment: "local"
+    environment: "dev"
   },
   matomo: {
     url: "https://matomo.chromia.dev/",
@@ -20,7 +19,7 @@ module.exports = {
     phpFilename: "js/"
   },
   topBar: {
-    message: "Local Environment"
+    message: "Development Environment"
   },
   test: true,
   logLevel: "debug"

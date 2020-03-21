@@ -1,6 +1,6 @@
 {
   "name": "chromunity",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.9.7",
@@ -31,7 +31,7 @@
     "react-piwik": "^1.8.0",
     "react-redux": "^7.2.0",
     "react-router-dom": "^5.1.2",
-    "react-scripts": "3.4.0",
+    "react-scripts": "3.4.1",
     "react-select": "^3.0.8",
     "reactour": "^1.16.3",
     "redux": "^4.0.5",
@@ -51,8 +51,7 @@
     "build-local": "react-scripts build",
     "test": "react-scripts test",
     "test-bc": "jest --setupFiles dotenv/config",
-    "eject": "react-scripts eject",
-    "coveralls": "jest --coverage --setupFiles dotenv/config && cat ./coverage/lcov.info | coveralls"
+    "eject": "react-scripts eject"
   },
   "browserslist": {
     "production": [
@@ -71,12 +70,9 @@
     "@types/jest": "^25.1.4",
     "@types/react-redux": "^7.1.7",
     "@types/react-router-dom": "^5.1.3",
-    "@types/react-transition-group": "^4.2.4",
     "@types/scrypt-async": "^1.3.0",
     "@types/secp256k1": "3.5.3",
-    "coveralls": "^3.0.9",
     "dotenv": "^8.2.0",
-    "prettier": "^1.19.1",
     "redux-logger": "^3.0.6",
     "ts-jest": "^25.2.1"
   }
