@@ -8,8 +8,8 @@ module.exports = {
     callbackBaseUrl: "https://testnet.chromunity.com"
   },
   sentry: {
-    dsn: "https://9fcd3766732c4665b89f08e2d58b286f@sentry.io/1870353",
-    environment: "testnet"
+    dsn: "https://a45f0d3d7c5d42819cabb34e32f56998@sentry.io/1851343",
+    environment: "TestNet"
   },
   matomo: {
     url: "https://matomo.chromia.dev/",
