@@ -20,7 +20,7 @@ const PreviewLinks: React.FunctionComponent<Props> = props => {
 
   function getLastLink(): string {
     const urls = props.text.match(REGEX);
-    return urls.length > 0 ? urls[urls.length - 1] : null;
+    return urls && urls.length > 0 ? urls[urls.length - 1] : null;
   }
 
   function renderTinyLink(url: string) {
