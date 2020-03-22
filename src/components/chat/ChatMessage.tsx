@@ -33,7 +33,7 @@ const ChatMessage: React.FunctionComponent<Props> = (props: Props) => {
         primary={
           <div>
             <MarkdownRenderer text={props.message.msg}/>
-            <div className={classes.linkPreviewWrapper}><PreviewLinks text={props.message.msg} size={"small"}/></div>
+            <div className={classes.linkPreviewWrapper}><PreviewLinks text={props.message.msg}/></div>
           </div>}
         secondary={<Typography className={classes.timestamp}>{timeAgoReadable(props.message.timestamp)}</Typography>}
         classes={{ primary: classes.message }}

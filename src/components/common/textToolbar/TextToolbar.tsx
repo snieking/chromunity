@@ -4,7 +4,6 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import AddImageButton from "./AddImageButton";
 import AddEmojiButton from "./AddEmojiButton";
 import AddCodeBlockButton from "./AddCodeBlockButton";
-import AddVideoButton from "./AddVideoButton";
 
 interface Props {
   addText: Function;
@@ -32,9 +31,6 @@ const TextToolbar: React.FunctionComponent<Props> = (props: Props) => {
       </Grid>
       <Grid item>
         <AddImageButton addText={props.addText} />
-      </Grid>
-      <Grid item>
-        <AddVideoButton addText={props.addText} />
       </Grid>
       <Grid item>
         <AddCodeBlockButton addText={props.addText} />

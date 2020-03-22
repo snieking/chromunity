@@ -238,7 +238,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
             {topic.title}
           </Typography>
           <MarkdownRenderer text={topic.message} />
-          <PreviewLinks text={topic ? topic.message : null} size={"small"}/>
+          <PreviewLinks text={topic ? topic.message : null} />
         </div>
       </CardContent>
     );

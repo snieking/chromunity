@@ -349,7 +349,7 @@ const TopicReplyCard = withStyles(styles)(
             <div className={this.props.classes.content}>
               <Timestamp milliseconds={this.props.reply.timestamp} />
               <MarkdownRenderer text={this.props.reply.message} />
-              <PreviewLinks text={this.props.reply ? this.props.reply.message : null} size={"small"}/>
+              <PreviewLinks text={this.props.reply ? this.props.reply.message : null} />
             </div>
           </CardContent>
           {this.bottomBar()}
