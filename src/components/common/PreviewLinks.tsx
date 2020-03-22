@@ -13,7 +13,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const REGEX = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gi;
+const REGEX = /https?:\/\/(?![^" ]*(?:jpg|jpeg|png|gif))[^" ]+/gi;
 
 const PreviewLinks: React.FunctionComponent<Props> = props => {
   const classes = useStyles();
