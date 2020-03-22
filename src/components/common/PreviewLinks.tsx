@@ -40,7 +40,6 @@ const PreviewLinks: React.FunctionComponent<Props> = props => {
   function isValidYouTubeUrl(url: string) {
     if (url !== undefined || url !== "") {
       const match = url.match(YOUTUBE_ID_REGEX);
-      console.log("Matches: ", match);
       return match && match[2].length >= 11;
     }
 
