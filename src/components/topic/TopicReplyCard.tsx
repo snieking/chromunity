@@ -54,6 +54,7 @@ import { shouldBeFiltered, toLowerCase, uniqueId } from "../../util/util";
 import TextToolbar from "../common/textToolbar/TextToolbar";
 import CardActions from "@material-ui/core/CardActions";
 import Divider from "@material-ui/core/Divider";
+import PreviewLinks from "../common/PreviewLinks";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -348,6 +349,7 @@ const TopicReplyCard = withStyles(styles)(
             <div className={this.props.classes.content}>
               <Timestamp milliseconds={this.props.reply.timestamp} />
               <MarkdownRenderer text={this.props.reply.message} />
+              <PreviewLinks text={this.props.reply ? this.props.reply.message : null} size={"small"}/>
             </div>
           </CardContent>
           {this.bottomBar()}

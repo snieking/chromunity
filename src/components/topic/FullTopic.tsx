@@ -66,6 +66,8 @@ import { step } from "../common/TutorialStep";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
+import PreviewLinks from "../common/PreviewLinks";
+import PageMeta from "../common/PageMeta";
 
 interface MatchParams {
   id: string;
@@ -215,6 +217,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     ) {
       return (
         <div className={filtered ? classes.removed : ""}>
+          <PageMeta title={topic ? topic.title : null} description={topic ? topic.message : null} />
           <Card raised={true} key={topic.id}>
             {renderCardContent()}
             {renderCardActions()}
@@ -235,6 +238,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
             {topic.title}
           </Typography>
           <MarkdownRenderer text={topic.message} />
+          <PreviewLinks text={topic ? topic.message : null} size={"small"}/>
         </div>
       </CardContent>
     );

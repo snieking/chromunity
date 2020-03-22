@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 module.exports = {
   blockchain: {
     nodeApiUrl: "https://cg7tt9fhch.execute-api.eu-central-1.amazonaws.com/dev/",
@@ -5,7 +6,7 @@ module.exports = {
   },
   vault: {
     url: "https://dev.vault.chromia-development.com",
-    callbackBaseUrl: "https://dev.chromunity.com"
+    callbackBaseUrl: "http://localhost:3000"
   },
   sentry: {
     dsn: "https://a45f0d3d7c5d42819cabb34e32f56998@sentry.io/1851343",
