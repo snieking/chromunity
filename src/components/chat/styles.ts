@@ -38,6 +38,9 @@ export const chatMessageStyles = makeStyles((theme: Theme) =>
       fontSize: "11px",
       position: "relative",
       bottom: "5px"
+    },
+    linkPreviewWrapper: {
+      marginRight: "15px"
     }
   })
 );

@@ -10,6 +10,7 @@ import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import { chatMessageStyles } from "./styles";
 import MarkdownRenderer from "../common/MarkdownRenderer";
+import PreviewLinks from "../common/PreviewLinks";
 
 interface Props {
   message: ChatMessageDecrypted;
@@ -29,7 +30,11 @@ const ChatMessage: React.FunctionComponent<Props> = (props: Props) => {
     <ListItem style={{ marginBottom: "0px"}}>
       <ListItemText
         disableTypography
-        primary={<MarkdownRenderer text={props.message.msg}/>}
+        primary={
+          <div>
+            <MarkdownRenderer text={props.message.msg}/>
+            <div className={classes.linkPreviewWrapper}><PreviewLinks text={props.message.msg} size={"small"}/></div>
+          </div>}
         secondary={<Typography className={classes.timestamp}>{timeAgoReadable(props.message.timestamp)}</Typography>}
         classes={{ primary: classes.message }}
       />
