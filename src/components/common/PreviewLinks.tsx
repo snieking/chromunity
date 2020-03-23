@@ -1,7 +1,7 @@
 import React from "react";
 import { ReactTinyLink } from "react-tiny-link";
+import * as ResponsiveEmbed from "react-responsive-embed";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import { uniqueId } from "../../util/util";
 
 interface Props {
   text: string;
@@ -12,17 +12,7 @@ const useStyles = makeStyles(theme => ({
     marginBottom: "5px"
   },
   iframeWrapper: {
-    position: "relative",
-    paddingBottom: "56.25%" /* 16:9 */,
-    paddingTop: 25,
-    height: 0
-  },
-  iframe: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "90%",
-    height: "90%"
+    width: "60%"
   }
 }));
 
@@ -56,12 +46,7 @@ const PreviewLinks: React.FunctionComponent<Props> = props => {
       const id = parseYouTubeVideoId(url);
       return (
         <div className={classes.iframeWrapper}>
-          <iframe className={classes.iframe}
-                  title={uniqueId()}
-                  src={"https://www.youtube.com/embed/" + id}
-                  frameBorder="0"
-                  allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen />
+        <ResponsiveEmbed src={"https://www.youtube.com/embed/" + id} ratio="16:9" allowfullscreen />
         </div>
       )
     } else {

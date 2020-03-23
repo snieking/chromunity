@@ -14,8 +14,8 @@ const useStyles = makeStyles(theme => ({
       wordBreak: "break-all"
     },
     '& img': {
-      maxWidth: "95%",
-      maxHeight: "95%",
+      maxWidth: "70%",
+      maxHeight: "70%",
       [theme.breakpoints.down("sm")]: {
         maxWidth: "80%",
         maxHeight: "80%"
