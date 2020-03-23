@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import {
-  Chip,
   Container,
   createStyles,
   LinearProgress,
@@ -19,7 +18,6 @@ import ProfileCard from "../user/ProfileCard";
 import TopicOverviewCard from "../topic/TopicOverviewCard";
 import LoadMoreButton from "../buttons/LoadMoreButton";
 import TopicReplyOverviewCard from "../topic/TopicReplyOverviewCard";
-import { stringToHexColor } from "../../util/util";
 import { connect } from "react-redux";
 import { ApplicationState } from "../../store";
 import {
@@ -28,6 +26,7 @@ import {
   loadUserReplies,
   loadUserFollowedChannels
 } from "../user/redux/userPageActions";
+import CustomChip from "../common/CustomChip";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -138,17 +137,7 @@ const UserWall = withStyles(styles)(
               {this.props.userFollowedChannels.map(channel => {
                 return (
                   <Link key={channel} to={"/c/" + channel.replace("#", "")}>
-                    <Chip
-                      size="small"
-                      label={"#" + channel}
-                      style={{
-                        marginLeft: "1px",
-                        marginRight: "1px",
-                        marginBottom: "3px",
-                        backgroundColor: stringToHexColor(channel),
-                        cursor: "pointer"
-                      }}
-                    />
+                    <CustomChip tag={channel}/>
                   </Link>
                 );
               })}

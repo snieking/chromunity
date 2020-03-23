@@ -1,9 +1,9 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
 
-import { Card, CardContent, Chip } from "@material-ui/core";
+import { Card, CardContent } from "@material-ui/core";
 import { getTrendingChannels } from "../../blockchain/ChannelService";
-import { stringToHexColor } from "../../util/util";
+import CustomChip from "../common/CustomChip";
 
 type State = {
   channels: string[];
@@ -26,17 +26,7 @@ export class TrendingChannels extends React.Component<{}, State> {
           {this.state.channels.map((channel: string) => {
             return (
               <Link key={channel} to={"/c/" + channel}>
-                <Chip
-                  size="small"
-                  label={"#" + channel}
-                  style={{
-                    marginLeft: "1px",
-                    marginRight: "1px",
-                    marginTop: "3px",
-                    backgroundColor: stringToHexColor(channel),
-                    cursor: "pointer"
-                  }}
-                />
+                <CustomChip tag={channel}/>
               </Link>
             );
           })}

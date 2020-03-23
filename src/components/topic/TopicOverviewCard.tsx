@@ -6,14 +6,13 @@ import {
   Card,
   CardActionArea,
   CardContent,
-  Chip,
   createStyles,
   Theme,
   Typography,
   withStyles,
   WithStyles
 } from "@material-ui/core";
-import { prepareUrlPath, shouldBeFiltered, stringToHexColor, toLowerCase } from "../../util/util";
+import { prepareUrlPath, shouldBeFiltered, toLowerCase } from "../../util/util";
 import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { StarBorder, StarRate } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
@@ -25,6 +24,7 @@ import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import Timestamp from "../common/Timestamp";
 import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
+import CustomChip from "../common/CustomChip";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -198,17 +198,7 @@ const TopicOverviewCard = withStyles(styles)(
             {this.state.channels.map(tag => {
               return (
                 <Link key={this.props.topic.id + ":" + tag} to={"/c/" + tag.replace("#", "")}>
-                  <Chip
-                    size="small"
-                    label={"#" + tag}
-                    style={{
-                      marginLeft: "1px",
-                      marginRight: "1px",
-                      marginBottom: "3px",
-                      backgroundColor: stringToHexColor(tag),
-                      cursor: "pointer"
-                    }}
-                  />
+                  <CustomChip tag={tag}/>
                 </Link>
               );
             })}

@@ -107,6 +107,19 @@ export function stringToHexColor(str: string): string {
   return "#" + intToARGB(hashCode(str));
 }
 
+export function isBright(hex: string): boolean {
+  const color = hex.replace("#", "");
+  const rgb = parseInt(color, 16);
+
+  const r = (rgb >> 16) & 0xff;  // extract red
+  const g = (rgb >>  8) & 0xff;  // extract green
+  const b = (rgb >>  0) & 0xff;  // extract blue
+
+  const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+  return luma > 140;
+}
+
 function hashCode(str: string): number {
   var hash = 0;
   for (var i = 0; i < str.length; i++) {
