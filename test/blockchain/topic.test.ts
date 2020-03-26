@@ -31,7 +31,7 @@ import {
 import { CREATE_LOGGED_IN_USER } from "../users";
 import { CREATE_RANDOM_TOPIC } from "../topics";
 
-jest.setTimeout(30000);
+jest.setTimeout(60000);
 
 describe("topic tests", () => {
   const channel: string = "TopicTesting";
@@ -55,9 +55,8 @@ describe("topic tests", () => {
 
     await createTopic(user, channel, "First topic", "Sweet topic you got there!");
     await createTopic(user2, channel, "Second topic", "Not as good as the first one... #superior");
-    const topics: Topic[] = await getTopicsByUserPriorToTimestamp(userLoggedIn.name, Date.now(), 10);
-    expect(topics.length).toBeGreaterThanOrEqual(2);
-    topic = topics[0];
+    const topics: Topic[] = await getTopicsByUserPriorToTimestamp(user.name, Date.now(), 10);
+    expect(topics.length).toBeGreaterThanOrEqual(1);
   });
 
   it("create many topics", async () => {
@@ -77,17 +76,16 @@ describe("topic tests", () => {
     expect(replies.length).toBe(1);
     const reply: TopicReply = replies[0];
 
-    await giveReplyStarRating(userLoggedIn, reply.id);
+    await giveReplyStarRating(user2, reply.id);
     const upvotedBy: string[] = await getReplyStarRaters(reply.id);
     expect(upvotedBy.length).toBe(1);
 
-    await removeReplyStarRating(userLoggedIn, reply.id);
+    const replyStars: number = await countReplyStarRatingForUser(user.name);
+    expect(replyStars).toBeGreaterThanOrEqual(1);
+
+    await removeReplyStarRating(user2, reply.id);
     const upvotedBy2: string[] = await getReplyStarRaters(reply.id);
     expect(upvotedBy2.length).toBe(0);
-
-    await giveReplyStarRating(userLoggedIn, reply.id);
-    const upvotedBy3: string[] = await getReplyStarRaters(reply.id);
-    expect(upvotedBy3.length).toBe(1);
 
     await createTopicSubReply(user2, topic.id, reply.id, "Are you certain?", userLoggedIn.name);
     const subReplies: TopicReply[] = await getTopicSubReplies(reply.id);
@@ -112,8 +110,12 @@ describe("topic tests", () => {
 
   it("star rate topic", async () => {
     await giveTopicStarRating(userLoggedIn, topic.id);
+
     const usersWhoRated: string[] = await getTopicStarRaters(topic.id);
     expect(usersWhoRated.length).toBe(1);
+
+    const topicStars: number = await countTopicStarRatingForUser(userLoggedIn.name);
+    expect(topicStars).toBeGreaterThanOrEqual(1);
   });
 
   it("remove star rate on topic", async () => {
@@ -158,12 +160,14 @@ describe("topic tests", () => {
 
   it("get topic by id", async () => {
     const fetchedTopic: Topic = await getTopicById(topic.id);
-    await giveTopicStarRating(userLoggedIn, fetchedTopic.id);
     expect(topic.message).toBe(fetchedTopic.message);
   });
 
   it("get replies by user", async () => {
-    const replies: TopicReply[] = await getTopicRepliesByUserPriorToTimestamp(userLoggedIn.name, Date.now(), 10);
+    const user = await CREATE_LOGGED_IN_USER();
+    await createTopicReply(user, topic.id, "Hello!");
+
+    const replies: TopicReply[] = await getTopicRepliesByUserPriorToTimestamp(user.name, Date.now(), 10);
     expect(replies.length).toBeGreaterThanOrEqual(1);
   });
 
@@ -176,7 +180,7 @@ describe("topic tests", () => {
     expect(topics.length).toBeGreaterThan(0);
 
     await modifyTopic(
-      userLoggedIn,
+      user,
       topics[0].id,
       "Post your rell questions here to receive help from the awesome community."
     );
@@ -192,8 +196,7 @@ describe("topic tests", () => {
     expect(topics.length).toBe(1);
 
     let topic: Topic = topics[0];
-
-    await deleteTopic(user, topics[0].id);
+    await deleteTopic(user, topic.id);
 
     topics = await getTopicsByUserPriorToTimestamp(user.name, Date.now(), 10);
     expect(topics.length).toBe(0);
@@ -218,14 +221,6 @@ describe("topic tests", () => {
 
     expect(countOfTopics).toBeGreaterThan(0);
     expect(countOfReplies).toBeGreaterThan(0);
-  });
-
-  it("count topic and reply stars", async () => {
-    const topicStars: number = await countTopicStarRatingForUser(userLoggedIn.name);
-    const replyStars: number = await countReplyStarRatingForUser(userLoggedIn.name);
-
-    expect(topicStars).toBeGreaterThanOrEqual(1);
-    expect(replyStars).toBeGreaterThanOrEqual(1);
   });
 
   it("get all topics by popularity", async () => {

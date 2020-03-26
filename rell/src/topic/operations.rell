@@ -1,6 +1,8 @@
 import channel;
 import topic.rating;
 import user;
+import topic.subscription;
+import topic.poll;
 
 operation create_topic(id: text, descriptor_id: byte_array, username: text, channel_key: name, channel_name: name, title: name, message: text) {
     val author = user.get_and_charge_verified_user(username, descriptor_id);
@@ -36,6 +38,16 @@ operation delete_topic(id: text, descriptor_id: byte_array, username: text) {
 
     val topic = topic@{ .id == id, .author == author };
     require_mutable(topic.timestamp, op_context.last_block_time, "Delete topic");
+    delete channel.channel@{ topic };
+    delete rating.tmp_topic_rating@{ topic };
+    delete subscription.subscription@?{ topic };
+    
+    val opt_poll = poll.poll@?{ topic };
+    if (opt_poll != null) {
+    	delete poll.poll_option@*{ .poll == opt_poll };
+    	delete poll.poll_vote@*{ .poll == opt_poll };
+    }
+    
 	delete topic;
 }
 
