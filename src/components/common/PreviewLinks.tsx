@@ -50,7 +50,14 @@ const PreviewLinks: React.FunctionComponent<Props> = props => {
         </div>
       )
     } else {
-      return <ReactTinyLink cardSize={"small"} showGraphic={true} maxLine={2} minLine={1} url={url} />;
+      return <ReactTinyLink
+        cardSize={"small"}
+        showGraphic={true}
+        maxLine={2}
+        minLine={1}
+        url={url}
+        proxyUrl={"https://cors-anywhere.herokuapp.com"}
+      />;
     }
   }
 
