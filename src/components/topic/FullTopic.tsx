@@ -68,6 +68,7 @@ import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import PreviewLinks from "../common/PreviewLinks";
 import PageMeta from "../common/PageMeta";
+import logger from "../../util/logger";
 
 interface MatchParams {
   id: string;
@@ -208,13 +209,14 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function renderTopic() {
+    logger.info(`Distrusted users: ${props.distrustedUsers}`);
     const filtered = shouldBeFiltered(topic.moderated_by, props.distrustedUsers);
-    if (
-      !props.distrustedUsers.includes(topic.author) &&
-      ((props.user != null && toLowerCase(topic.author) === toLowerCase(props.user.name)) ||
-        (props.user != null && props.representatives.includes(toLowerCase(props.user.name))) ||
-        !filtered)
-    ) {
+    const authorIsMe = props.user != null && toLowerCase(topic.author) === toLowerCase(props.user.name);
+    const iAmRepresentative = props.user != null && props.representatives.includes(toLowerCase(props.user.name));
+
+    logger.info(`Filtered ${filtered}, authorIsMe ${authorIsMe}, iAmRepresentative ${iAmRepresentative}`);
+
+    if (authorIsMe || iAmRepresentative || !filtered) {
       return (
         <div className={filtered ? classes.removed : ""}>
           <PageMeta title={topic ? topic.title : null} description={topic ? topic.message : null} />
@@ -443,7 +445,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     if (isRepresentative() && !hasReportedId(REMOVE_TOPIC_OP_ID + ":" + topic.id)) {
       return (
         <div style={{ display: "inline-block" }}>
-          <IconButton aria-label="Remove topic" onClick={() => setRemoveTopicDialogOpen(false)}>
+          <IconButton aria-label="Remove topic" onClick={() => setRemoveTopicDialogOpen(true)}>
             <Tooltip title="Remove topic">
               <Delete className={classes.iconRed} />
             </Tooltip>

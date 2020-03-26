@@ -46,7 +46,7 @@ const PreviewLinks: React.FunctionComponent<Props> = props => {
       const id = parseYouTubeVideoId(url);
       return (
         <div className={classes.iframeWrapper}>
-        <ResponsiveEmbed src={"https://www.youtube.com/embed/" + id} ratio="16:9" allowfullscreen />
+        <ResponsiveEmbed src={"https://www.youtube.com/embed/" + id} ratio="16:9" allowFullScreen />
         </div>
       )
     } else {

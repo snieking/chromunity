@@ -50,8 +50,11 @@ describe("topic tests", () => {
   });
 
   it("create topic", async () => {
-    await createTopic(userLoggedIn, channel, "First topic", "Sweet topic you got there!");
-    await createTopic(userLoggedIn, channel, "Second topic", "Not as good as the first one... #superior");
+    const user = await CREATE_LOGGED_IN_USER();
+    const user2 = await CREATE_LOGGED_IN_USER();
+
+    await createTopic(user, channel, "First topic", "Sweet topic you got there!");
+    await createTopic(user2, channel, "Second topic", "Not as good as the first one... #superior");
     const topics: Topic[] = await getTopicsByUserPriorToTimestamp(userLoggedIn.name, Date.now(), 10);
     expect(topics.length).toBeGreaterThanOrEqual(2);
     topic = topics[0];
@@ -65,7 +68,10 @@ describe("topic tests", () => {
   });
 
   it("reply to topic and reply to a reply", async () => {
-    await createTopicReply(userLoggedIn, topic.id, "I completely agree!");
+    const user = await CREATE_LOGGED_IN_USER();
+    const user2 = await CREATE_LOGGED_IN_USER();
+
+    await createTopicReply(user, topic.id, "I completely agree!");
 
     const replies: TopicReply[] = await getTopicRepliesPriorToTimestamp(topic.id, Date.now(), 10);
     expect(replies.length).toBe(1);
@@ -83,24 +89,25 @@ describe("topic tests", () => {
     const upvotedBy3: string[] = await getReplyStarRaters(reply.id);
     expect(upvotedBy3.length).toBe(1);
 
-    await createTopicSubReply(secondLoggedInUser, topic.id, reply.id, "Are you certain?", userLoggedIn.name);
+    await createTopicSubReply(user2, topic.id, reply.id, "Are you certain?", userLoggedIn.name);
     const subReplies: TopicReply[] = await getTopicSubReplies(reply.id);
     expect(subReplies.length).toBe(1);
 
     const subReply: TopicReply = subReplies[0];
-    await createTopicSubReply(userLoggedIn, topic.id, subReply.id, "I am always certain", secondLoggedInUser.name);
+    await createTopicSubReply(user2, topic.id, subReply.id, "I am always certain", secondLoggedInUser.name);
 
     const subSubReplies: TopicReply[] = await getTopicSubReplies(subReply.id);
     expect(subSubReplies.length).toBe(1);
   });
 
   it("reply to topic and update reply", async () => {
-    await createTopicReply(userLoggedIn, topic.id, "This message should be modified!");
+    const user = await CREATE_LOGGED_IN_USER();
+    await createTopicReply(user, topic.id, "This message should be modified!");
     const replies: TopicReply[] = await getTopicRepliesPriorToTimestamp(topic.id, Date.now(), 10);
     expect(replies.length).toBeGreaterThanOrEqual(1);
     const reply: TopicReply = replies[0];
 
-    await modifyReply(userLoggedIn, reply.id, "Tis post has been modified");
+    await modifyReply(user, reply.id, "This post has been modified");
   });
 
   it("star rate topic", async () => {
@@ -132,23 +139,26 @@ describe("topic tests", () => {
   });
 
   it("get topic after timestamp", async () => {
+    const user = await CREATE_LOGGED_IN_USER();
     const title: string = "It is fun to program in Rell";
     const message: string = "It is fun to program in #Rell. It is a great language to interact with a #blockchain.";
-    await createTopic(userLoggedIn, channel, title, message);
+    await createTopic(user, channel, title, message);
     const topics: Topic[] = await getTopicsAfterTimestamp(Date.now() - 30000, 10);
     expect(topics.length).toBeGreaterThan(0);
   });
 
   it("get topic prior to timestamp", async () => {
+    const user = await CREATE_LOGGED_IN_USER();
     const title: string = "Blockchain has never been easier";
     const message: string = "This is a fact.";
-    await createTopic(userLoggedIn, channel, title, message);
+    await createTopic(user, channel, title, message);
     const topics: Topic[] = await getTopicsPriorToTimestamp(Date.now(), 10);
     expect(topics.length).toBeGreaterThan(0);
   });
 
   it("get topic by id", async () => {
     const fetchedTopic: Topic = await getTopicById(topic.id);
+    await giveTopicStarRating(userLoggedIn, fetchedTopic.id);
     expect(topic.message).toBe(fetchedTopic.message);
   });
 
@@ -158,10 +168,11 @@ describe("topic tests", () => {
   });
 
   it("create and mofiy topic", async () => {
+    const user = await CREATE_LOGGED_IN_USER();
     const title: string = "Rell Assistance";
     const message: string = "Post your rell questions here to receive help from the community.";
-    await createTopic(userLoggedIn, "rell", title, message);
-    const topics: Topic[] = await getTopicsByUserPriorToTimestamp(userLoggedIn.name, Date.now(), 10);
+    await createTopic(user, "rell", title, message);
+    const topics: Topic[] = await getTopicsByUserPriorToTimestamp(user.name, Date.now(), 10);
     expect(topics.length).toBeGreaterThan(0);
 
     await modifyTopic(
@@ -189,18 +200,21 @@ describe("topic tests", () => {
   });
 
   it("count posts", async () => {
-    await createTopic(userLoggedIn, "rell", "Why Rell?", "Could someone clarify for me some benefits of using Rell?");
-    const topics: Topic[] = await getTopicsByUserPriorToTimestamp(userLoggedIn.name, Date.now(), 10);
+    const user = await CREATE_LOGGED_IN_USER();
+    const user2 = await CREATE_LOGGED_IN_USER();
+
+    await createTopic(user, "rell", "Why Rell?", "Could someone clarify for me some benefits of using Rell?");
+    const topics: Topic[] = await getTopicsByUserPriorToTimestamp(user.name, Date.now(), 10);
     expect(topics.length).toBeGreaterThan(0);
 
     await createTopicReply(
-      secondLoggedInUser,
+      user2,
       topics[0].id,
       "Rell is very developer friendly as it a language which is very familiar to SQL."
     );
 
-    const countOfTopics: number = await countTopicsByUser(userLoggedIn.name);
-    const countOfReplies: number = await countRepliesByUser(secondLoggedInUser.name);
+    const countOfTopics: number = await countTopicsByUser(user.name);
+    const countOfReplies: number = await countRepliesByUser(user2.name);
 
     expect(countOfTopics).toBeGreaterThan(0);
     expect(countOfReplies).toBeGreaterThan(0);
@@ -210,8 +224,8 @@ describe("topic tests", () => {
     const topicStars: number = await countTopicStarRatingForUser(userLoggedIn.name);
     const replyStars: number = await countReplyStarRatingForUser(userLoggedIn.name);
 
-    expect(topicStars).toBe(1);
-    expect(replyStars).toBe(1);
+    expect(topicStars).toBeGreaterThanOrEqual(1);
+    expect(replyStars).toBeGreaterThanOrEqual(1);
   });
 
   it("get all topics by popularity", async () => {

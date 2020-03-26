@@ -29,16 +29,6 @@ describe("Representatives sagas tests", () => {
     expect(dispatchedActions.length).toBe(0);
   });
 
-  it("get unhandled topics", async () => {
-    const dispatchedActions: GovernmentActions[] = [];
-    const fakeStore = createFakeStore(dispatchedActions, {
-      unhandledReportsLastUpdated: 0
-    });
-
-    await runSaga(fakeStore, retrieveReports).toPromise();
-    expect(dispatchedActions.length).toBe(1);
-  });
-
   it("unhandled topics cache not expired", async () => {
     const dispatchedActions: GovernmentActions[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {

@@ -194,8 +194,6 @@ export const shouldBeFiltered = (moderators: string[], distrusted: string[]) => 
   return (
     moderators != null &&
     distrusted != null &&
-    moderators.length > 0 &&
-    distrusted.length > 0 &&
     moderators.filter(n => !distrusted.includes(n)).length > 0
   );
 };

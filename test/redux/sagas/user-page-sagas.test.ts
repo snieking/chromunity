@@ -46,7 +46,8 @@ describe("User page saga tests", () => {
         message: "message",
         timestamp: timestamp,
         last_modified: timestamp,
-        latest_poster: "author"
+        latest_poster: "author",
+        moderated_by: []
       }
     ];
   };
@@ -59,7 +60,8 @@ describe("User page saga tests", () => {
         author: "author",
         message: "message",
         timestamp: timestamp,
-        isSubReply: false
+        isSubReply: false,
+        moderated_by: []
       }
     ];
   };

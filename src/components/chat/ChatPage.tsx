@@ -159,11 +159,14 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   }, [props.activeChatMessages, newMessages]);
 
   useInterval(() => {
-    updateChats();
+    if (props.successfullyAuthorized) {
+      updateChats();
+    }
   }, 3000);
 
   useEffect(() => {
     if (props.user) {
+      console.log("Successfully authorized: ", props.successfullyAuthorized);
       if (props.successfullyAuthorized && props.activeChat == null) {
         props.loadUserChats(props.user);
       } else if (props.successfullyAuthorized && props.activeChat != null) {

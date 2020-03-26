@@ -53,7 +53,8 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
         message: "message",
         timestamp: timestamp,
         last_modified: timestamp,
-        latest_poster: "author"
+        latest_poster: "author",
+        moderated_by: []
       }
     ];
   };

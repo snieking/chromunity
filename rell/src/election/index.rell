@@ -38,10 +38,11 @@ function is_eligible_to_vote(user.user): boolean {
 		return true;
 	}
 	
-	val current_election_start = election_block_details@{ 
-		.representative_election.id == current_election_id
+	val current_election_start = (election_block_details, block)@{ 
+		election_block_details.representative_election.id == current_election_id,
+		election_block_details.started_height == block.block_height
 	} ( 
-		.started_height
+		block.timestamp
 	);
 	
 	if (user.registered > current_election_start) {
@@ -49,11 +50,12 @@ function is_eligible_to_vote(user.user): boolean {
 		return false; 
 	}
 	
-	val previous_election_completed = (representative_election, election_block_details)@?{
+	val previous_election_completed = (representative_election, election_block_details, block)@?{
 		representative_election == election_block_details.representative_election,
-		representative_election.completed == true
+		representative_election.completed == true,
+		block.block_height == election_block_details.finished_height
 	} ( 
-		election_block_details.finished_height, 
+		block.timestamp,
 		@omit @sort_desc representative_election.timestamp
 	) limit 1;
 	
@@ -78,11 +80,11 @@ function is_eligible_to_vote(user.user): boolean {
 }
 
 function governing_period_in_blocks(): integer {
-	return 2160; //75000;
+	return 75000;
 }
 
 function election_duration_in_blocks(): integer {
-	return 2160;//25000;
+	return 25000;
 }
 
 function get_current_election_id(): integer? {
