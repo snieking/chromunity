@@ -5,7 +5,6 @@ import { Topic, TopicReply, ChromunityUser, PollSpecification, PollData } from "
 import { sendNotifications } from "./NotificationService";
 import { op } from "ft3-lib";
 import { getUsers } from "../util/text-parsing";
-import logger from "../util/logger";
 
 const topicsCache = BoomerangCache.create("topic-bucket", {
   storage: "session",
