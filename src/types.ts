@@ -82,3 +82,18 @@ export interface ChatMessageDecrypted {
   timestamp: number;
   msg: string;
 }
+
+export interface PollSpecification {
+  question: string;
+  options: Array<string>;
+}
+
+export interface PollData {
+  question: string;
+  options: Array<PollOption>;
+}
+
+export interface PollOption {
+  option: string;
+  votes: number;
+}

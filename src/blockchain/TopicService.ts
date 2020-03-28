@@ -1,10 +1,11 @@
 import { BLOCKCHAIN, executeQuery, executeOperations } from "./Postchain";
 import { toLowerCase, uniqueId } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
-import { Topic, TopicReply, ChromunityUser } from "../types";
+import { Topic, TopicReply, ChromunityUser, PollSpecification, PollData } from "../types";
 import { sendNotifications } from "./NotificationService";
 import { op } from "ft3-lib";
 import { getUsers } from "../util/text-parsing";
+import logger from "../util/logger";
 
 const topicsCache = BoomerangCache.create("topic-bucket", {
   storage: "session",
@@ -21,7 +22,13 @@ export const removeTopicIdFromCache = (id: string) => topicsCache.remove(id);
 const sendUserMentionNotifications = (user: ChromunityUser, topicId: string, message: string) =>
   sendNotifications(user, "@" + user.name + " mentioned you in /t/" + topicId, message, getUsers(message));
 
-export function createTopic(user: ChromunityUser, channelName: string, title: string, message: string) {
+export function createTopic(
+  user: ChromunityUser,
+  channelName: string,
+  title: string,
+  message: string,
+  poll?: PollSpecification
+) {
   const topicId = uniqueId();
 
   const operation = "create_topic";
@@ -39,6 +46,15 @@ export function createTopic(user: ChromunityUser, channelName: string, title: st
       message
     )
   ).then((promise: unknown) => {
+    if (poll) {
+      executeOperations(
+        user.ft3User,
+        op("create_poll", topicId, user.ft3User.authDescriptor.id, toLowerCase(user.name), poll.question, poll.options)
+      )
+        .catch()
+        .then();
+    }
+
     subscribeToTopic(user, topicId)
       .catch()
       .then(() =>
@@ -496,4 +512,19 @@ function getTopicsByPopularityAfterTimestamp(
   rellOperation: string
 ): Promise<Topic[]> {
   return executeQuery(rellOperation, { name: toLowerCase(name), timestamp, page_size: pageSize });
+}
+
+export function getPoll(topicId: string): Promise<PollData> {
+  return executeQuery("get_poll", { topic_id: topicId });
+}
+
+export function getPollVote(topicId: string, user: ChromunityUser): Promise<string> {
+  return executeQuery("get_poll_vote", { topic_id: topicId, username: user.name });
+}
+
+export function voteForOptionInPoll(user: ChromunityUser, topicId: string, option: string) {
+  return executeOperations(
+    user.ft3User,
+    op("vote_for_poll_option", topicId, user.ft3User.authDescriptor.id, toLowerCase(user.name), option)
+  );
 }

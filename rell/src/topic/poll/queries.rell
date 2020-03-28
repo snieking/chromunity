@@ -1,0 +1,24 @@
+query get_poll(topic_id: text): poll_record? {
+	val poll = poll@?{ .topic.id == topic_id };
+	
+	if (poll == null) {
+		return null;
+	}
+	
+	val options = list<option_record>();
+	for (opt in poll_option@*{ .poll == poll }) {
+		options.add(option_record(opt.text, opt.votes));
+	}
+	
+	return poll_record(poll.text, options);
+}
+
+query get_poll_vote(topic_id: text, username: text): text? {
+	val vote = poll_vote@?{ 
+		.poll.topic.id == topic_id, 
+		.user.name == username.lower_case()
+	};
+	
+	if (vote == null) return null;
+	return vote.poll_option.text;
+}

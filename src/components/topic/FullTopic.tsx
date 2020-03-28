@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { RouteComponentProps } from "react-router";
-import { ChromunityUser, Topic, TopicReply } from "../../types";
+import { ChromunityUser, PollData, Topic, TopicReply } from "../../types";
 import { shouldBeFiltered, toLowerCase } from "../../util/util";
 import {
   Badge,
@@ -46,6 +46,7 @@ import {
 import {
   createTopicReply,
   deleteTopic,
+  getPoll,
   getTopicById,
   getTopicRepliesAfterTimestamp,
   getTopicRepliesPriorToTimestamp,
@@ -68,7 +69,7 @@ import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import PreviewLinks from "../common/PreviewLinks";
 import PageMeta from "../common/PageMeta";
-import logger from "../../util/logger";
+import PollRenderer from "./PollRenderer";
 
 interface MatchParams {
   id: string;
@@ -139,6 +140,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
   const [removeTopicDialogOpen, setRemoveTopicDialogOpen] = useState(false);
   const [reportTopicDialogOpen, setReportTopicDialogOpen] = useState(false);
   const [timeLeftUntilNoLongerModifiable, setTimeLeftUntilNoLongerModifiable] = useState(0);
+  const [poll, setPoll] = useState<PollData>(null);
 
   const textInput: React.RefObject<HTMLInputElement> = useRef();
 
@@ -163,6 +165,9 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     setTopic(t);
 
     retrieveLatestReplies();
+
+    getPoll(t.id).then(poll => setPoll(poll));
+
     getTopicStarRaters(t.id, true).then(usersWhoStarRated => {
       setStars(usersWhoStarRated.length);
       setRatedByMe(usersWhoStarRated.includes(props.user != null && toLowerCase(props.user.name)));
@@ -209,12 +214,9 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function renderTopic() {
-    logger.info(`Distrusted users: ${props.distrustedUsers}`);
     const filtered = shouldBeFiltered(topic.moderated_by, props.distrustedUsers);
     const authorIsMe = props.user != null && toLowerCase(topic.author) === toLowerCase(props.user.name);
     const iAmRepresentative = props.user != null && props.representatives.includes(toLowerCase(props.user.name));
-
-    logger.info(`Filtered ${filtered}, authorIsMe ${authorIsMe}, iAmRepresentative ${iAmRepresentative}`);
 
     if (authorIsMe || iAmRepresentative || !filtered) {
       return (
@@ -620,6 +622,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
         <br />
         {isLoading ? <LinearProgress variant="query" /> : <div />}
         {renderTopic()}
+        <PollRenderer topicId={topic.id} poll={poll} />
         {topicReplies.length > 0 ? <SubdirectoryArrowRight /> : <div />}
         {topicReplies.map(reply => (
           <TopicReplyCard

@@ -11,7 +11,7 @@ import IconButton from "@material-ui/core/IconButton";
 import { Forum } from "@material-ui/icons";
 import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import { createTopic } from "../../blockchain/TopicService";
-import { ChromunityUser } from "../../types";
+import { ChromunityUser, PollSpecification } from "../../types";
 import { getTrendingChannels } from "../../blockchain/ChannelService";
 import { largeButtonStyles } from "./ButtonStyles";
 import {
@@ -29,6 +29,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
 import TextToolbar from "../common/textToolbar/TextToolbar";
+import PollCreator from "../topic/PollCreator";
 
 interface OptionType {
   label: string;
@@ -50,9 +51,11 @@ export interface NewTopicButtonState {
   newTopicSuccessOpen: boolean;
   newTopicErrorOpen: boolean;
   newTopicStatusMessage: string;
+  displayPoll: boolean;
   suggestions: OptionType[];
   channel: ValueType<OptionType>;
   activeTab: number;
+  poll: PollSpecification;
 }
 
 const maxTitleLength: number = 40;
@@ -75,8 +78,13 @@ const NewTopicButton = withStyles(largeButtonStyles)(
           newTopicSuccessOpen: false,
           newTopicErrorOpen: false,
           newTopicStatusMessage: "",
+          displayPoll: false,
           suggestions: [],
-          activeTab: 0
+          activeTab: 0,
+          poll: {
+            question: "",
+            options: new Array<string>()
+          }
         };
 
         this.textInput = React.createRef();
@@ -158,7 +166,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
             const topicMessage = this.state.topicMessage;
             this.setState({ topicTitle: "", topicMessage: "" });
 
-            createTopic(this.props.user, topicChannel, topicTitle, topicMessage)
+            createTopic(this.props.user, topicChannel, topicTitle, topicMessage, this.state.poll)
               .then(() => {
                 this.setState({
                   newTopicStatusMessage: "Topic created",
@@ -294,6 +302,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                   </Tabs>
                   {this.state.activeTab === 0 && this.renderEditor()}
                   {this.state.activeTab === 1 && this.renderPreview()}
+                  {this.renderPoll()}
                 </DialogContent>
                 <DialogActions>
                   <Button onClick={() => this.toggleNewTopicDialog()} color="secondary" variant="contained">
@@ -335,6 +344,37 @@ const NewTopicButton = withStyles(largeButtonStyles)(
             </Snackbar>
           </div>
         );
+      }
+
+      renderPoll() {
+        return (
+          <>
+            <div className={this.props.classes.btnWrapper}>
+              {this.pollToggleButton()}
+            </div>
+            {this.state.displayPoll && (
+              <div className={this.props.classes.pollWrapper}>
+                <PollCreator poll={this.state.poll}/>
+              </div>
+            )}
+          </>
+        );
+      }
+
+      pollToggleButton() {
+        if (this.state.displayPoll) {
+          return (
+            <Button color="secondary" variant="contained" onClick={() => this.setState({ displayPoll: false })}>
+              Remove Poll
+            </Button>
+          );
+        } else {
+          return (
+            <Button color="primary" variant="contained" onClick={() => this.setState({ displayPoll: true })}>
+              Add Poll
+            </Button>
+          );
+        }
       }
 
       renderEditor() {
