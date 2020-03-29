@@ -310,7 +310,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                     Cancel
                   </Button>
                   <Button type="submit" color="primary" variant="contained">
-                    Create topic
+                    Create
                   </Button>
                   <br />
                 </DialogActions>
