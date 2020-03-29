@@ -305,6 +305,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                   {this.renderPoll()}
                 </DialogContent>
                 <DialogActions>
+                  {this.pollToggleButton()}
                   <Button onClick={() => this.toggleNewTopicDialog()} color="secondary" variant="contained">
                     Cancel
                   </Button>
@@ -349,9 +350,6 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       renderPoll() {
         return (
           <>
-            <div className={this.props.classes.btnWrapper}>
-              {this.pollToggleButton()}
-            </div>
             {this.state.displayPoll && (
               <div className={this.props.classes.pollWrapper}>
                 <PollCreator poll={this.state.poll}/>
@@ -364,13 +362,13 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       pollToggleButton() {
         if (this.state.displayPoll) {
           return (
-            <Button color="secondary" variant="contained" onClick={() => this.setState({ displayPoll: false })}>
+            <Button color="secondary" variant="outlined" onClick={() => this.setState({ displayPoll: false })}>
               Remove Poll
             </Button>
           );
         } else {
           return (
-            <Button color="primary" variant="contained" onClick={() => this.setState({ displayPoll: true })}>
+            <Button color="primary" variant="outlined" onClick={() => this.setState({ displayPoll: true })}>
               Add Poll
             </Button>
           );

@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import { ChromunityUser, PollData } from "../../types";
 import { Card, CardContent } from "@material-ui/core";
 import Poll from "react-polls";
-import useTheme from "@material-ui/core/styles/useTheme";
 import { getPollVote, voteForOptionInPoll } from "../../blockchain/TopicService";
 import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
+import makeStyles from "@material-ui/core/styles/makeStyles";
+import { COLOR_CHROMIA_DARK, COLOR_OFF_WHITE } from "../../theme";
 
 interface Props {
   topicId: string;
@@ -13,8 +14,16 @@ interface Props {
   user: ChromunityUser;
 }
 
+const useStyles = makeStyles({
+  pollWrapper: {
+    background: COLOR_OFF_WHITE,
+    border: "solid 1px",
+    borderColor: COLOR_CHROMIA_DARK
+  }
+});
+
 const PollRenderer: React.FunctionComponent<Props> = props => {
-  const theme = useTheme();
+  const classes = useStyles();
   const [optionVote, setOptionVote] = useState<string>(null);
 
   useEffect(() => {
@@ -24,8 +33,6 @@ const PollRenderer: React.FunctionComponent<Props> = props => {
   }, [props]);
 
   if (!props.poll) return null;
-
-  const darkTheme = theme.palette.type === "dark";
 
   function handleVote(voteAnswer: string) {
     if (props.user) {
@@ -44,18 +51,21 @@ const PollRenderer: React.FunctionComponent<Props> = props => {
     return (
       <Card key="poll">
         <CardContent>
-          <Poll
-            question={props.poll.question}
-            answers={props.poll.options}
-            customStyles={{
-              theme: darkTheme ? "white" : "black",
-              questionBold: true,
-              questionColor: theme.palette.primary.main
-            }}
-            onVote={handleVote}
-            noStorage={true}
-            vote={optionVote}
-          />
+          <div className={classes.pollWrapper}>
+            <Poll
+              question={props.poll.question}
+              answers={props.poll.options}
+              customStyles={{
+                theme: "black",
+                questionBold: true,
+                questionColor: COLOR_CHROMIA_DARK,
+                votesColor: "pink"
+              }}
+              onVote={handleVote}
+              noStorage={true}
+              vote={optionVote}
+            />
+          </div>
         </CardContent>
       </Card>
     );
