@@ -19,7 +19,7 @@ import {
   COLOR_CHROMIA_DARK_LIGHTER,
   COLOR_CHROMIA_LIGHT,
   COLOR_CHROMIA_LIGHTER,
-  COLOR_OFF_WHITE
+  COLOR_OFF_WHITE, COLOR_RED
 } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import withTheme from "@material-ui/core/styles/withTheme";
@@ -30,6 +30,7 @@ import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
 import TextToolbar from "../common/textToolbar/TextToolbar";
 import PollCreator from "../topic/PollCreator";
+import PollIcon from '@material-ui/icons/Poll';
 
 interface OptionType {
   label: string;
@@ -360,19 +361,11 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       }
 
       pollToggleButton() {
-        if (this.state.displayPoll) {
-          return (
-            <Button color="secondary" variant="outlined" onClick={() => this.setState({ displayPoll: false })}>
-              Remove Poll
-            </Button>
-          );
-        } else {
-          return (
-            <Button color="primary" variant="outlined" onClick={() => this.setState({ displayPoll: true })}>
-              Add Poll
-            </Button>
-          );
-        }
+        return (
+          <IconButton onClick={() => this.setState(prevState => ({ displayPoll: !prevState.displayPoll }))}>
+            <PollIcon style={{ color: this.state.displayPoll ? COLOR_RED : "" }}/>
+          </IconButton>
+        )
       }
 
       renderEditor() {
