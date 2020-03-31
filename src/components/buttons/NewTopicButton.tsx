@@ -29,7 +29,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
 import TextToolbar from "../common/textToolbar/TextToolbar";
-import PollCreator from "../topic/PollCreator";
+import PollCreator from "../topic/poll/PollCreator";
 import PollIcon from '@material-ui/icons/Poll';
 
 interface OptionType {

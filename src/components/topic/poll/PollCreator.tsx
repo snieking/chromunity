@@ -4,8 +4,8 @@ import TextField from "@material-ui/core/TextField";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 import IconButton from "@material-ui/core/IconButton";
-import { COLOR_RED } from "../../theme";
-import { PollSpecification } from "../../types";
+import { COLOR_RED } from "../../../theme";
+import { PollSpecification } from "../../../types";
 
 interface Props {
   poll: PollSpecification;

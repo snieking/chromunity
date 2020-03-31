@@ -69,7 +69,7 @@ import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import PreviewLinks from "../common/PreviewLinks";
 import PageMeta from "../common/PageMeta";
-import PollRenderer from "./PollRenderer";
+import PollRenderer from "./poll/PollRenderer";
 
 interface MatchParams {
   id: string;
