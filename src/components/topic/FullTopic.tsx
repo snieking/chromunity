@@ -70,6 +70,7 @@ import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import PreviewLinks from "../common/PreviewLinks";
 import PageMeta from "../common/PageMeta";
 import PollRenderer from "./poll/PollRenderer";
+import SocialShareButton from "../common/SocialShareButton";
 
 interface MatchParams {
   id: string;
@@ -327,6 +328,8 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
               </Tooltip>
             </IconButton>
           )}
+
+          <SocialShareButton text={topic.title}/>
 
           {renderAdminActions()}
         </CardActions>

@@ -36,6 +36,7 @@
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
     "react-select": "^3.0.8",
+    "react-share": "^4.1.0",
     "react-tiny-link": "^3.2.0",
     "reactour": "^1.16.3",
     "redux": "^4.0.5",
