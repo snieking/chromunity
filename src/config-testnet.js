@@ -1,7 +1,7 @@
 // eslint-disable-next-line
 module.exports = {
   blockchain: {
-    nodeApiUrl: "https://cg7tt9fhch.execute-api.eu-central-1.amazonaws.com/dev/",
+    nodeApiUrl: "https://3o5bblkaha.execute-api.eu-west-1.amazonaws.com/chromia-node-vault/",
     rid: "0EEB09D65EBED13ADB57AB0DF6B64C3715E414C359F10EEC0EF92FB21131AFF3"
   },
   vault: {
