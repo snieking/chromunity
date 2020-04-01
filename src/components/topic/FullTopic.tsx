@@ -275,7 +275,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
 
     if (user != null) {
       return (
-        <CardActions style={{ marginTop: "-20px" }}>
+        <CardActions disableSpacing style={{ display: "block" }}>
           <IconButton data-tut="star_btn" aria-label="Like" onClick={() => toggleStarRate()}>
             <Badge color="secondary" badgeContent={stars}>
               <Tooltip title="Like">{ratedByMe ? <StarRate className={classes.iconYellow} /> : <StarBorder />}</Tooltip>
@@ -303,7 +303,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
               deleteFunction={deleteTheTopic}
             />
           ) : (
-            <div />
+            <div style={{ display: "inline" }} />
           )}
 
           {user && (

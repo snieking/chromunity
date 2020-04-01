@@ -363,7 +363,7 @@ const TopicReplyCard = withStyles(styles)(
 
       if (user != null) {
         return (
-          <CardActions style={{ marginTop: "-20px" }}>
+          <CardActions disableSpacing style={{ display: "block", marginTop: "-10px" }}>
             <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
               <Badge className="star-badge" color="secondary" badgeContent={this.state.stars}>
                 <Tooltip title="Like">
