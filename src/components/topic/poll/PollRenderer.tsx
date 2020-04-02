@@ -30,6 +30,8 @@ const PollRenderer: React.FunctionComponent<Props> = props => {
   useEffect(() => {
     if (props.topicId && props.user) {
       getPollVote(props.topicId, props.user).then(vote => setOptionVote(vote ? vote : ""));
+    } else if (!props.user) {
+      setOptionVote("");
     }
   }, [props]);
 
