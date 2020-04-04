@@ -42,14 +42,29 @@ This can be done via docker for convenience.
 cd test/docker
 docker-compose up -d
 
-# Add BRID to project .env which is used for the app to correct to the correct blockchain
-./add-brid-to-env.sh
+# Add RID to project .env which is used for the app to correct to the correct blockchain
+./add-rid-to-env.sh
 ```
 
 ### Starting Chromunity
 * Navigate back to project root directory
 * `npm install`
 * `npm start`
+
+### Using the dev Vault for Single-Sign-On (SSO)
+
+Chromia provides a development Vault that can be used for local SSO during development.
+
+1. Navigate to https://dev.vault.chromia-development.com
+2. Sign-up if you don't have an account there yet. If you already have it, just sign-in.
+3. Add a custom dApp, and fill in the following details:
+   ```
+   DApp name: Chromunity Local
+   Host: http://localhost
+   Port: 7740
+   Website: http://localhost:3000
+   Chain ID: <take the one from your .env file>
+   ```
 
 ## Copyrighted fonts
 Chromunity uses a copyrighted font which is not included in the repository.
