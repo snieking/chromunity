@@ -22,37 +22,37 @@ When new features are stable enough in the `dev` branch, they are merged to the 
 | master | https://chromunity.com     |
 | dev    | https://dev.chromunity.com |
 
-### Running Chromunity
+## Running Chromunity
+
+### Requirements
+1. Docker
+2. Node.js 12+
+
+### Running a local Blockchain 
 
 **Chromunity** can be run with a local blockchain which is useful during development.
+This can be done via docker for convenience.
 
-#### Requirements
-1. Node.js 12+
-2. Npm 65.6.0
-3. PostgresSQL 10.5+
+```shell script
 
-#### Setting up Postgres for Postchain
-* `createdb chromunity`
-* `psql chromunity`
-* `createuser -s postgres`
-* `psql -c "create role postchain LOGIN ENCRYPTED PASSWORD 'postchain'"`
-* `psql -c "grant ALL ON DATABASE chromunity TO postchain"`
-* `\q`
+# A helper script is provided in the base directory for building the image.
+./build-image.sh
 
-#### Starting local Postchain node
-* `cd rell`
-* `./run-dev-node.sh`
+# Blockchain can be started after that in the test directory.
+cd test/docker
+docker-compose up -d
 
-#### Starting Chromunity
+# Add BRID to project .env which is used for the app to correct to the correct blockchain
+./add-brid-to-env.sh
+```
+
+### Starting Chromunity
 * Navigate back to project root directory
 * `npm install`
 * `npm start`
 
-## Copyrighted font
+## Copyrighted fonts
 Chromunity uses a copyrighted font which is not included in the repository.
 
 In order to use the Chromia font, add **Battlefin-Black.otf**, as well as **International.ttf** to **public/fonts** directory in order to use that font. 
 The application will work fine without it and fall back to other fonts.
-
-## Rell UML diagram
-https://drive.google.com/file/d/1uCtLX1CNtUNSJTWPFot6jVVHWrElAbqq/view?usp=sharing
