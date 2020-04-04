@@ -48,8 +48,8 @@ docker-compose up -d
 
 ### Starting Chromunity
 * Navigate back to project root directory
-* `npm install`
-* `npm start`
+1. `npm install`
+2. `npm start`
 
 ### Using the dev Vault for Single-Sign-On (SSO)
 
@@ -65,6 +65,7 @@ Chromia provides a development Vault that can be used for local SSO during devel
    Website: http://localhost:3000
    Chain ID: <take the one from your .env file>
    ```
+4. Click add and you should now be able to sign-in to your local Chromunity using SSO.
 
 ## Copyrighted fonts
 Chromunity uses a copyrighted font which is not included in the repository.
