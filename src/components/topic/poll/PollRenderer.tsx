@@ -66,9 +66,8 @@ const PollRenderer: React.FunctionComponent<Props> = props => {
     return props.poll.options.map(option => <PollOption text={option.option} voteHandler={handleVote} />);
   }
 
-  const total = props.poll != null && props.poll.options.length > 0 ? props.poll.options.map(opt => opt.votes).reduce((a, b) => a + b) : 0;
-
-  if (optionVote != null) {
+  if (props.poll != null && props.poll.question && props.poll.options.length > 0 && optionVote != null) {
+    const total = props.poll.options.map(opt => opt.votes).reduce((a, b) => a + b);
     return (
       <Card key="poll">
         <CardContent>
