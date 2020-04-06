@@ -162,7 +162,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     if (props.successfullyAuthorized) {
       updateChats();
     }
-  }, 3000);
+  }, 2000);
 
   useEffect(() => {
     if (props.user) {
