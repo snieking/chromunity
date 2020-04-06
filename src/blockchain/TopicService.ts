@@ -45,7 +45,7 @@ export function createTopic(
       message
     )
   ).then((promise: unknown) => {
-    if (poll) {
+    if (poll && poll.question && poll.options.length > 1) {
       executeOperations(
         user.ft3User,
         op("create_poll", topicId, user.ft3User.authDescriptor.id, toLowerCase(user.name), poll.question, poll.options)
