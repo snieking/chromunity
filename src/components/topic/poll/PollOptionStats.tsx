@@ -42,9 +42,6 @@ const PollOptionStats: React.FunctionComponent<Props> = props => {
 
   return (
     <>
-      <Typography id={props.text} gutterBottom style={{ zIndex: 1000 }}>
-        {props.text}
-      </Typography>
       <div
         className={classes.wrapper}
         style={{

@@ -145,7 +145,7 @@ const VaultSuccess: React.FunctionComponent<Props> = props => {
         <ChromiaPageHeader text={"It looks like you're new here!"} />
         <LeftShapes className={classes.leftShapes} />
         <RightShapes className={classes.rightShapes} />
-        <p>By which name would you like to be referred to as?</p>
+        <p>By which name would you like to be referred to?</p>
         <TextField
           label="Username"
           name="name"

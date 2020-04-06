@@ -16,6 +16,10 @@ interface Props {
 }
 
 const useStyles = makeStyles(theme => ({
+  question: {
+    marginBottom: "10px",
+    fontWeight: "bold"
+  },
   votes: {
     textAlign: "center",
     color: theme.palette.primary.main,
@@ -72,13 +76,13 @@ const PollRenderer: React.FunctionComponent<Props> = props => {
       <Card key="poll">
         <CardContent>
           <>
-            <Typography component="h6" variant="h6" gutterBottom>
+            <Typography component="p" variant="subtitle2" className={classes.question}>
               {props.poll.question}
             </Typography>
             {props.user && optionVote === "" ? renderOptions() : renderStats(total)}
-            {total > 0 && (<Typography component="p" variant="subtitle1" className={classes.votes} gutterBottom>
+            <Typography component="p" variant="subtitle1" className={classes.votes} gutterBottom>
               {total} {total === 1 ? "vote" : "votes"}
-            </Typography>)}
+            </Typography>
           </>
         </CardContent>
       </Card>
