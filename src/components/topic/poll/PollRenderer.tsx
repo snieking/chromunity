@@ -77,9 +77,9 @@ const PollRenderer: React.FunctionComponent<Props> = props => {
               {props.poll.question}
             </Typography>
             {props.user && optionVote === "" ? renderOptions() : renderStats(total)}
-            <Typography component="p" variant="subtitle1" className={classes.votes} gutterBottom>
+            {total > 0 && (<Typography component="p" variant="subtitle1" className={classes.votes} gutterBottom>
               {total} {total === 1 ? "vote" : "votes"}
-            </Typography>
+            </Typography>)}
           </>
         </CardContent>
       </Card>
