@@ -4,7 +4,7 @@ import user;
 import util;
 
 operation remove_topic(username: text, descriptor_id: byte_array, topic_id: text) {
-    val user = user.get_verified_user(username, descriptor_id);
+    val user = user.get_and_charge_verified_user(username, descriptor_id);
 
     val recent_election = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
     val representative = representative @{ user, .representative_election.id == recent_election.id };
@@ -22,7 +22,7 @@ operation remove_topic(username: text, descriptor_id: byte_array, topic_id: text
 }
 
 operation remove_topic_reply(username: text, descriptor_id: byte_array, topic_reply_id: text) {
-    val user = user.get_verified_user(username, descriptor_id);
+    val user = user.get_and_charge_verified_user(username, descriptor_id);
 
     val recent_election_id = require(election.get_latest_completed_election_id(), "No election has been held yet");
     val representative = representative @{ user, .representative_election.id == recent_election_id };
@@ -40,7 +40,7 @@ operation remove_topic_reply(username: text, descriptor_id: byte_array, topic_re
 }
 
 operation suspend_user(username: text, descriptor_id: byte_array, user_to_be_suspended: text) {
-    val user = user.get_verified_user(username, descriptor_id);
+    val user = user.get_and_charge_verified_user(username, descriptor_id);
 
     val recent_election_id = require(election.get_latest_completed_election_id(), "No election has been held yet");
     val representative = representative @{ user, .representative_election.id == recent_election_id };
@@ -80,7 +80,7 @@ operation suspend_user(username: text, descriptor_id: byte_array, user_to_be_sus
 }
 
 operation distrust_representative(name, descriptor_id: byte_array, distrusted: name) {
-	val user = user.get_verified_user(name, descriptor_id);
+	val user = user.get_and_charge_verified_user(name, descriptor_id);
 	
 	val recent_election_id = require(election.get_latest_completed_election_id(), "No election has been held yet");
 	

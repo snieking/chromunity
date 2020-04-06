@@ -26,18 +26,22 @@ const names: string[] = [
   "Joso"
 ];
 
-const CREATE_RANDOM_USER = (): TestUser => {
-  const randomNumber = Math.floor(Math.random() * names.length);
+const CREATE_LOGGED_IN_USER = async (name?: string) => {
+  const user = name ? CREATE_USER(name) : CREATE_RANDOM_USER();
+  return loginDappUser(user);
+};
+
+const CREATE_USER = (name: string): TestUser => {
   const keyPair = makeKeyPair();
   return {
-    name: names[randomNumber] + "_" + getANumber(),
+    name: name + getANumber(),
     keyPair: new KeyPair(keyPair.privKey.toString("hex"))
   };
 };
 
-const CREATE_LOGGED_IN_USER = async () => {
-  const user = CREATE_RANDOM_USER();
-  return loginDappUser(user);
+const CREATE_RANDOM_USER = (): TestUser => {
+  const randomNumber = Math.floor(Math.random() * names.length);
+  return CREATE_USER(names[randomNumber]);
 };
 
 const loginDappUser = async (user: TestUser): Promise<ChromunityUser> => {

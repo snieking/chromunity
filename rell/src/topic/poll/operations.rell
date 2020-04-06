@@ -4,7 +4,7 @@ import topic;
 operation create_poll(id: text, descriptor_id: byte_array, 
 	username: text, question: text, options: list<text>
 ) {
-	val author = user.get_verified_user(username, descriptor_id);
+	val author = user.get_and_charge_verified_user(username, descriptor_id);
 	val topic = topic.topic@{ .id == id, author };
 	
 	val poll = create poll(topic, question);
@@ -15,7 +15,7 @@ operation create_poll(id: text, descriptor_id: byte_array,
 }
 
 operation vote_for_poll_option(id: text, descriptor_id: byte_array, username: text, option: text) {
-	val user = user.get_verified_user(username, descriptor_id);
+	val user = user.get_and_charge_verified_user(username, descriptor_id);
 	
 	val poll_opt = poll_option@{ .poll.topic.id == id, .text == option };
 

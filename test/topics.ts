@@ -3,7 +3,7 @@ import * as bip39 from "bip39";
 import { ChromunityUser } from "../src/types";
 
 const CREATE_RANDOM_TOPIC = (user: ChromunityUser, channel: string) => {
-    return createTopic(user, channel, upperCaseFirst(bip39.generateMnemonic(128)), upperCaseFirst(bip39.generateMnemonic(256)));
+    return createTopic(user, channel, upperCaseFirst(bip39.generateMnemonic(128).substring(0, 39)), upperCaseFirst(bip39.generateMnemonic(256)));
 };
 
 function upperCaseFirst(s: string) {

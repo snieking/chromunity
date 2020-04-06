@@ -1,0 +1,21 @@
+# Common files
+*.md
+*.yml
+*.js
+*.json
+.env
+LICENSE
+.prettierrc
+.gitignore
+.git
+
+# IDE
+.idea
+bin
+.project
+
+# Node
+node_modules
+src
+test
+typings-custom
