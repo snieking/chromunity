@@ -2,12 +2,14 @@ import { Election, ChromunityUser } from "../types";
 import { executeOperations, executeQuery } from "./Postchain";
 import { toLowerCase } from "../util/util";
 import { nop, op } from "ft3-lib";
+import { electionEvent } from "../util/matomo";
 
 export function processElection(user: ChromunityUser) {
   return executeOperations(user.ft3User, op("process_election"), nop());
 }
 
 export function signUpForElection(user: ChromunityUser): Promise<any> {
+  electionEvent("sign-up");
   return executeOperations(
     user.ft3User,
     op("sign_up_for_election", toLowerCase(user.name), user.ft3User.authDescriptor.id),
@@ -16,6 +18,7 @@ export function signUpForElection(user: ChromunityUser): Promise<any> {
 }
 
 export function voteForCandidate(user: ChromunityUser, candidate: string): Promise<any> {
+  electionEvent("vote");
   return executeOperations(
     user.ft3User,
     op(

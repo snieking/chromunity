@@ -61,6 +61,7 @@ import { ApplicationState } from "../../../store";
 import { Chat, ChatMessage, ChatMessageDecrypted } from "../../../types";
 import { getChatPassphrase, storeChatPassphrase } from "../../../util/user-util";
 import logger from "../../../util/logger";
+import { chatEvent } from "../../../util/matomo";
 
 export function* chatWatcher() {
   yield takeLatest(ChatActionTypes.CHECK_CHAT_AUTH_ACTION, checkChatAuthenticationSaga);
@@ -130,6 +131,8 @@ export function* createChatKeyPairSaga(action: CreateChatKeyPairAction) {
 
   storeChatPassphrase(action.password);
   yield put(storeChatKeyPair(rsaKey, true));
+
+  chatEvent("create-key-pair");
   logger.silly("[SAGA - FINISHED]: Creating chat key pair");
 }
 
@@ -145,6 +148,8 @@ export function* createNewChatSaga(action: CreateNewChatAction) {
 
   yield createNewChat(action.user, id, encryptedSharedChatKey.cipher);
   yield put(loadUserChats(action.user, true));
+
+  chatEvent("create");
   logger.silly("[SAGA - FINISHED]: Create new chat");
 }
 
@@ -164,6 +169,7 @@ export function* addUserToChatSaga(action: AddUserToChatAction) {
 
       yield addUserToChat(action.user, chat.id, action.username, encryptedSharedChatKey.cipher);
       yield put(sendMessage(action.user, chat, "I invited '" + action.username + "' to join us."));
+      chatEvent("invite-user");
     } else {
       logger.info("User [%s] hasn't created a chat key yet", action.username);
     }
@@ -176,6 +182,8 @@ export function* leaveChatSaga(action: LeaveChatAction) {
   const chat = yield select(getActiveChat);
   yield leaveChat(action.user, chat.id);
   yield put(loadUserChats(action.user, true));
+
+  chatEvent("leave");
   logger.silly("[SAGA - FINISHED]: Leave chat");
 }
 
@@ -294,6 +302,7 @@ export function* sendMessageSaga(action: SendMessageAction) {
   yield sendChatMessage(action.user, action.chat.id, encrypt(action.message, sharedChatKey.plaintext));
   yield put(refreshOpenChat(action.user));
 
+  chatEvent("message");
   logger.silly("[SAGA - FINISHED]: Send message");
 }
 
@@ -311,6 +320,7 @@ export function* modifyTitleSaga(action: ModifyTitleAction) {
   yield put(openChat(updatedChat, action.user));
   yield put(loadUserChats(action.user, true));
 
+  chatEvent("modify-title");
   logger.silly("[SAGA - FINISHED]: Modify title");
 }
 
@@ -331,6 +341,8 @@ export function* loadChatUsersSaga(action: LoadChatUsersAction) {
 export function* deleteChatUserSaga(action: DeleteChatUserAction) {
   logger.silly("[SAGA - STARTED]: Delete chat user");
   yield deleteChatUser(action.user);
+
+  chatEvent("delete-user");
   logger.silly("[SAGA - FINISHED]: Delete chat user");
 }
 

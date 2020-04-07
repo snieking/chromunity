@@ -5,6 +5,7 @@ import { Topic, TopicReply, ChromunityUser, PollSpecification, PollData } from "
 import { sendNotifications } from "./NotificationService";
 import { op } from "ft3-lib";
 import { getUsers } from "../util/text-parsing";
+import { topicEvent } from "../util/matomo";
 
 const topicsCache = BoomerangCache.create("topic-bucket", {
   storage: "session",
@@ -62,22 +63,26 @@ export function createTopic(
           .then()
       );
 
+    topicEvent("create");
     return promise;
   });
 }
 
 export function modifyTopic(user: ChromunityUser, topicId: string, updatedText: string) {
   topicsCache.remove(topicId);
+  topicEvent("modify");
   return modifyText(user, topicId, updatedText, "modify_topic");
 }
 
 export function modifyReply(user: ChromunityUser, replyId: string, updatedText: string) {
+  topicEvent("modify-reply");
   return modifyText(user, replyId, updatedText, "modify_reply");
 }
 
 export function deleteReply(user: ChromunityUser, replyId: string) {
   const rellOperation = "delete_reply";
 
+  topicEvent("delete-reply");
   return executeOperations(
     user.ft3User,
     op(rellOperation, replyId, user.ft3User.authDescriptor.id, toLowerCase(user.name))
@@ -95,6 +100,7 @@ export function deleteTopic(user: ChromunityUser, id: string) {
   topicsCache.remove(id);
   const rellOperation = "delete_topic";
 
+  topicEvent("delete");
   return executeOperations(user.ft3User, op(rellOperation, id, user.ft3User.authDescriptor.id, toLowerCase(user.name)));
 }
 
@@ -126,6 +132,7 @@ export function createTopicReply(user: ChromunityUser, topicId: string, message:
           .then()
       );
 
+    topicEvent("create-reply")
     return promise;
   });
 }
@@ -166,6 +173,8 @@ export function createTopicSubReply(
           .then()
       );
 
+    topicEvent("create-reply");
+    topicEvent("create-sub-reply");
     return promise;
   });
 }
@@ -292,26 +301,32 @@ export function getTopicStarRaters(topicId: string, clearCache = false): Promise
 }
 
 export function giveTopicStarRating(user: ChromunityUser, topicId: string) {
+  topicEvent("add-star");
   return modifyRatingAndSubscription(user, topicId, "give_topic_star_rating");
 }
 
 export function removeTopicStarRating(user: ChromunityUser, topicId: string) {
+  topicEvent("remove-star");
   return modifyRatingAndSubscription(user, topicId, "remove_topic_star_rating");
 }
 
 export function giveReplyStarRating(user: ChromunityUser, replyId: string) {
+  topicEvent("add-reply-star");
   return modifyRatingAndSubscription(user, replyId, "give_reply_star_rating");
 }
 
 export function removeReplyStarRating(user: ChromunityUser, replyId: string) {
+  topicEvent("remove-reply-star");
   return modifyRatingAndSubscription(user, replyId, "remove_reply_star_rating");
 }
 
 export function subscribeToTopic(user: ChromunityUser, id: string) {
+  topicEvent("subscribe");
   return modifyRatingAndSubscription(user, id, "subscribe_to_topic");
 }
 
 export function unsubscribeFromTopic(user: ChromunityUser, id: string) {
+  topicEvent("unsubscribe");
   return modifyRatingAndSubscription(user, id, "unsubscribe_from_topic");
 }
 
@@ -522,6 +537,7 @@ export function getPollVote(topicId: string, user: ChromunityUser): Promise<stri
 }
 
 export function voteForOptionInPoll(user: ChromunityUser, topicId: string, option: string) {
+  topicEvent("poll-vote");
   return executeOperations(
     user.ft3User,
     op("vote_for_poll_option", topicId, user.ft3User.authDescriptor.id, toLowerCase(user.name), option)

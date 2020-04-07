@@ -6,6 +6,7 @@ import * as BoomerangCache from "boomerang-cache";
 import { op } from "ft3-lib";
 import { removeTopicIdFromCache } from "./TopicService";
 import logger from "../util/logger";
+import { representativeEvent } from "../util/matomo";
 
 const representativesCache = BoomerangCache.create("rep-bucket", { storage: "session", encrypt: false });
 const localCache = BoomerangCache.create("rep-local", { storage: "local", encrypt: false });
@@ -56,6 +57,8 @@ export function getAllRepresentativeActionsPriorToTimestamp(
 export const REMOVE_TOPIC_OP_ID = "remove_topic";
 
 export function removeTopic(user: ChromunityUser, topicId: string) {
+  representativeEvent("remove-topic");
+
   const reportId = REMOVE_TOPIC_OP_ID + ":" + topicId;
   if (hasReportedId(reportId)) {
     return;
@@ -73,6 +76,8 @@ export function removeTopic(user: ChromunityUser, topicId: string) {
 export const REMOVE_TOPIC_REPLY_OP_ID = "remove_topic_reply";
 
 export function removeTopicReply(user: ChromunityUser, topicReplyId: string) {
+  representativeEvent("remove-reply");
+
   const reportId = REMOVE_TOPIC_REPLY_OP_ID + ":" + topicReplyId;
   if (hasReportedId(reportId)) {
     return;
@@ -93,6 +98,8 @@ export function suspendUser(user: ChromunityUser, userToBeSuspended: string) {
   if (hasReportedId(reportId)) {
     return Promise.resolve();
   }
+
+  representativeEvent("suspend-user");
 
   try {
     return executeOperations(
@@ -133,6 +140,9 @@ export function getReports(): Promise<RepresentativeReport[]> {
 
 export function distrustRepresentative(user: ChromunityUser, distrusted: string) {
   localCache.set("distrusted-" + distrusted, true, 86400*30);
+
+  representativeEvent("distrust-representative");
+
   try {
     return executeOperations(
       user.ft3User,

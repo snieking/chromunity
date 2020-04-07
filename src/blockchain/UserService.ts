@@ -4,6 +4,7 @@ import { ChromunityUser } from "../types";
 import * as BoomerangCache from "boomerang-cache";
 import { toLowerCase } from "../util/util";
 import { nop, op } from "ft3-lib";
+import { userEvent } from "../util/matomo";
 
 const boomerang = BoomerangCache.create("users-bucket", {
   storage: "session",
@@ -52,6 +53,8 @@ export function updateUserSettings(user: ChromunityUser, avatar: string, descrip
   const userLC: string = toLowerCase(user.name);
   boomerang.remove(userLC);
 
+  userEvent("update-settings");
+
   const operation = "update_user_settings";
   return executeOperations(user.ft3User, op(operation, userLC, user.ft3User.authDescriptor.id, avatar, description));
 }
@@ -60,6 +63,11 @@ export function toggleUserDistrust(user: ChromunityUser, name: string, muted: bo
   boomerang.remove("distrusted-users");
 
   const operation = "toggle_distrust";
+
+  if (muted)
+    userEvent("distrust");
+  else
+    userEvent("trust");
 
   return executeOperations(
     user.ft3User,

@@ -3,6 +3,7 @@ import { executeOperations, executeQuery } from "./Postchain";
 import { sortByFrequency, toLowerCase } from "../util/util";
 import * as BoomerangCache from "boomerang-cache";
 import { nop, op } from "ft3-lib";
+import { channelEvent } from "../util/matomo";
 
 const channelsCache = BoomerangCache.create("channels-bucket", {
   storage: "session",
@@ -10,10 +11,12 @@ const channelsCache = BoomerangCache.create("channels-bucket", {
 });
 
 export function followChannel(user: ChromunityUser, name: string) {
+  channelEvent("follow");
   return modifyChannelollowing(user, name, "follow_channel");
 }
 
 export function unfollowChannel(user: ChromunityUser, name: string) {
+  channelEvent("unfollow");
   return modifyChannelollowing(user, name, "unfollow_channel");
 }
 

@@ -4,6 +4,7 @@ import * as BoomerangCache from "boomerang-cache";
 import { removeNotificationsForId, sendNotificationWithDeterministicId } from "./NotificationService";
 import { toLowerCase } from "../util/util";
 import { nop, op } from "ft3-lib";
+import { userEvent } from "../util/matomo";
 
 const boomerang = BoomerangCache.create("following-bucket", {
   storage: "session",
@@ -11,6 +12,7 @@ const boomerang = BoomerangCache.create("following-bucket", {
 });
 
 export function createFollowing(user: ChromunityUser, following: string) {
+  userEvent("follow");
   return updateFollowing(user, following, "create_following").then((response: unknown) => {
     const id: string = createDeterministicId(user.name, following);
     const trigger: string = createFollowingNotificationTrigger(user.name);
@@ -22,6 +24,7 @@ export function createFollowing(user: ChromunityUser, following: string) {
 }
 
 export function removeFollowing(user: ChromunityUser, following: string) {
+  userEvent("unfollow");
   return updateFollowing(user, following, "remove_following").then((response: unknown) => {
     removeNotificationsForId(user, createDeterministicId(user.name, following), [following.toLocaleLowerCase()]);
     return response;
