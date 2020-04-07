@@ -16,7 +16,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const URL_REGEX = /https?:\/\/(?![^" ]*(?:jpg|jpeg|png|gif))[^" ]+/gi;
+const URL_REGEX = /\(?https?:\/\/(?![^" ]*(?:jpg|jpeg|png|gif))[^" \s)]+/gi;
 const YOUTUBE_ID_REGEX = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
 
 const PreviewLinks: React.FunctionComponent<Props> = props => {
@@ -24,7 +24,18 @@ const PreviewLinks: React.FunctionComponent<Props> = props => {
 
   function getLastLink(): string {
     const urls = props.text.match(URL_REGEX);
-    return urls && urls.length > 0 ? urls[urls.length - 1] : null;
+
+    if (urls == null)
+      return null;
+
+    for (let i = urls.length - 1; i >= 0; i--) {
+      const url = urls[i];
+
+      if (!url.startsWith("("))
+        return url;
+    }
+
+    return null;
   }
 
   function isValidYouTubeUrl(url: string) {
