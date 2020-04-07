@@ -26,23 +26,25 @@ if (config.sentry.environment !== "Local") {
   });
 }
 
-const piwik = new ReactPiwik({
+const piwik = config.matomo.enabled ? new ReactPiwik({
   url: config.matomo.url,
   siteId: config.matomo.siteId,
   trackErrors: config.matomo.trackErrors,
   jsFilename: config.matomo.jsFileName,
   phpFilename: config.matomo.phpFilename
-});
+}) : null;
 
-ReactPiwik.push(["enableHeartBeatTimer"]);
-ReactPiwik.push(["trackPageView"]);
+if (piwik != null) {
+  ReactPiwik.push(["enableHeartBeatTimer"]);
+  ReactPiwik.push(["trackPageView"]);
+}
 
 const App: React.FunctionComponent<Props> = props => {
   return (
     <Provider store={props.store}>
       <DynamicTheme>
         <CssBaseline />
-        <Router history={piwik.connectToHistory(history)}>
+        <Router history={piwik != null ? piwik.connectToHistory(history) : history}>
           <HeaderNav />
           <Content />
           <Footer />

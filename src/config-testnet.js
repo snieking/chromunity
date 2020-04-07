@@ -13,6 +13,7 @@ module.exports = {
     environment: "TestNet"
   },
   matomo: {
+    enabled: true,
     url: "https://matomo.chromia.dev/",
     siteId: 3,
     trackErrors: true,
