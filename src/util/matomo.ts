@@ -9,8 +9,8 @@ export const userSignInEvent = (name: string) => sendEvent(CATEGORY_USER_REGISTR
 
 export const userAuthenticatedEvent = (name: string) => sendEvent(CATEGORY_USER_REGISTRATION, "authenticated", name);
 
-function sendEvent(category: string, name: string, value: string) {
+function sendEvent(category: string, subCategory: string, name: string) {
   if (config.matomo.enabled && ReactPiwik != null) {
-    ReactPiwik.push(['trackEvent', category, name, value]);
+    ReactPiwik.push(['trackEvent', category + "_" + subCategory, name]);
   }
 }
