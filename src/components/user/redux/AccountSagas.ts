@@ -26,7 +26,7 @@ import {
 import { ChromunityUser } from "../../../types";
 import { ApplicationState } from "../../../store";
 import { toLowerCase } from "../../../util/util";
-import { userRegisteredEvent } from "../../../util/matomo";
+import { userRegisteredEvent, userSignInEvent } from "../../../util/matomo";
 
 SSO.vaultUrl = config.vault.url;
 
@@ -79,6 +79,7 @@ function* vaultSuccessSaga(action: IVaultSuccess): Generator<any, any, any> {
 
     if (username) {
       yield authorizeUser(username, user);
+      userSignInEvent(username);
     } else {
       yield put(saveVaultAccount(account.id, user));
       yield put(setAuthenticationStep(AuthenticationStep.USERNAME_INPUT_REQUIRED));
