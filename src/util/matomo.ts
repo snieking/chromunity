@@ -11,3 +11,8 @@ export const userSignInEvent = (name: string) => {
   if (ReactPiwik != null)
     ReactPiwik.push(['trackEvent', CATEGORY_USER_REGISTRATION, "sign-in", name]);
 };
+
+export const userAuthenticatedEvent = (name: string) => {
+  if (ReactPiwik != null)
+    ReactPiwik.push(['trackEvent', CATEGORY_USER_REGISTRATION, "authenticated", name]);
+};

@@ -26,7 +26,7 @@ import {
 import { ChromunityUser } from "../../../types";
 import { ApplicationState } from "../../../store";
 import { toLowerCase } from "../../../util/util";
-import { userRegisteredEvent, userSignInEvent } from "../../../util/matomo";
+import { userAuthenticatedEvent, userRegisteredEvent, userSignInEvent } from "../../../util/matomo";
 
 SSO.vaultUrl = config.vault.url;
 
@@ -153,6 +153,7 @@ function* authorizeUser(username: string, user: User) {
     yield put(setUser(chromunityUser));
     yield put(setAuthenticationStep(AuthenticationStep.AUTHENTICATED));
     yield put(checkDistrustedUsers(chromunityUser));
+    userAuthenticatedEvent(username);
   } else {
     logger.info("Username [%s], or [%s] was null", username, JSON.stringify(user));
   }
