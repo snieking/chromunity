@@ -363,10 +363,11 @@ export function getTopicSubscribers(topicId: string): Promise<string[]> {
   return executeQuery(query, { id: topicId });
 }
 
+const ALLOWED_EDIT_DURATION = 5 * 60000;
 export function getTopicById(id: string, user?: ChromunityUser): Promise<Topic> {
   const cachedTopic: Topic = topicsCache.get(id);
 
-  if (cachedTopic != null) {
+  if (cachedTopic != null && cachedTopic.timestamp < Date.now() + ALLOWED_EDIT_DURATION) {
     return new Promise<Topic>(resolve => resolve(cachedTopic));
   }
 
@@ -375,7 +376,7 @@ export function getTopicById(id: string, user?: ChromunityUser): Promise<Topic> 
   return executeQuery(query, { username: user != null ? toLowerCase(user.name) : "", id })
     .catch(() => null)
     .then((topic: Topic) => {
-      topicsCache.set(id, topic, 300);
+      topicsCache.set(id, topic);
       return topic;
     });
 }
