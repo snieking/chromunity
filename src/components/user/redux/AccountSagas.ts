@@ -26,7 +26,7 @@ import {
 import { ChromunityUser } from "../../../types";
 import { ApplicationState } from "../../../store";
 import { toLowerCase } from "../../../util/util";
-import { userAuthenticatedEvent, userRegisteredEvent, userSignInEvent } from "../../../util/matomo";
+import { userEvent } from "../../../util/matomo";
 
 SSO.vaultUrl = config.vault.url;
 
@@ -79,7 +79,7 @@ function* vaultSuccessSaga(action: IVaultSuccess): Generator<any, any, any> {
 
     if (username) {
       yield authorizeUser(username, user);
-      userSignInEvent(username);
+      userEvent("sign-in");
     } else {
       yield put(saveVaultAccount(account.id, user));
       yield put(setAuthenticationStep(AuthenticationStep.USERNAME_INPUT_REQUIRED));
@@ -102,7 +102,7 @@ function* registerUserSaga(action: IRegisterUser) {
   try {
     yield executeOperations(user, op("register_user", action.username, accountId));
     yield authorizeUser(action.username, user);
-    userRegisteredEvent(action.username);
+    userEvent("register");
   } catch (error) {
     yield put(vaultCancel("Error signing in: " + error.message));
   }
@@ -153,7 +153,7 @@ function* authorizeUser(username: string, user: User) {
     yield put(setUser(chromunityUser));
     yield put(setAuthenticationStep(AuthenticationStep.AUTHENTICATED));
     yield put(checkDistrustedUsers(chromunityUser));
-    userAuthenticatedEvent(username);
+    userEvent("authenticate");
   } else {
     logger.info("Username [%s], or [%s] was null", username, JSON.stringify(user));
   }
