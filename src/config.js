@@ -15,7 +15,7 @@ module.exports = {
   matomo: {
     enabled: false,
     url: "https://matomo.chromia.dev/",
-    siteId: 3,
+    siteId: 4,
     trackErrors: true,
     jsFileName: "js/",
     phpFilename: "js/"
