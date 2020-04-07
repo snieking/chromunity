@@ -26,6 +26,7 @@ import {
 import { ChromunityUser } from "../../../types";
 import { ApplicationState } from "../../../store";
 import { toLowerCase } from "../../../util/util";
+import { userRegisteredEvent } from "../../../util/matomo";
 
 SSO.vaultUrl = config.vault.url;
 
@@ -100,6 +101,7 @@ function* registerUserSaga(action: IRegisterUser) {
   try {
     yield executeOperations(user, op("register_user", action.username, accountId));
     yield authorizeUser(action.username, user);
+    userRegisteredEvent(action.username);
   } catch (error) {
     yield put(vaultCancel("Error signing in: " + error.message));
   }
