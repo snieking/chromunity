@@ -2,6 +2,8 @@ import React from "react";
 
 import Avatar from "react-avatar-edit";
 import { createStyles, WithStyles, withStyles } from "@material-ui/core";
+import useTheme from "@material-ui/core/styles/useTheme";
+import { COLOR_CHROMIA_DARK, COLOR_OFF_WHITE } from "../../../theme";
 
 const styles = createStyles({
   avatarChanger: {
@@ -22,6 +24,7 @@ interface AvatarChangerState {
 
 const AvatarChanger = withStyles(styles)(
   class extends React.Component<AvatarChangerProps, AvatarChangerState> {
+
     constructor(props: AvatarChangerProps) {
       super(props);
       this.state = { src: "" };
@@ -37,6 +40,12 @@ const AvatarChanger = withStyles(styles)(
           onCrop={this.onCrop}
           src={this.state.src}
           className={this.props.classes.avatarChanger}
+          labelStyle={{
+            textShadow: `-0.7px -0.7px 0 ${COLOR_OFF_WHITE}, 0.7px -0.7px 0 ${COLOR_OFF_WHITE } -0.7px 0.7px 0 ${COLOR_OFF_WHITE}, 0.7px 0.7px 0 ${COLOR_OFF_WHITE}`,
+            fontSize: "18px",
+            fontFamily: '"International", "Roboto", "Helvetica", "Arial", sans-serif',
+            cursor: "pointer"
+          }}
         />
       );
     }
