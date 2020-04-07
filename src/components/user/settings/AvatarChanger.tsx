@@ -2,8 +2,7 @@ import React from "react";
 
 import Avatar from "react-avatar-edit";
 import { createStyles, WithStyles, withStyles } from "@material-ui/core";
-import useTheme from "@material-ui/core/styles/useTheme";
-import { COLOR_CHROMIA_DARK, COLOR_OFF_WHITE } from "../../../theme";
+import { COLOR_OFF_WHITE } from "../../../theme";
 
 const styles = createStyles({
   avatarChanger: {
