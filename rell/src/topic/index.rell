@@ -45,6 +45,7 @@ struct ext_topic {
 
 struct ext_topic_reply {
 	id: text;
+	topic_id: text;
 	author: text;
 	message: text;
 	is_sub_reply: boolean;

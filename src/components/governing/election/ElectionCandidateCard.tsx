@@ -197,7 +197,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
             onCopy={() => setSnackBarOpen(true)}
           >
             <Button fullWidth size="small" variant="contained" color="secondary">
-              Copy Vote Link
+              Share Vote Link
             </Button>
           </CopyToClipboard>
         </div>

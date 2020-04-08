@@ -82,6 +82,7 @@ query get_topic_replies_prior_to_timestamp(username: name, topic_id: text, times
     	val moderated_by = topic_reply_moderation @*{ .topic_reply.id == reply.id } ( .user.name );
     	val ext_reply = ext_topic_reply (
     		id = reply.id,
+    		topic_id = reply.topic_id,
     		author = reply.author,
     		message = reply.message,
     		is_sub_reply = reply.is_sub_reply,
@@ -117,6 +118,7 @@ query get_topic_replies_after_timestamp(username: name, topic_id: text, timestam
     	val moderated_by = topic_reply_moderation @*{ .topic_reply.id == reply.id } ( .user.name );
     	val ext_reply = ext_topic_reply (
     		id = reply.id,
+    		topic_id = reply.topic_id,
     		author = reply.author,
     		message = reply.message,
     		is_sub_reply = reply.is_sub_reply,
@@ -150,10 +152,11 @@ query count_replies_by_user(name): integer {
 
 query get_sub_replies(username: name, parent_reply_id: text) {	
     val replies = sub_reply@*{ .parent_reply.id == parent_reply_id } (
-        id= .child_reply.id,
-        author= .child_reply.author.display_name,
-        message= .child_reply.message,
-        is_sub_reply= .child_reply.is_sub_reply,
+        id = .child_reply.id,
+        topic_id = .child_reply.topic.id,
+        author = .child_reply.author.display_name,
+        message = .child_reply.message,
+        is_sub_reply = .child_reply.is_sub_reply,
         @sort timestamp= .child_reply.timestamp
     );
    
@@ -162,6 +165,7 @@ query get_sub_replies(username: name, parent_reply_id: text) {
     	val moderated_by = topic_reply_moderation @*{ .topic_reply.id == reply.id } ( .user.name );
     	val ext_reply = ext_topic_reply (
     		id = reply.id,
+    		topic_id = reply.topic_id,
     		author = reply.author,
     		message = reply.message,
     		is_sub_reply = reply.is_sub_reply,
