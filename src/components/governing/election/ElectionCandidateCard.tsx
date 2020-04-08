@@ -25,6 +25,7 @@ import { electionCandidateCardStyles } from "../sharedStyles";
 import { ApplicationState } from "../../../store";
 import { connect } from "react-redux";
 import { ChromunityUser } from "../../../types";
+import ConfirmDialog from "../../common/ConfirmDialog";
 
 interface Props {
   candidate: string;
@@ -45,6 +46,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
   const [replies, setReplies] = useState(0);
   const [distrusters, setDistrusters] = useState(0);
   const [distrusted, setDistrusted] = useState(0);
+  const [voteConfirmOpen, setVoteConfirmOpen] = useState(false);
 
   const [snackbarOpen, setSnackBarOpen] = useState(false);
 
@@ -205,13 +207,23 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
     } else {
       return (
         <div>
+          <ConfirmDialog
+            text={`Are you sure you would like to vote for @${name}?`}
+            subText={"You can always change your vote until the election completes."}
+            open={voteConfirmOpen}
+            onClose={() => setVoteConfirmOpen(false)}
+            onConfirm={() => {
+              setVoteConfirmOpen(false);
+              props.voteForCandidate(name);
+            }}
+          />
           {props.user != null && toLowerCase(props.user.name) !== toLowerCase(name) ? (
             <Button
               fullWidth
               size="small"
               variant="contained"
               color="primary"
-              onClick={() => props.voteForCandidate(name)}
+              onClick={() => setVoteConfirmOpen(true)}
               className={classes.voteBtn}
             >
               Vote
@@ -231,7 +243,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
             onCopy={() => setSnackBarOpen(true)}
           >
             <Button fullWidth size="small" variant="contained" color="secondary">
-              Copy Vote Link
+              Share Vote Link
             </Button>
           </CopyToClipboard>
         </div>

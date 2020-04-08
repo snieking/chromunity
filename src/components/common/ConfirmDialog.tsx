@@ -8,6 +8,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 
 interface Props {
   text: string;
+  subText?: string;
   open: boolean;
   onClose: Function;
   onConfirm: Function;
@@ -21,6 +22,7 @@ const ConfirmDialog: React.FunctionComponent<Props> = (props: Props) => {
       <DialogTitle>Are you sure?</DialogTitle>
       <DialogContent>
         <DialogContentText>{props.text}</DialogContentText>
+        {props.subText && (<DialogContentText>{props.subText}</DialogContentText>)}
       </DialogContent>
       <DialogActions>
         <Button onClick={() => props.onClose()} color="secondary">
