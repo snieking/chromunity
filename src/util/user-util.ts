@@ -38,7 +38,16 @@ export function getChatPassphrase(): any {
 
 export function getUsername(): string {
   const username = LOCAL_CACHE.get(USER_KEY);
+  pushUsernameToMatomo(username);
+  return username;
+}
 
+export function setUsername(username: string): void {
+  LOCAL_CACHE.set(USER_KEY, username);
+  pushUsernameToMatomo(username);
+}
+
+function pushUsernameToMatomo(username: string) {
   if (Sentry != null && ReactPiwik != null && username != null && !debugUserSet) {
     try {
       Sentry.configureScope(scope => scope.setUser({"username": username}));
@@ -48,12 +57,6 @@ export function getUsername(): string {
       logger.error("Error adding username [%s] for debug", username, error);
     }
   }
-
-  return username;
-}
-
-export function setUsername(username: string): void {
-  LOCAL_CACHE.set(USER_KEY, username);
 }
 
 export function ifEmptyAvatarThenPlaceholder(avatar: string, seed: string) {
