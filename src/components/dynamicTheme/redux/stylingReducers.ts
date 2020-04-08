@@ -1,8 +1,8 @@
 import { darkTheme, lightTheme } from "../../../theme";
-import { genericEvent } from "../../../util/eventHandler";
 import { Theme } from "@material-ui/core";
 import { Reducer } from "redux";
 import { StylingActions, StylingActionTypes, StylingState } from "./stylingTypes";
+import { genericEvent } from "../../../util/matomo";
 
 const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
 const isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches;
@@ -28,7 +28,7 @@ export const stylingReducer: Reducer<StylingState, StylingActions> = (state = in
       const isCurrentlyDarkTheme = state.theme === darkTheme;
       const selectedTheme = isCurrentlyDarkTheme ? "light" : "dark";
       localStorage.setItem("theme", selectedTheme);
-      genericEvent("theme", "Selected " + selectedTheme + " theme");
+      genericEvent("theme", "toggle-" + selectedTheme + "-theme");
 
       return {
         ...state,

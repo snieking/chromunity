@@ -15,6 +15,8 @@ export const electionEvent = (name: string) => sendEvent(CATEGORY_ELECTION, name
 export const representativeEvent = (name: string) => sendEvent(CATEGORY_REPRESENTATIVE, name);
 export const channelEvent = (name: string) => sendEvent(CATEGORY_CHANNEL, name);
 
+export const genericEvent = (category: string, action: string) => sendEvent(category, action);
+
 function sendEvent(category: string, name: string) {
   if (config.matomo.enabled && ReactPiwik != null) {
     ReactPiwik.push(['trackEvent', category, name]);
