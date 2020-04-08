@@ -49,6 +49,7 @@ operation delete_topic(id: text, descriptor_id: byte_array, username: text) {
     if (opt_poll != null) {
     	delete poll.poll_option@*{ .poll == opt_poll };
     	delete poll.poll_vote@*{ .poll == opt_poll };
+    	delete opt_poll;
     }
     
 	delete topic;

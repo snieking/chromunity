@@ -6,6 +6,7 @@ import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 import IconButton from "@material-ui/core/IconButton";
 import { COLOR_RED } from "../../../theme";
 import { PollSpecification } from "../../../types";
+import Typography from "@material-ui/core/Typography";
 
 interface Props {
   poll: PollSpecification;
@@ -13,8 +14,8 @@ interface Props {
 
 const useStyles = makeStyles(theme => ({
   question: {
-    marginTop: "10px",
-    marginBottom: "5px"
+    marginTop: "30px",
+    marginBottom: "15px"
   },
   optionWrapper: {
     marginTop: "1px",
@@ -95,6 +96,7 @@ const PollCreator: React.FunctionComponent<Props> = props => {
     <>
       <Grid container spacing={1}>
         <Grid item xs={12} className={classes.question}>
+          <Typography variant="h6" component="h6" style={{ marginBottom: "5px" }}>Poll</Typography>
           <TextField
             label="Question"
             variant="outlined"
