@@ -17,10 +17,15 @@ import CandidateElectionVoteLink from "./components/governing/election/Candidate
 import ChatPage from "./components/chat/ChatPage";
 import VaultCancel from "./components/user/authentication/VaultCancel";
 import Reports from "./components/governing/reports/Reports";
+import MetaTags from "react-meta-tags";
+import * as config from "./config";
 
 const Content: React.FunctionComponent = () => {
   return (
     <div className="content">
+      <MetaTags>
+        {config.test && (<meta property="robots" content="noindex" />)}
+      </MetaTags>
       <Switch>
         <Route exact path="/" component={() => <TopicWall key="topic-wall" type="all" />} />
         <Route path="/followings" component={() => <TopicWall type="userFollowings" />} />

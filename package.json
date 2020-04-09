@@ -51,8 +51,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "cp ./src/config.js ./src/config.bak.js && cp ./src/config-prod.js ./src/config.js && react-scripts build && mv ./src/config.bak.js ./src/config.js",
-    "build-dev": "cp ./src/config.js ./src/config.bak.js && cp ./src/config-dev.js ./src/config.js && react-scripts build && mv ./src/config.bak.js ./src/config.js",
-    "build-testnet": "cp ./src/config.js ./src/config.bak.js && cp ./src/config-testnet.js ./src/config.js && react-scripts build && mv ./src/config.bak.js ./src/config.js",
+    "build-dev": "cp ./src/config.js ./src/config.bak.js && cp ./src/config-dev.js ./src/config.js && cp ./public/robots.txt ./public/robots.txt.bak && cp ./public/robots.txt.dev ./public/robots.txt && react-scripts build && mv ./src/config.bak.js ./src/config.js && mv ./public/robots.txt.bak ./public/robots.txt",
+    "build-testnet": "cp ./src/config.js ./src/config.bak.js && cp ./src/config-testnet.js ./src/config.js && cp ./public/robots.txt ./public/robots.txt.bak && cp ./public/robots.txt.dev ./public/robots.txt && react-scripts build && mv ./src/config.bak.js ./src/config.js && mv ./public/robots.txt.bak ./public/robots.txt",
     "build-local": "react-scripts build",
     "test": "react-scripts test",
     "test-bc": "jest --setupFiles dotenv/config",

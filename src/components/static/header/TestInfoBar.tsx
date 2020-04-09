@@ -16,6 +16,8 @@ const TestInfoBar: React.FunctionComponent<Props> = (props: Props) => {
         </Typography>
       </AppBar>
     );
+  } else {
+    return null;
   }
 };
 
