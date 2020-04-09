@@ -101,10 +101,11 @@ describe("User page saga tests", () => {
 
   it(topicsTitle, async () => {
     const actions: UserPageActions[] = [];
-    const fakeStore = createFakeStore(actions, { username: user.name, topics: emptyTopics });
+    const fakeStore = createFakeStore(actions, { topics: emptyTopics });
 
     await runSaga(fakeStore, loadUserTopics, {
       type: UserPageActionTypes.LOAD_USER_TOPICS,
+      username: user.name,
       pageSize: pageSize
     }).toPromise();
     const updateUserTopicsAction = getUpdateUserTopicsAction(actions);
@@ -115,10 +116,11 @@ describe("User page saga tests", () => {
 
   it(topicsTitle + " | none exists", async () => {
     const actions: UserPageActions[] = [];
-    const fakeStore = createFakeStore(actions, { username: secondUser.name, topics: emptyTopics });
+    const fakeStore = createFakeStore(actions, { topics: emptyTopics });
 
     await runSaga(fakeStore, loadUserTopics, {
       type: UserPageActionTypes.LOAD_USER_TOPICS,
+      username: secondUser.name,
       pageSize: pageSize
     }).toPromise();
     const updateUserTopicsAction = getUpdateUserTopicsAction(actions);
@@ -129,10 +131,11 @@ describe("User page saga tests", () => {
 
   it(topicsTitle + " | pageSize returned", async () => {
     const actions: UserPageActions[] = [];
-    const fakeStore = createFakeStore(actions, { username: user.name, topics: emptyTopics });
+    const fakeStore = createFakeStore(actions, { topics: emptyTopics });
 
     await runSaga(fakeStore, loadUserTopics, {
       type: UserPageActionTypes.LOAD_USER_TOPICS,
+      username: user.name,
       pageSize: 1
     }).toPromise();
     const updateUserTopicsAction = getUpdateUserTopicsAction(actions);
@@ -143,10 +146,11 @@ describe("User page saga tests", () => {
 
   it(topicsTitle + " | older already loaded", async () => {
     const actions: UserPageActions[] = [];
-    const fakeStore = createFakeStore(actions, { username: user.name, topics: createFakeTopics(Date.now()) });
+    const fakeStore = createFakeStore(actions, { topics: createFakeTopics(Date.now()) });
 
     await runSaga(fakeStore, loadUserTopics, {
       type: UserPageActionTypes.LOAD_USER_TOPICS,
+      username: user.name,
       pageSize: pageSize
     }).toPromise();
     const updateUserTopicsAction = getUpdateUserTopicsAction(actions);
@@ -157,10 +161,11 @@ describe("User page saga tests", () => {
 
   it(repliesTitle, async () => {
     const actions: UserPageActions[] = [];
-    const fakeStore = createFakeStore(actions, { username: secondUser.name, replies: emptyReplies });
+    const fakeStore = createFakeStore(actions, { replies: emptyReplies });
 
     await runSaga(fakeStore, loadUserReplies, {
       type: UserPageActionTypes.LOAD_USER_REPLIES,
+      username: secondUser.name,
       pageSize: pageSize
     }).toPromise();
     const updateUserRepliesAction = getUpdateUserRepliesAction(actions);
@@ -171,10 +176,11 @@ describe("User page saga tests", () => {
 
   it(repliesTitle + " | none exists", async () => {
     const actions: UserPageActions[] = [];
-    const fakeStore = createFakeStore(actions, { username: user.name, replies: emptyReplies });
+    const fakeStore = createFakeStore(actions, { replies: emptyReplies });
 
     await runSaga(fakeStore, loadUserReplies, {
       type: UserPageActionTypes.LOAD_USER_REPLIES,
+      username: user.name,
       pageSize: pageSize
     }).toPromise();
     const updateUserRepliesAction = getUpdateUserRepliesAction(actions);
@@ -185,10 +191,11 @@ describe("User page saga tests", () => {
 
   it(repliesTitle + " | pageSize returned", async () => {
     const actions: UserPageActions[] = [];
-    const fakeStore = createFakeStore(actions, { username: secondUser.name, replies: emptyReplies });
+    const fakeStore = createFakeStore(actions, { replies: emptyReplies });
 
     await runSaga(fakeStore, loadUserReplies, {
       type: UserPageActionTypes.LOAD_USER_REPLIES,
+      username: secondUser.name,
       pageSize: 1
     }).toPromise();
     const updateUserRepliesAction = getUpdateUserRepliesAction(actions);
@@ -199,10 +206,11 @@ describe("User page saga tests", () => {
 
   it(repliesTitle + " | older already loaded", async () => {
     const actions: UserPageActions[] = [];
-    const fakeStore = createFakeStore(actions, { username: secondUser.name, replies: createFakeReplies(Date.now()) });
+    const fakeStore = createFakeStore(actions, { replies: createFakeReplies(Date.now()) });
 
     await runSaga(fakeStore, loadUserReplies, {
       type: UserPageActionTypes.LOAD_USER_REPLIES,
+      username: secondUser.name,
       pageSize: pageSize
     }).toPromise();
     const updateUserRepliesAction = getUpdateUserRepliesAction(actions);
@@ -213,10 +221,11 @@ describe("User page saga tests", () => {
 
   it(channelsTitle, async () => {
     const actions: UserPageActions[] = [];
-    const fakeStore = createFakeStore(actions, { username: secondUser.name });
+    const fakeStore = createFakeStore(actions, { });
 
     await runSaga(fakeStore, loadUserFollowedChannels, {
-      type: UserPageActionTypes.LOAD_USER_FOLLOWED_CHANNELS
+      type: UserPageActionTypes.LOAD_USER_FOLLOWED_CHANNELS,
+      username: secondUser.name
     }).toPromise();
 
     const updateUserFollowedChannelsAction = getUpdateUserFollowedChannelsAction(actions);
@@ -226,10 +235,11 @@ describe("User page saga tests", () => {
 
   it(channelsTitle + " | none returned", async () => {
     const actions: UserPageActions[] = [];
-    const fakeStore = createFakeStore(actions, { username: user.name });
+    const fakeStore = createFakeStore(actions, { });
 
     await runSaga(fakeStore, loadUserFollowedChannels, {
-      type: UserPageActionTypes.LOAD_USER_FOLLOWED_CHANNELS
+      type: UserPageActionTypes.LOAD_USER_FOLLOWED_CHANNELS,
+      username: user.name
     }).toPromise();
 
     const updateUserFollowedChannelsAction = getUpdateUserFollowedChannelsAction(actions);
