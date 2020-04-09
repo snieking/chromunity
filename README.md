@@ -66,9 +66,3 @@ Chromia provides a development Vault that can be used for local SSO during devel
    Chain ID: <take the one from your .env file>
    ```
 4. Click add and you should now be able to sign-in to your local Chromunity using SSO.
-
-## Copyrighted fonts
-Chromunity uses a copyrighted font which is not included in the repository.
-
-In order to use the Chromia font, add **Battlefin-Black.otf**, as well as **International.ttf** to **public/fonts** directory in order to use that font. 
-The application will work fine without it and fall back to other fonts.

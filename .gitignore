@@ -37,10 +37,6 @@ yarn-error.log*
 *.iml
 .classpath
 
-# Exclude copyrighted fonts
-*.otf
-*.ttf
-
 # Emacs
 *~
 /bin/
