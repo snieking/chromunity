@@ -72,16 +72,27 @@ const UserWall = withStyles(styles)(
         activeTab: 0
       };
 
-      this.props.userPageInit(props.match.params.userId);
-
       this.renderUserPageIntro = this.renderUserPageIntro.bind(this);
       this.handleChange = this.handleChange.bind(this);
+      this.update = this.update.bind(this);
     }
 
     componentDidMount(): void {
-      this.props.loadUserTopics(topicsPageSize);
-      this.props.loadUserReplies(topicsPageSize);
-      this.props.loadUserFollowedChannels();
+      this.update();
+    }
+
+    componentDidUpdate(prevProps: Readonly<UserWallProps>): void {
+      if (prevProps.match.params.userId !== this.props.match.params.userId) {
+        this.update();
+      }
+    }
+
+    update() {
+      const username = this.props.match.params.userId;
+      this.props.userPageInit();
+      this.props.loadUserTopics(username, topicsPageSize);
+      this.props.loadUserReplies(username, topicsPageSize);
+      this.props.loadUserFollowedChannels(username);
     }
 
     render() {
@@ -164,10 +175,10 @@ const mapStateToProps = (store: ApplicationState) => {
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
-    userPageInit: (username: string) => dispatch(userPageInit(username)),
-    loadUserTopics: (pageSize: number) => dispatch(loadUserTopics(pageSize)),
-    loadUserReplies: (pageSize: number) => dispatch(loadUserReplies(pageSize)),
-    loadUserFollowedChannels: () => dispatch(loadUserFollowedChannels())
+    userPageInit: () => dispatch(userPageInit()),
+    loadUserTopics: (username: string, pageSize: number) => dispatch(loadUserTopics(username, pageSize)),
+    loadUserReplies: (username: string, pageSize: number) => dispatch(loadUserReplies(username, pageSize)),
+    loadUserFollowedChannels: (username: string, ) => dispatch(loadUserFollowedChannels(username))
   };
 };
 

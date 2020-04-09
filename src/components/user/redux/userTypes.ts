@@ -12,11 +12,11 @@ export enum UserPageActionTypes {
 
 export interface InitUserAction {
   type: UserPageActionTypes.INIT_USER;
-  username: string;
 }
 
 export interface LoadUserTopicsAction {
   type: UserPageActionTypes.LOAD_USER_TOPICS;
+  username: string;
   pageSize: number;
 }
 
@@ -28,6 +28,7 @@ export interface UpdateUserTopicsAction {
 
 export interface LoadUserRepliesAction {
   type: UserPageActionTypes.LOAD_USER_REPLIES;
+  username: string;
   pageSize: number;
 }
 
@@ -39,6 +40,7 @@ export interface UpdateUserRepliesAction {
 
 export interface LoadUserFollowedChannelsAction {
   type: UserPageActionTypes.LOAD_USER_FOLLOWED_CHANNELS;
+  username: string;
 }
 
 export interface UpdateUserFollowedChannelsAction {
@@ -57,7 +59,6 @@ export type UserPageActions =
 
 export interface UserPageState {
   loading: boolean;
-  username: string;
   topics: Topic[];
   couldExistOlderTopics: boolean;
   replies: TopicReply[];

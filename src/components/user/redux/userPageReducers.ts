@@ -3,7 +3,6 @@ import { Reducer } from "redux";
 
 const initialUserPageState: UserPageState = {
   loading: false,
-  username: "",
   topics: [],
   couldExistOlderTopics: false,
   replies: [],
@@ -17,7 +16,6 @@ export const userPageReducer: Reducer<UserPageState, UserPageActions> = (state =
       return {
         ...state,
         loading: true,
-        username: action.username,
         topics: [],
         replies: [],
         followedChannels: [],

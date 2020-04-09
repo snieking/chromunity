@@ -11,25 +11,26 @@ import {
 } from "./userTypes";
 import { Topic, TopicReply } from "../../../types";
 
-export const userPageInit: ActionCreator<InitUserAction> = (username: string) => ({
-  type: UserPageActionTypes.INIT_USER,
-  username: username
+export const userPageInit: ActionCreator<InitUserAction> = () => ({
+  type: UserPageActionTypes.INIT_USER
 });
 
-export const loadUserTopics: ActionCreator<LoadUserTopicsAction> = (pageSize: number) => ({
+export const loadUserTopics: ActionCreator<LoadUserTopicsAction> = (username: string, pageSize: number) => ({
   type: UserPageActionTypes.LOAD_USER_TOPICS,
-  pageSize: pageSize
+  username,
+  pageSize
 });
 
 export const updateUserTopics: ActionCreator<UpdateUserTopicsAction> = (topics: Topic[], couldExistOlder: boolean) => ({
   type: UserPageActionTypes.UPDATE_USER_TOPICS,
-  topics: topics,
+  topics,
   couldExistOlderTopics: couldExistOlder
 });
 
-export const loadUserReplies: ActionCreator<LoadUserRepliesAction> = (pageSize: number) => ({
+export const loadUserReplies: ActionCreator<LoadUserRepliesAction> = (username: string, pageSize: number) => ({
   type: UserPageActionTypes.LOAD_USER_REPLIES,
-  pageSize: pageSize
+  username,
+  pageSize
 });
 
 export const updateUserReplies: ActionCreator<UpdateUserRepliesAction> = (
@@ -41,8 +42,9 @@ export const updateUserReplies: ActionCreator<UpdateUserRepliesAction> = (
   couldExistOlderReplies: couldExistOlder
 });
 
-export const loadUserFollowedChannels: ActionCreator<LoadUserFollowedChannelsAction> = () => ({
-  type: UserPageActionTypes.LOAD_USER_FOLLOWED_CHANNELS
+export const loadUserFollowedChannels: ActionCreator<LoadUserFollowedChannelsAction> = (username: string) => ({
+  type: UserPageActionTypes.LOAD_USER_FOLLOWED_CHANNELS,
+  username
 });
 
 export const updateUserFollowedChannels: ActionCreator<UpdateUserFollowedChannelsAction> = (channels: string[]) => ({

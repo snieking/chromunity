@@ -134,9 +134,20 @@ const ProfileCard = withStyles(styles)(
       this.renderActions = this.renderActions.bind(this);
       this.suspendUser = this.suspendUser.bind(this);
       this.handleSuspendUserClose = this.handleSuspendUserClose.bind(this);
+      this.update = this.update.bind(this);
     }
 
     componentDidMount(): void {
+      this.update();
+    }
+
+    componentDidUpdate(prevProps: Readonly<ProfileCardProps>): void {
+      if (prevProps.username !== this.props.username) {
+        this.update();
+      }
+    }
+
+    update() {
       isRegistered(this.props.username).then(isRegistered => {
         this.setState({ registered: isRegistered });
 

@@ -179,7 +179,7 @@ export function* loadFollowedChannelsTopics(action: LoadFollowedChannelsTopicWal
   const topics: Topic[] = yield select(getFollowedChannelsTopics);
 
   let retrievedTopics: Topic[];
-  let couldExistOlder = false;
+  let couldExistOlder: boolean;
   if (topics.length > 0) {
     // Load recent topics
     retrievedTopics = yield getTopicsFromFollowedChannelsAfterTimestamp(
