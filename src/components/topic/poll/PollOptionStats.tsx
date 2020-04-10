@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Typography from "@material-ui/core/Typography";
 import useTheme from "@material-ui/core/styles/useTheme";
 import makeStyles from "@material-ui/core/styles/makeStyles";
@@ -27,7 +27,8 @@ const useStyles = makeStyles(theme => ({
       theme.palette.type === "dark" ? COLOR_CHROMIA_DARK : COLOR_OFF_WHITE
     }, -0.7px 0.7px 0 ${theme.palette.type === "dark" ? COLOR_CHROMIA_DARK : COLOR_OFF_WHITE}, 0.7px 0.7px 0 ${
       theme.palette.type === "dark" ? COLOR_CHROMIA_DARK : COLOR_OFF_WHITE
-    }`
+    }`,
+    zIndex: 9999
   },
   percentage: {
     marginRight: "20px"
@@ -37,6 +38,17 @@ const useStyles = makeStyles(theme => ({
 const PollOptionStats: React.FunctionComponent<Props> = props => {
   const theme = useTheme();
   const classes = useStyles();
+
+  const [width, setWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    function handleResize() {
+      setWidth(window.innerWidth);
+    }
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const percentageOfVotes = (props.votes / props.total) * 100;
 
@@ -51,7 +63,7 @@ const PollOptionStats: React.FunctionComponent<Props> = props => {
         }}
       >
         <div className={classes.textWrapper}>
-          <Typography id={props.text} className={classes.text} gutterBottom>
+          <Typography id={props.text} className={classes.text} style={{ minWidth: width*0.7 }} gutterBottom>
             <span className={classes.percentage}>{Math.round(percentageOfVotes)}%</span>
             {props.text}
           </Typography>
