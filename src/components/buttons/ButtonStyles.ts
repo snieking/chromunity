@@ -5,7 +5,8 @@ export const largeButtonStyles = (theme: Theme) =>
     buttonWrapper: {
       position: "fixed",
       bottom: "1px",
-      right: "1px"
+      right: "1px",
+      zIndex: 9999
     },
     button: {
       backgroundColor: theme.palette.primary.main,
