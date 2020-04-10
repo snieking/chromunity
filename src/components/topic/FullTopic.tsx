@@ -132,6 +132,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
   const [notFound, setNotFound] = useState(false);
   const [avatar, setAvatar] = useState("");
   const [stars, setStars] = useState(0);
+  const [usersWhoStarRated, setUsersWhoStarRated] = useState<string[]>([]);
   const [ratedByMe, setRatedByMe] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [topicReplies, setTopicReplies] = useState<TopicReply[]>([]);
@@ -162,6 +163,12 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     // eslint-disable-next-line
   }, [props.match.params.id]);
 
+  useEffect(() => {
+    if (props.user && usersWhoStarRated) {
+      setRatedByMe(usersWhoStarRated.includes(toLowerCase(props.user.name)));
+    }
+  }, [props.user, usersWhoStarRated]);
+
   function consumeTopicData(t: Topic): void {
     setTopic(t);
 
@@ -170,8 +177,8 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     getPoll(t.id).then(poll => setPoll(poll));
 
     getTopicStarRaters(t.id, true).then(usersWhoStarRated => {
+      setUsersWhoStarRated(usersWhoStarRated);
       setStars(usersWhoStarRated.length);
-      setRatedByMe(usersWhoStarRated.includes(props.user != null && toLowerCase(props.user.name)));
     });
     getTopicSubscribers(t.id).then(subscribers =>
       setSubscribed(props.user != null && subscribers.includes(props.user.name))
