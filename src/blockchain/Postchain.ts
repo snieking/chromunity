@@ -56,7 +56,7 @@ export const executeOperations = async (user: User, ...operations: Operation[]) 
     .then((result: unknown) => {
       OP_LOCK.remove(lockId);
       return result;
-    }).finally(() => finalizeMetrics(operations[0].name, stopwatch));
+    }).finally(() => finalizeMetrics("trx", operations[0].name, stopwatch));
 };
 
 export const executeQuery = async (name: string, params: any) => {
@@ -88,12 +88,12 @@ export const executeQuery = async (name: string, params: any) => {
       logger.debug(`Returning result: ${JSON.stringify(result)}`);
       return result;
     })
-    .finally(() => finalizeMetrics(name, sw));
+    .finally(() => finalizeMetrics("query", name, sw));
 };
 
-const finalizeMetrics = (name: string, sw: Stopwatch) => {
+const finalizeMetrics = (type: string, name: string, sw: Stopwatch) => {
   sw.stop();
-  metricEvent(name, sw.getTime());
+  metricEvent(type, name, sw.getTime());
 };
 
 const removeSessionObjects = () => {

@@ -20,7 +20,7 @@ export const channelEvent = (name: string) => sendEvent(CATEGORY_CHANNEL, name);
 
 export const generalEvent = (action: string) => sendEvent(CATEGORY_GENERAL, action);
 
-export const metricEvent = (name: string, value: number) => sendEventValue(CATEGORY_METRICS, name, value);
+export const metricEvent = (type: string, name: string, value: number) => sendEventValue(CATEGORY_METRICS, type, name, value);
 
 function sendEvent(category: string, name: string) {
   if (config.matomo.enabled && ReactPiwik != null) {
@@ -28,8 +28,8 @@ function sendEvent(category: string, name: string) {
   }
 }
 
-function sendEventValue(category: string, name: string, value: number) {
+function sendEventValue(category: string, type: string, name: string, value: number) {
   if (config.matomo.enabled && ReactPiwik != null) {
-    ReactPiwik.push(['trackEvent', category, name, value]);
+    ReactPiwik.push(['trackEvent', category, type, name, value]);
   }
 }
