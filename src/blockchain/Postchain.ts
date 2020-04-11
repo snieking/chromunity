@@ -57,7 +57,7 @@ export const executeOperations = async (user: User, ...operations: Operation[]) 
       OP_LOCK.remove(lockId);
       return result;
     })
-    .finally(() => finalizeMetrics("trx", operations[0].name, stopwatch));
+    .finally(() => finalizeMetrics("transactions", operations[0].name, stopwatch));
 };
 
 export const executeQuery = async (name: string, params: any) => {
@@ -77,19 +77,14 @@ export const executeQuery = async (name: string, params: any) => {
 
   const BC = await BLOCKCHAIN;
 
-  const sw = new Stopwatch();
-  sw.start();
+  return BC.query(name, params).then((result: unknown) => {
+    if (!test) {
+      QUERY_CACHE.set(cacheId, result, 3);
+    }
 
-  return BC.query(name, params)
-    .then((result: unknown) => {
-      if (!test) {
-        QUERY_CACHE.set(cacheId, result, 3);
-      }
-
-      logger.debug(`Returning result: ${JSON.stringify(result)}`);
-      return result;
-    })
-    .finally(() => finalizeMetrics("query", name, sw));
+    logger.debug(`Returning result: ${JSON.stringify(result)}`);
+    return result;
+  });
 };
 
 const finalizeMetrics = (type: string, name: string, sw: Stopwatch) => {
