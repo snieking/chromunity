@@ -9,6 +9,8 @@ const CATEGORY_REPRESENTATIVE = "representative";
 const CATEGORY_CHANNEL = "channel";
 const CATEGORY_GENERAL = "general";
 
+const CATEGORY_METRICS = "metrics";
+
 export const userEvent = (name: string) => sendEvent(CATEGORY_USER, name);
 export const chatEvent = (name: string) => sendEvent(CATEGORY_CHAT, name);
 export const topicEvent = (name: string) => sendEvent(CATEGORY_TOPIC, name);
@@ -18,8 +20,16 @@ export const channelEvent = (name: string) => sendEvent(CATEGORY_CHANNEL, name);
 
 export const generalEvent = (action: string) => sendEvent(CATEGORY_GENERAL, action);
 
+export const metricEvent = (name: string, value: number) => sendEventValue(CATEGORY_METRICS, name, value);
+
 function sendEvent(category: string, name: string) {
   if (config.matomo.enabled && ReactPiwik != null) {
     ReactPiwik.push(['trackEvent', category, name]);
+  }
+}
+
+function sendEventValue(category: string, name: string, value: number) {
+  if (config.matomo.enabled && ReactPiwik != null) {
+    ReactPiwik.push(['trackEvent', category, name, value]);
   }
 }

@@ -4,6 +4,8 @@ import { Operation, User } from "ft3-lib";
 import * as BoomerangCache from "boomerang-cache";
 import logger from "../util/logger";
 import Postchain from "ft3-lib/dist/ft3/core/postchain";
+import { Stopwatch } from "ts-stopwatch";
+import { metricEvent } from "../util/matomo";
 
 const IF_NULL_CLEAR_CACHE = "clear-cache";
 
@@ -45,13 +47,16 @@ export const executeOperations = async (user: User, ...operations: Operation[]) 
   const trxBuilder = BC.transactionBuilder();
   operations.every(value => trxBuilder.add(value));
 
+  const stopwatch = new Stopwatch();
+  stopwatch.start();
+
   return trxBuilder
     .buildAndSign(user)
     .post()
     .then((result: unknown) => {
       OP_LOCK.remove(lockId);
       return result;
-    });
+    }).finally(() => finalizeMetrics(operations[0].name, stopwatch));
 };
 
 export const executeQuery = async (name: string, params: any) => {
@@ -70,14 +75,25 @@ export const executeQuery = async (name: string, params: any) => {
   }
 
   const BC = await BLOCKCHAIN;
-  return BC.query(name, params).then((result: unknown) => {
-    if (!test) {
-      QUERY_CACHE.set(cacheId, result, 3);
-    }
 
-    logger.debug(`Returning result: ${JSON.stringify(result)}`);
-    return result;
-  });
+  const sw = new Stopwatch();
+  sw.start();
+
+  return BC.query(name, params)
+    .then((result: unknown) => {
+      if (!test) {
+        QUERY_CACHE.set(cacheId, result, 3);
+      }
+
+      logger.debug(`Returning result: ${JSON.stringify(result)}`);
+      return result;
+    })
+    .finally(() => finalizeMetrics(name, sw));
+};
+
+const finalizeMetrics = (name: string, sw: Stopwatch) => {
+  sw.stop();
+  metricEvent(name, sw.getTime());
 };
 
 const removeSessionObjects = () => {
