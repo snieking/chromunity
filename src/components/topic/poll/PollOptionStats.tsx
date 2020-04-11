@@ -23,11 +23,6 @@ const useStyles = makeStyles(theme => ({
     margin: "10px"
   },
   text: {
-    textShadow: `-0.7px -0.7px 0 ${theme.palette.type === "dark" ? COLOR_CHROMIA_DARK : COLOR_OFF_WHITE}, 0.7px -0.7px 0 ${
-      theme.palette.type === "dark" ? COLOR_CHROMIA_DARK : COLOR_OFF_WHITE
-    }, -0.7px 0.7px 0 ${theme.palette.type === "dark" ? COLOR_CHROMIA_DARK : COLOR_OFF_WHITE}, 0.7px 0.7px 0 ${
-      theme.palette.type === "dark" ? COLOR_CHROMIA_DARK : COLOR_OFF_WHITE
-    }`,
     zIndex: 9999
   },
   percentage: {
@@ -57,7 +52,8 @@ const PollOptionStats: React.FunctionComponent<Props> = props => {
       <div
         className={classes.wrapper}
         style={{
-          backgroundColor: props.selected ? theme.palette.secondary.main : theme.palette.primary.main,
+          opacity: props.selected ? 1 : 0.5,
+          backgroundColor: theme.palette.secondary.main,
           transition: "width .2s ease-in",
           width: `${percentageOfVotes}%`
         }}
