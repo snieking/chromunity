@@ -2,7 +2,8 @@
 module.exports = {
   blockchain: {
     nodeApiUrl: "http://localhost:7740",
-    rid: process.env.REACT_APP_BRID
+    rid: process.env.REACT_APP_BRID,
+    explorerBaseUrl: "https://explorer-testnet.chromia.com/"
   },
   vault: {
     url: "https://dev.vault.chromia-development.com",

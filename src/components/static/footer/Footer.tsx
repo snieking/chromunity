@@ -4,27 +4,28 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import GitHubLogo from "./GitHubLogo";
 import TwitterLogo from "./TwitterLogo";
 import TelegramLogo from "./TelegramLogo";
+import BlockExplorerLogo from "./BlockExplorerLogo";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   footer: {
     width: "100%",
     position: "relative",
     textAlign: "center",
-    marginBottom: "10px"
+    marginBottom: "10px",
   },
   link: {
     textDecoration: "none",
     color: "inherit",
-    margin: "3px"
+    margin: "3px",
   },
   text: {
     fontSize: "12px",
     color: theme.palette.primary.main,
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif'
-  }
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+  },
 }));
 
-const Footer: React.FunctionComponent = props => {
+const Footer: React.FunctionComponent = (props) => {
   const classes = useStyles(props);
   return (
     <footer className={classes.footer}>
@@ -48,8 +49,9 @@ const Footer: React.FunctionComponent = props => {
           <GitHubLogo />
         </a>
       </Tooltip>
+      <BlockExplorerLogo />
     </footer>
   );
 };
 
-export default (Footer);
+export default Footer;
