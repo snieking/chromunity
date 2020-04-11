@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Typography from "@material-ui/core/Typography";
 import useTheme from "@material-ui/core/styles/useTheme";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import { COLOR_CHROMIA_DARK, COLOR_CHROMIA_DARKER, COLOR_OFF_WHITE } from "../../../theme";
+import { COLOR_CHROMIA_DARKER } from "../../../theme";
 
 interface Props {
   text: string;
