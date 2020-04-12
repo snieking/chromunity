@@ -142,6 +142,10 @@ const TopicOverviewCard = withStyles(styles)(
     }
 
     isNewTopic() {
+      if (this.props.user == null || toLowerCase(this.props.user.name) === toLowerCase(this.props.topic.author)) {
+        return false;
+      }
+
       const topicCreated = this.props.topic.timestamp;
       const wallPreviouslyRead = getWallPreviouslyRefreshed();
 
