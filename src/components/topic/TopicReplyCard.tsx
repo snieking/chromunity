@@ -19,7 +19,7 @@ import {
   Tooltip,
   Typography,
   withStyles,
-  WithStyles
+  WithStyles,
 } from "@material-ui/core";
 import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { Delete, Reply, Report, StarBorder, StarRate, UnfoldMore } from "@material-ui/icons";
@@ -31,7 +31,7 @@ import {
   getTopicSubReplies,
   giveReplyStarRating,
   modifyReply,
-  removeReplyStarRating
+  removeReplyStarRating,
 } from "../../blockchain/TopicService";
 
 import {
@@ -39,7 +39,7 @@ import {
   removeTopicReply,
   hasReportedId,
   REMOVE_TOPIC_REPLY_OP_ID,
-  hasReportedReply
+  hasReportedReply,
 } from "../../blockchain/RepresentativesService";
 import EditMessageButton from "../buttons/EditMessageButton";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
@@ -59,57 +59,57 @@ import PreviewLinks from "../common/PreviewLinks";
 const styles = (theme: Theme) =>
   createStyles({
     removed: {
-      opacity: 0.25
+      opacity: 0.25,
     },
     authorName: {
       display: "block",
       paddingTop: "2px",
       paddingLeft: "5px",
-      paddingRight: "5px"
+      paddingRight: "5px",
     },
     authorLink: {
       float: "right",
       borderRadius: "0 0 0 5px",
       marginTop: "-18px",
       marginBottom: "7px",
-      marginRight: "-16px"
+      marginRight: "-16px",
     },
     content: {
       marginRight: "5px",
       whiteSpace: "normal",
-      maxWidth: "95%"
+      maxWidth: "95%",
     },
     bottomBar: {
       marginTop: "7px",
       marginBottom: "-22px",
-      marginLeft: "-10px"
+      marginLeft: "-10px",
     },
     userColor: {
-      backgroundColor: theme.palette.secondary.main
+      backgroundColor: theme.palette.secondary.main,
     },
     repColor: {
-      backgroundColor: COLOR_ORANGE
+      backgroundColor: COLOR_ORANGE,
     },
     iconYellow: {
-      color: COLOR_YELLOW
+      color: COLOR_YELLOW,
     },
     iconOrange: {
-      color: COLOR_ORANGE
+      color: COLOR_ORANGE,
     },
     iconRed: {
-      color: COLOR_RED
+      color: COLOR_RED,
     },
     editorWrapper: {
-      position: "relative"
+      position: "relative",
     },
     highlighted: {
       borderColor: theme.palette.secondary.main,
       borderSize: "1px",
-      border: "solid"
+      border: "solid",
     },
     hidden: {
-      display: "none"
-    }
+      display: "none",
+    },
   });
 
 interface Props extends WithStyles<typeof styles> {
@@ -142,7 +142,7 @@ const replyMaxRenderAgeMillis: number = 1000 * 60 * 60 * 24;
 
 const replyUnfoldCache = BoomerangCache.create("reply-unfold-bucket", {
   storage: "local",
-  encrypt: false
+  encrypt: false,
 });
 
 const TopicReplyCard = withStyles(styles)(
@@ -169,7 +169,7 @@ const TopicReplyCard = withStyles(styles)(
         reportReplyDialogOpen: false,
         isLoading: false,
         timeLeftUntilNoLongerModifiable: 0,
-        renderSubReplies: previouslyFoldedSubReplies ? decisionToRenderSubReplies : shouldRenderDueToTimestamp
+        renderSubReplies: previouslyFoldedSubReplies ? decisionToRenderSubReplies : shouldRenderDueToTimestamp,
       };
 
       if (!previouslyFoldedSubReplies && shouldRenderDueToTimestamp && this.props.cascadeOpenSubReplies != null) {
@@ -193,24 +193,28 @@ const TopicReplyCard = withStyles(styles)(
     componentDidMount() {
       const user: ChromunityUser = this.props.user;
 
-      getUserSettingsCached(this.props.reply.author, 1440).then(settings => {
+      getUserSettingsCached(this.props.reply.author, 1440).then((settings) => {
         this.setState({
-          avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.reply.author)
+          avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.reply.author),
         });
       });
-      getReplyStarRaters(this.props.reply.id).then(usersWhoStarRated =>
+      getReplyStarRaters(this.props.reply.id).then((usersWhoStarRated) =>
         this.setState({
           stars: usersWhoStarRated.length,
-          ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase())
+          ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase()),
         })
       );
-      getTopicSubReplies(this.props.reply.id, user).then(replies => this.setState({ subReplies: replies }));
+      getTopicSubReplies(this.props.reply.id, user).then((replies) => this.setState({ subReplies: replies }));
 
       const modifiableUntil = this.props.reply.timestamp + allowedEditTimeMillis;
-      setInterval(() => {
-        this.setState({ timeLeftUntilNoLongerModifiable: this.getTimeLeft(modifiableUntil) });
-      }, 1000);
 
+      if (modifiableUntil > Date.now()) {
+        setInterval(() => {
+          if (modifiableUntil >= Date.now()) {
+            this.setState({ timeLeftUntilNoLongerModifiable: this.getTimeLeft(modifiableUntil) });
+          }
+        }, 1000);
+      }
       if (this.isReplyHighlighted()) {
         this.openSubReplies();
         this.scrollToReply();
@@ -261,7 +265,7 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     renderSubReplies() {
-      return this.state.subReplies.map(reply => (
+      return this.state.subReplies.map((reply) => (
         <TopicReplyCard
           key={"reply-" + reply.id}
           reply={reply}
@@ -290,20 +294,20 @@ const TopicReplyCard = withStyles(styles)(
           if (this.state.ratedByMe) {
             removeReplyStarRating(this.props.user, id)
               .then(() =>
-                this.setState(prevState => ({
+                this.setState((prevState) => ({
                   ratedByMe: false,
                   stars: prevState.stars - 1,
-                  isLoading: false
+                  isLoading: false,
                 }))
               )
               .catch(() => this.setState({ isLoading: false }));
           } else {
             giveReplyStarRating(this.props.user, id)
               .then(() =>
-                this.setState(prevState => ({
+                this.setState((prevState) => ({
                   ratedByMe: true,
                   stars: prevState.stars + 1,
-                  isLoading: false
+                  isLoading: false,
                 }))
               )
               .catch(() => this.setState({ isLoading: false }));
@@ -384,8 +388,8 @@ const TopicReplyCard = withStyles(styles)(
             <IconButton
               aria-label="Reply"
               onClick={() =>
-                this.setState(prevState => ({
-                  replyBoxOpen: !prevState.replyBoxOpen
+                this.setState((prevState) => ({
+                  replyBoxOpen: !prevState.replyBoxOpen,
                 }))
               }
             >
@@ -446,7 +450,7 @@ const TopicReplyCard = withStyles(styles)(
 
     toggleRenderReply() {
       replyUnfoldCache.set(this.props.reply.id, !this.state.renderSubReplies, replyMaxRenderAgeMillis * 7);
-      this.setState(prevState => ({ renderSubReplies: !prevState.renderSubReplies }));
+      this.setState((prevState) => ({ renderSubReplies: !prevState.renderSubReplies }));
     }
 
     editReplyMessage(text: string) {
@@ -512,7 +516,7 @@ const TopicReplyCard = withStyles(styles)(
                   onClick={() =>
                     this.setState(
                       {
-                        removeReplyDialogOpen: false
+                        removeReplyDialogOpen: false,
                       },
                       () => removeTopicReply(this.props.user, this.props.reply.id).then(() => window.location.reload())
                     )
@@ -576,12 +580,12 @@ const TopicReplyCard = withStyles(styles)(
     addTextFromToolbarInReply(text: string) {
       const startPosition = this.textInput.current.selectionStart;
 
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         replyMessage: [
           prevState.replyMessage.slice(0, startPosition),
           text,
-          prevState.replyMessage.slice(startPosition)
-        ].join("")
+          prevState.replyMessage.slice(startPosition),
+        ].join(""),
       }));
 
       setTimeout(() => {
@@ -606,7 +610,7 @@ const TopicReplyCard = withStyles(styles)(
         message,
         this.props.reply.author
       ).then(() => {
-        getTopicSubReplies(this.props.reply.id).then(replies => this.setState({ subReplies: replies }));
+        getTopicSubReplies(this.props.reply.id).then((replies) => this.setState({ subReplies: replies }));
         this.openSubReplies();
       });
     }
@@ -616,7 +620,7 @@ const TopicReplyCard = withStyles(styles)(
 const mapStateToProps = (store: ApplicationState) => {
   return {
     user: store.account.user,
-    distrustedUsers: store.account.distrustedUsers
+    distrustedUsers: store.account.distrustedUsers,
   };
 };
 
