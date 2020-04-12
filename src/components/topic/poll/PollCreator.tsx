@@ -29,7 +29,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const MAX_OPTIONS = 4;
+const MAX_OPTIONS = 6;
 const MIN_OPTIONS = 2;
 
 const PollCreator: React.FunctionComponent<Props> = props => {

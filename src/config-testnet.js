@@ -2,7 +2,8 @@
 module.exports = {
   blockchain: {
     nodeApiUrl: "https://3o5bblkaha.execute-api.eu-west-1.amazonaws.com/chromia-node-vault/",
-    rid: "8683A6FB0F8B1A8A9C335ECB69743500590CA881FE567A75C627BA4CFFE7E254"
+    rid: "8683A6FB0F8B1A8A9C335ECB69743500590CA881FE567A75C627BA4CFFE7E254",
+    explorerBaseUrl: "https://explorer-testnet.chromia.com/"
   },
   vault: {
     url: "https://vault-testnet.chromia.com",

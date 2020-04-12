@@ -22,6 +22,7 @@ import { channelInit, loadChannel, loadChannelByPopularity, loadOlderTopicsInCha
 import { ApplicationState } from "../../store";
 import { shouldBeFiltered, toLowerCase } from "../../util/util";
 import { clearTopicsCache } from "./redux/wallActions";
+import { markTopicWallRefreshed } from "../../util/user-util";
 
 interface MatchParams {
   channel: string;
@@ -95,6 +96,7 @@ class ChannelWall extends React.Component<Props, State> {
 
     countChannelFollowers(channel).then(count => this.setState({ countOfFollowers: count }));
     countTopicsInChannel(channel).then(count => this.setState({ countOfTopics: count }));
+    markTopicWallRefreshed();
   }
 
   render() {

@@ -13,11 +13,14 @@ export interface Props {
 
 const useStyles = makeStyles(theme =>
   createStyles({
-    wrapper: {},
+    wrapper: {
+
+    },
     helpBtn: {
       position: "fixed",
       bottom: "1px",
-      left: "1px"
+      left: "1px",
+      zIndex: 10000
     },
     helpIcon: {
       color: theme.palette.type === "dark" ? COLOR_OFF_WHITE : COLOR_STEEL_BLUE,

@@ -17,7 +17,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const URL_REGEX = /\(?https?:\/\/(?![^" ]*(?:jpg|jpeg|png|gif))[^" \s)]+/gi;
-const YOUTUBE_ID_REGEX = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+const YOUTUBE_ID_REGEX = /^.*(youtu\.be\/|v\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
 
 const PreviewLinks: React.FunctionComponent<Props> = props => {
   const classes = useStyles();

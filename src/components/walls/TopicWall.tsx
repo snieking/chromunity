@@ -25,6 +25,7 @@ import { shouldBeFiltered, toLowerCase, uniqueId } from "../../util/util";
 import { COLOR_CHROMIA_DARK } from "../../theme";
 import Tutorial from "../common/Tutorial";
 import TutorialButton from "../buttons/TutorialButton";
+import { markTopicWallRefreshed } from "../../util/user-util";
 
 interface Props {
   type: string;
@@ -74,6 +75,7 @@ class TopicWall extends React.Component<Props, State> {
 
   componentDidMount() {
     this.retrieveLatestTopics(false);
+    markTopicWallRefreshed();
   }
 
   render() {
