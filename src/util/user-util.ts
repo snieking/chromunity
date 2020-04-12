@@ -20,6 +20,10 @@ const USER_KEY = "user";
 const USER_META_KEY = "user_meta";
 const RSA_PASS = "rsaPassPhrase";
 
+const WALL_UPDATED_IN_SESSION = "wallUpdatedInSession";
+const WALL_REFRESHED = "wallRefreshed";
+const WALL_PREVIOUSLY_REFRESHED = "wallPreviouslyRefreshed";
+
 let debugUserSet: boolean = false;
 
 export function clearSession(): void {
@@ -34,6 +38,22 @@ export function storeChatPassphrase(passphrase: string) {
 
 export function getChatPassphrase(): any {
   return ENCRYPTED_LOCAL_CACHE.get(RSA_PASS);
+}
+
+export function markTopicWallRefreshed() {
+  const updatedInTheSession = SESSION_CACHE.get(WALL_UPDATED_IN_SESSION);
+
+  if (!updatedInTheSession) {
+    const wallLatestRefresh = LOCAL_CACHE.get(WALL_REFRESHED);
+    LOCAL_CACHE.set(WALL_PREVIOUSLY_REFRESHED, wallLatestRefresh ? wallLatestRefresh : 0);
+    LOCAL_CACHE.set(WALL_REFRESHED, Date.now());
+    SESSION_CACHE.set(WALL_UPDATED_IN_SESSION, true, 300);
+  }
+}
+
+export function getWallPreviouslyRefreshed(): number {
+  const prevRefreshed = LOCAL_CACHE.get(WALL_PREVIOUSLY_REFRESHED);
+  return prevRefreshed ? prevRefreshed : 0;
 }
 
 export function getUsername(): string {

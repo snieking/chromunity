@@ -10,10 +10,10 @@ import {
   Theme,
   Typography,
   withStyles,
-  WithStyles
+  WithStyles,
 } from "@material-ui/core";
 import { prepareUrlPath, shouldBeFiltered, toLowerCase } from "../../util/util";
-import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
+import { getWallPreviouslyRefreshed, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
 import { StarBorder, StarRate } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import { Redirect } from "react-router";
@@ -25,38 +25,39 @@ import Timestamp from "../common/Timestamp";
 import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
 import CustomChip from "../common/CustomChip";
+import NewBadge from "./NewBadge";
 
 const styles = (theme: Theme) =>
   createStyles({
     representativeColor: {
-      color: COLOR_ORANGE
+      color: COLOR_ORANGE,
     },
     authorName: {
       display: "block",
       marginTop: "10px",
       marginRight: "10px",
-      marginLeft: "5px"
+      marginLeft: "5px",
     },
     rating: {
-      marginTop: "10px"
+      marginTop: "10px",
     },
     overviewDetails: {
-      marginLeft: "42px"
+      marginLeft: "42px",
     },
     iconYellow: {
-      color: COLOR_YELLOW
+      color: COLOR_YELLOW,
     },
     tagChips: {
-      display: "inline"
+      display: "inline",
     },
     removed: {
-      opacity: 0.5
+      opacity: 0.5,
     },
     replyStatusText: {
       [theme.breakpoints.down("md")]: {
-        display: "none"
-      }
-    }
+        display: "none",
+      },
+    },
   });
 
 interface Props extends WithStyles<typeof styles> {
@@ -75,6 +76,8 @@ interface State {
   numberOfReplies: number;
 }
 
+const DAY_IN_MILLIS = 86_400_000;
+
 const TopicOverviewCard = withStyles(styles)(
   class extends React.Component<Props, State> {
     constructor(props: Props) {
@@ -86,7 +89,7 @@ const TopicOverviewCard = withStyles(styles)(
         ratedByMe: false,
         redirectToFullCard: false,
         avatar: "",
-        numberOfReplies: 0
+        numberOfReplies: 0,
       };
 
       this.authorIsRepresentative = this.authorIsRepresentative.bind(this);
@@ -94,17 +97,17 @@ const TopicOverviewCard = withStyles(styles)(
     }
 
     componentDidMount() {
-      getTopicChannelBelongings(this.props.topic.id).then(channels => this.setState({ channels: channels }));
+      getTopicChannelBelongings(this.props.topic.id).then((channels) => this.setState({ channels: channels }));
 
       const user: ChromunityUser = this.props.user;
       this.setAvatar();
-      getTopicStarRaters(this.props.topic.id).then(usersWhoStarRated =>
+      getTopicStarRaters(this.props.topic.id).then((usersWhoStarRated) =>
         this.setState({
           stars: usersWhoStarRated.length,
-          ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase())
+          ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase()),
         })
       );
-      countTopicReplies(this.props.topic.id).then(count => this.setState({ numberOfReplies: count }));
+      countTopicReplies(this.props.topic.id).then((count) => this.setState({ numberOfReplies: count }));
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
@@ -120,14 +123,16 @@ const TopicOverviewCard = withStyles(styles)(
         return (
           <div
             className={
-              (this.props.user != null && this.props.representatives.includes(toLowerCase(this.props.user.name)))
-                && shouldBeFiltered(this.props.topic.moderated_by, this.props.distrustedUsers)
+              this.props.user != null &&
+              this.props.representatives.includes(toLowerCase(this.props.user.name)) &&
+              shouldBeFiltered(this.props.topic.moderated_by, this.props.distrustedUsers)
                 ? this.props.classes.removed
                 : ""
             }
           >
-            <Card raised={true} key={this.props.topic.id}>
+            <Card raised={true} key={this.props.topic.id} style={{ zIndex: 0 }}>
               <CardActionArea onClick={() => this.setState({ redirectToFullCard: true })}>
+                {this.isNewTopic() && <NewBadge />}
                 {this.renderCardContent()}
               </CardActionArea>
             </Card>
@@ -136,16 +141,23 @@ const TopicOverviewCard = withStyles(styles)(
       }
     }
 
+    isNewTopic() {
+      const topicCreated = this.props.topic.timestamp;
+      const wallPreviouslyRead = getWallPreviouslyRefreshed();
+
+      return topicCreated > wallPreviouslyRead && Date.now() - topicCreated < DAY_IN_MILLIS;
+    }
+
     setAvatar() {
       getUserSettingsCached(
         this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author,
         1440
-      ).then(settings =>
+      ).then((settings) =>
         this.setState({
           avatar: ifEmptyAvatarThenPlaceholder(
             settings.avatar,
             this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author
-          )
+          ),
         })
       );
     }
@@ -195,10 +207,10 @@ const TopicOverviewCard = withStyles(styles)(
       if (this.state.channels != null) {
         return (
           <div className={this.props.classes.tagChips}>
-            {this.state.channels.map(tag => {
+            {this.state.channels.map((tag) => {
               return (
                 <Link key={this.props.topic.id + ":" + tag} to={"/c/" + tag.replace("#", "")}>
-                  <CustomChip tag={tag}/>
+                  <CustomChip tag={tag} />
                 </Link>
               );
             })}
@@ -235,7 +247,7 @@ const mapStateToProps = (store: ApplicationState) => {
   return {
     user: store.account.user,
     distrustedUsers: store.account.distrustedUsers,
-    representatives: store.government.representatives.map(rep => toLowerCase(rep))
+    representatives: store.government.representatives.map((rep) => toLowerCase(rep)),
   };
 };
 

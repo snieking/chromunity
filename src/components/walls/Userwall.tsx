@@ -27,6 +27,7 @@ import {
   loadUserFollowedChannels
 } from "../user/redux/userPageActions";
 import CustomChip from "../common/CustomChip";
+import { markTopicWallRefreshed } from "../../util/user-util";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -79,6 +80,7 @@ const UserWall = withStyles(styles)(
 
     componentDidMount(): void {
       this.update();
+      markTopicWallRefreshed();
     }
 
     componentDidUpdate(prevProps: Readonly<UserWallProps>): void {
