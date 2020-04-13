@@ -59,7 +59,7 @@ export function getWallPreviouslyRefreshed(): number {
 }
 
 export function markTopicReadInSession(topicId: string) {
-  SESSION_CACHE.set(TOPIC_READ_PREFIX + topicId);
+  SESSION_CACHE.set(TOPIC_READ_PREFIX + topicId, true);
 }
 
 export function isTopicReadInSession(topicId: string) {
