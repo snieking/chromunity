@@ -22,11 +22,12 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "12px",
     color: theme.palette.primary.main,
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-  },
+  }
 }));
 
 const Footer: React.FunctionComponent = (props) => {
   const classes = useStyles(props);
+
   return (
     <footer className={classes.footer}>
       <Tooltip title="Chromia Twitter">
