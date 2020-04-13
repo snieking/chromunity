@@ -65,7 +65,7 @@ import Tutorial from "../common/Tutorial";
 import TutorialButton from "../buttons/TutorialButton";
 import { step } from "../common/TutorialStep";
 import { getUserSettingsCached } from "../../blockchain/UserService";
-import { ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
+import { ifEmptyAvatarThenPlaceholder, markTopicReadInSession } from "../../util/user-util";
 import Avatar, { AVATAR_SIZE } from "../common/Avatar";
 import PreviewLinks from "../common/PreviewLinks";
 import PageMeta from "../common/PageMeta";
@@ -156,6 +156,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     getTopicById(id, user).then(topic => {
       if (topic != null) {
         consumeTopicData(topic);
+        markTopicReadInSession(topic.id);
       } else {
         setNotFound(true);
       }

@@ -13,7 +13,7 @@ import {
   WithStyles,
 } from "@material-ui/core";
 import { prepareUrlPath, shouldBeFiltered, toLowerCase } from "../../util/util";
-import { getWallPreviouslyRefreshed, ifEmptyAvatarThenPlaceholder } from "../../util/user-util";
+import { getWallPreviouslyRefreshed, ifEmptyAvatarThenPlaceholder, isTopicReadInSession } from "../../util/user-util";
 import { StarBorder, StarRate } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../blockchain/UserService";
 import { Redirect } from "react-router";
@@ -149,7 +149,11 @@ const TopicOverviewCard = withStyles(styles)(
       const topicCreated = this.props.topic.timestamp;
       const wallPreviouslyRead = getWallPreviouslyRefreshed();
 
-      return topicCreated > wallPreviouslyRead && Date.now() - topicCreated < DAY_IN_MILLIS;
+      return (
+        topicCreated > wallPreviouslyRead &&
+        Date.now() - topicCreated < DAY_IN_MILLIS &&
+        !isTopicReadInSession(this.props.topic.id)
+      );
     }
 
     setAvatar() {

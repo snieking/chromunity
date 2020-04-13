@@ -24,6 +24,8 @@ const WALL_UPDATED_IN_SESSION = "wallUpdatedInSession";
 const WALL_REFRESHED = "wallRefreshed";
 const WALL_PREVIOUSLY_REFRESHED = "wallPreviouslyRefreshed";
 
+const TOPIC_READ_PREFIX = "topicRead:";
+
 let debugUserSet: boolean = false;
 
 export function clearSession(): void {
@@ -54,6 +56,14 @@ export function markTopicWallRefreshed() {
 export function getWallPreviouslyRefreshed(): number {
   const prevRefreshed = LOCAL_CACHE.get(WALL_PREVIOUSLY_REFRESHED);
   return prevRefreshed ? prevRefreshed : 0;
+}
+
+export function markTopicReadInSession(topicId: string) {
+  SESSION_CACHE.set(TOPIC_READ_PREFIX + topicId);
+}
+
+export function isTopicReadInSession(topicId: string) {
+  return SESSION_CACHE.get(TOPIC_READ_PREFIX + topicId) != null;
 }
 
 export function getUsername(): string {
