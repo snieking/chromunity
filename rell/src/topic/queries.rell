@@ -132,7 +132,7 @@ query get_topic_replies_after_timestamp(username: name, topic_id: text, timestam
 }
 
 query get_topic_replies_by_user_prior_to_timestamp(name, timestamp, page_size: integer) {
-    return topic_reply@*{ .author.name == name, .timestamp < timestamp } (
+    val replies = topic_reply@*{ .author.name == name, .timestamp < timestamp } (
         .id,
         topic_id = .topic.id,
         author=.author.display_name,
@@ -140,6 +140,23 @@ query get_topic_replies_by_user_prior_to_timestamp(name, timestamp, page_size: i
         .is_sub_reply,
         @sort_desc .timestamp
     ) limit page_size;
+    
+    val ext_replies = list<ext_topic_reply>();
+    for (reply in replies) {
+    	val moderated_by = topic_reply_moderation @*{ .topic_reply.id == reply.id } ( .user.name );
+    	val ext_reply = ext_topic_reply (
+    		id = reply.id,
+    		topic_id = reply.topic_id,
+    		author = reply.author,
+    		message = reply.message,
+    		is_sub_reply = reply.is_sub_reply,
+    		timestamp = reply.timestamp,
+    		moderated_by = moderated_by
+    	);
+    	ext_replies.add(ext_reply);
+    }
+    
+    return ext_replies;
 }
 
 query count_topics_by_user(name): integer {
