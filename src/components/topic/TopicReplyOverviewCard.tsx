@@ -88,9 +88,10 @@ const TopicReplyOverviewCard = withStyles(styles)(
         return (
           <div
             className={
-              !(this.props.user != null && this.props.representatives.includes(toLowerCase(this.props.user.name))) &&
+              this.props.user != null &&
+              this.props.representatives.includes(toLowerCase(this.props.user.name)) &&
               shouldBeFiltered(this.props.reply.moderated_by, this.props.distrustedUsers)
-                ? "removed"
+                ? this.props.classes.removed
                 : ""
             }
           >
