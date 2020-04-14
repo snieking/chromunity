@@ -17,10 +17,11 @@ Please feel free to ask questions or discuss **Chromunity** related development 
 **Chromunity** is automatically deployed as commits get merged. Work is always done first on the `dev` branch. 
 When new features are stable enough in the `dev` branch, they are merged to the `master` branch.
 
-| Branch | Address                    |
-|--------|----------------------------|
-| master | https://chromunity.com     |
-| dev    | https://dev.chromunity.com |
+| Branch  | Address                        |
+|---------|--------------------------------|
+| master  | https://chromunity.com         |
+| testnet | https://testnet.chromunity.com |
+| dev     | https://dev.chromunity.com     |
 
 ## Running Chromunity
 
