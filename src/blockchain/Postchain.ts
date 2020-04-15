@@ -55,11 +55,10 @@ export const executeOperations = async (user: User, ...operations: Operation[]) 
   return trxBuilder
     .buildAndSign(user)
     .post()
-    .then((result: unknown) => {
+    .finally(() => {
       OP_LOCK.remove(lockId);
-      return result;
-    })
-    .finally(() => finalizeMetrics("transactions", operations[0].name, stopwatch));
+      finalizeMetrics("transactions", operations[0].name, stopwatch);
+    });
 };
 
 export const executeQuery = async (name: string, params: any) => {

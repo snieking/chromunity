@@ -14,7 +14,7 @@ import {
   LinearProgress,
   TextField,
   Tooltip,
-  Typography
+  Typography,
 } from "@material-ui/core";
 import {
   Delete,
@@ -24,7 +24,7 @@ import {
   Report,
   StarBorder,
   StarRate,
-  SubdirectoryArrowRight
+  SubdirectoryArrowRight,
 } from "@material-ui/icons";
 import TopicReplyCard from "./TopicReplyCard";
 import { Link, Redirect } from "react-router-dom";
@@ -41,7 +41,7 @@ import {
   hasReportedTopic,
   REMOVE_TOPIC_OP_ID,
   removeTopic,
-  reportTopic
+  reportTopic,
 } from "../../blockchain/RepresentativesService";
 import {
   createTopicReply,
@@ -56,7 +56,7 @@ import {
   modifyTopic,
   removeTopicStarRating,
   subscribeToTopic,
-  unsubscribeFromTopic
+  unsubscribeFromTopic,
 } from "../../blockchain/TopicService";
 import Divider from "@material-ui/core/Divider";
 import TextToolbar from "../common/textToolbar/TextToolbar";
@@ -83,44 +83,44 @@ interface Props extends RouteComponentProps<MatchParams> {
   user: ChromunityUser;
 }
 
-const useStyles = makeStyles(theme =>
+const useStyles = makeStyles((theme) =>
   createStyles({
     removed: {
-      opacity: 0.25
+      opacity: 0.25,
     },
     authorName: {
       display: "block",
       paddingTop: "2px",
       paddingLeft: "5px",
-      paddingRight: "5px"
+      paddingRight: "5px",
     },
     authorLink: {
       float: "right",
       borderRadius: "0 0 0 5px",
       marginTop: "-18px",
       marginBottom: "7px",
-      marginRight: "-16px"
+      marginRight: "-16px",
     },
     content: {
       marginRight: "5px",
       whiteSpace: "normal",
-      maxWidth: "95%"
+      maxWidth: "95%",
     },
     userColor: {
-      backgroundColor: theme.palette.secondary.main
+      backgroundColor: theme.palette.secondary.main,
     },
     repColor: {
-      backgroundColor: COLOR_ORANGE
+      backgroundColor: COLOR_ORANGE,
     },
     iconYellow: {
-      color: COLOR_YELLOW
+      color: COLOR_YELLOW,
     },
     iconOrange: {
-      color: COLOR_ORANGE
+      color: COLOR_ORANGE,
     },
     iconRed: {
-      color: COLOR_RED
-    }
+      color: COLOR_RED,
+    },
   })
 );
 
@@ -153,7 +153,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     const id = props.match.params.id;
     const user: ChromunityUser = props.user;
 
-    getTopicById(id, user).then(topic => {
+    getTopicById(id, user).then((topic) => {
       if (topic != null) {
         consumeTopicData(topic);
         markTopicReadInSession(topic.id);
@@ -175,17 +175,17 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
 
     retrieveLatestReplies();
 
-    getPoll(t.id).then(poll => setPoll(poll));
+    getPoll(t.id).then((poll) => setPoll(poll));
 
-    getTopicStarRaters(t.id, true).then(usersWhoStarRated => {
+    getTopicStarRaters(t.id, true).then((usersWhoStarRated) => {
       setUsersWhoStarRated(usersWhoStarRated);
       setStars(usersWhoStarRated.length);
     });
-    getTopicSubscribers(t.id).then(subscribers =>
+    getTopicSubscribers(t.id).then((subscribers) =>
       setSubscribed(props.user != null && subscribers.includes(props.user.name))
     );
 
-    getUserSettingsCached(t.author, 86400).then(settings =>
+    getUserSettingsCached(t.author, 86400).then((settings) =>
       setAvatar(ifEmptyAvatarThenPlaceholder(settings.avatar, t.author))
     );
 
@@ -212,7 +212,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     }
 
     replies
-      .then(retrievedReplies => {
+      .then((retrievedReplies) => {
         if (retrievedReplies.length > 0) {
           setTopicReplies(Array.from(new Set(retrievedReplies.concat(topicReplies))));
           setCouldExistOlderReplies(retrievedReplies.length >= repliesPageSize);
@@ -337,7 +337,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
             </IconButton>
           )}
 
-          <SocialShareButton text={topic.title}/>
+          <SocialShareButton text={topic.title} />
 
           {renderAdminActions()}
         </CardActions>
@@ -350,7 +350,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
               <Tooltip title="Like">{ratedByMe ? <StarRate className={classes.iconYellow} /> : <StarBorder />}</Tooltip>
             </Badge>
           </div>
-          <SocialShareButton text={topic.title}/>
+          <SocialShareButton text={topic.title} />
         </CardActions>
       );
     }
@@ -422,7 +422,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           timestamp: topic.timestamp,
           last_modified: topic.last_modified,
           latest_poster: topic.latest_poster,
-          moderated_by: topic.moderated_by
+          moderated_by: topic.moderated_by,
         };
 
         setTopic(updatedTopic);
@@ -564,7 +564,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
       setLoading(true);
       const oldestTimestamp: number = topicReplies[topicReplies.length - 1].timestamp;
       getTopicRepliesPriorToTimestamp(topic.id, oldestTimestamp - 1, repliesPageSize, props.user)
-        .then(retrievedReplies => {
+        .then((retrievedReplies) => {
           if (retrievedReplies.length > 0) {
             setTopicReplies(Array.from(new Set(topicReplies.concat(retrievedReplies))));
             setCouldExistOlderReplies(retrievedReplies.length >= repliesPageSize);
@@ -597,7 +597,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           <p>If you like a topic, and are signed-in in, give it a star rating!</p>
           <p>Replies can also receive a star rating.</p>
         </>
-      )
+      ),
     ];
 
     if (props.user != null) {
@@ -624,11 +624,10 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     return steps;
   }
 
-  if (
-    topic != null &&
-    !props.distrustedUsers.map(n => toLowerCase(n)).includes(toLowerCase(topic.author)) &&
-    !notFound
-  ) {
+  const distrustedUser =
+    topic != null && props.distrustedUsers.map((n) => toLowerCase(n)).includes(toLowerCase(topic.author));
+
+  if (topic != null && !distrustedUser && !notFound) {
     return (
       <Container fixed>
         <br />
@@ -636,7 +635,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
         {renderTopic()}
         <PollRenderer topicId={topic.id} poll={poll} />
         {topicReplies.length > 0 ? <SubdirectoryArrowRight /> : <div />}
-        {topicReplies.map(reply => (
+        {topicReplies.map((reply) => (
           <TopicReplyCard
             key={"reply-" + reply.id}
             reply={reply}
@@ -651,6 +650,18 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     );
   } else if (notFound) {
     return <Redirect to={"/"} />;
+  } else if (distrustedUser && !isLoading) {
+    return (
+      <Container fixed style={{ textAlign: "center" }}>
+        <br />
+        <Typography component="h6" variant="h6">
+          You have distrusted the author <a href={`/u/${topic.author}`}>@{topic.author}</a>
+        </Typography>
+        <Typography>
+          The contents of this topic is filtered since you have choosen to distrust the author of it.
+        </Typography>
+      </Container>
+    );
   } else {
     return <LinearProgress variant="query" />;
   }
@@ -659,8 +670,8 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
 const mapStateToProps = (store: ApplicationState) => {
   return {
     user: store.account.user,
-    representatives: store.government.representatives.map(rep => toLowerCase(rep)),
-    distrustedUsers: store.account.distrustedUsers
+    representatives: store.government.representatives.map((rep) => toLowerCase(rep)),
+    distrustedUsers: store.account.distrustedUsers,
   };
 };
 
