@@ -159,7 +159,7 @@ const ProfileCard = withStyles(styles)(
             );
             getDistrustedUsers(user).then(users =>
               this.setState({
-                distrusted: users.includes(this.props.username.toLocaleLowerCase())
+                distrusted: users.map(user => toLowerCase(user)).includes(toLowerCase(this.props.username))
               })
             );
           }
