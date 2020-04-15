@@ -626,7 +626,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
 
   const distrustedUser =
     topic != null && props.distrustedUsers.map((n) => toLowerCase(n)).includes(toLowerCase(topic.author));
-  const iAmRep = props.representatives.includes(toLowerCase(props.user.name));
+  const iAmRep = props.user != null && props.representatives.includes(toLowerCase(props.user.name));
 
   if (topic != null && (iAmRep || !distrustedUser) && !notFound) {
     return (
