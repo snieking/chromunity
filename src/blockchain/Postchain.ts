@@ -29,8 +29,10 @@ export const GTX = pcl.gtxClient.createClient(REST_CLIENT, Buffer.from(BLOCKCHAI
 export const BLOCKCHAIN = new Postchain(NODE_API_URL).blockchain(BLOCKCHAIN_RID);
 
 export const executeOperations = async (user: User, ...operations: Operation[]) => {
+  if (operations.length < 1) return new Promise<unknown>(resolve => resolve());
+
   operations.every((op) => logger.debug("Executing operation [%s] for user [%o]", op.name, JSON.stringify(user)));
-  const lockId = JSON.stringify(user);
+  const lockId = JSON.stringify(operations[0].name);
 
   const ongoing = OP_LOCK.get(lockId) != null;
 
@@ -39,7 +41,7 @@ export const executeOperations = async (user: User, ...operations: Operation[]) 
     return new Promise<unknown>((resolve) => resolve());
   } else {
     if (!test) {
-      OP_LOCK.set(lockId, operations, 1);
+      OP_LOCK.set(lockId, operations, 60);
     }
   }
 
