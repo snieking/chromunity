@@ -261,7 +261,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                 <DialogContent>
                   <br />
                   <CreatableSelect
-                    placeholder={"Select or create channel..."}
+                    placeholder={"Create or select channel..."}
                     isSearchable={true}
                     options={this.state.suggestions}
                     value={this.state.channel}
