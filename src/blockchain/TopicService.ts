@@ -9,12 +9,12 @@ import { topicEvent } from "../util/matomo";
 
 const topicsCache = BoomerangCache.create("topic-bucket", {
   storage: "session",
-  encrypt: false
+  encrypt: false,
 });
 
 const starRatingCache = BoomerangCache.create("rating-bucket", {
   storage: "session",
-  encrypt: false
+  encrypt: false,
 });
 
 export const removeTopicIdFromCache = (id: string) => topicsCache.remove(id);
@@ -57,11 +57,7 @@ export function createTopic(
 
     subscribeToTopic(user, topicId)
       .catch()
-      .then(() =>
-        sendUserMentionNotifications(user, topicId, message)
-          .catch()
-          .then()
-      );
+      .then(() => sendUserMentionNotifications(user, topicId, message).catch().then());
 
     topicEvent("create");
     return promise;
@@ -114,25 +110,21 @@ export function createTopicReply(user: ChromunityUser, topicId: string, message:
     op(rellOperation, topicId, user.ft3User.authDescriptor.id, replyId, toLowerCase(user.name), message)
   ).then((promise: unknown) => {
     getTopicSubscribers(topicId)
-      .then(users =>
-        createReplyTriggerString(user, topicId, replyId).then(s =>
+      .then((users) =>
+        createReplyTriggerString(user, topicId, replyId).then((s) =>
           sendNotifications(
             user,
             s,
             message,
-            users.map(name => name.toLocaleLowerCase()).filter(item => item !== user.name)
+            users.map((name) => name.toLocaleLowerCase()).filter((item) => item !== user.name)
           )
             .catch()
             .then()
         )
       )
-      .then(() =>
-        sendUserMentionNotifications(user, topicId, message)
-          .catch()
-          .then()
-      );
+      .then(() => sendUserMentionNotifications(user, topicId, message).catch().then());
 
-    topicEvent("create-reply")
+    topicEvent("create-reply");
     return promise;
   });
 }
@@ -153,25 +145,21 @@ export function createTopicSubReply(
     op(operation, topicId, user.ft3User.authDescriptor.id, replyId, subReplyId, toLowerCase(user.name), message)
   ).then((promise: unknown) => {
     getTopicSubscribers(topicId)
-      .then(users => {
+      .then((users) => {
         if (!users.includes(replyTo.toLocaleLowerCase())) {
           users.push(replyTo);
         }
 
-        createReplyTriggerString(user, topicId, subReplyId).then(s =>
+        createReplyTriggerString(user, topicId, subReplyId).then((s) =>
           sendNotifications(
             user,
             s,
             message,
-            users.map(name => name.toLocaleLowerCase()).filter(item => item !== user.name)
+            users.map((name) => name.toLocaleLowerCase()).filter((item) => item !== user.name)
           )
         );
       })
-      .then(() =>
-        sendUserMentionNotifications(user, topicId, message)
-          .catch()
-          .then()
-      );
+      .then(() => sendUserMentionNotifications(user, topicId, message).catch().then());
 
     topicEvent("create-reply");
     topicEvent("create-sub-reply");
@@ -182,8 +170,8 @@ export function createTopicSubReply(
 async function createReplyTriggerString(user: ChromunityUser, id: string, replyId: string): Promise<string> {
   let topic: Topic = topicsCache.get(id);
 
-  if (topic === undefined) {
-    topic = await getTopicById(id, user);
+  if (topic == null) {
+    topic = await getTopicById(id, user, true);
   }
 
   return Promise.resolve("@" + user.name + " replied to '" + topic.title + "' /t/" + id + "#" + replyId);
@@ -214,12 +202,12 @@ function getTopicRepliesForTimestamp(
   rellOperation: string,
   user?: ChromunityUser
 ) {
-  return BLOCKCHAIN.then(bc =>
+  return BLOCKCHAIN.then((bc) =>
     bc.query(rellOperation, {
       username: user != null ? toLowerCase(user.name) : "",
       topic_id: topicId,
       timestamp,
-      page_size: pageSize
+      page_size: pageSize,
     })
   );
 }
@@ -236,7 +224,7 @@ export function getTopicRepliesByUserPriorToTimestamp(
 export function getTopicSubReplies(replyId: string, user?: ChromunityUser): Promise<TopicReply[]> {
   return executeQuery("get_sub_replies", {
     username: user != null ? toLowerCase(user.name) : "",
-    parent_reply_id: replyId
+    parent_reply_id: replyId,
   });
 }
 
@@ -248,7 +236,7 @@ export function getTopicsByUserPriorToTimestamp(
   const query = "get_topics_by_user_id_prior_to_timestamp";
   return executeQuery(query, { name: toLowerCase(username), timestamp, page_size: pageSize }).then(
     (topics: Topic[]) => {
-      topics.forEach(topic => topicsCache.set(topic.id, topic, 300));
+      topics.forEach((topic) => topicsCache.set(topic.id, topic, 300));
       return topics;
     }
   );
@@ -263,7 +251,7 @@ export function getTopicsByChannelPriorToTimestamp(
 
   return executeQuery(query, { name: toLowerCase(channelName), timestamp, page_size: pageSize }).then(
     (topics: Topic[]) => {
-      topics.forEach(topic => topicsCache.set(topic.id, topic, 300));
+      topics.forEach((topic) => topicsCache.set(topic.id, topic, 300));
       return topics;
     }
   );
@@ -272,7 +260,7 @@ export function getTopicsByChannelPriorToTimestamp(
 export function getTopicsByChannelAfterTimestamp(channelName: string, timestamp: number): Promise<Topic[]> {
   const query = "get_topics_by_channel_after_timestamp";
   return executeQuery(query, { name: toLowerCase(channelName), timestamp }).then((topics: Topic[]) => {
-    topics.forEach(topic => topicsCache.set(topic.id, topic, 300));
+    topics.forEach((topic) => topicsCache.set(topic.id, topic, 300));
     return topics;
   });
 }
@@ -289,7 +277,7 @@ export function getTopicStarRaters(topicId: string, clearCache = false): Promise
     const raters: string[] = starRatingCache.get(topicId);
 
     if (raters != null) {
-      return new Promise<string[]>(resolve => resolve(raters));
+      return new Promise<string[]>((resolve) => resolve(raters));
     }
   }
 
@@ -348,7 +336,7 @@ export function countTopicReplies(topicId: string): Promise<number> {
   const count: number = topicsCache.get(topicId + "-reply_count");
 
   if (count != null) {
-    return new Promise<number>(resolve => resolve(count));
+    return new Promise<number>((resolve) => resolve(count));
   }
 
   const query = "count_topic_replies";
@@ -364,11 +352,13 @@ export function getTopicSubscribers(topicId: string): Promise<string[]> {
 }
 
 const ALLOWED_EDIT_DURATION = 5 * 60000;
-export function getTopicById(id: string, user?: ChromunityUser): Promise<Topic> {
-  const cachedTopic: Topic = topicsCache.get(id);
+export function getTopicById(id: string, user?: ChromunityUser, skipCache = false): Promise<Topic> {
+  if (!skipCache) {
+    const cachedTopic: Topic = topicsCache.get(id);
 
-  if (cachedTopic != null && cachedTopic.timestamp < Date.now() + ALLOWED_EDIT_DURATION) {
-    return new Promise<Topic>(resolve => resolve(cachedTopic));
+    if (cachedTopic != null && cachedTopic.timestamp < Date.now() + ALLOWED_EDIT_DURATION) {
+      return new Promise<Topic>((resolve) => resolve(cachedTopic));
+    }
   }
 
   const query = "get_topic_by_id";
@@ -391,7 +381,7 @@ export function getTopicsAfterTimestamp(timestamp: number, pageSize: number): Pr
 
 function getTopicsForTimestamp(timestamp: number, pageSize: number, rellOperation: string): Promise<Topic[]> {
   return executeQuery(rellOperation, { timestamp, page_size: pageSize }).then((topics: Topic[]) => {
-    topics.forEach(topic => topicsCache.set(topic.id, topic, 300));
+    topics.forEach((topic) => topicsCache.set(topic.id, topic, 300));
     return topics;
   });
 }
@@ -468,7 +458,7 @@ export function getTopicsFromFollowedChannels(
   return executeQuery(rellOperation, { username: toLowerCase(username), timestamp, page_size: pageSize }).then(
     (topics: Topic[]) => {
       const seen: Set<string> = new Set<string>();
-      return topics.filter(item => {
+      return topics.filter((item) => {
         let k = item.id;
         return seen.has(k) ? false : seen.add(k);
       });
