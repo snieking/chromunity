@@ -81,6 +81,7 @@ export interface ChatMessageDecrypted {
   sender: string;
   timestamp: number;
   msg: string;
+  inMemory: boolean;
 }
 
 export interface PollSpecification {

@@ -12,27 +12,52 @@ const useStyles = makeStyles(theme => ({
     marginBottom: "5px"
   },
   iframeWrapper: {
-    width: "60%"
+    width: "80%"
   }
 }));
 
 const URL_REGEX = /\(?https?:\/\/(?![^" ]*(?:jpg|jpeg|png|gif))[^" \s)]+/gi;
 const YOUTUBE_ID_REGEX = /^.*(youtu\.be\/|v\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
 
+const PRIORITY_REGEXPS: RegExp[] = [ YOUTUBE_ID_REGEX ];
+const SKIP_REGEXPS: RegExp[] = [
+  /twitter.com.*/
+];
+
 const PreviewLinks: React.FunctionComponent<Props> = props => {
   const classes = useStyles();
 
-  function getLastLink(): string {
+  function getPreviewLink(): string {
     const urls = props.text.match(URL_REGEX);
 
     if (urls == null)
       return null;
 
+    
+    for (const regexp of PRIORITY_REGEXPS) {
+      for (const url of urls) {
+        if (url.match(regexp)) {
+          return url;
+        }
+      }
+    }
+
     for (let i = urls.length - 1; i >= 0; i--) {
       const url = urls[i];
 
-      if (!url.startsWith("("))
-        return url;
+      if (!url.startsWith("(")) {
+        // Check so that the URL shouldn't be skipped
+        let skip = false;
+        for (const regexp of SKIP_REGEXPS) {
+          if (url.match(regexp)) {
+            skip = true;
+            break;
+          }
+        }
+
+        if (!skip)
+          return url;
+      }
     }
 
     return null;
@@ -82,7 +107,7 @@ const PreviewLinks: React.FunctionComponent<Props> = props => {
     }
   }
 
-  return renderLink(getLastLink());
+  return renderLink(getPreviewLink());
 };
 
 export default PreviewLinks;

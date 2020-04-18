@@ -12,7 +12,7 @@ import {
   ModifyTitleAction,
   OpenChatAction,
   RefreshOpenChatAction,
-  SendMessageAction
+  SendMessageAction,
 } from "./chatTypes";
 import { put, select, takeLatest } from "redux-saga/effects";
 import {
@@ -22,7 +22,7 @@ import {
   makeKeyPair,
   rsaDecrypt,
   rsaEncrypt,
-  rsaKeyToPubKey
+  rsaKeyToPubKey,
 } from "../../../blockchain/CryptoService";
 import {
   addUserToChat,
@@ -40,13 +40,12 @@ import {
   leaveChat,
   markChatAsRead,
   modifyTitle,
-  sendChatMessage
+  sendChatMessage,
 } from "../../../blockchain/ChatService";
 import {
   countUnreadChatsAction,
   loadUserChats,
   openChat,
-  refreshOpenChat,
   sendMessage,
   storeChatKeyPair,
   storeChatParticipants,
@@ -54,7 +53,7 @@ import {
   storeDecryptedChat,
   storeErrorMessage,
   storeUnreadChatsCountAction,
-  storeUserChats
+  storeUserChats,
 } from "./chatActions";
 import { uniqueId } from "../../../util/util";
 import { ApplicationState } from "../../../store";
@@ -275,10 +274,23 @@ export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
 
       yield put(storeChatParticipants(participants));
       const couldExistOlder = yield select(couldExistOlderMessages);
+
+      const newMessages: ChatMessageDecrypted[] = [];
+      for (const newMsg of decryptedMessages) {
+        for (const prevMsg of previousMessages) {
+          if (newMsg.sender === prevMsg.sender && newMsg.msg === prevMsg.msg && prevMsg.inMemory) {
+            break;
+          }
+
+          newMessages.push(newMsg);
+          break;
+        }
+      }
+
       yield put(
         storeDecryptedChat(
           chat,
-          previousMessages.concat(decryptedMessages),
+          previousMessages.concat(newMessages),
           determineCouldExistOlderMessages(decryptedMessages.length, couldExistOlder)
         )
       );
@@ -299,10 +311,24 @@ export function* sendMessageSaga(action: SendMessageAction) {
   const rsaKey = yield select(getRsaKey);
   const sharedChatKey: any = yield rsaDecrypt(action.chat.encrypted_chat_key, rsaKey);
 
-  yield sendChatMessage(action.user, action.chat.id, encrypt(action.message, sharedChatKey.plaintext));
-  yield put(refreshOpenChat(action.user));
+  try {
+    yield sendChatMessage(action.user, action.chat.id, encrypt(action.message, sharedChatKey.plaintext));
 
-  chatEvent("message");
+    const previousMessages: ChatMessageDecrypted[] = yield select(getActiveChatMessages);
+    const msg: ChatMessageDecrypted = {
+      sender: action.user.name,
+      timestamp: Date.now(),
+      msg: action.message,
+      inMemory: true,
+    };
+
+    const couldExistOlder = yield select(couldExistOlderMessages);
+    yield put(storeDecryptedChat(action.chat, previousMessages.concat([msg]), couldExistOlder));
+
+    chatEvent("message");
+  } catch (error) {
+    yield put(storeErrorMessage(error.message));
+  }
   logger.silly("[SAGA - FINISHED]: Send message");
 }
 
@@ -315,7 +341,7 @@ export function* modifyTitleSaga(action: ModifyTitleAction) {
     encrypted_chat_key: action.chat.encrypted_chat_key,
     timestamp: action.chat.timestamp,
     last_message: action.chat.last_message,
-    last_opened: action.chat.last_opened
+    last_opened: action.chat.last_opened,
   };
   yield put(openChat(updatedChat, action.user));
   yield put(loadUserChats(action.user, true));
@@ -403,7 +429,8 @@ function decryptMessages(rsaKey: any, sharedChatKey: any, chatMessages: ChatMess
     return {
       sender: message.sender,
       timestamp: message.timestamp,
-      msg: decrypt(message.encrypted_msg, sharedChatKey.plaintext)
+      msg: decrypt(message.encrypted_msg, sharedChatKey.plaintext),
+      inMemory: false,
     };
   });
 }

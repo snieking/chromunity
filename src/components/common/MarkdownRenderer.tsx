@@ -19,7 +19,10 @@ const useStyles = makeStyles(theme => ({
       [theme.breakpoints.down("sm")]: {
         maxWidth: "80%",
         maxHeight: "80%"
-      }
+      },
+      display: "block",
+      marginTop: "5px",
+      marginBottom: "5px"
     }
   },
 }));
