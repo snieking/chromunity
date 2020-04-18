@@ -55,6 +55,7 @@ import { step } from "../common/TutorialStep";
 import { checkDistrustedUsers } from "./redux/accountActions";
 import BlockIcon from "@material-ui/icons/Block";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import SocialBar from "./socials/SocialBar";
 
 const styles = createStyles({
   iconRed: {
@@ -81,6 +82,11 @@ const styles = createStyles({
     float: "right",
     marginBottom: "5px",
     marginTop: "5px"
+  },
+  socials: {
+    position: "relative",
+    bottom: 0,
+    left: 0
   }
 });
 
@@ -195,6 +201,9 @@ const ProfileCard = withStyles(styles)(
               </Typography>
               <div style={{ clear: "left" }} />
               {this.renderIcons()}
+              <div className={this.props.classes.socials}>
+                <SocialBar socials={{ twitter: "test", linkedin: "test" }}/>
+              </div>
             </Card>
             {this.renderTour()}
           </div>
