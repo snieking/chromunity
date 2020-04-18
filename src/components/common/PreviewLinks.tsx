@@ -12,7 +12,7 @@ const useStyles = makeStyles(theme => ({
     marginBottom: "5px"
   },
   iframeWrapper: {
-    width: "60%"
+    width: "80%"
   }
 }));
 
