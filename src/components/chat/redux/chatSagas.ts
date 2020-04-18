@@ -283,6 +283,7 @@ export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
           }
 
           newMessages.push(newMsg);
+          break;
         }
       }
 
