@@ -16,6 +16,7 @@ import {
   WithStyles,
   Grid,
   Theme,
+  Typography,
 } from "@material-ui/core";
 import AvatarChanger from "./AvatarChanger";
 
@@ -27,45 +28,55 @@ import { ApplicationState } from "../../../store";
 import { connect } from "react-redux";
 import { Socials } from "../socials/socialTypes";
 import { TwitterIcon, LinkedinIcon } from "react-share";
+import * as config from "../../../config";
 
-const styles = (theme: Theme) => createStyles({
-  avatarWrapper: {
-    float: "left",
-    marginTop: "10px",
-    marginLeft: "10px",
-    opacity: 0.8,
-    "&:hover": {
-      cursor: "pointer",
-      opacity: 1,
-    }
-  },
-  description: {
-    marginTop: "15px",
-    marginLeft: "10px",
-    width: "80%",
-    [theme.breakpoints.down("xs")]: {
-      width: "55%"
-    }
-  },
-  commitBtnWrapper: {
-    textAlign: "center",
-    marginTop: "5px",
-  },
-  socialsWrapper: {
-    margin: "10px"
-  },
-  socialsBlock: {
-    
-  },
-  socialsField: {
-    width: "62%"
-  },
-  socialsIcon: {
-    marginRight: "10px",
-    position: "relative",
-    top: 15
-  }
-});
+const styles = (theme: Theme) =>
+  createStyles({
+    settingsCard: {
+      marginBottom: "10px",
+    },
+    chapterHeader: {
+      marginTop: "5px",
+      textAlign: "center"
+    },
+    avatarWrapper: {
+      float: "left",
+      marginTop: "10px",
+      marginLeft: "10px",
+      opacity: 0.8,
+      "&:hover": {
+        cursor: "pointer",
+        opacity: 1,
+      },
+    },
+    description: {
+      marginTop: "15px",
+      marginLeft: "10px",
+      width: "80%",
+      [theme.breakpoints.down("xs")]: {
+        width: "55%",
+      },
+    },
+    commitBtnWrapper: {
+      textAlign: "center",
+      marginTop: "5px",
+    },
+    socialsWrapper: {
+      margin: "10px",
+    },
+    socialsBlock: {},
+    socialsField: {
+      width: "80%",
+      [theme.breakpoints.down("xs")]: {
+        width: "55%",
+      },
+    },
+    socialsIcon: {
+      marginRight: "10px",
+      position: "relative",
+      top: 15,
+    },
+  });
 
 interface Props extends WithStyles<typeof styles> {
   user: ChromunityUser;
@@ -119,7 +130,7 @@ const Settings = withStyles(styles)(
           this.setState({
             avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, user.name),
             description: settings.description,
-            socials: JSON.parse(settings.socials) as Socials
+            socials: JSON.parse(settings.socials) as Socials,
           });
         });
       }
@@ -130,11 +141,19 @@ const Settings = withStyles(styles)(
         <div>
           <Container fixed maxWidth="sm">
             <ChromiaPageHeader text="Edit Settings" />
-            <Card key={"user-card"}>
+            <Card key={"user-card"} className={this.props.classes.settingsCard}>
+            <Typography variant="h6" component="h6" className={this.props.classes.chapterHeader}>
+                General
+              </Typography>
               {this.avatarEditor()}
               {this.descriptionEditor()}
             </Card>
-            <Card key={"socials-card"}>{this.socialsEditor()}</Card>
+            <Card key={"socials-card"} className={this.props.classes.settingsCard}>
+              <Typography variant="h6" component="h6" className={this.props.classes.chapterHeader}>
+                Social Profiles
+              </Typography>
+              {this.socialsEditor()}
+            </Card>
             {this.saveButton()}
           </Container>
           {this.snackBars()}
@@ -191,7 +210,7 @@ const Settings = withStyles(styles)(
           <Grid item xs={6} className={this.props.classes.socialsBlock}>
             <TwitterIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
             <TextField
-              disabled
+              disabled={!config.features.userSocialsEnabled}
               className={this.props.classes.socialsField}
               id="twitter"
               margin="dense"
@@ -206,7 +225,7 @@ const Settings = withStyles(styles)(
           <Grid item xs={6} className={this.props.classes.socialsBlock}>
             <LinkedinIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
             <TextField
-              disabled
+              disabled={!config.features.userSocialsEnabled}
               className={this.props.classes.socialsField}
               id="twitter"
               margin="dense"
@@ -296,7 +315,12 @@ const Settings = withStyles(styles)(
 
     private saveSettings() {
       // TODO: Add this.state.socials
-      updateUserSettings(this.props.user, this.state.avatar, this.state.description)
+      updateUserSettings(
+        this.props.user,
+        this.state.avatar,
+        this.state.description,
+        config.features.userSocialsEnabled ? this.state.socials : null
+      )
         .then(() =>
           this.setState({
             settingsUpdateStatus: "Settings saved",
