@@ -14,6 +14,8 @@ import {
   TextField,
   withStyles,
   WithStyles,
+  Grid,
+  Theme,
 } from "@material-ui/core";
 import AvatarChanger from "./AvatarChanger";
 
@@ -24,8 +26,9 @@ import Avatar, { AVATAR_SIZE } from "../../common/Avatar";
 import { ApplicationState } from "../../../store";
 import { connect } from "react-redux";
 import { Socials } from "../socials/socialTypes";
+import { TwitterIcon, LinkedinIcon } from "react-share";
 
-const styles = createStyles({
+const styles = (theme: Theme) => createStyles({
   avatarWrapper: {
     float: "left",
     marginTop: "10px",
@@ -34,17 +37,34 @@ const styles = createStyles({
     "&:hover": {
       cursor: "pointer",
       opacity: 1,
-    },
+    }
   },
   description: {
     marginTop: "15px",
     marginLeft: "10px",
     width: "80%",
+    [theme.breakpoints.down("xs")]: {
+      width: "55%"
+    }
   },
   commitBtnWrapper: {
     textAlign: "center",
     marginTop: "5px",
   },
+  socialsWrapper: {
+    margin: "10px"
+  },
+  socialsBlock: {
+    
+  },
+  socialsField: {
+    width: "62%"
+  },
+  socialsIcon: {
+    marginRight: "10px",
+    position: "relative",
+    top: 15
+  }
 });
 
 interface Props extends WithStyles<typeof styles> {
@@ -85,6 +105,8 @@ const Settings = withStyles(styles)(
       this.saveSettings = this.saveSettings.bind(this);
       this.toggleEditAvatarDialog = this.toggleEditAvatarDialog.bind(this);
       this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
+      this.handleTwitterChange = this.handleTwitterChange.bind(this);
+      this.handleLinkedInChange = this.handleLinkedInChange.bind(this);
       this.handleClose = this.handleClose.bind(this);
     }
 
@@ -97,6 +119,7 @@ const Settings = withStyles(styles)(
           this.setState({
             avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, user.name),
             description: settings.description,
+            socials: JSON.parse(settings.socials) as Socials
           });
         });
       }
@@ -110,8 +133,8 @@ const Settings = withStyles(styles)(
             <Card key={"user-card"}>
               {this.avatarEditor()}
               {this.descriptionEditor()}
-              {this.socialsEditor()}
             </Card>
+            <Card key={"socials-card"}>{this.socialsEditor()}</Card>
             {this.saveButton()}
           </Container>
           {this.snackBars()}
@@ -152,7 +175,7 @@ const Settings = withStyles(styles)(
           multiline
           rows="2"
           rowsMax={3}
-          label="Profile description"
+          label="Description"
           type="text"
           variant="outlined"
           onChange={this.handleDescriptionChange}
@@ -162,18 +185,40 @@ const Settings = withStyles(styles)(
     }
 
     private socialsEditor() {
+      const ICON_SIZE = 24;
       return (
-        <>
-          <TextField
-            id="twitter"
-            margin="dense"
-            label="Twitter Profile URL"
-            type="text"
-            variant="outlined"
-            onChange={this.handleTwitterChange}
-            value={this.state.socials.twitter}
-          />
-        </>
+        <Grid container className={this.props.classes.socialsWrapper}>
+          <Grid item xs={6} className={this.props.classes.socialsBlock}>
+            <TwitterIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
+            <TextField
+              disabled
+              className={this.props.classes.socialsField}
+              id="twitter"
+              margin="dense"
+              label="Twitter"
+              placeholder="Username"
+              type="text"
+              variant="outlined"
+              onChange={this.handleTwitterChange}
+              value={this.state.socials.twitter}
+            />
+          </Grid>
+          <Grid item xs={6} className={this.props.classes.socialsBlock}>
+            <LinkedinIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
+            <TextField
+              disabled
+              className={this.props.classes.socialsField}
+              id="twitter"
+              margin="dense"
+              label="LinkedIn"
+              placeholder="Username"
+              type="text"
+              variant="outlined"
+              onChange={this.handleLinkedInChange}
+              value={this.state.socials.linkedin}
+            />
+          </Grid>
+        </Grid>
       );
     }
 
@@ -215,9 +260,21 @@ const Settings = withStyles(styles)(
     }
 
     private handleTwitterChange(event: React.ChangeEvent<HTMLInputElement>) {
-      this.setState((prevState) => ({
-        socials: { twitter: event.target.value, linkedin: prevState.socials.linkedin },
-      }));
+      const socials: Socials = {
+        twitter: event.target.value,
+        linkedin: this.state.socials.linkedin,
+      };
+
+      this.setState({ socials });
+    }
+
+    private handleLinkedInChange(event: React.ChangeEvent<HTMLInputElement>) {
+      const socials: Socials = {
+        linkedin: event.target.value,
+        twitter: this.state.socials.twitter,
+      };
+
+      this.setState({ socials });
     }
 
     private toggleEditAvatarDialog() {
@@ -238,6 +295,7 @@ const Settings = withStyles(styles)(
     }
 
     private saveSettings() {
+      // TODO: Add this.state.socials
       updateUserSettings(this.props.user, this.state.avatar, this.state.description)
         .then(() =>
           this.setState({

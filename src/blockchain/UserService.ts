@@ -1,3 +1,4 @@
+import { Socials } from './../components/user/socials/socialTypes';
 import { UserSettings } from "../types";
 import { executeOperations, executeQuery } from "./Postchain";
 import { ChromunityUser } from "../types";
@@ -49,14 +50,18 @@ export function getUserSettingsCached(name: string, cacheDuration: number): Prom
   });
 }
 
-export function updateUserSettings(user: ChromunityUser, avatar: string, description: string) {
+export function updateUserSettings(user: ChromunityUser, avatar: string, description: string, socials?: Socials) {
   const userLC: string = toLowerCase(user.name);
   boomerang.remove(userLC);
 
   userEvent("update-settings");
 
   const operation = "update_user_settings";
-  return executeOperations(user.ft3User, op(operation, userLC, user.ft3User.authDescriptor.id, avatar, description));
+
+  if (socials)
+    return executeOperations(user.ft3User, op(operation, userLC, user.ft3User.authDescriptor.id, avatar, description, JSON.stringify(socials)));
+  else
+    return executeOperations(user.ft3User, op(operation, userLC, user.ft3User.authDescriptor.id, avatar, description));
 }
 
 export function toggleUserDistrust(user: ChromunityUser, name: string, muted: boolean) {

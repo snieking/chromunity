@@ -1,4 +1,5 @@
 import { User } from "ft3-lib";
+import { Socials } from "./components/user/socials/socialTypes";
 
 export interface ChromunityUser {
   name: string;
@@ -42,6 +43,7 @@ export interface Election {
 export interface UserSettings {
   avatar: string;
   description: string;
+  socials: string;
 }
 
 export interface RepresentativeAction {

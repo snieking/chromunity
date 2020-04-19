@@ -1,11 +1,11 @@
 import user;
 
-operation create_user_settings(name, descriptor_id: byte_array, avatar: text, description: text) {
+operation create_user_settings(name, descriptor_id: byte_array, avatar: text, description: text, socials: json) {
     val user = user.get_and_charge_verified_user(name, descriptor_id);
-    create user_settings(user, avatar = avatar, description = description);
+    create user_settings(user, avatar = avatar, description = description, socials);
 }
 
-operation update_user_settings(name, descriptor_id: byte_array, avatar: text, description: text) {
+operation update_user_settings(name, descriptor_id: byte_array, avatar: text, description: text, socials: json) {
     val user = user.get_and_charge_verified_user(name, descriptor_id);
-    update user_settings@{ .user == user }( avatar = avatar, description = description );
+    update user_settings@{ .user == user }( avatar = avatar, description = description, socials);
 }
