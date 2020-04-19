@@ -30,11 +30,13 @@ describe("User tests", () => {
     userSettings = await getUserSettings(loggedInUser);
     expect(userSettings.avatar).toBe("");
     expect(userSettings.description).toBe("");
+    expect(userSettings.socials).toBe("{}");
 
-    await updateUserSettings(loggedInUser, "BB==", "Description");
+    await updateUserSettings(loggedInUser, "BB==", "Description", { twitter: "", linkedin: "" });
     userSettings = await getUserSettings(loggedInUser);
     expect(userSettings.avatar).toBe("BB==");
     expect(userSettings.description).toBe("Description");
+    expect(userSettings.socials).toContain("twitter");
 
     const settings: UserSettings = await getUserSettingsCached(loggedInUser.name, 0);
     expect(settings.avatar).toBe("BB==");
