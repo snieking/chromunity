@@ -24,6 +24,9 @@ module.exports = {
   topBar: {
     message: ""
   },
+  features: {
+    userSocialsEnabled: true
+  },
   test: false,
   logLevel: "info"
 };

@@ -24,6 +24,9 @@ module.exports = {
   topBar: {
     message: "Development Environment"
   },
+  features: {
+    userSocialsEnabled: true
+  },
   test: true,
   logLevel: "debug"
 };

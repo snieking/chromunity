@@ -55,6 +55,8 @@ import { step } from "../common/TutorialStep";
 import { checkDistrustedUsers } from "./redux/accountActions";
 import BlockIcon from "@material-ui/icons/Block";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import SocialBar from "./socials/SocialBar";
+import { Socials } from "./socials/socialTypes";
 
 const styles = createStyles({
   iconRed: {
@@ -81,6 +83,11 @@ const styles = createStyles({
     float: "right",
     marginBottom: "5px",
     marginTop: "5px"
+  },
+  socials: {
+    position: "relative",
+    bottom: 0,
+    left: 0
   }
 });
 
@@ -103,6 +110,7 @@ interface ProfileCardState {
   replyStars: number;
   avatar: string;
   description: string;
+  socials: Socials;
   suspendUserDialogOpen: boolean;
   distrusted: boolean;
 }
@@ -125,6 +133,7 @@ const ProfileCard = withStyles(styles)(
         replyStars: 0,
         avatar: "",
         description: "",
+        socials: null,
         suspendUserDialogOpen: false,
         distrusted: false
       };
@@ -167,7 +176,8 @@ const ProfileCard = withStyles(styles)(
           getUserSettingsCached(this.props.username, 1440).then(settings =>
             this.setState({
               avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.username),
-              description: settings.description
+              description: settings.description,
+              socials: JSON.parse(settings.socials) as Socials
             })
           );
           countUserFollowers(this.props.username).then(count => this.setState({ followers: count }));
@@ -195,6 +205,9 @@ const ProfileCard = withStyles(styles)(
               </Typography>
               <div style={{ clear: "left" }} />
               {this.renderIcons()}
+              {this.state.socials && (<div className={this.props.classes.socials}>
+                <SocialBar socials={this.state.socials}/>
+              </div>)}
             </Card>
             {this.renderTour()}
           </div>

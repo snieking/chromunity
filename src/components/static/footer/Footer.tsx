@@ -1,10 +1,10 @@
 import React from "react";
 import { Tooltip } from "@material-ui/core";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import GitHubLogo from "./GitHubLogo";
-import TwitterLogo from "./TwitterLogo";
-import TelegramLogo from "./TelegramLogo";
-import BlockExplorerLogo from "./BlockExplorerLogo";
+import GitHubLogo from "../../common/logos/GitHubLogo";
+import TwitterLogo from "../../common/logos/TwitterLogo";
+import TelegramLogo from "../../common/logos/TelegramLogo";
+import BlockExplorerLogo from "../../common/logos/BlockExplorerLogo";
 
 const useStyles = makeStyles((theme) => ({
   footer: {
