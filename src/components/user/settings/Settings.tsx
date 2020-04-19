@@ -93,8 +93,11 @@ interface SettingsState {
   settingsUpdateStatus: string;
 }
 
+const DEFAULT_SOCIALS: Socials = { twitter: "", linkedin: "" };
+
 const Settings = withStyles(styles)(
   class extends React.Component<Props, SettingsState> {
+
     constructor(props: Props) {
       super(props);
       this.state = {
@@ -102,10 +105,7 @@ const Settings = withStyles(styles)(
         editedAvatar: "",
         editAvatarOpen: false,
         description: "",
-        socials: {
-          twitter: "",
-          linkedin: "",
-        },
+        socials: DEFAULT_SOCIALS,
         updateSuccessOpen: false,
         updateErrorOpen: false,
         settingsUpdateStatus: "",
@@ -130,7 +130,7 @@ const Settings = withStyles(styles)(
           this.setState({
             avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, user.name),
             description: settings.description,
-            socials: JSON.parse(settings.socials) as Socials,
+            socials: settings.socials ? JSON.parse(settings.socials) as Socials : DEFAULT_SOCIALS,
           });
         });
       }

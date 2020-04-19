@@ -177,7 +177,7 @@ const ProfileCard = withStyles(styles)(
             this.setState({
               avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.username),
               description: settings.description,
-              socials: JSON.parse(settings.socials) as Socials
+              socials: settings.socials ? JSON.parse(settings.socials) as Socials : null
             })
           );
           countUserFollowers(this.props.username).then(count => this.setState({ followers: count }));
