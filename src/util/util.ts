@@ -25,7 +25,7 @@ export const uniqueId = function() {
 };
 
 export function prepareUrlPath(path: string): string {
-  return path.toLocaleLowerCase().replace(/ /g, "-");
+  return encodeURI(path.toLocaleLowerCase().replace(/ /g, "-").replace("%", ""));
 }
 
 export function sortByFrequency(array: string[]): string[] {
