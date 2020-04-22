@@ -27,8 +27,9 @@ import Avatar, { AVATAR_SIZE } from "../../common/Avatar";
 import { ApplicationState } from "../../../store";
 import { connect } from "react-redux";
 import { Socials } from "../socials/socialTypes";
-import { TwitterIcon, LinkedinIcon } from "react-share";
+import { TwitterIcon, LinkedinIcon, FacebookIcon } from "react-share";
 import * as config from "../../../config";
+import GitHubLogo from "../../common/logos/GitHubLogo";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -37,7 +38,7 @@ const styles = (theme: Theme) =>
     },
     chapterHeader: {
       marginTop: "5px",
-      textAlign: "center"
+      textAlign: "center",
     },
     avatarWrapper: {
       float: "left",
@@ -75,6 +76,7 @@ const styles = (theme: Theme) =>
       marginRight: "10px",
       position: "relative",
       top: 15,
+      display: "inline"
     },
   });
 
@@ -93,11 +95,11 @@ interface SettingsState {
   settingsUpdateStatus: string;
 }
 
-const DEFAULT_SOCIALS: Socials = { twitter: "", linkedin: "" };
+const DEFAULT_SOCIALS: Socials = { twitter: "", linkedin: "", facebook: "", github: "" };
+const ICON_SIZE = 24;
 
 const Settings = withStyles(styles)(
   class extends React.Component<Props, SettingsState> {
-
     constructor(props: Props) {
       super(props);
       this.state = {
@@ -118,6 +120,8 @@ const Settings = withStyles(styles)(
       this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
       this.handleTwitterChange = this.handleTwitterChange.bind(this);
       this.handleLinkedInChange = this.handleLinkedInChange.bind(this);
+      this.handleFacebookChange = this.handleFacebookChange.bind(this);
+      this.handleGithubChange = this.handleGithubChange.bind(this);
       this.handleClose = this.handleClose.bind(this);
     }
 
@@ -130,7 +134,7 @@ const Settings = withStyles(styles)(
           this.setState({
             avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, user.name),
             description: settings.description,
-            socials: settings.socials ? JSON.parse(settings.socials) as Socials : DEFAULT_SOCIALS,
+            socials: settings.socials ? (JSON.parse(settings.socials) as Socials) : DEFAULT_SOCIALS,
           });
         });
       }
@@ -142,7 +146,7 @@ const Settings = withStyles(styles)(
           <Container fixed maxWidth="sm">
             <ChromiaPageHeader text="Edit Settings" />
             <Card key={"user-card"} className={this.props.classes.settingsCard}>
-            <Typography variant="h6" component="h6" className={this.props.classes.chapterHeader}>
+              <Typography variant="h6" component="h6" className={this.props.classes.chapterHeader}>
                 General
               </Typography>
               {this.avatarEditor()}
@@ -204,40 +208,103 @@ const Settings = withStyles(styles)(
     }
 
     private socialsEditor() {
-      const ICON_SIZE = 24;
       return (
         <Grid container className={this.props.classes.socialsWrapper}>
           <Grid item xs={6} className={this.props.classes.socialsBlock}>
-            <TwitterIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
-            <TextField
-              disabled={!config.features.userSocialsEnabled}
-              className={this.props.classes.socialsField}
-              id="twitter"
-              margin="dense"
-              label="Twitter"
-              placeholder="Username"
-              type="text"
-              variant="outlined"
-              onChange={this.handleTwitterChange}
-              value={this.state.socials.twitter}
-            />
+            {this.twitterInput()}
           </Grid>
           <Grid item xs={6} className={this.props.classes.socialsBlock}>
-            <LinkedinIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
-            <TextField
-              disabled={!config.features.userSocialsEnabled}
-              className={this.props.classes.socialsField}
-              id="twitter"
-              margin="dense"
-              label="LinkedIn"
-              placeholder="Username"
-              type="text"
-              variant="outlined"
-              onChange={this.handleLinkedInChange}
-              value={this.state.socials.linkedin}
-            />
+            {this.linkedInInput()}
+          </Grid>
+          <Grid item xs={6} className={this.props.classes.socialsBlock}>
+            {this.facebookInput()}
+          </Grid>
+          <Grid item xs={6} className={this.props.classes.socialsBlock}>
+            {this.githubInput()}
           </Grid>
         </Grid>
+      );
+    }
+
+    private twitterInput() {
+      return (
+        <>
+          <TwitterIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
+          <TextField
+            disabled={!config.features.userSocialsEnabled}
+            className={this.props.classes.socialsField}
+            id="twitter"
+            margin="dense"
+            label="Twitter"
+            placeholder="Username"
+            type="text"
+            variant="outlined"
+            onChange={this.handleTwitterChange}
+            value={this.state.socials.twitter}
+          />
+        </>
+      );
+    }
+
+    private linkedInInput() {
+      return (
+        <>
+          <LinkedinIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
+          <TextField
+            disabled={!config.features.userSocialsEnabled}
+            className={this.props.classes.socialsField}
+            id="twitter"
+            margin="dense"
+            label="LinkedIn"
+            placeholder="Username"
+            type="text"
+            variant="outlined"
+            onChange={this.handleLinkedInChange}
+            value={this.state.socials.linkedin}
+          />
+        </>
+      );
+    }
+
+    private facebookInput() {
+      return (
+        <>
+          <FacebookIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
+          <TextField
+            disabled={!config.features.userSocialsEnabled}
+            className={this.props.classes.socialsField}
+            id="facebook"
+            margin="dense"
+            label="Facebook"
+            placeholder="Username"
+            type="text"
+            variant="outlined"
+            onChange={this.handleFacebookChange}
+            value={this.state.socials.facebook}
+          />
+        </>
+      );
+    }
+
+    private githubInput() {
+      return (
+        <>
+          <div className={this.props.classes.socialsIcon}>
+            <GitHubLogo />
+          </div>
+          <TextField
+            disabled={!config.features.userSocialsEnabled}
+            className={this.props.classes.socialsField}
+            id="github"
+            margin="dense"
+            label="Github"
+            placeholder="Username"
+            type="text"
+            variant="outlined"
+            onChange={this.handleGithubChange}
+            value={this.state.socials.github}
+          />
+        </>
       );
     }
 
@@ -282,6 +349,8 @@ const Settings = withStyles(styles)(
       const socials: Socials = {
         twitter: event.target.value,
         linkedin: this.state.socials.linkedin,
+        facebook: this.state.socials.facebook,
+        github: this.state.socials.github,
       };
 
       this.setState({ socials });
@@ -291,6 +360,30 @@ const Settings = withStyles(styles)(
       const socials: Socials = {
         linkedin: event.target.value,
         twitter: this.state.socials.twitter,
+        facebook: this.state.socials.facebook,
+        github: this.state.socials.github,
+      };
+
+      this.setState({ socials });
+    }
+
+    private handleFacebookChange(event: React.ChangeEvent<HTMLInputElement>) {
+      const socials: Socials = {
+        linkedin: this.state.socials.linkedin,
+        twitter: this.state.socials.twitter,
+        facebook: event.target.value,
+        github: this.state.socials.github,
+      };
+
+      this.setState({ socials });
+    }
+
+    private handleGithubChange(event: React.ChangeEvent<HTMLInputElement>) {
+      const socials: Socials = {
+        linkedin: this.state.socials.linkedin,
+        twitter: this.state.socials.twitter,
+        facebook: this.state.socials.facebook,
+        github: event.target.value,
       };
 
       this.setState({ socials });
