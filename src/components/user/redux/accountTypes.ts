@@ -34,7 +34,6 @@ export interface IVaultSuccess {
 
 export interface IVaultCancel {
   type: AccountActionTypes.VAULT_CANCEL;
-  error: string;
 }
 
 export interface ISetUser {
@@ -105,7 +104,6 @@ export interface AccountState {
   loading: boolean;
   autoLoginInProgress: boolean;
   authenticationStep: AuthenticationStep;
-  error: string;
   accountId: string;
   ft3User: User;
   user: ChromunityUser;

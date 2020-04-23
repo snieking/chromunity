@@ -19,6 +19,7 @@ import VaultCancel from "./components/user/authentication/VaultCancel";
 import Reports from "./components/governing/reports/Reports";
 import MetaTags from "react-meta-tags";
 import * as config from "./config";
+import SnackbarHolder from "./components/snackbar/SnackbarHolder";
 
 const Content: React.FunctionComponent = () => {
   return (
@@ -47,6 +48,7 @@ const Content: React.FunctionComponent = () => {
         <Route path="/chat" component={ChatPage} />
         <Route path="/error" component={ErrorPage} />
       </Switch>
+      <SnackbarHolder />
     </div>
   );
 };

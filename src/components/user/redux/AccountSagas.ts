@@ -1,3 +1,4 @@
+import { setInfo, setError } from './../../snackbar/redux/snackbarTypes';
 import {
   AccountActionTypes,
   AuthenticationStep,
@@ -61,6 +62,7 @@ function* logoutSaga() {
   clearSession();
   yield put(setUser(null));
   yield put(setAuthenticationStep(null));
+  yield put(setInfo("Successfully signed out"));
 }
 
 function* vaultSuccessSaga(action: IVaultSuccess): Generator<any, any, any> {
@@ -79,13 +81,15 @@ function* vaultSuccessSaga(action: IVaultSuccess): Generator<any, any, any> {
 
     if (username) {
       yield authorizeUser(username, user);
+      yield put(setInfo("Successfully signed in"));
       userEvent("sign-in");
     } else {
       yield put(saveVaultAccount(account.id, user));
       yield put(setAuthenticationStep(AuthenticationStep.USERNAME_INPUT_REQUIRED));
     }
   } catch (error) {
-    yield put(vaultCancel("Error signing in: " + error.message));
+    yield put(vaultCancel());
+    yield put(setError("Error signing in: " + error.message));
   }
 }
 
@@ -95,7 +99,8 @@ function* registerUserSaga(action: IRegisterUser) {
   const user = yield select(getFt3User);
 
   if (!accountId || !user) {
-    yield put(vaultCancel("Login session was interrupted"));
+    yield put(vaultCancel());
+    yield put(setError("Login session was interrupted"));
     return;
   }
 
@@ -104,7 +109,8 @@ function* registerUserSaga(action: IRegisterUser) {
     yield authorizeUser(action.username, user);
     userEvent("register");
   } catch (error) {
-    yield put(vaultCancel("Error signing in: " + error.message));
+    yield put(vaultCancel());
+    yield put(setError("Error signing in: " + error.message))
   }
 }
 

@@ -7,17 +7,15 @@ import {
   ListItemIcon,
   Menu,
   MenuItem,
-  Snackbar,
   Tooltip,
   Typography,
-  WithStyles
+  WithStyles,
 } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
 import IconButton from "@material-ui/core/IconButton";
-import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import { ChromunityUser } from "../../types";
 import { Delete, Edit, MoreHoriz } from "@material-ui/icons";
 import { parseEmojis } from "../../util/text-parsing";
@@ -26,11 +24,12 @@ import ConfirmDialog from "../common/ConfirmDialog";
 import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
 import TextToolbar from "../common/textToolbar/TextToolbar";
+import { setInfo, setError } from "../snackbar/redux/snackbarTypes";
 
 const styles = createStyles({
   editorWrapper: {
-    position: "relative"
-  }
+    position: "relative",
+  },
 });
 
 export interface EditMessageButtonProps extends WithStyles<typeof styles> {
@@ -39,6 +38,8 @@ export interface EditMessageButtonProps extends WithStyles<typeof styles> {
   value: string;
   modifiableUntil: number;
   user: ChromunityUser;
+  setInfo: typeof setInfo;
+  setError: typeof setError;
 }
 
 export interface EditMessageButtonState {
@@ -46,9 +47,6 @@ export interface EditMessageButtonState {
   deleteDialogOpen: boolean;
   anchorEl: HTMLElement;
   message: string;
-  replyStatusSuccessOpen: boolean;
-  replyStatusErrorOpen: boolean;
-  replySentStatus: string;
 }
 
 const EditMessageButton = withStyles(styles)(
@@ -62,10 +60,7 @@ const EditMessageButton = withStyles(styles)(
         message: props.value,
         editDialogOpen: false,
         deleteDialogOpen: false,
-        replyStatusSuccessOpen: false,
-        replyStatusErrorOpen: false,
         anchorEl: null,
-        replySentStatus: ""
       };
 
       this.textInput = React.createRef();
@@ -76,17 +71,15 @@ const EditMessageButton = withStyles(styles)(
       this.submitDelete = this.submitDelete.bind(this);
       this.closeMenu = this.closeMenu.bind(this);
       this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
-      this.handleClose = this.handleClose.bind(this);
       this.addTextFromToolbar = this.addTextFromToolbar.bind(this);
-      this.renderSnackbars = this.renderSnackbars.bind(this);
     }
 
     toggleEditDialog() {
-      this.setState(prevState => ({ editDialogOpen: !prevState.editDialogOpen, anchorEl: null }));
+      this.setState((prevState) => ({ editDialogOpen: !prevState.editDialogOpen, anchorEl: null }));
     }
 
     toggleDeleteDialog() {
-      this.setState(prevState => ({ deleteDialogOpen: !prevState.deleteDialogOpen, anchorEl: null }));
+      this.setState((prevState) => ({ deleteDialogOpen: !prevState.deleteDialogOpen, anchorEl: null }));
     }
 
     handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -97,12 +90,18 @@ const EditMessageButton = withStyles(styles)(
 
     submitEdit() {
       this.toggleEditDialog();
-      this.props.editFunction(this.state.message);
+      this.props
+        .editFunction(this.state.message)
+        .catch((error: Error) => this.props.setError(error.message))
+        .then(() => this.props.setInfo("Message successfully edited"));
     }
 
     submitDelete() {
       this.toggleDeleteDialog();
-      this.props.deleteFunction();
+      this.props
+        .deleteFunction()
+        .catch((error: Error) => this.props.setError(error.message))
+        .then(() => this.props.setInfo("Message successfully deleted"));
     }
 
     editDialog() {
@@ -113,7 +112,7 @@ const EditMessageButton = withStyles(styles)(
               <DialogContent>
                 <br />
                 <div className={this.props.classes.editorWrapper}>
-                  <TextToolbar addText={this.addTextFromToolbar}/>
+                  <TextToolbar addText={this.addTextFromToolbar} />
                   <TextField
                     autoFocus
                     margin="dense"
@@ -136,7 +135,7 @@ const EditMessageButton = withStyles(styles)(
                   Cancel
                 </Button>
                 <Button
-                  onKeyPress={e => (e.key === "Enter" ? this.submitEdit() : "")}
+                  onKeyPress={(e) => (e.key === "Enter" ? this.submitEdit() : "")}
                   onClick={() => this.submitEdit()}
                   color="primary"
                   variant="contained"
@@ -150,40 +149,11 @@ const EditMessageButton = withStyles(styles)(
       );
     }
 
-    renderSnackbars() {
-      return (
-        <div>
-          <Snackbar
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "left"
-            }}
-            open={this.state.replyStatusSuccessOpen}
-            onClose={this.handleClose}
-            autoHideDuration={3000}
-          >
-            <CustomSnackbarContentWrapper variant="success" message={this.state.replySentStatus} />
-          </Snackbar>
-          <Snackbar
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "left"
-            }}
-            open={this.state.replyStatusErrorOpen}
-            autoHideDuration={3000}
-            onClose={this.handleClose}
-          >
-            <CustomSnackbarContentWrapper variant="error" message={this.state.replySentStatus} />
-          </Snackbar>
-        </div>
-      );
-    }
-
     addTextFromToolbar(text: string) {
       const startPosition = this.textInput.current.selectionStart;
 
-      this.setState(prevState => ({
-        message: [prevState.message.slice(0, startPosition), text, prevState.message.slice(startPosition)].join("")
+      this.setState((prevState) => ({
+        message: [prevState.message.slice(0, startPosition), text, prevState.message.slice(startPosition)].join(""),
       }));
 
       setTimeout(() => {
@@ -243,31 +213,26 @@ const EditMessageButton = withStyles(styles)(
               open={this.state.deleteDialogOpen}
               text="This action will delete the message"
             />
-            {this.renderSnackbars()}
           </div>
         );
       } else {
         return null;
       }
     }
-
-    private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
-      if (reason === "clickaway") {
-        return;
-      }
-
-      this.setState({
-        replyStatusSuccessOpen: false,
-        replyStatusErrorOpen: false
-      });
-    }
   }
 );
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    user: store.account.user
+    user: store.account.user,
   };
 };
 
-export default connect(mapStateToProps, null)(EditMessageButton);
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    setError: (msg: string) => dispatch(setError(msg)),
+    setInfo: (msg: string) => dispatch(setInfo(msg)),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(EditMessageButton);

@@ -10,7 +10,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Snackbar,
   TextField,
   withStyles,
   WithStyles,
@@ -21,7 +20,6 @@ import {
 import AvatarChanger from "./AvatarChanger";
 
 import { getUserSettings, updateUserSettings } from "../../../blockchain/UserService";
-import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import Avatar, { AVATAR_SIZE } from "../../common/Avatar";
 import { ApplicationState } from "../../../store";
@@ -30,6 +28,7 @@ import { Socials } from "../socials/socialTypes";
 import { TwitterIcon, LinkedinIcon, FacebookIcon } from "react-share";
 import * as config from "../../../config";
 import GitHubLogo from "../../common/logos/GitHubLogo";
+import { setError, setInfo } from "../../snackbar/redux/snackbarTypes";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -76,12 +75,14 @@ const styles = (theme: Theme) =>
       marginRight: "10px",
       position: "relative",
       top: 15,
-      display: "inline"
+      display: "inline",
     },
   });
 
 interface Props extends WithStyles<typeof styles> {
   user: ChromunityUser;
+  setInfo: typeof setInfo;
+  setError: typeof setError;
 }
 
 interface SettingsState {
@@ -90,9 +91,6 @@ interface SettingsState {
   editAvatarOpen: boolean;
   description: string;
   socials: Socials;
-  updateSuccessOpen: boolean;
-  updateErrorOpen: boolean;
-  settingsUpdateStatus: string;
 }
 
 const DEFAULT_SOCIALS: Socials = { twitter: "", linkedin: "", facebook: "", github: "" };
@@ -108,9 +106,6 @@ const Settings = withStyles(styles)(
         editAvatarOpen: false,
         description: "",
         socials: DEFAULT_SOCIALS,
-        updateSuccessOpen: false,
-        updateErrorOpen: false,
-        settingsUpdateStatus: "",
       };
 
       this.updateAvatar = this.updateAvatar.bind(this);
@@ -122,7 +117,6 @@ const Settings = withStyles(styles)(
       this.handleLinkedInChange = this.handleLinkedInChange.bind(this);
       this.handleFacebookChange = this.handleFacebookChange.bind(this);
       this.handleGithubChange = this.handleGithubChange.bind(this);
-      this.handleClose = this.handleClose.bind(this);
     }
 
     componentDidMount() {
@@ -142,26 +136,23 @@ const Settings = withStyles(styles)(
 
     render() {
       return (
-        <div>
-          <Container fixed maxWidth="sm">
-            <ChromiaPageHeader text="Edit Settings" />
-            <Card key={"user-card"} className={this.props.classes.settingsCard}>
-              <Typography variant="h6" component="h6" className={this.props.classes.chapterHeader}>
-                General
-              </Typography>
-              {this.avatarEditor()}
-              {this.descriptionEditor()}
-            </Card>
-            <Card key={"socials-card"} className={this.props.classes.settingsCard}>
-              <Typography variant="h6" component="h6" className={this.props.classes.chapterHeader}>
-                Social Profiles
-              </Typography>
-              {this.socialsEditor()}
-            </Card>
-            {this.saveButton()}
-          </Container>
-          {this.snackBars()}
-        </div>
+        <Container fixed maxWidth="sm">
+          <ChromiaPageHeader text="Edit Settings" />
+          <Card key={"user-card"} className={this.props.classes.settingsCard}>
+            <Typography variant="h6" component="h6" className={this.props.classes.chapterHeader}>
+              General
+            </Typography>
+            {this.avatarEditor()}
+            {this.descriptionEditor()}
+          </Card>
+          <Card key={"socials-card"} className={this.props.classes.settingsCard}>
+            <Typography variant="h6" component="h6" className={this.props.classes.chapterHeader}>
+              Social Profiles
+            </Typography>
+            {this.socialsEditor()}
+          </Card>
+          {this.saveButton()}
+        </Container>
       );
     }
 
@@ -318,29 +309,6 @@ const Settings = withStyles(styles)(
       );
     }
 
-    private snackBars() {
-      return (
-        <>
-          <Snackbar
-            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-            open={this.state.updateSuccessOpen}
-            autoHideDuration={3000}
-            onClose={this.handleClose}
-          >
-            <CustomSnackbarContentWrapper variant="success" message={this.state.settingsUpdateStatus} />
-          </Snackbar>
-          <Snackbar
-            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-            open={this.state.updateErrorOpen}
-            autoHideDuration={3000}
-            onClose={this.handleClose}
-          >
-            <CustomSnackbarContentWrapper variant="error" message={this.state.settingsUpdateStatus} />
-          </Snackbar>
-        </>
-      );
-    }
-
     private handleDescriptionChange(event: React.ChangeEvent<HTMLInputElement>) {
       this.setState({ description: event.target.value });
     }
@@ -407,33 +375,14 @@ const Settings = withStyles(styles)(
     }
 
     private saveSettings() {
-      // TODO: Add this.state.socials
       updateUserSettings(
         this.props.user,
         this.state.avatar,
         this.state.description,
         config.features.userSocialsEnabled ? this.state.socials : null
       )
-        .then(() =>
-          this.setState({
-            settingsUpdateStatus: "Settings saved",
-            updateSuccessOpen: true,
-          })
-        )
-        .catch(() =>
-          this.setState({
-            settingsUpdateStatus: "Error updating settings",
-            updateErrorOpen: true,
-          })
-        );
-    }
-
-    private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
-      if (reason === "clickaway") {
-        return;
-      }
-
-      this.setState({ updateSuccessOpen: false, updateErrorOpen: false });
+        .then(() => this.props.setInfo("Settings saved"))
+        .catch(() => this.props.setError("Error updating settings"));
     }
   }
 );
@@ -444,4 +393,11 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Settings);
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    setError: (msg: string) => dispatch(setError(msg)),
+    setInfo: (msg: string) => dispatch(setInfo(msg)),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Settings);

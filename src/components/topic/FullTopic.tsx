@@ -71,6 +71,7 @@ import PreviewLinks from "../common/PreviewLinks";
 import PageMeta from "../common/PageMeta";
 import PollRenderer from "./poll/PollRenderer";
 import SocialShareButton from "../common/SocialShareButton";
+import { setError, setInfo } from "../snackbar/redux/snackbarTypes";
 
 interface MatchParams {
   id: string;
@@ -81,6 +82,8 @@ interface Props extends RouteComponentProps<MatchParams> {
   representatives: string[];
   distrustedUsers: string[];
   user: ChromunityUser;
+  setError: typeof setError;
+  setInfo: typeof setInfo;
 }
 
 const useStyles = makeStyles((theme) =>
@@ -506,7 +509,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           </Button>
           <Button
             type="submit"
-            onClick={() => handleReplySubmit()}
+            onClick={handleReplySubmit}
             color="primary"
             variant="contained"
             style={{ marginLeft: "5px" }}
@@ -544,11 +547,12 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
       setReplyBoxOpen(false);
       setLoading(true);
       createTopicReply(props.user, topic.id, replyMessage)
+        .catch((error) => props.setError(error.message))
         .then(() => {
+          props.setInfo("Reply sent");
           retrieveLatestReplies();
           setReplyMessage("");
         })
-        .catch()
         .finally(() => setLoading(false));
     }
   }
@@ -676,4 +680,11 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-export default connect(mapStateToProps, null)(FullTopic);
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    setError: (msg: string) => dispatch(setError(msg)),
+    setInfo: (msg: string) => dispatch(setInfo(msg)),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(FullTopic);

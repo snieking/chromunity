@@ -39,9 +39,8 @@ export const vaultSuccess: ActionCreator<IVaultSuccess> = (rawTx: string) => ({
   rawTx
 });
 
-export const vaultCancel: ActionCreator<IVaultCancel> = (error: string) => ({
-  type: AccountActionTypes.VAULT_CANCEL,
-  error
+export const vaultCancel: ActionCreator<IVaultCancel> = () => ({
+  type: AccountActionTypes.VAULT_CANCEL
 });
 
 export const setUser: ActionCreator<ISetUser> = (user: ChromunityUser) => ({

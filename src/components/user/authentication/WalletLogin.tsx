@@ -1,9 +1,8 @@
 import React from "react";
-import { createStyles, makeStyles, Snackbar } from "@material-ui/core";
+import { createStyles, makeStyles } from "@material-ui/core";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import Container from "@material-ui/core/Container";
 import Button from "@material-ui/core/Button";
-import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
 import { ApplicationState } from "../../../store";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { connect } from "react-redux";
@@ -12,6 +11,7 @@ import { ReactComponent as LeftShapes } from "../../static/graphics/left-shapes.
 import { ReactComponent as RightShapes } from "../../static/graphics/right-shapes.svg";
 import { loginAccount, resetLoginState, setAuthenticationStep } from "../redux/accountActions";
 import { AuthenticationStep } from "../redux/accountTypes";
+import { setInfo, setError } from "../../snackbar/redux/snackbarTypes";
 
 const useStyles = makeStyles(theme =>
   createStyles({
@@ -52,12 +52,11 @@ const useStyles = makeStyles(theme =>
 interface Props {
   authenticationStep: AuthenticationStep;
   loading: boolean;
-  success: boolean;
-  failure: boolean;
-  error: string;
   loginAccount: typeof loginAccount;
   resetLoginState: typeof resetLoginState;
   setAuthenticationStep: typeof setAuthenticationStep;
+  setInfo: typeof setInfo;
+  setError: typeof setError;
 }
 
 const WalletLogin: React.FunctionComponent<Props> = props => {
@@ -91,15 +90,6 @@ const WalletLogin: React.FunctionComponent<Props> = props => {
           Redirecting to Chromia Vault...
         </Typography>
       )}
-
-      <Snackbar
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        open={props.error != null}
-        autoHideDuration={6000}
-        onClose={props.resetLoginState}
-      >
-        <CustomSnackbarContentWrapper variant="error" message={props.error} />
-      </Snackbar>
     </Container>
   );
 };
@@ -115,8 +105,7 @@ const mapDispatchToProps = (dispatch: any) => {
 const mapStateToProps = (store: ApplicationState) => {
   return {
     authenticationStep: store.account.authenticationStep,
-    loading: store.account.loading,
-    error: store.account.error
+    loading: store.account.loading
   };
 };
 

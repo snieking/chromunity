@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Redirect, RouteComponentProps } from "react-router";
 import { parse } from "query-string";
 import { connect } from "react-redux";
-import { createStyles, LinearProgress, Snackbar } from "@material-ui/core";
+import { createStyles, LinearProgress } from "@material-ui/core";
 import { registerUser, resetLoginState, vaultCancel, vaultSuccess } from "../redux/accountActions";
 import { ApplicationState } from "../../../store";
 import { ChromunityUser } from "../../../types";
@@ -10,58 +10,58 @@ import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import Container from "@material-ui/core/Container";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
-import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
 import { AuthenticationStep } from "../redux/accountTypes";
 import Button from "@material-ui/core/Button";
 import { ReactComponent as LeftShapes } from "../../static/graphics/left-shapes.svg";
 import { ReactComponent as RightShapes } from "../../static/graphics/right-shapes.svg";
+import { setError, setInfo } from "../../snackbar/redux/snackbarTypes";
 
 interface Props extends RouteComponentProps {
   vaultSuccess: typeof vaultSuccess;
   vaultCancel: typeof vaultCancel;
   resetLoginState: typeof resetLoginState;
   registerUser: typeof registerUser;
+  setInfo: typeof setInfo;
+  setError: typeof setError;
   authenticationStep: AuthenticationStep;
   loading: boolean;
   user: ChromunityUser;
   error: string;
 }
 
-const useStyles = makeStyles(theme =>
+const useStyles = makeStyles((theme) =>
   createStyles({
     contentWrapper: {
-      textAlign: "center"
+      textAlign: "center",
     },
     textInput: {
       marginTop: "10px",
       marginBottom: "20px",
-      width: "250px"
+      width: "250px",
     },
     btnInput: {
       marginTop: "10px",
       marginBottom: "20px",
-      width: "100px"
+      width: "100px",
     },
     leftShapes: {
       [theme.breakpoints.down("sm")]: {
-        display: "none"
+        display: "none",
       },
-      float: "left"
+      float: "left",
     },
     rightShapes: {
       [theme.breakpoints.down("sm")]: {
-        display: "none"
+        display: "none",
       },
-      float: "right"
-    }
+      float: "right",
+    },
   })
 );
 
-const VaultSuccess: React.FunctionComponent<Props> = props => {
+const VaultSuccess: React.FunctionComponent<Props> = (props) => {
   const classes = useStyles();
 
-  const [errorOpen, setErrorOpen] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
   const [name, setName] = useState("");
 
   useEffect(() => {
@@ -77,14 +77,12 @@ const VaultSuccess: React.FunctionComponent<Props> = props => {
 
   const selectUsername = () => {
     if (/\s/.test(name)) {
-      setErrorMsg("Username may not contain whitespace");
-      setErrorOpen(true);
+      props.setError("Username may not contain whitespace");
       setName("");
     } else if (!/[a-zA-Z0-9]{3,16}/.test(name)) {
-      setErrorMsg(
+      props.setError(
         "Username must start with a a-z, A-Z or 0-9 character. Username should have a size between 3-16 characters."
       );
-      setErrorOpen(true);
       setName("");
     } else {
       props.registerUser(name);
@@ -95,14 +93,6 @@ const VaultSuccess: React.FunctionComponent<Props> = props => {
     return (
       <Container maxWidth="md" className={classes.contentWrapper}>
         {authentication()}
-        <Snackbar
-          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-          open={errorOpen}
-          autoHideDuration={3000}
-          onClose={() => setErrorOpen(false)}
-        >
-          <CustomSnackbarContentWrapper variant="error" message={errorMsg} />
-        </Snackbar>
       </Container>
     );
   };
@@ -169,8 +159,7 @@ const mapStateToProps = (store: ApplicationState) => {
   return {
     loading: store.account.loading,
     user: store.account.user,
-    error: store.account.error,
-    authenticationStep: store.account.authenticationStep
+    authenticationStep: store.account.authenticationStep,
   };
 };
 
@@ -179,7 +168,9 @@ const mapDispatchToProps = (dispatch: any) => {
     vaultSuccess: (accountId: string, username: string, vaultPubKey: string) =>
       dispatch(vaultSuccess(accountId, username, vaultPubKey)),
     vaultCancel: (error: string) => dispatch(vaultCancel(error)),
-    registerUser: (username: string) => dispatch(registerUser(username))
+    registerUser: (username: string) => dispatch(registerUser(username)),
+    setError: (msg: string) => dispatch(setError(msg)),
+    setInfo: (msg: string) => dispatch(setInfo(msg)),
   };
 };
 

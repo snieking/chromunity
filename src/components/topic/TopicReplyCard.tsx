@@ -55,6 +55,7 @@ import TextToolbar from "../common/textToolbar/TextToolbar";
 import CardActions from "@material-ui/core/CardActions";
 import Divider from "@material-ui/core/Divider";
 import PreviewLinks from "../common/PreviewLinks";
+import { setError, setInfo } from "../snackbar/redux/snackbarTypes";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -120,6 +121,8 @@ interface Props extends WithStyles<typeof styles> {
   representatives: string[];
   distrustedUsers: string[];
   cascadeOpenSubReplies?: Function;
+  setError: typeof setError;
+  setInfo: typeof setInfo;
 }
 
 interface State {
@@ -275,6 +278,8 @@ const TopicReplyCard = withStyles(styles)(
           cascadeOpenSubReplies={this.openSubReplies}
           user={this.props.user}
           distrustedUsers={this.props.distrustedUsers}
+          setError={this.props.setError}
+          setInfo={this.props.setInfo}
         />
       ));
     }
@@ -603,16 +608,13 @@ const TopicReplyCard = withStyles(styles)(
     sendReply() {
       const message: string = this.state.replyMessage;
       this.setState({ replyBoxOpen: false, replyMessage: "" });
-      createTopicSubReply(
-        this.props.user,
-        this.props.topicId,
-        this.props.reply.id,
-        message,
-        this.props.reply.author
-      ).then(() => {
-        getTopicSubReplies(this.props.reply.id).then((replies) => this.setState({ subReplies: replies }));
-        this.openSubReplies();
-      });
+      createTopicSubReply(this.props.user, this.props.topicId, this.props.reply.id, message, this.props.reply.author)
+        .catch((error) => this.props.setError(error.message))
+        .then(() => {
+          this.props.setInfo("Reply sent");
+          getTopicSubReplies(this.props.reply.id).then((replies) => this.setState({ subReplies: replies }));
+          this.openSubReplies();
+        });
     }
   }
 );
@@ -624,4 +626,11 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-export default connect(mapStateToProps, null)(TopicReplyCard);
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    setError: (msg: string) => dispatch(setError(msg)),
+    setInfo: (msg: string) => dispatch(setInfo(msg)),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(TopicReplyCard);
