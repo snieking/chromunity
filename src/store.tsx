@@ -23,6 +23,8 @@ import { governmentWatcher } from "./components/governing/redux/govSagas";
 import { chatWatcher } from "./components/chat/redux/chatSagas";
 import { CommonState } from "./components/common/redux/CommonTypes";
 import { commonReducer } from "./components/common/redux/CommonReducers";
+import { SnackbarState } from "./components/snackbar/redux/snackbarTypes";
+import { snackbarReducer } from "./components/snackbar/redux/snackbarReducers";
 
 export interface ApplicationState {
   account: AccountState;
@@ -33,6 +35,7 @@ export interface ApplicationState {
   government: GovernmentState;
   chat: ChatState;
   common: CommonState;
+  snackbar: SnackbarState;
 }
 
 const rootReducer = combineReducers<ApplicationState>({
@@ -43,7 +46,8 @@ const rootReducer = combineReducers<ApplicationState>({
   styling: stylingReducer,
   government: governmentReducer,
   chat: chatReducer,
-  common: commonReducer
+  common: commonReducer,
+  snackbar: snackbarReducer
 });
 
 // Create Redux Store

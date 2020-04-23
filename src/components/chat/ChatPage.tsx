@@ -15,9 +15,8 @@ import {
   openChat,
   refreshOpenChat,
   sendMessage,
-  storeErrorMessage
 } from "./redux/chatActions";
-import { CircularProgress, Container, LinearProgress, Snackbar, Theme } from "@material-ui/core";
+import { CircularProgress, Container, LinearProgress, Theme } from "@material-ui/core";
 import ChromiaPageHeader from "../common/ChromiaPageHeader";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
@@ -49,7 +48,6 @@ import {
 } from "../../theme";
 import useTheme from "@material-ui/core/styles/useTheme";
 import LoadMoreButton from "../buttons/LoadMoreButton";
-import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import { toLowerCase, useInterval } from "../../util/util";
 import { chatPageStyles } from "./styles";
 import Tutorial from "../common/Tutorial";
@@ -57,6 +55,7 @@ import TutorialButton from "../buttons/TutorialButton";
 import { step } from "../common/TutorialStep";
 import { Redirect } from "react-router";
 import TextToolbar from "../common/textToolbar/TextToolbar";
+import { setInfo, setError } from "../snackbar/redux/snackbarTypes";
 
 interface OptionType {
   label: string;
@@ -76,8 +75,6 @@ interface Props {
   activeChatCouldExistOlderMessages: boolean;
   followedChatUsers: string[];
   chatUsers: string[];
-  errorMessage: string;
-  errorMessageOpen: boolean;
   checkChatAuthentication: typeof checkChatAuthentication;
   createChatKeyPair: typeof createChatKeyPair;
   deleteChatUser: typeof deleteChatUserAction;
@@ -91,7 +88,8 @@ interface Props {
   modifyTitle: typeof modifyTitleAction;
   loadChatUsers: typeof loadChatUsersAction;
   loadOlderMessages: typeof loadOlderMessagesAction;
-  storeErrorMessage: typeof storeErrorMessage;
+  setInfo: typeof setInfo;
+  setError: typeof setError;
   theme: Theme;
 }
 
@@ -107,8 +105,6 @@ interface State {
   drawerOpen: boolean;
   participantsDrawerOpen: boolean;
   scrolledToTop: boolean;
-  snackbarMessage: string;
-  snackbarOpen: boolean;
   showResetChatAccountDialog: boolean;
 }
 
@@ -129,8 +125,6 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     drawerOpen: false,
     participantsDrawerOpen: false,
     scrolledToTop: true,
-    snackbarMessage: "",
-    snackbarOpen: false,
     showResetChatAccountDialog: false
   });
 
@@ -628,8 +622,6 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     props.deleteChatUser(props.user);
     setValues({
       ...values,
-      snackbarMessage: "Chat account resetted",
-      snackbarOpen: true,
       password: "",
       showResetChatAccountDialog: false
     });
@@ -679,23 +671,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   return (
     <Container fixed>
-      <div>{renderContent()}</div>
-      <Snackbar
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        open={values.snackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => setValues({ ...values, snackbarMessage: "", snackbarOpen: false })}
-      >
-        <CustomSnackbarContentWrapper variant="success" message={values.snackbarMessage} />
-      </Snackbar>
-      <Snackbar
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        open={props.errorMessageOpen}
-        autoHideDuration={3000}
-        onClose={() => props.storeErrorMessage(null)}
-      >
-        <CustomSnackbarContentWrapper variant="error" message={props.errorMessage} />
-      </Snackbar>
+      {renderContent()}
     </Container>
   );
 };
@@ -715,7 +691,8 @@ const mapDispatchToProps = (dispatch: any) => {
     modifyTitle: (user: ChromunityUser, chat: Chat, title: string) => dispatch(modifyTitleAction(user, chat, title)),
     loadChatUsers: (user: ChromunityUser) => dispatch(loadChatUsersAction(user)),
     loadOlderMessages: () => dispatch(loadOlderMessagesAction()),
-    storeErrorMessage: (msg: string) => dispatch(storeErrorMessage(msg))
+    setError: (msg: string) => dispatch(setError(msg)),
+    setInfo: (msg: string) => dispatch(setInfo(msg))
   };
 };
 
@@ -732,9 +709,7 @@ const mapStateToProps = (store: ApplicationState) => {
     activeChatCouldExistOlderMessages: store.chat.activeChatCouldExistOlderMessages,
     activeChatParticipants: store.chat.activeChatParticipants,
     followedChatUsers: store.chat.followedChatUsers,
-    chatUsers: store.chat.chatUsers,
-    errorMessage: store.chat.errorMessage,
-    errorMessageOpen: store.chat.errorMessageOpen
+    chatUsers: store.chat.chatUsers
   };
 };
 
