@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Card, CardActions, CardContent, Grid, Snackbar, Tooltip, Typography } from "@material-ui/core";
+import { Button, Card, CardActions, CardContent, Grid, Tooltip, Typography } from "@material-ui/core";
 import { Link } from "react-router-dom";
 import {
   getTimesUserDistrustedSomeone,
@@ -18,7 +18,6 @@ import {
   countTopicStarRatingForUser
 } from "../../../blockchain/TopicService";
 import { countUserFollowers } from "../../../blockchain/FollowingService";
-import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { toLowerCase } from "../../../util/util";
 import { electionCandidateCardStyles } from "../sharedStyles";
@@ -26,6 +25,7 @@ import { ApplicationState } from "../../../store";
 import { connect } from "react-redux";
 import { ChromunityUser } from "../../../types";
 import ConfirmDialog from "../../common/ConfirmDialog";
+import { setError, setInfo } from "../../snackbar/redux/snackbarTypes";
 
 interface Props {
   candidate: string;
@@ -33,6 +33,8 @@ interface Props {
   voteForCandidate: Function;
   userIsEligibleToVote: boolean;
   user: ChromunityUser;
+  setInfo: typeof setInfo;
+  setError: typeof setError;
 }
 
 const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => {
@@ -47,8 +49,6 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
   const [distrusters, setDistrusters] = useState(0);
   const [distrusted, setDistrusted] = useState(0);
   const [voteConfirmOpen, setVoteConfirmOpen] = useState(false);
-
-  const [snackbarOpen, setSnackBarOpen] = useState(false);
 
   useEffect(() => {
     getUserSettingsCached(props.candidate, 1440).then(settings =>
@@ -161,17 +161,6 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
               </Tooltip>
             </Grid>
           </Grid>
-          <Snackbar
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "left"
-            }}
-            open={snackbarOpen}
-            autoHideDuration={3000}
-            onClose={() => setSnackBarOpen(false)}
-          >
-            <CustomSnackbarContentWrapper variant="info" message="Copied to clipboard" />
-          </Snackbar>
         </CardContent>
         <CardActions style={{ justifyContent: "center" }}>{renderCandidateCardActions(props.candidate)}</CardActions>
       </Card>
@@ -196,7 +185,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
               "/gov/vote/" +
               name
             }
-            onCopy={() => setSnackBarOpen(true)}
+            onCopy={() => props.setInfo("Copied to clipboard")}
           >
             <Button fullWidth size="small" variant="contained" color="secondary">
               Share Vote Link
@@ -240,7 +229,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
               "/gov/vote/" +
               name
             }
-            onCopy={() => setSnackBarOpen(true)}
+            onCopy={() => setInfo("Copied to clipboard")}
           >
             <Button fullWidth size="small" variant="contained" color="secondary">
               Share Vote Link
@@ -258,4 +247,11 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ElectionCandidateCard);
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    setError: (msg: string) => dispatch(setError(msg)),
+    setInfo: (msg: string) => dispatch(setInfo(msg))
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(ElectionCandidateCard);

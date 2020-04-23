@@ -5,7 +5,6 @@ const initialAccountState: AccountState = {
   authenticationStep: null,
   loading: false,
   autoLoginInProgress: true,
-  error: null,
   accountId: null,
   ft3User: null,
   user: null,
@@ -16,7 +15,6 @@ export const loginReducer: Reducer<AccountState, AccountActions> = (state = init
   if (action.type === AccountActionTypes.VAULT_CANCEL) {
     return {
       ...state,
-      error: action.error,
       loading: false,
       authenticationStep: null
     };

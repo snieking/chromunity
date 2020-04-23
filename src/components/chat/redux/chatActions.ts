@@ -18,7 +18,7 @@ import {
   StoreChatParticipants,
   StoreChatUsersAction,
   StoreDecryptedChatAction,
-  StoreErrorMessageAction, StoreUnreadChatsCountAction,
+  StoreUnreadChatsCountAction,
   StoreUserChatsAction
 } from "./chatTypes";
 import { Chat, ChatMessageDecrypted, ChromunityUser } from "../../../types";
@@ -131,11 +131,6 @@ export const loadOlderMessagesAction: ActionCreator<LoadOlderMessagesAction> = (
 export const deleteChatUserAction: ActionCreator<DeleteChatUserAction> = (user: ChromunityUser) => ({
   type: ChatActionTypes.DELETE_CHAT_USER,
   user: user
-});
-
-export const storeErrorMessage: ActionCreator<StoreErrorMessageAction> = (msg: string) => ({
-  type: ChatActionTypes.STORE_ERROR_MESSAGE,
-  message: msg
 });
 
 export const countUnreadChatsAction: ActionCreator<CountUnreadChatsAction> = (user: ChromunityUser) => ({

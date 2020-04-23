@@ -2,14 +2,13 @@ import React, { FormEvent } from "react";
 
 import CreatableSelect from "react-select/creatable";
 import { ValueType } from "react-select/src/types";
-import { Badge, Dialog, Snackbar, Tab, Tabs, withStyles, WithStyles, Typography, Theme } from "@material-ui/core";
+import { Badge, Dialog, Tab, Tabs, withStyles, WithStyles, Typography, Theme } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import TextField from "@material-ui/core/TextField";
 import IconButton from "@material-ui/core/IconButton";
 import { Forum } from "@material-ui/icons";
-import { CustomSnackbarContentWrapper } from "../common/CustomSnackbar";
 import { createTopic } from "../../blockchain/TopicService";
 import { ChromunityUser, PollSpecification } from "../../types";
 import { getTrendingChannels } from "../../blockchain/ChannelService";
@@ -19,7 +18,8 @@ import {
   COLOR_CHROMIA_DARK_LIGHTER,
   COLOR_CHROMIA_LIGHT,
   COLOR_CHROMIA_LIGHTER,
-  COLOR_OFF_WHITE, COLOR_RED
+  COLOR_OFF_WHITE,
+  COLOR_RED,
 } from "../../theme";
 import MarkdownRenderer from "../common/MarkdownRenderer";
 import withTheme from "@material-ui/core/styles/withTheme";
@@ -30,7 +30,8 @@ import { ApplicationState } from "../../store";
 import { connect } from "react-redux";
 import TextToolbar from "../common/textToolbar/TextToolbar";
 import PollCreator from "../topic/poll/PollCreator";
-import PollIcon from '@material-ui/icons/Poll';
+import PollIcon from "@material-ui/icons/Poll";
+import { setInfo, setError } from "../snackbar/redux/snackbarTypes";
 
 interface OptionType {
   label: string;
@@ -42,6 +43,8 @@ export interface NewTopicButtonProps extends WithStyles<typeof largeButtonStyles
   channel: string;
   theme: Theme;
   user: ChromunityUser;
+  setInfo: typeof setInfo;
+  setError: typeof setError;
 }
 
 export interface NewTopicButtonState {
@@ -49,9 +52,6 @@ export interface NewTopicButtonState {
   topicTitle: string;
   topicChannel: string;
   topicMessage: string;
-  newTopicSuccessOpen: boolean;
-  newTopicErrorOpen: boolean;
-  newTopicStatusMessage: string;
   displayPoll: boolean;
   suggestions: OptionType[];
   channel: ValueType<OptionType>;
@@ -76,16 +76,13 @@ const NewTopicButton = withStyles(largeButtonStyles)(
           channel: this.props.channel !== "" ? { value: this.props.channel, label: this.props.channel } : null,
           topicMessage: "",
           dialogOpen: false,
-          newTopicSuccessOpen: false,
-          newTopicErrorOpen: false,
-          newTopicStatusMessage: "",
           displayPoll: false,
           suggestions: [],
           activeTab: 0,
           poll: {
             question: "",
-            options: new Array<string>()
-          }
+            options: new Array<string>(),
+          },
         };
 
         this.textInput = React.createRef();
@@ -95,22 +92,21 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         this.handleChannelChange = this.handleChannelChange.bind(this);
         this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
         this.createNewTopic = this.createNewTopic.bind(this);
-        this.handleClose = this.handleClose.bind(this);
         this.handleChangeSingle = this.handleChangeSingle.bind(this);
         this.handleTabChange = this.handleTabChange.bind(this);
         this.addText = this.addText.bind(this);
       }
 
       componentDidMount() {
-        getTrendingChannels(7).then(channels =>
+        getTrendingChannels(7).then((channels) =>
           this.setState({
-            suggestions: channels.map(channel => ({ value: channel, label: channel } as OptionType))
+            suggestions: channels.map((channel) => ({ value: channel, label: channel } as OptionType)),
           })
         );
       }
 
       toggleNewTopicDialog() {
-        this.setState(prevState => ({ dialogOpen: !prevState.dialogOpen }));
+        this.setState((prevState) => ({ dialogOpen: !prevState.dialogOpen }));
       }
 
       handleDialogMessageChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -136,51 +132,28 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         const topicTitle: string = this.state.topicTitle;
 
         if (this.state.channel == null) {
-          this.setState({
-            newTopicStatusMessage: "A channel must be supplied",
-            newTopicErrorOpen: true
-          });
+          this.props.setError("A channel must be supplied");
         } else {
           const topicChannel: string = (this.state.channel as OptionType).value;
 
           if (topicTitle.length > maxTitleLength) {
-            this.setState({
-              newTopicStatusMessage: "Title is too long",
-              newTopicErrorOpen: true
-            });
+            this.props.setError("Title is too long");
           } else if (!/^[a-zA-Z0-9]+$/.test(topicChannel)) {
-            this.setState({
-              newTopicStatusMessage: "Channel may only contain a-z, A-Z & 0-9 characters",
-              newTopicErrorOpen: true
-            });
+            this.props.setError("Channel may only contain a-z, A-Z & 0-9 characters");
           } else if (topicChannel.length > maxChannelLength) {
-            this.setState({
-              newTopicStatusMessage: "Channel is too long",
-              newTopicErrorOpen: true
-            });
+            this.props.setError("Channel is too long");
           } else if (topicTitle.length < 3 || topicTitle.startsWith(" ")) {
-            this.setState({
-              newTopicStatusMessage: "Title must be longer than 3 characters, and must not start with a whitespace",
-              newTopicErrorOpen: true
-            });
+            this.props.setError("Title must be longer than 3 characters, and must not start with a whitespace");
           } else {
             const topicMessage = this.state.topicMessage;
             this.setState({ topicTitle: "", topicMessage: "" });
 
             createTopic(this.props.user, topicChannel, topicTitle, topicMessage, this.state.poll)
               .then(() => {
-                this.setState({
-                  newTopicStatusMessage: "Topic created",
-                  newTopicSuccessOpen: true
-                });
+                this.props.setInfo("Topic created");
                 this.props.updateFunction();
               })
-              .catch(() =>
-                this.setState({
-                  newTopicStatusMessage: "Error while creating topic",
-                  newTopicErrorOpen: true
-                })
-              );
+              .catch((error) => this.props.setError(error.message));
             this.toggleNewTopicDialog();
           }
         }
@@ -224,12 +197,12 @@ const NewTopicButton = withStyles(largeButtonStyles)(
             color: textColor,
             background: backgroundColor,
             border: "1px solid",
-            borderColor: borderColor
+            borderColor: borderColor,
           }),
           menu: (styles: any) => ({
             ...styles,
             zIndex: 999,
-            background: backgroundColor
+            background: backgroundColor,
           }),
           control: (provided: any) => ({
             ...provided,
@@ -237,7 +210,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
             color: theme.palette.primary.main,
             borderColor: theme.palette.primary.main,
             "&:hover": { borderColor: textColor },
-            boxShadow: "none"
+            boxShadow: "none",
           }),
           singleValue: (provided: any, state: any) => {
             const opacity = state.isDisabled ? 1 : 1;
@@ -252,99 +225,70 @@ const NewTopicButton = withStyles(largeButtonStyles)(
           noOptionsMessage: (provided: any) => {
             const color = textColor;
             return { ...provided, color };
-          }
+          },
         };
         return (
-          <div>
-            <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"md"}>
-              <form onSubmit={this.createNewTopic}>
-                <DialogContent>
-                  <br />
-                  <CreatableSelect
-                    placeholder={"Create or select channel..."}
-                    isSearchable={true}
-                    options={this.state.suggestions}
-                    value={this.state.channel}
-                    onChange={this.handleChangeSingle}
-                    styles={customStyles}
+          <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"md"}>
+            <form onSubmit={this.createNewTopic}>
+              <DialogContent>
+                <br />
+                <CreatableSelect
+                  placeholder={"Create or select channel..."}
+                  isSearchable={true}
+                  options={this.state.suggestions}
+                  value={this.state.channel}
+                  onChange={this.handleChangeSingle}
+                  styles={customStyles}
+                />
+                <br />
+                <Badge color="secondary" badgeContent={maxTitleLength - this.state.topicTitle.length} showZero>
+                  <TextField
+                    autoFocus
+                    margin="dense"
+                    type="text"
+                    id="title"
+                    label="Title"
+                    fullWidth
+                    onChange={this.handleDialogTitleChange}
+                    value={this.state.topicTitle}
+                    variant="outlined"
                   />
-                  <br />
-                  <Badge color="secondary" badgeContent={maxTitleLength - this.state.topicTitle.length} showZero>
-                    <TextField
-                      autoFocus
-                      margin="dense"
-                      type="text"
-                      id="title"
-                      label="Title"
-                      fullWidth
-                      onChange={this.handleDialogTitleChange}
-                      value={this.state.topicTitle}
-                      variant="outlined"
-                    />
-                  </Badge>
+                </Badge>
 
-                  <Tabs value={this.state.activeTab} onChange={this.handleTabChange} aria-label="New topic">
-                    <Tab
-                      label={
-                        <Typography component="span" variant="body2">
-                          Editor
-                        </Typography>
-                      }
-                      {...this.a11yProps(0)}
-                    />
-                    <Tab
-                      label={
-                        <Typography component="span" variant="body2">
-                          Preview
-                        </Typography>
-                      }
-                      {...this.a11yProps(1)}
-                    />
-                  </Tabs>
-                  {this.state.activeTab === 0 && this.renderEditor()}
-                  {this.state.activeTab === 1 && this.renderPreview()}
-                  {this.renderPoll()}
-                </DialogContent>
-                <DialogActions>
-                  {this.pollToggleButton()}
-                  <Button onClick={() => this.toggleNewTopicDialog()} color="secondary" variant="contained">
-                    Cancel
-                  </Button>
-                  <Button type="submit" color="primary" variant="contained">
-                    Create
-                  </Button>
-                  <br />
-                </DialogActions>
-              </form>
-            </Dialog>
-
-            <Snackbar
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left"
-              }}
-              open={this.state.newTopicSuccessOpen}
-              autoHideDuration={3000}
-              onClose={this.handleClose}
-            >
-              <CustomSnackbarContentWrapper variant="success" message={this.state.newTopicStatusMessage} />
-            </Snackbar>
-            <Snackbar
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left"
-              }}
-              open={this.state.newTopicErrorOpen}
-              autoHideDuration={3000}
-              onClose={this.handleClose}
-            >
-              <CustomSnackbarContentWrapper
-                onClose={this.handleClose}
-                variant="error"
-                message={this.state.newTopicStatusMessage}
-              />
-            </Snackbar>
-          </div>
+                <Tabs value={this.state.activeTab} onChange={this.handleTabChange} aria-label="New topic">
+                  <Tab
+                    label={
+                      <Typography component="span" variant="body2">
+                        Editor
+                      </Typography>
+                    }
+                    {...this.a11yProps(0)}
+                  />
+                  <Tab
+                    label={
+                      <Typography component="span" variant="body2">
+                        Preview
+                      </Typography>
+                    }
+                    {...this.a11yProps(1)}
+                  />
+                </Tabs>
+                {this.state.activeTab === 0 && this.renderEditor()}
+                {this.state.activeTab === 1 && this.renderPreview()}
+                {this.renderPoll()}
+              </DialogContent>
+              <DialogActions>
+                {this.pollToggleButton()}
+                <Button onClick={() => this.toggleNewTopicDialog()} color="secondary" variant="contained">
+                  Cancel
+                </Button>
+                <Button type="submit" color="primary" variant="contained">
+                  Create
+                </Button>
+                <br />
+              </DialogActions>
+            </form>
+          </Dialog>
         );
       }
 
@@ -353,7 +297,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
           <>
             {this.state.displayPoll && (
               <div className={this.props.classes.pollWrapper}>
-                <PollCreator poll={this.state.poll}/>
+                <PollCreator poll={this.state.poll} />
               </div>
             )}
           </>
@@ -362,10 +306,10 @@ const NewTopicButton = withStyles(largeButtonStyles)(
 
       pollToggleButton() {
         return (
-          <IconButton onClick={() => this.setState(prevState => ({ displayPoll: !prevState.displayPoll }))}>
-            <PollIcon style={{ color: this.state.displayPoll ? COLOR_RED : "" }}/>
+          <IconButton onClick={() => this.setState((prevState) => ({ displayPoll: !prevState.displayPoll }))}>
+            <PollIcon style={{ color: this.state.displayPoll ? COLOR_RED : "" }} />
           </IconButton>
-        )
+        );
       }
 
       renderEditor() {
@@ -393,12 +337,12 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       addText(text: string) {
         const startPosition = this.textInput.current.selectionStart;
 
-        this.setState(prevState => ({
+        this.setState((prevState) => ({
           topicMessage: [
             prevState.topicMessage.slice(0, startPosition),
             text,
-            prevState.topicMessage.slice(startPosition)
-          ].join("")
+            prevState.topicMessage.slice(startPosition),
+          ].join(""),
         }));
 
         setTimeout(() => {
@@ -418,7 +362,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       a11yProps(index: number) {
         return {
           id: `simple-tab-${index}`,
-          "aria-controls": `simple-tabpanel-${index}`
+          "aria-controls": `simple-tabpanel-${index}`,
         };
       }
 
@@ -434,22 +378,21 @@ const NewTopicButton = withStyles(largeButtonStyles)(
           </div>
         );
       }
-
-      private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
-        if (reason === "clickaway") {
-          return;
-        }
-
-        this.setState({ newTopicSuccessOpen: false, newTopicErrorOpen: false });
-      }
     }
   )
 );
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    user: store.account.user
+    user: store.account.user,
   };
 };
 
-export default connect(mapStateToProps, null)(NewTopicButton);
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    setError: (msg: string) => dispatch(setError(msg)),
+    setInfo: (msg: string) => dispatch(setInfo(msg))
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(NewTopicButton);

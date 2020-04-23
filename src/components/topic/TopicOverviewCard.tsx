@@ -68,8 +68,9 @@ interface Props extends WithStyles<typeof styles> {
 }
 
 interface State {
-  stars: number;
+  starRatedBy: string[];
   ratedByMe: boolean;
+  checkedIfRatedByMe: boolean;
   redirectToFullCard: boolean;
   avatar: string;
   channels: string[];
@@ -84,9 +85,10 @@ const TopicOverviewCard = withStyles(styles)(
       super(props);
 
       this.state = {
-        stars: 0,
+        starRatedBy: [],
         channels: [],
         ratedByMe: false,
+        checkedIfRatedByMe: false,
         redirectToFullCard: false,
         avatar: "",
         numberOfReplies: 0,
@@ -103,16 +105,24 @@ const TopicOverviewCard = withStyles(styles)(
       this.setAvatar();
       getTopicStarRaters(this.props.topic.id).then((usersWhoStarRated) =>
         this.setState({
-          stars: usersWhoStarRated.length,
+          starRatedBy: usersWhoStarRated,
           ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase()),
         })
       );
+      
       countTopicReplies(this.props.topic.id).then((count) => this.setState({ numberOfReplies: count }));
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
       if (this.props.topic.latest_poster !== prevProps.topic.latest_poster) {
         this.setAvatar();
+      }
+
+      if (this.props.user != null && this.state.starRatedBy.length > 0 && !this.state.checkedIfRatedByMe) {
+        this.setState({ 
+          ratedByMe: this.state.starRatedBy.map(user => toLowerCase(user)).includes(toLowerCase(this.props.user.name)),
+          checkedIfRatedByMe: true
+        })
       }
     }
 
@@ -232,7 +242,7 @@ const TopicOverviewCard = withStyles(styles)(
         <CardContent>
           <div style={{ float: "left" }}>
             <div className={this.props.classes.rating}>
-              <Badge color="secondary" badgeContent={this.state.stars}>
+              <Badge color="secondary" badgeContent={this.state.starRatedBy.length}>
                 {this.state.ratedByMe ? <StarRate className={this.props.classes.iconYellow} /> : <StarBorder />}
               </Badge>
             </div>

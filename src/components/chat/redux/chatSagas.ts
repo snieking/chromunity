@@ -1,3 +1,4 @@
+import { setError, setInfo } from './../../snackbar/redux/snackbarTypes';
 import {
   AddUserToChatAction,
   ChatActionTypes,
@@ -51,7 +52,6 @@ import {
   storeChatParticipants,
   storeChatUsersAction,
   storeDecryptedChat,
-  storeErrorMessage,
   storeUnreadChatsCountAction,
   storeUserChats,
 } from "./chatActions";
@@ -122,7 +122,7 @@ export function* createChatKeyPairSaga(action: CreateChatKeyPairAction) {
 
   if (pubKey != null && pubKey !== rsaPubKey) {
     logger.info("New pubkey didn't match old one");
-    yield put(storeErrorMessage("Incorrect passphrase"));
+    yield put(setError("Incorrect passphrase"));
     return;
   } else if (pubKey == null) {
     yield createChatUser(action.user, rsaPubKey);
@@ -327,7 +327,7 @@ export function* sendMessageSaga(action: SendMessageAction) {
 
     chatEvent("message");
   } catch (error) {
-    yield put(storeErrorMessage(error.message));
+    yield put(setError(error.message));
   }
   logger.silly("[SAGA - FINISHED]: Send message");
 }
@@ -366,8 +366,10 @@ export function* loadChatUsersSaga(action: LoadChatUsersAction) {
 
 export function* deleteChatUserSaga(action: DeleteChatUserAction) {
   logger.silly("[SAGA - STARTED]: Delete chat user");
-  yield deleteChatUser(action.user);
 
+  yield deleteChatUser(action.user);
+  yield put(setInfo("Chat account resetted"));
+  
   chatEvent("delete-user");
   logger.silly("[SAGA - FINISHED]: Delete chat user");
 }

@@ -10,7 +10,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Snackbar,
   TextField,
   withStyles,
   WithStyles,
@@ -21,14 +20,15 @@ import {
 import AvatarChanger from "./AvatarChanger";
 
 import { getUserSettings, updateUserSettings } from "../../../blockchain/UserService";
-import { CustomSnackbarContentWrapper } from "../../common/CustomSnackbar";
 import ChromiaPageHeader from "../../common/ChromiaPageHeader";
 import Avatar, { AVATAR_SIZE } from "../../common/Avatar";
 import { ApplicationState } from "../../../store";
 import { connect } from "react-redux";
 import { Socials } from "../socials/socialTypes";
-import { TwitterIcon, LinkedinIcon } from "react-share";
+import { TwitterIcon, LinkedinIcon, FacebookIcon } from "react-share";
 import * as config from "../../../config";
+import GitHubLogo from "../../common/logos/GitHubLogo";
+import { setError, setInfo } from "../../snackbar/redux/snackbarTypes";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -37,7 +37,7 @@ const styles = (theme: Theme) =>
     },
     chapterHeader: {
       marginTop: "5px",
-      textAlign: "center"
+      textAlign: "center",
     },
     avatarWrapper: {
       float: "left",
@@ -75,11 +75,14 @@ const styles = (theme: Theme) =>
       marginRight: "10px",
       position: "relative",
       top: 15,
+      display: "inline",
     },
   });
 
 interface Props extends WithStyles<typeof styles> {
   user: ChromunityUser;
+  setInfo: typeof setInfo;
+  setError: typeof setError;
 }
 
 interface SettingsState {
@@ -88,16 +91,13 @@ interface SettingsState {
   editAvatarOpen: boolean;
   description: string;
   socials: Socials;
-  updateSuccessOpen: boolean;
-  updateErrorOpen: boolean;
-  settingsUpdateStatus: string;
 }
 
-const DEFAULT_SOCIALS: Socials = { twitter: "", linkedin: "" };
+const DEFAULT_SOCIALS: Socials = { twitter: "", linkedin: "", facebook: "", github: "" };
+const ICON_SIZE = 24;
 
 const Settings = withStyles(styles)(
   class extends React.Component<Props, SettingsState> {
-
     constructor(props: Props) {
       super(props);
       this.state = {
@@ -106,9 +106,6 @@ const Settings = withStyles(styles)(
         editAvatarOpen: false,
         description: "",
         socials: DEFAULT_SOCIALS,
-        updateSuccessOpen: false,
-        updateErrorOpen: false,
-        settingsUpdateStatus: "",
       };
 
       this.updateAvatar = this.updateAvatar.bind(this);
@@ -118,7 +115,8 @@ const Settings = withStyles(styles)(
       this.handleDescriptionChange = this.handleDescriptionChange.bind(this);
       this.handleTwitterChange = this.handleTwitterChange.bind(this);
       this.handleLinkedInChange = this.handleLinkedInChange.bind(this);
-      this.handleClose = this.handleClose.bind(this);
+      this.handleFacebookChange = this.handleFacebookChange.bind(this);
+      this.handleGithubChange = this.handleGithubChange.bind(this);
     }
 
     componentDidMount() {
@@ -130,7 +128,7 @@ const Settings = withStyles(styles)(
           this.setState({
             avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, user.name),
             description: settings.description,
-            socials: settings.socials ? JSON.parse(settings.socials) as Socials : DEFAULT_SOCIALS,
+            socials: settings.socials ? (JSON.parse(settings.socials) as Socials) : DEFAULT_SOCIALS,
           });
         });
       }
@@ -138,26 +136,23 @@ const Settings = withStyles(styles)(
 
     render() {
       return (
-        <div>
-          <Container fixed maxWidth="sm">
-            <ChromiaPageHeader text="Edit Settings" />
-            <Card key={"user-card"} className={this.props.classes.settingsCard}>
+        <Container fixed maxWidth="sm">
+          <ChromiaPageHeader text="Edit Settings" />
+          <Card key={"user-card"} className={this.props.classes.settingsCard}>
             <Typography variant="h6" component="h6" className={this.props.classes.chapterHeader}>
-                General
-              </Typography>
-              {this.avatarEditor()}
-              {this.descriptionEditor()}
-            </Card>
-            <Card key={"socials-card"} className={this.props.classes.settingsCard}>
-              <Typography variant="h6" component="h6" className={this.props.classes.chapterHeader}>
-                Social Profiles
-              </Typography>
-              {this.socialsEditor()}
-            </Card>
-            {this.saveButton()}
-          </Container>
-          {this.snackBars()}
-        </div>
+              General
+            </Typography>
+            {this.avatarEditor()}
+            {this.descriptionEditor()}
+          </Card>
+          <Card key={"socials-card"} className={this.props.classes.settingsCard}>
+            <Typography variant="h6" component="h6" className={this.props.classes.chapterHeader}>
+              Social Profiles
+            </Typography>
+            {this.socialsEditor()}
+          </Card>
+          {this.saveButton()}
+        </Container>
       );
     }
 
@@ -204,40 +199,103 @@ const Settings = withStyles(styles)(
     }
 
     private socialsEditor() {
-      const ICON_SIZE = 24;
       return (
         <Grid container className={this.props.classes.socialsWrapper}>
           <Grid item xs={6} className={this.props.classes.socialsBlock}>
-            <TwitterIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
-            <TextField
-              disabled={!config.features.userSocialsEnabled}
-              className={this.props.classes.socialsField}
-              id="twitter"
-              margin="dense"
-              label="Twitter"
-              placeholder="Username"
-              type="text"
-              variant="outlined"
-              onChange={this.handleTwitterChange}
-              value={this.state.socials.twitter}
-            />
+            {this.twitterInput()}
           </Grid>
           <Grid item xs={6} className={this.props.classes.socialsBlock}>
-            <LinkedinIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
-            <TextField
-              disabled={!config.features.userSocialsEnabled}
-              className={this.props.classes.socialsField}
-              id="twitter"
-              margin="dense"
-              label="LinkedIn"
-              placeholder="Username"
-              type="text"
-              variant="outlined"
-              onChange={this.handleLinkedInChange}
-              value={this.state.socials.linkedin}
-            />
+            {this.linkedInInput()}
+          </Grid>
+          <Grid item xs={6} className={this.props.classes.socialsBlock}>
+            {this.facebookInput()}
+          </Grid>
+          <Grid item xs={6} className={this.props.classes.socialsBlock}>
+            {this.githubInput()}
           </Grid>
         </Grid>
+      );
+    }
+
+    private twitterInput() {
+      return (
+        <>
+          <TwitterIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
+          <TextField
+            disabled={!config.features.userSocialsEnabled}
+            className={this.props.classes.socialsField}
+            id="twitter"
+            margin="dense"
+            label="Twitter"
+            placeholder="Username"
+            type="text"
+            variant="outlined"
+            onChange={this.handleTwitterChange}
+            value={this.state.socials.twitter}
+          />
+        </>
+      );
+    }
+
+    private linkedInInput() {
+      return (
+        <>
+          <LinkedinIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
+          <TextField
+            disabled={!config.features.userSocialsEnabled}
+            className={this.props.classes.socialsField}
+            id="twitter"
+            margin="dense"
+            label="LinkedIn"
+            placeholder="Username"
+            type="text"
+            variant="outlined"
+            onChange={this.handleLinkedInChange}
+            value={this.state.socials.linkedin}
+          />
+        </>
+      );
+    }
+
+    private facebookInput() {
+      return (
+        <>
+          <FacebookIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
+          <TextField
+            disabled={!config.features.userSocialsEnabled}
+            className={this.props.classes.socialsField}
+            id="facebook"
+            margin="dense"
+            label="Facebook"
+            placeholder="Username"
+            type="text"
+            variant="outlined"
+            onChange={this.handleFacebookChange}
+            value={this.state.socials.facebook}
+          />
+        </>
+      );
+    }
+
+    private githubInput() {
+      return (
+        <>
+          <div className={this.props.classes.socialsIcon}>
+            <GitHubLogo />
+          </div>
+          <TextField
+            disabled={!config.features.userSocialsEnabled}
+            className={this.props.classes.socialsField}
+            id="github"
+            margin="dense"
+            label="Github"
+            placeholder="Username"
+            type="text"
+            variant="outlined"
+            onChange={this.handleGithubChange}
+            value={this.state.socials.github}
+          />
+        </>
       );
     }
 
@@ -251,29 +309,6 @@ const Settings = withStyles(styles)(
       );
     }
 
-    private snackBars() {
-      return (
-        <>
-          <Snackbar
-            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-            open={this.state.updateSuccessOpen}
-            autoHideDuration={3000}
-            onClose={this.handleClose}
-          >
-            <CustomSnackbarContentWrapper variant="success" message={this.state.settingsUpdateStatus} />
-          </Snackbar>
-          <Snackbar
-            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-            open={this.state.updateErrorOpen}
-            autoHideDuration={3000}
-            onClose={this.handleClose}
-          >
-            <CustomSnackbarContentWrapper variant="error" message={this.state.settingsUpdateStatus} />
-          </Snackbar>
-        </>
-      );
-    }
-
     private handleDescriptionChange(event: React.ChangeEvent<HTMLInputElement>) {
       this.setState({ description: event.target.value });
     }
@@ -282,6 +317,8 @@ const Settings = withStyles(styles)(
       const socials: Socials = {
         twitter: event.target.value,
         linkedin: this.state.socials.linkedin,
+        facebook: this.state.socials.facebook,
+        github: this.state.socials.github,
       };
 
       this.setState({ socials });
@@ -291,6 +328,30 @@ const Settings = withStyles(styles)(
       const socials: Socials = {
         linkedin: event.target.value,
         twitter: this.state.socials.twitter,
+        facebook: this.state.socials.facebook,
+        github: this.state.socials.github,
+      };
+
+      this.setState({ socials });
+    }
+
+    private handleFacebookChange(event: React.ChangeEvent<HTMLInputElement>) {
+      const socials: Socials = {
+        linkedin: this.state.socials.linkedin,
+        twitter: this.state.socials.twitter,
+        facebook: event.target.value,
+        github: this.state.socials.github,
+      };
+
+      this.setState({ socials });
+    }
+
+    private handleGithubChange(event: React.ChangeEvent<HTMLInputElement>) {
+      const socials: Socials = {
+        linkedin: this.state.socials.linkedin,
+        twitter: this.state.socials.twitter,
+        facebook: this.state.socials.facebook,
+        github: event.target.value,
       };
 
       this.setState({ socials });
@@ -314,33 +375,14 @@ const Settings = withStyles(styles)(
     }
 
     private saveSettings() {
-      // TODO: Add this.state.socials
       updateUserSettings(
         this.props.user,
         this.state.avatar,
         this.state.description,
         config.features.userSocialsEnabled ? this.state.socials : null
       )
-        .then(() =>
-          this.setState({
-            settingsUpdateStatus: "Settings saved",
-            updateSuccessOpen: true,
-          })
-        )
-        .catch(() =>
-          this.setState({
-            settingsUpdateStatus: "Error updating settings",
-            updateErrorOpen: true,
-          })
-        );
-    }
-
-    private handleClose(event: React.SyntheticEvent | React.MouseEvent, reason?: string) {
-      if (reason === "clickaway") {
-        return;
-      }
-
-      this.setState({ updateSuccessOpen: false, updateErrorOpen: false });
+        .then(() => this.props.setInfo("Settings saved"))
+        .catch(() => this.props.setError("Error updating settings"));
     }
   }
 );
@@ -351,4 +393,11 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-export default connect(mapStateToProps, null)(Settings);
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    setError: (msg: string) => dispatch(setError(msg)),
+    setInfo: (msg: string) => dispatch(setInfo(msg)),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Settings);

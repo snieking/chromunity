@@ -119,11 +119,6 @@ export interface LoadOlderMessagesAction {
   type: ChatActionTypes.LOAD_OLDER_MESSAGES
 }
 
-export interface StoreErrorMessageAction {
-  type: ChatActionTypes.STORE_ERROR_MESSAGE;
-  message: string;
-}
-
 export interface DeleteChatUserAction {
   type: ChatActionTypes.DELETE_CHAT_USER;
   user: ChromunityUser;
@@ -162,7 +157,6 @@ export type ChatActions =
   | StoreChatUsersAction
   | LoadOlderMessagesAction
   | DeleteChatUserAction
-  | StoreErrorMessageAction
   | CountUnreadChatsAction
   | StoreUnreadChatsCountAction
   | MarkChatAsReadAction;
@@ -180,7 +174,5 @@ export interface ChatState {
   followedChatUsers: string[];
   chatUsers: string[];
   chatUsersLastUpdate: number;
-  errorMessage: string;
-  errorMessageOpen: boolean;
   unreadChats: number;
 }
