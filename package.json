@@ -84,7 +84,6 @@
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
     "enzyme-to-json": "^3.4.4",
-    "jest": "^25.4.0",
     "jest-cli": "^25.4.0",
     "jsdom": "16.2.2",
     "jsdom-global": "3.0.2",
