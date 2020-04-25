@@ -1,39 +1,37 @@
 import React from "react";
-import VaultSuccess from "./components/user/authentication/VaultSuccess";
-import Logout from "./components/user/authentication/Logout";
-import Settings from "./components/user/settings/Settings";
-import UserWall from "./components/walls/Userwall";
-import UserNotifications from "./components/user/notifications/UserNotifications";
-import ChannelWall from "./components/walls/ChannelWall";
-import Representatives from "./components/governing/representatives/Representatives";
-import Election from "./components/governing/election/Election";
-import { GovLog } from "./components/governing/GovLog";
-import FullTopic from "./components/topic/FullTopic";
+import VaultSuccess from "./features/user/authentication/VaultSuccess";
+import Logout from "./features/user/authentication/Logout";
+import Settings from "./features/user/settings/Settings";
+import UserWall from "./features/walls/Userwall";
+import UserNotifications from "./features/user/notifications/UserNotifications";
+import ChannelWall from "./features/walls/ChannelWall";
+import Representatives from "./features/governing/representatives/Representatives";
+import Election from "./features/governing/election/Election";
+import { GovLog } from "./features/governing/GovLog";
+import FullTopic from "./features/topic/FullTopic";
 import { Route, Switch, withRouter } from "react-router";
-import TopicWall from "./components/walls/TopicWall";
-import WalletLogin from "./components/user/authentication/WalletLogin";
-import { ErrorPage } from "./components/static/ErrorPage";
-import CandidateElectionVoteLink from "./components/governing/election/CandidateElectionVoteLink";
-import ChatPage from "./components/chat/ChatPage";
-import VaultCancel from "./components/user/authentication/VaultCancel";
-import Reports from "./components/governing/reports/Reports";
+import TopicWall from "./features/walls/TopicWall";
+import { ErrorPage } from "./features/error-pages/ErrorPage";
+import CandidateElectionVoteLink from "./features/governing/election/CandidateElectionVoteLink";
+import ChatPage from "./features/chat/ChatPage";
+import VaultCancel from "./features/user/authentication/VaultCancel";
+import Reports from "./features/governing/reports/Reports";
 import MetaTags from "react-meta-tags";
 import * as config from "./config";
-import SnackbarHolder from "./components/snackbar/SnackbarHolder";
+import SnackbarHolder from "./core/snackbar/SnackbarHolder";
+import VaultLogin from "./features/user/authentication/vault-login/VaultLogin";
 
 const Content: React.FunctionComponent = () => {
   return (
     <div className="content">
-      <MetaTags>
-        {config.test && (<meta property="robots" content="noindex" />)}
-      </MetaTags>
+      <MetaTags>{config.test && <meta property="robots" content="noindex" />}</MetaTags>
       <Switch>
         <Route exact path="/" component={() => <TopicWall key="topic-wall" type="all" />} />
         <Route path="/followings" component={() => <TopicWall type="userFollowings" />} />
         <Route path="/channels" component={() => <TopicWall type="tagFollowings" />} />
         <Route path="/vault/success" component={VaultSuccess} />
         <Route path="/vault/cancel" component={VaultCancel} />
-        <Route path="/user/login" component={WalletLogin} />
+        <Route path="/user/login" component={VaultLogin} />
         <Route path="/user/logout" component={Logout} />
         <Route path="/user/settings" component={Settings} />
         <Route path="/u/:userId" component={UserWall} />

@@ -1,5 +1,5 @@
 import { User } from "ft3-lib";
-import { Socials } from "./components/user/socials/socialTypes";
+import { Socials } from "./features/user/socials/socialTypes";
 
 export interface ChromunityUser {
   name: string;
