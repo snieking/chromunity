@@ -85,6 +85,7 @@
     "enzyme-adapter-react-16": "^1.15.2",
     "enzyme-to-json": "^3.4.4",
     "jest-cli": "^25.4.0",
+    "jest-styled-components": "^7.0.2",
     "jsdom": "16.2.2",
     "jsdom-global": "3.0.2",
     "mock-local-storage": "^1.1.12",

@@ -6,7 +6,7 @@ import { COLOR_YELLOW } from "../../theme";
 interface Props {
   ratedBy: string[];
   ratedByMe: boolean;
-  toggleRating: () => void;
+  toggleRating?: () => void;
   className?: string;
 }
 
@@ -45,11 +45,25 @@ const StarRatingPresentation: React.FunctionComponent<Props> = (props) => {
     const maxRenderItems = 5;
     return (
       <div>
-        {props.ratedBy.length > 0 ? <p style={{ fontWeight: "bold" }}>Liked by</p> : <p>Like</p>}
+        {props.ratedBy.length > 0 ? (
+          <p style={{ fontWeight: "bold" }} key={"like"}>
+            Liked by
+          </p>
+        ) : (
+          <p>Like</p>
+        )}
         {props.ratedBy.slice(0, maxRenderItems).map((u) => (
-          <p>{u}</p>
+          <p key={u}>{u}</p>
         ))}
-        {props.ratedBy.length > maxRenderItems ? <p><i>...and <b>{props.ratedBy.length - maxRenderItems}</b> more</i></p> : <div />}
+        {props.ratedBy.length > maxRenderItems ? (
+          <p key={"more"}>
+            <i>
+              ...and <b>{props.ratedBy.length - maxRenderItems}</b> more
+            </i>
+          </p>
+        ) : (
+          <div />
+        )}
       </div>
     );
   }
