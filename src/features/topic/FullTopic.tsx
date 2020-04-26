@@ -60,7 +60,7 @@ import Avatar, { AVATAR_SIZE } from "../../shared/Avatar";
 import PreviewLinks from "../../shared/PreviewLinks";
 import PageMeta from "../../shared/PageMeta";
 import PollRenderer from "./poll/PollRenderer";
-import SocialShareButton from "../../shared/SocialShareButton";
+import SocialShareButton from "./SocialShareButton";
 import { setError, setInfo } from "../../core/snackbar/redux/snackbarTypes";
 import StarRating from "../../shared/star-rating/StarRating";
 

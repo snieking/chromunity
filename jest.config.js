@@ -1,5 +1,5 @@
 module.exports = {
-  testEnvironment: "jsdom",
+  testEnvironment: "node",
   roots: ["<rootDir>/src"],
   preset: "ts-jest",
   setupFilesAfterEnv: ["<rootDir>/setupTests.ts", "mock-local-storage"],

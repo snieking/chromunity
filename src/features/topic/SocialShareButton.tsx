@@ -11,7 +11,7 @@ import {
   TwitterIcon,
   TwitterShareButton,
 } from "react-share";
-import { COLOR_ORANGE } from "../theme";
+import { COLOR_ORANGE } from "../../theme";
 
 interface Props {
   text: string;
