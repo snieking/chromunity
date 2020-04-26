@@ -48,7 +48,7 @@ const GovMenu: React.FunctionComponent<Props> = (props: Props) => {
           <ListItemIcon>
             <Badge
               variant="dot"
-              invisible={!(props.isRepresentative() && props.recentLogbookEntryTimestamp <= retrieveLogbookLastRead())}
+              invisible={!(props.isRepresentative() && props.recentLogbookEntryTimestamp > retrieveLogbookLastRead())}
               color="secondary"
             >
               <Gavel className="menu-item-button" />
