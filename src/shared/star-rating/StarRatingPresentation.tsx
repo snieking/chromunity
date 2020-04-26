@@ -1,5 +1,5 @@
 import React from "react";
-import { Badge, makeStyles, IconButton } from "@material-ui/core";
+import { Badge, makeStyles, IconButton, Tooltip } from "@material-ui/core";
 import { StarRate, StarBorder } from "@material-ui/icons";
 import { COLOR_YELLOW } from "../../theme";
 
@@ -41,9 +41,22 @@ const StarRatingPresentation: React.FunctionComponent<Props> = (props) => {
     );
   }
 
+  function likedBy() {
+    const maxRenderItems = 5;
+    return (
+      <div>
+        {props.ratedBy.length > 0 ? <p style={{ fontWeight: "bold" }}>Liked by</p> : <p>Like</p>}
+        {props.ratedBy.slice(0, maxRenderItems).map((u) => (
+          <p>{u}</p>
+        ))}
+        {props.ratedBy.length > maxRenderItems ? <p><i>...and <b>{props.ratedBy.length - maxRenderItems}</b> more</i></p> : <div />}
+      </div>
+    );
+  }
+
   return (
     <div className={props.className}>
-      {render()}
+      <Tooltip title={likedBy()}>{render()}</Tooltip>
     </div>
   );
 };

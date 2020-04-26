@@ -1,6 +1,6 @@
 import React from "react";
 import ShareIcon from "@material-ui/icons/Share";
-import { IconButton, useTheme, makeStyles } from "@material-ui/core";
+import { IconButton, useTheme, makeStyles, Tooltip } from "@material-ui/core";
 import {
   LinkedinIcon,
   LinkedinShareButton,
@@ -71,9 +71,11 @@ const SocialShareButton: React.FunctionComponent<Props> = (props) => {
 
   return (
     <div>
-      <IconButton aria-controls="social-menu" aria-haspopup="true" onClick={toggle}>
-        <ShareIcon style={{ color: menuOpen ? COLOR_ORANGE : theme.palette.primary.main }} />
-      </IconButton>
+      <Tooltip title="Share">
+        <IconButton aria-controls="social-menu" aria-haspopup="true" onClick={toggle}>
+          <ShareIcon style={{ color: menuOpen ? COLOR_ORANGE : theme.palette.primary.main }} />
+        </IconButton>
+      </Tooltip>
       {menu()}
     </div>
   );
