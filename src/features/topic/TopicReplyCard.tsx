@@ -22,7 +22,7 @@ import {
   WithStyles,
 } from "@material-ui/core";
 import { ifEmptyAvatarThenPlaceholder } from "../../shared/util/user-util";
-import { Delete, Reply, Report, StarBorder, StarRate, UnfoldMore } from "@material-ui/icons";
+import { Delete, Reply, Report, UnfoldMore } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../core/services/UserService";
 import {
   createTopicSubReply,
@@ -56,6 +56,7 @@ import CardActions from "@material-ui/core/CardActions";
 import Divider from "@material-ui/core/Divider";
 import PreviewLinks from "../../shared/PreviewLinks";
 import { setError, setInfo } from "../../core/snackbar/redux/snackbarTypes";
+import StarRating from "../../shared/star-rating/StarRating";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -110,6 +111,9 @@ const styles = (theme: Theme) =>
     },
     hidden: {
       display: "none",
+    },
+    ratingWrapper: {
+      display: "inline",
     },
   });
 
@@ -289,40 +293,6 @@ const TopicReplyCard = withStyles(styles)(
       return currentTime < until ? Math.floor((until - currentTime) / 1000) : 0;
     }
 
-    toggleStarRate() {
-      if (!this.state.isLoading) {
-        this.setState({ isLoading: true });
-        const id = this.props.reply.id;
-        const user = this.props.user;
-
-        if (user != null) {
-          if (this.state.ratedByMe) {
-            removeReplyStarRating(this.props.user, id)
-              .then(() =>
-                this.setState((prevState) => ({
-                  ratedByMe: false,
-                  stars: prevState.stars - 1,
-                  isLoading: false,
-                }))
-              )
-              .catch(() => this.setState({ isLoading: false }));
-          } else {
-            giveReplyStarRating(this.props.user, id)
-              .then(() =>
-                this.setState((prevState) => ({
-                  ratedByMe: true,
-                  stars: prevState.stars + 1,
-                  isLoading: false,
-                }))
-              )
-              .catch(() => this.setState({ isLoading: false }));
-          }
-        } else {
-          window.location.href = "/user/login";
-        }
-      }
-    }
-
     renderAuthor() {
       return (
         <div style={{ float: "right" }}>
@@ -369,17 +339,18 @@ const TopicReplyCard = withStyles(styles)(
 
     bottomBar() {
       const user: ChromunityUser = this.props.user;
+      const id = this.props.reply.id;
 
       if (user != null) {
         return (
-          <CardActions disableSpacing style={{ display: "block", marginTop: "-10px" }}>
-            <IconButton aria-label="Like" onClick={() => this.toggleStarRate()}>
-              <Badge className="star-badge" color="secondary" badgeContent={this.state.stars}>
-                <Tooltip title="Like">
-                  {this.state.ratedByMe ? <StarRate className={this.props.classes.iconYellow} /> : <StarBorder />}
-                </Tooltip>
-              </Badge>
-            </IconButton>
+          <CardActions disableSpacing style={{ marginTop: "-10px" }}>
+            <div className={this.props.classes.ratingWrapper}>
+              <StarRating
+                starRatingFetcher={() => getReplyStarRaters(id)}
+                incrementRating={() => giveReplyStarRating(user, id)}
+                removeRating={() => removeReplyStarRating(user, id)}
+              />
+            </div>
             {this.props.reply.timestamp + allowedEditTimeMillis > Date.now() &&
             user != null &&
             this.props.reply.author === user.name ? (
@@ -438,16 +409,9 @@ const TopicReplyCard = withStyles(styles)(
       } else {
         return (
           <CardActions style={{ marginTop: "-20px" }}>
-            <Badge
-              className="star-badge"
-              color="secondary"
-              badgeContent={this.state.stars}
-              style={{ marginLeft: "5px", marginBottom: "5px" }}
-            >
-              <Tooltip title="Like">
-                <StarBorder />
-              </Tooltip>
-            </Badge>
+            <div className={this.props.classes.ratingWrapper}>
+              <StarRating starRatingFetcher={() => getReplyStarRaters(id)} />
+            </div>
           </CardActions>
         );
       }

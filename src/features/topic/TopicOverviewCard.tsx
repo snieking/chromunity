@@ -13,8 +13,11 @@ import {
   WithStyles,
 } from "@material-ui/core";
 import { prepareUrlPath, shouldBeFiltered, toLowerCase } from "../../shared/util/util";
-import { getWallPreviouslyRefreshed, ifEmptyAvatarThenPlaceholder, isTopicReadInSession } from "../../shared/util/user-util";
-import { StarBorder, StarRate } from "@material-ui/icons";
+import {
+  getWallPreviouslyRefreshed,
+  ifEmptyAvatarThenPlaceholder,
+  isTopicReadInSession,
+} from "../../shared/util/user-util";
 import { getUserSettingsCached } from "../../core/services/UserService";
 import { Redirect } from "react-router";
 import { countTopicReplies, getTopicStarRaters } from "../../core/services/TopicService";
@@ -26,6 +29,7 @@ import { ApplicationState } from "../../core/store";
 import { connect } from "react-redux";
 import CustomChip from "../../shared/CustomChip";
 import NewBadge from "./NewBadge";
+import StarRating from "../../shared/star-rating/StarRating";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -38,7 +42,8 @@ const styles = (theme: Theme) =>
       marginRight: "10px",
       marginLeft: "5px",
     },
-    rating: {
+    ratingWrapper: {
+      float: "left",
       marginTop: "10px",
     },
     overviewDetails: {
@@ -68,9 +73,6 @@ interface Props extends WithStyles<typeof styles> {
 }
 
 interface State {
-  starRatedBy: string[];
-  ratedByMe: boolean;
-  checkedIfRatedByMe: boolean;
   redirectToFullCard: boolean;
   avatar: string;
   channels: string[];
@@ -85,10 +87,7 @@ const TopicOverviewCard = withStyles(styles)(
       super(props);
 
       this.state = {
-        starRatedBy: [],
         channels: [],
-        ratedByMe: false,
-        checkedIfRatedByMe: false,
         redirectToFullCard: false,
         avatar: "",
         numberOfReplies: 0,
@@ -100,29 +99,13 @@ const TopicOverviewCard = withStyles(styles)(
 
     componentDidMount() {
       getTopicChannelBelongings(this.props.topic.id).then((channels) => this.setState({ channels: channels }));
-
-      const user: ChromunityUser = this.props.user;
       this.setAvatar();
-      getTopicStarRaters(this.props.topic.id).then((usersWhoStarRated) =>
-        this.setState({
-          starRatedBy: usersWhoStarRated,
-          ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase()),
-        })
-      );
-      
       countTopicReplies(this.props.topic.id).then((count) => this.setState({ numberOfReplies: count }));
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
       if (this.props.topic.latest_poster !== prevProps.topic.latest_poster) {
         this.setAvatar();
-      }
-
-      if (this.props.user != null && this.state.starRatedBy.length > 0 && !this.state.checkedIfRatedByMe) {
-        this.setState({ 
-          ratedByMe: this.state.starRatedBy.map(user => toLowerCase(user)).includes(toLowerCase(this.props.user.name)),
-          checkedIfRatedByMe: true
-        })
       }
     }
 
@@ -240,12 +223,8 @@ const TopicOverviewCard = withStyles(styles)(
     renderCardContent() {
       return (
         <CardContent>
-          <div style={{ float: "left" }}>
-            <div className={this.props.classes.rating}>
-              <Badge color="secondary" badgeContent={this.state.starRatedBy.length}>
-                {this.state.ratedByMe ? <StarRate className={this.props.classes.iconYellow} /> : <StarBorder />}
-              </Badge>
-            </div>
+          <div className={this.props.classes.ratingWrapper}>
+            <StarRating starRatingFetcher={() => getTopicStarRaters(this.props.topic.id)} />
           </div>
           {this.renderReplyStatus()}
           <div className={this.props.classes.overviewDetails}>

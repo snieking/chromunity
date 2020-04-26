@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { TopicReply, ChromunityUser } from "../../types";
 import {
-  Badge,
   Card,
   CardActionArea,
   CardContent,
@@ -13,7 +12,6 @@ import {
 } from "@material-ui/core";
 import { shouldBeFiltered, timeAgoReadable, toLowerCase } from "../../shared/util/util";
 import { ifEmptyAvatarThenPlaceholder } from "../../shared/util/user-util";
-import { StarBorder, StarRate } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../core/services/UserService";
 import { Redirect } from "react-router";
 import { getReplyStarRaters } from "../../core/services/TopicService";
@@ -23,6 +21,7 @@ import { COLOR_ORANGE, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../../shared/MarkdownRenderer";
 import { ApplicationState } from "../../core/store";
 import { connect } from "react-redux";
+import StarRating from "../../shared/star-rating/StarRating";
 
 const styles = createStyles({
   authorName: {
@@ -31,7 +30,8 @@ const styles = createStyles({
     marginRight: "10px",
     marginLeft: "10px"
   },
-  rating: {
+  ratingWrapper: {
+    float: "left",
     marginTop: "10px"
   },
   overviewDetails: {
@@ -60,8 +60,6 @@ interface Props extends WithStyles<typeof styles> {
 }
 
 interface State {
-  stars: number;
-  ratedByMe: boolean;
   redirectToTopic: boolean;
   avatar: string;
 }
@@ -72,8 +70,6 @@ const TopicReplyOverviewCard = withStyles(styles)(
       super(props);
 
       this.state = {
-        stars: 0,
-        ratedByMe: false,
         redirectToTopic: false,
         avatar: ""
       };
@@ -106,19 +102,11 @@ const TopicReplyOverviewCard = withStyles(styles)(
     }
 
     componentDidMount() {
-      const user: ChromunityUser = this.props.user;
       getUserSettingsCached(this.props.reply.author, 1440).then(settings => {
         this.setState({
           avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.reply.author)
         });
       });
-
-      getReplyStarRaters(this.props.reply.id).then(usersWhoStarRated =>
-        this.setState({
-          stars: usersWhoStarRated.length,
-          ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase())
-        })
-      );
     }
 
     authorIsRepresentative(): boolean {
@@ -148,12 +136,8 @@ const TopicReplyOverviewCard = withStyles(styles)(
     renderCardContent() {
       return (
         <CardContent>
-          <div style={{ float: "left" }}>
-            <div className={this.props.classes.rating}>
-              <Badge color="secondary" badgeContent={this.state.stars}>
-                {this.state.ratedByMe ? <StarRate className="yellow-color" /> : <StarBorder className="purple-color" />}
-              </Badge>
-            </div>
+          <div className={this.props.classes.ratingWrapper}>
+            <StarRating starRatingFetcher={() => getReplyStarRaters(this.props.reply.id)} />
           </div>
           {this.renderAuthor()}
           <div className={this.props.classes.overviewDetails}>

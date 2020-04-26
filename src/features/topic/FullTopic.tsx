@@ -3,7 +3,6 @@ import { RouteComponentProps } from "react-router";
 import { ChromunityUser, PollData, Topic, TopicReply } from "../../types";
 import { shouldBeFiltered, toLowerCase } from "../../shared/util/util";
 import {
-  Badge,
   Button,
   Card,
   CardActions,
@@ -16,16 +15,7 @@ import {
   Tooltip,
   Typography,
 } from "@material-ui/core";
-import {
-  Delete,
-  Notifications,
-  NotificationsActive,
-  Reply,
-  Report,
-  StarBorder,
-  StarRate,
-  SubdirectoryArrowRight,
-} from "@material-ui/icons";
+import { Delete, Notifications, NotificationsActive, Reply, Report, SubdirectoryArrowRight } from "@material-ui/icons";
 import TopicReplyCard from "./TopicReplyCard";
 import { Link, Redirect } from "react-router-dom";
 import { ApplicationState } from "../../core/store";
@@ -72,6 +62,7 @@ import PageMeta from "../../shared/PageMeta";
 import PollRenderer from "./poll/PollRenderer";
 import SocialShareButton from "../../shared/SocialShareButton";
 import { setError, setInfo } from "../../core/snackbar/redux/snackbarTypes";
+import StarRating from "../../shared/star-rating/StarRating";
 
 interface MatchParams {
   id: string;
@@ -124,6 +115,9 @@ const useStyles = makeStyles((theme) =>
     iconRed: {
       color: COLOR_RED,
     },
+    ratingWrapper: {
+      display: "inline",
+    },
   })
 );
 
@@ -134,9 +128,6 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
   const [topic, setTopic] = useState<Topic>(null);
   const [notFound, setNotFound] = useState(false);
   const [avatar, setAvatar] = useState("");
-  const [stars, setStars] = useState(0);
-  const [usersWhoStarRated, setUsersWhoStarRated] = useState<string[]>([]);
-  const [ratedByMe, setRatedByMe] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [topicReplies, setTopicReplies] = useState<TopicReply[]>([]);
   const [replyBoxOpen, setReplyBoxOpen] = useState(false);
@@ -167,23 +158,12 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     // eslint-disable-next-line
   }, [props.match.params.id]);
 
-  useEffect(() => {
-    if (props.user && usersWhoStarRated) {
-      setRatedByMe(usersWhoStarRated.includes(toLowerCase(props.user.name)));
-    }
-  }, [props.user, usersWhoStarRated]);
-
   function consumeTopicData(t: Topic): void {
     setTopic(t);
 
     retrieveLatestReplies();
 
     getPoll(t.id).then((poll) => setPoll(poll));
-
-    getTopicStarRaters(t.id, true).then((usersWhoStarRated) => {
-      setUsersWhoStarRated(usersWhoStarRated);
-      setStars(usersWhoStarRated.length);
-    });
     getTopicSubscribers(t.id).then((subscribers) =>
       setSubscribed(props.user != null && subscribers.includes(props.user.name))
     );
@@ -283,15 +263,18 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
 
   function renderCardActions() {
     const user: ChromunityUser = props.user;
+    const id: string = props.match.params.id;
 
     if (user != null) {
       return (
-        <CardActions disableSpacing style={{ display: "block" }}>
-          <IconButton data-tut="star_btn" aria-label="Like" onClick={() => toggleStarRate()}>
-            <Badge color="secondary" badgeContent={stars}>
-              <Tooltip title="Like">{ratedByMe ? <StarRate className={classes.iconYellow} /> : <StarBorder />}</Tooltip>
-            </Badge>
-          </IconButton>
+        <CardActions disableSpacing>
+          <div className={classes.ratingWrapper}>
+            <StarRating
+              starRatingFetcher={() => getTopicStarRaters(id)}
+              incrementRating={() => giveTopicStarRating(user, id)}
+              removeRating={() => removeTopicStarRating(user, id)}
+            />
+          </div>
           <IconButton data-tut="subscribe_btn" aria-label="Subscribe" onClick={() => toggleSubscription()}>
             {subscribed ? (
               <Tooltip title="Unsubscribe">
@@ -348,44 +331,12 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     } else {
       return (
         <CardActions>
-          <div data-tut="star_btn" style={{ display: "inline" }}>
-            <Badge color="secondary" badgeContent={stars} style={{ marginBottom: "5px", marginLeft: "5px" }}>
-              <Tooltip title="Like">{ratedByMe ? <StarRate className={classes.iconYellow} /> : <StarBorder />}</Tooltip>
-            </Badge>
+          <div className={classes.ratingWrapper}>
+            <StarRating starRatingFetcher={() => getTopicStarRaters(props.match.params.id)} />
           </div>
           <SocialShareButton text={topic.title} />
         </CardActions>
       );
-    }
-  }
-
-  function toggleStarRate() {
-    if (!isLoading) {
-      setLoading(true);
-      const id: string = topic.id;
-      const user: ChromunityUser = props.user;
-
-      if (user != null) {
-        if (ratedByMe) {
-          removeTopicStarRating(user, id)
-            .then(() => {
-              setRatedByMe(false);
-              setStars(stars - 1);
-            })
-            .catch()
-            .finally(() => setLoading(false));
-        } else {
-          giveTopicStarRating(user, id)
-            .then(() => {
-              setRatedByMe(true);
-              setStars(stars + 1);
-            })
-            .catch()
-            .finally(() => setLoading(false));
-        }
-      } else {
-        window.location.href = "/user/login";
-      }
     }
   }
 

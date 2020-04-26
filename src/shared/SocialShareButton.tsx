@@ -1,6 +1,6 @@
 import React from "react";
 import ShareIcon from "@material-ui/icons/Share";
-import { IconButton, useTheme } from "@material-ui/core";
+import { IconButton, useTheme, makeStyles } from "@material-ui/core";
 import {
   LinkedinIcon,
   LinkedinShareButton,
@@ -9,7 +9,7 @@ import {
   TelegramIcon,
   TelegramShareButton,
   TwitterIcon,
-  TwitterShareButton
+  TwitterShareButton,
 } from "react-share";
 import { COLOR_ORANGE } from "../theme";
 
@@ -17,10 +17,21 @@ interface Props {
   text: string;
 }
 
+const useStyles = makeStyles({
+  icon: {
+    position: "relative",
+    top: 8,
+    marginLeft: "5px",
+    marginRight: "5px",
+  },
+});
+
 const ICON_SIZE = 24;
 
-const SocialShareButton: React.FunctionComponent<Props> = props => {
+const SocialShareButton: React.FunctionComponent<Props> = (props) => {
   const theme = useTheme();
+  const classes = useStyles();
+
   const [menuOpen, setMenuOpen] = React.useState(false);
 
   const toggle = () => {
@@ -33,37 +44,25 @@ const SocialShareButton: React.FunctionComponent<Props> = props => {
         <>
           <TwitterShareButton
             url={window.location.href}
-            children={
-              <IconButton onClick={toggle}>
-                <TwitterIcon size={ICON_SIZE} round={true} />
-              </IconButton>
-            }
+            onClick={toggle}
+            children={<TwitterIcon className={classes.icon} size={ICON_SIZE} round={true} />}
             title={props.text}
             hashtags={["chromunity"]}
           />
           <TelegramShareButton
             url={window.location.href}
-            children={
-              <IconButton onClick={toggle}>
-                <TelegramIcon size={ICON_SIZE} round={true} />
-              </IconButton>
-            }
+            onClick={toggle}
+            children={<TelegramIcon className={classes.icon} size={ICON_SIZE} round={true} />}
           />
           <RedditShareButton
             url={window.location.href}
-            children={
-              <IconButton onClick={toggle}>
-                <RedditIcon size={ICON_SIZE} round={true} />
-              </IconButton>
-            }
+            onClick={toggle}
+            children={<RedditIcon className={classes.icon} size={ICON_SIZE} round={true} />}
           />
           <LinkedinShareButton
             url={window.location.href}
-            children={
-              <IconButton onClick={toggle}>
-                <LinkedinIcon size={ICON_SIZE} round={true} />
-              </IconButton>
-            }
+            onClick={toggle}
+            children={<LinkedinIcon className={classes.icon} size={ICON_SIZE} round={true} />}
           />
         </>
       );
@@ -71,12 +70,12 @@ const SocialShareButton: React.FunctionComponent<Props> = props => {
   }
 
   return (
-    <>
+    <div>
       <IconButton aria-controls="social-menu" aria-haspopup="true" onClick={toggle}>
         <ShareIcon style={{ color: menuOpen ? COLOR_ORANGE : theme.palette.primary.main }} />
       </IconButton>
       {menu()}
-    </>
+    </div>
   );
 };
 
