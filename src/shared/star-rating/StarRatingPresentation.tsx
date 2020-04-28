@@ -45,15 +45,9 @@ const StarRatingPresentation: React.FunctionComponent<Props> = (props) => {
     const maxRenderItems = 5;
     return (
       <div>
-        {props.ratedBy.length > 0 ? (
-          <p style={{ fontWeight: "bold" }} key={"like"}>
-            Liked by
-          </p>
-        ) : (
-          <p>Like</p>
-        )}
+        {props.ratedBy.length > 0 ? <div /> : <p>Like</p>}
         {props.ratedBy.slice(0, maxRenderItems).map((u) => (
-          <p key={u}>{u}</p>
+          <p key={u}>@{u}</p>
         ))}
         {props.ratedBy.length > maxRenderItems ? (
           <p key={"more"}>

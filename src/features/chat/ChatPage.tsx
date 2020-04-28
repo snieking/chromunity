@@ -41,10 +41,11 @@ import Box from "@material-ui/core/Box";
 import Select, { createFilter } from "react-select";
 import { ValueType } from "react-select/src/types";
 import {
-  COLOR_CHROMIA_DARK, COLOR_CHROMIA_DARK_LIGHTER,
+  COLOR_CHROMIA_DARK,
+  COLOR_CHROMIA_DARK_LIGHTER,
   COLOR_CHROMIA_LIGHT,
   COLOR_CHROMIA_LIGHTER,
-  COLOR_OFF_WHITE
+  COLOR_OFF_WHITE,
 } from "../../theme";
 import useTheme from "@material-ui/core/styles/useTheme";
 import LoadMoreButton from "../../shared/buttons/LoadMoreButton";
@@ -75,6 +76,7 @@ interface Props {
   activeChatCouldExistOlderMessages: boolean;
   followedChatUsers: string[];
   chatUsers: string[];
+  rateLimited: boolean;
   checkChatAuthentication: typeof checkChatAuthentication;
   createChatKeyPair: typeof createChatKeyPair;
   deleteChatUser: typeof deleteChatUserAction;
@@ -125,7 +127,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     drawerOpen: false,
     participantsDrawerOpen: false,
     scrolledToTop: true,
-    showResetChatAccountDialog: false
+    showResetChatAccountDialog: false,
   });
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -245,7 +247,13 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   function renderChatCreationActions() {
     return (
       <div style={{ textAlign: "center", marginTop: "15px", marginLeft: "10px", marginRight: "10px" }}>
-        <Button type="button" color="secondary" variant="contained" onClick={() => props.createNewChat(props.user)}>
+        <Button
+          type="button"
+          color="secondary"
+          variant="contained"
+          onClick={() => props.createNewChat(props.user)}
+          disabled={props.rateLimited}
+        >
           New Chat
         </Button>
       </div>
@@ -255,7 +263,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   function listChatRooms() {
     return (
       <List component="nav" aria-label="main">
-        {props.chats.map(chat => (
+        {props.chats.map((chat) => (
           <ChatListItem key={chat.id} chat={chat} selectedId={values.selectedChatId} onClick={selectChat} />
         ))}
       </List>
@@ -320,7 +328,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     return (
       <Drawer anchor="right" open={values.participantsDrawerOpen} onClose={toggleParticipantsDrawer(false)}>
         <List aria-label="main">
-          {props.activeChatParticipants.map(name => (
+          {props.activeChatParticipants.map((name) => (
             <ChatParticipantListItem name={name} key={name} />
           ))}
         </List>
@@ -349,7 +357,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
           <Button color="secondary" variant="outlined" onClick={() => setValues({ ...values, modifyTitle: false })}>
             Cancel
           </Button>
-          <Button color="primary" variant="outlined" onClick={confirmUpdatedTitle}>
+          <Button color="primary" variant="outlined" onClick={confirmUpdatedTitle} disabled={props.rateLimited}>
             Update
           </Button>
         </DialogActions>
@@ -378,7 +386,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function leaveChat() {
-    const chat = props.chats.find(value => value.id !== props.activeChat.id);
+    const chat = props.chats.find((value) => value.id !== props.activeChat.id);
 
     props.leaveChat(props.user);
     props.openChat(chat, props.user);
@@ -388,8 +396,8 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   const suggestions = () => {
     return props.chatUsers
-      .filter(user => toLowerCase(user) !== toLowerCase(props.user.name))
-      .map(user => ({ value: user, label: user } as OptionType));
+      .filter((user) => toLowerCase(user) !== toLowerCase(props.user.name))
+      .map((user) => ({ value: user, label: user } as OptionType));
   };
 
   const darkTheme = theme.palette.type === "dark";
@@ -404,12 +412,12 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       color: textColor,
       background: backgroundColor,
       border: "1px solid",
-      borderColor: borderColor
+      borderColor: borderColor,
     }),
     menu: (styles: any) => ({
       ...styles,
       zIndex: 999,
-      background: backgroundColor
+      background: backgroundColor,
     }),
     control: (provided: any) => ({
       ...provided,
@@ -417,7 +425,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       color: theme.palette.primary.main,
       borderColor: theme.palette.secondary,
       "&:hover": { borderColor: textColor },
-      boxShadow: "none"
+      boxShadow: "none",
     }),
     singleValue: (provided: any, state: any) => {
       const opacity = state.isDisabled ? 1 : 1;
@@ -432,7 +440,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     noOptionsMessage: (provided: any) => {
       const color = textColor;
       return { ...provided, color };
-    }
+    },
   };
 
   function addUserDialog() {
@@ -464,7 +472,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
           <Button color="secondary" variant="outlined" onClick={closeAddUserDialog}>
             Cancel
           </Button>
-          <Button color="primary" variant="outlined" onClick={confirmAddUser}>
+          <Button color="primary" variant="outlined" onClick={confirmAddUser} disabled={props.rateLimited}>
             Add
           </Button>
         </DialogActions>
@@ -488,7 +496,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     return (
       <div className={classes.chatMessages} ref={scrollRef} onScroll={handleScroll}>
         <List>
-          {props.activeChatMessages.map(message => (
+          {props.activeChatMessages.map((message) => (
             <ChatMessage key={message.timestamp} message={message} />
           ))}
         </List>
@@ -526,7 +534,14 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
             inputRef={textInput}
           />
         </div>
-        <Button type="submit" size="small" className={classes.submitMessage} variant="contained" color="secondary">
+        <Button
+          type="submit"
+          size="small"
+          className={classes.submitMessage}
+          variant="contained"
+          color="secondary"
+          disabled={props.rateLimited}
+        >
           Send
         </Button>
       </form>
@@ -537,7 +552,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     const startPosition = textInput.current.selectionStart;
     setValues({
       ...values,
-      message: [values.message.slice(0, startPosition), text, values.message.slice(startPosition)].join("")
+      message: [values.message.slice(0, startPosition), text, values.message.slice(startPosition)].join(""),
     });
     setTimeout(() => {
       textInput.current.selectionStart = startPosition + text.length;
@@ -591,6 +606,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
             color="secondary"
             style={{ marginRight: "5px" }}
             onClick={() => setValues({ ...values, showResetChatAccountDialog: true })}
+            disabled={props.rateLimited}
           >
             Reset chat account
           </Button>
@@ -623,7 +639,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     setValues({
       ...values,
       password: "",
-      showResetChatAccountDialog: false
+      showResetChatAccountDialog: false,
     });
   }
 
@@ -635,7 +651,11 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function renderContent() {
     if (props.autoLoginInProgress) {
-      return <div style={{ textAlign: "center", marginTop: "25px" }}><CircularProgress /></div>;
+      return (
+        <div style={{ textAlign: "center", marginTop: "25px" }}>
+          <CircularProgress />
+        </div>
+      );
     } else if (!props.autoLoginInProgress && !props.user) {
       return <Redirect to={"/user/login"} />;
     } else if (props.successfullyAuthorized && props.rsaKey != null) {
@@ -665,15 +685,11 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
             private chat key is not stored on the blockchain.
           </p>
         </>
-      )
+      ),
     ];
   };
 
-  return (
-    <Container fixed>
-      {renderContent()}
-    </Container>
-  );
+  return <Container fixed>{renderContent()}</Container>;
 };
 
 const mapDispatchToProps = (dispatch: any) => {
@@ -692,7 +708,7 @@ const mapDispatchToProps = (dispatch: any) => {
     loadChatUsers: (user: ChromunityUser) => dispatch(loadChatUsersAction(user)),
     loadOlderMessages: () => dispatch(loadOlderMessagesAction()),
     setError: (msg: string) => dispatch(setError(msg)),
-    setInfo: (msg: string) => dispatch(setInfo(msg))
+    setInfo: (msg: string) => dispatch(setInfo(msg)),
   };
 };
 
@@ -709,7 +725,8 @@ const mapStateToProps = (store: ApplicationState) => {
     activeChatCouldExistOlderMessages: store.chat.activeChatCouldExistOlderMessages,
     activeChatParticipants: store.chat.activeChatParticipants,
     followedChatUsers: store.chat.followedChatUsers,
-    chatUsers: store.chat.chatUsers
+    chatUsers: store.chat.chatUsers,
+    rateLimited: store.common.rateLimited,
   };
 };
 

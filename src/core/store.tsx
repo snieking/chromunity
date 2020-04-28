@@ -25,6 +25,7 @@ import { CommonState } from "../shared/redux/CommonTypes";
 import { commonReducer } from "../shared/redux/CommonReducers";
 import { SnackbarState } from "./snackbar/redux/snackbarTypes";
 import { snackbarReducer } from "./snackbar/redux/snackbarReducers";
+import { commonWatcher } from "../shared/redux/CommonSagas";
 
 export interface ApplicationState {
   account: AccountState;
@@ -78,6 +79,7 @@ function* rootSaga() {
     channelWatcher(),
     userPageWatcher(),
     governmentWatcher(),
-    chatWatcher()
+    chatWatcher(),
+    commonWatcher()
   ]);
 }

@@ -13,9 +13,9 @@ export const stopStopwatch = (sw: Stopwatch): number => {
   return sw.getTime();
 };
 
-export const uniqueId = function() {
+export const uniqueId = function () {
   let dt = new Date().getTime();
-  const uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+  const uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
     const r = (dt + Math.random() * 16) % 16 | 0;
     dt = Math.floor(dt / 16);
     return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
@@ -31,15 +31,15 @@ export function prepareUrlPath(path: string): string {
 export function sortByFrequency(array: string[]): string[] {
   const frequency: any = {};
 
-  array.forEach(function(value) {
+  array.forEach(function (value) {
     frequency[value] = 0;
   });
 
-  const uniques = array.filter(function(value) {
+  const uniques = array.filter(function (value) {
     return ++frequency[value] === 1;
   });
 
-  return uniques.sort(function(a, b) {
+  return uniques.sort(function (a, b) {
     return frequency[b] - frequency[a];
   });
 }
@@ -111,9 +111,9 @@ export function isBright(hex: string): boolean {
   const color = hex.replace("#", "");
   const rgb = parseInt(color, 16);
 
-  const r = (rgb >> 16) & 0xff;  // extract red
-  const g = (rgb >>  8) & 0xff;  // extract green
-  const b = (rgb >>  0) & 0xff;  // extract blue
+  const r = (rgb >> 16) & 0xff; // extract red
+  const g = (rgb >> 8) & 0xff; // extract green
+  const b = (rgb >> 0) & 0xff; // extract blue
 
   const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
 
@@ -191,11 +191,7 @@ export const toLowerCase = (text: string) => {
 };
 
 export const shouldBeFiltered = (moderators: string[], distrusted: string[]) => {
-  return (
-    moderators != null &&
-    distrusted != null &&
-    moderators.filter(n => !distrusted.includes(n)).length > 0
-  );
+  return moderators != null && distrusted != null && moderators.filter((n) => !distrusted.includes(n)).length > 0;
 };
 
 export function useTraceUpdate(props: any) {
@@ -208,7 +204,7 @@ export function useTraceUpdate(props: any) {
       return ps;
     }, {});
     if (Object.keys(changedProps).length > 0) {
-      console.log('Changed props:', changedProps);
+      console.log("Changed props:", changedProps);
     }
     prev.current = props;
   });

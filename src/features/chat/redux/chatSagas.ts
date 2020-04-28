@@ -1,4 +1,5 @@
-import { setError, setInfo } from '../../../core/snackbar/redux/snackbarTypes';
+import { setRateLimited } from "./../../../shared/redux/CommonActions";
+import { setError, setInfo } from "../../../core/snackbar/redux/snackbarTypes";
 import {
   AddUserToChatAction,
   ChatActionTypes,
@@ -120,18 +121,24 @@ export function* createChatKeyPairSaga(action: CreateChatKeyPairAction) {
   const rsaKey = generateRSAKey(action.password);
   const rsaPubKey = rsaKeyToPubKey(rsaKey);
 
-  if (pubKey != null && pubKey !== rsaPubKey) {
-    logger.info("New pubkey didn't match old one");
-    yield put(setError("Incorrect passphrase"));
-    return;
-  } else if (pubKey == null) {
-    yield createChatUser(action.user, rsaPubKey);
+  try {
+    if (pubKey != null && pubKey !== rsaPubKey) {
+      logger.info("New pubkey didn't match old one");
+      yield put(setError("Incorrect passphrase"));
+      return;
+    } else if (pubKey == null) {
+      yield createChatUser(action.user, rsaPubKey);
+    }
+
+    storeChatPassphrase(action.password);
+    yield put(storeChatKeyPair(rsaKey, true));
+
+    chatEvent("create-key-pair");
+  } catch (error) {
+    yield put(setError(error.message));
+    yield put(setRateLimited(true));
   }
 
-  storeChatPassphrase(action.password);
-  yield put(storeChatKeyPair(rsaKey, true));
-
-  chatEvent("create-key-pair");
   logger.silly("[SAGA - FINISHED]: Creating chat key pair");
 }
 
@@ -145,10 +152,16 @@ export function* createNewChatSaga(action: CreateNewChatAction) {
   const rsaPubKey = rsaKeyToPubKey(rsaKey);
   const encryptedSharedChatKey = yield rsaEncrypt(sharedChatKey.toString("hex"), rsaPubKey);
 
-  yield createNewChat(action.user, id, encryptedSharedChatKey.cipher);
-  yield put(loadUserChats(action.user, true));
+  try {
+    yield createNewChat(action.user, id, encryptedSharedChatKey.cipher);
+    yield put(loadUserChats(action.user, true));
 
-  chatEvent("create");
+    chatEvent("create");
+  } catch (error) {
+    yield put(setError(error.message));
+    yield put(setRateLimited(true));
+  }
+
   logger.silly("[SAGA - FINISHED]: Create new chat");
 }
 
@@ -156,33 +169,46 @@ export function* addUserToChatSaga(action: AddUserToChatAction) {
   logger.silly("[SAGA - STARTED]: Add user to chat");
   const chatParticipants = yield select(getActiveChatParticipants);
 
-  if (chatParticipants == null || !chatParticipants.includes(action.username)) {
-    const targetUserPubKey = yield getUserPubKey(action.username);
+  try {
+    if (chatParticipants == null || !chatParticipants.includes(action.username)) {
+      const targetUserPubKey = yield getUserPubKey(action.username);
 
-    if (targetUserPubKey != null) {
-      const chat = yield select(getActiveChat);
-      const rsaKey = yield select(getRsaKey);
+      if (targetUserPubKey != null) {
+        const chat = yield select(getActiveChat);
+        const rsaKey = yield select(getRsaKey);
 
-      const decryptedChatKey = yield rsaDecrypt(chat.encrypted_chat_key, rsaKey);
-      const encryptedSharedChatKey = yield rsaEncrypt(decryptedChatKey.plaintext, targetUserPubKey);
+        const decryptedChatKey = yield rsaDecrypt(chat.encrypted_chat_key, rsaKey);
+        const encryptedSharedChatKey = yield rsaEncrypt(decryptedChatKey.plaintext, targetUserPubKey);
 
-      yield addUserToChat(action.user, chat.id, action.username, encryptedSharedChatKey.cipher);
-      yield put(sendMessage(action.user, chat, "I invited '" + action.username + "' to join us."));
-      chatEvent("invite-user");
-    } else {
-      logger.info("User [%s] hasn't created a chat key yet", action.username);
+        yield addUserToChat(action.user, chat.id, action.username, encryptedSharedChatKey.cipher);
+        yield put(sendMessage(action.user, chat, "I invited '" + action.username + "' to join us."));
+        chatEvent("invite-user");
+      } else {
+        logger.info("User [%s] hasn't created a chat key yet", action.username);
+      }
     }
+  } catch (error) {
+    yield put(setError(error.message));
+    yield put(setRateLimited(true));
   }
+
   logger.silly("[SAGA - FINISHED]: Add user to chat");
 }
 
 export function* leaveChatSaga(action: LeaveChatAction) {
   logger.silly("[SAGA - STARTED]: Leave chat");
   const chat = yield select(getActiveChat);
-  yield leaveChat(action.user, chat.id);
-  yield put(loadUserChats(action.user, true));
 
-  chatEvent("leave");
+  try {
+    yield leaveChat(action.user, chat.id);
+    yield put(loadUserChats(action.user, true));
+
+    chatEvent("leave");
+  } catch (error) {
+    yield put(setError(error.message));
+    yield put(setRateLimited(true));
+  }
+
   logger.silly("[SAGA - FINISHED]: Leave chat");
 }
 
@@ -328,25 +354,34 @@ export function* sendMessageSaga(action: SendMessageAction) {
     chatEvent("message");
   } catch (error) {
     yield put(setError(error.message));
+    yield put(setRateLimited(true));
   }
   logger.silly("[SAGA - FINISHED]: Send message");
 }
 
 export function* modifyTitleSaga(action: ModifyTitleAction) {
   logger.silly("[SAGA - STARTED]: Modify title");
-  yield modifyTitle(action.user, action.chat.id, action.title);
-  const updatedChat: Chat = {
-    id: action.chat.id,
-    title: action.title,
-    encrypted_chat_key: action.chat.encrypted_chat_key,
-    timestamp: action.chat.timestamp,
-    last_message: action.chat.last_message,
-    last_opened: action.chat.last_opened,
-  };
-  yield put(openChat(updatedChat, action.user));
-  yield put(loadUserChats(action.user, true));
 
-  chatEvent("modify-title");
+  try {
+    yield modifyTitle(action.user, action.chat.id, action.title);
+
+    const updatedChat: Chat = {
+      id: action.chat.id,
+      title: action.title,
+      encrypted_chat_key: action.chat.encrypted_chat_key,
+      timestamp: action.chat.timestamp,
+      last_message: action.chat.last_message,
+      last_opened: action.chat.last_opened,
+    };
+    yield put(openChat(updatedChat, action.user));
+    yield put(loadUserChats(action.user, true));
+
+    chatEvent("modify-title");
+  } catch (error) {
+    yield put(setError(error.message));
+    yield put(setRateLimited(true));
+  }
+
   logger.silly("[SAGA - FINISHED]: Modify title");
 }
 
@@ -369,7 +404,7 @@ export function* deleteChatUserSaga(action: DeleteChatUserAction) {
 
   yield deleteChatUser(action.user);
   yield put(setInfo("Chat account resetted"));
-  
+
   chatEvent("delete-user");
   logger.silly("[SAGA - FINISHED]: Delete chat user");
 }
