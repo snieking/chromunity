@@ -1,9 +1,9 @@
 module;
 
 namespace ft3 {
-	import acc: lib.ft3.account;
-	import acc_op: lib.ft3.account.operations;
-	import transfer_op: lib.ft3.core.operations.transfer;
-	import xc: lib.ft3.crosschain;
+	import acc: ^.account;
+	import acc_op: ^.account.operations;
+	import transfer_op: ^.core.operations.transfer;
+	import xc: ^.crosschain;
 }
 

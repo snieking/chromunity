@@ -11,3 +11,4 @@ import follow;
 import election;
 import representative;
 import chat;
+import config;

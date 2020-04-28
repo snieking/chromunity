@@ -10,3 +10,15 @@ struct module_args {
     rate_limit_recovery_time: integer;
     rate_limit_points_at_account_creation: integer;    
 }
+
+function scan_args_my_blockchain_info(): module_args {
+    return module_args(
+        my_blockchain_name = chain_context.args.my_blockchain_name,
+        my_blockchain_website = chain_context.args.my_blockchain_website,
+        my_blockchain_description = chain_context.args.my_blockchain_description,
+        rate_limit_active = chain_context.args.rate_limit_active,
+        rate_limit_max_points = chain_context.args.rate_limit_max_points,
+        rate_limit_recovery_time = chain_context.args.rate_limit_recovery_time,
+        rate_limit_points_at_account_creation = chain_context.args.rate_limit_points_at_account_creation
+    );
+}
