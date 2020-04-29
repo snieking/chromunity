@@ -25,6 +25,7 @@ import { ApplicationState } from "../../core/store";
 import { connect } from "react-redux";
 import TextToolbar from "../textToolbar/TextToolbar";
 import { setInfo, setError } from "../../core/snackbar/redux/snackbarTypes";
+import { setRateLimited } from "../redux/CommonActions";
 
 const styles = createStyles({
   editorWrapper: {
@@ -38,8 +39,10 @@ export interface EditMessageButtonProps extends WithStyles<typeof styles> {
   value: string;
   modifiableUntil: number;
   user: ChromunityUser;
+  rateLimited: boolean;
   setInfo: typeof setInfo;
   setError: typeof setError;
+  setRateLimited: typeof setRateLimited;
 }
 
 export interface EditMessageButtonState {
@@ -92,7 +95,10 @@ const EditMessageButton = withStyles(styles)(
       this.toggleEditDialog();
       this.props
         .editFunction(this.state.message)
-        .catch((error: Error) => this.props.setError(error.message))
+        .catch((error: Error) => {
+          this.props.setError(error.message);
+          this.props.setRateLimited();
+        })
         .then(() => this.props.setInfo("Message successfully edited"));
     }
 
@@ -100,7 +106,10 @@ const EditMessageButton = withStyles(styles)(
       this.toggleDeleteDialog();
       this.props
         .deleteFunction()
-        .catch((error: Error) => this.props.setError(error.message))
+        .catch((error: Error) => {
+          this.props.setError(error.message);
+          this.props.setRateLimited();
+        })
         .then(() => this.props.setInfo("Message successfully deleted"));
     }
 
@@ -139,6 +148,7 @@ const EditMessageButton = withStyles(styles)(
                   onClick={() => this.submitEdit()}
                   color="primary"
                   variant="contained"
+                  disabled={this.props.rateLimited}
                 >
                   Send
                 </Button>
@@ -225,6 +235,7 @@ const EditMessageButton = withStyles(styles)(
 const mapStateToProps = (store: ApplicationState) => {
   return {
     user: store.account.user,
+    rateLimited: store.common.rateLimited,
   };
 };
 
@@ -232,6 +243,7 @@ const mapDispatchToProps = (dispatch: any) => {
   return {
     setError: (msg: string) => dispatch(setError(msg)),
     setInfo: (msg: string) => dispatch(setInfo(msg)),
+    setRateLimited: () => dispatch(setRateLimited()),
   };
 };
 

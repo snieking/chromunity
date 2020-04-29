@@ -510,7 +510,9 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       event.preventDefault();
     } else if (!event.shiftKey && event.keyCode === 13) {
       event.preventDefault();
-      sendMessage();
+      if (!props.rateLimited) {
+        sendMessage();
+      }
     }
   };
 

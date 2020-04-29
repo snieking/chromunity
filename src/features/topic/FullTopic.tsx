@@ -63,6 +63,7 @@ import PollRenderer from "./poll/PollRenderer";
 import SocialShareButton from "./SocialShareButton";
 import { setError, setInfo } from "../../core/snackbar/redux/snackbarTypes";
 import StarRating from "../../shared/star-rating/StarRating";
+import { setRateLimited } from "../../shared/redux/CommonActions";
 
 interface MatchParams {
   id: string;
@@ -72,9 +73,11 @@ interface Props extends RouteComponentProps<MatchParams> {
   pathName: string;
   representatives: string[];
   distrustedUsers: string[];
+  rateLimited: boolean;
   user: ChromunityUser;
   setError: typeof setError;
   setInfo: typeof setInfo;
+  setRateLimited: typeof setRateLimited;
 }
 
 const useStyles = makeStyles((theme) =>
@@ -350,12 +353,18 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
         if (subscribed) {
           unsubscribeFromTopic(user, id)
             .then(() => setSubscribed(false))
-            .catch()
+            .catch((error) => {
+              setError(error.message);
+              setRateLimited();
+            })
             .finally(() => setLoading(false));
         } else {
           subscribeToTopic(user, id)
             .then(() => setSubscribed(true))
-            .catch()
+            .catch((error) => {
+              setError(error.message);
+              setRateLimited();
+            })
             .finally(() => setLoading(false));
         }
       } else {
@@ -381,12 +390,20 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
 
         setTopic(updatedTopic);
       })
-      .catch()
+      .catch((error) => {
+        setError(error.message);
+        setRateLimited();
+      })
       .finally(() => setLoading(false));
   }
 
   function deleteTheTopic() {
-    deleteTopic(props.user, topic.id).then(() => (window.location.href = "/"));
+    deleteTopic(props.user, topic.id)
+      .catch((error) => {
+        setError(error.message);
+        setRateLimited();
+      })
+      .then(() => (window.location.href = "/"));
   }
 
   function closeReportTopic() {
@@ -398,7 +415,12 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     const user: ChromunityUser = props.user;
 
     if (user != null) {
-      reportTopic(user, topic).then();
+      reportTopic(user, topic)
+        .catch((error) => {
+          setError(error.message);
+          setRateLimited();
+        })
+        .then();
     } else {
       window.location.href = "/user/login";
     }
@@ -427,7 +449,12 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
             onClose={() => setRemoveTopicDialogOpen(false)}
             onConfirm={() => {
               setRemoveTopicDialogOpen(false);
-              removeTopic(props.user, topic.id).then(() => window.location.reload());
+              removeTopic(props.user, topic.id)
+                .catch((error) => {
+                  setError(error.message);
+                  setRateLimited();
+                })
+                .then(() => window.location.reload());
             }}
           />
         </div>
@@ -464,6 +491,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
             color="primary"
             variant="contained"
             style={{ marginLeft: "5px" }}
+            disabled={props.rateLimited}
           >
             Reply
           </Button>
@@ -498,7 +526,10 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
       setReplyBoxOpen(false);
       setLoading(true);
       createTopicReply(props.user, topic.id, replyMessage)
-        .catch((error) => props.setError(error.message))
+        .catch((error) => {
+          setError(error.message);
+          setRateLimited();
+        })
         .then(() => {
           props.setInfo("Reply sent");
           retrieveLatestReplies();
@@ -628,6 +659,7 @@ const mapStateToProps = (store: ApplicationState) => {
     user: store.account.user,
     representatives: store.government.representatives.map((rep) => toLowerCase(rep)),
     distrustedUsers: store.account.distrustedUsers,
+    rateLimited: store.common.rateLimited,
   };
 };
 
@@ -635,6 +667,7 @@ const mapDispatchToProps = (dispatch: any) => {
   return {
     setError: (msg: string) => dispatch(setError(msg)),
     setInfo: (msg: string) => dispatch(setInfo(msg)),
+    setRateLimited: () => dispatch(setRateLimited()),
   };
 };
 

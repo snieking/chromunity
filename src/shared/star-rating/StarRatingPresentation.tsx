@@ -8,6 +8,7 @@ interface Props {
   ratedByMe: boolean;
   toggleRating?: () => void;
   className?: string;
+  disabled: boolean;
 }
 
 const useStyles = makeStyles({
@@ -24,7 +25,7 @@ const StarRatingPresentation: React.FunctionComponent<Props> = (props) => {
   function render() {
     if (props.toggleRating) {
       return (
-        <IconButton data-tut="star_btn" aria-label="Like" onClick={props.toggleRating}>
+        <IconButton data-tut="star_btn" aria-label="Like" onClick={props.toggleRating} disabled={props.disabled}>
           {icon()}
         </IconButton>
       );

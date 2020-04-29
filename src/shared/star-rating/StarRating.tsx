@@ -4,12 +4,17 @@ import { ApplicationState } from "../../core/store";
 import { connect } from "react-redux";
 import StarRatingPresentation from "./StarRatingPresentation";
 import { toLowerCase } from "../util/util";
+import { setRateLimited } from "../redux/CommonActions";
+import { setError } from "../../core/snackbar/redux/snackbarTypes";
 
 interface Props {
   starRatingFetcher: () => Promise<string[]>;
   removeRating?: () => Promise<unknown>;
   incrementRating?: () => Promise<unknown>;
   user: ChromunityUser;
+  rateLimited: boolean;
+  setRateLimited: typeof setRateLimited;
+  setError: typeof setError;
 }
 
 const StarRating: React.FunctionComponent<Props> = (props) => {
@@ -33,15 +38,27 @@ const StarRating: React.FunctionComponent<Props> = (props) => {
       setLoading(true);
 
       if (ratedByMe() && props.removeRating) {
-        props.removeRating().then(() => {
-          setRatedBy(ratedBy.filter((u) => toLowerCase(u) !== toLowerCase(props.user.name)));
-          setLoading(false);
-        });
+        props
+          .removeRating()
+          .catch((error) => {
+            props.setError(error.message);
+            props.setRateLimited();
+          })
+          .then(() => {
+            setRatedBy(ratedBy.filter((u) => toLowerCase(u) !== toLowerCase(props.user.name)));
+            setLoading(false);
+          });
       } else if (!ratedByMe() && props.incrementRating) {
-        props.incrementRating().then(() => {
-          setRatedBy(ratedBy.concat([props.user.name]));
-          setLoading(false);
-        });
+        props
+          .incrementRating()
+          .catch((error) => {
+            props.setError(error.message);
+            props.setRateLimited();
+          })
+          .then(() => {
+            setRatedBy(ratedBy.concat([props.user.name]));
+            setLoading(false);
+          });
       }
     }
   }
@@ -51,6 +68,7 @@ const StarRating: React.FunctionComponent<Props> = (props) => {
       ratedBy={ratedBy}
       ratedByMe={ratedByMe()}
       toggleRating={props.incrementRating && props.removeRating ? toggleRating : null}
+      disabled={props.rateLimited}
     />
   );
 };
@@ -58,7 +76,15 @@ const StarRating: React.FunctionComponent<Props> = (props) => {
 const mapStateToProps = (store: ApplicationState) => {
   return {
     user: store.account.user,
+    rateLimited: store.common.rateLimited,
   };
 };
 
-export default connect(mapStateToProps, null)(StarRating);
+const mapDispatchToProps = (dispatch: any) => {
+  return {
+    setRateLimited: () => dispatch(setRateLimited()),
+    setError: (msg: string) => dispatch(setError(msg)),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(StarRating);
