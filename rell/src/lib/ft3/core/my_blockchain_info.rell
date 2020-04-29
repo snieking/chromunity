@@ -7,6 +7,8 @@ object my_blockchain_info {
     mutable rate_limit_max_points: integer = chain_context.args.rate_limit_max_points;
     mutable rate_limit_recovery_time: integer = chain_context.args.rate_limit_recovery_time;
     mutable rate_limit_points_at_account_creation: integer = chain_context.args.rate_limit_points_at_account_creation;
+    
+    mutable last_update: integer = 0;
 }
 
 

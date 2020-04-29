@@ -1,0 +1,37 @@
+import ft3_acc: lib.ft3.account;
+import ft3_core: lib.ft3.core;
+
+
+
+operation update_block_YOUR_BLOCK_NUMBER(){
+  val update_at_block = XXX_YOUR_UPDATE_BLOCK_NUMBER;
+  require(op_context.block_height>=update_at_block);
+  require(ft3_core.my_blockchain_info.last_update < update_at_block);
+
+  update_new_users_limit();
+  update_previous_users_limit();
+
+  ft3_core.my_blockchain_info.last_update = update_at_block;
+}
+
+function update_new_users_limit() {
+  val new_args = ft3_core.scan_args_my_blockchain_info();
+  ft3_core.my_blockchain_info.name = new_args.my_blockchain_name;
+  ft3_core.my_blockchain_info.name = new_args.my_blockchain_name;
+  ft3_core.my_blockchain_info.website = new_args.my_blockchain_website;
+  ft3_core.my_blockchain_info.description = new_args.my_blockchain_description;
+  ft3_core.my_blockchain_info.rate_limit_active = new_args.rate_limit_active;
+  ft3_core.my_blockchain_info.rate_limit_max_points = new_args.rate_limit_max_points;
+  ft3_core.my_blockchain_info.rate_limit_recovery_time = new_args.rate_limit_recovery_time;
+  ft3_core.my_blockchain_info.rate_limit_points_at_account_creation = new_args.rate_limit_points_at_account_creation;
+}
+
+function update_previous_users_limit() {
+  update ft3_acc.rl_state@*{
+    .recovery_time > ft3_core.my_blockchain_info.rate_limit_recovery_time,
+    .max_points < ft3_core.my_blockchain_info.rate_limit_max_points
+  }(
+    .recovery_time = ft3_core.my_blockchain_info.rate_limit_recovery_time,
+    .max_points = ft3_core.my_blockchain_info.rate_limit_max_points
+  );
+}
