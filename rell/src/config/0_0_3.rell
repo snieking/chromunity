@@ -1,10 +1,8 @@
 import ft3_acc: lib.ft3.account;
 import ft3_core: lib.ft3.core;
 
-
-
-operation update_block_YOUR_BLOCK_NUMBER(){
-  val update_at_block = XXX_YOUR_UPDATE_BLOCK_NUMBER;
+operation update_block_79000(){
+  val update_at_block = 79000;
   require(op_context.block_height>=update_at_block);
   require(ft3_core.my_blockchain_info.last_update < update_at_block);
 
