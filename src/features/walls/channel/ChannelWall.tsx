@@ -4,7 +4,6 @@ import { Container, LinearProgress, MenuItem, Select } from "@material-ui/core";
 import { ChromunityUser, Topic } from "../../../types";
 
 import { RouteComponentProps } from "react-router";
-import { countTopicsInChannel } from "../../../core/services/TopicService";
 import TopicOverviewCard from "../../topic/TopicOverviewCard";
 import LoadMoreButton from "../../../shared/buttons/LoadMoreButton";
 import NewTopicButton from "../../../shared/buttons/NewTopicButton";
@@ -73,21 +72,18 @@ class ChannelWall extends React.Component<Props, State> {
   componentDidMount(): void {
     this.props.channelInit();
     this.retrieveTopics();
-
-    const channel = this.props.match.params.channel;
-
-    countTopicsInChannel(channel).then((count) => this.setState({ countOfTopics: count }));
     markTopicWallRefreshed();
   }
 
   render() {
+    const channel = this.props.match.params.channel;
     return (
       <Container>
         <div style={{ textAlign: "center", marginTop: "20px", marginBottom: "-50px" }}>
-          <ChannelTitle channel={this.props.match.params.channel}/>
+          <ChannelTitle channel={channel}/>
         </div>
 
-        <ChannelFollowingButton channel={this.props.match.params.channel} />
+        <ChannelFollowingButton channel={channel} />
 
         {this.state.isLoading || this.props.loading ? <LinearProgress variant="query" /> : <div />}
         <StyledSelect value={this.state.selector} onChange={this.handleSelectorChange}>
@@ -120,7 +116,7 @@ class ChannelWall extends React.Component<Props, State> {
         })}
         {this.renderLoadMoreButton()}
         {this.props.user != null ? (
-          <NewTopicButton channel={this.props.match.params.channel} updateFunction={this.retrieveTopics} />
+          <NewTopicButton channel={channel} updateFunction={this.retrieveTopics} />
         ) : (
           <div />
         )}

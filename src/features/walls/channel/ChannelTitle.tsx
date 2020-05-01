@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Badge, makeStyles } from "@material-ui/core";
 import ChromiaPageHeader from "../../../shared/ChromiaPageHeader";
+import { countTopicsInChannel } from "../../../core/services/TopicService";
 
 interface Props {
   channel: string;
@@ -15,9 +16,16 @@ const useStyles = makeStyles({
 
 const ChannelTitle: React.FunctionComponent<Props> = (props) => {
   const classes = useStyles();
+  const [nrOfTopics, setNrOfTopics] = useState(0);
+
+  useEffect(() => {
+    if (props.channel) {
+      countTopicsInChannel(props.channel).then((count) => setNrOfTopics(count));
+    }
+  }, [props.channel]);
 
   return (
-    <Badge badgeContent={1} color="secondary" overlap="rectangle">
+    <Badge badgeContent={nrOfTopics} color="secondary" overlap="rectangle">
       <div className={classes.title}>
         <ChromiaPageHeader text={"#" + props.channel} />
       </div>
