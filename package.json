@@ -58,8 +58,7 @@
     "test": "jest --config jest.config.js --setupFiles dotenv/config",
     "test-bc": "jest --setupFiles dotenv/config",
     "eject": "react-scripts eject",
-    "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "snyk-protect": "snyk protect --prune-repeated-subdependencies"
   },
   "browserslist": {
     "production": [
