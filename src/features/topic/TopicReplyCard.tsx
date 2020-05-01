@@ -57,6 +57,7 @@ import Divider from "@material-ui/core/Divider";
 import PreviewLinks from "../../shared/PreviewLinks";
 import { setError, setInfo } from "../../core/snackbar/redux/snackbarTypes";
 import StarRating from "../../shared/star-rating/StarRating";
+import { setRateLimited } from "../../shared/redux/CommonActions";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -124,9 +125,11 @@ interface Props extends WithStyles<typeof styles> {
   indention: number;
   representatives: string[];
   distrustedUsers: string[];
+  rateLimited: boolean;
   cascadeOpenSubReplies?: Function;
   setError: typeof setError;
   setInfo: typeof setInfo;
+  setRateLimited: typeof setRateLimited;
 }
 
 interface State {
@@ -284,6 +287,8 @@ const TopicReplyCard = withStyles(styles)(
           distrustedUsers={this.props.distrustedUsers}
           setError={this.props.setError}
           setInfo={this.props.setInfo}
+          setRateLimited={this.props.setRateLimited}
+          rateLimited={this.props.rateLimited}
         />
       ));
     }
@@ -382,7 +387,11 @@ const TopicReplyCard = withStyles(styles)(
             />
 
             {!this.isRepresentative() && !hasReportedReply(user, this.props.reply) && (
-              <IconButton aria-label="Report" onClick={() => this.setState({ reportReplyDialogOpen: true })}>
+              <IconButton
+                aria-label="Report"
+                onClick={() => this.setState({ reportReplyDialogOpen: true })}
+                disabled={this.props.rateLimited}
+              >
                 <Tooltip title="Report">
                   <Report />
                 </Tooltip>
@@ -426,14 +435,22 @@ const TopicReplyCard = withStyles(styles)(
       this.setState({ isLoading: true });
       modifyReply(this.props.user, this.props.reply.id, text)
         .then(() => window.location.reload())
-        .catch(() => this.setState({ isLoading: false }));
+        .catch((error) => {
+          this.props.setError(error.message);
+          this.props.setRateLimited();
+        })
+        .finally(() => this.setState({ isLoading: false }));
     }
 
     deleteReplyMessage() {
       this.setState({ isLoading: true });
       deleteReply(this.props.user, this.props.reply.id)
         .then(() => window.location.reload())
-        .catch(() => this.setState({ isLoading: false }));
+        .catch((error) => {
+          this.props.setError(error.message);
+          this.props.setRateLimited();
+        })
+        .finally(() => this.setState({ isLoading: false }));
     }
 
     closeReportReply() {
@@ -444,7 +461,10 @@ const TopicReplyCard = withStyles(styles)(
       this.closeReportReply();
 
       if (this.props.user != null) {
-        reportReply(this.props.user, this.props.reply);
+        reportReply(this.props.user, this.props.reply).catch((error) => {
+          this.props.setError(error.message);
+          this.props.setRateLimited();
+        });
       } else {
         window.location.href = "/user/login";
       }
@@ -459,7 +479,11 @@ const TopicReplyCard = withStyles(styles)(
       if (this.isRepresentative() && !hasReportedId(REMOVE_TOPIC_REPLY_OP_ID + ":" + this.props.reply.id)) {
         return (
           <div style={{ display: "inline-block" }}>
-            <IconButton aria-label="Remove reply" onClick={() => this.setState({ removeReplyDialogOpen: true })}>
+            <IconButton
+              aria-label="Remove reply"
+              onClick={() => this.setState({ removeReplyDialogOpen: true })}
+              disabled={this.props.rateLimited}
+            >
               <Tooltip title="Remove reply">
                 <Delete className={this.props.classes.iconRed} />
               </Tooltip>
@@ -487,10 +511,17 @@ const TopicReplyCard = withStyles(styles)(
                       {
                         removeReplyDialogOpen: false,
                       },
-                      () => removeTopicReply(this.props.user, this.props.reply.id).then(() => window.location.reload())
+                      () =>
+                        removeTopicReply(this.props.user, this.props.reply.id)
+                          .catch((error) => {
+                            this.props.setError(error.message);
+                            this.props.setRateLimited();
+                          })
+                          .then(() => window.location.reload())
                     )
                   }
                   color="primary"
+                  disabled={this.props.rateLimited}
                 >
                   Yes
                 </Button>
@@ -535,7 +566,12 @@ const TopicReplyCard = withStyles(styles)(
               >
                 Cancel
               </Button>
-              <Button color="primary" variant="contained" onClick={() => this.sendReply()}>
+              <Button
+                color="primary"
+                variant="contained"
+                onClick={() => this.sendReply()}
+                disabled={this.props.rateLimited}
+              >
                 Send
               </Button>
               <br />
@@ -573,7 +609,10 @@ const TopicReplyCard = withStyles(styles)(
       const message: string = this.state.replyMessage;
       this.setState({ replyBoxOpen: false, replyMessage: "" });
       createTopicSubReply(this.props.user, this.props.topicId, this.props.reply.id, message, this.props.reply.author)
-        .catch((error) => this.props.setError(error.message))
+        .catch((error) => {
+          this.props.setError(error.message);
+          this.props.setRateLimited();
+        })
         .then(() => {
           this.props.setInfo("Reply sent");
           getTopicSubReplies(this.props.reply.id).then((replies) => this.setState({ subReplies: replies }));
@@ -587,6 +626,7 @@ const mapStateToProps = (store: ApplicationState) => {
   return {
     user: store.account.user,
     distrustedUsers: store.account.distrustedUsers,
+    rateLimited: store.common.rateLimited,
   };
 };
 
@@ -594,6 +634,7 @@ const mapDispatchToProps = (dispatch: any) => {
   return {
     setError: (msg: string) => dispatch(setError(msg)),
     setInfo: (msg: string) => dispatch(setInfo(msg)),
+    setRateLimited: () => dispatch(setRateLimited()),
   };
 };
 
