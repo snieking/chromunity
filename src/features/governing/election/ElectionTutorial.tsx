@@ -1,7 +1,22 @@
 import React from "react";
+import Tutorial from "../../../shared/Tutorial";
+import TutorialButton from "../../../shared/buttons/TutorialButton";
 import { COLOR_CHROMIA_DARK } from "../../../theme";
 
-export const electionTutorialSteps = (candidates: number) => {
+interface Props {
+  candidates: number;
+}
+
+const ElectionTutorial: React.FunctionComponent<Props> = (props) => {
+  return (
+    <>
+      <Tutorial steps={steps(props.candidates)} />
+      <TutorialButton />
+    </>
+  );
+};
+
+const steps = (candidates: number) => {
   const steps = [
     {
       selector: ".first-step",
@@ -56,3 +71,5 @@ export const electionTutorialSteps = (candidates: number) => {
 
   return steps;
 };
+
+export default ElectionTutorial;

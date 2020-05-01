@@ -10,7 +10,7 @@ import {
   Grid,
   Typography,
   withStyles,
-  WithStyles
+  WithStyles,
 } from "@material-ui/core";
 import {
   blocksUntilElectionWrapsUp,
@@ -20,7 +20,7 @@ import {
   getNextElectionTimestamp,
   isEligibleForVoting,
   signUpForElection,
-  voteForCandidate
+  voteForCandidate,
 } from "../../../core/services/ElectionService";
 import ChromiaPageHeader from "../../../shared/ChromiaPageHeader";
 import { ChromunityUser } from "../../../types";
@@ -28,19 +28,17 @@ import ElectionCandidateCard from "./ElectionCandidateCard";
 import { ApplicationState } from "../../../core/store";
 import { connect } from "react-redux";
 import { toLowerCase } from "../../../shared/util/util";
-import Tutorial from "../../../shared/Tutorial";
-import TutorialButton from "../../../shared/buttons/TutorialButton";
-import { electionTutorialSteps } from "./tutorial-steps";
+import ElectionTutorial from "./ElectionTutorial";
 
 const styles = createStyles({
   electionCard: {
     textAlign: "center",
-    marginTop: "28px"
+    marginTop: "28px",
   },
   actionBtn: {
     textAlign: "center",
-    margin: "0 auto"
-  }
+    margin: "0 auto",
+  },
 });
 
 interface Props extends WithStyles<typeof styles> {
@@ -72,31 +70,30 @@ const Election = withStyles(styles)(
         votedFor: "",
         isACandidate: false,
         electionCandidates: [],
-        isEligibleForVoting: false
+        isEligibleForVoting: false,
       };
 
       this.voteForCandidate = this.voteForCandidate.bind(this);
       this.handleUserExists = this.handleUserExists.bind(this);
-      this.renderTour = this.renderTour.bind(this);
     }
 
     componentDidMount(): void {
-      getNextElectionTimestamp().then(election => {
+      getNextElectionTimestamp().then((election) => {
         if (election != null) {
           this.setState({
             timestamp: election.timestamp,
             activeElection: true,
-            electionId: election.id
+            electionId: election.id,
           });
 
           getElectionCandidates()
-            .then(candidates => this.setState({ electionCandidates: candidates }))
+            .then((candidates) => this.setState({ electionCandidates: candidates }))
             .then(() => {
               if (this.props.user != null) {
                 this.setState({
                   isACandidate: this.state.electionCandidates
-                    .map(name => toLowerCase(name))
-                    .includes(toLowerCase(this.props.user.name))
+                    .map((name) => toLowerCase(name))
+                    .includes(toLowerCase(this.props.user.name)),
                 });
               }
             });
@@ -105,9 +102,9 @@ const Election = withStyles(styles)(
             this.handleUserExists();
           }
 
-          blocksUntilElectionWrapsUp().then(blocks => this.setState({ blocksUntilElectionWrapsUp: blocks }));
+          blocksUntilElectionWrapsUp().then((blocks) => this.setState({ blocksUntilElectionWrapsUp: blocks }));
         } else {
-          blocksUntilNextElection().then(blocks => this.setState({ blocksUntilNextElection: blocks }));
+          blocksUntilNextElection().then((blocks) => this.setState({ blocksUntilNextElection: blocks }));
         }
       });
     }
@@ -117,16 +114,16 @@ const Election = withStyles(styles)(
         this.handleUserExists();
         this.setState({
           isACandidate: this.state.electionCandidates
-            .map(name => toLowerCase(name))
-            .includes(toLowerCase(this.props.user.name))
+            .map((name) => toLowerCase(name))
+            .includes(toLowerCase(this.props.user.name)),
         });
       }
     }
 
     handleUserExists() {
-      isEligibleForVoting(this.props.user.name).then(eligible => this.setState({ isEligibleForVoting: eligible }));
+      isEligibleForVoting(this.props.user.name).then((eligible) => this.setState({ isEligibleForVoting: eligible }));
 
-      getElectionVoteForUser(this.props.user.name).then(candidate => {
+      getElectionVoteForUser(this.props.user.name).then((candidate) => {
         if (candidate != null) {
           this.setState({ votedFor: candidate });
         }
@@ -199,7 +196,7 @@ const Election = withStyles(styles)(
           </Card>
           <br />
           <Grid container spacing={1} data-tut="candidates">
-            {this.state.electionCandidates.map(candidate => (
+            {this.state.electionCandidates.map((candidate) => (
               <ElectionCandidateCard
                 candidate={candidate}
                 votedFor={this.state.votedFor}
@@ -209,17 +206,8 @@ const Election = withStyles(styles)(
               />
             ))}
           </Grid>
-          {this.renderTour()}
+          <ElectionTutorial candidates={this.state.electionCandidates.length} />
         </Container>
-      );
-    }
-
-    renderTour() {
-      return (
-        <>
-          <Tutorial steps={electionTutorialSteps(this.state.electionCandidates.length)} />
-          <TutorialButton />
-        </>
       );
     }
   }
@@ -227,7 +215,7 @@ const Election = withStyles(styles)(
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    user: store.account.user
+    user: store.account.user,
   };
 };
 

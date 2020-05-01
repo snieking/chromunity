@@ -4,7 +4,7 @@ import Logout from "./features/user/authentication/Logout";
 import Settings from "./features/user/settings/Settings";
 import UserWall from "./features/walls/Userwall";
 import UserNotifications from "./features/user/notifications/UserNotifications";
-import ChannelWall from "./features/walls/ChannelWall";
+import ChannelWall from "./features/walls/channel/ChannelWall";
 import Representatives from "./features/governing/representatives/Representatives";
 import Election from "./features/governing/election/Election";
 import { GovLog } from "./features/governing/GovLog";

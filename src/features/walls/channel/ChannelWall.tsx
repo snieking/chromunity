@@ -1,28 +1,22 @@
 import React from "react";
 import { styled } from "@material-ui/core/styles";
-import { Badge, Container, IconButton, LinearProgress, MenuItem, Select, Tooltip, Typography } from "@material-ui/core";
-import { ChromunityUser, Topic } from "../../types";
+import { Container, LinearProgress, MenuItem, Select } from "@material-ui/core";
+import { ChromunityUser, Topic } from "../../../types";
 
 import { RouteComponentProps } from "react-router";
-import { countTopicsInChannel } from "../../core/services/TopicService";
-import TopicOverviewCard from "../topic/TopicOverviewCard";
-import LoadMoreButton from "../../shared/buttons/LoadMoreButton";
-import {
-  countChannelFollowers,
-  followChannel,
-  getFollowedChannels,
-  unfollowChannel
-} from "../../core/services/ChannelService";
-import ChromiaPageHeader from "../../shared/ChromiaPageHeader";
-import NewTopicButton from "../../shared/buttons/NewTopicButton";
-import { Favorite, FavoriteBorder } from "@material-ui/icons";
-import { TOPIC_VIEW_SELECTOR_OPTION } from "./WallCommon";
+import { countTopicsInChannel } from "../../../core/services/TopicService";
+import TopicOverviewCard from "../../topic/TopicOverviewCard";
+import LoadMoreButton from "../../../shared/buttons/LoadMoreButton";
+import NewTopicButton from "../../../shared/buttons/NewTopicButton";
+import { TOPIC_VIEW_SELECTOR_OPTION } from "../WallCommon";
 import { connect } from "react-redux";
-import { channelInit, loadChannel, loadChannelByPopularity, loadOlderTopicsInChannel } from "./redux/channelActions";
-import { ApplicationState } from "../../core/store";
-import { shouldBeFiltered, toLowerCase } from "../../shared/util/util";
-import { clearTopicsCache } from "./redux/wallActions";
-import { markTopicWallRefreshed } from "../../shared/util/user-util";
+import { channelInit, loadChannel, loadChannelByPopularity, loadOlderTopicsInChannel } from "../redux/channelActions";
+import { ApplicationState } from "../../../core/store";
+import { shouldBeFiltered, toLowerCase } from "../../../shared/util/util";
+import { clearTopicsCache } from "../redux/wallActions";
+import { markTopicWallRefreshed } from "../../../shared/util/user-util";
+import ChannelFollowingButton from "./ChannelFollowingButton";
+import ChannelTitle from "./ChannelTitle";
 
 interface MatchParams {
   channel: string;
@@ -45,17 +39,15 @@ interface Props extends RouteComponentProps<MatchParams> {
 interface State {
   isLoading: boolean;
   id: string;
-  channelFollowed: boolean;
   countOfTopics: number;
-  countOfFollowers: number;
   selector: TOPIC_VIEW_SELECTOR_OPTION;
   popularSelector: TOPIC_VIEW_SELECTOR_OPTION;
 }
 
-const StyledSelect = styled(Select)(style => ({
+const StyledSelect = styled(Select)((style) => ({
   color: style.theme.palette.primary.main,
   float: "left",
-  marginRight: "10px"
+  marginRight: "10px",
 }));
 
 const topicsPageSize: number = 15;
@@ -66,11 +58,9 @@ class ChannelWall extends React.Component<Props, State> {
     this.state = {
       id: "",
       isLoading: false,
-      channelFollowed: false,
       countOfTopics: 0,
-      countOfFollowers: 0,
       selector: TOPIC_VIEW_SELECTOR_OPTION.RECENT,
-      popularSelector: TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK
+      popularSelector: TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK,
     };
 
     this.retrieveTopics = this.retrieveTopics.bind(this);
@@ -85,41 +75,19 @@ class ChannelWall extends React.Component<Props, State> {
     this.retrieveTopics();
 
     const channel = this.props.match.params.channel;
-    const user: ChromunityUser = this.props.user;
-    if (user != null) {
-      getFollowedChannels(user.name).then(channels =>
-        this.setState({
-          channelFollowed: channels.includes(channel.toLocaleLowerCase())
-        })
-      );
-    }
 
-    countChannelFollowers(channel).then(count => this.setState({ countOfFollowers: count }));
-    countTopicsInChannel(channel).then(count => this.setState({ countOfTopics: count }));
+    countTopicsInChannel(channel).then((count) => this.setState({ countOfTopics: count }));
     markTopicWallRefreshed();
   }
 
   render() {
     return (
       <Container>
-        <div style={{ textAlign: "center" }}>
-          <ChromiaPageHeader text={"#" + this.props.match.params.channel} />
-          <Typography component="span" variant="subtitle1" className="pink-typography" style={{ display: "inline" }}>
-            Topics: {this.state.countOfTopics}
-          </Typography>
+        <div style={{ textAlign: "center", marginTop: "20px", marginBottom: "-50px" }}>
+          <ChannelTitle channel={this.props.match.params.channel}/>
         </div>
 
-        <IconButton onClick={() => this.toggleChannelFollow()}>
-          <Badge badgeContent={this.state.countOfFollowers} color="primary">
-            <Tooltip title={this.state.channelFollowed ? "Unfollow channel" : "Follow channel"}>
-              {this.state.channelFollowed ? (
-                <Favorite className="red-color" fontSize="large" />
-              ) : (
-                <FavoriteBorder className="pink-color" fontSize="large" />
-              )}
-            </Tooltip>
-          </Badge>
-        </IconButton>
+        <ChannelFollowingButton channel={this.props.match.params.channel} />
 
         {this.state.isLoading || this.props.loading ? <LinearProgress variant="query" /> : <div />}
         <StyledSelect value={this.state.selector} onChange={this.handleSelectorChange}>
@@ -138,7 +106,7 @@ class ChannelWall extends React.Component<Props, State> {
         )}
         <br />
         <br />
-        {this.props.topics.map(topic => {
+        {this.props.topics.map((topic) => {
           if (
             (this.props.user != null && this.props.representatives.includes(toLowerCase(this.props.user.name))) ||
             (this.props.user != null && toLowerCase(topic.author) === toLowerCase(this.props.user.name)) ||
@@ -165,35 +133,6 @@ class ChannelWall extends React.Component<Props, State> {
 
     if (channel != null) {
       this.props.loadChannel(channel, topicsPageSize);
-    }
-  }
-
-  toggleChannelFollow() {
-    this.props.clearTopicsCache();
-    if (!this.state.isLoading) {
-      const channel = this.props.match.params.channel;
-      this.setState({ isLoading: true });
-      if (this.state.channelFollowed) {
-        unfollowChannel(this.props.user, channel)
-          .then(() =>
-            this.setState(prevState => ({
-              channelFollowed: false,
-              countOfFollowers: prevState.countOfFollowers - 1,
-              isLoading: false
-            }))
-          )
-          .catch(() => this.setState({ isLoading: false }));
-      } else {
-        followChannel(this.props.user, channel)
-          .then(() =>
-            this.setState(prevState => ({
-              channelFollowed: true,
-              countOfFollowers: prevState.countOfFollowers + 1,
-              isLoading: false
-            }))
-          )
-          .catch(() => this.setState({ isLoading: false }));
-      }
     }
   }
 
@@ -260,7 +199,7 @@ const mapDispatchToProps = (dispatch: any) => {
     loadOlderTopicsInChannel: (pageSize: number) => dispatch(loadOlderTopicsInChannel(pageSize)),
     loadChannelByPopularity: (name: string, timestamp: number, pageSize: number) =>
       dispatch(loadChannelByPopularity(name, timestamp, pageSize)),
-    clearTopicsCache: () => dispatch(clearTopicsCache())
+    clearTopicsCache: () => dispatch(clearTopicsCache()),
   };
 };
 
@@ -270,8 +209,8 @@ const mapStateToProps = (store: ApplicationState) => {
     loading: store.channel.loading,
     topics: store.channel.topics,
     couldExistOlder: store.channel.couldExistOlder,
-    representatives: store.government.representatives.map(rep => toLowerCase(rep)),
-    distrustedUsers: store.account.distrustedUsers
+    representatives: store.government.representatives.map((rep) => toLowerCase(rep)),
+    distrustedUsers: store.account.distrustedUsers,
   };
 };
 
