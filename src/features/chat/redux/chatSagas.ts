@@ -1,5 +1,5 @@
 import { setRateLimited } from "./../../../shared/redux/CommonActions";
-import { setError, setInfo } from "../../../core/snackbar/redux/snackbarTypes";
+import { setError, notifySuccess } from "../../../core/snackbar/redux/snackbarTypes";
 import {
   AddUserToChatAction,
   ChatActionTypes,
@@ -403,7 +403,7 @@ export function* deleteChatUserSaga(action: DeleteChatUserAction) {
   logger.silly("[SAGA - STARTED]: Delete chat user");
 
   yield deleteChatUser(action.user);
-  yield put(setInfo("Chat account resetted"));
+  yield put(notifySuccess("Chat account resetted"));
 
   chatEvent("delete-user");
   logger.silly("[SAGA - FINISHED]: Delete chat user");

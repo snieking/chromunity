@@ -14,14 +14,14 @@ import { AuthenticationStep } from "../redux/accountTypes";
 import Button from "@material-ui/core/Button";
 import { ReactComponent as LeftShapes } from "../../../shared/graphics/left-shapes.svg";
 import { ReactComponent as RightShapes } from "../../../shared/graphics/right-shapes.svg";
-import { setError, setInfo } from "../../../core/snackbar/redux/snackbarTypes";
+import { setError, notifySuccess } from "../../../core/snackbar/redux/snackbarTypes";
 
 interface Props extends RouteComponentProps {
   vaultSuccess: typeof vaultSuccess;
   vaultCancel: typeof vaultCancel;
   resetLoginState: typeof resetLoginState;
   registerUser: typeof registerUser;
-  setInfo: typeof setInfo;
+  setv : typeof notifySuccess;
   setError: typeof setError;
   authenticationStep: AuthenticationStep;
   loading: boolean;
@@ -170,7 +170,7 @@ const mapDispatchToProps = (dispatch: any) => {
     vaultCancel: (error: string) => dispatch(vaultCancel(error)),
     registerUser: (username: string) => dispatch(registerUser(username)),
     setError: (msg: string) => dispatch(setError(msg)),
-    setInfo: (msg: string) => dispatch(setInfo(msg)),
+    setInfo: (msg: string) => dispatch(notifySuccess(msg)),
   };
 };
 

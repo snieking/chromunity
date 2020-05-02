@@ -3,7 +3,9 @@ import { ActionCreator } from "redux";
 export enum SnackbarActionTypes {
   SET_ERROR = "SNACKBAR/ERROR/SET",
   CLEAR_ERROR = "SNACKBAR/ERROR/CLEAR",
-  SET_INFO = "SNACKBAR/INFO/SET",
+  NOTIFY_SUCCESS = "SNACKBAR/SUCCESS/NOTIFY",
+  CLEAR_SUCCESS = "SNACKBAR/SUCCESS/CLEAR",
+  NOTIFY_INFO = "SNACKBAR/INFO/NOTIFY",
   CLEAR_INFO = "SNACKBAR/INFO/CLEAR",
 }
 
@@ -25,13 +27,31 @@ export const clearError: ActionCreator<IClearError> = () => ({
   type: SnackbarActionTypes.CLEAR_ERROR,
 });
 
-export interface ISetInfo {
-  type: SnackbarActionTypes.SET_INFO;
+export interface INotifySuccess {
+  type: SnackbarActionTypes.NOTIFY_SUCCESS;
   msg: string;
 }
 
-export const setInfo: ActionCreator<ISetInfo> = (msg: string) => ({
-  type: SnackbarActionTypes.SET_INFO,
+export const notifySuccess: ActionCreator<INotifySuccess> = (msg: string) => ({
+  type: SnackbarActionTypes.NOTIFY_SUCCESS,
+  msg,
+});
+
+export interface IClearSuccess {
+  type: SnackbarActionTypes.CLEAR_SUCCESS;
+}
+
+export const clearSuccess: ActionCreator<IClearSuccess> = () => ({
+  type: SnackbarActionTypes.CLEAR_SUCCESS,
+});
+
+export interface INotifyInfo {
+  type: SnackbarActionTypes.NOTIFY_INFO;
+  msg: string;
+}
+
+export const notifyInfo: ActionCreator<INotifyInfo> = (msg: string) => ({
+  type: SnackbarActionTypes.NOTIFY_INFO,
   msg,
 });
 
@@ -43,11 +63,13 @@ export const clearInfo: ActionCreator<IClearInfo> = () => ({
   type: SnackbarActionTypes.CLEAR_INFO,
 });
 
-export type SnackbarActions = ISetError | IClearError | ISetInfo | IClearInfo;
+export type SnackbarActions = ISetError | IClearError | INotifySuccess | IClearSuccess | INotifyInfo | IClearInfo;
 
 export interface SnackbarState {
   error: boolean;
   errorMsg: string;
   info: boolean;
   infoMsg: string;
+  success: boolean;
+  successMsg: string;
 }

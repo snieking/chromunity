@@ -25,7 +25,7 @@ import { ApplicationState } from "../../../core/store";
 import { connect } from "react-redux";
 import { ChromunityUser } from "../../../types";
 import ConfirmDialog from "../../../shared/ConfirmDialog";
-import { setError, setInfo } from "../../../core/snackbar/redux/snackbarTypes";
+import { setError, notifySuccess } from "../../../core/snackbar/redux/snackbarTypes";
 
 interface Props {
   candidate: string;
@@ -33,7 +33,7 @@ interface Props {
   voteForCandidate: Function;
   userIsEligibleToVote: boolean;
   user: ChromunityUser;
-  setInfo: typeof setInfo;
+  setInfo: typeof notifySuccess;
   setError: typeof setError;
 }
 
@@ -229,7 +229,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
               "/gov/vote/" +
               name
             }
-            onCopy={() => setInfo("Copied to clipboard")}
+            onCopy={() => notifySuccess("Copied to clipboard")}
           >
             <Button fullWidth size="small" variant="contained" color="secondary">
               Share Vote Link
@@ -250,7 +250,7 @@ const mapStateToProps = (store: ApplicationState) => {
 const mapDispatchToProps = (dispatch: any) => {
   return {
     setError: (msg: string) => dispatch(setError(msg)),
-    setInfo: (msg: string) => dispatch(setInfo(msg))
+    setInfo: (msg: string) => dispatch(notifySuccess(msg))
   };
 };
 

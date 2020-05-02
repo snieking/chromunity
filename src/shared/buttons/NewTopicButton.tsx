@@ -31,7 +31,7 @@ import { connect } from "react-redux";
 import TextToolbar from "../textToolbar/TextToolbar";
 import PollCreator from "../../features/topic/poll/PollCreator";
 import PollIcon from "@material-ui/icons/Poll";
-import { setInfo, setError } from "../../core/snackbar/redux/snackbarTypes";
+import { notifySuccess, setError } from "../../core/snackbar/redux/snackbarTypes";
 
 interface OptionType {
   label: string;
@@ -43,7 +43,7 @@ export interface NewTopicButtonProps extends WithStyles<typeof largeButtonStyles
   channel: string;
   theme: Theme;
   user: ChromunityUser;
-  setInfo: typeof setInfo;
+  setSuccess: typeof notifySuccess;
   setError: typeof setError;
 }
 
@@ -150,7 +150,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
 
             createTopic(this.props.user, topicChannel, topicTitle, topicMessage, this.state.poll)
               .then(() => {
-                this.props.setInfo("Topic created");
+                this.props.setSuccess("Topic created");
                 this.props.updateFunction();
               })
               .catch((error) => this.props.setError(error.message));
@@ -391,7 +391,7 @@ const mapStateToProps = (store: ApplicationState) => {
 const mapDispatchToProps = (dispatch: any) => {
   return {
     setError: (msg: string) => dispatch(setError(msg)),
-    setInfo: (msg: string) => dispatch(setInfo(msg))
+    setSuccess: (msg: string) => dispatch(notifySuccess(msg))
   };
 };
 

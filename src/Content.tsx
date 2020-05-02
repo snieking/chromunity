@@ -8,7 +8,7 @@ import ChannelWall from "./features/walls/channel/ChannelWall";
 import Representatives from "./features/governing/representatives/Representatives";
 import Election from "./features/governing/election/Election";
 import { GovLog } from "./features/governing/GovLog";
-import FullTopic from "./features/topic/FullTopic";
+import FullTopic from "./features/topic/full/FullTopic";
 import { Route, Switch, withRouter } from "react-router";
 import TopicWall from "./features/walls/TopicWall";
 import { ErrorPage } from "./features/error-pages/ErrorPage";

@@ -55,7 +55,7 @@ import TextToolbar from "../../shared/textToolbar/TextToolbar";
 import CardActions from "@material-ui/core/CardActions";
 import Divider from "@material-ui/core/Divider";
 import PreviewLinks from "../../shared/PreviewLinks";
-import { setError, setInfo } from "../../core/snackbar/redux/snackbarTypes";
+import { setError, notifySuccess } from "../../core/snackbar/redux/snackbarTypes";
 import StarRating from "../../shared/star-rating/StarRating";
 import { setRateLimited } from "../../shared/redux/CommonActions";
 
@@ -128,7 +128,7 @@ interface Props extends WithStyles<typeof styles> {
   rateLimited: boolean;
   cascadeOpenSubReplies?: Function;
   setError: typeof setError;
-  setInfo: typeof setInfo;
+  setSuccess: typeof notifySuccess;
   setRateLimited: typeof setRateLimited;
 }
 
@@ -286,7 +286,7 @@ const TopicReplyCard = withStyles(styles)(
           user={this.props.user}
           distrustedUsers={this.props.distrustedUsers}
           setError={this.props.setError}
-          setInfo={this.props.setInfo}
+          setSuccess={this.props.setSuccess}
           setRateLimited={this.props.setRateLimited}
           rateLimited={this.props.rateLimited}
         />
@@ -373,6 +373,7 @@ const TopicReplyCard = withStyles(styles)(
                   replyBoxOpen: !prevState.replyBoxOpen,
                 }))
               }
+              disabled={this.props.rateLimited}
             >
               <Tooltip title="Reply">
                 <Reply className={this.state.replyBoxOpen ? this.props.classes.iconOrange : ""} />
@@ -614,7 +615,7 @@ const TopicReplyCard = withStyles(styles)(
           this.props.setRateLimited();
         })
         .then(() => {
-          this.props.setInfo("Reply sent");
+          this.props.setSuccess("Reply sent");
           getTopicSubReplies(this.props.reply.id).then((replies) => this.setState({ subReplies: replies }));
           this.openSubReplies();
         });
@@ -633,7 +634,7 @@ const mapStateToProps = (store: ApplicationState) => {
 const mapDispatchToProps = (dispatch: any) => {
   return {
     setError: (msg: string) => dispatch(setError(msg)),
-    setInfo: (msg: string) => dispatch(setInfo(msg)),
+    setSuccess: (msg: string) => dispatch(notifySuccess(msg)),
     setRateLimited: () => dispatch(setRateLimited()),
   };
 };

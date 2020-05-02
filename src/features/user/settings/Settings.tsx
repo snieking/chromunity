@@ -28,7 +28,7 @@ import { Socials } from "../socials/socialTypes";
 import { TwitterIcon, LinkedinIcon, FacebookIcon } from "react-share";
 import * as config from "../../../config";
 import GitHubLogo from "../../../shared/logos/GitHubLogo";
-import { setError, setInfo } from "../../../core/snackbar/redux/snackbarTypes";
+import { setError, notifySuccess } from "../../../core/snackbar/redux/snackbarTypes";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -81,7 +81,7 @@ const styles = (theme: Theme) =>
 
 interface Props extends WithStyles<typeof styles> {
   user: ChromunityUser;
-  setInfo: typeof setInfo;
+  setInfo: typeof notifySuccess;
   setError: typeof setError;
 }
 
@@ -396,7 +396,7 @@ const mapStateToProps = (store: ApplicationState) => {
 const mapDispatchToProps = (dispatch: any) => {
   return {
     setError: (msg: string) => dispatch(setError(msg)),
-    setInfo: (msg: string) => dispatch(setInfo(msg)),
+    setInfo: (msg: string) => dispatch(notifySuccess(msg)),
   };
 };
 

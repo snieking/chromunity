@@ -56,7 +56,7 @@ import TutorialButton from "../../shared/buttons/TutorialButton";
 import { step } from "../../shared/TutorialStep";
 import { Redirect } from "react-router";
 import TextToolbar from "../../shared/textToolbar/TextToolbar";
-import { setInfo, setError } from "../../core/snackbar/redux/snackbarTypes";
+import { notifySuccess, setError } from "../../core/snackbar/redux/snackbarTypes";
 
 interface OptionType {
   label: string;
@@ -90,7 +90,7 @@ interface Props {
   modifyTitle: typeof modifyTitleAction;
   loadChatUsers: typeof loadChatUsersAction;
   loadOlderMessages: typeof loadOlderMessagesAction;
-  setInfo: typeof setInfo;
+  setInfo: typeof notifySuccess;
   setError: typeof setError;
   theme: Theme;
 }
@@ -710,7 +710,7 @@ const mapDispatchToProps = (dispatch: any) => {
     loadChatUsers: (user: ChromunityUser) => dispatch(loadChatUsersAction(user)),
     loadOlderMessages: () => dispatch(loadOlderMessagesAction()),
     setError: (msg: string) => dispatch(setError(msg)),
-    setInfo: (msg: string) => dispatch(setInfo(msg)),
+    setInfo: (msg: string) => dispatch(notifySuccess(msg)),
   };
 };
 

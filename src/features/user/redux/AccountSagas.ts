@@ -1,4 +1,4 @@
-import { setInfo, setError } from '../../../core/snackbar/redux/snackbarTypes';
+import { notifySuccess, setError } from '../../../core/snackbar/redux/snackbarTypes';
 import {
   AccountActionTypes,
   AuthenticationStep,
@@ -62,7 +62,7 @@ function* logoutSaga() {
   clearSession();
   yield put(setUser(null));
   yield put(setAuthenticationStep(null));
-  yield put(setInfo("Successfully signed out"));
+  yield put(notifySuccess("Successfully signed out"));
 }
 
 function* vaultSuccessSaga(action: IVaultSuccess): Generator<any, any, any> {
@@ -81,7 +81,7 @@ function* vaultSuccessSaga(action: IVaultSuccess): Generator<any, any, any> {
 
     if (username) {
       yield authorizeUser(username, user);
-      yield put(setInfo("Successfully signed in"));
+      yield put(notifySuccess("Successfully signed in"));
       userEvent("sign-in");
     } else {
       yield put(saveVaultAccount(account.id, user));

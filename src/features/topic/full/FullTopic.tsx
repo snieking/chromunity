@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { RouteComponentProps } from "react-router";
-import { ChromunityUser, PollData, Topic, TopicReply } from "../../types";
-import { shouldBeFiltered, toLowerCase } from "../../shared/util/util";
+import { ChromunityUser, PollData, Topic, TopicReply } from "../../../types";
+import { shouldBeFiltered, toLowerCase } from "../../../shared/util/util";
 import {
   Button,
   Card,
@@ -16,23 +16,23 @@ import {
   Typography,
 } from "@material-ui/core";
 import { Delete, Notifications, NotificationsActive, Reply, Report, SubdirectoryArrowRight } from "@material-ui/icons";
-import TopicReplyCard from "./TopicReplyCard";
+import TopicReplyCard from "../TopicReplyCard";
 import { Link, Redirect } from "react-router-dom";
-import { ApplicationState } from "../../core/store";
+import { ApplicationState } from "../../../core/store";
 import { connect } from "react-redux";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
-import Timestamp from "../../shared/Timestamp";
-import MarkdownRenderer from "../../shared/MarkdownRenderer";
-import EditMessageButton from "../../shared/buttons/EditMessageButton";
-import ConfirmDialog from "../../shared/ConfirmDialog";
+import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../../theme";
+import Timestamp from "../../../shared/Timestamp";
+import MarkdownRenderer from "../../../shared/MarkdownRenderer";
+import EditMessageButton from "../../../shared/buttons/EditMessageButton";
+import ConfirmDialog from "../../../shared/ConfirmDialog";
 import {
   hasReportedId,
   hasReportedTopic,
   REMOVE_TOPIC_OP_ID,
   removeTopic,
   reportTopic,
-} from "../../core/services/RepresentativesService";
+} from "../../../core/services/RepresentativesService";
 import {
   createTopicReply,
   deleteTopic,
@@ -47,23 +47,21 @@ import {
   removeTopicStarRating,
   subscribeToTopic,
   unsubscribeFromTopic,
-} from "../../core/services/TopicService";
+} from "../../../core/services/TopicService";
 import Divider from "@material-ui/core/Divider";
-import TextToolbar from "../../shared/textToolbar/TextToolbar";
-import LoadMoreButton from "../../shared/buttons/LoadMoreButton";
-import Tutorial from "../../shared/Tutorial";
-import TutorialButton from "../../shared/buttons/TutorialButton";
-import { step } from "../../shared/TutorialStep";
-import { getUserSettingsCached } from "../../core/services/UserService";
-import { ifEmptyAvatarThenPlaceholder, markTopicReadInSession } from "../../shared/util/user-util";
-import Avatar, { AVATAR_SIZE } from "../../shared/Avatar";
-import PreviewLinks from "../../shared/PreviewLinks";
-import PageMeta from "../../shared/PageMeta";
-import PollRenderer from "./poll/PollRenderer";
-import SocialShareButton from "./SocialShareButton";
-import { setError, setInfo } from "../../core/snackbar/redux/snackbarTypes";
-import StarRating from "../../shared/star-rating/StarRating";
-import { setRateLimited } from "../../shared/redux/CommonActions";
+import TextToolbar from "../../../shared/textToolbar/TextToolbar";
+import LoadMoreButton from "../../../shared/buttons/LoadMoreButton";
+import { getUserSettingsCached } from "../../../core/services/UserService";
+import { ifEmptyAvatarThenPlaceholder, markTopicReadInSession } from "../../../shared/util/user-util";
+import Avatar, { AVATAR_SIZE } from "../../../shared/Avatar";
+import PreviewLinks from "../../../shared/PreviewLinks";
+import PageMeta from "../../../shared/PageMeta";
+import PollRenderer from "../poll/PollRenderer";
+import SocialShareButton from "../SocialShareButton";
+import { setError, notifySuccess } from "../../../core/snackbar/redux/snackbarTypes";
+import StarRating from "../../../shared/star-rating/StarRating";
+import { setRateLimited } from "../../../shared/redux/CommonActions";
+import FullTopicTutorial from "./FullTopicTutorial";
 
 interface MatchParams {
   id: string;
@@ -76,7 +74,7 @@ interface Props extends RouteComponentProps<MatchParams> {
   rateLimited: boolean;
   user: ChromunityUser;
   setError: typeof setError;
-  setInfo: typeof setInfo;
+  setInfo: typeof notifySuccess;
   setRateLimited: typeof setRateLimited;
 }
 
@@ -278,7 +276,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
               removeRating={() => removeTopicStarRating(user, id)}
             />
           </div>
-          <IconButton data-tut="subscribe_btn" aria-label="Subscribe" onClick={() => toggleSubscription()}>
+          <IconButton data-tut="subscribe_btn" aria-label="Subscribe" onClick={() => toggleSubscription()} disabled={props.rateLimited}>
             {subscribed ? (
               <Tooltip title="Unsubscribe">
                 <NotificationsActive className={classes.iconOrange} />
@@ -304,7 +302,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           )}
 
           {user && (
-            <IconButton data-tut="reply_btn" onClick={toggleReplyBox}>
+            <IconButton data-tut="reply_btn" onClick={toggleReplyBox} disabled={props.rateLimited}>
               <Tooltip title="Reply">
                 <Reply className={replyBoxOpen ? classes.iconOrange : ""} />
               </Tooltip>
@@ -319,7 +317,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           />
 
           {!isRepresentative() && !hasReportedTopic(user, topic) && (
-            <IconButton data-tut="report_btn" aria-label="Report-test" onClick={() => setReportTopicDialogOpen(true)}>
+            <IconButton data-tut="report_btn" aria-label="Report-test" onClick={() => setReportTopicDialogOpen(true)} disabled={props.rateLimited}>
               <Tooltip title="Report">
                 <Report />
               </Tooltip>
@@ -562,54 +560,6 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     }
   }
 
-  function renderTour() {
-    return (
-      <>
-        <Tutorial steps={steps()} />
-        <TutorialButton />
-      </>
-    );
-  }
-
-  function steps(): any[] {
-    const steps: any[] = [
-      step(
-        ".first-step",
-        <p>This is a topic. A topic contains hopefully some interesting subject to discuss with the community.</p>
-      ),
-      step(
-        '[data-tut="star_btn"]',
-        <>
-          <p>If you like a topic, and are signed-in in, give it a star rating!</p>
-          <p>Replies can also receive a star rating.</p>
-        </>
-      ),
-    ];
-
-    if (props.user != null) {
-      steps.push(
-        step(
-          '[data-tut="subscribe_btn"]',
-          <p>Subscribing to a post will keep you updated with notifications when someone replies to it.</p>
-        )
-      );
-
-      steps.push(step('[data-tut="reply_btn"]', <p>Join in the conversation by sending a reply to the topic.</p>));
-
-      steps.push(
-        step(
-          '[data-tut="report_btn"]',
-          <p>
-            If you find the topic inappropriate you can report it, sending a notice to representatives to have a look at
-            it.
-          </p>
-        )
-      );
-    }
-
-    return steps;
-  }
-
   const distrustedUser =
     topic != null && props.distrustedUsers.map((n) => toLowerCase(n)).includes(toLowerCase(topic.author));
   const iAmRep = props.user != null && props.representatives.includes(toLowerCase(props.user.name));
@@ -632,7 +582,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           />
         ))}
         {renderLoadMoreButton()}
-        {renderTour()}
+        <FullTopicTutorial />
       </Container>
     );
   } else if (notFound) {
@@ -666,7 +616,7 @@ const mapStateToProps = (store: ApplicationState) => {
 const mapDispatchToProps = (dispatch: any) => {
   return {
     setError: (msg: string) => dispatch(setError(msg)),
-    setInfo: (msg: string) => dispatch(setInfo(msg)),
+    setInfo: (msg: string) => dispatch(notifySuccess(msg)),
     setRateLimited: () => dispatch(setRateLimited()),
   };
 };

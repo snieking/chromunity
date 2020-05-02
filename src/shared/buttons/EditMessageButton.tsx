@@ -24,7 +24,7 @@ import ConfirmDialog from "../ConfirmDialog";
 import { ApplicationState } from "../../core/store";
 import { connect } from "react-redux";
 import TextToolbar from "../textToolbar/TextToolbar";
-import { setInfo, setError } from "../../core/snackbar/redux/snackbarTypes";
+import { notifySuccess, setError } from "../../core/snackbar/redux/snackbarTypes";
 import { setRateLimited } from "../redux/CommonActions";
 
 const styles = createStyles({
@@ -40,7 +40,7 @@ export interface EditMessageButtonProps extends WithStyles<typeof styles> {
   modifiableUntil: number;
   user: ChromunityUser;
   rateLimited: boolean;
-  setInfo: typeof setInfo;
+  setInfo: typeof notifySuccess;
   setError: typeof setError;
   setRateLimited: typeof setRateLimited;
 }
@@ -209,6 +209,7 @@ const EditMessageButton = withStyles(styles)(
               <IconButton
                 aria-label="Edit"
                 onClick={(event: React.MouseEvent<HTMLElement>) => this.setState({ anchorEl: event.currentTarget })}
+                disabled={this.props.rateLimited}
               >
                 <Badge max={600} badgeContent={this.props.modifiableUntil} color="secondary">
                   <MoreHoriz />
@@ -242,7 +243,7 @@ const mapStateToProps = (store: ApplicationState) => {
 const mapDispatchToProps = (dispatch: any) => {
   return {
     setError: (msg: string) => dispatch(setError(msg)),
-    setInfo: (msg: string) => dispatch(setInfo(msg)),
+    setInfo: (msg: string) => dispatch(notifySuccess(msg)),
     setRateLimited: () => dispatch(setRateLimited()),
   };
 };

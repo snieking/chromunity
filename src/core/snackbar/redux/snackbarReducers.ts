@@ -5,7 +5,9 @@ const initialSnackbarState: SnackbarState = {
     error: false,
     errorMsg: null,
     info: false,
-    infoMsg: null
+    infoMsg: null,
+    success: false,
+    successMsg: null
 };
 
 export const snackbarReducer: Reducer<SnackbarState, SnackbarActions> = (state = initialSnackbarState, action) => {
@@ -24,20 +26,34 @@ export const snackbarReducer: Reducer<SnackbarState, SnackbarActions> = (state =
                 errorMsg: null
             }
         }
-        case SnackbarActionTypes.SET_INFO: {
+        case SnackbarActionTypes.NOTIFY_SUCCESS: {
             return {
                 ...state,
-                info: true,
-                infoMsg: action.msg
+                success: true,
+                successMsg: action.msg
             }
         }
-        case SnackbarActionTypes.CLEAR_INFO: {
+        case SnackbarActionTypes.CLEAR_SUCCESS: {
             return {
                 ...state,
-                info: false,
-                infoMsg: null
+                success: false,
+                successMsg: null
             }
         }
+        case SnackbarActionTypes.NOTIFY_INFO: {
+          return {
+              ...state,
+              info: true,
+              infoMsg: action.msg
+          }
+      }
+      case SnackbarActionTypes.CLEAR_INFO: {
+          return {
+              ...state,
+              info: false,
+              infoMsg: null
+          }
+      }
     }
 
     return state;
