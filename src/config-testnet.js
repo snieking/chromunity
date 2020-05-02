@@ -25,7 +25,7 @@ module.exports = {
     message: "TestNet"
   },
   features: {
-    userSocialsEnabled: false
+    userSocialsEnabled: true
   },
   test: true,
   logLevel: "info"
