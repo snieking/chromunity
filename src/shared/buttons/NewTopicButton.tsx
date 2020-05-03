@@ -82,7 +82,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       }
 
       componentDidMount() {
-        getTrendingChannels(31).then((channels) =>
+        getTrendingChannels(7, 100).then((channels) =>
           this.setState({
             suggestions: channels.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })),
           })
