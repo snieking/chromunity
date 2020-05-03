@@ -7,7 +7,7 @@ import {
   UpdateUserRepliesAction,
   UpdateUserTopicsAction,
   UserPageActions,
-  UserPageActionTypes
+  UserPageActionTypes,
 } from "./userTypes";
 import { loadUserTopics, loadUserReplies, loadUserFollowedChannels } from "./userPageSagas";
 import { runSaga } from "redux-saga";
@@ -33,7 +33,7 @@ describe("User page saga tests", () => {
   const createFakeStore = (dispatchedActions: UserPageActions[], state: any) => {
     return {
       dispatch: (action: UserPageActions) => dispatchedActions.push(action),
-      getState: () => ({ userPage: state })
+      getState: () => ({ userPage: state }),
     };
   };
 
@@ -47,8 +47,8 @@ describe("User page saga tests", () => {
         timestamp: timestamp,
         last_modified: timestamp,
         latest_poster: "author",
-        moderated_by: []
-      }
+        moderated_by: [],
+      },
     ];
   };
 
@@ -61,30 +61,30 @@ describe("User page saga tests", () => {
         message: "message",
         timestamp: timestamp,
         isSubReply: false,
-        moderated_by: []
-      }
+        moderated_by: [],
+      },
     ];
   };
 
   const getUpdateUserTopicsAction = (actions: UserPageActions[]): UpdateUserTopicsAction => {
-    expect(actions.length).toBe(1);
-    const action = actions[0];
-    expect(action.type).toBe(UserPageActionTypes.UPDATE_USER_TOPICS);
-    return action as UpdateUserTopicsAction;
+    for (const action of actions) {
+      if (action.type === UserPageActionTypes.UPDATE_USER_TOPICS) return action as UpdateUserTopicsAction;
+    }
+    return null;
   };
 
   const getUpdateUserRepliesAction = (actions: UserPageActions[]): UpdateUserRepliesAction => {
-    expect(actions.length).toBe(1);
-    const action = actions[0];
-    expect(action.type).toBe(UserPageActionTypes.UPDATE_USER_REPLIES);
-    return action as UpdateUserRepliesAction;
+    for (const action of actions) {
+      if (action.type === UserPageActionTypes.UPDATE_USER_REPLIES) return action as UpdateUserRepliesAction;
+    }
+    return null;
   };
 
   const getUpdateUserFollowedChannelsAction = (actions: UserPageActions[]): UpdateUserFollowedChannelsAction => {
-    expect(actions.length).toBe(1);
-    const action = actions[0];
-    expect(action.type).toBe(UserPageActionTypes.UPDATE_USER_FOLLOWED_CHANNELS);
-    return action as UpdateUserFollowedChannelsAction;
+    for (const action of actions) {
+      if (action.type === UserPageActionTypes.UPDATE_USER_FOLLOWED_CHANNELS) return action as UpdateUserFollowedChannelsAction;
+    }
+    return null;
   };
 
   beforeAll(async () => {
@@ -106,7 +106,7 @@ describe("User page saga tests", () => {
     await runSaga(fakeStore, loadUserTopics, {
       type: UserPageActionTypes.LOAD_USER_TOPICS,
       username: user.name,
-      pageSize: pageSize
+      pageSize: pageSize,
     }).toPromise();
     const updateUserTopicsAction = getUpdateUserTopicsAction(actions);
 
@@ -121,7 +121,7 @@ describe("User page saga tests", () => {
     await runSaga(fakeStore, loadUserTopics, {
       type: UserPageActionTypes.LOAD_USER_TOPICS,
       username: secondUser.name,
-      pageSize: pageSize
+      pageSize: pageSize,
     }).toPromise();
     const updateUserTopicsAction = getUpdateUserTopicsAction(actions);
 
@@ -136,7 +136,7 @@ describe("User page saga tests", () => {
     await runSaga(fakeStore, loadUserTopics, {
       type: UserPageActionTypes.LOAD_USER_TOPICS,
       username: user.name,
-      pageSize: 1
+      pageSize: 1,
     }).toPromise();
     const updateUserTopicsAction = getUpdateUserTopicsAction(actions);
 
@@ -151,7 +151,7 @@ describe("User page saga tests", () => {
     await runSaga(fakeStore, loadUserTopics, {
       type: UserPageActionTypes.LOAD_USER_TOPICS,
       username: user.name,
-      pageSize: pageSize
+      pageSize: pageSize,
     }).toPromise();
     const updateUserTopicsAction = getUpdateUserTopicsAction(actions);
 
@@ -166,7 +166,7 @@ describe("User page saga tests", () => {
     await runSaga(fakeStore, loadUserReplies, {
       type: UserPageActionTypes.LOAD_USER_REPLIES,
       username: secondUser.name,
-      pageSize: pageSize
+      pageSize: pageSize,
     }).toPromise();
     const updateUserRepliesAction = getUpdateUserRepliesAction(actions);
 
@@ -181,7 +181,7 @@ describe("User page saga tests", () => {
     await runSaga(fakeStore, loadUserReplies, {
       type: UserPageActionTypes.LOAD_USER_REPLIES,
       username: user.name,
-      pageSize: pageSize
+      pageSize: pageSize,
     }).toPromise();
     const updateUserRepliesAction = getUpdateUserRepliesAction(actions);
 
@@ -196,7 +196,7 @@ describe("User page saga tests", () => {
     await runSaga(fakeStore, loadUserReplies, {
       type: UserPageActionTypes.LOAD_USER_REPLIES,
       username: secondUser.name,
-      pageSize: 1
+      pageSize: 1,
     }).toPromise();
     const updateUserRepliesAction = getUpdateUserRepliesAction(actions);
 
@@ -211,7 +211,7 @@ describe("User page saga tests", () => {
     await runSaga(fakeStore, loadUserReplies, {
       type: UserPageActionTypes.LOAD_USER_REPLIES,
       username: secondUser.name,
-      pageSize: pageSize
+      pageSize: pageSize,
     }).toPromise();
     const updateUserRepliesAction = getUpdateUserRepliesAction(actions);
 
@@ -221,11 +221,11 @@ describe("User page saga tests", () => {
 
   it(channelsTitle, async () => {
     const actions: UserPageActions[] = [];
-    const fakeStore = createFakeStore(actions, { });
+    const fakeStore = createFakeStore(actions, {});
 
     await runSaga(fakeStore, loadUserFollowedChannels, {
       type: UserPageActionTypes.LOAD_USER_FOLLOWED_CHANNELS,
-      username: secondUser.name
+      username: secondUser.name,
     }).toPromise();
 
     const updateUserFollowedChannelsAction = getUpdateUserFollowedChannelsAction(actions);
@@ -235,11 +235,11 @@ describe("User page saga tests", () => {
 
   it(channelsTitle + " | none returned", async () => {
     const actions: UserPageActions[] = [];
-    const fakeStore = createFakeStore(actions, { });
+    const fakeStore = createFakeStore(actions, {});
 
     await runSaga(fakeStore, loadUserFollowedChannels, {
       type: UserPageActionTypes.LOAD_USER_FOLLOWED_CHANNELS,
-      username: user.name
+      username: user.name,
     }).toPromise();
 
     const updateUserFollowedChannelsAction = getUpdateUserFollowedChannelsAction(actions);

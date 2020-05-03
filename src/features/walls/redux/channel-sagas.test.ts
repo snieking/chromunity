@@ -23,10 +23,10 @@ describe("Channel saga tests", () => {
   };
 
   const getUpdateChannelAction = (dispatchedActions: ChannelActions[]): UpdateChannelAction => {
-    expect(dispatchedActions.length).toBe(1);
-    const action = dispatchedActions[0];
-    expect(action.type).toBe(ChannelActionTypes.UPDATE_CHANNEL);
-    return action as UpdateChannelAction;
+    for (const action of dispatchedActions) {
+      if (action.type === ChannelActionTypes.UPDATE_CHANNEL) return action as UpdateChannelAction;
+    }
+    return null;
   };
 
   const createFakeTopics = (timestamp: number): Topic[] => {

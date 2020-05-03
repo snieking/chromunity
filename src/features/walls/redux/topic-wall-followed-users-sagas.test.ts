@@ -39,19 +39,16 @@ describe("Topic wall [FOLLOWED USERS] saga tests", () => {
   };
 
   const getUpdateTopicsAction = (dispatchedActions: TopicWallActions[]): UpdateTopicsAction => {
-    logger.debug("Actions: ", dispatchedActions);
-    expect(dispatchedActions.length).toBe(1);
-    const action = dispatchedActions[0];
-    expect(action.type).toBe(WallActionTypes.UPDATE_TOPICS_WALL);
-    return action as UpdateTopicsAction;
+    for (const action of dispatchedActions) {
+      if (action.type === WallActionTypes.UPDATE_TOPICS_WALL) return action as UpdateTopicsAction;
+    }
+    return null;
   };
 
   const getUpdateTopicsFromCacheAction = (dispatchedActions: TopicWallActions[]): UpdateTopicWallFromCacheAction => {
-    logger.debug("Actions: ", dispatchedActions);
-    expect(dispatchedActions.length).toBe(1);
-    const action = dispatchedActions[0];
-    expect(action.type).toBe(WallActionTypes.UPDATE_TOPICS_WALL_FROM_CACHE);
-    return action as UpdateTopicWallFromCacheAction;
+    for (const action of dispatchedActions) {
+      if (action.type === WallActionTypes.UPDATE_TOPICS_WALL_FROM_CACHE) return action as UpdateTopicWallFromCacheAction;
+    }
   };
 
   const createFakeTopics = (timestamp: number): Topic[] => {
