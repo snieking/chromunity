@@ -402,7 +402,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
           <Autocomplete
             id="combo-box-demo"
             options={suggestions()}
-            style={{ width: 300 }}
+            style={{ maxWidth: "300px", width: "95%" }}
             freeSolo
             value={values.userToAdd}
             onChange={(event: any, newValue: string | null) => {

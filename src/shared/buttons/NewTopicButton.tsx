@@ -162,7 +162,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                 <Autocomplete
                   id="combo-box-demo"
                   options={this.state.suggestions}
-                  style={{ width: 300 }}
+                  style={{ maxWidth: "300px", width: "95%" }}
                   freeSolo
                   value={this.state.channel}
                   onChange={(event: any, newValue: string | null) => {
