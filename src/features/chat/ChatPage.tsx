@@ -384,12 +384,6 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
   };
 
-  function handleUserToAddChange(event: React.ChangeEvent<HTMLInputElement>) {
-    event.preventDefault();
-    event.stopPropagation();
-    setValues({ ...values, userToAdd: event.target.value });
-  }
-
   function addUserDialog() {
     return (
       <Dialog
@@ -409,15 +403,12 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
             id="combo-box-demo"
             options={suggestions()}
             style={{ width: 300 }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                onChange={handleUserToAddChange}
-                value={values.userToAdd}
-                label="User"
-                variant="outlined"
-              />
-            )}
+            freeSolo
+            value={values.userToAdd}
+            onChange={(event: any, newValue: string | null) => {
+              setValues({ ...values, userToAdd: newValue });
+            }}
+            renderInput={(params) => <TextField {...params} label="User" variant="outlined" />}
           />
         </DialogContent>
         <DialogActions>

@@ -74,7 +74,6 @@ const NewTopicButton = withStyles(largeButtonStyles)(
 
         this.toggleNewTopicDialog = this.toggleNewTopicDialog.bind(this);
         this.handleDialogTitleChange = this.handleDialogTitleChange.bind(this);
-        this.handleChannelChange = this.handleChannelChange.bind(this);
         this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
         this.createNewTopic = this.createNewTopic.bind(this);
         this.handleTabChange = this.handleTabChange.bind(this);
@@ -97,12 +96,6 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         event.preventDefault();
         event.stopPropagation();
         this.setState({ topicMessage: parseEmojis(event.target.value) });
-      }
-
-      handleChannelChange(event: React.ChangeEvent<HTMLInputElement>) {
-        event.preventDefault();
-        event.stopPropagation();
-        this.setState({ channel: event.target.value });
       }
 
       handleDialogTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -170,15 +163,12 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                   id="combo-box-demo"
                   options={this.state.suggestions}
                   style={{ width: 300 }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      onChange={this.handleChannelChange}
-                      value={this.state.channel}
-                      label="Channel"
-                      variant="outlined"
-                    />
-                  )}
+                  freeSolo
+                  value={this.state.channel}
+                  onChange={(event: any, newValue: string | null) => {
+                    this.setState({ channel: newValue });
+                  }}
+                  renderInput={(params) => <TextField {...params} label="Channel" variant="outlined" />}
                 />
                 <br />
                 <Badge color="secondary" badgeContent={maxTitleLength - this.state.topicTitle.length} showZero>
