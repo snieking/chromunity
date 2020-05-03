@@ -60,7 +60,7 @@ import PollRenderer from "../poll/PollRenderer";
 import SocialShareButton from "../SocialShareButton";
 import { setError, notifySuccess } from "../../../core/snackbar/redux/snackbarTypes";
 import StarRating from "../../../shared/star-rating/StarRating";
-import { setRateLimited } from "../../../shared/redux/CommonActions";
+import { setRateLimited, setOperationPending } from "../../../shared/redux/CommonActions";
 import FullTopicTutorial from "./FullTopicTutorial";
 
 interface MatchParams {
@@ -76,6 +76,7 @@ interface Props extends RouteComponentProps<MatchParams> {
   setError: typeof setError;
   setInfo: typeof notifySuccess;
   setRateLimited: typeof setRateLimited;
+  setOperationPending: typeof setOperationPending;
 }
 
 const useStyles = makeStyles((theme) =>
@@ -166,7 +167,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
 
     getPoll(t.id).then((poll) => setPoll(poll));
     getTopicSubscribers(t.id).then((subscribers) =>
-      setSubscribed(props.user != null && subscribers.includes(props.user.name))
+      setSubscribed(props.user != null && subscribers.map((n) => toLowerCase(n)).includes(toLowerCase(props.user.name)))
     );
 
     getUserSettingsCached(t.author, 86400).then((settings) =>
@@ -276,7 +277,12 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
               removeRating={() => removeTopicStarRating(user, id)}
             />
           </div>
-          <IconButton data-tut="subscribe_btn" aria-label="Subscribe" onClick={() => toggleSubscription()} disabled={props.rateLimited}>
+          <IconButton
+            data-tut="subscribe_btn"
+            aria-label="Subscribe"
+            onClick={() => toggleSubscription()}
+            disabled={props.rateLimited}
+          >
             {subscribed ? (
               <Tooltip title="Unsubscribe">
                 <NotificationsActive className={classes.iconOrange} />
@@ -317,7 +323,12 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           />
 
           {!isRepresentative() && !hasReportedTopic(user, topic) && (
-            <IconButton data-tut="report_btn" aria-label="Report-test" onClick={() => setReportTopicDialogOpen(true)} disabled={props.rateLimited}>
+            <IconButton
+              data-tut="report_btn"
+              aria-label="Report-test"
+              onClick={() => setReportTopicDialogOpen(true)}
+              disabled={props.rateLimited}
+            >
               <Tooltip title="Report">
                 <Report />
               </Tooltip>
@@ -344,6 +355,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
   function toggleSubscription() {
     if (!isLoading) {
       setLoading(true);
+      props.setOperationPending(true);
       const id: string = topic.id;
       const user: ChromunityUser = props.user;
 
@@ -355,7 +367,10 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
               setError(error.message);
               setRateLimited();
             })
-            .finally(() => setLoading(false));
+            .finally(() => {
+              setLoading(false);
+              props.setOperationPending(false);
+            });
         } else {
           subscribeToTopic(user, id)
             .then(() => setSubscribed(true))
@@ -363,7 +378,10 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
               setError(error.message);
               setRateLimited();
             })
-            .finally(() => setLoading(false));
+            .finally(() => {
+              setLoading(false);
+              props.setOperationPending(false);
+            });
         }
       } else {
         window.location.href = "/user/login";
@@ -373,6 +391,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
 
   function editTopicMessage(text: string) {
     setLoading(true);
+    props.setOperationPending(true);
     modifyTopic(props.user, topic.id, text)
       .then(() => {
         const updatedTopic: Topic = {
@@ -392,16 +411,21 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
         setError(error.message);
         setRateLimited();
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        props.setOperationPending(false);
+      });
   }
 
   function deleteTheTopic() {
+    props.setOperationPending(true);
     deleteTopic(props.user, topic.id)
       .catch((error) => {
         setError(error.message);
         setRateLimited();
       })
-      .then(() => (window.location.href = "/"));
+      .then(() => (window.location.href = "/"))
+      .finally(() => props.setOperationPending(false));
   }
 
   function closeReportTopic() {
@@ -473,6 +497,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           multiline
           type="text"
           rows="3"
+          rowsMax="10"
           fullWidth
           value={replyMessage}
           onChange={handleReplyMessageChange}
@@ -523,6 +548,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     if (props.user != null) {
       setReplyBoxOpen(false);
       setLoading(true);
+      props.setOperationPending(true);
       createTopicReply(props.user, topic.id, replyMessage)
         .catch((error) => {
           setError(error.message);
@@ -533,7 +559,10 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           retrieveLatestReplies();
           setReplyMessage("");
         })
-        .finally(() => setLoading(false));
+        .finally(() => {
+          setLoading(false);
+          props.setOperationPending(false);
+        });
     }
   }
 
@@ -618,6 +647,7 @@ const mapDispatchToProps = (dispatch: any) => {
     setError: (msg: string) => dispatch(setError(msg)),
     setInfo: (msg: string) => dispatch(notifySuccess(msg)),
     setRateLimited: () => dispatch(setRateLimited()),
+    setOperationPending: (pending: boolean) => dispatch(setOperationPending(pending)),
   };
 };
 

@@ -55,7 +55,7 @@ import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import SocialBar from "./socials/SocialBar";
 import { Socials } from "./socials/socialTypes";
 import { setError } from "../../core/snackbar/redux/snackbarTypes";
-import { setRateLimited } from "../../shared/redux/CommonActions";
+import { setRateLimited, setOperationPending } from "../../shared/redux/CommonActions";
 import ProfileTutorial from "./ProfileTutorial";
 
 const styles = createStyles({
@@ -100,6 +100,7 @@ interface ProfileCardProps extends WithStyles<typeof styles> {
   setRateLimited: typeof setRateLimited;
   clearTopicsCache: typeof clearTopicsCache;
   checkDistrustedUsers: typeof checkDistrustedUsers;
+  setOperationPending: typeof setOperationPending;
 }
 
 interface ProfileCardState {
@@ -224,6 +225,7 @@ const ProfileCard = withStyles(styles)(
 
     toggleFollowing() {
       this.props.clearTopicsCache();
+      this.props.setOperationPending(true);
       if (this.state.following) {
         removeFollowing(this.props.user, this.props.username)
           .catch((error) => {
@@ -236,7 +238,8 @@ const ProfileCard = withStyles(styles)(
               followers: prevState.followers - 1,
               userFollowings: prevState.userFollowings,
             }));
-          });
+          })
+          .finally(() => this.props.setOperationPending(false));
       } else {
         createFollowing(this.props.user, this.props.username)
           .catch((error) => {
@@ -249,7 +252,8 @@ const ProfileCard = withStyles(styles)(
               followers: prevState.followers + 1,
               userFollowings: prevState.userFollowings,
             }));
-          });
+          })
+          .finally(() => this.props.setOperationPending(false));
       }
     }
 
@@ -280,7 +284,8 @@ const ProfileCard = withStyles(styles)(
 
     suspendUser() {
       this.setState({ suspendUserDialogOpen: false });
-      suspendUser(this.props.user, this.props.username);
+      this.props.setOperationPending(true);
+      suspendUser(this.props.user, this.props.username).finally(() => this.props.setOperationPending(false));
     }
 
     handleSuspendUserClose() {
@@ -290,11 +295,12 @@ const ProfileCard = withStyles(styles)(
     }
 
     toggleDistrustUser() {
+      this.props.setOperationPending(true);
       const distrusted: boolean = !this.state.distrusted;
       this.setState({ distrusted: distrusted }, () =>
-        toggleUserDistrust(this.props.user, this.props.username, distrusted).then(() =>
-          this.props.checkDistrustedUsers(this.props.user)
-        )
+        toggleUserDistrust(this.props.user, this.props.username, distrusted)
+          .then(() => this.props.checkDistrustedUsers(this.props.user))
+          .finally(() => this.props.setOperationPending(false))
       );
     }
 
@@ -430,6 +436,7 @@ const mapDispatchToProps = (dispatch: any) => {
     checkDistrustedUsers: (user: ChromunityUser) => dispatch(checkDistrustedUsers(user)),
     setError: (msg: string) => dispatch(setError(msg)),
     setRateLimited: () => dispatch(setRateLimited()),
+    setOperationPending: (pending: boolean) => dispatch(setOperationPending(pending)),
   };
 };
 

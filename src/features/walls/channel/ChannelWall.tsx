@@ -1,6 +1,6 @@
 import React from "react";
 import { styled } from "@material-ui/core/styles";
-import { Container, LinearProgress, MenuItem, Select } from "@material-ui/core";
+import { Container, MenuItem, Select } from "@material-ui/core";
 import { ChromunityUser, Topic } from "../../../types";
 
 import { RouteComponentProps } from "react-router";
@@ -22,7 +22,6 @@ interface MatchParams {
 }
 
 interface Props extends RouteComponentProps<MatchParams> {
-  loading: boolean;
   topics: Topic[];
   couldExistOlder: boolean;
   representatives: string[];
@@ -36,7 +35,6 @@ interface Props extends RouteComponentProps<MatchParams> {
 }
 
 interface State {
-  isLoading: boolean;
   id: string;
   countOfTopics: number;
   selector: TOPIC_VIEW_SELECTOR_OPTION;
@@ -56,7 +54,6 @@ class ChannelWall extends React.Component<Props, State> {
     super(props);
     this.state = {
       id: "",
-      isLoading: false,
       countOfTopics: 0,
       selector: TOPIC_VIEW_SELECTOR_OPTION.RECENT,
       popularSelector: TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK,
@@ -80,12 +77,12 @@ class ChannelWall extends React.Component<Props, State> {
     return (
       <Container>
         <div style={{ textAlign: "center", marginTop: "20px", marginBottom: "-50px" }}>
-          <ChannelTitle channel={channel}/>
+          <ChannelTitle channel={channel} />
         </div>
 
-        <ChannelFollowingButton channel={channel} />
-
-        {this.state.isLoading || this.props.loading ? <LinearProgress variant="query" /> : <div />}
+        <div>
+          <ChannelFollowingButton channel={channel} />
+        </div>
         <StyledSelect value={this.state.selector} onChange={this.handleSelectorChange}>
           <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.RECENT}>Recent</MenuItem>
           <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR}>Popular</MenuItem>
@@ -115,11 +112,7 @@ class ChannelWall extends React.Component<Props, State> {
           }
         })}
         {this.renderLoadMoreButton()}
-        {this.props.user != null ? (
-          <NewTopicButton channel={channel} updateFunction={this.retrieveTopics} />
-        ) : (
-          <div />
-        )}
+        {this.props.user != null ? <NewTopicButton channel={channel} updateFunction={this.retrieveTopics} /> : <div />}
       </Container>
     );
   }
@@ -202,7 +195,6 @@ const mapDispatchToProps = (dispatch: any) => {
 const mapStateToProps = (store: ApplicationState) => {
   return {
     user: store.account.user,
-    loading: store.channel.loading,
     topics: store.channel.topics,
     couldExistOlder: store.channel.couldExistOlder,
     representatives: store.government.representatives.map((rep) => toLowerCase(rep)),

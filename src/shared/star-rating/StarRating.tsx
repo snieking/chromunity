@@ -4,7 +4,7 @@ import { ApplicationState } from "../../core/store";
 import { connect } from "react-redux";
 import StarRatingPresentation from "./StarRatingPresentation";
 import { toLowerCase } from "../util/util";
-import { setRateLimited } from "../redux/CommonActions";
+import { setRateLimited, setOperationPending } from "../redux/CommonActions";
 import { setError } from "../../core/snackbar/redux/snackbarTypes";
 
 interface Props {
@@ -15,6 +15,7 @@ interface Props {
   rateLimited: boolean;
   setRateLimited: typeof setRateLimited;
   setError: typeof setError;
+  setOperationPending: typeof setOperationPending;
 }
 
 const StarRating: React.FunctionComponent<Props> = (props) => {
@@ -36,6 +37,7 @@ const StarRating: React.FunctionComponent<Props> = (props) => {
   function toggleRating() {
     if (!loading && props.user) {
       setLoading(true);
+      props.setOperationPending(true);
 
       if (ratedByMe() && props.removeRating) {
         props
@@ -44,9 +46,10 @@ const StarRating: React.FunctionComponent<Props> = (props) => {
             props.setError(error.message);
             props.setRateLimited();
           })
-          .then(() => {
-            setRatedBy(ratedBy.filter((u) => toLowerCase(u) !== toLowerCase(props.user.name)));
+          .then(() => setRatedBy(ratedBy.filter((u) => toLowerCase(u) !== toLowerCase(props.user.name))))
+          .finally(() => {
             setLoading(false);
+            props.setOperationPending(false);
           });
       } else if (!ratedByMe() && props.incrementRating) {
         props
@@ -55,9 +58,10 @@ const StarRating: React.FunctionComponent<Props> = (props) => {
             props.setError(error.message);
             props.setRateLimited();
           })
-          .then(() => {
-            setRatedBy(ratedBy.concat([props.user.name]));
+          .then(() => setRatedBy(ratedBy.concat([props.user.name])))
+          .finally(() => {
             setLoading(false);
+            props.setOperationPending(false);
           });
       }
     }
@@ -84,6 +88,7 @@ const mapDispatchToProps = (dispatch: any) => {
   return {
     setRateLimited: () => dispatch(setRateLimited()),
     setError: (msg: string) => dispatch(setError(msg)),
+    setOperationPending: (pending: boolean) => dispatch(setOperationPending(pending)),
   };
 };
 

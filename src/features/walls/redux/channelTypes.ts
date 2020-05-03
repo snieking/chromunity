@@ -45,7 +45,6 @@ export type ChannelActions =
   | UpdateChannelAction;
 
 export interface ChannelState {
-  loading: boolean;
   name: string;
   topics: Topic[];
   couldExistOlder: boolean;

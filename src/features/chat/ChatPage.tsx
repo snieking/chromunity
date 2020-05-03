@@ -16,7 +16,7 @@ import {
   refreshOpenChat,
   sendMessage,
 } from "./redux/chatActions";
-import { CircularProgress, Container, LinearProgress, Theme } from "@material-ui/core";
+import { Container, Theme } from "@material-ui/core";
 import ChromiaPageHeader from "../../shared/ChromiaPageHeader";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
@@ -66,7 +66,6 @@ interface OptionType {
 interface Props {
   autoLoginInProgress: boolean;
   user: ChromunityUser;
-  loading: boolean;
   rsaKey: any;
   successfullyAuthorized: boolean;
   chats: Chat[];
@@ -77,6 +76,7 @@ interface Props {
   followedChatUsers: string[];
   chatUsers: string[];
   rateLimited: boolean;
+  operationPending: boolean;
   checkChatAuthentication: typeof checkChatAuthentication;
   createChatKeyPair: typeof createChatKeyPair;
   deleteChatUser: typeof deleteChatUserAction;
@@ -226,7 +226,6 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   function renderChat() {
     return (
       <>
-        {props.loading ? <LinearProgress variant="query" /> : <div />}
         <div className={classes.mobileSidePanel}>
           <Box className={classes.drawerOpenerBtn} onClick={toggleDrawer(true)} data-tut="mobile_drawer_btn" />
           <Drawer open={values.drawerOpen} onClose={toggleDrawer(false)}>
@@ -510,7 +509,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       event.preventDefault();
     } else if (!event.shiftKey && event.keyCode === 13) {
       event.preventDefault();
-      if (!props.rateLimited) {
+      if (!props.rateLimited && !props.operationPending) {
         sendMessage();
       }
     }
@@ -542,7 +541,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
           className={classes.submitMessage}
           variant="contained"
           color="secondary"
-          disabled={props.rateLimited}
+          disabled={props.rateLimited || props.operationPending}
         >
           Send
         </Button>
@@ -655,7 +654,9 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     if (props.autoLoginInProgress) {
       return (
         <div style={{ textAlign: "center", marginTop: "25px" }}>
-          <CircularProgress />
+          <Typography variant="h5" component="h5">
+            Authorizing...
+          </Typography>
         </div>
       );
     } else if (!props.autoLoginInProgress && !props.user) {
@@ -717,7 +718,6 @@ const mapDispatchToProps = (dispatch: any) => {
 const mapStateToProps = (store: ApplicationState) => {
   return {
     autoLoginInProgress: store.account.autoLoginInProgress,
-    loading: store.chat.loading,
     user: store.account.user,
     rsaKey: store.chat.rsaKey,
     successfullyAuthorized: store.chat.successfullyAuthorized,
@@ -729,6 +729,7 @@ const mapStateToProps = (store: ApplicationState) => {
     followedChatUsers: store.chat.followedChatUsers,
     chatUsers: store.chat.chatUsers,
     rateLimited: store.common.rateLimited,
+    operationPending: store.common.operationPending,
   };
 };
 

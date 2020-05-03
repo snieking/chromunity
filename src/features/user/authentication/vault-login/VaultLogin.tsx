@@ -7,7 +7,6 @@ import VaultLoginPresentation from "./VaultLoginPresentation";
 
 interface Props {
   authenticationStep: AuthenticationStep;
-  loading: boolean;
   loginAccount: typeof loginAccount;
   setAuthenticationStep: typeof setAuthenticationStep;
 }
@@ -18,7 +17,7 @@ const VaultLogin: React.FunctionComponent<Props> = (props) => {
     props.loginAccount();
   };
 
-  return <VaultLoginPresentation loading={props.loading} authenticationStep={props.authenticationStep} login={login} />;
+  return <VaultLoginPresentation authenticationStep={props.authenticationStep} login={login} />;
 };
 
 const mapDispatchToProps = (dispatch: any) => {
@@ -30,8 +29,7 @@ const mapDispatchToProps = (dispatch: any) => {
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    authenticationStep: store.account.authenticationStep,
-    loading: store.account.loading,
+    authenticationStep: store.account.authenticationStep
   };
 };
 

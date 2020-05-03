@@ -170,7 +170,6 @@ export interface ChatState {
   activeChatParticipants: string[];
   activeChatCouldExistOlderMessages: boolean;
   lastUpdate: number;
-  loading: boolean;
   followedChatUsers: string[];
   chatUsers: string[];
   chatUsersLastUpdate: number;

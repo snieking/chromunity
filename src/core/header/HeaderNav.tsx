@@ -25,10 +25,8 @@ import TestInfoBar from "./TestInfoBar";
 import GovMenu from "./GovMenu";
 import ChromiaLogo from "./ChromiaLogo";
 import { autoLogin } from "../../features/user/redux/accountActions";
-import { LinearProgress } from "@material-ui/core";
 
 interface Props {
-  autoLoginInProgress: boolean;
   representatives: string[];
   reports: RepresentativeReport[];
   activeElection: boolean;
@@ -203,7 +201,6 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   return (
     <div className={classes.grow}>
       <TestInfoBar classes={classes} />
-      {props.autoLoginInProgress && <LinearProgress variant="query" />}
       <AppBar position="static">
         <Toolbar>
           <div className={classes.leftGroup}>
@@ -245,7 +242,6 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    autoLoginInProgress: store.account.autoLoginInProgress,
     representatives: store.government.representatives.map(rep => toLowerCase(rep)),
     reports: store.government.reports,
     activeElection: store.government.activeElection,

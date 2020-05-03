@@ -1,7 +1,7 @@
 import React from "react";
 import { styled } from "@material-ui/core/styles";
 import { ChromunityUser, Topic } from "../../types";
-import { Container, LinearProgress, MenuItem, Select } from "@material-ui/core";
+import { Container, MenuItem, Select } from "@material-ui/core";
 import TopicOverviewCard from "../topic/TopicOverviewCard";
 import NewTopicButton from "../../shared/buttons/NewTopicButton";
 import LoadMoreButton from "../../shared/buttons/LoadMoreButton";
@@ -29,7 +29,6 @@ import { markTopicWallRefreshed } from "../../shared/util/user-util";
 
 interface Props {
   type: string;
-  loading: boolean;
   topics: Topic[];
   couldExistOlderTopics: boolean;
   representatives: string[];
@@ -83,7 +82,6 @@ class TopicWall extends React.Component<Props, State> {
       <div>
         <Container fixed>
           <ChromiaPageHeader text={this.getHeader()} />
-          {this.props.loading ? <LinearProgress variant="query" /> : <div />}
           {this.props.type === "tagFollowings" ? <TrendingChannels /> : <div />}
           {this.props.type === "tagFollowings" ? <ChromiaPageHeader text="Followed Channels" /> : <div />}
           <StyledSelector data-tut="main_selector" value={this.state.selector} onChange={this.handleSelectorChange}>
@@ -287,7 +285,6 @@ const mapStateToProps = (store: ApplicationState) => {
   return {
     user: store.account.user,
     topics: store.topicWall.topics,
-    loading: store.topicWall.loading,
     couldExistOlderTopics: store.topicWall.couldExistOlder,
     representatives: store.government.representatives.map(rep => toLowerCase(rep)),
     distrustedUsers: store.account.distrustedUsers
