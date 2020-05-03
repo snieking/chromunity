@@ -29,6 +29,7 @@ import { TwitterIcon, LinkedinIcon, FacebookIcon } from "react-share";
 import * as config from "../../../config";
 import GitHubLogo from "../../../shared/logos/GitHubLogo";
 import { setError, notifySuccess } from "../../../core/snackbar/redux/snackbarTypes";
+import { setOperationPending } from "../../../shared/redux/CommonActions";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -83,6 +84,7 @@ interface Props extends WithStyles<typeof styles> {
   user: ChromunityUser;
   setInfo: typeof notifySuccess;
   setError: typeof setError;
+  setOperationPending: typeof setOperationPending;
 }
 
 interface SettingsState {
@@ -226,7 +228,7 @@ const Settings = withStyles(styles)(
             className={this.props.classes.socialsField}
             id="twitter"
             margin="dense"
-            label="Twitter"
+            label="Twitter user"
             placeholder="Username"
             type="text"
             variant="outlined"
@@ -246,7 +248,7 @@ const Settings = withStyles(styles)(
             className={this.props.classes.socialsField}
             id="twitter"
             margin="dense"
-            label="LinkedIn"
+            label="LinkedIn user"
             placeholder="Username"
             type="text"
             variant="outlined"
@@ -266,7 +268,7 @@ const Settings = withStyles(styles)(
             className={this.props.classes.socialsField}
             id="facebook"
             margin="dense"
-            label="Facebook"
+            label="Facebook user"
             placeholder="Username"
             type="text"
             variant="outlined"
@@ -288,7 +290,7 @@ const Settings = withStyles(styles)(
             className={this.props.classes.socialsField}
             id="github"
             margin="dense"
-            label="Github"
+            label="Github user"
             placeholder="Username"
             type="text"
             variant="outlined"
@@ -375,6 +377,7 @@ const Settings = withStyles(styles)(
     }
 
     private saveSettings() {
+      this.props.setOperationPending(true);
       updateUserSettings(
         this.props.user,
         this.state.avatar,
@@ -382,7 +385,8 @@ const Settings = withStyles(styles)(
         config.features.userSocialsEnabled ? this.state.socials : null
       )
         .then(() => this.props.setInfo("Settings saved"))
-        .catch(() => this.props.setError("Error updating settings"));
+        .catch(() => this.props.setError("Error updating settings"))
+        .finally(() => this.props.setOperationPending(false));
     }
   }
 );
@@ -397,6 +401,7 @@ const mapDispatchToProps = (dispatch: any) => {
   return {
     setError: (msg: string) => dispatch(setError(msg)),
     setInfo: (msg: string) => dispatch(notifySuccess(msg)),
+    setOperationPending: (pending: boolean) => dispatch(setOperationPending(pending)),
   };
 };
 
