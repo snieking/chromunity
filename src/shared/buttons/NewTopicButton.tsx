@@ -168,7 +168,14 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                   onChange={(event: any, newValue: string | null) => {
                     this.setState({ channel: newValue });
                   }}
-                  renderInput={(params) => <TextField {...params} label="Channel" variant="outlined" />}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Channel"
+                      variant="outlined"
+                      onChange={(event: React.ChangeEvent<HTMLInputElement>) => this.setState({ channel: event.target.value })}
+                    />
+                  )}
                 />
                 <br />
                 <Badge color="secondary" badgeContent={maxTitleLength - this.state.topicTitle.length} showZero>

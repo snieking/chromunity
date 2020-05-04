@@ -408,7 +408,16 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
             onChange={(event: any, newValue: string | null) => {
               setValues({ ...values, userToAdd: newValue });
             }}
-            renderInput={(params) => <TextField {...params} label="User" variant="outlined" />}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="User"
+                variant="outlined"
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  setValues({ ...values, userToAdd: event.target.value })
+                }
+              />
+            )}
           />
         </DialogContent>
         <DialogActions>
