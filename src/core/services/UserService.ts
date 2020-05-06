@@ -1,4 +1,4 @@
-import { Socials } from '../../features/user/socials/socialTypes';
+import { Socials } from "../../features/user/socials/socialTypes";
 import { UserSettings } from "../../types";
 import { executeOperations, executeQuery } from "./Postchain";
 import { ChromunityUser } from "../../types";
@@ -9,7 +9,7 @@ import { userEvent } from "../../shared/util/matomo";
 
 const boomerang = BoomerangCache.create("users-bucket", {
   storage: "session",
-  encrypt: false
+  encrypt: false,
 });
 
 export function isRegistered(name: string): Promise<boolean> {
@@ -39,7 +39,7 @@ export function getUserSettingsCached(name: string, cacheDuration: number): Prom
   const cachedAvatar: UserSettings = boomerang.get(userLC);
 
   if (cachedAvatar != null) {
-    return new Promise<UserSettings>(resolve => resolve(cachedAvatar));
+    return new Promise<UserSettings>((resolve) => resolve(cachedAvatar));
   }
 
   const query = "get_user_settings";
@@ -50,7 +50,7 @@ export function getUserSettingsCached(name: string, cacheDuration: number): Prom
   });
 }
 
-export function updateUserSettings(user: ChromunityUser, avatar: string, description: string, socials?: Socials) {
+export function updateUserSettings(user: ChromunityUser, avatar: string, description: string, socials: Socials) {
   const userLC: string = toLowerCase(user.name);
   boomerang.remove(userLC);
 
@@ -58,10 +58,11 @@ export function updateUserSettings(user: ChromunityUser, avatar: string, descrip
 
   const operation = "update_user_settings";
 
-  if (socials)
-    return executeOperations(user.ft3User, op(operation, userLC, user.ft3User.authDescriptor.id, avatar, description, JSON.stringify(socials)));
-  else
-    return executeOperations(user.ft3User, op(operation, userLC, user.ft3User.authDescriptor.id, avatar, description));
+  return executeOperations(
+    user.ft3User,
+    op(operation, userLC, user.ft3User.authDescriptor.id, avatar, description, JSON.stringify(socials)),
+    nop()
+  );
 }
 
 export function toggleUserDistrust(user: ChromunityUser, name: string, muted: boolean) {
@@ -69,10 +70,8 @@ export function toggleUserDistrust(user: ChromunityUser, name: string, muted: bo
 
   const operation = "toggle_distrust";
 
-  if (muted)
-    userEvent("distrust");
-  else
-    userEvent("trust");
+  if (muted) userEvent("distrust");
+  else userEvent("trust");
 
   return executeOperations(
     user.ft3User,
@@ -85,7 +84,7 @@ export function getDistrustedUsers(user: ChromunityUser): Promise<string[]> {
   const distrustedUsers: string[] = boomerang.get("distrusted-users");
 
   if (distrustedUsers != null) {
-    return new Promise<string[]>(resolve => resolve(distrustedUsers));
+    return new Promise<string[]>((resolve) => resolve(distrustedUsers));
   }
 
   const query = "get_distrusted_users";

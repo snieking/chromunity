@@ -173,22 +173,29 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                       {...params}
                       label="Channel"
                       variant="outlined"
-                      onChange={(event: React.ChangeEvent<HTMLInputElement>) => this.setState({ channel: event.target.value })}
+                      onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                        this.setState({ channel: event.target.value })
+                      }
                     />
                   )}
                 />
                 <br />
-                <Badge color="secondary" badgeContent={maxTitleLength - this.state.topicTitle.length} showZero>
+                <Badge
+                  color="secondary"
+                  badgeContent={maxTitleLength - this.state.topicTitle.length}
+                  showZero
+                  style={{ maxWidth: "350px", width: "95%" }}
+                >
                   <TextField
                     autoFocus
                     margin="dense"
                     type="text"
                     id="title"
                     label="Title"
-                    fullWidth
                     onChange={this.handleDialogTitleChange}
                     value={this.state.topicTitle}
                     variant="outlined"
+                    fullWidth
                   />
                 </Badge>
                 <Tabs value={this.state.activeTab} onChange={this.handleTabChange} aria-label="New topic">

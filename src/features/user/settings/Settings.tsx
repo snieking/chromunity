@@ -26,10 +26,15 @@ import { ApplicationState } from "../../../core/store";
 import { connect } from "react-redux";
 import { Socials } from "../socials/socialTypes";
 import { TwitterIcon, LinkedinIcon, FacebookIcon } from "react-share";
-import * as config from "../../../config";
 import GitHubLogo from "../../../shared/logos/GitHubLogo";
 import { setError, notifySuccess } from "../../../core/snackbar/redux/snackbarTypes";
-import { setOperationPending } from "../../../shared/redux/CommonActions";
+import { setOperationPending, setRateLimited } from "../../../shared/redux/CommonActions";
+import {
+  parseTwitterUsername,
+  parseLinkedinUsername,
+  parseGithubUsername,
+  parseFacebookUsername,
+} from "../../../shared/util/util";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -82,9 +87,11 @@ const styles = (theme: Theme) =>
 
 interface Props extends WithStyles<typeof styles> {
   user: ChromunityUser;
+  rateLimited: boolean;
   setInfo: typeof notifySuccess;
   setError: typeof setError;
   setOperationPending: typeof setOperationPending;
+  setRateLimited: typeof setRateLimited;
 }
 
 interface SettingsState {
@@ -224,7 +231,6 @@ const Settings = withStyles(styles)(
         <>
           <TwitterIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
           <TextField
-            disabled={!config.features.userSocialsEnabled}
             className={this.props.classes.socialsField}
             id="twitter"
             margin="dense"
@@ -244,7 +250,6 @@ const Settings = withStyles(styles)(
         <>
           <LinkedinIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
           <TextField
-            disabled={!config.features.userSocialsEnabled}
             className={this.props.classes.socialsField}
             id="twitter"
             margin="dense"
@@ -264,7 +269,6 @@ const Settings = withStyles(styles)(
         <>
           <FacebookIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
           <TextField
-            disabled={!config.features.userSocialsEnabled}
             className={this.props.classes.socialsField}
             id="facebook"
             margin="dense"
@@ -286,7 +290,6 @@ const Settings = withStyles(styles)(
             <GitHubLogo />
           </div>
           <TextField
-            disabled={!config.features.userSocialsEnabled}
             className={this.props.classes.socialsField}
             id="github"
             margin="dense"
@@ -304,7 +307,13 @@ const Settings = withStyles(styles)(
     private saveButton() {
       return (
         <div className={this.props.classes.commitBtnWrapper}>
-          <Button size="large" variant="contained" color="primary" onClick={() => this.saveSettings()}>
+          <Button
+            size="large"
+            variant="contained"
+            color="primary"
+            onClick={() => this.saveSettings()}
+            disabled={this.props.rateLimited}
+          >
             Save
           </Button>
         </div>
@@ -378,14 +387,22 @@ const Settings = withStyles(styles)(
 
     private saveSettings() {
       this.props.setOperationPending(true);
-      updateUserSettings(
-        this.props.user,
-        this.state.avatar,
-        this.state.description,
-        config.features.userSocialsEnabled ? this.state.socials : null
-      )
+
+      const socials: Socials = {
+        twitter: parseTwitterUsername(this.state.socials.twitter),
+        linkedin: parseLinkedinUsername(this.state.socials.linkedin),
+        github: parseGithubUsername(this.state.socials.github),
+        facebook: parseFacebookUsername(this.state.socials.facebook),
+      };
+
+      this.setState({ socials });
+
+      updateUserSettings(this.props.user, this.state.avatar, this.state.description, socials)
         .then(() => this.props.setInfo("Settings saved"))
-        .catch(() => this.props.setError("Error updating settings"))
+        .catch(() => {
+          this.props.setError("Error updating settings");
+          this.props.setRateLimited();
+        })
         .finally(() => this.props.setOperationPending(false));
     }
   }
@@ -394,6 +411,7 @@ const Settings = withStyles(styles)(
 const mapStateToProps = (store: ApplicationState) => {
   return {
     user: store.account.user,
+    rateLimited: store.common.rateLimited,
   };
 };
 
@@ -402,6 +420,7 @@ const mapDispatchToProps = (dispatch: any) => {
     setError: (msg: string) => dispatch(setError(msg)),
     setInfo: (msg: string) => dispatch(notifySuccess(msg)),
     setOperationPending: (pending: boolean) => dispatch(setOperationPending(pending)),
+    setRateLimited: () => dispatch(setRateLimited()),
   };
 };
 

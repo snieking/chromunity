@@ -24,9 +24,6 @@ module.exports = {
   topBar: {
     message: "TestNet"
   },
-  features: {
-    userSocialsEnabled: true
-  },
   test: true,
   logLevel: "info"
 };

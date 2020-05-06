@@ -60,7 +60,7 @@ import PollRenderer from "../poll/PollRenderer";
 import SocialShareButton from "../SocialShareButton";
 import { setError, notifySuccess } from "../../../core/snackbar/redux/snackbarTypes";
 import StarRating from "../../../shared/star-rating/StarRating";
-import { setRateLimited, setOperationPending } from "../../../shared/redux/CommonActions";
+import { setRateLimited, setOperationPending, setQueryPending } from "../../../shared/redux/CommonActions";
 import FullTopicTutorial from "./FullTopicTutorial";
 
 interface MatchParams {
@@ -77,6 +77,7 @@ interface Props extends RouteComponentProps<MatchParams> {
   setInfo: typeof notifySuccess;
   setRateLimited: typeof setRateLimited;
   setOperationPending: typeof setOperationPending;
+  setQueryPending: typeof setQueryPending;
 }
 
 const useStyles = makeStyles((theme) =>
@@ -149,14 +150,19 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     const id = props.match.params.id;
     const user: ChromunityUser = props.user;
 
-    getTopicById(id, user).then((topic) => {
-      if (topic != null) {
-        consumeTopicData(topic);
-        markTopicReadInSession(topic.id);
-      } else {
-        setNotFound(true);
-      }
-    });
+    props.setQueryPending(true);
+    getTopicById(id, user)
+      .then((topic) => {
+        if (topic != null) {
+          consumeTopicData(topic);
+          markTopicReadInSession(topic.id);
+        } else {
+          setNotFound(true);
+        }
+      })
+      .finally(() => {
+        props.setQueryPending(false);
+      });
     // eslint-disable-next-line
   }, [props.match.params.id]);
 
@@ -188,6 +194,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
 
   function retrieveLatestReplies(): void {
     setLoading(true);
+    props.setQueryPending(true);
     const topicId: string = props.match.params.id;
     let replies: Promise<TopicReply[]>;
     if (topicReplies.length === 0) {
@@ -204,7 +211,10 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
         }
       })
       .catch()
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        props.setQueryPending(false);
+      });
   }
 
   function renderTopic() {
@@ -390,31 +400,33 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function editTopicMessage(text: string) {
-    setLoading(true);
-    props.setOperationPending(true);
-    modifyTopic(props.user, topic.id, text)
-      .then(() => {
-        const updatedTopic: Topic = {
-          id: topic.id,
-          author: topic.author,
-          title: topic.title,
-          message: text,
-          timestamp: topic.timestamp,
-          last_modified: topic.last_modified,
-          latest_poster: topic.latest_poster,
-          moderated_by: topic.moderated_by,
-        };
+    if (!isLoading) {
+      setLoading(true);
+      props.setOperationPending(true);
+      modifyTopic(props.user, topic.id, text)
+        .then(() => {
+          const updatedTopic: Topic = {
+            id: topic.id,
+            author: topic.author,
+            title: topic.title,
+            message: text,
+            timestamp: topic.timestamp,
+            last_modified: topic.last_modified,
+            latest_poster: topic.latest_poster,
+            moderated_by: topic.moderated_by,
+          };
 
-        setTopic(updatedTopic);
-      })
-      .catch((error) => {
-        setError(error.message);
-        setRateLimited();
-      })
-      .finally(() => {
-        setLoading(false);
-        props.setOperationPending(false);
-      });
+          setTopic(updatedTopic);
+        })
+        .catch((error) => {
+          setError(error.message);
+          setRateLimited();
+        })
+        .finally(() => {
+          setLoading(false);
+          props.setOperationPending(false);
+        });
+    }
   }
 
   function deleteTheTopic() {
@@ -597,7 +609,6 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     return (
       <Container fixed>
         <br />
-        {isLoading ? <LinearProgress variant="query" /> : <div />}
         {renderTopic()}
         <PollRenderer topicId={topic.id} poll={poll} />
         {topicReplies.length > 0 ? <SubdirectoryArrowRight /> : <div />}
@@ -648,6 +659,7 @@ const mapDispatchToProps = (dispatch: any) => {
     setInfo: (msg: string) => dispatch(notifySuccess(msg)),
     setRateLimited: () => dispatch(setRateLimited()),
     setOperationPending: (pending: boolean) => dispatch(setOperationPending(pending)),
+    setQueryPending: (pending: boolean) => dispatch(setQueryPending(pending)),
   };
 };
 

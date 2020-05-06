@@ -24,9 +24,6 @@ module.exports = {
   topBar: {
     message: "Local Environment"
   },
-  features: {
-    userSocialsEnabled: true
-  },
   test: true,
   logLevel: "debug"
 };

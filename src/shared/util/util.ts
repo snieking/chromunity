@@ -209,3 +209,29 @@ export function useTraceUpdate(props: any) {
     prev.current = props;
   });
 }
+
+const TWITTER_REGEXP = new RegExp(/\/?[A-Za-z0-9_]+\/?$/);
+const LINKEDIN_REGEXP = new RegExp(/\/?[A-Za-z0-9]+\/?$/);
+const GITHUB_REGEXP = new RegExp(/\/?[A-Za-z0-9-]+[^-]\/?$/);
+const FACEBOOK_REGEXP = new RegExp(/\/?[A-Za-z0-9.]+\/?$/);
+
+export function parseTwitterUsername(input: string): string {
+  return parseUsername(TWITTER_REGEXP, input);
+}
+
+export function parseLinkedinUsername(input: string): string {
+  return parseUsername(LINKEDIN_REGEXP, input);
+}
+
+export function parseGithubUsername(input: string): string {
+  return parseUsername(GITHUB_REGEXP, input);
+}
+
+export function parseFacebookUsername(input: string): string {
+  return parseUsername(FACEBOOK_REGEXP, input);
+}
+
+function parseUsername(regexp: RegExp, input: string): string {
+  const matches = regexp.exec(input);
+  return matches[matches.length - 1].replace(/\//g, "");
+}
