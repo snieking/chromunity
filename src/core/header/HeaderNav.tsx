@@ -177,7 +177,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function renderGovernmentIcon() {
-    if (isRepresentative()) {
+    if (!props.activeElection && isRepresentative()) {
       return (
         <Badge
           invisible={
