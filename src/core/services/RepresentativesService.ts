@@ -44,7 +44,7 @@ export function getRepresentatives(): Promise<string[]> {
 }
 
 export function getTimesRepresentative(name: string): Promise<number> {
-  return executeQuery("get_number_of_times_representative", { name });
+  return executeQuery("get_number_of_times_representative", { name: toLowerCase(name) });
 }
 
 export function getAllRepresentativeActionsPriorToTimestamp(

@@ -1,5 +1,5 @@
 import { Reducer } from "redux";
-import { AccountActions, AccountActionTypes, AccountState } from "./accountTypes";
+import { AccountActions, AccountActionTypes, AccountState, AuthenticationStep } from "./accountTypes";
 
 const initialAccountState: AccountState = {
   authenticationStep: null,
@@ -10,11 +10,20 @@ const initialAccountState: AccountState = {
   autoLoginInProgress: true,
 };
 
+function getCancellationStep(step: AuthenticationStep): AuthenticationStep {
+  switch (step) {
+    case AuthenticationStep.REGISTERING_USER:
+      return AuthenticationStep.USERNAME_INPUT_REQUIRED;
+      default:
+        return null;
+  }
+}
+
 export const loginReducer: Reducer<AccountState, AccountActions> = (state = initialAccountState, action) => {
   if (action.type === AccountActionTypes.VAULT_CANCEL) {
     return {
       ...state,
-      authenticationStep: null,
+      authenticationStep: getCancellationStep(state.authenticationStep)
     };
   } else if (action.type === AccountActionTypes.SET_USER) {
     return {

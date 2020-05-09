@@ -25,7 +25,7 @@ query get_all_representative_actions(timestamp, page_size: integer) {
 }
 
 query get_number_of_times_representative(name) {
-    return representative@*{ .user.name == name } ( .representative_election.id ).size();
+    return representative@*{ .user.name == name.lower_case() } ( .representative_election.id ).size();
 }
 
 query is_user_suspended_by_me(username: name, user_to_be_suspended: name, timestamp) {

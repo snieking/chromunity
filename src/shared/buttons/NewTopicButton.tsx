@@ -181,7 +181,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                 />
                 <br />
                 <Badge
-                  color="secondary"
+                  color={maxTitleLength - this.state.topicTitle.length < 0 ? "error" : "primary"}
                   badgeContent={maxTitleLength - this.state.topicTitle.length}
                   showZero
                   style={{ maxWidth: "350px", width: "95%" }}
