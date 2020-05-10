@@ -15,7 +15,7 @@ import {
   Tooltip,
   Typography,
 } from "@material-ui/core";
-import { Delete, Notifications, NotificationsActive, Reply, Report, SubdirectoryArrowRight } from "@material-ui/icons";
+import { Delete, Notifications, NotificationsActive, Report, SubdirectoryArrowRight } from "@material-ui/icons";
 import TopicReplyCard from "../TopicReplyCard";
 import { Link, Redirect } from "react-router-dom";
 import { ApplicationState } from "../../../core/store";
@@ -62,6 +62,7 @@ import { setError, notifySuccess } from "../../../core/snackbar/redux/snackbarTy
 import StarRating from "../../../shared/star-rating/StarRating";
 import { setRateLimited, setOperationPending, setQueryPending } from "../../../shared/redux/CommonActions";
 import FullTopicTutorial from "./FullTopicTutorial";
+import ReplyButton from "../../../shared/buttons/ReplyButton";
 
 interface MatchParams {
   id: string;
@@ -121,6 +122,10 @@ const useStyles = makeStyles((theme) =>
     ratingWrapper: {
       display: "inline",
     },
+    cardActions: {
+      width: "100%",
+      display: "flex"
+    }
   })
 );
 
@@ -279,7 +284,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
 
     if (user != null) {
       return (
-        <CardActions disableSpacing>
+        <CardActions disableSpacing className={classes.cardActions}>
           <div className={classes.ratingWrapper}>
             <StarRating
               starRatingFetcher={() => getTopicStarRaters(id)}
@@ -317,14 +322,6 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
             <div style={{ display: "inline" }} />
           )}
 
-          {user && (
-            <IconButton data-tut="reply_btn" onClick={toggleReplyBox} disabled={props.rateLimited}>
-              <Tooltip title="Reply">
-                <Reply className={replyBoxOpen ? classes.iconOrange : ""} />
-              </Tooltip>
-            </IconButton>
-          )}
-
           <ConfirmDialog
             text="This action will report the topic"
             open={reportTopicDialogOpen}
@@ -348,6 +345,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           <SocialShareButton text={topic.title} />
 
           {renderAdminActions()}
+          <ReplyButton onClick={toggleReplyBox} toggled={replyBoxOpen} size="medium" />
         </CardActions>
       );
     } else {
