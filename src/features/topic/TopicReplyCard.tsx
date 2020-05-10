@@ -21,7 +21,7 @@ import {
   WithStyles,
 } from "@material-ui/core";
 import { ifEmptyAvatarThenPlaceholder } from "../../shared/util/user-util";
-import { Delete, Reply, Report, UnfoldMore } from "@material-ui/icons";
+import { Delete, Report, UnfoldMore } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../core/services/UserService";
 import {
   createTopicSubReply,
@@ -57,6 +57,7 @@ import PreviewLinks from "../../shared/PreviewLinks";
 import { setError, notifySuccess } from "../../core/snackbar/redux/snackbarTypes";
 import StarRating from "../../shared/star-rating/StarRating";
 import { setRateLimited, setQueryPending, setOperationPending } from "../../shared/redux/CommonActions";
+import ReplyButton from "../../shared/buttons/ReplyButton";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -114,6 +115,11 @@ const styles = (theme: Theme) =>
     },
     ratingWrapper: {
       display: "inline",
+    },
+    cardActions: {
+      width: "100%",
+      display: "flex",
+      marginTop: "-10px",
     },
   });
 
@@ -348,7 +354,7 @@ const TopicReplyCard = withStyles(styles)(
 
       if (user != null) {
         return (
-          <CardActions disableSpacing style={{ marginTop: "-10px" }}>
+          <CardActions disableSpacing className={this.props.classes.cardActions}>
             <div className={this.props.classes.ratingWrapper}>
               <StarRating
                 starRatingFetcher={() => getReplyStarRaters(id)}
@@ -366,19 +372,6 @@ const TopicReplyCard = withStyles(styles)(
                 deleteFunction={this.deleteReplyMessage}
               />
             ) : null}
-            <IconButton
-              aria-label="Reply"
-              onClick={() =>
-                this.setState((prevState) => ({
-                  replyBoxOpen: !prevState.replyBoxOpen,
-                }))
-              }
-              disabled={this.props.rateLimited}
-            >
-              <Tooltip title="Reply">
-                <Reply className={this.state.replyBoxOpen ? this.props.classes.iconOrange : ""} />
-              </Tooltip>
-            </IconButton>
 
             <ConfirmDialog
               text="This action will report the message"
@@ -401,6 +394,16 @@ const TopicReplyCard = withStyles(styles)(
 
             {this.subRepliesButton()}
             {this.renderAdminActions()}
+
+            <ReplyButton
+              onClick={() =>
+                this.setState((prevState) => ({
+                  replyBoxOpen: !prevState.replyBoxOpen,
+                }))
+              }
+              size="small"
+              toggled={this.state.replyBoxOpen}
+            />
           </CardActions>
         );
       } else {
