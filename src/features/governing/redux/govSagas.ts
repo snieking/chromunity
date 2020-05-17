@@ -62,7 +62,7 @@ export function* pinTopicSaga(action: IPinTopic) {
 }
 
 export function* checkPinnedTopic() {
-  if (config.features.pinEnabled) return;
+  if (!config.features.pinEnabled) return;
 
   logger.silly("[SAGA - STARTED]: Checked pinned topic");
 
@@ -82,7 +82,7 @@ export function* checkPinnedTopic() {
 }
 
 export function* checkPinnedTopicByRep() {
-  if (config.features.pinEnabled) return;
+  if (!config.features.pinEnabled) return;
 
   logger.silly("[SAGA - STARTED]: Checked pinned topic by rep");
 
