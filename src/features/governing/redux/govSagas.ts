@@ -72,8 +72,10 @@ export function* checkPinnedTopic() {
 
   if (topic == null && cacheExpired(lastChecked)) {
     const topicId = yield getPinnedTopicId(user ? user.name : null);
-    const topic = yield getTopicById(topicId, user);
-    yield put(updatePinnedTopic(topic));
+    if (topicId) {
+      const topic = yield getTopicById(topicId, user);
+      yield put(updatePinnedTopic(topic));
+    }
   }
 
   logger.silly("[SAGA - FINISHED]: Checked pinned topic");
