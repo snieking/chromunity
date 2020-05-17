@@ -30,6 +30,7 @@ import { connect } from "react-redux";
 import CustomChip from "../../shared/CustomChip";
 import NewBadge from "./NewBadge";
 import StarRating from "../../shared/star-rating/StarRating";
+import PinBadge from "./PinBadge";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -70,6 +71,7 @@ interface Props extends WithStyles<typeof styles> {
   representatives: string[];
   distrustedUsers: string[];
   user: ChromunityUser;
+  pinned?: boolean;
 }
 
 interface State {
@@ -125,6 +127,7 @@ const TopicOverviewCard = withStyles(styles)(
           >
             <Card raised={true} key={this.props.topic.id} style={{ zIndex: 0 }}>
               <CardActionArea onClick={() => this.setState({ redirectToFullCard: true })}>
+                {this.props.pinned && <PinBadge />}
                 {this.isNewTopic() && <NewBadge />}
                 {this.renderCardContent()}
               </CardActionArea>

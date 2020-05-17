@@ -3,7 +3,7 @@ import { RepresentativeAction, RepresentativeReport, ChromunityUser, Topic, Topi
 import { toLowerCase } from "../../shared/util/util";
 
 import * as BoomerangCache from "boomerang-cache";
-import { op } from "ft3-lib";
+import { op, nop } from "ft3-lib";
 import { removeTopicIdFromCache } from "./TopicService";
 import logger from "../../shared/util/logger";
 import { representativeEvent } from "../../shared/util/matomo";
@@ -105,11 +105,11 @@ export function suspendUser(user: ChromunityUser, userToBeSuspended: string) {
     return executeOperations(
       user.ft3User,
       op(SUSPEND_USER_OP_ID, toLowerCase(user.name), user.ft3User.authDescriptor.id, toLowerCase(userToBeSuspended))
-    )
+    );
   } catch (error) {
     logger.info("Error suspending user %s", error.message);
   } finally {
-    addReportId(reportId)
+    addReportId(reportId);
   }
 }
 
@@ -139,7 +139,7 @@ export function getReports(): Promise<RepresentativeReport[]> {
 }
 
 export function distrustRepresentative(user: ChromunityUser, distrusted: string) {
-  localCache.set("distrusted-" + distrusted, true, 86400*30);
+  localCache.set("distrusted-" + distrusted, true, 86400 * 30);
 
   representativeEvent("distrust-representative");
 
@@ -151,6 +151,26 @@ export function distrustRepresentative(user: ChromunityUser, distrusted: string)
   } catch (error) {
     logger.info("Error distrusting representative: %s", error.message);
   }
+}
+
+export function getPinnedTopicId(name?: string): Promise<string> {
+  return executeQuery("get_pinned_topic", { name: name ? name : "" })
+    .then((topic: string) => {
+      console.log("*** Found Topic: ", topic);
+      return topic;
+    });
+}
+
+export function getPinnedTopicByRep(name: string): Promise<Topic> {
+  return executeQuery("get_representatives_topic_pin", { name });
+}
+
+export function pinTopic(user: ChromunityUser, topicId: string) {
+  return executeOperations(
+    user.ft3User,
+    op("pin_topic", toLowerCase(user.name), user.ft3User.authDescriptor.id, topicId),
+    nop()
+  );
 }
 
 export const isDistrustedByMe = (distrusted: string) => localCache.get("distrusted-" + distrusted) != null;

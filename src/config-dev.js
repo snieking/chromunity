@@ -24,6 +24,9 @@ module.exports = {
   topBar: {
     message: "Development Environment"
   },
+  features: {
+    pinEnabled: false
+  },
   test: true,
   logLevel: "debug"
 };

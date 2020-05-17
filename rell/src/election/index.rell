@@ -84,7 +84,7 @@ function governing_period_in_blocks(): integer {
 }
 
 function election_duration_in_blocks(): integer {
-	return 25000;
+	return 25;//25000;
 }
 
 function get_current_election_id(): integer? {

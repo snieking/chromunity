@@ -24,6 +24,9 @@ module.exports = {
   topBar: {
     message: "TestNet"
   },
+  features: {
+    pinEnabled: false
+  },
   test: true,
   logLevel: "info"
 };
