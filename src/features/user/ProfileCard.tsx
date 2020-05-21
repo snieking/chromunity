@@ -12,6 +12,7 @@ import {
   Tooltip,
   withStyles,
   WithStyles,
+  Theme,
 } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 
@@ -58,38 +59,49 @@ import { setError } from "../../core/snackbar/redux/snackbarTypes";
 import { setRateLimited, setOperationPending } from "../../shared/redux/CommonActions";
 import ProfileTutorial from "./ProfileTutorial";
 
-const styles = createStyles({
-  iconRed: {
-    color: COLOR_RED,
-  },
-  iconYellow: {
-    color: COLOR_YELLOW,
-  },
-  iconOrange: {
-    color: COLOR_ORANGE,
-  },
-  contentWrapper: {
-    float: "left",
-    marginTop: "10px",
-    marginLeft: "10px",
-    marginRight: "10px",
-  },
-  description: {
-    marginRight: "12px",
-    marginTop: "5px",
-    marginLeft: "10px",
-  },
-  bottomBar: {
-    float: "right",
-    marginBottom: "5px",
-    marginTop: "5px",
-  },
-  socials: {
-    position: "relative",
-    bottom: 0,
-    left: 0,
-  },
-});
+const styles = (theme: Theme) =>
+  createStyles({
+    iconRed: {
+      color: COLOR_RED,
+    },
+    iconYellow: {
+      color: COLOR_YELLOW,
+    },
+    iconOrange: {
+      color: COLOR_ORANGE,
+    },
+    contentWrapper: {
+      float: "left",
+      marginTop: "10px",
+      marginLeft: "10px",
+      marginRight: "10px",
+    },
+    description: {
+      marginRight: "12px",
+      marginTop: "5px",
+      marginLeft: "10px",
+    },
+    bottomBarWrapper: {
+      position: "relative",
+      marginTop: "15px",
+    },
+    bottomBar: {
+      float: "right",
+      marginBottom: "5px",
+      marginTop: "5px",
+      maxWidth: "60%",
+      display: "inline",
+    },
+    socials: {
+      visibility: "hidden",
+      position: "absolute",
+      bottom: -35,
+      maxWidth: "35%",
+      [theme.breakpoints.up("sm")]: {
+        visibility: "visible",
+      },
+    },
+  });
 
 interface ProfileCardProps extends WithStyles<typeof styles> {
   username: string;
@@ -208,12 +220,14 @@ const ProfileCard = withStyles(styles)(
                 {this.state.description !== "" ? this.state.description : "I haven't written any description yet..."}
               </Typography>
               <div style={{ clear: "left" }} />
-              {this.renderIcons()}
-              {this.state.socials && (
-                <div className={this.props.classes.socials}>
-                  <SocialBar socials={this.state.socials} />
-                </div>
-              )}
+              <div className={this.props.classes.bottomBarWrapper}>
+                {this.state.socials && (
+                  <div className={this.props.classes.socials}>
+                    <SocialBar socials={this.state.socials} />
+                  </div>
+                )}
+                {this.renderIcons()}
+              </div>
             </Card>
             <ProfileTutorial />
           </div>
