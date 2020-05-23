@@ -1,0 +1,62 @@
+import ft3_core: lib.ft3.core;
+
+query get_user_vibes(name) {
+	val user = user@{ name };
+	val balance = get_balance(user);
+	
+	if (balance == null)
+		return 0;
+	else
+		return balance.amount;
+}
+
+function reward_asset(user, amount: integer) {
+	val account_balance = get_balance(user);
+	
+	val modified_amount = calculate_asset_with_modifier(amount);
+	
+	if (account_balance == null) {
+		create_balance(user, modified_amount);
+		return;
+	}
+	
+	update account_balance(amount = account_balance.amount+modified_amount);
+}
+
+function get_balance(user): ft3_core.balance? {
+	return ft3_core.balance@?{ 
+		user.account,
+		.asset.name == asset_name()
+	};
+}
+
+function create_balance(user, amount: integer) {
+	var asset = ft3_core.asset@?{ .name == asset_name() };
+	
+	if (asset == null) {
+		asset = ft3_core.register_asset(asset_name(), chain_context.blockchain_rid);
+	}
+	
+	create ft3_core.balance(user.account, asset, amount);
+}
+
+function asset_name(): text {
+	return "Vibe";
+}
+
+function calculate_asset_with_modifier(amount: integer): integer {
+	val block = op_context.block_height;
+	
+	return when {
+		block < 10000000 -> amount * 10;
+		block < 20000000 -> amount * 9;
+		block < 30000000 -> amount * 8;
+		block < 40000000 -> amount * 7;
+		block < 50000000 -> amount * 6;
+		block < 60000000 -> amount * 5;
+		block < 70000000 -> amount * 4;
+		block < 80000000 -> amount * 3;
+		block < 90000000 -> amount * 2;
+		else -> amount;
+	};
+}

@@ -2,11 +2,17 @@ import user;
 import topic;
 
 operation give_topic_star_rating(username: text, descriptor_id: byte_array, id: text, unique_id: text) {
-    val user = user.get_and_charge_verified_user(username, descriptor_id);
-    create topic_star_rating(topic.topic@{ .id == id }, user);
+    val my_user = user.get_and_charge_verified_user(username, descriptor_id);
+    val topic = topic.topic@{ .id == id };
+    
+    create topic_star_rating(topic.topic@{ .id == id }, my_user);
 
     val topicRating = tmp_topic_rating@{ topic.topic@{ .id == id }};
     update topicRating ( stars = topicRating.stars + 1 );
+    
+    if (my_user.name != topic.author.name) {
+    	user.reward_asset(topic.author, 2);
+    }
 }
 
 operation remove_topic_star_rating(username: text, descriptor_id: byte_array, id: text, unique_id: text) {
