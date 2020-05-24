@@ -14,7 +14,10 @@ export enum AccountActionTypes {
   REGISTER_USER = "ACCOUNT/REGISTER/USER",
   AUTO_LOGIN_ATTEMPTED = "ACCOUNT/AUTO/LOGIN/ATTEMPTED",
   CHECK_DISTRUSTED_USERS = "ACCOUNT/CHECK/DISTRUSTED_REPS",
-  STORE_DISTRUSTED_USERS = "ACCOUNT/STORE/DISTRUSTED_REPS"
+  STORE_DISTRUSTED_USERS = "ACCOUNT/STORE/DISTRUSTED_REPS",
+  STORE_USER_VIBES = "ACCOUNT/STORE/VIBES",
+  CHECK_USER_VIBES = "ACCOUNT/CHECK/VIBES",
+  SEND_VIBES = "ACCOUNT/SEND/VIBES"
 }
 
 export interface ILoginAccount {
@@ -77,6 +80,21 @@ export interface IStoreDistrustedUsers {
   distrustedUsers: string[];
 }
 
+export interface IStoreUserVibes {
+  type: AccountActionTypes.STORE_USER_VIBES;
+  vibes: number;
+}
+
+export interface ICheckUserVibes {
+  type: AccountActionTypes.CHECK_USER_VIBES;
+}
+
+export interface ISendVibes {
+  type: AccountActionTypes.SEND_VIBES;
+  receiver: string;
+  vibes: number;
+}
+
 export type AccountActions =
   | ILoginAccount
   | ISetAuthenticationStep
@@ -90,7 +108,10 @@ export type AccountActions =
   | IResetLoginState
   | IRegisterUser
   | ICheckDistrustedUsers
-  | IStoreDistrustedUsers;
+  | IStoreDistrustedUsers
+  | ICheckUserVibes
+  | IStoreUserVibes
+  | ISendVibes;
 
 export enum AuthenticationStep {
   VAULT_IN_PROGRESS,
@@ -107,4 +128,5 @@ export interface AccountState {
   ft3User: User;
   user: ChromunityUser;
   distrustedUsers: string[];
+  vibes: number;
 }

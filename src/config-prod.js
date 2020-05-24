@@ -25,7 +25,8 @@ module.exports = {
     message: ""
   },
   features: {
-    pinEnabled: true
+    pinEnabled: true,
+    vibeEnabled: true
   },
   test: false,
   logLevel: "info"

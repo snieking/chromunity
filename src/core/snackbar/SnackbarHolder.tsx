@@ -25,6 +25,9 @@ const SnackbarHolder: React.FunctionComponent<Props> = (props) => {
           vertical: "bottom",
           horizontal: "left",
         }}
+        style={{
+          zIndex: 10000
+        }}
         open={props.success}
         autoHideDuration={3000}
         onClose={props.clearSuccess}
@@ -36,6 +39,9 @@ const SnackbarHolder: React.FunctionComponent<Props> = (props) => {
           vertical: "bottom",
           horizontal: "left",
         }}
+        style={{
+          zIndex: 10000
+        }}
         open={props.error}
         autoHideDuration={3000}
         onClose={props.clearError}
@@ -46,6 +52,9 @@ const SnackbarHolder: React.FunctionComponent<Props> = (props) => {
         anchorOrigin={{
           vertical: "bottom",
           horizontal: "right",
+        }}
+        style={{
+          zIndex: 10000
         }}
         open={props.info}
         autoHideDuration={3000}

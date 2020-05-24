@@ -64,6 +64,7 @@ import { setRateLimited, setOperationPending, setQueryPending } from "../../../s
 import FullTopicTutorial from "./FullTopicTutorial";
 import ReplyButton from "../../../shared/buttons/ReplyButton";
 import PinButton from "./PinButton";
+import TippingButton from "../../../shared/buttons/TippingButton";
 
 interface MatchParams {
   id: string;
@@ -309,6 +310,8 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
               </Tooltip>
             )}
           </IconButton>
+
+          <TippingButton receiver={topic.author} />
 
           {topic.timestamp + allowedEditTimeMillis > Date.now() &&
           user != null &&

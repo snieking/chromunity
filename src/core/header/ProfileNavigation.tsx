@@ -7,16 +7,17 @@ import { AccountCircle, Chat, ExitToApp, Settings } from "@material-ui/icons";
 import NotificationsButton from "../../shared/buttons/NotificationsButton";
 import ThemeSwitcher from "../ThemeSwitcher";
 import { ChromunityUser } from "../../types";
+import { nFormatter } from "../../shared/util/util";
 
 interface Props {
   user: ChromunityUser;
   classes: Record<string, string>;
   unreadChats: number;
+  vibes: number;
 }
 
 const ProfileNavigation: React.FunctionComponent<Props> = (props: Props) => {
   const [profileAnchorEl, setProfileAnchorEl] = React.useState<null | HTMLElement>(null);
-
 
   function handleProfileClick(event: React.MouseEvent<HTMLButtonElement>) {
     setProfileAnchorEl(event.currentTarget);
@@ -24,6 +25,10 @@ const ProfileNavigation: React.FunctionComponent<Props> = (props: Props) => {
 
   function handleProfileClose() {
     setProfileAnchorEl(null);
+  }
+
+  function formattedVibe() {
+    return nFormatter(props.vibes, 1);
   }
 
   if (props.user != null) {
@@ -51,7 +56,9 @@ const ProfileNavigation: React.FunctionComponent<Props> = (props: Props) => {
           onClick={handleProfileClick}
         >
           <Tooltip title="Profile">
-            <AccountCircle />
+            <Badge badgeContent={props.vibes !== 0 ? formattedVibe() : 0} color="secondary">
+              <AccountCircle />
+            </Badge>
           </Tooltip>
         </IconButton>
 

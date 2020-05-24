@@ -14,7 +14,10 @@ import {
   ISetUser,
   IStoreDistrustedUsers,
   IVaultCancel,
-  IVaultSuccess
+  IVaultSuccess,
+  IStoreUserVibes,
+  ICheckUserVibes,
+  ISendVibes
 } from "./accountTypes";
 import { ChromunityUser } from "../../../types";
 import User from "ft3-lib/dist/ft3/user/user";
@@ -77,4 +80,19 @@ export const checkDistrustedUsers: ActionCreator<ICheckDistrustedUsers> = (user:
 export const storeDistrustedUsers: ActionCreator<IStoreDistrustedUsers> = (distrustedUsers: string[]) => ({
   type: AccountActionTypes.STORE_DISTRUSTED_USERS,
   distrustedUsers
+});
+
+export const checkUserVibes: ActionCreator<ICheckUserVibes> = () => ({
+  type: AccountActionTypes.CHECK_USER_VIBES
+})
+
+export const storeUserVibes: ActionCreator<IStoreUserVibes> = (vibes: number) => ({
+  type: AccountActionTypes.STORE_USER_VIBES,
+  vibes
+});
+
+export const sendVibes: ActionCreator<ISendVibes> = (receiver: string, vibes: number) => ({
+  type: AccountActionTypes.SEND_VIBES,
+  receiver,
+  vibes
 });

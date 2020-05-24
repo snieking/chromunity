@@ -8,6 +8,7 @@ operation register_user(name, account_id: byte_array) {
 	
     val account = ft3_acc.account @ { account_id };
     val user = create user(name = name.lower_case(), display_name = name, account, op_context.block_height);
+    create_balance(user, 0);
     
     create settings.user_settings(user, avatar = "" , description = "");
 }

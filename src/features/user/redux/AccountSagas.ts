@@ -5,12 +5,13 @@ import {
   AuthenticationStep,
   ICheckDistrustedUsers,
   IRegisterUser,
-  IVaultSuccess
+  IVaultSuccess,
+  ISendVibes
 } from "./accountTypes";
 import { takeLatest, put, select } from "redux-saga/effects";
 import { op, SSOStoreLocalStorage } from "ft3-lib";
 import config from "../../../config.js";
-import { getDistrustedUsers, getUsernameByAccountId } from "../../../core/services/UserService";
+import { getDistrustedUsers, getUsernameByAccountId, getVibes, sendVibes } from "../../../core/services/UserService";
 import { BLOCKCHAIN, executeOperations } from "../../../core/services/Postchain";
 import { clearSession, getUsername, setUsername } from "../../../shared/util/user-util";
 import logger from "../../../shared/util/logger";
@@ -23,7 +24,9 @@ import {
   setAuthenticationStep,
   setUser,
   storeDistrustedUsers,
-  vaultCancel
+  vaultCancel,
+  storeUserVibes,
+  checkUserVibes
 } from "./accountActions";
 import { ChromunityUser } from "../../../types";
 import { ApplicationState } from "../../../core/store";
@@ -43,6 +46,8 @@ export function* accountWatcher() {
   yield takeLatest(AccountActionTypes.AUTO_LOGIN, autoLoginSaga);
   yield takeLatest(AccountActionTypes.LOGOUT_ACCOUNT, logoutSaga);
   yield takeLatest(AccountActionTypes.CHECK_DISTRUSTED_USERS, checkDistrustedUsersSaga);
+  yield takeLatest(AccountActionTypes.CHECK_USER_VIBES, checkUserVibesSaga);
+  yield takeLatest(AccountActionTypes.SEND_VIBES, sendVibesSaga);
 }
 
 function* loginSaga() {
@@ -183,4 +188,30 @@ export function* checkDistrustedUsersSaga(action: ICheckDistrustedUsers) {
   const distrustedReps = action.user != null ? yield getDistrustedUsers(action.user) : [];
   yield put(storeDistrustedUsers(distrustedReps));
   logger.silly("[SAGA - FINISHED]: Checking distrusted reps");
+}
+
+export function* checkUserVibesSaga() {
+  logger.silly("[SAGA - STARTED]: Checking user vibes");
+  const user = yield select(getUser);
+
+  if (user && config.features.vibeEnabled) {
+    const vibes = yield getVibes(user.name);
+    yield put(storeUserVibes(vibes));
+  }
+
+  logger.silly("[SAGA - FINISHED]: Checking user vibes");
+}
+
+export function* sendVibesSaga(action: ISendVibes) {
+  logger.silly("[SAGA - STARTED]: Send vibes");
+
+  const user = yield select(getUser);
+
+  if (user && config.features.vibeEnabled) {
+    yield sendVibes(user, action.receiver, action.vibes);
+    yield put(checkUserVibes());
+    yield put(notifySuccess(`Sent ${action.vibes} ${action.vibes > 1 ? "vibes" : "vibe"} to @${action.receiver}`));
+  }
+
+  logger.silly("[SAGA - FINISHED]: Send vibes");
 }
