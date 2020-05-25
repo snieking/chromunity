@@ -2,7 +2,6 @@ import { ChatActions, ChatActionTypes, ChatState } from "./chatTypes";
 import { Reducer } from "redux";
 
 const initialChatState: ChatState = {
-  loading: false,
   rsaKey: null,
   successfullyAuthorized: false,
   chats: [],
@@ -50,14 +49,12 @@ export const chatReducer: Reducer<ChatState, ChatActions> = (state = initialChat
     }
     case ChatActionTypes.LEAVE_CHAT: {
       return {
-        ...state,
-        loading: true
+        ...state
       }
     }
     case ChatActionTypes.CREATE_NEW_CHAT: {
       return {
-        ...state,
-        loading: true
+        ...state
       }
     }
     case ChatActionTypes.STORE_CHAT_USERS: {

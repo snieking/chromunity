@@ -109,7 +109,6 @@ export type TopicWallActions =
   | IClearTopicsCache;
 
 export interface TopicWallState {
-  loading: boolean;
   topics: Topic[];
   couldExistOlder: boolean;
   all: {

@@ -2,19 +2,13 @@ import React from "react";
 
 import {
   Button,
-  Card,
-  CardActions,
-  CardContent,
   Container,
   createStyles,
   Grid,
-  Typography,
   withStyles,
   WithStyles,
 } from "@material-ui/core";
 import {
-  blocksUntilElectionWrapsUp,
-  blocksUntilNextElection,
   getElectionCandidates,
   getElectionVoteForUser,
   getNextElectionTimestamp,
@@ -29,16 +23,19 @@ import { ApplicationState } from "../../../core/store";
 import { connect } from "react-redux";
 import { toLowerCase } from "../../../shared/util/util";
 import ElectionTutorial from "./ElectionTutorial";
+import ElectionDetails from "./ElectionDetails";
+import { ElectionStatus } from "./ElectionStatus";
 
 const styles = createStyles({
-  electionCard: {
-    textAlign: "center",
-    marginTop: "28px",
-  },
   actionBtn: {
     textAlign: "center",
     margin: "0 auto",
   },
+  participateBtn: {
+    textAlign: "center",
+    marginTop: "10px",
+    marginBottom: "10px"
+  }
 });
 
 interface Props extends WithStyles<typeof styles> {
@@ -47,10 +44,7 @@ interface Props extends WithStyles<typeof styles> {
 
 export interface ElectionState {
   timestamp: number;
-  activeElection: boolean;
-  blocksUntilElectionWrapsUp: number;
-  blocksUntilNextElection: number;
-  electionId: string;
+  electionStatus: ElectionStatus;
   votedFor: string;
   isACandidate: boolean;
   electionCandidates: string[];
@@ -62,10 +56,7 @@ const Election = withStyles(styles)(
     constructor(props: Props) {
       super(props);
       this.state = {
-        activeElection: false,
-        blocksUntilElectionWrapsUp: -1,
-        blocksUntilNextElection: -1,
-        electionId: "",
+        electionStatus: ElectionStatus.NOT_CHECKED,
         timestamp: Date.now(),
         votedFor: "",
         isACandidate: false,
@@ -80,11 +71,7 @@ const Election = withStyles(styles)(
     componentDidMount(): void {
       getNextElectionTimestamp().then((election) => {
         if (election != null) {
-          this.setState({
-            timestamp: election.timestamp,
-            activeElection: true,
-            electionId: election.id,
-          });
+          this.setState({ electionStatus: ElectionStatus.ONGOING });
 
           getElectionCandidates()
             .then((candidates) => this.setState({ electionCandidates: candidates }))
@@ -101,10 +88,8 @@ const Election = withStyles(styles)(
           if (this.props.user != null) {
             this.handleUserExists();
           }
-
-          blocksUntilElectionWrapsUp().then((blocks) => this.setState({ blocksUntilElectionWrapsUp: blocks }));
         } else {
-          blocksUntilNextElection().then((blocks) => this.setState({ blocksUntilNextElection: blocks }));
+          this.setState({ electionStatus: ElectionStatus.FINISHED });
         }
       });
     }
@@ -130,50 +115,25 @@ const Election = withStyles(styles)(
       });
     }
 
-    renderElectionVoteStatus() {
-      let text =
-        this.state.blocksUntilElectionWrapsUp !== -1
-          ? "An election is in progress and will finish in " + this.state.blocksUntilElectionWrapsUp + " blocks"
-          : "An election is in progress";
-
-      if (!this.state.activeElection) {
-        text =
-          this.state.blocksUntilNextElection !== -1
-            ? "No election is currently in progress, next one is in " + this.state.blocksUntilNextElection + " blocks"
-            : "No election is currently in progress.";
-      } else if (this.state.votedFor !== "") {
-        text = "Thanks for doing your duty as a Chromian!";
-        if (this.state.blocksUntilElectionWrapsUp !== -1) {
-          text = text + " The election will finish in " + this.state.blocksUntilElectionWrapsUp + " blocks";
-        }
-      } else if (this.props.user == null) {
-        text = "Sign-in to be able to vote & participate in the election";
-      }
-
-      return (
-        <Typography variant="subtitle1" component="p">
-          {text}
-        </Typography>
-      );
-    }
-
     renderParticipateButton() {
       if (
-        this.state.activeElection &&
+        ElectionStatus.ONGOING === this.state.electionStatus &&
         this.props.user != null &&
         this.props.user.name != null &&
         !this.state.isACandidate &&
         this.state.isEligibleForVoting
       ) {
         return (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => this.registerForElection()}
-            className={this.props.classes.actionBtn}
-          >
-            Participate in the election
-          </Button>
+          <div className={this.props.classes.participateBtn}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => this.registerForElection()}
+              className={this.props.classes.actionBtn}
+            >
+              Participate in the election
+            </Button>
+          </div>
         );
       }
     }
@@ -190,10 +150,8 @@ const Election = withStyles(styles)(
       return (
         <Container fixed>
           <ChromiaPageHeader text="Election" />
-          <Card raised={false} key={"next-election"} className={this.props.classes.electionCard}>
-            <CardContent data-tut="election_status">{this.renderElectionVoteStatus()}</CardContent>
-            <CardActions>{this.renderParticipateButton()}</CardActions>
-          </Card>
+          <ElectionDetails electionStatus={this.state.electionStatus} />
+          {this.renderParticipateButton()}
           <br />
           <Grid container spacing={1} data-tut="candidates">
             {this.state.electionCandidates.map((candidate) => (

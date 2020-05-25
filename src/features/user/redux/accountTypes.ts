@@ -101,7 +101,6 @@ export enum AuthenticationStep {
 }
 
 export interface AccountState {
-  loading: boolean;
   autoLoginInProgress: boolean;
   authenticationStep: AuthenticationStep;
   accountId: string;

@@ -25,7 +25,7 @@ module.exports = {
     message: "Local Environment"
   },
   features: {
-    userSocialsEnabled: true
+    pinEnabled: true
   },
   test: true,
   logLevel: "debug"

@@ -1,7 +1,6 @@
 import React, { FormEvent } from "react";
 
-import CreatableSelect from "react-select/creatable";
-import { ValueType } from "react-select/src/types";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 import { Badge, Dialog, Tab, Tabs, withStyles, WithStyles, Typography, Theme } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -13,14 +12,7 @@ import { createTopic } from "../../core/services/TopicService";
 import { ChromunityUser, PollSpecification } from "../../types";
 import { getTrendingChannels } from "../../core/services/ChannelService";
 import { largeButtonStyles } from "./ButtonStyles";
-import {
-  COLOR_CHROMIA_DARK,
-  COLOR_CHROMIA_DARK_LIGHTER,
-  COLOR_CHROMIA_LIGHT,
-  COLOR_CHROMIA_LIGHTER,
-  COLOR_OFF_WHITE,
-  COLOR_RED,
-} from "../../theme";
+import { COLOR_RED } from "../../theme";
 import MarkdownRenderer from "../MarkdownRenderer";
 import withTheme from "@material-ui/core/styles/withTheme";
 import { parseEmojis } from "../util/text-parsing";
@@ -32,11 +24,6 @@ import TextToolbar from "../textToolbar/TextToolbar";
 import PollCreator from "../../features/topic/poll/PollCreator";
 import PollIcon from "@material-ui/icons/Poll";
 import { notifySuccess, setError } from "../../core/snackbar/redux/snackbarTypes";
-
-interface OptionType {
-  label: string;
-  value: string;
-}
 
 export interface NewTopicButtonProps extends WithStyles<typeof largeButtonStyles> {
   updateFunction: Function;
@@ -50,11 +37,10 @@ export interface NewTopicButtonProps extends WithStyles<typeof largeButtonStyles
 export interface NewTopicButtonState {
   dialogOpen: boolean;
   topicTitle: string;
-  topicChannel: string;
   topicMessage: string;
   displayPoll: boolean;
-  suggestions: OptionType[];
-  channel: ValueType<OptionType>;
+  suggestions: string[];
+  channel: string;
   activeTab: number;
   poll: PollSpecification;
 }
@@ -72,8 +58,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
 
         this.state = {
           topicTitle: "",
-          topicChannel: this.props.channel,
-          channel: this.props.channel !== "" ? { value: this.props.channel, label: this.props.channel } : null,
+          channel: this.props.channel ? this.props.channel : null,
           topicMessage: "",
           dialogOpen: false,
           displayPoll: false,
@@ -89,18 +74,16 @@ const NewTopicButton = withStyles(largeButtonStyles)(
 
         this.toggleNewTopicDialog = this.toggleNewTopicDialog.bind(this);
         this.handleDialogTitleChange = this.handleDialogTitleChange.bind(this);
-        this.handleChannelChange = this.handleChannelChange.bind(this);
         this.handleDialogMessageChange = this.handleDialogMessageChange.bind(this);
         this.createNewTopic = this.createNewTopic.bind(this);
-        this.handleChangeSingle = this.handleChangeSingle.bind(this);
         this.handleTabChange = this.handleTabChange.bind(this);
         this.addText = this.addText.bind(this);
       }
 
       componentDidMount() {
-        getTrendingChannels(7).then((channels) =>
+        getTrendingChannels(7, 100).then((channels) =>
           this.setState({
-            suggestions: channels.map((channel) => ({ value: channel, label: channel } as OptionType)),
+            suggestions: channels.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })),
           })
         );
       }
@@ -115,12 +98,6 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         this.setState({ topicMessage: parseEmojis(event.target.value) });
       }
 
-      handleChannelChange(event: React.ChangeEvent<HTMLInputElement>) {
-        event.preventDefault();
-        event.stopPropagation();
-        this.setState({ topicChannel: event.target.value });
-      }
-
       handleDialogTitleChange(event: React.ChangeEvent<HTMLInputElement>) {
         event.preventDefault();
         event.stopPropagation();
@@ -130,17 +107,16 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       createNewTopic(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const topicTitle: string = this.state.topicTitle;
+        const channel: string = this.state.channel;
 
-        if (this.state.channel == null) {
+        if (channel == null) {
           this.props.setError("A channel must be supplied");
         } else {
-          const topicChannel: string = (this.state.channel as OptionType).value;
-
           if (topicTitle.length > maxTitleLength) {
             this.props.setError("Title is too long");
-          } else if (!/^[a-zA-Z0-9]+$/.test(topicChannel)) {
+          } else if (!/^[a-zA-Z0-9]+$/.test(channel)) {
             this.props.setError("Channel may only contain a-z, A-Z & 0-9 characters");
-          } else if (topicChannel.length > maxChannelLength) {
+          } else if (channel.length > maxChannelLength) {
             this.props.setError("Channel is too long");
           } else if (topicTitle.length < 3 || topicTitle.startsWith(" ")) {
             this.props.setError("Title must be longer than 3 characters, and must not start with a whitespace");
@@ -148,7 +124,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
             const topicMessage = this.state.topicMessage;
             this.setState({ topicTitle: "", topicMessage: "" });
 
-            createTopic(this.props.user, topicChannel, topicTitle, topicMessage, this.state.poll)
+            createTopic(this.props.user, channel, topicTitle, topicMessage, this.state.poll)
               .then(() => {
                 this.props.setSuccess("Topic created");
                 this.props.updateFunction();
@@ -177,84 +153,51 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         }
       }
 
-      handleChangeSingle(value: ValueType<OptionType>) {
-        if (value != null) {
-          this.setState({ channel: value });
-        }
-      }
-
       newThreadDialog() {
-        const { theme } = this.props;
-        const darkTheme = theme.palette.type === "dark";
-
-        const textColor = darkTheme ? COLOR_OFF_WHITE : COLOR_CHROMIA_DARK;
-        const backgroundColor = darkTheme ? COLOR_CHROMIA_DARK : COLOR_CHROMIA_LIGHTER;
-        const borderColor = darkTheme ? COLOR_CHROMIA_DARK_LIGHTER : COLOR_CHROMIA_LIGHT;
-
-        const customStyles = {
-          option: (provided: any) => ({
-            ...provided,
-            color: textColor,
-            background: backgroundColor,
-            border: "1px solid",
-            borderColor: borderColor,
-          }),
-          menu: (styles: any) => ({
-            ...styles,
-            zIndex: 999,
-            background: backgroundColor,
-          }),
-          control: (provided: any) => ({
-            ...provided,
-            background: backgroundColor,
-            color: theme.palette.primary.main,
-            borderColor: theme.palette.primary.main,
-            "&:hover": { borderColor: textColor },
-            boxShadow: "none",
-          }),
-          singleValue: (provided: any, state: any) => {
-            const opacity = state.isDisabled ? 1 : 1;
-            const transition = "opacity 300ms";
-            const color = textColor;
-            return { ...provided, color, opacity, transition };
-          },
-          input: (provided: any) => {
-            const color = textColor;
-            return { ...provided, color };
-          },
-          noOptionsMessage: (provided: any) => {
-            const color = textColor;
-            return { ...provided, color };
-          },
-        };
         return (
           <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"md"}>
             <form onSubmit={this.createNewTopic}>
               <DialogContent>
                 <br />
-                <CreatableSelect
-                  placeholder={"Create or select channel..."}
-                  isSearchable={true}
+                <Autocomplete
+                  id="combo-box-demo"
                   options={this.state.suggestions}
+                  style={{ maxWidth: "300px", width: "95%" }}
+                  freeSolo
                   value={this.state.channel}
-                  onChange={this.handleChangeSingle}
-                  styles={customStyles}
+                  onChange={(event: any, newValue: string | null) => {
+                    this.setState({ channel: newValue });
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Channel"
+                      variant="outlined"
+                      onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                        this.setState({ channel: event.target.value })
+                      }
+                    />
+                  )}
                 />
                 <br />
-                <Badge color="secondary" badgeContent={maxTitleLength - this.state.topicTitle.length} showZero>
+                <Badge
+                  color={maxTitleLength - this.state.topicTitle.length < 0 ? "error" : "primary"}
+                  badgeContent={maxTitleLength - this.state.topicTitle.length}
+                  showZero
+                  style={{ maxWidth: "350px", width: "95%" }}
+                >
                   <TextField
                     autoFocus
                     margin="dense"
                     type="text"
                     id="title"
                     label="Title"
-                    fullWidth
                     onChange={this.handleDialogTitleChange}
                     value={this.state.topicTitle}
                     variant="outlined"
+                    fullWidth
                   />
                 </Badge>
-
                 <Tabs value={this.state.activeTab} onChange={this.handleTabChange} aria-label="New topic">
                   <Tab
                     label={
@@ -391,7 +334,7 @@ const mapStateToProps = (store: ApplicationState) => {
 const mapDispatchToProps = (dispatch: any) => {
   return {
     setError: (msg: string) => dispatch(setError(msg)),
-    setSuccess: (msg: string) => dispatch(notifySuccess(msg))
+    setSuccess: (msg: string) => dispatch(notifySuccess(msg)),
   };
 };
 

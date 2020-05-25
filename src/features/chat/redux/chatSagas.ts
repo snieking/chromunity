@@ -1,4 +1,4 @@
-import { setRateLimited } from "./../../../shared/redux/CommonActions";
+import { setRateLimited, setQueryPending, setOperationPending } from "./../../../shared/redux/CommonActions";
 import { setError, notifySuccess } from "../../../core/snackbar/redux/snackbarTypes";
 import {
   AddUserToChatAction,
@@ -100,6 +100,7 @@ const shouldUpdate = (updated: number): boolean => {
 
 export function* checkChatAuthenticationSaga() {
   logger.silly("[SAGA - STARTED]: Check chat authentication");
+  yield put(setQueryPending(true));
   const rsaKey = yield select(getRsaKey);
 
   if (rsaKey == null) {
@@ -111,6 +112,7 @@ export function* checkChatAuthenticationSaga() {
     }
   }
 
+  yield put(setQueryPending(false));
   logger.silly("[SAGA - FINISHED]: Check chat authentication");
 }
 
@@ -122,6 +124,7 @@ export function* createChatKeyPairSaga(action: CreateChatKeyPairAction) {
   const rsaPubKey = rsaKeyToPubKey(rsaKey);
 
   try {
+    yield put(setOperationPending(true));
     if (pubKey != null && pubKey !== rsaPubKey) {
       logger.info("New pubkey didn't match old one");
       yield put(setError("Incorrect passphrase"));
@@ -137,6 +140,8 @@ export function* createChatKeyPairSaga(action: CreateChatKeyPairAction) {
   } catch (error) {
     yield put(setError(error.message));
     yield put(setRateLimited(true));
+  } finally {
+    yield put(setOperationPending(false));
   }
 
   logger.silly("[SAGA - FINISHED]: Creating chat key pair");
@@ -153,6 +158,7 @@ export function* createNewChatSaga(action: CreateNewChatAction) {
   const encryptedSharedChatKey = yield rsaEncrypt(sharedChatKey.toString("hex"), rsaPubKey);
 
   try {
+    yield put(setOperationPending(true));
     yield createNewChat(action.user, id, encryptedSharedChatKey.cipher);
     yield put(loadUserChats(action.user, true));
 
@@ -160,6 +166,8 @@ export function* createNewChatSaga(action: CreateNewChatAction) {
   } catch (error) {
     yield put(setError(error.message));
     yield put(setRateLimited(true));
+  } finally {
+    yield put(setOperationPending(false));
   }
 
   logger.silly("[SAGA - FINISHED]: Create new chat");
@@ -174,6 +182,7 @@ export function* addUserToChatSaga(action: AddUserToChatAction) {
       const targetUserPubKey = yield getUserPubKey(action.username);
 
       if (targetUserPubKey != null) {
+        yield put(setOperationPending(true));
         const chat = yield select(getActiveChat);
         const rsaKey = yield select(getRsaKey);
 
@@ -190,6 +199,8 @@ export function* addUserToChatSaga(action: AddUserToChatAction) {
   } catch (error) {
     yield put(setError(error.message));
     yield put(setRateLimited(true));
+  } finally {
+    yield put(setOperationPending(false));
   }
 
   logger.silly("[SAGA - FINISHED]: Add user to chat");
@@ -200,7 +211,9 @@ export function* leaveChatSaga(action: LeaveChatAction) {
   const chat = yield select(getActiveChat);
 
   try {
+    yield put(setOperationPending(true));
     yield leaveChat(action.user, chat.id);
+    yield put(setOperationPending(false));
     yield put(loadUserChats(action.user, true));
 
     chatEvent("leave");
@@ -217,6 +230,7 @@ export function* loadUserChatsSaga(action: LoadUserChatsAction) {
   const lastUpdate = yield select(getLastUpdate);
 
   if (action.force || shouldUpdate(lastUpdate)) {
+    yield put(setQueryPending(true));
     const chats: Chat[] = yield getUserChats(action.user.name);
     const prevChats: Chat[] = yield select(getChats);
     if (prevChats == null || !arraysEqual(chats, prevChats)) {
@@ -238,6 +252,8 @@ export function* loadUserChatsSaga(action: LoadUserChatsAction) {
         yield put(openChat(chats[0], action.user));
       }
     }
+
+    yield put(setQueryPending(false));
   }
 
   logger.silly("[SAGA - FINISHED]: Load user chats");
@@ -246,6 +262,7 @@ export function* loadUserChatsSaga(action: LoadUserChatsAction) {
 export function* openChatSaga(action: OpenChatAction) {
   logger.silly("[SAGA - STARTED]: Open chat");
   if (action.chat != null) {
+    yield put(setQueryPending(true));
     const chatMessages = yield getChatMessages(action.chat.id, Date.now(), PAGE_SIZE);
     const rsaKey = yield select(getRsaKey);
     const sharedChatKey: any = yield rsaDecrypt(action.chat.encrypted_chat_key, rsaKey);
@@ -266,6 +283,7 @@ export function* openChatSaga(action: OpenChatAction) {
 
     yield markChatAsRead(action.user, action.chat.id);
     yield put(countUnreadChatsAction(action.user));
+    yield put(setQueryPending(false));
   } else {
     yield put(storeDecryptedChat(null, []));
   }
@@ -338,6 +356,7 @@ export function* sendMessageSaga(action: SendMessageAction) {
   const sharedChatKey: any = yield rsaDecrypt(action.chat.encrypted_chat_key, rsaKey);
 
   try {
+    yield put(setOperationPending(true));
     yield sendChatMessage(action.user, action.chat.id, encrypt(action.message, sharedChatKey.plaintext));
 
     const previousMessages: ChatMessageDecrypted[] = yield select(getActiveChatMessages);
@@ -355,7 +374,10 @@ export function* sendMessageSaga(action: SendMessageAction) {
   } catch (error) {
     yield put(setError(error.message));
     yield put(setRateLimited(true));
+  } finally {
+    yield put(setOperationPending(false));
   }
+
   logger.silly("[SAGA - FINISHED]: Send message");
 }
 
@@ -363,6 +385,7 @@ export function* modifyTitleSaga(action: ModifyTitleAction) {
   logger.silly("[SAGA - STARTED]: Modify title");
 
   try {
+    yield put(setOperationPending(true));
     yield modifyTitle(action.user, action.chat.id, action.title);
 
     const updatedChat: Chat = {
@@ -380,6 +403,8 @@ export function* modifyTitleSaga(action: ModifyTitleAction) {
   } catch (error) {
     yield put(setError(error.message));
     yield put(setRateLimited(true));
+  } finally {
+    yield put(setOperationPending(false));
   }
 
   logger.silly("[SAGA - FINISHED]: Modify title");
@@ -390,10 +415,12 @@ export function* loadChatUsersSaga(action: LoadChatUsersAction) {
   const lastUpdated = yield select(getChatUsersLastUpdate);
 
   if (shouldUpdate(lastUpdated)) {
+    yield put(setQueryPending(true));
     const followedChatUsers = yield getFollowedChatUsers(action.user.name);
     const chatUsers = yield getChatUsers();
 
     yield put(storeChatUsersAction(followedChatUsers, chatUsers));
+    yield put(setQueryPending(false));
   }
 
   logger.silly("[SAGA - FINISHED]: Load chat users");
@@ -402,8 +429,10 @@ export function* loadChatUsersSaga(action: LoadChatUsersAction) {
 export function* deleteChatUserSaga(action: DeleteChatUserAction) {
   logger.silly("[SAGA - STARTED]: Delete chat user");
 
+  yield put(setOperationPending(true));
   yield deleteChatUser(action.user);
   yield put(notifySuccess("Chat account resetted"));
+  yield put(setOperationPending(false));
 
   chatEvent("delete-user");
   logger.silly("[SAGA - FINISHED]: Delete chat user");
@@ -414,6 +443,7 @@ export function* loadOlderMessagesSaga() {
   const messages: ChatMessageDecrypted[] = yield select(getActiveChatMessages);
 
   if (messages != null && messages.length >= PAGE_SIZE) {
+    yield put(setQueryPending(true));
     const chat = yield select(getActiveChat);
 
     const encOlderMessages = yield getChatMessages(chat.id, messages[0].timestamp, PAGE_SIZE);
@@ -430,6 +460,7 @@ export function* loadOlderMessagesSaga() {
         determineCouldExistOlderMessages(decryptedMessages.length, couldExistOlder)
       )
     );
+    yield put(setQueryPending(false));
   } else {
     logger.debug(
       "Messages [%s] are less than pageSize [%s], there shouldn't be any older messages",

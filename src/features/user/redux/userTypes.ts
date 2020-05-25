@@ -58,7 +58,6 @@ export type UserPageActions =
   | UpdateUserFollowedChannelsAction;
 
 export interface UserPageState {
-  loading: boolean;
   topics: Topic[];
   couldExistOlderTopics: boolean;
   replies: TopicReply[];

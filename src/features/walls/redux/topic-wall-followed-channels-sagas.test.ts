@@ -38,10 +38,10 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
   };
 
   const getUpdateTopicAction = (dispatchedActions: TopicWallActions[]): UpdateTopicsAction => {
-    expect(dispatchedActions.length).toBe(1);
-    const action = dispatchedActions[0];
-    expect(action.type).toBe(WallActionTypes.UPDATE_TOPICS_WALL);
-    return action as UpdateTopicsAction;
+    for (const action of dispatchedActions) {
+      if (action.type === WallActionTypes.UPDATE_TOPICS_WALL) return action as UpdateTopicsAction;
+    }
+    return null;
   };
 
   const createFakeTopics = (timestamp: number): Topic[] => {

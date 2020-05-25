@@ -1,3 +1,4 @@
+import { setQueryPending } from './../../../shared/redux/CommonActions';
 import {
   LoadAllTopicsByPopularityAction,
   LoadAllTopicWallAction,
@@ -68,6 +69,7 @@ export function* loadAllTopics(action: LoadAllTopicWallAction) {
     yield put(updateTopicWallFromCache(WallType.ALL));
     return;
   } else {
+    yield put(setQueryPending(true));
     topics = yield select(getAllTopics);
   }
 
@@ -89,10 +91,13 @@ export function* loadAllTopics(action: LoadAllTopicWallAction) {
       WallType.ALL
     )
   );
+
+  yield put(setQueryPending(false));
 }
 
 export function* loadOlderAllTopics(action: LoadOlderAllTopicsAction) {
   const topics: Topic[] = yield select(getAllTopics);
+  yield put(setQueryPending(true));
 
   let retrievedTopics: Topic[] = [];
   if (topics.length > 0) {
@@ -104,11 +109,14 @@ export function* loadOlderAllTopics(action: LoadOlderAllTopicsAction) {
   const updatedTopics: Topic[] = topics.concat(retrievedTopics);
 
   yield put(updateTopics(updatedTopics, retrievedTopics.length >= action.pageSize, WallType.ALL));
+  yield put(setQueryPending(false));
 }
 
 export function* loadAllTopicsByPopularity(action: LoadAllTopicsByPopularityAction) {
+  yield put(setQueryPending(true));
   const topics: Topic[] = yield getAllTopicsByPopularityAfterTimestamp(action.timestamp, action.pageSize);
   yield put(updateTopics(topics, false, WallType.NONE));
+  yield put(setQueryPending(false));
 }
 
 export function* loadFollowedUsersTopics(action: LoadFollowedUsersTopicWallAction) {
@@ -119,6 +127,7 @@ export function* loadFollowedUsersTopics(action: LoadFollowedUsersTopicWallActio
     return;
   }
 
+  yield put(setQueryPending(true));
   const topics: Topic[] = yield select(getFollowedUsersTopics);
 
   let retrievedTopics: Topic[];
@@ -142,6 +151,8 @@ export function* loadFollowedUsersTopics(action: LoadFollowedUsersTopicWallActio
       WallType.USER
     )
   );
+
+  yield put(setQueryPending(false));
 }
 
 export function* loadOlderFollowedUsersTopics(action: LoadOlderFollowedUsersTopicsAction) {
@@ -149,6 +160,7 @@ export function* loadOlderFollowedUsersTopics(action: LoadOlderFollowedUsersTopi
 
   let retrievedTopics: Topic[] = [];
   if (topics.length > 0) {
+    yield put(setQueryPending(true));
     retrievedTopics = yield getTopicsFromFollowsPriorToTimestamp(
       action.username,
       topics[topics.length - 1].last_modified,
@@ -157,15 +169,18 @@ export function* loadOlderFollowedUsersTopics(action: LoadOlderFollowedUsersTopi
   }
 
   yield put(updateTopics(topics.concat(retrievedTopics), retrievedTopics.length >= action.pageSize, WallType.USER));
+  yield put(setQueryPending(false));
 }
 
 export function* loadFollowedUsersTopicsByPopularity(action: LoadFollowedUsersTopicsByPopularityAction) {
+  yield put(setQueryPending(true));
   const topics: Topic[] = yield getTopicsByFollowsSortedByPopularityAfterTimestamp(
     action.username,
     action.timestamp,
     action.pageSize
   );
   yield put(updateTopics(topics, false, WallType.NONE));
+  yield put(setQueryPending(false));
 }
 
 export function* loadFollowedChannelsTopics(action: LoadFollowedChannelsTopicWallAction) {
@@ -176,6 +191,7 @@ export function* loadFollowedChannelsTopics(action: LoadFollowedChannelsTopicWal
     return;
   }
 
+  yield put(setQueryPending(true));
   const topics: Topic[] = yield select(getFollowedChannelsTopics);
 
   let retrievedTopics: Topic[];
@@ -200,6 +216,7 @@ export function* loadFollowedChannelsTopics(action: LoadFollowedChannelsTopicWal
       WallType.CHANNEL
     )
   );
+  yield put(setQueryPending(false));
 }
 
 export function* loadOlderFollowedChannelsTopics(action: LoadOlderFollowedChannelsTopicsAction) {
@@ -207,6 +224,7 @@ export function* loadOlderFollowedChannelsTopics(action: LoadOlderFollowedChanne
 
   let retrievedTopics: Topic[] = [];
   if (topics.length > 0) {
+    yield put(setQueryPending(true));
     retrievedTopics = yield getTopicsFromFollowedChannelsPriorToTimestamp(
       action.username,
       topics[topics.length - 1].last_modified,
@@ -215,13 +233,16 @@ export function* loadOlderFollowedChannelsTopics(action: LoadOlderFollowedChanne
   }
 
   yield put(updateTopics(topics.concat(retrievedTopics), retrievedTopics.length >= action.pageSize, WallType.CHANNEL));
+  yield put(setQueryPending(false));
 }
 
 export function* loadFollowedChannelsTopicsByPopularity(action: LoadFollowedChannelsTopicsByPopularityAction) {
+  yield put(setQueryPending(true));
   const topics: Topic[] = yield getTopicsByFollowedChannelSortedByPopularityAfterTimestamp(
     action.username,
     action.timestamp,
     action.pageSize
   );
   yield put(updateTopics(topics, false, WallType.NONE));
+  yield put(setQueryPending(false));
 }

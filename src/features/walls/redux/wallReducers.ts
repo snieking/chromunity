@@ -9,7 +9,6 @@ import {
 import { Reducer } from "redux";
 
 const initialTopicWallState: TopicWallState = {
-  loading: false,
   topics: [],
   couldExistOlder: false,
   all: {
@@ -52,28 +51,10 @@ export const topicWallReducer: Reducer<TopicWallState, TopicWallActions> = (stat
         }
       }
     }
-    case WallActionTypes.LOAD_ALL_TOPIC_WALL:
-    case WallActionTypes.LOAD_OLDER_ALL_TOPICS:
-    case WallActionTypes.LOAD_ALL_TOPICS_BY_POPULARITY:
-    case WallActionTypes.LOAD_FOLLOWED_USERS_TOPIC_WALL:
-    case WallActionTypes.LOAD_OLDER_FOLLOWED_USERS_TOPICS:
-    case WallActionTypes.LOAD_FOLLOWED_USERS_TOPICS_BY_POPULARITY:
-    case WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPIC_WALL:
-    case WallActionTypes.LOAD_OLDER_FOLLOWED_CHANNELS_TOPICS:
-    case WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPICS_BY_POPULARITY: {
-      return setLoadingFinished(state);
-    }
     default: {
       return state;
     }
   }
-};
-
-const setLoadingFinished = (state: TopicWallState): TopicWallState => {
-  return {
-    ...state,
-    loading: true
-  };
 };
 
 const updateTopicsWall = (state: TopicWallState, action: UpdateTopicsAction): TopicWallState => {
@@ -91,8 +72,7 @@ const updateTopicsWall = (state: TopicWallState, action: UpdateTopicsAction): To
       return {
         ...state,
         topics: action.topics,
-        couldExistOlder: action.couldExistOlder,
-        loading: false
+        couldExistOlder: action.couldExistOlder
       };
     }
   }

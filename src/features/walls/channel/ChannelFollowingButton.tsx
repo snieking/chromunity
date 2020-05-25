@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ChromunityUser } from "../../../types";
 import { setError } from "../../../core/snackbar/redux/snackbarTypes";
-import { setRateLimited } from "../../../shared/redux/CommonActions";
+import { setRateLimited, setOperationPending } from "../../../shared/redux/CommonActions";
 import { connect } from "react-redux";
 import { ApplicationState } from "../../../core/store";
 import {
@@ -22,6 +22,7 @@ interface Props {
   setError: typeof setError;
   setRateLimited: typeof setRateLimited;
   clearTopicsCache: typeof clearTopicsCache;
+  setOperationPending: typeof setOperationPending;
 }
 
 const ChannelFollowingButton: React.FunctionComponent<Props> = (props) => {
@@ -47,6 +48,7 @@ const ChannelFollowingButton: React.FunctionComponent<Props> = (props) => {
     if (!loading) {
       props.clearTopicsCache();
       setLoading(true);
+      props.setOperationPending(true);
       if (followed) {
         unfollowChannel(props.user, props.channel)
           .catch((error: Error) => {
@@ -57,7 +59,10 @@ const ChannelFollowingButton: React.FunctionComponent<Props> = (props) => {
             setFollowed(false);
             setNrOfFollowers(nrOfFollowers - 1);
           })
-          .finally(() => setLoading(false));
+          .finally(() => {
+            setLoading(false);
+            props.setOperationPending(false);
+          });
       } else {
         followChannel(props.user, props.channel)
           .then(() => {
@@ -68,7 +73,10 @@ const ChannelFollowingButton: React.FunctionComponent<Props> = (props) => {
             props.setError(error.message);
             props.setRateLimited();
           })
-          .finally(() => setLoading(false));
+          .finally(() => {
+            setLoading(false);
+            props.setOperationPending(false);
+          });
       }
     }
   }
@@ -93,6 +101,7 @@ const mapDispatchToProps = (dispatch: any) => {
     setError: (msg: string) => dispatch(setError(msg)),
     setRateLimited: () => dispatch(setRateLimited()),
     clearTopicsCache: () => dispatch(clearTopicsCache()),
+    setOperationPending: (pending: boolean) => dispatch(setOperationPending(pending))
   };
 };
 

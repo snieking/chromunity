@@ -12,6 +12,7 @@ import {
   Tooltip,
   withStyles,
   WithStyles,
+  Theme,
 } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 
@@ -55,41 +56,52 @@ import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import SocialBar from "./socials/SocialBar";
 import { Socials } from "./socials/socialTypes";
 import { setError } from "../../core/snackbar/redux/snackbarTypes";
-import { setRateLimited } from "../../shared/redux/CommonActions";
+import { setRateLimited, setOperationPending } from "../../shared/redux/CommonActions";
 import ProfileTutorial from "./ProfileTutorial";
 
-const styles = createStyles({
-  iconRed: {
-    color: COLOR_RED,
-  },
-  iconYellow: {
-    color: COLOR_YELLOW,
-  },
-  iconOrange: {
-    color: COLOR_ORANGE,
-  },
-  contentWrapper: {
-    float: "left",
-    marginTop: "10px",
-    marginLeft: "10px",
-    marginRight: "10px",
-  },
-  description: {
-    marginRight: "12px",
-    marginTop: "5px",
-    marginLeft: "10px",
-  },
-  bottomBar: {
-    float: "right",
-    marginBottom: "5px",
-    marginTop: "5px",
-  },
-  socials: {
-    position: "relative",
-    bottom: 0,
-    left: 0,
-  },
-});
+const styles = (theme: Theme) =>
+  createStyles({
+    iconRed: {
+      color: COLOR_RED,
+    },
+    iconYellow: {
+      color: COLOR_YELLOW,
+    },
+    iconOrange: {
+      color: COLOR_ORANGE,
+    },
+    contentWrapper: {
+      float: "left",
+      marginTop: "10px",
+      marginLeft: "10px",
+      marginRight: "10px",
+    },
+    description: {
+      marginRight: "12px",
+      marginTop: "5px",
+      marginLeft: "10px",
+    },
+    bottomBarWrapper: {
+      position: "relative",
+      marginTop: "15px",
+    },
+    bottomBar: {
+      float: "right",
+      marginBottom: "5px",
+      marginTop: "5px",
+      maxWidth: "60%",
+      display: "inline",
+    },
+    socials: {
+      visibility: "hidden",
+      position: "absolute",
+      bottom: -35,
+      maxWidth: "35%",
+      [theme.breakpoints.up("sm")]: {
+        visibility: "visible",
+      },
+    },
+  });
 
 interface ProfileCardProps extends WithStyles<typeof styles> {
   username: string;
@@ -100,6 +112,7 @@ interface ProfileCardProps extends WithStyles<typeof styles> {
   setRateLimited: typeof setRateLimited;
   clearTopicsCache: typeof clearTopicsCache;
   checkDistrustedUsers: typeof checkDistrustedUsers;
+  setOperationPending: typeof setOperationPending;
 }
 
 interface ProfileCardState {
@@ -207,12 +220,14 @@ const ProfileCard = withStyles(styles)(
                 {this.state.description !== "" ? this.state.description : "I haven't written any description yet..."}
               </Typography>
               <div style={{ clear: "left" }} />
-              {this.renderIcons()}
-              {this.state.socials && (
-                <div className={this.props.classes.socials}>
-                  <SocialBar socials={this.state.socials} />
-                </div>
-              )}
+              <div className={this.props.classes.bottomBarWrapper}>
+                {this.state.socials && (
+                  <div className={this.props.classes.socials}>
+                    <SocialBar socials={this.state.socials} />
+                  </div>
+                )}
+                {this.renderIcons()}
+              </div>
             </Card>
             <ProfileTutorial />
           </div>
@@ -224,6 +239,7 @@ const ProfileCard = withStyles(styles)(
 
     toggleFollowing() {
       this.props.clearTopicsCache();
+      this.props.setOperationPending(true);
       if (this.state.following) {
         removeFollowing(this.props.user, this.props.username)
           .catch((error) => {
@@ -236,7 +252,8 @@ const ProfileCard = withStyles(styles)(
               followers: prevState.followers - 1,
               userFollowings: prevState.userFollowings,
             }));
-          });
+          })
+          .finally(() => this.props.setOperationPending(false));
       } else {
         createFollowing(this.props.user, this.props.username)
           .catch((error) => {
@@ -249,7 +266,8 @@ const ProfileCard = withStyles(styles)(
               followers: prevState.followers + 1,
               userFollowings: prevState.userFollowings,
             }));
-          });
+          })
+          .finally(() => this.props.setOperationPending(false));
       }
     }
 
@@ -280,7 +298,8 @@ const ProfileCard = withStyles(styles)(
 
     suspendUser() {
       this.setState({ suspendUserDialogOpen: false });
-      suspendUser(this.props.user, this.props.username);
+      this.props.setOperationPending(true);
+      suspendUser(this.props.user, this.props.username).finally(() => this.props.setOperationPending(false));
     }
 
     handleSuspendUserClose() {
@@ -290,11 +309,12 @@ const ProfileCard = withStyles(styles)(
     }
 
     toggleDistrustUser() {
+      this.props.setOperationPending(true);
       const distrusted: boolean = !this.state.distrusted;
       this.setState({ distrusted: distrusted }, () =>
-        toggleUserDistrust(this.props.user, this.props.username, distrusted).then(() =>
-          this.props.checkDistrustedUsers(this.props.user)
-        )
+        toggleUserDistrust(this.props.user, this.props.username, distrusted)
+          .then(() => this.props.checkDistrustedUsers(this.props.user))
+          .finally(() => this.props.setOperationPending(false))
       );
     }
 
@@ -430,6 +450,7 @@ const mapDispatchToProps = (dispatch: any) => {
     checkDistrustedUsers: (user: ChromunityUser) => dispatch(checkDistrustedUsers(user)),
     setError: (msg: string) => dispatch(setError(msg)),
     setRateLimited: () => dispatch(setRateLimited()),
+    setOperationPending: (pending: boolean) => dispatch(setOperationPending(pending)),
   };
 };
 

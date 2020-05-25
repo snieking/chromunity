@@ -13,6 +13,7 @@ import {
   getTopicsByChannelSortedByPopularityAfterTimestamp
 } from "../../../core/services/TopicService";
 import { updateChannel } from "./channelActions";
+import { setQueryPending } from "../../../shared/redux/CommonActions";
 
 export function* channelWatcher() {
   yield takeLatest(ChannelActionTypes.LOAD_CHANNEL, loadChannel);
@@ -24,6 +25,7 @@ export const getPreviousChannel = (state: ApplicationState) => state.channel.nam
 export const getTopics = (state: ApplicationState) => state.channel.topics;
 
 export function* loadChannel(action: LoadChannelAction) {
+  yield put(setQueryPending(true));
   const previousChannel: string = yield select(getPreviousChannel);
   const previousTopics: Topic[] = yield select(getTopics);
 
@@ -36,6 +38,7 @@ export function* loadChannel(action: LoadChannelAction) {
   }
 
   yield put(updateChannel(action.name, topics, topics.length >= action.pageSize));
+  yield put(setQueryPending(false));
 }
 
 export function* loadOlderTopicsInChannel(action: LoadOlderTopicsInChannelAction) {
@@ -44,6 +47,7 @@ export function* loadOlderTopicsInChannel(action: LoadOlderTopicsInChannelAction
 
   let topics: Topic[] = [];
   if (previousTopics.length > 0) {
+    yield put(setQueryPending(true));
     topics = yield getTopicsByChannelPriorToTimestamp(
       previousChannel,
       previousTopics[previousTopics.length - 1].last_modified,
@@ -52,9 +56,11 @@ export function* loadOlderTopicsInChannel(action: LoadOlderTopicsInChannelAction
   }
 
   yield put(updateChannel(previousChannel, previousTopics.concat(topics), topics.length >= action.pageSize));
+  yield put(setQueryPending(false));
 }
 
 export function* loadChannelByPopularity(action: LoadChannelByPopularityAction) {
+  yield put(setQueryPending(true));
   const topics: Topic[] = yield getTopicsByChannelSortedByPopularityAfterTimestamp(
     action.name,
     action.timestamp,
@@ -62,4 +68,5 @@ export function* loadChannelByPopularity(action: LoadChannelByPopularityAction) 
   );
 
   yield put(updateChannel("", topics, false));
+  yield put(setQueryPending(false));
 }

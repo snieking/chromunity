@@ -17,7 +17,7 @@ operation remove_topic(username: text, descriptor_id: byte_array, topic_id: text
         id = op_context.transaction.tx_rid,
         representative,
         op_context.last_block_time,
-        action = "Topic /t/" + the_topic.id + " was removed by @" + user.display_name
+        action = "A topic from @" + the_topic.author.display_name + " was removed by @" + user.display_name
     );
 }
 
@@ -35,7 +35,8 @@ operation remove_topic_reply(username: text, descriptor_id: byte_array, topic_re
         id = op_context.transaction.tx_rid,
         representative,
         op_context.last_block_time,
-        action = "Reply in topic /t/" + the_reply.topic.id + " was removed by @" + user.display_name
+        action = "Reply from @" + the_reply.author.display_name 
+               + " in topic /t/" + the_reply.topic.id + " was removed by @" + user.display_name
     );
 }
 

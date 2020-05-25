@@ -1,4 +1,4 @@
-import { ChromunityUser, RepresentativeReport } from "../../../types";
+import { ChromunityUser, RepresentativeReport, Topic } from "../../../types";
 
 export enum GovernmentActionTypes {
   LOAD_REPRESENTATIVES = "GOVERNMENT/REPRESENTATIVES/LOAD",
@@ -8,7 +8,12 @@ export enum GovernmentActionTypes {
   CHECK_ACTIVE_ELECTION = "GOVERNMENT/ACTIVE_ELECTION/CHECK",
   UPDATE_ACTIVE_ELECTION = "GOVERNMENT/ACTIVE_ELECTION/UPDATE",
   CHECK_LOGBOOK_ENTRIES = "GOVERNMENT/LOGBOOK/CHECK",
-  UPDATE_LOGBOOK_RECENT_ENTRY_TIMESTAMP = "GOVERNMENT/LOGBOOK/RECENT_ENTRY_TIMESTAMP"
+  UPDATE_LOGBOOK_RECENT_ENTRY_TIMESTAMP = "GOVERNMENT/LOGBOOK/RECENT_ENTRY_TIMESTAMP",
+  CHECK_PINNED_TOPIC = "GOVERNMENT/PINNED_TOPIC/CHECK",
+  UPDATE_PINNED_TOPIC = "GOVERNMENT/PINNED_TOPIC/UPDATE",
+  CHECK_PINNED_TOPIC_BY_REP = "GOVERNMENT/PINNED_TOPIC_BY_REP/CHECK",
+  UPDATE_PINNED_TOPIC_BY_REP = "GOVERNMENT/PINNED_TOPIC_BY_REP/UPDATE",
+  PIN_TOPIC = "GOVERNMENT/PIN_TOPIC"
 }
 
 export interface ILoadRepresentatives {
@@ -49,6 +54,29 @@ export interface IUpdateActiveElection {
   activeElection: boolean;
 }
 
+export interface ICheckPinnedTopic {
+  type: GovernmentActionTypes.CHECK_PINNED_TOPIC;
+}
+
+export interface IUpdatePinnedTopic {
+  type: GovernmentActionTypes.UPDATE_PINNED_TOPIC;
+  topic: Topic;
+}
+
+export interface IPinTopic {
+  type: GovernmentActionTypes.PIN_TOPIC;
+  topicId: string;
+}
+
+export interface ICheckPinnedTopicByRep {
+  type: GovernmentActionTypes.CHECK_PINNED_TOPIC_BY_REP;
+}
+
+export interface IUpdatePinnedTopicByRep {
+  type: GovernmentActionTypes.UPDATE_PINNED_TOPIC_BY_REP;
+  topicId: string;
+}
+
 export type GovernmentActions =
   | ILoadRepresentatives
   | IUpdateRepresentatives
@@ -57,7 +85,12 @@ export type GovernmentActions =
   | ICheckActiveElection
   | IUpdateActiveElection
   | ICheckNewLogbookEntries
-  | IUpdateLogbookRecentEntryTimestamp;
+  | IUpdateLogbookRecentEntryTimestamp
+  | ICheckPinnedTopic
+  | IUpdatePinnedTopic
+  | ICheckPinnedTopicByRep
+  | IUpdatePinnedTopicByRep
+  | IPinTopic;
 
 export interface GovernmentState {
   representatives: string[];
@@ -68,4 +101,7 @@ export interface GovernmentState {
   activeElectionLastUpdated: number;
   recentLogbookEntryTimestamp: number;
   lastNewLogbookCheck: number;
+  pinnedTopic: Topic;
+  pinnedTopicLastChecked: number;
+  topicIdPinnedByMe: string;
 }

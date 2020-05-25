@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Redirect, RouteComponentProps } from "react-router";
 import { parse } from "query-string";
 import { connect } from "react-redux";
-import { createStyles, LinearProgress } from "@material-ui/core";
+import { createStyles, CircularProgress } from "@material-ui/core";
 import { registerUser, resetLoginState, vaultCancel, vaultSuccess } from "../redux/accountActions";
 import { ApplicationState } from "../../../core/store";
 import { ChromunityUser } from "../../../types";
@@ -24,7 +24,6 @@ interface Props extends RouteComponentProps {
   setv : typeof notifySuccess;
   setError: typeof setError;
   authenticationStep: AuthenticationStep;
-  loading: boolean;
   user: ChromunityUser;
   error: string;
 }
@@ -120,7 +119,7 @@ const VaultSuccess: React.FunctionComponent<Props> = (props) => {
   const waitingForConfirmation = (title: string, message: string) => {
     return (
       <>
-        <LinearProgress variant="query" />
+        <CircularProgress />
         <ChromiaPageHeader text={title} />
         <LeftShapes className={classes.leftShapes} />
         <RightShapes className={classes.rightShapes} />
@@ -157,7 +156,6 @@ const VaultSuccess: React.FunctionComponent<Props> = (props) => {
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    loading: store.account.loading,
     user: store.account.user,
     authenticationStep: store.account.authenticationStep,
   };
