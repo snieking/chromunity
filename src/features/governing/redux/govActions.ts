@@ -8,9 +8,14 @@ import {
   ICheckActiveElection,
   IUpdateActiveElection,
   ICheckNewLogbookEntries,
-  IUpdateLogbookRecentEntryTimestamp
+  IUpdateLogbookRecentEntryTimestamp,
+  ICheckPinnedTopic,
+  IUpdatePinnedTopic,
+  ICheckPinnedTopicByRep,
+  IUpdatePinnedTopicByRep,
+  IPinTopic
 } from "./govTypes";
-import { ChromunityUser, RepresentativeReport } from "../../../types";
+import { ChromunityUser, RepresentativeReport, Topic } from "../../../types";
 
 export const loadRepresentatives: ActionCreator<ILoadRepresentatives> = () => ({
   type: GovernmentActionTypes.LOAD_REPRESENTATIVES
@@ -50,4 +55,27 @@ export const checkActiveElection: ActionCreator<ICheckActiveElection> = (user: C
 export const updateActiveElection: ActionCreator<IUpdateActiveElection> = (activeElection: boolean) => ({
   type: GovernmentActionTypes.UPDATE_ACTIVE_ELECTION,
   activeElection: activeElection
+});
+
+export const checkPinnedTopic: ActionCreator<ICheckPinnedTopic> = () => ({
+  type: GovernmentActionTypes.CHECK_PINNED_TOPIC
+});
+
+export const updatePinnedTopic: ActionCreator<IUpdatePinnedTopic> = (topic: Topic) => ({
+  type: GovernmentActionTypes.UPDATE_PINNED_TOPIC,
+  topic
+});
+
+export const pinTopic: ActionCreator<IPinTopic> = (topicId: string) => ({
+  type: GovernmentActionTypes.PIN_TOPIC,
+  topicId
+})
+
+export const checkPinnedTopicByRep: ActionCreator<ICheckPinnedTopicByRep> = () => ({
+  type: GovernmentActionTypes.CHECK_PINNED_TOPIC_BY_REP
+});
+
+export const updatePinnedTopicByRep: ActionCreator<IUpdatePinnedTopicByRep> = (topicId: string) => ({
+  type: GovernmentActionTypes.UPDATE_PINNED_TOPIC_BY_REP,
+  topicId
 });

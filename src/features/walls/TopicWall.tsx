@@ -18,7 +18,7 @@ import {
   loadFollowedUsersTopicWall,
   loadOlderAllTopics,
   loadOlderFollowedChannelsTopics,
-  loadOlderFollowedUsersTopics
+  loadOlderFollowedUsersTopics,
 } from "./redux/wallActions";
 import { connect } from "react-redux";
 import { shouldBeFiltered, toLowerCase, uniqueId } from "../../shared/util/util";
@@ -26,6 +26,7 @@ import { COLOR_CHROMIA_DARK } from "../../theme";
 import Tutorial from "../../shared/Tutorial";
 import TutorialButton from "../../shared/buttons/TutorialButton";
 import { markTopicWallRefreshed } from "../../shared/util/user-util";
+import PinnedTopic from "./PinnedTopic";
 
 interface Props {
   type: string;
@@ -34,6 +35,7 @@ interface Props {
   representatives: string[];
   distrustedUsers: string[];
   user: ChromunityUser;
+  pinnedTopic: Topic;
   loadAllTopics: typeof loadAllTopicWall;
   loadOlderTopics: typeof loadOlderAllTopics;
   loadAllTopicsByPopularity: typeof loadAllTopicsByPopularity;
@@ -50,10 +52,10 @@ interface State {
   popularSelector: TOPIC_VIEW_SELECTOR_OPTION;
 }
 
-const StyledSelector = styled(Select)(style => ({
+const StyledSelector = styled(Select)((style) => ({
   color: style.theme.palette.primary.main,
   float: "left",
-  marginRight: "10px"
+  marginRight: "10px",
 }));
 
 const topicsPageSize: number = 15;
@@ -63,7 +65,7 @@ class TopicWall extends React.Component<Props, State> {
     super(props);
     this.state = {
       selector: TOPIC_VIEW_SELECTOR_OPTION.RECENT,
-      popularSelector: TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK
+      popularSelector: TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK,
     };
 
     this.retrieveLatestTopics = this.retrieveLatestTopics.bind(this);
@@ -100,16 +102,18 @@ class TopicWall extends React.Component<Props, State> {
           )}
           <br />
           <br />
-          {this.props.topics.map(topic => {
+          <PinnedTopic />
+          {this.props.topics.map((topic) => {
             if (
-              (this.props.user != null && this.props.representatives.includes(toLowerCase(this.props.user.name))) ||
-              (this.props.user != null && toLowerCase(topic.author) === toLowerCase(this.props.user.name)) ||
-              (!this.props.distrustedUsers.includes(topic.author) &&
-                !shouldBeFiltered(topic.moderated_by, this.props.distrustedUsers))
+              (this.props.pinnedTopic == null || this.props.pinnedTopic.id !== topic.id) &&
+              ((this.props.user != null && this.props.representatives.includes(toLowerCase(this.props.user.name))) ||
+                (this.props.user != null && toLowerCase(topic.author) === toLowerCase(this.props.user.name)) ||
+                (!this.props.distrustedUsers.includes(topic.author) &&
+                  !shouldBeFiltered(topic.moderated_by, this.props.distrustedUsers)))
             ) {
               return <TopicOverviewCard key={"card-" + topic.id} topic={topic} />;
             } else {
-              return <div key={uniqueId()}/>;
+              return <div key={uniqueId()} />;
             }
           })}
           {this.renderLoadMoreButton()}
@@ -142,7 +146,7 @@ class TopicWall extends React.Component<Props, State> {
             <p>This page displays a wall of summarized topics.</p>
             <p>Click on a topic in order to read it.</p>
           </div>
-        )
+        ),
       },
       {
         selector: '[data-tut="main_selector"]',
@@ -150,8 +154,8 @@ class TopicWall extends React.Component<Props, State> {
           <div style={{ color: COLOR_CHROMIA_DARK }}>
             <p>Click on the selector to change in which order topics are viewed.</p>
           </div>
-        )
-      }
+        ),
+      },
     ];
 
     if (this.props.user != null) {
@@ -162,7 +166,7 @@ class TopicWall extends React.Component<Props, State> {
             <p>A new topic can be created by using this button.</p>
             <p>You will have to give the topic an appropriate title, as well as which channel it should belong to.</p>
           </div>
-        )
+        ),
       });
     }
 
@@ -277,7 +281,7 @@ const mapDispatchToProps = (dispatch: any) => {
     loadOlderFollowedChannelsTopics: (username: string, pageSize: number) =>
       dispatch(loadOlderFollowedChannelsTopics(username, pageSize)),
     loadFollowedChannelsTopicsByPopularity: (username: string, timestamp: number, pageSize: number) =>
-      dispatch(loadFollowedChannelsTopicsByPopularity(username, timestamp, pageSize))
+      dispatch(loadFollowedChannelsTopicsByPopularity(username, timestamp, pageSize)),
   };
 };
 
@@ -286,8 +290,9 @@ const mapStateToProps = (store: ApplicationState) => {
     user: store.account.user,
     topics: store.topicWall.topics,
     couldExistOlderTopics: store.topicWall.couldExistOlder,
-    representatives: store.government.representatives.map(rep => toLowerCase(rep)),
-    distrustedUsers: store.account.distrustedUsers
+    representatives: store.government.representatives.map((rep) => toLowerCase(rep)),
+    distrustedUsers: store.account.distrustedUsers,
+    pinnedTopic: store.government.pinnedTopic,
   };
 };
 

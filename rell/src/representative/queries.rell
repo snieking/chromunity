@@ -10,7 +10,7 @@ query get_representatives(): list<name> {
 
     return representative@*{
         .representative_election.id == election.id
-    } ( .user.name );
+    } ( .user.display_name );
 }
 
 query get_all_representative_actions(timestamp, page_size: integer) {

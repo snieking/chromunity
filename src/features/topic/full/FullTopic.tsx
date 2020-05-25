@@ -63,6 +63,7 @@ import StarRating from "../../../shared/star-rating/StarRating";
 import { setRateLimited, setOperationPending, setQueryPending } from "../../../shared/redux/CommonActions";
 import FullTopicTutorial from "./FullTopicTutorial";
 import ReplyButton from "../../../shared/buttons/ReplyButton";
+import PinButton from "./PinButton";
 
 interface MatchParams {
   id: string;
@@ -321,6 +322,8 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           ) : (
             <div style={{ display: "inline" }} />
           )}
+
+          <PinButton topicId={topic.id} />
 
           <ConfirmDialog
             text="This action will report the topic"
