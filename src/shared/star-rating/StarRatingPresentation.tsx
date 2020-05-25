@@ -20,8 +20,6 @@ const useStyles = makeStyles({
 const StarRatingPresentation: React.FunctionComponent<Props> = (props) => {
   const classes = useStyles();
 
-  console.log(props);
-
   function render() {
     if (props.toggleRating) {
       return (

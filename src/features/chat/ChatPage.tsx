@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ApplicationState } from "../../core/store";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 import { connect } from "react-redux";
 import {
   addUserToChatAction,
@@ -16,7 +17,7 @@ import {
   refreshOpenChat,
   sendMessage,
 } from "./redux/chatActions";
-import { CircularProgress, Container, LinearProgress, Theme } from "@material-ui/core";
+import { Container, Theme } from "@material-ui/core";
 import ChromiaPageHeader from "../../shared/ChromiaPageHeader";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
@@ -38,16 +39,6 @@ import ConfirmDialog from "../../shared/ConfirmDialog";
 import Drawer from "@material-ui/core/Drawer";
 import ChatParticipantListItem from "./ChatParticipantListItem";
 import Box from "@material-ui/core/Box";
-import Select, { createFilter } from "react-select";
-import { ValueType } from "react-select/src/types";
-import {
-  COLOR_CHROMIA_DARK,
-  COLOR_CHROMIA_DARK_LIGHTER,
-  COLOR_CHROMIA_LIGHT,
-  COLOR_CHROMIA_LIGHTER,
-  COLOR_OFF_WHITE,
-} from "../../theme";
-import useTheme from "@material-ui/core/styles/useTheme";
 import LoadMoreButton from "../../shared/buttons/LoadMoreButton";
 import { toLowerCase, useInterval } from "../../shared/util/util";
 import { chatPageStyles } from "./styles";
@@ -58,15 +49,9 @@ import { Redirect } from "react-router";
 import TextToolbar from "../../shared/textToolbar/TextToolbar";
 import { notifySuccess, setError } from "../../core/snackbar/redux/snackbarTypes";
 
-interface OptionType {
-  label: string;
-  value: string;
-}
-
 interface Props {
   autoLoginInProgress: boolean;
   user: ChromunityUser;
-  loading: boolean;
   rsaKey: any;
   successfullyAuthorized: boolean;
   chats: Chat[];
@@ -77,6 +62,7 @@ interface Props {
   followedChatUsers: string[];
   chatUsers: string[];
   rateLimited: boolean;
+  operationPending: boolean;
   checkChatAuthentication: typeof checkChatAuthentication;
   createChatKeyPair: typeof createChatKeyPair;
   deleteChatUser: typeof deleteChatUserAction;
@@ -100,7 +86,7 @@ interface State {
   selectedChatId: string;
   message: string;
   showAddDialog: boolean;
-  userToAdd: ValueType<OptionType>;
+  userToAdd: string;
   showLeaveChatDialog: boolean;
   modifyTitle: boolean;
   updatedTitle: string;
@@ -112,7 +98,6 @@ interface State {
 
 const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   const classes = chatPageStyles(props);
-  const theme = useTheme();
   const textInput = useRef<HTMLInputElement>(null);
 
   const [values, setValues] = useState<State>({
@@ -226,7 +211,6 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   function renderChat() {
     return (
       <>
-        {props.loading ? <LinearProgress variant="query" /> : <div />}
         <div className={classes.mobileSidePanel}>
           <Box className={classes.drawerOpenerBtn} onClick={toggleDrawer(true)} data-tut="mobile_drawer_btn" />
           <Drawer open={values.drawerOpen} onClose={toggleDrawer(false)}>
@@ -397,50 +381,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   const suggestions = () => {
     return props.chatUsers
       .filter((user) => toLowerCase(user) !== toLowerCase(props.user.name))
-      .map((user) => ({ value: user, label: user } as OptionType));
-  };
-
-  const darkTheme = theme.palette.type === "dark";
-
-  const textColor = darkTheme ? COLOR_OFF_WHITE : COLOR_CHROMIA_DARK;
-  const backgroundColor = darkTheme ? COLOR_CHROMIA_DARK : COLOR_CHROMIA_LIGHTER;
-  const borderColor = darkTheme ? COLOR_CHROMIA_DARK_LIGHTER : COLOR_CHROMIA_LIGHT;
-
-  const customStyles = {
-    option: (provided: any) => ({
-      ...provided,
-      color: textColor,
-      background: backgroundColor,
-      border: "1px solid",
-      borderColor: borderColor,
-    }),
-    menu: (styles: any) => ({
-      ...styles,
-      zIndex: 999,
-      background: backgroundColor,
-    }),
-    control: (provided: any) => ({
-      ...provided,
-      background: backgroundColor,
-      color: theme.palette.primary.main,
-      borderColor: theme.palette.secondary,
-      "&:hover": { borderColor: textColor },
-      boxShadow: "none",
-    }),
-    singleValue: (provided: any, state: any) => {
-      const opacity = state.isDisabled ? 1 : 1;
-      const transition = "opacity 300ms";
-      const color = textColor;
-      return { ...provided, color, opacity, transition };
-    },
-    input: (provided: any) => {
-      const color = textColor;
-      return { ...provided, color };
-    },
-    noOptionsMessage: (provided: any) => {
-      const color = textColor;
-      return { ...provided, color };
-    },
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
   };
 
   function addUserDialog() {
@@ -458,14 +399,25 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
             Invite an user to the chat. The chat is end-to-end encrypted and only the participants are able to read the
             messages. Beacuse of this, the user has to have created a chat passphrase prior to being invited.
           </DialogContentText>
-          <Select
-            placeholder={"Chat user"}
-            isSearchable={true}
+          <Autocomplete
+            id="combo-box-demo"
             options={suggestions()}
-            styles={customStyles}
-            filterOption={createFilter({ ignoreAccents: false })}
-            onChange={(value: ValueType<OptionType>) => setValues({ ...values, userToAdd: value })}
-            className={classes.dropDownMenu}
+            style={{ maxWidth: "300px", width: "95%" }}
+            freeSolo
+            value={values.userToAdd}
+            onChange={(event: any, newValue: string | null) => {
+              setValues({ ...values, userToAdd: newValue });
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="User"
+                variant="outlined"
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  setValues({ ...values, userToAdd: event.target.value })
+                }
+              />
+            )}
           />
         </DialogContent>
         <DialogActions>
@@ -485,9 +437,9 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function confirmAddUser() {
-    const selected = values.userToAdd as OptionType;
+    const selected = values.userToAdd;
     if (selected != null) {
-      props.addUserToChat(selected.value, props.user);
+      props.addUserToChat(selected, props.user);
     }
     setValues({ ...values, userToAdd: null, showAddDialog: false });
   }
@@ -510,7 +462,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       event.preventDefault();
     } else if (!event.shiftKey && event.keyCode === 13) {
       event.preventDefault();
-      if (!props.rateLimited) {
+      if (!props.rateLimited && !props.operationPending) {
         sendMessage();
       }
     }
@@ -542,7 +494,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
           className={classes.submitMessage}
           variant="contained"
           color="secondary"
-          disabled={props.rateLimited}
+          disabled={props.rateLimited || props.operationPending}
         >
           Send
         </Button>
@@ -655,7 +607,9 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     if (props.autoLoginInProgress) {
       return (
         <div style={{ textAlign: "center", marginTop: "25px" }}>
-          <CircularProgress />
+          <Typography variant="h5" component="h5">
+            Authorizing...
+          </Typography>
         </div>
       );
     } else if (!props.autoLoginInProgress && !props.user) {
@@ -717,7 +671,6 @@ const mapDispatchToProps = (dispatch: any) => {
 const mapStateToProps = (store: ApplicationState) => {
   return {
     autoLoginInProgress: store.account.autoLoginInProgress,
-    loading: store.chat.loading,
     user: store.account.user,
     rsaKey: store.chat.rsaKey,
     successfullyAuthorized: store.chat.successfullyAuthorized,
@@ -729,6 +682,7 @@ const mapStateToProps = (store: ApplicationState) => {
     followedChatUsers: store.chat.followedChatUsers,
     chatUsers: store.chat.chatUsers,
     rateLimited: store.common.rateLimited,
+    operationPending: store.common.operationPending,
   };
 };
 

@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import {
   Container,
   createStyles,
-  LinearProgress,
   Paper,
   Tab,
   Tabs,
@@ -41,7 +40,6 @@ interface MatchParams {
 }
 
 interface UserWallProps extends RouteComponentProps<MatchParams>, WithStyles<typeof styles> {
-  loading: boolean;
   userPageInit: typeof userPageInit;
   loadUserTopics: typeof loadUserTopics;
   loadUserReplies: typeof loadUserReplies;
@@ -101,7 +99,6 @@ const UserWall = withStyles(styles)(
       return (
         <div>
           <Container fixed>
-            {this.props.loading ? <LinearProgress variant="query" /> : <div />}
             {this.renderUserPageIntro()}
             <Tabs value={this.state.activeTab} onChange={this.handleChange} aria-label="User activity">
               <Tab data-tut="topics_nav" label="Topics" {...this.a11yProps(0)} className={this.props.classes.text} />
@@ -166,7 +163,6 @@ const UserWall = withStyles(styles)(
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    loading: store.userPage.loading,
     topics: store.userPage.topics,
     replies: store.userPage.replies,
     couldExistOlderTopics: store.userPage.couldExistOlderTopics,

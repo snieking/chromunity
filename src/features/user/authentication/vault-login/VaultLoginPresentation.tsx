@@ -3,7 +3,6 @@ import { createStyles, makeStyles } from "@material-ui/core";
 import ChromiaPageHeader from "../../../../shared/ChromiaPageHeader";
 import Container from "@material-ui/core/Container";
 import Button from "@material-ui/core/Button";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import Typography from "@material-ui/core/Typography";
 import { ReactComponent as LeftShapes } from "../../../../shared/graphics/left-shapes.svg";
 import { ReactComponent as RightShapes } from "../../../../shared/graphics/right-shapes.svg";
@@ -45,7 +44,6 @@ const useStyles = makeStyles(theme =>
 
 interface Props {
   authenticationStep: AuthenticationStep;
-  loading: boolean;
   login: () => void;
 }
 
@@ -55,7 +53,6 @@ const VaultLoginPresentation: React.FunctionComponent<Props> = props => {
   return (
     <Container maxWidth="md" className={classes.contentWrapper}>
       <ChromiaPageHeader text={"Login"} />
-      {props.loading && <CircularProgress disableShrink />}
       {props.authenticationStep == null && (
         <div>
           <LeftShapes className={classes.leftShapes} />

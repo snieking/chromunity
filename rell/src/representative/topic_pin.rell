@@ -1,0 +1,93 @@
+import election;
+import topic;
+import user;
+import user.distrust;
+
+entity topic_pin {
+	key representative;
+	mutable topic.topic;
+}
+
+operation pin_topic(name, descriptor_id: byte_array, topic_id: text) {
+	val user = user.get_and_charge_verified_user(name, descriptor_id);
+
+    val recent_election = election.representative_election@{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
+    val representative = representative @{ user, .representative_election.id == recent_election.id };
+    
+    val topic = topic.topic@{ .id == topic_id };
+    
+    val prev_pin = topic_pin@?{ representative };
+    
+    if (prev_pin != null) {
+    	update prev_pin(topic);
+    } else {
+    	create topic_pin(representative, topic);
+    }
+}
+
+query get_pinned_topic(name) {
+    val recent_election = election.representative_election@?{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
+	
+	if (recent_election == null) {
+		return null;
+	}
+	
+	val distrusted_by_me = distrust.user_distrust@*{ 
+		.distruster.name == name.lower_case() 
+	} ( .distrusted.name );
+	
+	val topic_pins = topic_pin@*{
+		.representative.representative_election.id == recent_election.id
+	} ( 
+		topic_id = .topic.id, 
+		name = .representative.user.name
+	);
+	
+	val pins_map = map<text, integer>();
+	for (pin in topic_pins) {
+		if (not distrusted_by_me.contains(pin.name)) {
+			var nrOfPins = 1;
+			if (pins_map.contains(pin.topic_id)) {
+				nrOfPins += pins_map[pin.topic_id];
+			}
+			pins_map.put(pin.topic_id, nrOfPins);
+		}
+	}
+	
+	var highest_topic_id = "";
+	var highest = 0;
+	
+	for (id in pins_map.keys()) {
+		val moderated_by = topic.topic_moderation@*{ .topic.id == id } ( .user.name );
+		var topic_is_clean = moderated_by.empty();
+		
+		var distrusted_moderators = set<name>();
+		for (moderator in moderated_by) {
+			if (distrusted_by_me.contains(moderator)) {
+				distrusted_moderators.add(moderator);
+			}
+		}
+		
+		if (topic_is_clean or distrusted_moderators.size() == moderated_by.size()) {
+			val pins_on_topic = pins_map[id];
+			if (pins_on_topic > highest) {
+				highest_topic_id = id;
+				highest = pins_on_topic;
+			}	
+		}
+	}
+	
+	return highest_topic_id;
+}
+
+query get_representatives_topic_pin(name) {
+    val recent_election = election.representative_election@?{ .completed == true } ( .id, @sort_desc .timestamp ) limit 1;
+    
+    if (recent_election == null)
+    	return null;
+    
+	return topic_pin@?{
+		.representative.representative_election.id == recent_election.id,
+		.representative.user.name == name.lower_case()
+	} ( .topic.id ) limit 1;
+}

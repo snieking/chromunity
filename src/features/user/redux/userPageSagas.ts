@@ -1,3 +1,4 @@
+import { setQueryPending } from './../../../shared/redux/CommonActions';
 import {
   LoadUserFollowedChannelsAction,
   LoadUserRepliesAction,
@@ -21,15 +22,18 @@ const getTopics = (state: ApplicationState) => state.userPage.topics;
 const getReplies = (state: ApplicationState) => state.userPage.replies;
 
 export function* loadUserTopics(action: LoadUserTopicsAction) {
+  yield put(setQueryPending(true));
   const username: string = action.username;
   const topics: Topic[] = yield select(getTopics);
 
   const timestamp: number = topics.length > 0 ? topics[topics.length - 1].last_modified : Date.now();
   const retrievedTopics: Topic[] = yield getTopicsByUserPriorToTimestamp(username, timestamp, action.pageSize);
   yield put(updateUserTopics(topics.concat(retrievedTopics), retrievedTopics.length >= action.pageSize));
+  yield put(setQueryPending(false));
 }
 
 export function* loadUserReplies(action: LoadUserRepliesAction) {
+  yield put(setQueryPending(true));
   const username: string = action.username;
   const replies: TopicReply[] = yield select(getReplies);
 
@@ -41,10 +45,13 @@ export function* loadUserReplies(action: LoadUserRepliesAction) {
   );
 
   yield put(updateUserReplies(replies.concat(retrievedReplies), retrievedReplies.length >= action.pageSize));
+  yield put(setQueryPending(false));
 }
 
 export function* loadUserFollowedChannels(action: LoadUserFollowedChannelsAction) {
+  yield put(setQueryPending(true));
   const username: string = action.username;
   const channels: string[] = yield getFollowedChannels(username);
   yield put(updateUserFollowedChannels(channels));
+  yield put(setQueryPending(false));
 }

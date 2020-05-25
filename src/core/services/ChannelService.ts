@@ -54,8 +54,9 @@ export function getTopicChannelBelongings(topicId: string): Promise<string[]> {
     });
 }
 
-export function getTrendingChannels(sinceDaysAgo: number): Promise<string[]> {
-  var trending: string[] = channelsCache.get("trending");
+export function getTrendingChannels(sinceDaysAgo: number, limit: number = 15): Promise<string[]> {
+  const trendingKey = "trending_" + limit;
+  var trending: string[] = channelsCache.get(trendingKey);
 
   if (trending != null) {
     return new Promise<string[]>(resolve => resolve(trending));
@@ -67,10 +68,10 @@ export function getTrendingChannels(sinceDaysAgo: number): Promise<string[]> {
 
   const query = "get_channels_since";
 
-  return executeQuery(query, { timestamp: date.getTime() / 1000 })
+  return executeQuery(query, { timestamp: date.getTime() })
     .then((tags: string[]) => {
-      trending = sortByFrequency(tags).slice(0, 10);
-      channelsCache.set("trending", trending, 3600);
+      trending = sortByFrequency(tags).slice(0, limit);
+      channelsCache.set(trendingKey, trending, 3600);
       return trending;
     });
 }

@@ -3,20 +3,36 @@ import { Reducer } from "redux";
 
 const initialCommonState: CommonState = {
   tutorial: false,
-  rateLimited: false
+  rateLimited: false,
+  queryPending: false,
+  operationPending: false,
 };
 
 export const commonReducer: Reducer<CommonState, CommonActions> = (state = initialCommonState, action) => {
-  if (action.type === CommonActionTypes.TOGGLE_TUTORIAL) {
-    return {
-      ...state,
-      tutorial: !state.tutorial
+  switch (action.type) {
+    case CommonActionTypes.TOGGLE_TUTORIAL: {
+      return {
+        ...state,
+        tutorial: !state.tutorial,
+      };
     }
-  } else if (action.type === CommonActionTypes.UPDATE_RATE_LIMITED) {
-    console.log("Setting rate limiting to: ", action.rateLimited);
-    return {
-      ...state,
-      rateLimited: action.rateLimited
+    case CommonActionTypes.UPDATE_RATE_LIMITED: {
+      return {
+        ...state,
+        rateLimited: action.rateLimited,
+      };
+    }
+    case CommonActionTypes.SET_OPERATION_PENDING: {
+      return {
+        ...state,
+        operationPending: action.operationPending,
+      };
+    }
+    case CommonActionTypes.SET_QUERY_PENDING: {
+      return {
+        ...state,
+        queryPending: action.queryPending,
+      };
     }
   }
 

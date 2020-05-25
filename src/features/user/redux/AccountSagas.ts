@@ -1,3 +1,4 @@
+import { setOperationPending, setQueryPending } from './../../../shared/redux/CommonActions';
 import { notifySuccess, setError } from '../../../core/snackbar/redux/snackbarTypes';
 import {
   AccountActionTypes,
@@ -54,6 +55,7 @@ function* loginSaga() {
 }
 
 function* logoutSaga() {
+  yield put(setOperationPending(true));
   const BC = yield BLOCKCHAIN;
   const sso = new SSO(BC, new SSOStoreLocalStorage());
 
@@ -62,11 +64,13 @@ function* logoutSaga() {
   clearSession();
   yield put(setUser(null));
   yield put(setAuthenticationStep(null));
+  yield put(setOperationPending(false));
   yield put(notifySuccess("Successfully signed out"));
 }
 
 function* vaultSuccessSaga(action: IVaultSuccess): Generator<any, any, any> {
   logger.silly("[SAGA - STARTED] Received success from vault");
+  yield put(setQueryPending(true));
   yield put(setAuthenticationStep(AuthenticationStep.CONFIRMING_VAULT_TRANSACTION));
   const BC = yield BLOCKCHAIN;
 
@@ -90,6 +94,8 @@ function* vaultSuccessSaga(action: IVaultSuccess): Generator<any, any, any> {
   } catch (error) {
     yield put(vaultCancel());
     yield put(setError("Error signing in: " + error.message));
+  } finally {
+    yield put(setQueryPending(false));
   }
 }
 
@@ -104,6 +110,8 @@ function* registerUserSaga(action: IRegisterUser) {
     return;
   }
 
+  yield put(setOperationPending(true));
+
   try {
     yield executeOperations(user, op("register_user", action.username, accountId));
     yield authorizeUser(action.username, user);
@@ -111,6 +119,8 @@ function* registerUserSaga(action: IRegisterUser) {
   } catch (error) {
     yield put(vaultCancel());
     yield put(setError("Error signing in: " + error.message))
+  } finally {
+    yield put(setOperationPending(false));
   }
 }
 
@@ -123,6 +133,8 @@ function* autoLoginSaga(): Generator<any, any, any> {
     username,
     JSON.stringify(foundUser)
   );
+
+  yield put(setQueryPending(true));
 
   const BC = yield BLOCKCHAIN;
   const sso = new SSO(BC, new SSOStoreLocalStorage());
@@ -148,6 +160,7 @@ function* autoLoginSaga(): Generator<any, any, any> {
   }
 
   yield put(autoLoginAttempted());
+  yield put(setQueryPending(false));
 }
 
 function* authorizeUser(username: string, user: User) {

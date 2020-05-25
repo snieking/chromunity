@@ -2,7 +2,6 @@ import React from "react";
 import { Socials } from "./socialTypes";
 import { IconButton } from "@material-ui/core";
 import TwitterLogo from "../../../shared/logos/TwitterLogo";
-import * as config from "../../../config";
 import LinkedInLogo from "../../../shared/logos/LinkedInLogo";
 import GitHubLogo from "../../../shared/logos/GitHubLogo";
 import FacebookLogo from "../../../shared/logos/FacebookLogo";
@@ -40,14 +39,14 @@ const SocialBar: React.FunctionComponent<Props> = (props) => {
       </IconButton>
     ) : null;
 
-  return config.features.userSocialsEnabled ? (
+  return (
     <div>
       {renderTwitter()}
       {renderLinkedIn()}
       {renderFacebook()}
       {renderGithub()}
     </div>
-  ) : null;
+  );
 };
 
 export default SocialBar;

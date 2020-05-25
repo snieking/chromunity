@@ -13,7 +13,6 @@ import {
   DialogContentText,
   DialogTitle,
   IconButton,
-  LinearProgress,
   TextField,
   Theme,
   Tooltip,
@@ -22,7 +21,7 @@ import {
   WithStyles,
 } from "@material-ui/core";
 import { ifEmptyAvatarThenPlaceholder } from "../../shared/util/user-util";
-import { Delete, Reply, Report, UnfoldMore } from "@material-ui/icons";
+import { Delete, Report, UnfoldMore } from "@material-ui/icons";
 import { getUserSettingsCached } from "../../core/services/UserService";
 import {
   createTopicSubReply,
@@ -57,7 +56,8 @@ import Divider from "@material-ui/core/Divider";
 import PreviewLinks from "../../shared/PreviewLinks";
 import { setError, notifySuccess } from "../../core/snackbar/redux/snackbarTypes";
 import StarRating from "../../shared/star-rating/StarRating";
-import { setRateLimited } from "../../shared/redux/CommonActions";
+import { setRateLimited, setQueryPending, setOperationPending } from "../../shared/redux/CommonActions";
+import ReplyButton from "../../shared/buttons/ReplyButton";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -116,6 +116,11 @@ const styles = (theme: Theme) =>
     ratingWrapper: {
       display: "inline",
     },
+    cardActions: {
+      width: "100%",
+      display: "flex",
+      marginTop: "-10px",
+    },
   });
 
 interface Props extends WithStyles<typeof styles> {
@@ -130,6 +135,8 @@ interface Props extends WithStyles<typeof styles> {
   setError: typeof setError;
   setSuccess: typeof notifySuccess;
   setRateLimited: typeof setRateLimited;
+  setQueryPending: typeof setQueryPending;
+  setOperationPending: typeof setOperationPending;
 }
 
 interface State {
@@ -142,7 +149,6 @@ interface State {
   subReplies: TopicReply[];
   removeReplyDialogOpen: boolean;
   reportReplyDialogOpen: boolean;
-  isLoading: boolean;
   timeLeftUntilNoLongerModifiable: number;
   renderSubReplies: boolean;
 }
@@ -177,7 +183,6 @@ const TopicReplyCard = withStyles(styles)(
         subReplies: [],
         removeReplyDialogOpen: false,
         reportReplyDialogOpen: false,
-        isLoading: false,
         timeLeftUntilNoLongerModifiable: 0,
         renderSubReplies: previouslyFoldedSubReplies ? decisionToRenderSubReplies : shouldRenderDueToTimestamp,
       };
@@ -249,7 +254,6 @@ const TopicReplyCard = withStyles(styles)(
                 style={{ marginLeft: this.props.indention + "px" }}
                 className={this.isReplyHighlighted() ? this.props.classes.highlighted : ""}
               >
-                {this.state.isLoading ? <LinearProgress /> : <div />}
                 {this.renderCardContent()}
               </Card>
             </div>
@@ -289,6 +293,8 @@ const TopicReplyCard = withStyles(styles)(
           setSuccess={this.props.setSuccess}
           setRateLimited={this.props.setRateLimited}
           rateLimited={this.props.rateLimited}
+          setQueryPending={this.props.setQueryPending}
+          setOperationPending={this.props.setOperationPending}
         />
       ));
     }
@@ -348,7 +354,7 @@ const TopicReplyCard = withStyles(styles)(
 
       if (user != null) {
         return (
-          <CardActions disableSpacing style={{ marginTop: "-10px" }}>
+          <CardActions disableSpacing className={this.props.classes.cardActions}>
             <div className={this.props.classes.ratingWrapper}>
               <StarRating
                 starRatingFetcher={() => getReplyStarRaters(id)}
@@ -366,19 +372,6 @@ const TopicReplyCard = withStyles(styles)(
                 deleteFunction={this.deleteReplyMessage}
               />
             ) : null}
-            <IconButton
-              aria-label="Reply"
-              onClick={() =>
-                this.setState((prevState) => ({
-                  replyBoxOpen: !prevState.replyBoxOpen,
-                }))
-              }
-              disabled={this.props.rateLimited}
-            >
-              <Tooltip title="Reply">
-                <Reply className={this.state.replyBoxOpen ? this.props.classes.iconOrange : ""} />
-              </Tooltip>
-            </IconButton>
 
             <ConfirmDialog
               text="This action will report the message"
@@ -399,21 +392,18 @@ const TopicReplyCard = withStyles(styles)(
               </IconButton>
             )}
 
-            {this.state.subReplies.length > 0 ? (
-              <IconButton aria-label="Load replies" onClick={() => this.toggleRenderReply()}>
-                <Tooltip title="Toggle replies">
-                  <Badge
-                    badgeContent={!this.state.renderSubReplies ? this.state.subReplies.length : 0}
-                    color="secondary"
-                  >
-                    <UnfoldMore />
-                  </Badge>
-                </Tooltip>
-              </IconButton>
-            ) : (
-              <div style={{ display: "inline-block" }} />
-            )}
+            {this.subRepliesButton()}
             {this.renderAdminActions()}
+
+            <ReplyButton
+              onClick={() =>
+                this.setState((prevState) => ({
+                  replyBoxOpen: !prevState.replyBoxOpen,
+                }))
+              }
+              size="small"
+              toggled={this.state.replyBoxOpen}
+            />
           </CardActions>
         );
       } else {
@@ -422,8 +412,25 @@ const TopicReplyCard = withStyles(styles)(
             <div className={this.props.classes.ratingWrapper}>
               <StarRating starRatingFetcher={() => getReplyStarRaters(id)} />
             </div>
+            {this.subRepliesButton()}
           </CardActions>
         );
+      }
+    }
+
+    subRepliesButton() {
+      if (this.state.subReplies.length > 0) {
+        return (
+          <IconButton aria-label="Load replies" onClick={() => this.toggleRenderReply()}>
+            <Tooltip title="Toggle replies">
+              <Badge badgeContent={!this.state.renderSubReplies ? this.state.subReplies.length : 0} color="secondary">
+                <UnfoldMore />
+              </Badge>
+            </Tooltip>
+          </IconButton>
+        );
+      } else {
+        return <div style={{ display: "inline-block" }} />;
       }
     }
 
@@ -433,25 +440,25 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     editReplyMessage(text: string) {
-      this.setState({ isLoading: true });
+      this.props.setOperationPending(true);
       modifyReply(this.props.user, this.props.reply.id, text)
         .then(() => window.location.reload())
         .catch((error) => {
           this.props.setError(error.message);
           this.props.setRateLimited();
         })
-        .finally(() => this.setState({ isLoading: false }));
+        .finally(() => this.props.setOperationPending(false));
     }
 
     deleteReplyMessage() {
-      this.setState({ isLoading: true });
+      this.props.setOperationPending(true);
       deleteReply(this.props.user, this.props.reply.id)
         .then(() => window.location.reload())
         .catch((error) => {
           this.props.setError(error.message);
           this.props.setRateLimited();
         })
-        .finally(() => this.setState({ isLoading: false }));
+        .finally(() => this.props.setOperationPending(false));
     }
 
     closeReportReply() {
@@ -462,10 +469,13 @@ const TopicReplyCard = withStyles(styles)(
       this.closeReportReply();
 
       if (this.props.user != null) {
-        reportReply(this.props.user, this.props.reply).catch((error) => {
-          this.props.setError(error.message);
-          this.props.setRateLimited();
-        });
+        this.props.setOperationPending(true);
+        reportReply(this.props.user, this.props.reply)
+          .catch((error) => {
+            this.props.setError(error.message);
+            this.props.setRateLimited();
+          })
+          .finally(() => this.props.setOperationPending(false));
       } else {
         window.location.href = "/user/login";
       }
@@ -551,6 +561,7 @@ const TopicReplyCard = withStyles(styles)(
                 label="Reply"
                 type="text"
                 rows="3"
+                rowsMax="10"
                 variant="outlined"
                 fullWidth
                 onChange={this.handleReplyMessageChange}
@@ -609,6 +620,7 @@ const TopicReplyCard = withStyles(styles)(
     sendReply() {
       const message: string = this.state.replyMessage;
       this.setState({ replyBoxOpen: false, replyMessage: "" });
+      this.props.setOperationPending(true);
       createTopicSubReply(this.props.user, this.props.topicId, this.props.reply.id, message, this.props.reply.author)
         .catch((error) => {
           this.props.setError(error.message);
@@ -618,7 +630,8 @@ const TopicReplyCard = withStyles(styles)(
           this.props.setSuccess("Reply sent");
           getTopicSubReplies(this.props.reply.id).then((replies) => this.setState({ subReplies: replies }));
           this.openSubReplies();
-        });
+        })
+        .finally(() => this.props.setOperationPending(false));
     }
   }
 );
@@ -636,6 +649,8 @@ const mapDispatchToProps = (dispatch: any) => {
     setError: (msg: string) => dispatch(setError(msg)),
     setSuccess: (msg: string) => dispatch(notifySuccess(msg)),
     setRateLimited: () => dispatch(setRateLimited()),
+    setQueryPending: (pending: boolean) => dispatch(setQueryPending(pending)),
+    setOperationPending: (pending: boolean) => dispatch(setOperationPending(pending)),
   };
 };
 

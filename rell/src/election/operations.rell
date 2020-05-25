@@ -46,7 +46,9 @@ function complete_election() {
     update current_election ( completed = true );
     update election_block_details@{ current_election } ( finished_height = op_context.block_height );
     
-    val nr_of_participants = temp_votes_counter@*{} ( 
+    val nr_of_participants = temp_votes_counter@*{
+    	.representative_election_candidate.representative_election == current_election
+    } ( 
     	.representative_election_candidate.user.name
     ).size();
     

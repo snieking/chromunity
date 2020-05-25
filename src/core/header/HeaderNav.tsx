@@ -16,7 +16,7 @@ import {
   checkActiveElection,
   checkNewLogbookEntries,
   loadRepresentatives,
-  loadReports
+  loadReports,
 } from "../../features/governing/redux/govActions";
 import ProfileNavigation from "./ProfileNavigation";
 import MobileWallNavigation from "./MobileWallNavigation";
@@ -25,10 +25,8 @@ import TestInfoBar from "./TestInfoBar";
 import GovMenu from "./GovMenu";
 import ChromiaLogo from "./ChromiaLogo";
 import { autoLogin } from "../../features/user/redux/accountActions";
-import { LinearProgress } from "@material-ui/core";
 
 interface Props {
-  autoLoginInProgress: boolean;
   representatives: string[];
   reports: RepresentativeReport[];
   activeElection: boolean;
@@ -46,91 +44,91 @@ interface Props {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     testInfo: {
-      textAlign: "center"
+      textAlign: "center",
     },
     desktopWallNav: {
       display: "inherit",
       [theme.breakpoints.down("sm")]: {
-        display: "none"
-      }
+        display: "none",
+      },
     },
     mobileWallNav: {
       display: "inherit",
       [theme.breakpoints.up("md")]: {
-        display: "none"
-      }
+        display: "none",
+      },
     },
     navIcon: {
-      color: theme.palette.primary.main
+      color: theme.palette.primary.main,
     },
     grow: {
-      flexGrow: 1
+      flexGrow: 1,
     },
     leftMenuButton: {
       [theme.breakpoints.up("sm")]: {
-        marginRight: theme.spacing(1)
+        marginRight: theme.spacing(1),
       },
       [theme.breakpoints.up("md")]: {
-        marginRight: theme.spacing(2)
+        marginRight: theme.spacing(2),
       },
       [theme.breakpoints.up("lg")]: {
-        marginRight: theme.spacing(3)
-      }
+        marginRight: theme.spacing(3),
+      },
     },
     rightMenuButton: {
       [theme.breakpoints.up("sm")]: {
-        marginLeft: theme.spacing(1)
+        marginLeft: theme.spacing(1),
       },
       [theme.breakpoints.up("md")]: {
-        marginLeft: theme.spacing(2)
+        marginLeft: theme.spacing(2),
       },
       [theme.breakpoints.up("lg")]: {
-        marginLeft: theme.spacing(3)
-      }
+        marginLeft: theme.spacing(3),
+      },
     },
     inputRoot: {
-      color: "inherit"
+      color: "inherit",
     },
     inputInput: {
       padding: theme.spacing(1, 1, 1, 7),
       transition: theme.transitions.create("width"),
       width: "100%",
       [theme.breakpoints.up("md")]: {
-        width: 200
-      }
+        width: 200,
+      },
     },
     leftGroup: {
       float: "left",
       display: "flex",
       width: "40%",
       [theme.breakpoints.down("sm")]: {
-        width: "50%"
-      }
+        width: "50%",
+      },
     },
     middleGroup: {
       textAlign: "center",
       float: "none",
       width: "0%",
       [theme.breakpoints.up("md")]: {
-        width: "20%"
-      }
+        width: "20%",
+      },
     },
     logo: {
       display: "none",
       [theme.breakpoints.up("md")]: {
-        display: "block"
-      }
+        display: "block",
+      },
     },
     rightGroup: {
       width: "40%",
       float: "right",
       [theme.breakpoints.down("sm")]: {
-        width: "50%"
-      }
+        width: "50%",
+      },
     },
     profileMenu: {
-      float: "right"
-    }
+      float: "right",
+    },
   })
 );
 
@@ -179,7 +177,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function renderGovernmentIcon() {
-    if (isRepresentative()) {
+    if (!props.activeElection && isRepresentative()) {
       return (
         <Badge
           invisible={
@@ -203,7 +201,6 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   return (
     <div className={classes.grow}>
       <TestInfoBar classes={classes} />
-      {props.autoLoginInProgress && <LinearProgress variant="query" />}
       <AppBar position="static">
         <Toolbar>
           <div className={classes.leftGroup}>
@@ -245,13 +242,12 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    autoLoginInProgress: store.account.autoLoginInProgress,
-    representatives: store.government.representatives.map(rep => toLowerCase(rep)),
+    representatives: store.government.representatives.map((rep) => toLowerCase(rep)),
     reports: store.government.reports,
     activeElection: store.government.activeElection,
     unreadChats: store.chat.unreadChats,
     recentLogbookEntryTimestamp: store.government.recentLogbookEntryTimestamp,
-    user: store.account.user
+    user: store.account.user,
   };
 };
 
@@ -262,7 +258,7 @@ const mapDispatchToProps = (dispatch: any) => {
     countUnreadChats: (user: ChromunityUser) => dispatch(countUnreadChatsAction(user)),
     loadRepresentatives: () => dispatch(loadRepresentatives()),
     loadReports: () => dispatch(loadReports()),
-    autoLogin: () => dispatch(autoLogin())
+    autoLogin: () => dispatch(autoLogin()),
   };
 };
 
