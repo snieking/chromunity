@@ -8,7 +8,7 @@
     "@material-ui/lab": "^4.0.0-alpha.51",
     "@sentry/browser": "^5.15.5",
     "@types/react": "16.9.34",
-    "@types/node": "13.11.1",
+    "@types/node": "13.13.5",
     "@types/react-dom": "16.9.6",
     "@types/react-router": "^5.1.4",
     "bip39": "3.0.2",
