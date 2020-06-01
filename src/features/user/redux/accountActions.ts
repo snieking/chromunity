@@ -15,9 +15,9 @@ import {
   IStoreDistrustedUsers,
   IVaultCancel,
   IVaultSuccess,
-  IStoreUserVibes,
-  ICheckUserVibes,
-  ISendVibes
+  IStoreUserKudos,
+  ICheckUserKudos,
+  ISendKudos
 } from "./accountTypes";
 import { ChromunityUser } from "../../../types";
 import User from "ft3-lib/dist/ft3/user/user";
@@ -82,17 +82,17 @@ export const storeDistrustedUsers: ActionCreator<IStoreDistrustedUsers> = (distr
   distrustedUsers
 });
 
-export const checkUserVibes: ActionCreator<ICheckUserVibes> = () => ({
-  type: AccountActionTypes.CHECK_USER_VIBES
+export const checkUserKudos: ActionCreator<ICheckUserKudos> = () => ({
+  type: AccountActionTypes.CHECK_USER_KUDOS
 })
 
-export const storeUserVibes: ActionCreator<IStoreUserVibes> = (vibes: number) => ({
-  type: AccountActionTypes.STORE_USER_VIBES,
-  vibes
+export const storeUserKudos: ActionCreator<IStoreUserKudos> = (kudos: number) => ({
+  type: AccountActionTypes.STORE_USER_KUDOS,
+  kudos
 });
 
-export const sendVibes: ActionCreator<ISendVibes> = (receiver: string, vibes: number) => ({
-  type: AccountActionTypes.SEND_VIBES,
+export const sendKudos: ActionCreator<ISendKudos> = (receiver: string, kudos: number) => ({
+  type: AccountActionTypes.SEND_KUDOS,
   receiver,
-  vibes
+  kudos
 });

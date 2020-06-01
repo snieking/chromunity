@@ -30,16 +30,12 @@ operation send_vibe(name, descriptor_id: byte_array, receiver: name, amount: int
 	);
 	
 	ft3_core._transfer([ input ], [ output ]);
-	
-	var noun = "vibes";
-	if (amount == 1)
-		noun = "vibe";
 		
 	create noti.notification(
 		id = op_context.transaction.tx_rid.to_hex(),
 		receiving_user,
-		trigger = "Received " + noun,
-		content = "@" + user.display_name + " sent you " + amount + " " + noun,
+		trigger = "Received kudos",
+		content = "@" + user.display_name + " sent you " + amount + " kudos",
 		false,
 		op_context.last_block_time
 	);
@@ -90,22 +86,22 @@ function create_balance(user, amount: integer) {
 }
 
 function asset_name(): text {
-	return "VIBE";
+	return "KUDOS";
 }
 
 function calculate_asset_with_modifier(amount: integer): integer {
-	val block = op_context.block_height;
+	val current_users = user@*{}( .name ).size();
 	
 	return when {
-		block < 10000000 -> amount * 10;
-		block < 20000000 -> amount * 9;
-		block < 30000000 -> amount * 8;
-		block < 40000000 -> amount * 7;
-		block < 50000000 -> amount * 6;
-		block < 60000000 -> amount * 5;
-		block < 70000000 -> amount * 4;
-		block < 80000000 -> amount * 3;
-		block < 90000000 -> amount * 2;
+		current_users < 100 -> amount * 10;
+		current_users < 500 -> amount * 9;
+		current_users < 1000 -> amount * 8;
+		current_users < 5000 -> amount * 7;
+		current_users < 10000 -> amount * 6;
+		current_users < 25000 -> amount * 5;
+		current_users < 50000 -> amount * 4;
+		current_users < 75000 -> amount * 3;
+		current_users < 100000 -> amount * 2;
 		else -> amount;
 	};
 }

@@ -26,7 +26,7 @@ module.exports = {
   },
   features: {
     pinEnabled: true,
-    vibeEnabled: false
+    kudosEnabled: false
   },
   test: true,
   logLevel: "debug"

@@ -8,7 +8,7 @@ const initialAccountState: AccountState = {
   user: null,
   distrustedUsers: [],
   autoLoginInProgress: true,
-  vibes: 0,
+  kudos: 0,
 };
 
 function getCancellationStep(step: AuthenticationStep): AuthenticationStep {
@@ -66,10 +66,10 @@ export const loginReducer: Reducer<AccountState, AccountActions> = (state = init
       ...state,
       distrustedUsers: action.distrustedUsers,
     };
-  } else if (action.type === AccountActionTypes.STORE_USER_VIBES) {
+  } else if (action.type === AccountActionTypes.STORE_USER_KUDOS) {
     return {
       ...state,
-      vibes: action.vibes,
+      kudos: action.kudos,
     };
   }
 

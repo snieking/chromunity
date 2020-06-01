@@ -15,9 +15,9 @@ export enum AccountActionTypes {
   AUTO_LOGIN_ATTEMPTED = "ACCOUNT/AUTO/LOGIN/ATTEMPTED",
   CHECK_DISTRUSTED_USERS = "ACCOUNT/CHECK/DISTRUSTED_REPS",
   STORE_DISTRUSTED_USERS = "ACCOUNT/STORE/DISTRUSTED_REPS",
-  STORE_USER_VIBES = "ACCOUNT/STORE/VIBES",
-  CHECK_USER_VIBES = "ACCOUNT/CHECK/VIBES",
-  SEND_VIBES = "ACCOUNT/SEND/VIBES"
+  STORE_USER_KUDOS = "ACCOUNT/STORE/KUDOS",
+  CHECK_USER_KUDOS = "ACCOUNT/CHECK/KUDOS",
+  SEND_KUDOS = "ACCOUNT/SEND/KUDOS"
 }
 
 export interface ILoginAccount {
@@ -80,19 +80,19 @@ export interface IStoreDistrustedUsers {
   distrustedUsers: string[];
 }
 
-export interface IStoreUserVibes {
-  type: AccountActionTypes.STORE_USER_VIBES;
-  vibes: number;
+export interface IStoreUserKudos {
+  type: AccountActionTypes.STORE_USER_KUDOS;
+  kudos: number;
 }
 
-export interface ICheckUserVibes {
-  type: AccountActionTypes.CHECK_USER_VIBES;
+export interface ICheckUserKudos {
+  type: AccountActionTypes.CHECK_USER_KUDOS;
 }
 
-export interface ISendVibes {
-  type: AccountActionTypes.SEND_VIBES;
+export interface ISendKudos {
+  type: AccountActionTypes.SEND_KUDOS;
   receiver: string;
-  vibes: number;
+  kudos: number;
 }
 
 export type AccountActions =
@@ -109,9 +109,9 @@ export type AccountActions =
   | IRegisterUser
   | ICheckDistrustedUsers
   | IStoreDistrustedUsers
-  | ICheckUserVibes
-  | IStoreUserVibes
-  | ISendVibes;
+  | ICheckUserKudos
+  | IStoreUserKudos
+  | ISendKudos;
 
 export enum AuthenticationStep {
   VAULT_IN_PROGRESS,
@@ -128,5 +128,5 @@ export interface AccountState {
   ft3User: User;
   user: ChromunityUser;
   distrustedUsers: string[];
-  vibes: number;
+  kudos: number;
 }

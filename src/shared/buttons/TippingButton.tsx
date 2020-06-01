@@ -16,14 +16,14 @@ import {
 } from "@material-ui/core";
 import { setError } from "../../core/snackbar/redux/snackbarTypes";
 import * as config from "../../config";
-import { sendVibes } from "../../features/user/redux/accountActions";
+import { sendKudos } from "../../features/user/redux/accountActions";
 
 interface Props {
   receiver: string;
   user: ChromunityUser;
-  vibes: number;
+  kudos: number;
   setError: typeof setError;
-  sendVibes: typeof sendVibes;
+  sendKudos: typeof sendKudos;
 }
 
 const TippingButton: React.FunctionComponent<Props> = (props) => {
@@ -40,13 +40,13 @@ const TippingButton: React.FunctionComponent<Props> = (props) => {
 
   const sendTip = () => {
     handleClose();
-    const vibes = parseInt(amount);
-    if (vibes < 1) {
-      props.setError(`Can't send amount of ${vibes}`);
-    } else if (vibes > props.vibes) {
-      props.setError(`Can't send more vibes than you have, you need ${vibes - props.vibes} more`);
+    const kudos = parseInt(amount);
+    if (kudos < 1) {
+      props.setError(`Can't send amount of ${kudos}`);
+    } else if (kudos > props.kudos) {
+      props.setError(`Can't send more kudos than you have, you need ${kudos - props.kudos} more`);
     } else {
-      props.sendVibes(props.receiver, vibes);
+      props.sendKudos(props.receiver, kudos);
     }
 
     setAmount("");
@@ -64,10 +64,10 @@ const TippingButton: React.FunctionComponent<Props> = (props) => {
   function renderDialog() {
     return (
       <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-        <DialogTitle>Send vibes</DialogTitle>
+        <DialogTitle>Send kudos</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Enter the amount of vibes that you would like to send to <b>@{props.receiver}</b> below.
+            Enter the amount of kudos that you would like to send to <b>@{props.receiver}</b> below.
           </DialogContentText>
           <TextField
             autoFocus
@@ -92,13 +92,13 @@ const TippingButton: React.FunctionComponent<Props> = (props) => {
     );
   }
 
-  if (!props.user && !config.features.vibeEnabled) return null;
+  if (!props.user && !config.features.kudosEnabled) return null;
 
   return (
     <>
       {renderDialog()}
       <IconButton onClick={handleClickOpen}>
-        <Tooltip title="Send vibes">
+        <Tooltip title="Send kudos">
           <MoneyIcon />
         </Tooltip>
       </IconButton>
@@ -109,14 +109,14 @@ const TippingButton: React.FunctionComponent<Props> = (props) => {
 const mapStateToProps = (store: ApplicationState) => {
   return {
     user: store.account.user,
-    vibes: store.account.vibes,
+    kudos: store.account.kudos,
   };
 };
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
     setError: (msg: string) => dispatch(setError(msg)),
-    sendVibes: (receiver: string, vibes: number) => dispatch(sendVibes(receiver, vibes)),
+    sendKudos: (receiver: string, kudos: number) => dispatch(sendKudos(receiver, kudos)),
   };
 };
 
