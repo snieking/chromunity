@@ -72,7 +72,7 @@ const StarRating: React.FunctionComponent<Props> = (props) => {
       ratedBy={ratedBy}
       ratedByMe={ratedByMe()}
       toggleRating={props.incrementRating && props.removeRating ? toggleRating : null}
-      disabled={props.rateLimited}
+      disabled={props.rateLimited && !props.user}
     />
   );
 };

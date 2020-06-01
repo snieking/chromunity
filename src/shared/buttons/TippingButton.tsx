@@ -17,6 +17,7 @@ import {
 import { setError } from "../../core/snackbar/redux/snackbarTypes";
 import * as config from "../../config";
 import { sendKudos } from "../../features/user/redux/accountActions";
+import { toLowerCase } from "../util/util";
 
 interface Props {
   receiver: string;
@@ -92,7 +93,8 @@ const TippingButton: React.FunctionComponent<Props> = (props) => {
     );
   }
 
-  if (!props.user && !config.features.kudosEnabled) return null;
+  if (!props.user || toLowerCase(props.user.name) === toLowerCase(props.receiver) || !config.features.kudosEnabled)
+    return null;
 
   return (
     <>

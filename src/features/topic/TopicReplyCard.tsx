@@ -58,6 +58,7 @@ import { setError, notifySuccess } from "../../core/snackbar/redux/snackbarTypes
 import StarRating from "../../shared/star-rating/StarRating";
 import { setRateLimited, setQueryPending, setOperationPending } from "../../shared/redux/CommonActions";
 import ReplyButton from "../../shared/buttons/ReplyButton";
+import TippingButton from "../../shared/buttons/TippingButton";
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -362,6 +363,7 @@ const TopicReplyCard = withStyles(styles)(
                 removeRating={() => removeReplyStarRating(user, id)}
               />
             </div>
+            <TippingButton receiver={this.props.reply.author} />
             {this.props.reply.timestamp + allowedEditTimeMillis > Date.now() &&
             user != null &&
             this.props.reply.author === user.name ? (
@@ -408,7 +410,7 @@ const TopicReplyCard = withStyles(styles)(
         );
       } else {
         return (
-          <CardActions style={{ marginTop: "-20px" }}>
+          <CardActions>
             <div className={this.props.classes.ratingWrapper}>
               <StarRating starRatingFetcher={() => getReplyStarRaters(id)} />
             </div>
