@@ -36,6 +36,7 @@ yarn-error.log*
 *.pid
 *.iml
 .classpath
+.externalToolBuilders/
 
 # Emacs
 *~
