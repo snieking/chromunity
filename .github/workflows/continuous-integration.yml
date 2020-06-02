@@ -1,0 +1,60 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ dev, testnet, master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build Blockchain image
+      run: ./build-image.sh
+
+    - name: Start containers
+      run: docker-compose up -d
+      working-directory: test/docker
+
+    - name: Wait for startup
+      uses: jakejarvis/wait-action@master
+      with:
+        time: '15s'
+
+    - name: Add RID to .env
+      run: ./add-rid-to-env.sh
+      working-directory: test/docker
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run tests
+      run: npm test
+
+    - name: Build dev environment if dev branch
+      run: npm run build-dev
+      if: github.ref == ‘refs/heads/dev && github.event_name == ‘push’
+
+    - name: Build testnet environment if testnet branch
+      run: npm run build-testnet
+      if: github.ref == ‘refs/heads/testnet && github.event_name == ‘push’
+
+    - name: Build prod environment if master branch
+      run: npm run build
+      if: github.ref == ‘refs/heads/master && github.event_name == ‘push’
+
+    - uses: jakejarvis/s3-sync-action@master
+      with:
+        args: --acl public-read --follow-symlinks --delete
+      env:
+        AWS_S3_BUCKET: dev.chromunity.com
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: 'eu-west-1'   # optional: defaults to us-east-1
+        SOURCE_DIR: 'build'      # optional: defaults to entire repository
