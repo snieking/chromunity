@@ -49,12 +49,22 @@ jobs:
       run: npm run build
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
 
-    - uses: jakejarvis/s3-sync-action@master
-      with:
-        args: --acl public-read --follow-symlinks --delete
+    # - uses: jakejarvis/s3-sync-action@master
+    #   with:
+    #     args: --acl public-read --follow-symlinks --delete
+    #   env:
+    #     AWS_S3_BUCKET: dev.chromunity.com
+    #     AWS_ACCESS_KEY_ID: ${{ secrets.TESTNET_AWS_ACCESS_KEY_ID }}
+    #     AWS_SECRET_ACCESS_KEY: ${{ secrets.TESTNET_AWS_SECRET_ACCESS_KEY }}
+    #     AWS_REGION: 'eu-west-1'
+    #     SOURCE_DIR: 'build'
+
+    - name: Publish to AWS S3
+      uses: opspresso/action-s3-sync@master
       env:
-        AWS_S3_BUCKET: dev.chromunity.com
-        AWS_ACCESS_KEY_ID: ${{ secrets.TESTNET_AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.TESTNET_AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: 'eu-west-1'
-        SOURCE_DIR: 'build'
+        AWS_ACCESS_KEY_ID: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: "eu-west-1"
+        FROM_PATH: "./build"
+        DEST_PATH: "s3://dev.chromunity.com/"
+        OPTIONS: "--acl public-read"
