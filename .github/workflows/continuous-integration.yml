@@ -59,12 +59,25 @@ jobs:
     #     DEST_PATH: "s3://dev.chromunity.com/"
     #     OPTIONS: "--acl public-read"
 
-    - uses: jakejarvis/s3-sync-action@master
+    - uses: chrislennon/action-aws-cli@v1.1
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
       with:
-        args: --acl public-read
-      env:
-        AWS_S3_BUCKET: dev.chromunity.com
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: 'eu-west-1'
-        SOURCE_DIR: 'build'
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-west-1
+
+    - name: Deploy to S3
+      shell: bash
+      run: aws s3 sync ./build/ s3://dev.chromunity.com --acl public-read --follow-symlinks --delete
+
+    # - uses: jakejarvis/s3-sync-action@master
+    #   with:
+    #     args: --acl public-read
+    #   env:
+    #     AWS_S3_BUCKET: dev.chromunity.com
+    #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #     AWS_REGION: 'eu-west-1'
+    #     SOURCE_DIR: 'build'
