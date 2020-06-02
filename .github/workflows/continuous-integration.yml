@@ -39,15 +39,15 @@ jobs:
 
     - name: Build dev environment if dev branch
       run: npm run build-dev
-      if: github.ref == ‘refs/heads/dev && github.event_name == ‘push’
+      if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
 
     - name: Build testnet environment if testnet branch
       run: npm run build-testnet
-      if: github.ref == ‘refs/heads/testnet && github.event_name == ‘push’
+      if: github.ref == 'refs/heads/testnet' && github.event_name == 'push'
 
     - name: Build prod environment if master branch
       run: npm run build
-      if: github.ref == ‘refs/heads/master && github.event_name == ‘push’
+      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
 
     - uses: jakejarvis/s3-sync-action@master
       with:
@@ -56,5 +56,5 @@ jobs:
         AWS_S3_BUCKET: dev.chromunity.com
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: 'eu-west-1'   # optional: defaults to us-east-1
-        SOURCE_DIR: 'build'      # optional: defaults to entire repository
+        AWS_REGION: 'eu-west-1'
+        SOURCE_DIR: 'build'
