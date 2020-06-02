@@ -9,7 +9,7 @@
     "@sentry/browser": "^5.15.5",
     "@types/react": "16.9.34",
     "@types/node": "13.13.5",
-    "@types/react-dom": "16.9.6",
+    "@types/react-dom": "16.9.8",
     "@types/react-router": "^5.1.7",
     "bip39": "3.0.2",
     "boomerang-cache": "1.2.0",
