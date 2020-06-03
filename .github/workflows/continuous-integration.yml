@@ -49,14 +49,17 @@ jobs:
       run: npm run build
       if: github.ref == 'refs/heads/master' && github.event_name == 'push'
 
+    - name: AWS test
+      run: echo ${{ secrets.AWS_ACCESS_KEY_ID }}
+
     - name: Publish to AWS S3
       uses: opspresso/action-s3-sync@master
       env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: "eu-west-1"
-        FROM_PATH: "./build"
-        DEST_PATH: "s3://dev.chromunity.com/"
+        FROM_PATH: "build"
+        DEST_PATH: "s3://dev.chromunity.com"
         OPTIONS: "--acl public-read"
 
     - uses: chrislennon/action-aws-cli@v1.1
