@@ -38,15 +38,15 @@ jobs:
 
       - name: Build dev environment if dev branch
         run: npm run build-dev
-        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/dev'
 
       - name: Build testnet environment if testnet branch
         run: npm run build-testnet
-        if: github.ref == 'refs/heads/testnet' && github.event_name == 'push'
+        if: github.ref == 'refs/heads/testnet'
 
-      - name: Build prod environment if master branch
-        run: npm run build
-        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      # - name: Build prod environment if master branch
+      #   run: npm run build
+      #   if: github.ref == 'refs/heads/master'
 
       - uses: chrislennon/action-aws-cli@v1.1
 
@@ -57,7 +57,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-1
 
-      - name: Deploy to S3
+      - name: Deploy to Dev S3
         shell: bash
         run: aws s3 sync . s3://dev.chromunity.com/ --follow-symlinks --delete
         working-directory: build
+        if: github.ref == 'refs/heads/dev'
+
+      - name: Deploy to TestNet S3
+        shell: bash
+        run: aws s3 sync . s3://testnet.chromunity.com/ --follow-symlinks --delete
+        working-directory: build
+        if: github.ref == 'refs/heads/testnet'
