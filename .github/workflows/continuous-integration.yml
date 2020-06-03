@@ -5,84 +5,59 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ dev, testnet, master ]
+    branches: [dev, testnet, master]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    # - name: Build Blockchain image
-    #   run: ./build-image.sh
+      - name: Build Blockchain image
+        run: ./build-image.sh
 
-    # - name: Start containers
-    #   run: docker-compose up -d
-    #   working-directory: test/docker
+      - name: Start containers
+        run: docker-compose up -d
+        working-directory: test/docker
 
-    # - name: Wait for startup
-    #   uses: jakejarvis/wait-action@master
-    #   with:
-    #     time: '15s'
+      - name: Wait for startup
+        uses: jakejarvis/wait-action@master
+        with:
+          time: "15s"
 
-    # - name: Add RID to .env
-    #   run: ./add-rid-to-env.sh
-    #   working-directory: test/docker
+      - name: Add RID to .env
+        run: ./add-rid-to-env.sh
+        working-directory: test/docker
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    # - name: Run tests
-    #   run: npm test
+      - name: Run tests
+        run: npm test
 
-    - name: Build dev environment if dev branch
-      run: npm run build-dev
-      if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+      - name: Build dev environment if dev branch
+        run: npm run build-dev
+        if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
 
-    - name: Build testnet environment if testnet branch
-      run: npm run build-testnet
-      if: github.ref == 'refs/heads/testnet' && github.event_name == 'push'
+      - name: Build testnet environment if testnet branch
+        run: npm run build-testnet
+        if: github.ref == 'refs/heads/testnet' && github.event_name == 'push'
 
-    - name: Build prod environment if master branch
-      run: npm run build
-      if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+      - name: Build prod environment if master branch
+        run: npm run build
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
 
-    - name: AWS test
-      run: echo ${{ secrets.AWS_ACCESS_KEY_ID }}
+      - uses: chrislennon/action-aws-cli@v1.1
 
-    - name: Publish to AWS S3
-      uses: opspresso/action-s3-sync@master
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: "eu-west-1"
-        FROM_PATH: "build"
-        DEST_PATH: "s3://dev.chromunity.com"
-        OPTIONS: "--acl public-read"
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
 
-    - uses: chrislennon/action-aws-cli@v1.1
-
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: eu-west-1
-
-    - name: Deploy to S3
-      shell: bash
-      run: |
-        aws s3 sync . s3://dev.chromunity.com --acl public-read --follow-symlinks --delete
-      working-directory: build
-
-    # - uses: jakejarvis/s3-sync-action@master
-    #   with:
-    #     args: --acl public-read
-    #   env:
-    #     AWS_S3_BUCKET: dev.chromunity.com
-    #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    #     AWS_REGION: 'eu-west-1'
-    #     SOURCE_DIR: 'build'
+      - name: Deploy to S3
+        shell: bash
+        run: aws s3 sync . s3://dev.chromunity.com/ --follow-symlinks --delete
+        working-directory: build
