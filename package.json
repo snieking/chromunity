@@ -82,7 +82,7 @@
     "dotenv": "^8.2.0",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
-    "enzyme-to-json": "^3.4.4",
+    "enzyme-to-json": "^3.5.0",
     "jest-cli": "^26.0.1",
     "jest-styled-components": "^7.0.2",
     "jsdom": "16.2.2",
