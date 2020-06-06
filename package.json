@@ -70,7 +70,7 @@
     ]
   },
   "devDependencies": {
-    "@types/crypto-js": "^3.1.43",
+    "@types/crypto-js": "^3.1.47",
     "@types/enzyme": "^3.10.5",
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/jest": "^25.2.3",
