@@ -59,8 +59,18 @@ jobs:
         working-directory: build
         if: github.ref == 'refs/heads/dev'
 
+      - name: Invalidate Cloudfront [dev] caches
+        shell: bash
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID_DEV }} --paths "/*"
+        if: github.ref == 'refs/heads/dev'
+
       - name: Deploy to S3 [testnet] Bucket
         shell: bash
         run: aws s3 sync . s3://testnet.chromunity.com/ --follow-symlinks --delete --cache-control max-age=86400
         working-directory: build
+        if: github.ref == 'refs/heads/testnet'
+
+      - name: Invalidate Cloudfront [testnet] caches
+        shell: bash
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID_TESTNET }} --paths "/*"
         if: github.ref == 'refs/heads/testnet'
