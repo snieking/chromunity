@@ -13,7 +13,7 @@ interface Props {
   user: ChromunityUser;
   classes: Record<string, string>;
   unreadChats: number;
-  vibes: number;
+  kudos: number;
 }
 
 const ProfileNavigation: React.FunctionComponent<Props> = (props: Props) => {
@@ -27,8 +27,8 @@ const ProfileNavigation: React.FunctionComponent<Props> = (props: Props) => {
     setProfileAnchorEl(null);
   }
 
-  function formattedVibe() {
-    return nFormatter(props.vibes, 1);
+  function formattedKudos() {
+    return nFormatter(props.kudos, 1);
   }
 
   if (props.user != null) {
@@ -56,7 +56,7 @@ const ProfileNavigation: React.FunctionComponent<Props> = (props: Props) => {
           onClick={handleProfileClick}
         >
           <Tooltip title="Profile">
-            <Badge badgeContent={props.vibes !== 0 ? formattedVibe() : 0} color="secondary">
+            <Badge badgeContent={props.kudos !== 0 ? formattedKudos() : 0} max={999999} color="secondary">
               <AccountCircle />
             </Badge>
           </Tooltip>

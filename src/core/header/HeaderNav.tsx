@@ -235,7 +235,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
             </div>
           </div>
           <div className={classes.rightGroup}>
-            <ProfileNavigation user={props.user} classes={classes} unreadChats={props.unreadChats} vibes={props.kudos} />
+            <ProfileNavigation user={props.user} classes={classes} unreadChats={props.unreadChats} kudos={props.kudos} />
           </div>
         </Toolbar>
       </AppBar>

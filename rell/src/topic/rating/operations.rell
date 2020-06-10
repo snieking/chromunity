@@ -11,7 +11,7 @@ operation give_topic_star_rating(username: text, descriptor_id: byte_array, id: 
     update topicRating ( stars = topicRating.stars + 1 );
     
     if (my_user.name != topic.author.name) {
-    	user.reward_asset(topic.author, 1);
+    	user.reward_asset(topic.author, 2);
     }
 }
 

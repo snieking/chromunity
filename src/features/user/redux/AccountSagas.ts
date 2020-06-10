@@ -11,7 +11,7 @@ import {
 import { takeLatest, put, select } from "redux-saga/effects";
 import { op, SSOStoreLocalStorage } from "ft3-lib";
 import config from "../../../config.js";
-import { getDistrustedUsers, getUsernameByAccountId, getVibes as getKudos, sendVibes } from "../../../core/services/UserService";
+import { getDistrustedUsers, getUsernameByAccountId, getKudos, sendKudos } from "../../../core/services/UserService";
 import { BLOCKCHAIN, executeOperations } from "../../../core/services/Postchain";
 import { clearSession, getUsername, setUsername } from "../../../shared/util/user-util";
 import logger from "../../../shared/util/logger";
@@ -208,7 +208,7 @@ export function* sendVibesSaga(action: ISendKudos) {
   const user = yield select(getUser);
 
   if (user && config.features.kudosEnabled) {
-    yield sendVibes(user, action.receiver, action.kudos);
+    yield sendKudos(user, action.receiver, action.kudos);
     yield put(checkUserKudos());
     yield put(notifySuccess(`Sent ${action.kudos} ${action.kudos > 1 ? "vibes" : "vibe"} to ${action.receiver}`));
   }
