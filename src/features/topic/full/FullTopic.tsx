@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { RouteComponentProps } from "react-router";
 import { ChromunityUser, PollData, Topic, TopicReply } from "../../../types";
-import { shouldBeFiltered, toLowerCase } from "../../../shared/util/util";
+import { shouldBeFiltered, toLowerCase, useInterval } from "../../../shared/util/util";
 import {
   Button,
   Card,
@@ -193,14 +193,18 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     }, 1000);
   }
 
+  useInterval(() => {
+    retrieveLatestReplies(false);
+  }, 10000);
+
   function getTimeLeft(until: number): number {
     const currentTime = Date.now();
     return currentTime < until ? Math.floor((until - currentTime) / 1000) : 0;
   }
 
-  function retrieveLatestReplies(): void {
+  function retrieveLatestReplies(notifyLoading: boolean = true): void {
     setLoading(true);
-    props.setQueryPending(true);
+    props.setQueryPending(notifyLoading);
     const topicId: string = props.match.params.id;
     let replies: Promise<TopicReply[]>;
     if (topicReplies.length === 0) {

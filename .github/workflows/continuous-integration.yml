@@ -1,0 +1,76 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Continuous Integration
+
+on:
+  push:
+    branches: [dev, testnet, master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build Blockchain image
+        run: ./build-image.sh
+
+      - name: Start containers
+        run: docker-compose up -d
+        working-directory: test/docker
+
+      - name: Wait for startup
+        uses: jakejarvis/wait-action@master
+        with:
+          time: "15s"
+
+      - name: Add RID to .env
+        run: ./add-rid-to-env.sh
+        working-directory: test/docker
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build dev environment if [dev] branch
+        run: npm run build-dev
+        if: github.ref == 'refs/heads/dev'
+
+      - name: Build testnet environment if [testnet] branch
+        run: npm run build-testnet
+        if: github.ref == 'refs/heads/testnet'
+
+      - uses: chrislennon/action-aws-cli@v1.1
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Deploy to S3 [dev] Bucket
+        shell: bash
+        run: aws s3 sync . s3://dev.chromunity.com/ --follow-symlinks --delete --cache-control max-age=600
+        working-directory: build
+        if: github.ref == 'refs/heads/dev'
+
+      - name: Invalidate Cloudfront [dev] caches
+        shell: bash
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID_DEV }} --paths "/*"
+        if: github.ref == 'refs/heads/dev'
+
+      - name: Deploy to S3 [testnet] Bucket
+        shell: bash
+        run: aws s3 sync . s3://testnet.chromunity.com/ --follow-symlinks --delete --cache-control max-age=86400
+        working-directory: build
+        if: github.ref == 'refs/heads/testnet'
+
+      - name: Invalidate Cloudfront [testnet] caches
+        shell: bash
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID_TESTNET }} --paths "/*"
+        if: github.ref == 'refs/heads/testnet'
