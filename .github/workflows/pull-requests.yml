@@ -1,0 +1,34 @@
+name: Pull Requests
+
+on:
+  pull_request:
+    branches: [dev, testnet, master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build Blockchain image
+        run: ./build-image.sh
+
+      - name: Start containers
+        run: docker-compose up -d
+        working-directory: test/docker
+
+      - name: Wait for startup
+        uses: jakejarvis/wait-action@master
+        with:
+          time: "15s"
+
+      - name: Add RID to .env
+        run: ./add-rid-to-env.sh
+        working-directory: test/docker
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test

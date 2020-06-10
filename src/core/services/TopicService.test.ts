@@ -109,23 +109,23 @@ describe("topic tests", () => {
   });
 
   it("star rate topic", async () => {
-    await giveTopicStarRating(userLoggedIn, topic.id);
+    const user = await CREATE_LOGGED_IN_USER();
+    await giveTopicStarRating(user, topic.id);
 
-    const usersWhoRated: string[] = await getTopicStarRaters(topic.id);
+    let usersWhoRated: string[] = await getTopicStarRaters(topic.id);
     expect(usersWhoRated.length).toBe(1);
 
-    const topicStars: number = await countTopicStarRatingForUser(userLoggedIn.name);
+    const topicStars: number = await countTopicStarRatingForUser(topic.author);
     expect(topicStars).toBeGreaterThanOrEqual(1);
-  });
 
-  it("remove star rate on topic", async () => {
-    await removeTopicStarRating(userLoggedIn, topic.id);
-    const usersWhoRated: string[] = await getTopicStarRaters(topic.id);
+    await removeTopicStarRating(user, topic.id);
+    usersWhoRated = await getTopicStarRaters(topic.id);
     expect(usersWhoRated.length).toBe(0);
   });
 
   it("star rate topic again", async () => {
-    await giveTopicStarRating(userLoggedIn, topic.id);
+    const user = await CREATE_LOGGED_IN_USER();
+    await giveTopicStarRating(user, topic.id);
     const usersWhoRated: string[] = await getTopicStarRaters(topic.id);
     expect(usersWhoRated.length).toBe(1);
   });

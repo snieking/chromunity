@@ -152,6 +152,7 @@ interface State {
   reportReplyDialogOpen: boolean;
   timeLeftUntilNoLongerModifiable: number;
   renderSubReplies: boolean;
+  interval: NodeJS.Timeout;
 }
 
 const allowedEditTimeMillis: number = 300000;
@@ -186,6 +187,7 @@ const TopicReplyCard = withStyles(styles)(
         reportReplyDialogOpen: false,
         timeLeftUntilNoLongerModifiable: 0,
         renderSubReplies: previouslyFoldedSubReplies ? decisionToRenderSubReplies : shouldRenderDueToTimestamp,
+        interval: null
       };
 
       if (!previouslyFoldedSubReplies && shouldRenderDueToTimestamp && this.props.cascadeOpenSubReplies != null) {
@@ -220,7 +222,14 @@ const TopicReplyCard = withStyles(styles)(
           ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase()),
         })
       );
+
       getTopicSubReplies(this.props.reply.id, user).then((replies) => this.setState({ subReplies: replies }));
+
+      var interval = setInterval(() => {
+        getTopicSubReplies(this.props.reply.id, user).then((replies) => this.setState({ subReplies: replies }));
+      }, 30000);
+
+      this.setState({ interval: interval });
 
       const modifiableUntil = this.props.reply.timestamp + allowedEditTimeMillis;
 
@@ -234,6 +243,12 @@ const TopicReplyCard = withStyles(styles)(
       if (this.isReplyHighlighted()) {
         this.openSubReplies();
         this.scrollToReply();
+      }
+    }
+
+    componentWillUnmount() {
+      if (this.state.interval) {
+        clearInterval(this.state.interval);
       }
     }
 
