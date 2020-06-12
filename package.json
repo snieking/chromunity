@@ -23,7 +23,7 @@
     "keypair": "^1.0.1",
     "postchain-client": "0.9.2",
     "prettier": "^2.0.5",
-    "query-string": "^6.13.0",
+    "query-string": "^6.13.1",
     "react": "^16.13.0",
     "react-avatar-edit": "0.8.3",
     "react-copy-to-clipboard": "^5.0.2",
