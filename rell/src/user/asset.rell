@@ -99,17 +99,16 @@ function create_balance(user): ft3_core.balance {
 function calculate_asset_with_modifier(amount: integer): integer {
 	val current_users = user@*{}( .name ).size();
 	
-	// Upvote amount is 2
 	return when {
-		current_users < 100 -> amount * 136; // 272
-		current_users < 500 -> amount * 84; // 168
-		current_users < 1000 -> amount * 52; // 104
-		current_users < 5000 -> amount * 32; // 64
-		current_users < 10000 -> amount * 20; // 40
-		current_users < 25000 -> amount * 12; // 24
-		current_users < 50000 -> amount * 8; // 16
-		current_users < 75000 -> amount * 4; // 8
-		current_users < 100000 -> amount * 2; // 4
+		current_users < 100 -> amount * 30;
+		current_users < 500 -> amount * 25;
+		current_users < 1000 -> amount * 20;
+		current_users < 5000 -> amount * 15;
+		current_users < 10000 -> amount * 12;
+		current_users < 25000 -> amount * 8;
+		current_users < 50000 -> amount * 5;
+		current_users < 75000 -> amount * 4;
+		current_users < 100000 -> amount * 2;
 		else -> amount;
 	};
 }
