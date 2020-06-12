@@ -25,7 +25,8 @@ module.exports = {
     message: "Local Environment"
   },
   features: {
-    pinEnabled: true
+    pinEnabled: true,
+    kudosEnabled: true
   },
   test: true,
   logLevel: "debug"

@@ -1,0 +1,114 @@
+import ft3_core: lib.ft3.core;
+import noti: notifications;
+
+object asset_info {
+	name: name = "KUDOS";
+}
+
+operation send_kudos(name, descriptor_id: byte_array, receiver: name, amount: integer) {
+	val user = get_and_charge_verified_user(name, descriptor_id);
+	
+	// Ensure receiver has a balance entity,
+	// since old users won't have one by default.
+	val receiving_user = user@{ .name == receiver.lower_case() };
+	val their_balance = get_balance(receiving_user);
+	if (their_balance == null) {
+		create_balance(receiving_user);
+	}
+	
+	val asset = ensure_asset();
+	
+	val input = ft3_core.xfer_input(
+		account_id = user.account.id, 
+		asset_id = asset.id, 
+		auth_descriptor_id = descriptor_id, 
+		amount, 
+		extra = map<text, gtv>()
+	);
+	
+	val output = ft3_core.xfer_output(
+		account_id = receiving_user.account.id,
+		asset_id = asset.id,
+		amount,
+		extra = map<text, gtv>()
+	);
+	
+	ft3_core._transfer([ input ], [ output ]);
+		
+	create noti.notification(
+		id = op_context.transaction.tx_rid.to_hex(),
+		receiving_user,
+		trigger = "Received kudos",
+		content = "@" + user.display_name + " sent you " + amount + " kudos",
+		false,
+		op_context.last_block_time
+	);
+}
+
+query get_user_kudos(name) {
+	val user = user@{ .name == name.lower_case() };
+	val balance = get_balance(user);
+	
+	if (balance == null)
+		return 0;
+	else
+		return balance.amount;
+}
+
+function reward_asset(user, amount: integer) {
+	val asset = ensure_asset();
+	val modified_amount = calculate_asset_with_modifier(amount);
+	
+	val output = ft3_core.xfer_output(
+		account_id = user.account.id,
+		asset_id = asset.id,
+		modified_amount,
+		extra = map<text, gtv>()
+	);
+	
+	val available_assets = map<ft3_core.asset, integer>();
+	available_assets.put(asset, modified_amount);
+
+	ft3_core.process_transfer_output(output, 0, available_assets);
+}
+
+function get_balance(user): ft3_core.balance? {
+	return ft3_core.balance@?{ 
+		user.account,
+		.asset.name == asset_info.name
+	};
+}
+
+function get_asset(): ft3_core.asset? {
+	return ft3_core.asset@?{ .name == asset_info.name };
+}
+
+function ensure_asset(): ft3_core.asset {
+	val asset = get_asset();
+
+	return 
+		if (asset != null) asset
+		else ft3_core.register_asset(asset_info.name, chain_context.blockchain_rid);
+}
+
+function create_balance(user): ft3_core.balance {
+	var asset = ensure_asset();
+	return ft3_core.ensure_balance(user.account, asset);
+}
+
+function calculate_asset_with_modifier(amount: integer): integer {
+	val current_users = user@*{}( .name ).size();
+	
+	return when {
+		current_users < 100 -> amount * 30;
+		current_users < 500 -> amount * 25;
+		current_users < 1000 -> amount * 20;
+		current_users < 5000 -> amount * 15;
+		current_users < 10000 -> amount * 12;
+		current_users < 25000 -> amount * 8;
+		current_users < 50000 -> amount * 5;
+		current_users < 75000 -> amount * 4;
+		current_users < 100000 -> amount * 2;
+		else -> amount;
+	};
+}

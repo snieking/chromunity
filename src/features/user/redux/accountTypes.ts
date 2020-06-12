@@ -14,7 +14,10 @@ export enum AccountActionTypes {
   REGISTER_USER = "ACCOUNT/REGISTER/USER",
   AUTO_LOGIN_ATTEMPTED = "ACCOUNT/AUTO/LOGIN/ATTEMPTED",
   CHECK_DISTRUSTED_USERS = "ACCOUNT/CHECK/DISTRUSTED_REPS",
-  STORE_DISTRUSTED_USERS = "ACCOUNT/STORE/DISTRUSTED_REPS"
+  STORE_DISTRUSTED_USERS = "ACCOUNT/STORE/DISTRUSTED_REPS",
+  STORE_USER_KUDOS = "ACCOUNT/STORE/KUDOS",
+  CHECK_USER_KUDOS = "ACCOUNT/CHECK/KUDOS",
+  SEND_KUDOS = "ACCOUNT/SEND/KUDOS"
 }
 
 export interface ILoginAccount {
@@ -77,6 +80,21 @@ export interface IStoreDistrustedUsers {
   distrustedUsers: string[];
 }
 
+export interface IStoreUserKudos {
+  type: AccountActionTypes.STORE_USER_KUDOS;
+  kudos: number;
+}
+
+export interface ICheckUserKudos {
+  type: AccountActionTypes.CHECK_USER_KUDOS;
+}
+
+export interface ISendKudos {
+  type: AccountActionTypes.SEND_KUDOS;
+  receiver: string;
+  kudos: number;
+}
+
 export type AccountActions =
   | ILoginAccount
   | ISetAuthenticationStep
@@ -90,7 +108,10 @@ export type AccountActions =
   | IResetLoginState
   | IRegisterUser
   | ICheckDistrustedUsers
-  | IStoreDistrustedUsers;
+  | IStoreDistrustedUsers
+  | ICheckUserKudos
+  | IStoreUserKudos
+  | ISendKudos;
 
 export enum AuthenticationStep {
   VAULT_IN_PROGRESS,
@@ -107,4 +128,5 @@ export interface AccountState {
   ft3User: User;
   user: ChromunityUser;
   distrustedUsers: string[];
+  kudos: number;
 }

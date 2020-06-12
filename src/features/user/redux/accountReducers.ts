@@ -8,14 +8,15 @@ const initialAccountState: AccountState = {
   user: null,
   distrustedUsers: [],
   autoLoginInProgress: true,
+  kudos: 0,
 };
 
 function getCancellationStep(step: AuthenticationStep): AuthenticationStep {
   switch (step) {
     case AuthenticationStep.REGISTERING_USER:
       return AuthenticationStep.USERNAME_INPUT_REQUIRED;
-      default:
-        return null;
+    default:
+      return null;
   }
 }
 
@@ -23,7 +24,7 @@ export const loginReducer: Reducer<AccountState, AccountActions> = (state = init
   if (action.type === AccountActionTypes.VAULT_CANCEL) {
     return {
       ...state,
-      authenticationStep: getCancellationStep(state.authenticationStep)
+      authenticationStep: getCancellationStep(state.authenticationStep),
     };
   } else if (action.type === AccountActionTypes.SET_USER) {
     return {
@@ -64,6 +65,11 @@ export const loginReducer: Reducer<AccountState, AccountActions> = (state = init
     return {
       ...state,
       distrustedUsers: action.distrustedUsers,
+    };
+  } else if (action.type === AccountActionTypes.STORE_USER_KUDOS) {
+    return {
+      ...state,
+      kudos: action.kudos,
     };
   }
 

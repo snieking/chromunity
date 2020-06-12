@@ -25,7 +25,8 @@ module.exports = {
     message: "TestNet"
   },
   features: {
-    pinEnabled: true
+    pinEnabled: true,
+    kudosEnabled: false
   },
   test: true,
   logLevel: "info"

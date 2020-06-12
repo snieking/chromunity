@@ -25,7 +25,8 @@ module.exports = {
     message: "Development Environment"
   },
   features: {
-    pinEnabled: true
+    pinEnabled: true,
+    kudosEnabled: false
   },
   test: true,
   logLevel: "debug"

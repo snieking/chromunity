@@ -14,7 +14,10 @@ import {
   ISetUser,
   IStoreDistrustedUsers,
   IVaultCancel,
-  IVaultSuccess
+  IVaultSuccess,
+  IStoreUserKudos,
+  ICheckUserKudos,
+  ISendKudos
 } from "./accountTypes";
 import { ChromunityUser } from "../../../types";
 import User from "ft3-lib/dist/ft3/user/user";
@@ -77,4 +80,19 @@ export const checkDistrustedUsers: ActionCreator<ICheckDistrustedUsers> = (user:
 export const storeDistrustedUsers: ActionCreator<IStoreDistrustedUsers> = (distrustedUsers: string[]) => ({
   type: AccountActionTypes.STORE_DISTRUSTED_USERS,
   distrustedUsers
+});
+
+export const checkUserKudos: ActionCreator<ICheckUserKudos> = () => ({
+  type: AccountActionTypes.CHECK_USER_KUDOS
+})
+
+export const storeUserKudos: ActionCreator<IStoreUserKudos> = (kudos: number) => ({
+  type: AccountActionTypes.STORE_USER_KUDOS,
+  kudos
+});
+
+export const sendKudos: ActionCreator<ISendKudos> = (receiver: string, kudos: number) => ({
+  type: AccountActionTypes.SEND_KUDOS,
+  receiver,
+  kudos
 });

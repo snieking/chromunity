@@ -7,7 +7,8 @@ import {
   parseTwitterUsername,
   parseLinkedinUsername,
   parseGithubUsername,
-  parseFacebookUsername
+  parseFacebookUsername,
+  nFormatter
 } from "./util";
 import { getTags, parseEmojis } from "./text-parsing";
 
@@ -231,5 +232,23 @@ describe("parse facebook user", () => {
 
   it("should parse link with trailing slash", () => {
     expect(parseFacebookUsername("https://www.linkedin.com/in/viktor.plane/")).toBe("viktor.plane");
+  });
+});
+
+describe("format number", () => {
+  it("should format 100 to 100", () => {
+    expect(nFormatter(100, 0)).toBe("100");
+  });
+
+  it("should format 1100 to 1k with 0 digits", () => {
+    expect(nFormatter(1100, 0)).toBe("1k");
+  });
+
+  it("should format 1100 to 1.1k with 1 digit", () => {
+    expect(nFormatter(1100, 1)).toBe("1.1k");
+  });
+
+  it("should format 997000 to 997k", () => {
+    expect(nFormatter(997000, 0)).toBe("997k");
   });
 });

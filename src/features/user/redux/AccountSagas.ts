@@ -5,12 +5,13 @@ import {
   AuthenticationStep,
   ICheckDistrustedUsers,
   IRegisterUser,
-  IVaultSuccess
+  IVaultSuccess,
+  ISendKudos
 } from "./accountTypes";
 import { takeLatest, put, select } from "redux-saga/effects";
 import { op, SSOStoreLocalStorage } from "ft3-lib";
 import config from "../../../config.js";
-import { getDistrustedUsers, getUsernameByAccountId } from "../../../core/services/UserService";
+import { getDistrustedUsers, getUsernameByAccountId, getKudos, sendKudos } from "../../../core/services/UserService";
 import { BLOCKCHAIN, executeOperations } from "../../../core/services/Postchain";
 import { clearSession, getUsername, setUsername } from "../../../shared/util/user-util";
 import logger from "../../../shared/util/logger";
@@ -23,7 +24,9 @@ import {
   setAuthenticationStep,
   setUser,
   storeDistrustedUsers,
-  vaultCancel
+  vaultCancel,
+  storeUserKudos,
+  checkUserKudos
 } from "./accountActions";
 import { ChromunityUser } from "../../../types";
 import { ApplicationState } from "../../../core/store";
@@ -43,6 +46,8 @@ export function* accountWatcher() {
   yield takeLatest(AccountActionTypes.AUTO_LOGIN, autoLoginSaga);
   yield takeLatest(AccountActionTypes.LOGOUT_ACCOUNT, logoutSaga);
   yield takeLatest(AccountActionTypes.CHECK_DISTRUSTED_USERS, checkDistrustedUsersSaga);
+  yield takeLatest(AccountActionTypes.CHECK_USER_KUDOS, checkUserKudosSaga);
+  yield takeLatest(AccountActionTypes.SEND_KUDOS, sendVibesSaga);
 }
 
 function* loginSaga() {
@@ -183,4 +188,30 @@ export function* checkDistrustedUsersSaga(action: ICheckDistrustedUsers) {
   const distrustedReps = action.user != null ? yield getDistrustedUsers(action.user) : [];
   yield put(storeDistrustedUsers(distrustedReps));
   logger.silly("[SAGA - FINISHED]: Checking distrusted reps");
+}
+
+export function* checkUserKudosSaga() {
+  logger.silly("[SAGA - STARTED]: Checking user kudos");
+  const user = yield select(getUser);
+
+  if (user && config.features.kudosEnabled) {
+    const kudos = yield getKudos(user.name);
+    yield put(storeUserKudos(kudos));
+  }
+
+  logger.silly("[SAGA - FINISHED]: Checking user kudos");
+}
+
+export function* sendVibesSaga(action: ISendKudos) {
+  logger.silly("[SAGA - STARTED]: Send kudos");
+
+  const user = yield select(getUser);
+
+  if (user && config.features.kudosEnabled) {
+    yield sendKudos(user, action.receiver, action.kudos);
+    yield put(checkUserKudos());
+    yield put(notifySuccess(`Sent ${action.kudos} ${action.kudos > 1 ? "vibes" : "vibe"} to ${action.receiver}`));
+  }
+
+  logger.silly("[SAGA - FINISHED]: Send kudos");
 }

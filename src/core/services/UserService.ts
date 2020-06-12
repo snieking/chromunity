@@ -102,3 +102,17 @@ export function getTimesUserWasDistrusted(name: string) {
 export function getTimesUserDistrustedSomeone(name: string) {
   return executeQuery("times_user_distrusted_someone", { name });
 }
+
+export function getKudos(name: string) {
+  return executeQuery("get_user_kudos", { name });
+}
+
+export function sendKudos(user: ChromunityUser, receiver: string, amount: number) {
+  console.log("Receiver: ", typeof(receiver), receiver);
+  console.log("Amount: ", typeof(amount), amount);
+  return executeOperations(
+    user.ft3User,
+    op("send_kudos", toLowerCase(user.name), user.ft3User.authDescriptor.id, toLowerCase(receiver), amount),
+    nop()
+  );
+}

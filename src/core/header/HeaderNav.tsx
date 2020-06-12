@@ -24,7 +24,7 @@ import DesktopWallNavigation from "./DesktopWallNavigation";
 import TestInfoBar from "./TestInfoBar";
 import GovMenu from "./GovMenu";
 import ChromiaLogo from "./ChromiaLogo";
-import { autoLogin } from "../../features/user/redux/accountActions";
+import { autoLogin, checkUserKudos } from "../../features/user/redux/accountActions";
 
 interface Props {
   representatives: string[];
@@ -33,12 +33,14 @@ interface Props {
   unreadChats: number;
   recentLogbookEntryTimestamp: number;
   user: ChromunityUser;
+  kudos: number;
   autoLogin: typeof autoLogin;
   loadRepresentatives: typeof loadRepresentatives;
   loadReports: typeof loadReports;
   checkActiveElection: typeof checkActiveElection;
   countUnreadChats: typeof countUnreadChatsAction;
   checkNewLogbookEntries: typeof checkNewLogbookEntries;
+  checkUserKudos: typeof checkUserKudos;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -151,6 +153,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
 
     if (props.user != null) {
       props.checkActiveElection(props.user);
+      props.checkUserKudos();
     }
     // eslint-disable-next-line
   }, [props.user]);
@@ -232,7 +235,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
             </div>
           </div>
           <div className={classes.rightGroup}>
-            <ProfileNavigation user={props.user} classes={classes} unreadChats={props.unreadChats} />
+            <ProfileNavigation user={props.user} classes={classes} unreadChats={props.unreadChats} kudos={props.kudos} />
           </div>
         </Toolbar>
       </AppBar>
@@ -248,6 +251,7 @@ const mapStateToProps = (store: ApplicationState) => {
     unreadChats: store.chat.unreadChats,
     recentLogbookEntryTimestamp: store.government.recentLogbookEntryTimestamp,
     user: store.account.user,
+    kudos: store.account.kudos
   };
 };
 
@@ -259,6 +263,7 @@ const mapDispatchToProps = (dispatch: any) => {
     loadRepresentatives: () => dispatch(loadRepresentatives()),
     loadReports: () => dispatch(loadReports()),
     autoLogin: () => dispatch(autoLogin()),
+    checkUserKudos: () => dispatch(checkUserKudos())
   };
 };
 
