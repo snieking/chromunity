@@ -210,7 +210,7 @@ export function* sendVibesSaga(action: ISendKudos) {
   if (user && config.features.kudosEnabled) {
     yield sendKudos(user, action.receiver, action.kudos);
     yield put(checkUserKudos());
-    yield put(notifySuccess(`Sent ${action.kudos} ${action.kudos > 1 ? "vibes" : "vibe"} to ${action.receiver}`));
+    yield put(notifySuccess(`Sent ${action.kudos} kudos to ${action.receiver}`));
   }
 
   logger.silly("[SAGA - FINISHED]: Send kudos");
