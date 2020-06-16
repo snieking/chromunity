@@ -15,7 +15,7 @@ import {
   Tooltip,
   Typography,
 } from "@material-ui/core";
-import { Delete, Notifications, NotificationsActive, Report, SubdirectoryArrowRight } from "@material-ui/icons";
+import { Notifications, NotificationsActive, Report, SubdirectoryArrowRight } from "@material-ui/icons";
 import TopicReplyCard from "../TopicReplyCard";
 import { Link, Redirect } from "react-router-dom";
 import { ApplicationState } from "../../../core/store";
@@ -26,13 +26,7 @@ import Timestamp from "../../../shared/Timestamp";
 import MarkdownRenderer from "../../../shared/MarkdownRenderer";
 import EditMessageButton from "../../../shared/buttons/EditMessageButton";
 import ConfirmDialog from "../../../shared/ConfirmDialog";
-import {
-  hasReportedId,
-  hasReportedTopic,
-  REMOVE_TOPIC_OP_ID,
-  removeTopic,
-  reportTopic,
-} from "../../../core/services/RepresentativesService";
+import { reportTopic, hasReportedTopic } from "../../../core/services/RepresentativesService";
 import {
   createTopicReply,
   deleteTopic,
@@ -63,8 +57,8 @@ import StarRating from "../../../shared/star-rating/StarRating";
 import { setRateLimited, setOperationPending, setQueryPending } from "../../../shared/redux/CommonActions";
 import FullTopicTutorial from "./FullTopicTutorial";
 import ReplyButton from "../../../shared/buttons/ReplyButton";
-import PinButton from "./PinButton";
 import TippingButton from "../../../shared/buttons/TippingButton";
+import GoverningActions from "./GoverningActions";
 
 interface MatchParams {
   id: string;
@@ -143,7 +137,6 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
   const [replyBoxOpen, setReplyBoxOpen] = useState(false);
   const [replyMessage, setReplyMessage] = useState("");
   const [couldExistOlderReplies, setCouldExistOlderReplies] = useState(false);
-  const [removeTopicDialogOpen, setRemoveTopicDialogOpen] = useState(false);
   const [reportTopicDialogOpen, setReportTopicDialogOpen] = useState(false);
   const [timeLeftUntilNoLongerModifiable, setTimeLeftUntilNoLongerModifiable] = useState(0);
   const [poll, setPoll] = useState<PollData>(null);
@@ -269,7 +262,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
         <Link
           className={`${classes.authorLink} ${
             props.representatives.includes(topic.author.toLocaleLowerCase()) ? classes.repColor : classes.userColor
-          }`}
+            }`}
           to={"/u/" + topic.author}
         >
           <Typography gutterBottom variant="subtitle1" component="span" className="typography">
@@ -309,28 +302,28 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
                 <NotificationsActive className={classes.iconOrange} />
               </Tooltip>
             ) : (
-              <Tooltip title="Subscribe">
-                <Notifications />
-              </Tooltip>
-            )}
+                <Tooltip title="Subscribe">
+                  <Notifications />
+                </Tooltip>
+              )}
           </IconButton>
 
           <TippingButton receiver={topic.author} />
 
           {topic.timestamp + allowedEditTimeMillis > Date.now() &&
-          user != null &&
-          toLowerCase(topic.author) === toLowerCase(user.name) ? (
-            <EditMessageButton
-              value={topic.message}
-              modifiableUntil={timeLeftUntilNoLongerModifiable}
-              editFunction={editTopicMessage}
-              deleteFunction={deleteTheTopic}
-            />
-          ) : (
-            <div style={{ display: "inline" }} />
-          )}
+            user != null &&
+            toLowerCase(topic.author) === toLowerCase(user.name) ? (
+              <EditMessageButton
+                value={topic.message}
+                modifiableUntil={timeLeftUntilNoLongerModifiable}
+                editFunction={editTopicMessage}
+                deleteFunction={deleteTheTopic}
+              />
+            ) : (
+              <div style={{ display: "inline" }} />
+            )}
 
-          <PinButton topicId={topic.id} />
+          <GoverningActions topicId={topic.id} />
 
           <ConfirmDialog
             text="This action will report the topic"
@@ -354,7 +347,6 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
 
           <SocialShareButton text={topic.title} />
 
-          {renderAdminActions()}
           <ReplyButton onClick={toggleReplyBox} toggled={replyBoxOpen} size="medium" />
         </CardActions>
       );
@@ -471,37 +463,6 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
   function isRepresentative() {
     const user: ChromunityUser = props.user;
     return user != null && props.representatives.includes(toLowerCase(user.name));
-  }
-
-  function renderAdminActions() {
-    if (isRepresentative() && !hasReportedId(REMOVE_TOPIC_OP_ID + ":" + topic.id)) {
-      return (
-        <div style={{ display: "inline-block" }}>
-          <IconButton aria-label="Remove topic" onClick={() => setRemoveTopicDialogOpen(true)}>
-            <Tooltip title="Remove topic">
-              <Delete className={classes.iconRed} />
-            </Tooltip>
-          </IconButton>
-
-          <ConfirmDialog
-            text={
-              "This action will remove the topic, which makes sure that no one will be able to read the initial message."
-            }
-            open={removeTopicDialogOpen}
-            onClose={() => setRemoveTopicDialogOpen(false)}
-            onConfirm={() => {
-              setRemoveTopicDialogOpen(false);
-              removeTopic(props.user, topic.id)
-                .catch((error) => {
-                  setError(error.message);
-                  setRateLimited();
-                })
-                .then(() => window.location.reload());
-            }}
-          />
-        </div>
-      );
-    }
   }
 
   function renderReplyForm() {
