@@ -4,13 +4,14 @@ import { ApplicationState } from "../../../core/store";
 import { ChromunityUser } from "../../../types";
 import { connect } from "react-redux";
 import { toLowerCase } from "../../../shared/util/util";
-import { IconButton, Tooltip } from "@material-ui/core";
+import { ListItemIcon, MenuItem, Typography } from "@material-ui/core";
 import { pinTopic, checkPinnedTopicByRep } from "../../governing/redux/govActions";
 import { COLOR_ORANGE } from "../../../theme";
 import ConfirmDialog from "../../../shared/ConfirmDialog";
 
 interface Props {
   topicId: string;
+  handleClose: Function;
   user: ChromunityUser;
   rateLimited: boolean;
   representatives: string[];
@@ -52,11 +53,12 @@ const PinButton: React.FunctionComponent<Props> = (props) => {
           onClose={() => setDialogOpen(false)}
           onConfirm={confirm}
         />
-        <Tooltip title={isPinnedByMe() ? "Remove pin" : "Pin"}>
-          <IconButton disabled={props.rateLimited} onClick={() => setDialogOpen(true)}>
+        <MenuItem onClick={() => setDialogOpen(true)} disabled={props.rateLimited || isPinnedByMe()}>
+          <ListItemIcon>
             <PinDropIcon style={{ color: isPinnedByMe() ? COLOR_ORANGE : "" }} />
-          </IconButton>
-        </Tooltip>
+          </ListItemIcon>
+          <Typography>Pin topic</Typography>
+        </MenuItem>
       </>
     );
   }
