@@ -30,30 +30,34 @@ const PinButton: React.FunctionComponent<Props> = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.representatives, props.user]);
 
-  function isRepresentative() {
-    return props.user && props.representatives && props.representatives.includes(toLowerCase(props.user.name));
+  const isRepresentative = () => props.user && props.representatives && props.representatives.includes(toLowerCase(props.user.name));
+  const isPinnedByMe = () => isRepresentative() && props.topicIdPinnedByMe && props.topicIdPinnedByMe === props.topicId;
+
+  const openDialog = () => {
+    props.handleClose();
+    setDialogOpen(true);
   }
 
-  function isPinnedByMe() {
-    return isRepresentative() && props.topicIdPinnedByMe && props.topicIdPinnedByMe === props.topicId;
-  }
-
-  function confirm() {
+  const confirm = () => {
     setDialogOpen(false);
     props.pinTopic(props.topicId);
   }
 
-  function pinButton() {
+  const cancel = () => {
+    setDialogOpen(false);
+  }
+
+  const pinButton = () => {
     return (
       <>
         <ConfirmDialog
           text="You may only have one active pin at the same time."
           subText=" Topics with the most pins from representatives will be displayed at the top."
           open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
+          onClose={cancel}
           onConfirm={confirm}
         />
-        <MenuItem onClick={() => setDialogOpen(true)} disabled={props.rateLimited || isPinnedByMe()}>
+        <MenuItem onClick={openDialog} disabled={props.rateLimited || isPinnedByMe()}>
           <ListItemIcon>
             <PinDropIcon style={{ color: isPinnedByMe() ? COLOR_ORANGE : "" }} />
           </ListItemIcon>
