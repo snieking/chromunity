@@ -140,6 +140,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
   const [reportTopicDialogOpen, setReportTopicDialogOpen] = useState(false);
   const [timeLeftUntilNoLongerModifiable, setTimeLeftUntilNoLongerModifiable] = useState(0);
   const [poll, setPoll] = useState<PollData>(null);
+  const [topicReported, setTopicReported] = useState(false);
 
   const textInput: React.RefObject<HTMLInputElement> = useRef();
 
@@ -148,10 +149,10 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
 
   useEffect(() => {
     const id = props.match.params.id;
-    const user: ChromunityUser = props.user;
+
 
     props.setQueryPending(true);
-    getTopicById(id, user)
+    getTopicById(id, props.user)
       .then((topic) => {
         if (topic != null) {
           consumeTopicData(topic);
@@ -165,6 +166,12 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
       });
     // eslint-disable-next-line
   }, [props.match.params.id]);
+
+  useEffect(() => {
+    if (props.user) {
+      setTopicReported(hasReportedTopic(props.user, topic));
+    }
+  })
 
   function consumeTopicData(t: Topic): void {
     setTopic(t);
@@ -332,7 +339,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
             onConfirm={reportTheTopic}
           />
 
-          {!isRepresentative() && !hasReportedTopic(user, topic) && (
+          {!isRepresentative() && !topicReported && (
             <IconButton
               data-tut="report_btn"
               aria-label="Report-test"
@@ -449,12 +456,14 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     const user: ChromunityUser = props.user;
 
     if (user != null) {
+      props.setOperationPending(true);
       reportTopic(user, topic)
         .catch((error) => {
           setError(error.message);
           setRateLimited();
         })
-        .then();
+        .then(() => setTopicReported(true))
+        .finally(() => props.setOperationPending(false));
     } else {
       window.location.href = "/user/login";
     }
