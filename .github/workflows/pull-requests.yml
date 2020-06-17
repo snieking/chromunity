@@ -38,5 +38,4 @@ jobs:
         with:
           name: PR
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: coverage-final.json
-        working-directory: coverage
+          file: coverage/coverage-final.json
