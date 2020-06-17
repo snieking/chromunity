@@ -168,10 +168,10 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
   }, [props.match.params.id]);
 
   useEffect(() => {
-    if (props.user) {
+    if (props.user && topic) {
       setTopicReported(hasReportedTopic(props.user, topic));
     }
-  })
+  }, [props.user, topic]);
 
   function consumeTopicData(t: Topic): void {
     setTopic(t);
