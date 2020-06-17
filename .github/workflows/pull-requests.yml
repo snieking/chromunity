@@ -32,3 +32,11 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Codecov
+        uses: codecov/codecov-action@v1.0.7
+        with:
+          name: PR
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: coverage-final.json
+        working-directory: coverage

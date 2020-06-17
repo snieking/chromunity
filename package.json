@@ -54,7 +54,6 @@
     "build-testnet": "cp ./src/config.js ./src/config.bak.js && cp ./src/config-testnet.js ./src/config.js && cp ./public/robots.txt ./public/robots.txt.bak && cp ./public/robots.txt.dev ./public/robots.txt && react-scripts build && mv ./src/config.bak.js ./src/config.js && mv ./public/robots.txt.bak ./public/robots.txt",
     "build-local": "react-scripts build",
     "test": "jest --config jest.config.js --setupFiles dotenv/config",
-    "test-bc": "jest --setupFiles dotenv/config",
     "eject": "react-scripts eject"
   },
   "browserslist": {

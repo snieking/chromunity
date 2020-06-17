@@ -14,4 +14,6 @@ module.exports = {
   moduleNameMapper: {
     "\\.(jpe?g|png|gif|webp|svg|mp4|webm|ogg|mp3|wav|flac|aac|woff2?|eot|ttf|otf)$": "<rootDir>/file-mock.js",
   },
+  coverageDirectory: "./coverage/",
+  collectCoverage: true
 };
