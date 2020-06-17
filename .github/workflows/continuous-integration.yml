@@ -36,6 +36,13 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Codecov
+        uses: codecov/codecov-action@v1.0.7
+        with:
+          name: PR
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: coverage/coverage-final.json
+
       - name: Build dev environment if [dev] branch
         run: npm run build-dev
         if: github.ref == 'refs/heads/dev'
