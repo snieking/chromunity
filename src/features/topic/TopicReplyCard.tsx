@@ -150,6 +150,7 @@ interface State {
   subReplies: TopicReply[];
   removeReplyDialogOpen: boolean;
   reportReplyDialogOpen: boolean;
+  replyReported: boolean;
   timeLeftUntilNoLongerModifiable: number;
   renderSubReplies: boolean;
   interval: NodeJS.Timeout;
@@ -185,6 +186,7 @@ const TopicReplyCard = withStyles(styles)(
         subReplies: [],
         removeReplyDialogOpen: false,
         reportReplyDialogOpen: false,
+        replyReported: false,
         timeLeftUntilNoLongerModifiable: 0,
         renderSubReplies: previouslyFoldedSubReplies ? decisionToRenderSubReplies : shouldRenderDueToTimestamp,
         interval: null
@@ -222,6 +224,8 @@ const TopicReplyCard = withStyles(styles)(
           ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase()),
         })
       );
+
+      this.setState({ replyReported: hasReportedReply(user, this.props.reply) });
 
       getTopicSubReplies(this.props.reply.id, user).then((replies) => this.setState({ subReplies: replies }));
 
@@ -328,7 +332,7 @@ const TopicReplyCard = withStyles(styles)(
               this.props.representatives.includes(this.props.reply.author.toLocaleLowerCase())
                 ? this.props.classes.repColor
                 : this.props.classes.userColor
-            }`}
+              }`}
             to={"/u/" + this.props.reply.author}
           >
             <Typography gutterBottom variant="subtitle1" component="span">
@@ -380,15 +384,15 @@ const TopicReplyCard = withStyles(styles)(
             </div>
             <TippingButton receiver={this.props.reply.author} />
             {this.props.reply.timestamp + allowedEditTimeMillis > Date.now() &&
-            user != null &&
-            this.props.reply.author === user.name ? (
-              <EditMessageButton
-                modifiableUntil={this.state.timeLeftUntilNoLongerModifiable}
-                value={this.props.reply.message}
-                editFunction={this.editReplyMessage}
-                deleteFunction={this.deleteReplyMessage}
-              />
-            ) : null}
+              user != null &&
+              this.props.reply.author === user.name ? (
+                <EditMessageButton
+                  modifiableUntil={this.state.timeLeftUntilNoLongerModifiable}
+                  value={this.props.reply.message}
+                  editFunction={this.editReplyMessage}
+                  deleteFunction={this.deleteReplyMessage}
+                />
+              ) : null}
 
             <ConfirmDialog
               text="This action will report the message"
@@ -397,7 +401,7 @@ const TopicReplyCard = withStyles(styles)(
               onConfirm={this.reportReply}
             />
 
-            {!this.isRepresentative() && !hasReportedReply(user, this.props.reply) && (
+            {!this.isRepresentative() && !this.state.replyReported && (
               <IconButton
                 aria-label="Report"
                 onClick={() => this.setState({ reportReplyDialogOpen: true })}
@@ -492,6 +496,7 @@ const TopicReplyCard = withStyles(styles)(
             this.props.setError(error.message);
             this.props.setRateLimited();
           })
+          .then(() => this.setState({ replyReported: true }))
           .finally(() => this.props.setOperationPending(false));
       } else {
         window.location.href = "/user/login";
