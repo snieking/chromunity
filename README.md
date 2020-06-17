@@ -1,5 +1,5 @@
 # Chromunity
-![Continuous Integration](https://github.com/snieking/chromunity/workflows/Continuous%20Integration/badge.svg)[![codecov](https://codecov.io/gh/snieking/chromunity/branch/dev/graph/badge.svg)](https://codecov.io/gh/snieking/chromunity)
+![Continuous Integration](https://github.com/snieking/chromunity/workflows/Continuous%20Integration/badge.svg) [![codecov](https://codecov.io/gh/snieking/chromunity/branch/dev/graph/badge.svg)](https://codecov.io/gh/snieking/chromunity)
 
 **Chromunity** is a decentralized social media site where the data is stored in a blockchain. It is built with Rell, an easy to learn and powerful language. Rell is used to interact with https://chromia.com
 
