@@ -25,10 +25,10 @@ const ConfirmDialog: React.FunctionComponent<Props> = (props: Props) => {
         {props.subText && (<DialogContentText>{props.subText}</DialogContentText>)}
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => props.onClose()} color="secondary">
+        <Button variant="contained" onClick={() => props.onClose()} color="secondary">
           {props.cancelMessage || "Cancel"}
         </Button>
-        <Button onClick={() => props.onConfirm()} color="primary">
+        <Button variant="contained" onClick={() => props.onConfirm()} color="primary">
           {props.confirmMessage || "Confirm"}
         </Button>
       </DialogActions>
