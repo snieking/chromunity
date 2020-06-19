@@ -1,5 +1,5 @@
 import React from "react";
-import { toggleTutorial } from "./redux/CommonActions";
+import { toggleTutorial } from "./redux/common-actions";
 import Tour from 'reactour'
 import { connect } from "react-redux";
 import ApplicationState from "../core/application-state";

@@ -17,18 +17,18 @@ import {
   Theme,
   Typography,
 } from "@material-ui/core";
-import AvatarChanger from "./AvatarChanger";
+import AvatarChanger from "./avatar-changer";
 
-import { getUserSettings, updateUserSettings } from "../../../core/services/UserService";
-import ChromiaPageHeader from "../../../shared/ChromiaPageHeader";
-import Avatar, { AVATAR_SIZE } from "../../../shared/Avatar";
+import { getUserSettings, updateUserSettings } from "../../../core/services/user-service";
+import ChromiaPageHeader from "../../../shared/chromia-page-header";
+import Avatar, { AVATAR_SIZE } from "../../../shared/avatar";
 import ApplicationState from "../../../core/application-state";
 import { connect } from "react-redux";
-import { Socials } from "../socials/socialTypes";
+import { Socials } from "../socials/social-types";
 import { TwitterIcon, LinkedinIcon, FacebookIcon } from "react-share";
-import GitHubLogo from "../../../shared/logos/GitHubLogo";
-import { notifyError, notifyInfo } from "../../../core/snackbar/redux/snackbarActions";
-import { setOperationPending, setRateLimited } from "../../../shared/redux/CommonActions";
+import GitHubLogo from "../../../shared/logos/github-logo";
+import { notifyError, notifyInfo } from "../../../core/snackbar/redux/snackbar-actions";
+import { setOperationPending, setRateLimited } from "../../../shared/redux/common-actions";
 import {
   parseTwitterUsername,
   parseLinkedinUsername,

@@ -4,9 +4,9 @@ import {
   WallActionTypes,
   WallType,
   IUpdateTopics
-} from "./wallTypes";
+} from "./wall-types";
 import { runSaga } from "redux-saga";
-import { loadAllTopicsSaga, loadAllTopicsByPopularitySaga, loadOlderAllTopicsSaga } from "./wallSagas";
+import { loadAllTopicsSaga, loadAllTopicsByPopularitySaga, loadOlderAllTopicsSaga } from "./wall-sagas";
 import { ChromunityUser, Topic } from "../../../types";
 import { getANumber } from "../../../shared/test-utility/helper";
 import { Action } from "redux";

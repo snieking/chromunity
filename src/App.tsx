@@ -2,17 +2,17 @@ import * as React from "react";
 import { Router } from "react-router-dom";
 import { Provider } from "react-redux";
 import { Store } from "redux";
-import HeaderNav from "./core/header/HeaderNav";
-import Footer from "./core/footer/Footer";
+import HeaderNav from "./core/header/header-nav";
+import Footer from "./core/footer/footer";
 import { CssBaseline } from "@material-ui/core";
-import Content from "./Content";
-import DynamicTheme from "./core/dynamic-theme/DynamicTheme";
+import Content from "./content";
+import DynamicTheme from "./core/dynamic-theme/dynamic-theme";
 import ReactPiwik from "react-piwik";
 import history from "./history";
 import * as Sentry from "@sentry/browser";
 import * as config from "./config";
 import logger from "./shared/util/logger";
-import Spinners from "./core/spinners/Spinners";
+import Spinners from "./core/spinners/spinners";
 import ApplicationState from "./core/application-state";
 
 interface Props {

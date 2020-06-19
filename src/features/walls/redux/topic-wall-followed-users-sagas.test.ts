@@ -2,17 +2,17 @@ import {
   WallActionTypes,
   WallType,
   IUpdateTopics
-} from "./wallTypes";
+} from "./wall-types";
 import { ChromunityUser, Topic } from "../../../types";
 import { CREATE_LOGGED_IN_USER } from "../../../shared/test-utility/users";
 import { CREATE_RANDOM_TOPIC } from "../../../shared/test-utility/topics";
-import { createFollowing } from "../../../core/services/FollowingService";
+import { createFollowing } from "../../../core/services/following-service";
 import { runSaga } from "redux-saga";
 import {
   loadFollowedUsersTopicsSaga,
   loadFollowedUsersTopicsByPopularitySaga,
   loadOlderFollowedUsersTopicsSaga
-} from "./wallSagas";
+} from "./wall-sagas";
 import { getANumber } from "../../../shared/test-utility/helper";
 import { Action } from "redux";
 

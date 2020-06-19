@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import ApplicationState from "../../../core/application-state";
-import { logoutAccount } from "../redux/accountActions";
+import { logoutAccount } from "../redux/account-actions";
 import { connect } from "react-redux";
 import { ChromunityUser } from "../../../types";
 import { LinearProgress } from "@material-ui/core";

@@ -1,14 +1,14 @@
 import { ChromunityUser, Topic, TopicReply } from "../../../types";
 import { CREATE_LOGGED_IN_USER } from "../../../shared/test-utility/users";
 import { CREATE_RANDOM_TOPIC } from "../../../shared/test-utility/topics";
-import { createTopicReply, getTopicsByUserPriorToTimestamp } from "../../../core/services/TopicService";
+import { createTopicReply, getTopicsByUserPriorToTimestamp } from "../../../core/services/topic-service";
 import {
   UserPageActionTypes, IUpdateUserTopics, IUpdateUserReplies,
-} from "./userTypes";
-import { loadUserTopicsSaga, loadUserRepliesSaga, loadUserFollowedChannelsSaga } from "./userPageSagas";
+} from "./user-types";
+import { loadUserTopicsSaga, loadUserRepliesSaga, loadUserFollowedChannelsSaga } from "./user-page-sagas";
 import { runSaga } from "redux-saga";
 import { getANumber } from "../../../shared/test-utility/helper";
-import { followChannel } from "../../../core/services/ChannelService";
+import { followChannel } from "../../../core/services/channel-service";
 import { Action } from "@reduxjs/toolkit";
 
 describe("User page saga tests", () => {

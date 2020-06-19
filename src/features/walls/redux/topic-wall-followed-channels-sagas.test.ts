@@ -2,7 +2,7 @@ import {
   WallActionTypes,
   WallType,
   IUpdateTopics
-} from "./wallTypes";
+} from "./wall-types";
 import { ChromunityUser, Topic } from "../../../types";
 import { CREATE_LOGGED_IN_USER } from "../../../shared/test-utility/users";
 import { CREATE_RANDOM_TOPIC } from "../../../shared/test-utility/topics";
@@ -11,8 +11,8 @@ import {
   loadFollowedChannelsTopicsSaga,
   loadFollowedChannelsTopicsByPopularitySaga,
   loadOlderFollowedChannelsTopicsSaga
-} from "./wallSagas";
-import { followChannel } from "../../../core/services/ChannelService";
+} from "./wall-sagas";
+import { followChannel } from "../../../core/services/channel-service";
 import { getANumber } from "../../../shared/test-utility/helper";
 import logger from "../../../shared/util/logger";
 import { Action } from "redux";

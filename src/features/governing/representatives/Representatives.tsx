@@ -1,13 +1,13 @@
 import React from "react";
 
 import { Container, Grid } from "@material-ui/core";
-import RepresentativeCard from "./RepresentativeCard";
-import ChromiaPageHeader from "../../../shared/ChromiaPageHeader";
+import RepresentativeCard from "./representative-card";
+import ChromiaPageHeader from "../../../shared/chromia-page-header";
 import { ChromunityUser } from "../../../types";
 import ApplicationState from "../../../core/application-state";
 import { connect } from "react-redux";
-import Tutorial from "../../../shared/Tutorial";
-import TutorialButton from "../../../shared/buttons/TutorialButton";
+import Tutorial from "../../../shared/tutorial";
+import TutorialButton from "../../../shared/buttons/tutorial-button";
 import representativesTutorialSteps from "./tutorial-steps";
 
 interface Props {

@@ -4,7 +4,7 @@ import { render } from "react-dom";
 import "./index.css";
 import * as serviceWorker from "./serviceWorker";
 
-import App from "./App";
+import App from "./app";
 
 const store = getStore();
 

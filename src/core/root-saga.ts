@@ -1,11 +1,11 @@
 import { all } from "redux-saga/effects";
-import { accountWatcher } from "../features/user/redux/AccountSagas";
-import { topicWallWatcher } from "../features/walls/redux/wallSagas";
-import { channelWatcher } from "../features/walls/redux/channelSagas";
-import { userPageWatcher } from "../features/user/redux/userPageSagas";
-import { governmentWatcher } from "../features/governing/redux/govSagas";
-import { chatWatcher } from "../features/chat/redux/chatSagas";
-import { commonWatcher } from "../shared/redux/CommonSagas";
+import { accountWatcher } from "../features/user/redux/account-sagas";
+import { topicWallWatcher } from "../features/walls/redux/wall-sagas";
+import { channelWatcher } from "../features/walls/redux/channel-sagas";
+import { userPageWatcher } from "../features/user/redux/user-page-sagas";
+import { governmentWatcher } from "../features/governing/redux/gov-sagas";
+import { chatWatcher } from "../features/chat/redux/chat-sagas";
+import { commonWatcher } from "../shared/redux/common-sagas";
 
 export default function* saga() {
   yield all([

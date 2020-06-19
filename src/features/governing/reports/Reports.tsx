@@ -1,9 +1,9 @@
 import * as React from "react";
 import { RepresentativeReport } from "../../../types";
 import { Container } from "@material-ui/core";
-import { updateReportsLastRead } from "../../../core/services/RepresentativesService";
-import ReportCard from "./ReportCard";
-import ChromiaPageHeader from "../../../shared/ChromiaPageHeader";
+import { updateReportsLastRead } from "../../../core/services/representatives-service";
+import ReportCard from "./report-card";
+import ChromiaPageHeader from "../../../shared/chromia-page-header";
 import { connect } from "react-redux";
 import ApplicationState from "../../../core/application-state";
 

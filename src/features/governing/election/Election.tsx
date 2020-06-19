@@ -15,16 +15,16 @@ import {
   isEligibleForVoting,
   signUpForElection,
   voteForCandidate,
-} from "../../../core/services/ElectionService";
-import ChromiaPageHeader from "../../../shared/ChromiaPageHeader";
+} from "../../../core/services/election-service";
+import ChromiaPageHeader from "../../../shared/chromia-page-header";
 import { ChromunityUser } from "../../../types";
-import ElectionCandidateCard from "./ElectionCandidateCard";
+import ElectionCandidateCard from "./election-candidate-card";
 import ApplicationState from "../../../core/application-state";
 import { connect } from "react-redux";
 import { toLowerCase } from "../../../shared/util/util";
-import ElectionTutorial from "./ElectionTutorial";
-import ElectionDetails from "./ElectionDetails";
-import { ElectionStatus } from "./ElectionStatus";
+import ElectionTutorial from "./election-tutorial";
+import ElectionDetails from "./election-details";
+import { ElectionStatus } from "./election-status";
 
 const styles = createStyles({
   actionBtn: {
