@@ -50,7 +50,7 @@ import * as BoomerangCache from "boomerang-cache";
 import ApplicationState from "../../core/application-state";
 import { connect } from "react-redux";
 import { shouldBeFiltered, toLowerCase, uniqueId } from "../../shared/util/util";
-import TextToolbar from "../../shared/textToolbar/text-toolbar";
+import TextToolbar from "../../shared/text-toolbar/text-toolbar";
 import CardActions from "@material-ui/core/CardActions";
 import Divider from "@material-ui/core/Divider";
 import PreviewLinks from "../../shared/preview-links";

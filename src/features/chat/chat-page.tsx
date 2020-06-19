@@ -46,7 +46,7 @@ import Tutorial from "../../shared/tutorial";
 import TutorialButton from "../../shared/buttons/tutorial-button";
 import { step } from "../../shared/tutorial-step";
 import { Redirect } from "react-router";
-import TextToolbar from "../../shared/textToolbar/text-toolbar";
+import TextToolbar from "../../shared/text-toolbar/text-toolbar";
 import { notifySuccess, notifyError } from "../../core/snackbar/redux/snackbar-actions";
 
 interface Props {

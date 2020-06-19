@@ -20,7 +20,7 @@ import "emoji-mart/css/emoji-mart.css";
 import Tooltip from "@material-ui/core/Tooltip";
 import ApplicationState from "../../core/application-state";
 import { connect } from "react-redux";
-import TextToolbar from "../textToolbar/text-toolbar";
+import TextToolbar from "../text-toolbar/text-toolbar";
 import PollCreator from "../../features/topic/poll/poll-creator";
 import PollIcon from "@material-ui/icons/Poll";
 import { notifySuccess, notifyError } from "../../core/snackbar/redux/snackbar-actions";

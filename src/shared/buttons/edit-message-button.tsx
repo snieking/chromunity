@@ -23,7 +23,7 @@ import withStyles from "@material-ui/core/styles/withStyles";
 import ConfirmDialog from "../confirm-dialog";
 import ApplicationState from "../../core/application-state";
 import { connect } from "react-redux";
-import TextToolbar from "../textToolbar/text-toolbar";
+import TextToolbar from "../text-toolbar/text-toolbar";
 import { notifyInfo, notifyError } from "../../core/snackbar/redux/snackbar-actions";
 import { setRateLimited } from "../redux/common-actions";
 

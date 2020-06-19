@@ -43,7 +43,7 @@ import {
   unsubscribeFromTopic,
 } from "../../../core/services/topic-service";
 import Divider from "@material-ui/core/Divider";
-import TextToolbar from "../../../shared/textToolbar/text-toolbar";
+import TextToolbar from "../../../shared/text-toolbar/text-toolbar";
 import LoadMoreButton from "../../../shared/buttons/load-more-button";
 import { getUserSettingsCached } from "../../../core/services/user-service";
 import { ifEmptyAvatarThenPlaceholder, markTopicReadInSession } from "../../../shared/util/user-util";
