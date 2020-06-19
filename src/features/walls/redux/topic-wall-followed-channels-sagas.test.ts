@@ -1,22 +1,21 @@
 import {
-  TopicWallActions,
-  UpdateTopicsAction,
-  UpdateTopicWallFromCacheAction,
   WallActionTypes,
-  WallType
+  WallType,
+  IUpdateTopics
 } from "./wallTypes";
 import { ChromunityUser, Topic } from "../../../types";
 import { CREATE_LOGGED_IN_USER } from "../../../shared/test-utility/users";
 import { CREATE_RANDOM_TOPIC } from "../../../shared/test-utility/topics";
 import { runSaga } from "redux-saga";
 import {
-  loadFollowedChannelsTopics,
-  loadFollowedChannelsTopicsByPopularity,
-  loadOlderFollowedChannelsTopics
+  loadFollowedChannelsTopicsSaga,
+  loadFollowedChannelsTopicsByPopularitySaga,
+  loadOlderFollowedChannelsTopicsSaga
 } from "./wallSagas";
 import { followChannel } from "../../../core/services/ChannelService";
 import { getANumber } from "../../../shared/test-utility/helper";
 import logger from "../../../shared/util/logger";
+import { Action } from "redux";
 
 describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
   const testPrefix = "load followed channels topics wall";
@@ -30,16 +29,16 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  const createFakeStore = (dispatchedActions: TopicWallActions[], state: any) => {
+  const createFakeStore = (dispatchedActions: any[], state: any) => {
     return {
-      dispatch: (action: TopicWallActions) => dispatchedActions.push(action),
+      dispatch: (action: any) => dispatchedActions.push(action),
       getState: () => ({ topicWall: state })
     };
   };
 
-  const getUpdateTopicAction = (dispatchedActions: TopicWallActions[]): UpdateTopicsAction => {
+  const getUpdateTopicAction = (dispatchedActions: any[]): IUpdateTopics => {
     for (const action of dispatchedActions) {
-      if (action.type === WallActionTypes.UPDATE_TOPICS_WALL) return action as UpdateTopicsAction;
+      if (action.type === WallActionTypes.UPDATE_TOPICS_WALL) return action.payload;
     }
     return null;
   };
@@ -59,12 +58,12 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
     ];
   };
 
-  const getUpdateTopicsFromCacheAction = (dispatchedActions: TopicWallActions[]): UpdateTopicWallFromCacheAction => {
+  const getUpdateTopicsFromCacheAction = (dispatchedActions: any[]): WallType => {
     logger.debug("Actions: ", dispatchedActions);
     expect(dispatchedActions.length).toBe(1);
     const action = dispatchedActions[0];
     expect(action.type).toBe(WallActionTypes.UPDATE_TOPICS_WALL_FROM_CACHE);
-    return action as UpdateTopicWallFromCacheAction;
+    return action.payload;
   };
 
   beforeAll(async () => {
@@ -80,7 +79,7 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
   });
 
   it(testPrefix, async () => {
-    const dispatchedActions: TopicWallActions[] = [];
+    const dispatchedActions: any[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       followedChannels: {
         updated: 0,
@@ -88,12 +87,14 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
       }
     });
 
-    await runSaga(fakeStore, loadFollowedChannelsTopics, {
+    await runSaga(fakeStore, loadFollowedChannelsTopicsSaga, {
       type: WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPIC_WALL,
-      username: user.name,
-      pageSize: pageSize,
-      ignoreCache: false
-    }).toPromise();
+      payload: {
+        username: user.name,
+        pageSize: pageSize,
+        ignoreCache: false
+      }
+    } as Action).toPromise();
 
     const updateTopicsAction = getUpdateTopicAction(dispatchedActions);
 
@@ -103,7 +104,7 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
   });
 
   it(testPrefix + " | returns less than page size", async () => {
-    const dispatchedActions: TopicWallActions[] = [];
+    const dispatchedActions: any[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       followedChannels: {
         updated: 0,
@@ -111,12 +112,14 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
       }
     });
 
-    await runSaga(fakeStore, loadFollowedChannelsTopics, {
+    await runSaga(fakeStore, loadFollowedChannelsTopicsSaga, {
       type: WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPIC_WALL,
-      username: user.name,
-      pageSize: 1000,
-      ignoreCache: false
-    }).toPromise();
+      payload: {
+        username: user.name,
+        pageSize: 1000,
+        ignoreCache: false
+      }
+    } as Action).toPromise();
 
     const updateTopicsAction = getUpdateTopicAction(dispatchedActions);
 
@@ -126,7 +129,7 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
   });
 
   it(testPrefix + " | older loaded", async () => {
-    const dispatchedActions: TopicWallActions[] = [];
+    const dispatchedActions: any[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       wallType: WallType.CHANNEL,
       followedChannels: {
@@ -136,12 +139,14 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
       }
     });
 
-    await runSaga(fakeStore, loadFollowedChannelsTopics, {
+    await runSaga(fakeStore, loadFollowedChannelsTopicsSaga, {
       type: WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPIC_WALL,
-      username: user.name,
-      pageSize: pageSize,
-      ignoreCache: false
-    }).toPromise();
+      payload: {
+        username: user.name,
+        pageSize: pageSize,
+        ignoreCache: false
+      }
+    } as Action).toPromise();
 
     const updateTopicsAction = getUpdateTopicAction(dispatchedActions);
 
@@ -153,7 +158,7 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
   });
 
   it(testPrefix + " | load older", async () => {
-    const dispatchedActions: TopicWallActions[] = [];
+    const dispatchedActions: any[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       wallType: WallType.CHANNEL,
       followedChannels: {
@@ -162,11 +167,13 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
       }
     });
 
-    await runSaga(fakeStore, loadOlderFollowedChannelsTopics, {
+    await runSaga(fakeStore, loadOlderFollowedChannelsTopicsSaga, {
       type: WallActionTypes.LOAD_OLDER_FOLLOWED_CHANNELS_TOPICS,
-      username: user.name,
-      pageSize: pageSize
-    }).toPromise();
+      payload: {
+        username: user.name,
+        pageSize: pageSize
+      }
+    } as Action).toPromise();
 
     const updateTopicsAction = getUpdateTopicAction(dispatchedActions);
 
@@ -176,7 +183,7 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
   });
 
   it(testPrefix + " | from cache", async () => {
-    const dispatchedActions: TopicWallActions[] = [];
+    const dispatchedActions: any[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       wallType: WallType.CHANNEL,
       followedChannels: {
@@ -185,19 +192,21 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
       }
     });
 
-    await runSaga(fakeStore, loadFollowedChannelsTopics, {
+    await runSaga(fakeStore, loadFollowedChannelsTopicsSaga, {
       type: WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPIC_WALL,
-      username: user.name,
-      pageSize: pageSize,
-      ignoreCache: false
-    }).toPromise();
+      payload: {
+        username: user.name,
+        pageSize: pageSize,
+        ignoreCache: false
+      }
+    } as Action).toPromise();
 
     const action = getUpdateTopicsFromCacheAction(dispatchedActions);
-    expect(action.wallType).toBe(WallType.CHANNEL);
+    expect(action).toBe(WallType.CHANNEL);
   });
 
   it(testPrefix + " | by popularity", async () => {
-    const dispatchedActions: TopicWallActions[] = [];
+    const dispatchedActions: any[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       followedChannels: {
         updated: 0,
@@ -205,12 +214,14 @@ describe("Topic wall [FOLLOWED CHANNELS] saga tests", () => {
       }
     });
 
-    await runSaga(fakeStore, loadFollowedChannelsTopicsByPopularity, {
+    await runSaga(fakeStore, loadFollowedChannelsTopicsByPopularitySaga, {
       type: WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPICS_BY_POPULARITY,
-      username: user.name,
-      timestamp: 0,
-      pageSize: pageSize
-    }).toPromise();
+      payload: {
+        username: user.name,
+        timestamp: 0,
+        pageSize: pageSize
+      }
+    } as Action).toPromise();
 
     const updateTopicsAction = getUpdateTopicAction(dispatchedActions);
 

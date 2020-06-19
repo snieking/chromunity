@@ -1,5 +1,5 @@
 import React from "react";
-import { ApplicationState } from "../../../../core/store";
+import ApplicationState from "../../../../core/application-state";
 import { connect } from "react-redux";
 import { loginAccount, setAuthenticationStep } from "../../redux/accountActions";
 import { AuthenticationStep } from "../../redux/accountTypes";
@@ -20,11 +20,9 @@ const VaultLogin: React.FunctionComponent<Props> = (props) => {
   return <VaultLoginPresentation authenticationStep={props.authenticationStep} login={login} />;
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    loginAccount: () => dispatch(loginAccount()),
-    setAuthenticationStep: (step: AuthenticationStep) => dispatch(setAuthenticationStep(step)),
-  };
+const mapDispatchToProps = {
+  loginAccount,
+  setAuthenticationStep
 };
 
 const mapStateToProps = (store: ApplicationState) => {

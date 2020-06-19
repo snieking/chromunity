@@ -25,7 +25,7 @@ import { getTopicChannelBelongings } from "../../core/services/ChannelService";
 import { COLOR_ORANGE, COLOR_YELLOW } from "../../theme";
 import Avatar, { AVATAR_SIZE } from "../../shared/Avatar";
 import Timestamp from "../../shared/Timestamp";
-import { ApplicationState } from "../../core/store";
+import ApplicationState from "../../core/application-state";
 import { connect } from "react-redux";
 import CustomChip from "../../shared/CustomChip";
 import NewBadge from "./NewBadge";

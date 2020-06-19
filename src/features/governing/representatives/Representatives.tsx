@@ -4,7 +4,7 @@ import { Container, Grid } from "@material-ui/core";
 import RepresentativeCard from "./RepresentativeCard";
 import ChromiaPageHeader from "../../../shared/ChromiaPageHeader";
 import { ChromunityUser } from "../../../types";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { connect } from "react-redux";
 import Tutorial from "../../../shared/Tutorial";
 import TutorialButton from "../../../shared/buttons/TutorialButton";

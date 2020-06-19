@@ -4,7 +4,7 @@ import ConfirmDialog from "../../../shared/ConfirmDialog";
 import { isEligibleForVoting, voteForCandidate } from "../../../core/services/ElectionService";
 import { toLowerCase } from "../../../shared/util/util";
 import { ChromunityUser } from "../../../types";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { connect } from "react-redux";
 import { getUsername } from "../../../shared/util/user-util";
 

@@ -1,81 +1,32 @@
-import { ActionCreator } from "redux";
-import {
-  ILoadRepresentatives,
-  ILoadReports,
-  GovernmentActionTypes,
-  IUpdateRepresentatives,
-  IUpdateReports,
-  ICheckActiveElection,
-  IUpdateActiveElection,
-  ICheckNewLogbookEntries,
-  IUpdateLogbookRecentEntryTimestamp,
-  ICheckPinnedTopic,
-  IUpdatePinnedTopic,
-  ICheckPinnedTopicByRep,
-  IUpdatePinnedTopicByRep,
-  IPinTopic
-} from "./govTypes";
+import { GovernmentActionTypes } from "./govTypes";
 import { ChromunityUser, RepresentativeReport, Topic } from "../../../types";
+import { createAction } from "@reduxjs/toolkit";
+import { withPayloadType } from "../../../shared/redux/util";
 
-export const loadRepresentatives: ActionCreator<ILoadRepresentatives> = () => ({
-  type: GovernmentActionTypes.LOAD_REPRESENTATIVES
-});
+export const loadRepresentatives = createAction(GovernmentActionTypes.LOAD_REPRESENTATIVES);
 
-export const updateRepresentatives: ActionCreator<IUpdateRepresentatives> = (representatives: string[]) => ({
-  type: GovernmentActionTypes.UPDATE_REPRESENTATIVES,
-  representatives: representatives
-});
+export const updateRepresentatives = createAction(GovernmentActionTypes.UPDATE_REPRESENTATIVES, withPayloadType<string[]>());
 
-export const loadReports: ActionCreator<ILoadReports> = () => ({
-  type: GovernmentActionTypes.LOAD_REPORTS
-});
+export const loadReports = createAction(GovernmentActionTypes.LOAD_REPORTS);
 
-export const updateReports: ActionCreator<IUpdateReports> = (reports: RepresentativeReport[]) => ({
-  type: GovernmentActionTypes.UPDATE_REPORTS,
-  reports
-});
+export const updateReports = createAction(GovernmentActionTypes.UPDATE_REPORTS, withPayloadType<RepresentativeReport[]>());
 
-export const checkNewLogbookEntries: ActionCreator<ICheckNewLogbookEntries> = (user: ChromunityUser) => ({
-  type: GovernmentActionTypes.CHECK_LOGBOOK_ENTRIES,
-  user
-});
+export const checkNewLogbookEntries = createAction(GovernmentActionTypes.CHECK_LOGBOOK_ENTRIES, withPayloadType<ChromunityUser>());
 
-export const updateLogbookRecentEntryTimestamp: ActionCreator<IUpdateLogbookRecentEntryTimestamp> = (
-  timestamp: number
-) => ({
-  type: GovernmentActionTypes.UPDATE_LOGBOOK_RECENT_ENTRY_TIMESTAMP,
-  timestamp
-});
+export const updateLogbookRecentEntryTimestamp = createAction(
+  GovernmentActionTypes.UPDATE_LOGBOOK_RECENT_ENTRY_TIMESTAMP,
+  withPayloadType<number>());
 
-export const checkActiveElection: ActionCreator<ICheckActiveElection> = (user: ChromunityUser) => ({
-  type: GovernmentActionTypes.CHECK_ACTIVE_ELECTION,
-  user
-});
+export const checkActiveElection = createAction(GovernmentActionTypes.CHECK_ACTIVE_ELECTION, withPayloadType<ChromunityUser>());
 
-export const updateActiveElection: ActionCreator<IUpdateActiveElection> = (activeElection: boolean) => ({
-  type: GovernmentActionTypes.UPDATE_ACTIVE_ELECTION,
-  activeElection: activeElection
-});
+export const updateActiveElection = createAction(GovernmentActionTypes.UPDATE_ACTIVE_ELECTION, withPayloadType<boolean>());
 
-export const checkPinnedTopic: ActionCreator<ICheckPinnedTopic> = () => ({
-  type: GovernmentActionTypes.CHECK_PINNED_TOPIC
-});
+export const checkPinnedTopic = createAction(GovernmentActionTypes.CHECK_PINNED_TOPIC);
 
-export const updatePinnedTopic: ActionCreator<IUpdatePinnedTopic> = (topic: Topic) => ({
-  type: GovernmentActionTypes.UPDATE_PINNED_TOPIC,
-  topic
-});
+export const updatePinnedTopic = createAction(GovernmentActionTypes.UPDATE_PINNED_TOPIC, withPayloadType<Topic>());
 
-export const pinTopic: ActionCreator<IPinTopic> = (topicId: string) => ({
-  type: GovernmentActionTypes.PIN_TOPIC,
-  topicId
-})
+export const pinTopic = createAction(GovernmentActionTypes.PIN_TOPIC, withPayloadType<string>());
 
-export const checkPinnedTopicByRep: ActionCreator<ICheckPinnedTopicByRep> = () => ({
-  type: GovernmentActionTypes.CHECK_PINNED_TOPIC_BY_REP
-});
+export const checkPinnedTopicByRep = createAction(GovernmentActionTypes.CHECK_PINNED_TOPIC_BY_REP);
 
-export const updatePinnedTopicByRep: ActionCreator<IUpdatePinnedTopicByRep> = (topicId: string) => ({
-  type: GovernmentActionTypes.UPDATE_PINNED_TOPIC_BY_REP,
-  topicId
-});
+export const updatePinnedTopicByRep = createAction(GovernmentActionTypes.UPDATE_PINNED_TOPIC_BY_REP, withPayloadType<string>());

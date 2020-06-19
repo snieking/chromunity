@@ -1,5 +1,6 @@
-import { ChatActions, ChatActionTypes, ChatState } from "./chatTypes";
-import { Reducer } from "redux";
+import { ChatState } from "./chatTypes";
+import { createReducer } from "@reduxjs/toolkit";
+import { storeChatKeyPair, storeUserChats, storeDecryptedChat, storeChatParticipants, storeChatUsers, storeUnreadChatsCount } from "./chatActions";
 
 const initialChatState: ChatState = {
   rsaKey: null,
@@ -16,62 +17,30 @@ const initialChatState: ChatState = {
   unreadChats: 0
 };
 
-export const chatReducer: Reducer<ChatState, ChatActions> = (state = initialChatState, action) => {
-  switch (action.type) {
-    case ChatActionTypes.STORE_CHAT_KEY_PAIR: {
-      return {
-        ...state,
-        rsaKey: action.rsaKey,
-        successfullyAuthorized: true
-      };
-    }
-    case ChatActionTypes.STORE_USER_CHATS: {
-      return {
-        ...state,
-        chats: action.chats,
-        lastUpdate: Date.now(),
-        loading: false
-      };
-    }
-    case ChatActionTypes.STORE_DECRYPTED_CHAT: {
-      return {
-        ...state,
-        activeChat: action.chat,
-        activeChatMessages: action.messages,
-        activeChatCouldExistOlderMessages: action.couldExistOlderMessages
-      };
-    }
-    case ChatActionTypes.STORE_CHAT_PARTICIPANTS: {
-      return {
-        ...state,
-        activeChatParticipants: action.chatParticipants
-      }
-    }
-    case ChatActionTypes.LEAVE_CHAT: {
-      return {
-        ...state
-      }
-    }
-    case ChatActionTypes.CREATE_NEW_CHAT: {
-      return {
-        ...state
-      }
-    }
-    case ChatActionTypes.STORE_CHAT_USERS: {
-      return {
-        ...state,
-        followedChatUsers: action.followedChatUsers,
-        chatUsers: action.chatUsers,
-        chatUsersLastUpdate: Date.now()
-      }
-    }
-    case ChatActionTypes.STORE_UNREAD_CHATS_COUNT: {
-      return {
-        ...state,
-        unreadChats: action.count
-      }
-    }
-  }
-
-  return state;
-};
+export const chatReducer = createReducer(initialChatState, builder =>
+  builder
+    .addCase(storeChatKeyPair, (state, action) => {
+      state.rsaKey = action.payload;
+      state.successfullyAuthorized = true;
+    })
+    .addCase(storeUserChats, (state, action) => {
+      state.chats = action.payload;
+      state.lastUpdate = Date.now();
+    })
+    .addCase(storeDecryptedChat, (state, action) => {
+      state.activeChat = action.payload.chat;
+      state.activeChatMessages = action.payload.messages;
+      state.activeChatCouldExistOlderMessages = action.payload.couldExistOlderMessages;
+    })
+    .addCase(storeChatParticipants, (state, action) => {
+      state.activeChatParticipants = action.payload;
+    })
+    .addCase(storeChatUsers, (state, action) => {
+      state.followedChatUsers = action.payload.followedChatUsers;
+      state.chatUsers = action.payload.chatUsers;
+      state.chatUsersLastUpdate = Date.now();
+    })
+    .addCase(storeUnreadChatsCount, (state, action) => {
+      state.unreadChats = action.payload;
+    })
+)

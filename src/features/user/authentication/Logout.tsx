@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { logoutAccount } from "../redux/accountActions";
 import { connect } from "react-redux";
 import { ChromunityUser } from "../../../types";
@@ -31,10 +31,8 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    logoutAccount: () => dispatch(logoutAccount())
-  };
+const mapDispatchToProps = {
+  logoutAccount
 };
 
-export default connect(mapStateToProps, mapDispatchToProps) (Logout);
+export default connect(mapStateToProps, mapDispatchToProps)(Logout);

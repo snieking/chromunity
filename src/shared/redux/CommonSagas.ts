@@ -1,7 +1,7 @@
 import { updateRateLimited } from "./CommonActions";
 import { CommonActionTypes } from "./CommonTypes";
 import { put, takeLatest, select, call } from "redux-saga/effects";
-import { ApplicationState } from "../../core/store";
+import ApplicationState from "../../core/application-state";
 
 const RATE_LIMIT_DURATION = 30000;
 const delay = (time: number) => new Promise(resolve => setTimeout(resolve, time));

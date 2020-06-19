@@ -1,20 +1,7 @@
 import { setRateLimited, setQueryPending, setOperationPending } from "./../../../shared/redux/CommonActions";
-import { setError, notifySuccess } from "../../../core/snackbar/redux/snackbarTypes";
+import { notifyError, notifySuccess } from "../../../core/snackbar/redux/snackbarActions";
 import {
-  AddUserToChatAction,
   ChatActionTypes,
-  CountUnreadChatsAction,
-  CreateChatKeyPairAction,
-  CreateNewChatAction,
-  DeleteChatUserAction,
-  LeaveChatAction,
-  LoadChatUsersAction,
-  LoadUserChatsAction,
-  MarkChatAsReadAction,
-  ModifyTitleAction,
-  OpenChatAction,
-  RefreshOpenChatAction,
-  SendMessageAction,
 } from "./chatTypes";
 import { put, select, takeLatest } from "redux-saga/effects";
 import {
@@ -45,23 +32,32 @@ import {
   sendChatMessage,
 } from "../../../core/services/ChatService";
 import {
-  countUnreadChatsAction,
+  addUserToChat as addUserToChatAction,
+  countUnreadChats as countUnreadChatsAction,
+  deleteChatUser as deleteChatUserAction,
+  leaveChat as leaveChatAction,
   loadUserChats,
+  modifyTitle as modifyTitleAction,
+  markChatAsRead as markChatAsReadAction,
   openChat,
   sendMessage,
   storeChatKeyPair,
   storeChatParticipants,
-  storeChatUsersAction,
   storeDecryptedChat,
-  storeUnreadChatsCountAction,
   storeUserChats,
+  createChatKeyPair,
+  createNewChat as createNewChatAction,
+  refreshOpenChat,
+  storeChatUsers,
+  storeUnreadChatsCount as storeUnreadChatsCountAction
 } from "./chatActions";
 import { uniqueId } from "../../../shared/util/util";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { Chat, ChatMessage, ChatMessageDecrypted } from "../../../types";
 import { getChatPassphrase, storeChatPassphrase } from "../../../shared/util/user-util";
 import logger from "../../../shared/util/logger";
 import { chatEvent } from "../../../shared/util/matomo";
+import { Action } from "redux";
 
 export function* chatWatcher() {
   yield takeLatest(ChatActionTypes.CHECK_CHAT_AUTH_ACTION, checkChatAuthenticationSaga);
@@ -99,7 +95,6 @@ const shouldUpdate = (updated: number): boolean => {
 };
 
 export function* checkChatAuthenticationSaga() {
-  logger.silly("[SAGA - STARTED]: Check chat authentication");
   yield put(setQueryPending(true));
   const rsaKey = yield select(getRsaKey);
 
@@ -108,338 +103,328 @@ export function* checkChatAuthenticationSaga() {
 
     if (rsaPassphrase != null) {
       const reconstructedRSAKey = generateRSAKey(rsaPassphrase);
-      yield put(storeChatKeyPair(reconstructedRSAKey, true));
+      yield put(storeChatKeyPair(reconstructedRSAKey));
     }
   }
 
   yield put(setQueryPending(false));
-  logger.silly("[SAGA - FINISHED]: Check chat authentication");
 }
 
-export function* createChatKeyPairSaga(action: CreateChatKeyPairAction) {
-  logger.silly("[SAGA - STARTED]: Creating chat key pair");
-  const pubKey: string = yield getUserPubKey(action.user.name);
+export function* createChatKeyPairSaga(action: Action) {
+  if (createChatKeyPair.match(action)) {
+    const pubKey: string = yield getUserPubKey(action.payload.user.name);
 
-  const rsaKey = generateRSAKey(action.password);
-  const rsaPubKey = rsaKeyToPubKey(rsaKey);
+    const rsaKey = generateRSAKey(action.payload.password);
+    const rsaPubKey = rsaKeyToPubKey(rsaKey);
 
-  try {
-    yield put(setOperationPending(true));
-    if (pubKey != null && pubKey !== rsaPubKey) {
-      logger.info("New pubkey didn't match old one");
-      yield put(setError("Incorrect passphrase"));
-      return;
-    } else if (pubKey == null) {
-      yield createChatUser(action.user, rsaPubKey);
-    }
-
-    storeChatPassphrase(action.password);
-    yield put(storeChatKeyPair(rsaKey, true));
-
-    chatEvent("create-key-pair");
-  } catch (error) {
-    yield put(setError(error.message));
-    yield put(setRateLimited(true));
-  } finally {
-    yield put(setOperationPending(false));
-  }
-
-  logger.silly("[SAGA - FINISHED]: Creating chat key pair");
-}
-
-export function* createNewChatSaga(action: CreateNewChatAction) {
-  logger.silly("[SAGA - STARTED]: Create new chat");
-  const id = uniqueId();
-
-  const sharedChatKey = makeKeyPair().privKey;
-
-  const rsaKey = yield select(getRsaKey);
-  const rsaPubKey = rsaKeyToPubKey(rsaKey);
-  const encryptedSharedChatKey = yield rsaEncrypt(sharedChatKey.toString("hex"), rsaPubKey);
-
-  try {
-    yield put(setOperationPending(true));
-    yield createNewChat(action.user, id, encryptedSharedChatKey.cipher);
-    yield put(loadUserChats(action.user, true));
-
-    chatEvent("create");
-  } catch (error) {
-    yield put(setError(error.message));
-    yield put(setRateLimited(true));
-  } finally {
-    yield put(setOperationPending(false));
-  }
-
-  logger.silly("[SAGA - FINISHED]: Create new chat");
-}
-
-export function* addUserToChatSaga(action: AddUserToChatAction) {
-  logger.silly("[SAGA - STARTED]: Add user to chat");
-  const chatParticipants = yield select(getActiveChatParticipants);
-
-  try {
-    if (chatParticipants == null || !chatParticipants.includes(action.username)) {
-      const targetUserPubKey = yield getUserPubKey(action.username);
-
-      if (targetUserPubKey != null) {
-        yield put(setOperationPending(true));
-        const chat = yield select(getActiveChat);
-        const rsaKey = yield select(getRsaKey);
-
-        const decryptedChatKey = yield rsaDecrypt(chat.encrypted_chat_key, rsaKey);
-        const encryptedSharedChatKey = yield rsaEncrypt(decryptedChatKey.plaintext, targetUserPubKey);
-
-        yield addUserToChat(action.user, chat.id, action.username, encryptedSharedChatKey.cipher);
-        yield put(sendMessage(action.user, chat, "I invited '" + action.username + "' to join us."));
-        chatEvent("invite-user");
-      } else {
-        logger.info("User [%s] hasn't created a chat key yet", action.username);
+    try {
+      yield put(setOperationPending(true));
+      if (pubKey != null && pubKey !== rsaPubKey) {
+        logger.info("New pubkey didn't match old one");
+        yield put(notifyError("Incorrect passphrase"));
+        return;
+      } else if (pubKey == null) {
+        yield createChatUser(action.payload.user, rsaPubKey);
       }
+
+      storeChatPassphrase(action.payload.password);
+      yield put(storeChatKeyPair(rsaKey));
+
+      chatEvent("create-key-pair");
+    } catch (error) {
+      yield put(notifyError(error.message));
+      yield put(setRateLimited());
+    } finally {
+      yield put(setOperationPending(false));
     }
-  } catch (error) {
-    yield put(setError(error.message));
-    yield put(setRateLimited(true));
-  } finally {
-    yield put(setOperationPending(false));
   }
-
-  logger.silly("[SAGA - FINISHED]: Add user to chat");
 }
 
-export function* leaveChatSaga(action: LeaveChatAction) {
-  logger.silly("[SAGA - STARTED]: Leave chat");
-  const chat = yield select(getActiveChat);
+export function* createNewChatSaga(action: Action) {
+  if (createNewChatAction.match(action)) {
+    const id = uniqueId();
 
-  try {
-    yield put(setOperationPending(true));
-    yield leaveChat(action.user, chat.id);
-    yield put(setOperationPending(false));
-    yield put(loadUserChats(action.user, true));
+    const sharedChatKey = makeKeyPair().privKey;
 
-    chatEvent("leave");
-  } catch (error) {
-    yield put(setError(error.message));
-    yield put(setRateLimited(true));
+    const rsaKey = yield select(getRsaKey);
+    const rsaPubKey = rsaKeyToPubKey(rsaKey);
+    const encryptedSharedChatKey = yield rsaEncrypt(sharedChatKey.toString("hex"), rsaPubKey);
+
+    try {
+      yield put(setOperationPending(true));
+      yield createNewChat(action.payload, id, encryptedSharedChatKey.cipher);
+      yield put(loadUserChats({ user: action.payload, force: true }));
+
+      chatEvent("create");
+    } catch (error) {
+      yield put(notifyError(error.message));
+      yield put(setRateLimited());
+    } finally {
+      yield put(setOperationPending(false));
+    }
   }
-
-  logger.silly("[SAGA - FINISHED]: Leave chat");
 }
 
-export function* loadUserChatsSaga(action: LoadUserChatsAction) {
-  logger.silly("[SAGA - STARTED]: Load user chats");
-  const lastUpdate = yield select(getLastUpdate);
+export function* addUserToChatSaga(action: Action) {
+  if (addUserToChatAction.match(action)) {
+    const chatParticipants = yield select(getActiveChatParticipants);
 
-  if (action.force || shouldUpdate(lastUpdate)) {
-    yield put(setQueryPending(true));
-    const chats: Chat[] = yield getUserChats(action.user.name);
-    const prevChats: Chat[] = yield select(getChats);
-    if (prevChats == null || !arraysEqual(chats, prevChats)) {
-      yield put(
-        storeUserChats(
-          chats.sort(
-            (a: Chat, b: Chat) =>
-              (b.last_message != null ? b.last_message.timestamp : b.timestamp) -
-              (a.last_message != null ? a.last_message.timestamp : a.timestamp)
+    try {
+      if (chatParticipants == null || !chatParticipants.includes(action.payload.username)) {
+        const targetUserPubKey = yield getUserPubKey(action.payload.username);
+
+        if (targetUserPubKey != null) {
+          yield put(setOperationPending(true));
+          const chat = yield select(getActiveChat);
+          const rsaKey = yield select(getRsaKey);
+
+          const decryptedChatKey = yield rsaDecrypt(chat.encrypted_chat_key, rsaKey);
+          const encryptedSharedChatKey = yield rsaEncrypt(decryptedChatKey.plaintext, targetUserPubKey);
+
+          yield addUserToChat(action.payload.user, chat.id, action.payload.username, encryptedSharedChatKey.cipher);
+          yield put(sendMessage({ user: action.payload.user, chat, message: "I invited '" + action.payload.username + "' to join us." }));
+          chatEvent("invite-user");
+        } else {
+          logger.info("User [%s] hasn't created a chat key yet", action.payload.username);
+        }
+      }
+    } catch (error) {
+      yield put(notifyError(error.message));
+      yield put(setRateLimited());
+    } finally {
+      yield put(setOperationPending(false));
+    }
+  }
+}
+
+export function* leaveChatSaga(action: Action) {
+  if (leaveChatAction.match(action)) {
+    const chat = yield select(getActiveChat);
+
+    try {
+      yield put(setOperationPending(true));
+      yield leaveChat(action.payload, chat.id);
+      yield put(setOperationPending(false));
+      yield put(loadUserChats({ user: action.payload, force: true }));
+
+      chatEvent("leave");
+    } catch (error) {
+      yield put(notifyError(error.message));
+      yield put(setRateLimited());
+    }
+  }
+}
+
+export function* loadUserChatsSaga(action: Action) {
+  if (loadUserChats.match(action)) {
+    const lastUpdate = yield select(getLastUpdate);
+
+    if (action.payload.force || shouldUpdate(lastUpdate)) {
+      yield put(setQueryPending(true));
+      const chats: Chat[] = yield getUserChats(action.payload.user.name);
+      const prevChats: Chat[] = yield select(getChats);
+      if (prevChats == null || !arraysEqual(chats, prevChats)) {
+        yield put(
+          storeUserChats(
+            chats.sort(
+              (a: Chat, b: Chat) =>
+                (b.last_message != null ? b.last_message.timestamp : b.timestamp) -
+                (a.last_message != null ? a.last_message.timestamp : a.timestamp)
+            )
           )
-        )
-      );
-    }
-
-    if (chats.length > 0) {
-      const activeChat = yield select(getActiveChat);
-
-      if (activeChat == null) {
-        yield put(openChat(chats[0], action.user));
+        );
       }
-    }
 
-    yield put(setQueryPending(false));
-  }
+      if (chats.length > 0) {
+        const activeChat = yield select(getActiveChat);
 
-  logger.silly("[SAGA - FINISHED]: Load user chats");
-}
-
-export function* openChatSaga(action: OpenChatAction) {
-  logger.silly("[SAGA - STARTED]: Open chat");
-  if (action.chat != null) {
-    yield put(setQueryPending(true));
-    const chatMessages = yield getChatMessages(action.chat.id, Date.now(), PAGE_SIZE);
-    const rsaKey = yield select(getRsaKey);
-    const sharedChatKey: any = yield rsaDecrypt(action.chat.encrypted_chat_key, rsaKey);
-
-    const decryptedMessages: ChatMessageDecrypted[] = decryptMessages(rsaKey, sharedChatKey, chatMessages);
-
-    const participants = yield getChatParticipants(action.chat.id);
-    const couldExistOlder = yield select(couldExistOlderMessages);
-
-    yield put(storeChatParticipants(participants));
-    yield put(
-      storeDecryptedChat(
-        action.chat,
-        decryptedMessages,
-        determineCouldExistOlderMessages(decryptedMessages.length, couldExistOlder)
-      )
-    );
-
-    yield markChatAsRead(action.user, action.chat.id);
-    yield put(countUnreadChatsAction(action.user));
-    yield put(setQueryPending(false));
-  } else {
-    yield put(storeDecryptedChat(null, []));
-  }
-
-  logger.silly("[SAGA - FINISHED]: Open chat");
-}
-
-export function* refreshOpenChatSaga(action: RefreshOpenChatAction) {
-  logger.silly("[SAGA - STARTED]: Refresh open chat");
-  const chat = yield select(getActiveChat);
-
-  if (chat != null) {
-    const previousMessages: ChatMessageDecrypted[] = yield select(getActiveChatMessages);
-    const rsaKey = yield select(getRsaKey);
-    const sharedChatKey: any = yield rsaDecrypt(chat.encrypted_chat_key, rsaKey);
-
-    let chatMessages: ChatMessage[];
-    if (previousMessages != null && previousMessages.length > 0) {
-      chatMessages = yield getChatMessagesAfterTimestamp(
-        chat.id,
-        previousMessages[previousMessages.length - 1].timestamp,
-        PAGE_SIZE
-      );
-    } else {
-      chatMessages = yield getChatMessages(chat.id, Date.now(), PAGE_SIZE);
-    }
-
-    const decryptedMessages: ChatMessageDecrypted[] = decryptMessages(rsaKey, sharedChatKey, chatMessages);
-
-    if (decryptedMessages.length > 0) {
-      const participants = yield getChatParticipants(chat.id);
-
-      yield put(storeChatParticipants(participants));
-      const couldExistOlder = yield select(couldExistOlderMessages);
-
-      const newMessages: ChatMessageDecrypted[] = [];
-      for (const newMsg of decryptedMessages) {
-        for (const prevMsg of previousMessages) {
-          if (newMsg.sender === prevMsg.sender && newMsg.msg === prevMsg.msg && prevMsg.inMemory) {
-            break;
-          }
-
-          newMessages.push(newMsg);
-          break;
+        if (activeChat == null) {
+          yield put(openChat({ chat: chats[0], user: action.payload.user }));
         }
       }
 
-      yield put(
-        storeDecryptedChat(
-          chat,
-          previousMessages.concat(newMessages),
-          determineCouldExistOlderMessages(decryptedMessages.length, couldExistOlder)
-        )
-      );
-
-      yield markChatAsRead(action.user, chat.id).catch();
-      yield put(loadUserChats(action.user, true));
-      yield put(countUnreadChatsAction(action.user));
+      yield put(setQueryPending(false));
     }
   }
-
-  yield put(loadUserChats(action.user, false));
-
-  logger.silly("[SAGA - FINISHED]: Refresh open chat");
 }
 
-export function* sendMessageSaga(action: SendMessageAction) {
-  logger.silly("[SAGA - STARTED]: Send message");
-  const rsaKey = yield select(getRsaKey);
-  const sharedChatKey: any = yield rsaDecrypt(action.chat.encrypted_chat_key, rsaKey);
+export function* openChatSaga(action: Action) {
+  if (openChat.match(action)) {
+    if (action.payload.chat != null) {
+      yield put(setQueryPending(true));
+      const chatMessages = yield getChatMessages(action.payload.chat.id, Date.now(), PAGE_SIZE);
+      const rsaKey = yield select(getRsaKey);
+      const sharedChatKey: any = yield rsaDecrypt(action.payload.chat.encrypted_chat_key, rsaKey);
 
-  try {
+      const decryptedMessages: ChatMessageDecrypted[] = decryptMessages(sharedChatKey, chatMessages);
+
+      const participants = yield getChatParticipants(action.payload.chat.id);
+      const couldExistOlder = yield select(couldExistOlderMessages);
+
+      yield put(storeChatParticipants(participants));
+      yield put(
+        storeDecryptedChat({
+          chat: action.payload.chat,
+          messages: decryptedMessages,
+          couldExistOlderMessages: determineCouldExistOlderMessages(decryptedMessages.length, couldExistOlder)
+        })
+      );
+
+      yield markChatAsRead(action.payload.user, action.payload.chat.id);
+      yield put(countUnreadChatsAction(action.payload.user));
+      yield put(setQueryPending(false));
+    } else {
+      yield put(storeDecryptedChat({ chat: null, messages: [], couldExistOlderMessages: false }));
+    }
+  }
+}
+
+export function* refreshOpenChatSaga(action: Action) {
+  if (refreshOpenChat.match(action)) {
+    const chat = yield select(getActiveChat);
+
+    if (chat != null) {
+      const previousMessages: ChatMessageDecrypted[] = yield select(getActiveChatMessages);
+      const rsaKey = yield select(getRsaKey);
+      const sharedChatKey: any = yield rsaDecrypt(chat.encrypted_chat_key, rsaKey);
+
+      let chatMessages: ChatMessage[];
+      if (previousMessages != null && previousMessages.length > 0) {
+        chatMessages = yield getChatMessagesAfterTimestamp(
+          chat.id,
+          previousMessages[previousMessages.length - 1].timestamp,
+          PAGE_SIZE
+        );
+      } else {
+        chatMessages = yield getChatMessages(chat.id, Date.now(), PAGE_SIZE);
+      }
+
+      const decryptedMessages: ChatMessageDecrypted[] = decryptMessages(sharedChatKey, chatMessages);
+
+      if (decryptedMessages.length > 0) {
+        const participants = yield getChatParticipants(chat.id);
+
+        yield put(storeChatParticipants(participants));
+        const couldExistOlder = yield select(couldExistOlderMessages);
+
+        const newMessages: ChatMessageDecrypted[] = [];
+        for (const newMsg of decryptedMessages) {
+          for (const prevMsg of previousMessages) {
+            if (newMsg.sender === prevMsg.sender && newMsg.msg === prevMsg.msg && prevMsg.inMemory) {
+              break;
+            }
+
+            newMessages.push(newMsg);
+            break;
+          }
+        }
+
+        yield put(
+          storeDecryptedChat({
+            chat,
+            messages: previousMessages.concat(newMessages),
+            couldExistOlderMessages: determineCouldExistOlderMessages(decryptedMessages.length, couldExistOlder)
+          })
+        );
+
+        yield markChatAsRead(action.payload, chat.id).catch();
+        yield put(loadUserChats({ user: action.payload, force: true }));
+        yield put(countUnreadChatsAction(action.payload));
+      }
+    }
+
+    yield put(loadUserChats({ user: action.payload, force: false }));
+  }
+}
+
+export function* sendMessageSaga(action: Action) {
+  if (sendMessage.match(action)) {
+    const rsaKey = yield select(getRsaKey);
+    const sharedChatKey: any = yield rsaDecrypt(action.payload.chat.encrypted_chat_key, rsaKey);
+
+    try {
+      yield put(setOperationPending(true));
+      yield sendChatMessage(action.payload.user, action.payload.chat.id, encrypt(action.payload.message, sharedChatKey.plaintext));
+
+      const previousMessages: ChatMessageDecrypted[] = yield select(getActiveChatMessages);
+      const msg: ChatMessageDecrypted = {
+        sender: action.payload.user.name,
+        timestamp: Date.now(),
+        msg: action.payload.message,
+        inMemory: true,
+      };
+
+      const couldExistOlder = yield select(couldExistOlderMessages);
+      yield put(storeDecryptedChat({
+        chat: action.payload.chat,
+        messages: previousMessages.concat([msg]),
+        couldExistOlderMessages: couldExistOlder
+      }));
+
+      chatEvent("message");
+    } catch (error) {
+      yield put(notifyError(error.message));
+      yield put(setRateLimited());
+    } finally {
+      yield put(setOperationPending(false));
+    }
+  }
+}
+
+export function* modifyTitleSaga(action: Action) {
+  if (modifyTitleAction.match(action)) {
+    try {
+      yield put(setOperationPending(true));
+      yield modifyTitle(action.payload.user, action.payload.chat.id, action.payload.title);
+
+      const updatedChat: Chat = {
+        id: action.payload.chat.id,
+        title: action.payload.title,
+        encrypted_chat_key: action.payload.chat.encrypted_chat_key,
+        timestamp: action.payload.chat.timestamp,
+        last_message: action.payload.chat.last_message,
+        last_opened: action.payload.chat.last_opened,
+      };
+      yield put(openChat({ chat: updatedChat, user: action.payload.user }));
+      yield put(loadUserChats({ user: action.payload.user, force: true }));
+
+      chatEvent("modify-title");
+    } catch (error) {
+      yield put(notifyError(error.message));
+      yield put(setRateLimited());
+    } finally {
+      yield put(setOperationPending(false));
+    }
+  }
+}
+
+export function* loadChatUsersSaga(action: Action) {
+  if (loadUserChats.match(action)) {
+    const lastUpdated = yield select(getChatUsersLastUpdate);
+
+    if (shouldUpdate(lastUpdated)) {
+      yield put(setQueryPending(true));
+      const followedChatUsers = yield getFollowedChatUsers(action.payload.user.name);
+      const chatUsers = yield getChatUsers();
+
+      yield put(storeChatUsers({ followedChatUsers, chatUsers }));
+      yield put(setQueryPending(false));
+    }
+  }
+}
+
+export function* deleteChatUserSaga(action: Action) {
+  if (deleteChatUserAction.match(action)) {
     yield put(setOperationPending(true));
-    yield sendChatMessage(action.user, action.chat.id, encrypt(action.message, sharedChatKey.plaintext));
-
-    const previousMessages: ChatMessageDecrypted[] = yield select(getActiveChatMessages);
-    const msg: ChatMessageDecrypted = {
-      sender: action.user.name,
-      timestamp: Date.now(),
-      msg: action.message,
-      inMemory: true,
-    };
-
-    const couldExistOlder = yield select(couldExistOlderMessages);
-    yield put(storeDecryptedChat(action.chat, previousMessages.concat([msg]), couldExistOlder));
-
-    chatEvent("message");
-  } catch (error) {
-    yield put(setError(error.message));
-    yield put(setRateLimited(true));
-  } finally {
+    yield deleteChatUser(action.payload);
+    yield put(notifySuccess("Chat account resetted"));
     yield put(setOperationPending(false));
+
+    chatEvent("delete-user");
   }
-
-  logger.silly("[SAGA - FINISHED]: Send message");
-}
-
-export function* modifyTitleSaga(action: ModifyTitleAction) {
-  logger.silly("[SAGA - STARTED]: Modify title");
-
-  try {
-    yield put(setOperationPending(true));
-    yield modifyTitle(action.user, action.chat.id, action.title);
-
-    const updatedChat: Chat = {
-      id: action.chat.id,
-      title: action.title,
-      encrypted_chat_key: action.chat.encrypted_chat_key,
-      timestamp: action.chat.timestamp,
-      last_message: action.chat.last_message,
-      last_opened: action.chat.last_opened,
-    };
-    yield put(openChat(updatedChat, action.user));
-    yield put(loadUserChats(action.user, true));
-
-    chatEvent("modify-title");
-  } catch (error) {
-    yield put(setError(error.message));
-    yield put(setRateLimited(true));
-  } finally {
-    yield put(setOperationPending(false));
-  }
-
-  logger.silly("[SAGA - FINISHED]: Modify title");
-}
-
-export function* loadChatUsersSaga(action: LoadChatUsersAction) {
-  logger.silly("[SAGA - STARTED]: Load chat users");
-  const lastUpdated = yield select(getChatUsersLastUpdate);
-
-  if (shouldUpdate(lastUpdated)) {
-    yield put(setQueryPending(true));
-    const followedChatUsers = yield getFollowedChatUsers(action.user.name);
-    const chatUsers = yield getChatUsers();
-
-    yield put(storeChatUsersAction(followedChatUsers, chatUsers));
-    yield put(setQueryPending(false));
-  }
-
-  logger.silly("[SAGA - FINISHED]: Load chat users");
-}
-
-export function* deleteChatUserSaga(action: DeleteChatUserAction) {
-  logger.silly("[SAGA - STARTED]: Delete chat user");
-
-  yield put(setOperationPending(true));
-  yield deleteChatUser(action.user);
-  yield put(notifySuccess("Chat account resetted"));
-  yield put(setOperationPending(false));
-
-  chatEvent("delete-user");
-  logger.silly("[SAGA - FINISHED]: Delete chat user");
 }
 
 export function* loadOlderMessagesSaga() {
-  logger.silly("[SAGA - STARTED]: Load older messages");
   const messages: ChatMessageDecrypted[] = yield select(getActiveChatMessages);
 
   if (messages != null && messages.length >= PAGE_SIZE) {
@@ -450,15 +435,15 @@ export function* loadOlderMessagesSaga() {
     const rsaKey = yield select(getRsaKey);
     const sharedChatKey: any = yield rsaDecrypt(chat.encrypted_chat_key, rsaKey);
 
-    const decryptedMessages = decryptMessages(rsaKey, sharedChatKey, encOlderMessages);
+    const decryptedMessages = decryptMessages(sharedChatKey, encOlderMessages);
     const couldExistOlder = yield select(couldExistOlderMessages);
 
     yield put(
-      storeDecryptedChat(
+      storeDecryptedChat({
         chat,
-        decryptedMessages.concat(messages),
-        determineCouldExistOlderMessages(decryptedMessages.length, couldExistOlder)
-      )
+        messages: decryptedMessages.concat(messages),
+        couldExistOlderMessages: determineCouldExistOlderMessages(decryptedMessages.length, couldExistOlder)
+      })
     );
     yield put(setQueryPending(false));
   } else {
@@ -468,31 +453,23 @@ export function* loadOlderMessagesSaga() {
       PAGE_SIZE
     );
   }
-
-  logger.silly("[SAGA - FINISHED]: Load older messages");
 }
 
-export function* countUnreadChatsSaga(action: CountUnreadChatsAction) {
-  logger.silly("[SAGA - STARTED]: Count unread chats: " + action);
-  if (action.user != null) {
-    const count = yield countUnreadChats(action.user.name).catch(() => (window.location.href = "/user/logout"));
+export function* countUnreadChatsSaga(action: Action) {
+  if (countUnreadChatsAction.match(action) && action.payload != null) {
+    const count = yield countUnreadChats(action.payload.name).catch(() => (window.location.href = "/user/logout"));
     yield put(storeUnreadChatsCountAction(count));
   }
-
-  logger.silly("[SAGA - FINISHED]: Count unread chats");
 }
 
-export function* markChatAsReadSaga(action: MarkChatAsReadAction) {
-  logger.silly("[SAGA - STARTED]: Mark chat as read");
-  if (action.user != null) {
-    yield markChatAsRead(action.user, action.chat.id);
-    yield put(countUnreadChatsAction(action.user));
+export function* markChatAsReadSaga(action: Action) {
+  if (markChatAsReadAction.match(action) && action.payload.user != null) {
+    yield markChatAsRead(action.payload.user, action.payload.chat.id);
+    yield put(countUnreadChatsAction(action.payload.user));
   }
-
-  logger.silly("[SAGA - FINISHED]: Mark chat as read");
 }
 
-function decryptMessages(rsaKey: any, sharedChatKey: any, chatMessages: ChatMessage[]): ChatMessageDecrypted[] {
+function decryptMessages(sharedChatKey: any, chatMessages: ChatMessage[]): ChatMessageDecrypted[] {
   return chatMessages.map((message: ChatMessage) => {
     return {
       sender: message.sender,
@@ -509,7 +486,7 @@ function determineCouldExistOlderMessages(nrOfMessages: number, prevCouldExistOl
 
 function arraysEqual(arr1: Chat[], arr2: Chat[]) {
   if (arr1.length !== arr2.length) return false;
-  for (var i = arr1.length; i--; ) {
+  for (var i = arr1.length; i--;) {
     if (arr1[i].id !== arr2[i].id) return false;
   }
 }

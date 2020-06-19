@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { ChromunityUser } from "../../../types";
-import { setError } from "../../../core/snackbar/redux/snackbarTypes";
+import { notifyError } from "../../../core/snackbar/redux/snackbarActions";
 import { setRateLimited, setOperationPending } from "../../../shared/redux/CommonActions";
 import { connect } from "react-redux";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import {
   unfollowChannel,
   followChannel,
@@ -19,7 +19,7 @@ interface Props {
   channel: string;
   rateLimited: boolean;
   user: ChromunityUser;
-  setError: typeof setError;
+  notifyError: typeof notifyError;
   setRateLimited: typeof setRateLimited;
   clearTopicsCache: typeof clearTopicsCache;
   setOperationPending: typeof setOperationPending;
@@ -52,7 +52,7 @@ const ChannelFollowingButton: React.FunctionComponent<Props> = (props) => {
       if (followed) {
         unfollowChannel(props.user, props.channel)
           .catch((error: Error) => {
-            props.setError(error.message);
+            props.notifyError(error.message);
             props.setRateLimited();
           })
           .then(() => {
@@ -70,7 +70,7 @@ const ChannelFollowingButton: React.FunctionComponent<Props> = (props) => {
             setNrOfFollowers(nrOfFollowers + 1);
           })
           .catch((error: Error) => {
-            props.setError(error.message);
+            props.notifyError(error.message);
             props.setRateLimited();
           })
           .finally(() => {
@@ -88,21 +88,19 @@ const ChannelFollowingButton: React.FunctionComponent<Props> = (props) => {
           {followed ? (
             <Favorite className="red-color" fontSize="large" />
           ) : (
-            <FavoriteBorder className="pink-color" fontSize="large" />
-          )}
+              <FavoriteBorder className="pink-color" fontSize="large" />
+            )}
         </Tooltip>
       </Badge>
     </IconButton>
   );
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    setError: (msg: string) => dispatch(setError(msg)),
-    setRateLimited: () => dispatch(setRateLimited()),
-    clearTopicsCache: () => dispatch(clearTopicsCache()),
-    setOperationPending: (pending: boolean) => dispatch(setOperationPending(pending))
-  };
+const mapDispatchToProps = {
+  notifyError,
+  setRateLimited,
+  clearTopicsCache,
+  setOperationPending
 };
 
 const mapStateToProps = (store: ApplicationState) => {

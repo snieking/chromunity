@@ -47,14 +47,14 @@ import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../../shared/MarkdownRenderer";
 import ConfirmDialog from "../../shared/ConfirmDialog";
 import * as BoomerangCache from "boomerang-cache";
-import { ApplicationState } from "../../core/store";
+import ApplicationState from "../../core/application-state";
 import { connect } from "react-redux";
 import { shouldBeFiltered, toLowerCase, uniqueId } from "../../shared/util/util";
 import TextToolbar from "../../shared/textToolbar/TextToolbar";
 import CardActions from "@material-ui/core/CardActions";
 import Divider from "@material-ui/core/Divider";
 import PreviewLinks from "../../shared/PreviewLinks";
-import { setError, notifySuccess } from "../../core/snackbar/redux/snackbarTypes";
+import { notifyError, notifySuccess } from "../../core/snackbar/redux/snackbarActions";
 import StarRating from "../../shared/star-rating/StarRating";
 import { setRateLimited, setQueryPending, setOperationPending } from "../../shared/redux/CommonActions";
 import ReplyButton from "../../shared/buttons/ReplyButton";
@@ -133,8 +133,8 @@ interface Props extends WithStyles<typeof styles> {
   distrustedUsers: string[];
   rateLimited: boolean;
   cascadeOpenSubReplies?: Function;
-  setError: typeof setError;
-  setSuccess: typeof notifySuccess;
+  notifyError: typeof notifyError;
+  notifySuccess: typeof notifySuccess;
   setRateLimited: typeof setRateLimited;
   setQueryPending: typeof setQueryPending;
   setOperationPending: typeof setOperationPending;
@@ -309,8 +309,8 @@ const TopicReplyCard = withStyles(styles)(
           cascadeOpenSubReplies={this.openSubReplies}
           user={this.props.user}
           distrustedUsers={this.props.distrustedUsers}
-          setError={this.props.setError}
-          setSuccess={this.props.setSuccess}
+          notifyError={this.props.notifyError}
+          notifySuccess={this.props.notifySuccess}
           setRateLimited={this.props.setRateLimited}
           rateLimited={this.props.rateLimited}
           setQueryPending={this.props.setQueryPending}
@@ -465,7 +465,7 @@ const TopicReplyCard = withStyles(styles)(
       modifyReply(this.props.user, this.props.reply.id, text)
         .then(() => window.location.reload())
         .catch((error) => {
-          this.props.setError(error.message);
+          this.props.notifyError(error.message);
           this.props.setRateLimited();
         })
         .finally(() => this.props.setOperationPending(false));
@@ -476,7 +476,7 @@ const TopicReplyCard = withStyles(styles)(
       deleteReply(this.props.user, this.props.reply.id)
         .then(() => window.location.reload())
         .catch((error) => {
-          this.props.setError(error.message);
+          this.props.notifyError(error.message);
           this.props.setRateLimited();
         })
         .finally(() => this.props.setOperationPending(false));
@@ -493,7 +493,7 @@ const TopicReplyCard = withStyles(styles)(
         this.props.setOperationPending(true);
         reportReply(this.props.user, this.props.reply)
           .catch((error) => {
-            this.props.setError(error.message);
+            this.props.notifyError(error.message);
             this.props.setRateLimited();
           })
           .then(() => this.setState({ replyReported: true }))
@@ -547,7 +547,7 @@ const TopicReplyCard = withStyles(styles)(
                       () =>
                         removeTopicReply(this.props.user, this.props.reply.id)
                           .catch((error) => {
-                            this.props.setError(error.message);
+                            this.props.notifyError(error.message);
                             this.props.setRateLimited();
                           })
                           .then(() => window.location.reload())
@@ -645,11 +645,11 @@ const TopicReplyCard = withStyles(styles)(
       this.props.setOperationPending(true);
       createTopicSubReply(this.props.user, this.props.topicId, this.props.reply.id, message, this.props.reply.author)
         .catch((error) => {
-          this.props.setError(error.message);
+          this.props.notifyError(error.message);
           this.props.setRateLimited();
         })
         .then(() => {
-          this.props.setSuccess("Reply sent");
+          this.props.notifySuccess("Reply sent");
           getTopicSubReplies(this.props.reply.id).then((replies) => this.setState({ subReplies: replies }));
           this.openSubReplies();
         })
@@ -666,14 +666,12 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    setError: (msg: string) => dispatch(setError(msg)),
-    setSuccess: (msg: string) => dispatch(notifySuccess(msg)),
-    setRateLimited: () => dispatch(setRateLimited()),
-    setQueryPending: (pending: boolean) => dispatch(setQueryPending(pending)),
-    setOperationPending: (pending: boolean) => dispatch(setOperationPending(pending)),
-  };
+const mapDispatchToProps = {
+  notifyError,
+  notifySuccess,
+  setRateLimited,
+  setQueryPending,
+  setOperationPending
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(TopicReplyCard);

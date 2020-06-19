@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ChromunityUser } from "../../../types";
 import { connect } from "react-redux";
 import { toLowerCase } from "../../../shared/util/util";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { IconButton, Tooltip, Menu } from "@material-ui/core";
 import { LocationCity } from "@material-ui/icons";
 import PinButton from "./PinButton";

@@ -1,12 +1,9 @@
 import {
-  TopicWallActions,
   TopicWallState,
-  UpdateTopicsAction,
-  UpdateTopicWallFromCacheAction,
-  WallActionTypes,
   WallType
 } from "./wallTypes";
-import { Reducer } from "redux";
+import { createReducer } from "@reduxjs/toolkit";
+import { updateTopicWallFromCache, updateTopics, clearTopicsCache } from "./wallActions";
 
 const initialTopicWallState: TopicWallState = {
   topics: [],
@@ -28,144 +25,58 @@ const initialTopicWallState: TopicWallState = {
   }
 };
 
-export const topicWallReducer: Reducer<TopicWallState, TopicWallActions> = (state = initialTopicWallState, action) => {
-  switch (action.type) {
-    case WallActionTypes.UPDATE_TOPICS_WALL_FROM_CACHE: {
-      return updateTopicsWallFromCache(state, action);
-    }
-    case WallActionTypes.UPDATE_TOPICS_WALL: {
-      return updateTopicsWall(state, action);
-    }
-    case WallActionTypes.CLEAR_TOPICS_CACHE: {
-      return {
-        ...state,
-        followedUsers: {
-          topics: [],
-          updated: 0,
-          couldExistOlder: false
-        },
-        followedChannels: {
-          topics: [],
-          updated: 0,
-          couldExistOlder: false
+export const topicWallReducer = createReducer(initialTopicWallState, builder =>
+  builder
+    .addCase(updateTopicWallFromCache, (state, action) => {
+      switch (action.payload) {
+        case WallType.ALL: {
+          state.topics = state.all.topics;
+          state.couldExistOlder = state.all.couldExistOlder;
+          break;
+        }
+        case WallType.CHANNEL: {
+          state.topics = state.followedChannels.topics;
+          state.couldExistOlder = state.followedChannels.couldExistOlder;
+          break;
+        }
+        case WallType.USER: {
+          state.topics = state.followedUsers.topics;
+          state.couldExistOlder = state.followedUsers.couldExistOlder;
+          break;
         }
       }
-    }
-    default: {
-      return state;
-    }
-  }
-};
+    })
+    .addCase(updateTopics, (state, action) => {
+      state.topics = action.payload.topics;
+      state.couldExistOlder = action.payload.couldExistOlder;
 
-const updateTopicsWall = (state: TopicWallState, action: UpdateTopicsAction): TopicWallState => {
-  switch (action.wallType) {
-    case WallType.ALL: {
-      return updateTopicsWallAll(state, action);
-    }
-    case WallType.CHANNEL: {
-      return updateTopicsWallFollowedChannels(state, action);
-    }
-    case WallType.USER: {
-      return updateTopicsWallFollowedUsers(state, action);
-    }
-    default: {
-      return {
-        ...state,
-        topics: action.topics,
-        couldExistOlder: action.couldExistOlder
-      };
-    }
-  }
-};
-
-const updateTopicsWallAll = (state: TopicWallState, action: UpdateTopicsAction) => {
-  return {
-    ...state,
-    topics: action.topics,
-    loading: false,
-    couldExistOlder: action.couldExistOlder,
-    wallType: action.wallType,
-    all: {
-      topics: action.topics,
-      updated: Date.now(),
-      couldExistOlder: action.couldExistOlder
-    }
-  };
-};
-
-const updateTopicsWallFollowedUsers = (state: TopicWallState, action: UpdateTopicsAction) => {
-  return {
-    ...state,
-    topics: action.topics,
-    loading: false,
-    couldExistOlder: action.couldExistOlder,
-    wallType: action.wallType,
-    followedUsers: {
-      topics: action.topics,
-      updated: Date.now(),
-      couldExistOlder: action.couldExistOlder
-    }
-  };
-};
-
-const updateTopicsWallFollowedChannels = (state: TopicWallState, action: UpdateTopicsAction) => {
-  return {
-    ...state,
-    topics: action.topics,
-    loading: false,
-    couldExistOlder: action.couldExistOlder,
-    wallType: action.wallType,
-    followedChannels: {
-      topics: action.topics,
-      updated: Date.now(),
-      couldExistOlder: action.couldExistOlder
-    }
-  };
-};
-
-const updateTopicsWallFromCache = (state: TopicWallState, action: UpdateTopicWallFromCacheAction): TopicWallState => {
-  switch (action.wallType) {
-    case WallType.ALL: {
-      return updateTopicsWallAllFromCache(state, action);
-    }
-    case WallType.CHANNEL: {
-      return updateTopicsWallFollowedChannelsFromCache(state, action);
-    }
-    case WallType.USER: {
-      return updateTopicsWallFollowedUsersFromCache(state, action);
-    }
-    default: {
-      return state;
-    }
-  }
-};
-
-const updateTopicsWallAllFromCache = (state: TopicWallState, action: UpdateTopicWallFromCacheAction) => {
-  return {
-    ...state,
-    topics: state.all.topics,
-    loading: false,
-    wallType: action.wallType,
-    couldExistOlder: state.all.couldExistOlder
-  };
-};
-
-const updateTopicsWallFollowedChannelsFromCache = (state: TopicWallState, action: UpdateTopicWallFromCacheAction) => {
-  return {
-    ...state,
-    topics: state.followedChannels.topics,
-    loading: false,
-    wallType: action.wallType,
-    couldExistOlder: state.followedChannels.couldExistOlder
-  };
-};
-
-const updateTopicsWallFollowedUsersFromCache = (state: TopicWallState, action: UpdateTopicWallFromCacheAction) => {
-  return {
-    ...state,
-    topics: state.followedUsers.topics,
-    loading: false,
-    wallType: action.wallType,
-    couldExistOlder: state.followedUsers.couldExistOlder
-  };
-};
+      switch (action.payload.wallType) {
+        case WallType.ALL: {
+          state.all.topics = action.payload.topics;
+          state.all.couldExistOlder = action.payload.couldExistOlder;
+          state.all.updated = Date.now();
+          break;
+        }
+        case WallType.CHANNEL: {
+          state.followedChannels.topics = action.payload.topics;
+          state.followedChannels.couldExistOlder = action.payload.couldExistOlder;
+          state.followedChannels.updated = Date.now();
+          break;
+        }
+        case WallType.USER: {
+          state.followedUsers.topics = action.payload.topics;
+          state.followedUsers.couldExistOlder = action.payload.couldExistOlder;
+          state.followedUsers.updated = Date.now();
+          break;
+        }
+      }
+    })
+    .addCase(clearTopicsCache, (state, _) => {
+      state.followedChannels.topics = [];
+      state.followedChannels.couldExistOlder = false;
+      state.followedChannels.updated = 0;
+      state.followedUsers.topics = [];
+      state.followedUsers.couldExistOlder = false;
+      state.followedUsers.updated = 0;
+    })
+)

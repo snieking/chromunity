@@ -20,98 +20,15 @@ export enum AccountActionTypes {
   SEND_KUDOS = "ACCOUNT/SEND/KUDOS"
 }
 
-export interface ILoginAccount {
-  type: AccountActionTypes.LOGIN_ACCOUNT;
-}
-
 export interface ISaveVaultAccount {
-  type: AccountActionTypes.SAVE_VAULT_ACCOUNT;
   accountId: string;
   ft3User: User;
 }
 
-export interface IVaultSuccess {
-  type: AccountActionTypes.VAULT_SUCCESS;
-  rawTx: string;
-}
-
-export interface IVaultCancel {
-  type: AccountActionTypes.VAULT_CANCEL;
-}
-
-export interface ISetUser {
-  type: AccountActionTypes.SET_USER;
-  user: ChromunityUser;
-}
-
-export interface IAutoLogin {
-  type: AccountActionTypes.AUTO_LOGIN;
-}
-
-export interface ILogoutAccount {
-  type: AccountActionTypes.LOGOUT_ACCOUNT;
-}
-
-export interface IResetLoginState {
-  type: AccountActionTypes.RESET_LOGIN_STATE;
-}
-
-export interface ISetAuthenticationStep {
-  type: AccountActionTypes.SET_AUTHENTICATION_STEP;
-  authenticationStep: AuthenticationStep;
-}
-
-export interface IRegisterUser {
-  type: AccountActionTypes.REGISTER_USER;
-  username: string;
-}
-
-export interface IAutoLoginAttempted {
-  type: AccountActionTypes.AUTO_LOGIN_ATTEMPTED;
-}
-
-export interface ICheckDistrustedUsers {
-  type: AccountActionTypes.CHECK_DISTRUSTED_USERS;
-  user: ChromunityUser;
-}
-
-export interface IStoreDistrustedUsers {
-  type: AccountActionTypes.STORE_DISTRUSTED_USERS;
-  distrustedUsers: string[];
-}
-
-export interface IStoreUserKudos {
-  type: AccountActionTypes.STORE_USER_KUDOS;
-  kudos: number;
-}
-
-export interface ICheckUserKudos {
-  type: AccountActionTypes.CHECK_USER_KUDOS;
-}
-
 export interface ISendKudos {
-  type: AccountActionTypes.SEND_KUDOS;
   receiver: string;
   kudos: number;
 }
-
-export type AccountActions =
-  | ILoginAccount
-  | ISetAuthenticationStep
-  | ISaveVaultAccount
-  | IVaultSuccess
-  | IVaultCancel
-  | ISetUser
-  | IAutoLogin
-  | IAutoLoginAttempted
-  | ILogoutAccount
-  | IResetLoginState
-  | IRegisterUser
-  | ICheckDistrustedUsers
-  | IStoreDistrustedUsers
-  | ICheckUserKudos
-  | IStoreUserKudos
-  | ISendKudos;
 
 export enum AuthenticationStep {
   VAULT_IN_PROGRESS,

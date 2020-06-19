@@ -5,7 +5,7 @@ import { updateReportsLastRead } from "../../../core/services/RepresentativesSer
 import ReportCard from "./ReportCard";
 import ChromiaPageHeader from "../../../shared/ChromiaPageHeader";
 import { connect } from "react-redux";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 
 interface Props {
   reports: RepresentativeReport[];

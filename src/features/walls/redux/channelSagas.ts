@@ -1,72 +1,88 @@
 import {
-  ChannelActionTypes,
-  LoadChannelAction,
-  LoadChannelByPopularityAction,
-  LoadOlderTopicsInChannelAction
+  ChannelActionTypes
 } from "./channelTypes";
 import { select, takeLatest, put } from "redux-saga/effects";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { Topic } from "../../../types";
 import {
   getTopicsByChannelAfterTimestamp,
   getTopicsByChannelPriorToTimestamp,
   getTopicsByChannelSortedByPopularityAfterTimestamp
 } from "../../../core/services/TopicService";
-import { updateChannel } from "./channelActions";
+import { updateChannel, loadChannel, loadOlderTopicsInChannel, loadChannelByPopularity } from "./channelActions";
 import { setQueryPending } from "../../../shared/redux/CommonActions";
+import { Action } from "redux";
 
 export function* channelWatcher() {
-  yield takeLatest(ChannelActionTypes.LOAD_CHANNEL, loadChannel);
-  yield takeLatest(ChannelActionTypes.LOAD_OLDER_CHANNEL_TOPICS, loadOlderTopicsInChannel);
-  yield takeLatest(ChannelActionTypes.LOAD_CHANNEL_POPULARITY, loadChannelByPopularity);
+  yield takeLatest(ChannelActionTypes.LOAD_CHANNEL, loadChannelSaga);
+  yield takeLatest(ChannelActionTypes.LOAD_OLDER_CHANNEL_TOPICS, loadOlderTopicsInChannelSaga);
+  yield takeLatest(ChannelActionTypes.LOAD_CHANNEL_POPULARITY, loadChannelByPopularitySaga);
 }
 
 export const getPreviousChannel = (state: ApplicationState) => state.channel.name;
 export const getTopics = (state: ApplicationState) => state.channel.topics;
 
-export function* loadChannel(action: LoadChannelAction) {
-  yield put(setQueryPending(true));
-  const previousChannel: string = yield select(getPreviousChannel);
-  const previousTopics: Topic[] = yield select(getTopics);
-
-  let topics: Topic[] = [];
-  if (action.name === previousChannel && previousTopics.length > 0) {
-    topics = yield getTopicsByChannelAfterTimestamp(action.name, action.pageSize);
-    topics = topics.concat(previousTopics);
-  } else {
-    topics = yield getTopicsByChannelPriorToTimestamp(action.name, Date.now(), action.pageSize);
-  }
-
-  yield put(updateChannel(action.name, topics, topics.length >= action.pageSize));
-  yield put(setQueryPending(false));
-}
-
-export function* loadOlderTopicsInChannel(action: LoadOlderTopicsInChannelAction) {
-  const previousChannel: string = yield select(getPreviousChannel);
-  const previousTopics: Topic[] = yield select(getTopics);
-
-  let topics: Topic[] = [];
-  if (previousTopics.length > 0) {
+export function* loadChannelSaga(action: Action) {
+  if (loadChannel.match(action)) {
     yield put(setQueryPending(true));
-    topics = yield getTopicsByChannelPriorToTimestamp(
-      previousChannel,
-      previousTopics[previousTopics.length - 1].last_modified,
-      action.pageSize
-    );
-  }
+    const previousChannel: string = yield select(getPreviousChannel);
+    const previousTopics: Topic[] = yield select(getTopics);
 
-  yield put(updateChannel(previousChannel, previousTopics.concat(topics), topics.length >= action.pageSize));
-  yield put(setQueryPending(false));
+    let topics: Topic[] = [];
+    if (action.payload.name === previousChannel && previousTopics.length > 0) {
+      topics = yield getTopicsByChannelAfterTimestamp(action.payload.name, action.payload.pageSize);
+      topics = topics.concat(previousTopics);
+    } else {
+      topics = yield getTopicsByChannelPriorToTimestamp(action.payload.name, Date.now(), action.payload.pageSize);
+    }
+
+    yield put(updateChannel({
+      name: action.payload.name,
+      topics: topics,
+      couldExistOlder: topics.length >= action.payload.pageSize
+    }));
+    yield put(setQueryPending(false));
+  }
 }
 
-export function* loadChannelByPopularity(action: LoadChannelByPopularityAction) {
-  yield put(setQueryPending(true));
-  const topics: Topic[] = yield getTopicsByChannelSortedByPopularityAfterTimestamp(
-    action.name,
-    action.timestamp,
-    action.pageSize
-  );
+export function* loadOlderTopicsInChannelSaga(action: Action) {
+  if (loadOlderTopicsInChannel.match(action)) {
+    const previousChannel: string = yield select(getPreviousChannel);
+    const previousTopics: Topic[] = yield select(getTopics);
 
-  yield put(updateChannel("", topics, false));
-  yield put(setQueryPending(false));
+    let topics: Topic[] = [];
+    if (previousTopics.length > 0) {
+      yield put(setQueryPending(true));
+      topics = yield getTopicsByChannelPriorToTimestamp(
+        previousChannel,
+        previousTopics[previousTopics.length - 1].last_modified,
+        action.payload
+      );
+    }
+
+    yield put(updateChannel({
+      name: previousChannel,
+      topics: previousTopics.concat(topics),
+      couldExistOlder: topics.length >= action.payload
+    }));
+    yield put(setQueryPending(false));
+  }
+}
+
+export function* loadChannelByPopularitySaga(action: Action) {
+  if (loadChannelByPopularity.match(action)) {
+    yield put(setQueryPending(true));
+    const topics: Topic[] = yield getTopicsByChannelSortedByPopularityAfterTimestamp(
+      action.payload.name,
+      action.payload.timestamp,
+      action.payload.pageSize
+    );
+
+    yield put(updateChannel({
+      name: "",
+      topics,
+      couldExistOlder: false
+    }));
+    yield put(setQueryPending(false));
+  }
 }

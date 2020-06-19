@@ -19,7 +19,7 @@ import {
 import ChromiaPageHeader from "../../../shared/ChromiaPageHeader";
 import { ChromunityUser } from "../../../types";
 import ElectionCandidateCard from "./ElectionCandidateCard";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { connect } from "react-redux";
 import { toLowerCase } from "../../../shared/util/util";
 import ElectionTutorial from "./ElectionTutorial";

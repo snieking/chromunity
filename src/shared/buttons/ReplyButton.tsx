@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, makeStyles } from "@material-ui/core";
-import { ApplicationState } from "../../core/store";
+import ApplicationState from "../../core/application-state";
 import { connect } from "react-redux";
 
 interface Props {

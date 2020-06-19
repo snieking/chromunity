@@ -10,7 +10,7 @@ import NewTopicButton from "../../../shared/buttons/NewTopicButton";
 import { TOPIC_VIEW_SELECTOR_OPTION } from "../WallCommon";
 import { connect } from "react-redux";
 import { channelInit, loadChannel, loadChannelByPopularity, loadOlderTopicsInChannel } from "../redux/channelActions";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { shouldBeFiltered, toLowerCase } from "../../../shared/util/util";
 import { clearTopicsCache } from "../redux/wallActions";
 import { markTopicWallRefreshed } from "../../../shared/util/user-util";
@@ -95,8 +95,8 @@ class ChannelWall extends React.Component<Props, State> {
             <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_ALL_TIME}>All time</MenuItem>
           </StyledSelect>
         ) : (
-          <div />
-        )}
+            <div />
+          )}
         <br />
         <br />
         {this.props.topics.map((topic) => {
@@ -121,7 +121,7 @@ class ChannelWall extends React.Component<Props, State> {
     const channel = this.props.match.params.channel;
 
     if (channel != null) {
-      this.props.loadChannel(channel, topicsPageSize);
+      this.props.loadChannel({ name: channel, pageSize: topicsPageSize });
     }
   }
 
@@ -154,7 +154,11 @@ class ChannelWall extends React.Component<Props, State> {
         timestamp = 0;
     }
 
-    this.props.loadChannelByPopularity(this.props.match.params.channel, timestamp, topicsPageSize);
+    this.props.loadChannelByPopularity({
+      name: this.props.match.params.channel,
+      timestamp,
+      pageSize: topicsPageSize
+    });
   }
 
   handleSelectorChange(event: React.ChangeEvent<{ value: unknown }>) {
@@ -181,15 +185,12 @@ class ChannelWall extends React.Component<Props, State> {
   }
 }
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    channelInit: () => dispatch(channelInit()),
-    loadChannel: (name: string, pageSize: number) => dispatch(loadChannel(name, pageSize)),
-    loadOlderTopicsInChannel: (pageSize: number) => dispatch(loadOlderTopicsInChannel(pageSize)),
-    loadChannelByPopularity: (name: string, timestamp: number, pageSize: number) =>
-      dispatch(loadChannelByPopularity(name, timestamp, pageSize)),
-    clearTopicsCache: () => dispatch(clearTopicsCache()),
-  };
+const mapDispatchToProps = {
+  channelInit,
+  loadChannel,
+  loadOlderTopicsInChannel,
+  loadChannelByPopularity,
+  clearTopicsCache
 };
 
 const mapStateToProps = (store: ApplicationState) => {

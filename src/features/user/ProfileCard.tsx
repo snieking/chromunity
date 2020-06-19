@@ -46,7 +46,7 @@ import ChromiaPageHeader from "../../shared/ChromiaPageHeader";
 import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../theme";
 import Avatar, { AVATAR_SIZE } from "../../shared/Avatar";
 import { NotFound } from "../error-pages/NotFound";
-import { ApplicationState } from "../../core/store";
+import ApplicationState from "../../core/application-state";
 import { connect } from "react-redux";
 import { toLowerCase } from "../../shared/util/util";
 import { clearTopicsCache } from "../walls/redux/wallActions";
@@ -55,7 +55,7 @@ import BlockIcon from "@material-ui/icons/Block";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import SocialBar from "./socials/SocialBar";
 import { Socials } from "./socials/socialTypes";
-import { setError } from "../../core/snackbar/redux/snackbarTypes";
+import { notifyError } from "../../core/snackbar/redux/snackbarActions";
 import { setRateLimited, setOperationPending } from "../../shared/redux/CommonActions";
 import ProfileTutorial from "./ProfileTutorial";
 
@@ -108,7 +108,7 @@ interface ProfileCardProps extends WithStyles<typeof styles> {
   representatives: string[];
   user: ChromunityUser;
   rateLimited: boolean;
-  setError: typeof setError;
+  notifyError: typeof notifyError;
   setRateLimited: typeof setRateLimited;
   clearTopicsCache: typeof clearTopicsCache;
   checkDistrustedUsers: typeof checkDistrustedUsers;
@@ -243,7 +243,7 @@ const ProfileCard = withStyles(styles)(
       if (this.state.following) {
         removeFollowing(this.props.user, this.props.username)
           .catch((error) => {
-            this.props.setError(error.message);
+            this.props.notifyError(error.message);
             this.props.setRateLimited();
           })
           .then(() => {
@@ -257,7 +257,7 @@ const ProfileCard = withStyles(styles)(
       } else {
         createFollowing(this.props.user, this.props.username)
           .catch((error) => {
-            this.props.setError(error.message);
+            this.props.notifyError(error.message);
             this.props.setRateLimited();
           })
           .then(() => {
@@ -377,10 +377,10 @@ const ProfileCard = withStyles(styles)(
                   <CheckCircleOutlineIcon fontSize={"large"} className={this.props.classes.iconYellow} />
                 </Tooltip>
               ) : (
-                <Tooltip title="Block/Distrust user">
-                  <BlockIcon fontSize={"large"} className={this.props.classes.iconOrange} />
-                </Tooltip>
-              )}
+                  <Tooltip title="Block/Distrust user">
+                    <BlockIcon fontSize={"large"} className={this.props.classes.iconOrange} />
+                  </Tooltip>
+                )}
             </IconButton>
           </div>
         );
@@ -444,14 +444,12 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    clearTopicsCache: () => dispatch(clearTopicsCache()),
-    checkDistrustedUsers: (user: ChromunityUser) => dispatch(checkDistrustedUsers(user)),
-    setError: (msg: string) => dispatch(setError(msg)),
-    setRateLimited: () => dispatch(setRateLimited()),
-    setOperationPending: (pending: boolean) => dispatch(setOperationPending(pending)),
-  };
+const mapDispatchToProps = {
+  clearTopicsCache,
+  checkDistrustedUsers,
+  notifyError,
+  setRateLimited,
+  setOperationPending
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProfileCard);

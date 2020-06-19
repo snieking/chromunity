@@ -3,9 +3,11 @@ import { CREATE_LOGGED_IN_USER } from "../../../shared/test-utility/users";
 import { ChromunityUser, Topic } from "../../../types";
 import { CREATE_RANDOM_TOPIC } from "../../../shared/test-utility/topics";
 import { getANumber } from "../../../shared/test-utility/helper";
-import { ChannelActions, ChannelActionTypes, UpdateChannelAction } from "./channelTypes";
+import { ChannelActionTypes, IUpdateChannel } from "./channelTypes";
 import { runSaga } from "redux-saga";
-import { loadChannel, loadChannelByPopularity, loadOlderTopicsInChannel } from "./channelSagas";
+import { loadChannelSaga, loadChannelByPopularitySaga, loadOlderTopicsInChannelSaga } from "./channelSagas";
+import { expectSaga } from 'redux-saga-test-plan';
+import { Action } from "@reduxjs/toolkit";
 
 
 describe("Channel saga tests", () => {
@@ -15,16 +17,16 @@ describe("Channel saga tests", () => {
 
   let channel: string;
 
-  const createFakeStore = (dispatchedActions: ChannelActions[], state: any) => {
+  const createFakeStore = (dispatchedActions: any[], state: any) => {
     return {
-      dispatch: (action: ChannelActions) => dispatchedActions.push(action),
+      dispatch: (action: any) => dispatchedActions.push(action),
       getState: () => ({ channel: state })
     };
   };
 
-  const getUpdateChannelAction = (dispatchedActions: ChannelActions[]): UpdateChannelAction => {
+  const getUpdateChannelAction = (dispatchedActions: any[]): IUpdateChannel => {
     for (const action of dispatchedActions) {
-      if (action.type === ChannelActionTypes.UPDATE_CHANNEL) return action as UpdateChannelAction;
+      if (action.type === ChannelActionTypes.UPDATE_CHANNEL) return action.payload;
     }
     return null;
   };
@@ -54,16 +56,26 @@ describe("Channel saga tests", () => {
   jest.setTimeout(30000);
 
   it(testPrefix, async () => {
-    const dispatchedActions: ChannelActions[] = [];
+    return expectSaga(loadChannelSaga, { type: ChannelActionTypes.LOAD_CHANNEL, payload: { name: channel, pageSize } } as Action)
+      .put({
+        type: ChannelActionTypes.UPDATE_CHANNEL,
+        payload: {}
+      });
+  });
+
+  it(testPrefix, async () => {
+    const dispatchedActions: any[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       topics: []
     });
 
-    await runSaga(fakeStore, loadChannel, {
+    await runSaga(fakeStore, loadChannelSaga, {
       type: ChannelActionTypes.LOAD_CHANNEL,
-      name: channel,
-      pageSize: pageSize
-    }).toPromise();
+      payload: {
+        name: channel,
+        pageSize: pageSize
+      }
+    } as Action).toPromise();
 
     const action = getUpdateChannelAction(dispatchedActions);
 
@@ -72,17 +84,19 @@ describe("Channel saga tests", () => {
     expect(action.name).toBe(channel);
   });
 
-  it(testPrefix + " | no more exists", async () => {
-    const dispatchedActions: ChannelActions[] = [];
+  it(`${testPrefix} | no more exists`, async () => {
+    const dispatchedActions: any[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       topics: []
     });
 
-    await runSaga(fakeStore, loadChannel, {
+    await runSaga(fakeStore, loadChannelSaga, {
       type: ChannelActionTypes.LOAD_CHANNEL,
-      name: channel,
-      pageSize: 1000
-    }).toPromise();
+      payload: {
+        name: channel,
+        pageSize: 1000
+      }
+    } as Action).toPromise();
 
     const action = getUpdateChannelAction(dispatchedActions);
 
@@ -91,18 +105,20 @@ describe("Channel saga tests", () => {
     expect(action.name).toBe(channel);
   });
 
-  it(testPrefix + " | load more recent", async () => {
-    const dispatchedActions: ChannelActions[] = [];
+  it(`${testPrefix} | load more recent`, async () => {
+    const dispatchedActions: any[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       topics: createFakeTopics(0),
       name: channel
     });
 
-    await runSaga(fakeStore, loadChannel, {
+    await runSaga(fakeStore, loadChannelSaga, {
       type: ChannelActionTypes.LOAD_CHANNEL,
-      name: channel,
-      pageSize: pageSize
-    }).toPromise();
+      payload: {
+        name: channel,
+        pageSize: pageSize
+      }
+    } as Action).toPromise();
 
     const action = getUpdateChannelAction(dispatchedActions);
 
@@ -111,18 +127,20 @@ describe("Channel saga tests", () => {
     expect(action.name).toBe(channel);
   });
 
-  it(testPrefix + " | load different channel", async () => {
-    const dispatchedActions: ChannelActions[] = [];
+  it(`${testPrefix} | load different channel`, async () => {
+    const dispatchedActions: any[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       topics: createFakeTopics(0),
       name: "anotherChannel"
     });
 
-    await runSaga(fakeStore, loadChannel, {
+    await runSaga(fakeStore, loadChannelSaga, {
       type: ChannelActionTypes.LOAD_CHANNEL,
-      name: channel,
-      pageSize: pageSize
-    }).toPromise();
+      payload: {
+        name: channel,
+        pageSize: pageSize
+      }
+    } as Action).toPromise();
 
     const action = getUpdateChannelAction(dispatchedActions);
 
@@ -131,17 +149,17 @@ describe("Channel saga tests", () => {
     expect(action.name).toBe(channel);
   });
 
-  it(testPrefix + " | load older", async () => {
-    const dispatchedActions: ChannelActions[] = [];
+  it(`${testPrefix} | load older`, async () => {
+    const dispatchedActions: any[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       topics: createFakeTopics(Date.now()),
       name: channel
     });
 
-    await runSaga(fakeStore, loadOlderTopicsInChannel, {
+    await runSaga(fakeStore, loadOlderTopicsInChannelSaga, {
       type: ChannelActionTypes.LOAD_OLDER_CHANNEL_TOPICS,
-      pageSize: pageSize
-    }).toPromise();
+      payload: pageSize
+    } as Action).toPromise();
 
     const action = getUpdateChannelAction(dispatchedActions);
 
@@ -150,17 +168,17 @@ describe("Channel saga tests", () => {
     expect(action.name).toBe(channel);
   });
 
-  it(testPrefix + " | load older and no more exists", async () => {
-    const dispatchedActions: ChannelActions[] = [];
+  it(`${testPrefix} | load older and no more exists`, async () => {
+    const dispatchedActions: any[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       topics: createFakeTopics(Date.now()),
       name: channel
     });
 
-    await runSaga(fakeStore, loadOlderTopicsInChannel, {
+    await runSaga(fakeStore, loadOlderTopicsInChannelSaga, {
       type: ChannelActionTypes.LOAD_OLDER_CHANNEL_TOPICS,
-      pageSize: 1000
-    }).toPromise();
+      payload: 1000
+    } as Action).toPromise();
 
     const action = getUpdateChannelAction(dispatchedActions);
 
@@ -169,18 +187,20 @@ describe("Channel saga tests", () => {
     expect(action.name).toBe(channel);
   });
 
-  it(testPrefix + " | by popularity", async () => {
-    const dispatchedActions: ChannelActions[] = [];
+  it(`${testPrefix} | by popularity`, async () => {
+    const dispatchedActions: any[] = [];
     const fakeStore = createFakeStore(dispatchedActions, {
       name: channel
     });
 
-    await runSaga(fakeStore, loadChannelByPopularity, {
+    await runSaga(fakeStore, loadChannelByPopularitySaga, {
       type: ChannelActionTypes.LOAD_CHANNEL_POPULARITY,
-      name: channel,
-      timestamp: 0,
-      pageSize: pageSize
-    }).toPromise();
+      payload: {
+        name: channel,
+        timestamp: 0,
+        pageSize: pageSize
+      }
+    } as Action).toPromise();
 
     const action = getUpdateChannelAction(dispatchedActions);
 

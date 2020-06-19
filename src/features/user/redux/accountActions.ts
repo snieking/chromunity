@@ -1,98 +1,41 @@
-import { ActionCreator } from "redux";
-
 import {
   AccountActionTypes,
-  IAutoLogin,
-  IAutoLoginAttempted,
-  ICheckDistrustedUsers,
-  ILoginAccount,
-  ILogoutAccount,
-  IRegisterUser,
-  IResetLoginState,
   ISaveVaultAccount,
-  ISetAuthenticationStep,
-  ISetUser,
-  IStoreDistrustedUsers,
-  IVaultCancel,
-  IVaultSuccess,
-  IStoreUserKudos,
-  ICheckUserKudos,
-  ISendKudos
+  ISendKudos,
+  AuthenticationStep
 } from "./accountTypes";
 import { ChromunityUser } from "../../../types";
-import User from "ft3-lib/dist/ft3/user/user";
+import { createAction } from "@reduxjs/toolkit";
+import { withPayloadType } from "../../../shared/redux/util";
 
-export const setAuthenticationStep: ActionCreator<ISetAuthenticationStep> = authenticationStep => ({
-  type: AccountActionTypes.SET_AUTHENTICATION_STEP,
-  authenticationStep
-});
+export const setAuthenticationStep = createAction(AccountActionTypes.SET_AUTHENTICATION_STEP, withPayloadType<AuthenticationStep>());
 
-export const saveVaultAccount: ActionCreator<ISaveVaultAccount> = (accountId: string, ft3User: User) => ({
-  type: AccountActionTypes.SAVE_VAULT_ACCOUNT,
-  accountId,
-  ft3User
-});
+export const saveVaultAccount = createAction(AccountActionTypes.SAVE_VAULT_ACCOUNT, withPayloadType<ISaveVaultAccount>());
 
-export const loginAccount: ActionCreator<ILoginAccount> = () => ({
-  type: AccountActionTypes.LOGIN_ACCOUNT
-});
+export const loginAccount = createAction(AccountActionTypes.LOGIN_ACCOUNT);
 
-export const vaultSuccess: ActionCreator<IVaultSuccess> = (rawTx: string) => ({
-  type: AccountActionTypes.VAULT_SUCCESS,
-  rawTx
-});
+export const vaultSuccess = createAction(AccountActionTypes.VAULT_SUCCESS, withPayloadType<string>());
 
-export const vaultCancel: ActionCreator<IVaultCancel> = () => ({
-  type: AccountActionTypes.VAULT_CANCEL
-});
+export const vaultCancel = createAction(AccountActionTypes.VAULT_CANCEL);
 
-export const setUser: ActionCreator<ISetUser> = (user: ChromunityUser) => ({
-  type: AccountActionTypes.SET_USER,
-  user
-});
+export const setUser = createAction(AccountActionTypes.SET_USER, withPayloadType<ChromunityUser>());
 
-export const autoLogin: ActionCreator<IAutoLogin> = () => ({
-  type: AccountActionTypes.AUTO_LOGIN
-});
+export const autoLogin = createAction(AccountActionTypes.AUTO_LOGIN);
 
-export const logoutAccount: ActionCreator<ILogoutAccount> = () => ({
-  type: AccountActionTypes.LOGOUT_ACCOUNT
-});
+export const logoutAccount = createAction(AccountActionTypes.LOGOUT_ACCOUNT);
 
-export const resetLoginState: ActionCreator<IResetLoginState> = () => ({
-  type: AccountActionTypes.RESET_LOGIN_STATE
-});
+export const resetLoginState = createAction(AccountActionTypes.RESET_LOGIN_STATE);
 
-export const registerUser: ActionCreator<IRegisterUser> = (username: string) => ({
-  type: AccountActionTypes.REGISTER_USER,
-  username
-});
+export const registerUser = createAction(AccountActionTypes.REGISTER_USER, withPayloadType<string>());
 
-export const autoLoginAttempted: ActionCreator<IAutoLoginAttempted> = () => ({
-  type: AccountActionTypes.AUTO_LOGIN_ATTEMPTED
-});
+export const autoLoginAttempted = createAction(AccountActionTypes.AUTO_LOGIN_ATTEMPTED);
 
-export const checkDistrustedUsers: ActionCreator<ICheckDistrustedUsers> = (user: ChromunityUser) => ({
-  type: AccountActionTypes.CHECK_DISTRUSTED_USERS,
-  user
-});
+export const checkDistrustedUsers = createAction(AccountActionTypes.CHECK_DISTRUSTED_USERS, withPayloadType<ChromunityUser>());
 
-export const storeDistrustedUsers: ActionCreator<IStoreDistrustedUsers> = (distrustedUsers: string[]) => ({
-  type: AccountActionTypes.STORE_DISTRUSTED_USERS,
-  distrustedUsers
-});
+export const storeDistrustedUsers = createAction(AccountActionTypes.STORE_DISTRUSTED_USERS, withPayloadType<string[]>());
 
-export const checkUserKudos: ActionCreator<ICheckUserKudos> = () => ({
-  type: AccountActionTypes.CHECK_USER_KUDOS
-})
+export const checkUserKudos = createAction(AccountActionTypes.CHECK_USER_KUDOS);
 
-export const storeUserKudos: ActionCreator<IStoreUserKudos> = (kudos: number) => ({
-  type: AccountActionTypes.STORE_USER_KUDOS,
-  kudos
-});
+export const storeUserKudos = createAction(AccountActionTypes.STORE_USER_KUDOS, withPayloadType<number>());
 
-export const sendKudos: ActionCreator<ISendKudos> = (receiver: string, kudos: number) => ({
-  type: AccountActionTypes.SEND_KUDOS,
-  receiver,
-  kudos
-});
+export const sendKudos = createAction(AccountActionTypes.SEND_KUDOS, withPayloadType<ISendKudos>());

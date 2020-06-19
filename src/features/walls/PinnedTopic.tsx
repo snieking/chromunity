@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Topic } from "../../types";
 import { connect } from "react-redux";
-import { ApplicationState } from "../../core/store";
+import ApplicationState from "../../core/application-state";
 import TopicOverviewCard from "../topic/TopicOverviewCard";
 import { checkPinnedTopic } from "../governing/redux/govActions";
 
@@ -35,10 +35,8 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    checkPinnedTopic: () => dispatch(checkPinnedTopic()),
-  };
+const mapDispatchToProps = {
+  checkPinnedTopic
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(PinnedTopic);

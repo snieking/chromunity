@@ -19,7 +19,7 @@ import Avatar, { AVATAR_SIZE } from "../../shared/Avatar";
 import Timestamp from "../../shared/Timestamp";
 import { COLOR_ORANGE, COLOR_YELLOW } from "../../theme";
 import MarkdownRenderer from "../../shared/MarkdownRenderer";
-import { ApplicationState } from "../../core/store";
+import ApplicationState from "../../core/application-state";
 import { connect } from "react-redux";
 import StarRating from "../../shared/star-rating/StarRating";
 

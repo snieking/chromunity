@@ -3,7 +3,7 @@ import * as React from "react";
 import { ThemeProvider } from "@material-ui/styles";
 import { Theme } from "@material-ui/core";
 import { connect } from "react-redux";
-import { ApplicationState } from "../store";
+import ApplicationState from "../application-state";
 
 interface Props {
   theme: Theme;

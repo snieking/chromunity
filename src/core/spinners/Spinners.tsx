@@ -1,5 +1,5 @@
 import React from "react";
-import { ApplicationState } from "../store";
+import ApplicationState from "../application-state";
 import { LinearProgress } from "@material-ui/core";
 import { connect } from "react-redux";
 

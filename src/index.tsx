@@ -1,12 +1,12 @@
 import React from "react";
-import configureStore from "./core/store";
+import getStore from "./core/store";
 import { render } from "react-dom";
 import "./index.css";
 import * as serviceWorker from "./serviceWorker";
 
 import App from "./App";
 
-const store = configureStore();
+const store = getStore();
 
 render(<App store={store}/>, window.document.getElementById("root"));
 

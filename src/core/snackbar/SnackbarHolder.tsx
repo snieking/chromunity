@@ -1,6 +1,6 @@
 import React from "react";
-import { ApplicationState } from "../store";
-import { clearError, clearSuccess, clearInfo } from "./redux/snackbarTypes";
+import ApplicationState from "../application-state";
+import { clearError, clearSuccess, clearInfo } from "./redux/snackbarActions";
 import { connect } from "react-redux";
 import { Snackbar } from "@material-ui/core";
 import { CustomSnackbarContentWrapper } from "../../shared/CustomSnackbar";
@@ -77,12 +77,10 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    clearError: () => dispatch(clearError()),
-    clearSuccess: () => dispatch(clearSuccess()),
-    clearInfo: () => dispatch(clearInfo())
-  };
+const mapDispatchToProps = {
+  clearError,
+  clearSuccess,
+  clearInfo
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(SnackbarHolder);

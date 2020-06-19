@@ -1,5 +1,6 @@
-import { UserPageActions, UserPageActionTypes, UserPageState } from "./userTypes";
-import { Reducer } from "redux";
+import { UserPageState } from "./userTypes";
+import { createReducer } from "@reduxjs/toolkit";
+import { userPageInit, updateUserTopics, updateUserReplies, updateUserFollowedChannels } from "./userPageActions";
 
 const initialUserPageState: UserPageState = {
   topics: [],
@@ -9,39 +10,24 @@ const initialUserPageState: UserPageState = {
   followedChannels: []
 };
 
-export const userPageReducer: Reducer<UserPageState, UserPageActions> = (state = initialUserPageState, action) => {
-  switch (action.type) {
-    case UserPageActionTypes.INIT_USER: {
-      return {
-        ...state,
-        topics: [],
-        replies: [],
-        followedChannels: [],
-        couldExistOlderReplies: false,
-        couldExistOlderTopics: false
-      }
-    }
-    case UserPageActionTypes.UPDATE_USER_TOPICS: {
-      return {
-        ...state,
-        topics: action.topics,
-        couldExistOlderTopics: action.couldExistOlderTopics
-      }
-    }
-    case UserPageActionTypes.UPDATE_USER_REPLIES: {
-      return {
-        ...state,
-        replies: action.replies,
-        couldExistOlderReplies: action.couldExistOlderReplies
-      }
-    }
-    case UserPageActionTypes.UPDATE_USER_FOLLOWED_CHANNELS: {
-      return {
-        ...state,
-        followedChannels: action.channels
-      }
-    }
-  }
-
-  return state;
-};
+export const userPageReducer = createReducer(initialUserPageState, builder =>
+  builder
+    .addCase(userPageInit, (state, _) => {
+      state.topics = [];
+      state.replies = [];
+      state.followedChannels = [];
+      state.couldExistOlderReplies = false;
+      state.couldExistOlderTopics = false;
+    })
+    .addCase(updateUserTopics, (state, action) => {
+      state.topics = action.payload.topics;
+      state.couldExistOlderTopics = action.payload.couldExistOlderTopics;
+    })
+    .addCase(updateUserReplies, (state, action) => {
+      state.replies = action.payload.replies;
+      state.couldExistOlderReplies = action.payload.couldExistOlderReplies;
+    })
+    .addCase(updateUserFollowedChannels, (state, action) => {
+      state.followedChannels = action.payload;
+    })
+)

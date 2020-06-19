@@ -3,7 +3,7 @@ import Tutorial from "../../../shared/Tutorial";
 import TutorialButton from "../../../shared/buttons/TutorialButton";
 import { step } from "../../../shared/TutorialStep";
 import { ChromunityUser } from "../../../types";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { connect } from "react-redux";
 
 interface Props {

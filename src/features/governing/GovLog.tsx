@@ -86,10 +86,8 @@ class GovLog extends React.Component<Props, GovLogState> {
   }
 }
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    setQueryPending: (pending: boolean) => dispatch(setQueryPending(pending)),
-  };
+const mapDispatchToProps = {
+  setQueryPending
 };
 
 export default connect(null, mapDispatchToProps)(GovLog);
