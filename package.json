@@ -57,7 +57,8 @@
     "build-testnet": "cp ./src/config.js ./src/config.bak.js && cp ./src/config-testnet.js ./src/config.js && cp ./public/robots.txt ./public/robots.txt.bak && cp ./public/robots.txt.dev ./public/robots.txt && react-scripts build && mv ./src/config.bak.js ./src/config.js && mv ./public/robots.txt.bak ./public/robots.txt",
     "build-local": "react-scripts build",
     "test": "jest --config jest.config.js --setupFiles dotenv/config",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix"
   },
   "browserslist": {
     "production": [
@@ -80,11 +81,16 @@
     "@types/react-router-dom": "^5.1.5",
     "@types/scrypt-async": "^1.3.1",
     "@types/secp256k1": "4.0.1",
+    "@typescript-eslint/eslint-plugin": "^3.3.0",
+    "@typescript-eslint/parser": "^3.3.0",
     "babel-plugin-transform-export-extensions": "^6.22.0",
     "dotenv": "^8.2.0",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
     "enzyme-to-json": "^3.5.0",
+    "eslint": "^7.3.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-react": "^7.20.0",
     "jest-cli": "^26.0.1",
     "jest-styled-components": "^7.0.2",
     "jsdom": "16.2.2",
@@ -93,6 +99,5 @@
     "react-test-renderer": "^16.13.1",
     "redux-logger": "^3.0.6",
     "ts-jest": "^26.1.0"
-  },
-  "snyk": true
+  }
 }
