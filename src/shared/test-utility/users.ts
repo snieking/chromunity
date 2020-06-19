@@ -1,7 +1,7 @@
 import { getANumber } from "./helper";
-import { makeKeyPair } from "../../core/services/CryptoService";
+import { makeKeyPair } from "../../core/services/crypto-service";
 import { Account, FlagsType, KeyPair, op, SingleSignatureAuthDescriptor, User } from "ft3-lib";
-import { BLOCKCHAIN } from "../../core/services/Postchain";
+import { BLOCKCHAIN } from "../../core/services/postchain";
 import { ChromunityUser } from "../../types";
 import Transaction from "ft3-lib/dist/ft3/core/transaction";
 

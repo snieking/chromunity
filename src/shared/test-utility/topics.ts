@@ -1,4 +1,4 @@
-import {createTopic} from "../../core/services/TopicService";
+import {createTopic} from "../../core/services/topic-service";
 import * as bip39 from "bip39";
 import { ChromunityUser } from "../../types";
 
