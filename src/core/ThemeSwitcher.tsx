@@ -1,7 +1,7 @@
 import React from "react";
 import { Theme } from "@material-ui/core";
 import { connect } from "react-redux";
-import { ApplicationState } from "./store";
+import ApplicationState from "./application-state";
 import { toggleTheme } from "./dynamic-theme/redux/stylingActions";
 import MenuItem from "@material-ui/core/MenuItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";

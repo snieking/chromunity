@@ -1,117 +1,39 @@
-import { ActionCreator } from "redux";
 import {
-  LoadAllTopicWallAction,
-  LoadFollowedChannelsTopicWallAction,
-  LoadOlderAllTopicsAction,
-  LoadOlderFollowedChannelsTopicsAction,
-  LoadOlderFollowedUsersTopicsAction,
-  LoadFollowedUsersTopicWallAction,
-  UpdateTopicsAction,
   WallActionTypes,
   WallType,
-  LoadAllTopicsByPopularityAction,
-  LoadFollowedUsersTopicsByPopularityAction,
-  LoadFollowedChannelsTopicsByPopularityAction,
-  UpdateTopicWallFromCacheAction, IClearTopicsCache
+  IUpdateTopics,
+  ILoadAllTopicWall,
+  ILoadAllTopicsByPopularity,
+  ILoadFollowedUsersTopicWall,
+  ILoadOlderFollowedUsersTopics,
+  ILoadFollowedUsersTopicsByPopularity,
+  ILoadFollowedChannelsTopicWall,
+  ILoadOlderFollowedChannelsTopics,
+  ILoadFollowedChannelsTopicsByPopularity
 } from "./wallTypes";
-import { Topic } from "../../../types";
+import { createAction } from "@reduxjs/toolkit";
+import { withPayloadType } from "../../../shared/redux/util";
 
-export const updateTopicWallFromCache: ActionCreator<UpdateTopicWallFromCacheAction> = (wallType: WallType) => ({
-  type: WallActionTypes.UPDATE_TOPICS_WALL_FROM_CACHE,
-  wallType: wallType
-});
+export const updateTopicWallFromCache = createAction(WallActionTypes.UPDATE_TOPICS_WALL_FROM_CACHE, withPayloadType<WallType>());
 
-export const updateTopics: ActionCreator<UpdateTopicsAction> = (
-  topics: Topic[],
-  couldExistOlder: boolean,
-  wallType: WallType
-) => ({
-  type: WallActionTypes.UPDATE_TOPICS_WALL,
-  topics: topics,
-  couldExistOlder: couldExistOlder,
-  wallType: wallType
-});
+export const updateTopics = createAction(WallActionTypes.UPDATE_TOPICS_WALL, withPayloadType<IUpdateTopics>());
 
-export const loadAllTopicWall: ActionCreator<LoadAllTopicWallAction> = (pageSize: number, ignoreCache: boolean) => ({
-  type: WallActionTypes.LOAD_ALL_TOPIC_WALL,
-  pageSize: pageSize,
-  ignoreCache: ignoreCache
-});
+export const loadAllTopicWall = createAction(WallActionTypes.LOAD_ALL_TOPIC_WALL, withPayloadType<ILoadAllTopicWall>());
 
-export const loadOlderAllTopics: ActionCreator<LoadOlderAllTopicsAction> = (pageSize: number) => ({
-  type: WallActionTypes.LOAD_OLDER_ALL_TOPICS,
-  pageSize: pageSize
-});
+export const loadOlderAllTopics = createAction(WallActionTypes.LOAD_OLDER_ALL_TOPICS, withPayloadType<number>());
 
-export const loadAllTopicsByPopularity: ActionCreator<LoadAllTopicsByPopularityAction> = (
-  timestamp: number,
-  pageSize: number
-) => ({
-  type: WallActionTypes.LOAD_ALL_TOPICS_BY_POPULARITY,
-  timestamp: timestamp,
-  pageSize: pageSize
-});
+export const loadAllTopicsByPopularity = createAction(WallActionTypes.LOAD_ALL_TOPICS_BY_POPULARITY, withPayloadType<ILoadAllTopicsByPopularity>());
 
-export const loadFollowedUsersTopicWall: ActionCreator<LoadFollowedUsersTopicWallAction> = (
-  username: string,
-  pageSize: number
-) => ({
-  type: WallActionTypes.LOAD_FOLLOWED_USERS_TOPIC_WALL,
-  username: username,
-  pageSize: pageSize
-});
+export const loadFollowedUsersTopicWall = createAction(WallActionTypes.LOAD_FOLLOWED_USERS_TOPIC_WALL, withPayloadType<ILoadFollowedUsersTopicWall>());
 
-export const loadOlderFollowedUsersTopics: ActionCreator<LoadOlderFollowedUsersTopicsAction> = (
-  username: string,
-  pageSize: number
-) => ({
-  type: WallActionTypes.LOAD_OLDER_FOLLOWED_USERS_TOPICS,
-  username: username,
-  pageSize: pageSize
-});
+export const loadOlderFollowedUsersTopics = createAction(WallActionTypes.LOAD_OLDER_FOLLOWED_USERS_TOPICS, withPayloadType<ILoadOlderFollowedUsersTopics>());
 
-export const loadFollowedUsersTopicsByPopularity: ActionCreator<LoadFollowedUsersTopicsByPopularityAction> = (
-  username: string,
-  timestamp: number,
-  pageSize: number
-) => ({
-  type: WallActionTypes.LOAD_FOLLOWED_USERS_TOPICS_BY_POPULARITY,
-  username: username,
-  timestamp: timestamp,
-  pageSize: pageSize
-});
+export const loadFollowedUsersTopicsByPopularity = createAction(WallActionTypes.LOAD_FOLLOWED_USERS_TOPICS_BY_POPULARITY, withPayloadType<ILoadFollowedUsersTopicsByPopularity>());
 
-export const loadFollowedChannelsTopicWall: ActionCreator<LoadFollowedChannelsTopicWallAction> = (
-  username: string,
-  pageSize: number,
-  ignoreCache: boolean
-) => ({
-  type: WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPIC_WALL,
-  username: username,
-  pageSize: pageSize,
-  ignoreCache: ignoreCache
-});
+export const loadFollowedChannelsTopicWall = createAction(WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPIC_WALL, withPayloadType<ILoadFollowedChannelsTopicWall>());
 
-export const loadOlderFollowedChannelsTopics: ActionCreator<LoadOlderFollowedChannelsTopicsAction> = (
-  username: string,
-  pageSize: number
-) => ({
-  type: WallActionTypes.LOAD_OLDER_FOLLOWED_CHANNELS_TOPICS,
-  username: username,
-  pageSize: pageSize
-});
+export const loadOlderFollowedChannelsTopics = createAction(WallActionTypes.LOAD_OLDER_FOLLOWED_CHANNELS_TOPICS, withPayloadType<ILoadOlderFollowedChannelsTopics>());
 
-export const loadFollowedChannelsTopicsByPopularity: ActionCreator<LoadFollowedChannelsTopicsByPopularityAction> = (
-  username: string,
-  timestamp: number,
-  pageSize: number
-) => ({
-  type: WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPICS_BY_POPULARITY,
-  username: username,
-  timestamp: timestamp,
-  pageSize: pageSize
-});
+export const loadFollowedChannelsTopicsByPopularity = createAction(WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPICS_BY_POPULARITY, withPayloadType<ILoadFollowedChannelsTopicsByPopularity>());
 
-export const clearTopicsCache: ActionCreator<IClearTopicsCache> = () => ({
-  type: WallActionTypes.CLEAR_TOPICS_CACHE
-});
+export const clearTopicsCache = createAction(WallActionTypes.CLEAR_TOPICS_CACHE);

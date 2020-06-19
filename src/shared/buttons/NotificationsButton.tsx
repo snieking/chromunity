@@ -5,7 +5,7 @@ import { Notifications, NotificationsActive } from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
 import { countUnreadUserNotifications } from "../../core/services/NotificationService";
 import { ChromunityUser } from "../../types";
-import { ApplicationState } from "../../core/store";
+import ApplicationState from "../../core/application-state";
 import { connect } from "react-redux";
 
 export interface NotificationsButtonProps {

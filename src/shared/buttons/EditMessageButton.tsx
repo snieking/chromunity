@@ -21,10 +21,10 @@ import { Delete, Edit, MoreHoriz } from "@material-ui/icons";
 import { parseEmojis } from "../util/text-parsing";
 import withStyles from "@material-ui/core/styles/withStyles";
 import ConfirmDialog from "../ConfirmDialog";
-import { ApplicationState } from "../../core/store";
+import ApplicationState from "../../core/application-state";
 import { connect } from "react-redux";
 import TextToolbar from "../textToolbar/TextToolbar";
-import { notifySuccess, setError } from "../../core/snackbar/redux/snackbarTypes";
+import { notifyInfo, notifyError } from "../../core/snackbar/redux/snackbarActions";
 import { setRateLimited } from "../redux/CommonActions";
 
 const styles = createStyles({
@@ -40,8 +40,8 @@ export interface EditMessageButtonProps extends WithStyles<typeof styles> {
   modifiableUntil: number;
   user: ChromunityUser;
   rateLimited: boolean;
-  setInfo: typeof notifySuccess;
-  setError: typeof setError;
+  notifyInfo: typeof notifyInfo;
+  notifyError: typeof notifyError;
   setRateLimited: typeof setRateLimited;
 }
 
@@ -96,10 +96,10 @@ const EditMessageButton = withStyles(styles)(
       this.props
         .editFunction(this.state.message)
         .catch((error: Error) => {
-          this.props.setError(error.message);
+          this.props.notifyError(error.message);
           this.props.setRateLimited();
         })
-        .then(() => this.props.setInfo("Message successfully edited"));
+        .then(() => this.props.notifyInfo("Message successfully edited"));
     }
 
     submitDelete() {
@@ -107,10 +107,10 @@ const EditMessageButton = withStyles(styles)(
       this.props
         .deleteFunction()
         .catch((error: Error) => {
-          this.props.setError(error.message);
+          this.props.notifyError(error.message);
           this.props.setRateLimited();
         })
-        .then(() => this.props.setInfo("Message successfully deleted"));
+        .then(() => this.props.notifyInfo("Message successfully deleted"));
     }
 
     editDialog() {
@@ -240,12 +240,10 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    setError: (msg: string) => dispatch(setError(msg)),
-    setInfo: (msg: string) => dispatch(notifySuccess(msg)),
-    setRateLimited: () => dispatch(setRateLimited()),
-  };
+const mapDispatchToProps = {
+  notifyError,
+  notifyInfo,
+  setRateLimited
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(EditMessageButton);

@@ -1,53 +1,23 @@
-import { ActionCreator } from "redux";
 import {
-  InitUserAction,
-  LoadUserFollowedChannelsAction,
-  LoadUserRepliesAction,
-  LoadUserTopicsAction,
-  UpdateUserFollowedChannelsAction,
-  UpdateUserRepliesAction,
-  UpdateUserTopicsAction,
-  UserPageActionTypes
+  UserPageActionTypes,
+  ILoadUserTopics,
+  IUpdateUserTopics,
+  ILoadUserReplies,
+  IUpdateUserReplies
 } from "./userTypes";
-import { Topic, TopicReply } from "../../../types";
+import { createAction } from "@reduxjs/toolkit";
+import { withPayloadType } from "../../../shared/redux/util";
 
-export const userPageInit: ActionCreator<InitUserAction> = () => ({
-  type: UserPageActionTypes.INIT_USER
-});
+export const userPageInit = createAction(UserPageActionTypes.INIT_USER);
 
-export const loadUserTopics: ActionCreator<LoadUserTopicsAction> = (username: string, pageSize: number) => ({
-  type: UserPageActionTypes.LOAD_USER_TOPICS,
-  username,
-  pageSize
-});
+export const loadUserTopics = createAction(UserPageActionTypes.LOAD_USER_TOPICS, withPayloadType<ILoadUserTopics>());
 
-export const updateUserTopics: ActionCreator<UpdateUserTopicsAction> = (topics: Topic[], couldExistOlder: boolean) => ({
-  type: UserPageActionTypes.UPDATE_USER_TOPICS,
-  topics,
-  couldExistOlderTopics: couldExistOlder
-});
+export const updateUserTopics = createAction(UserPageActionTypes.UPDATE_USER_TOPICS, withPayloadType<IUpdateUserTopics>());
 
-export const loadUserReplies: ActionCreator<LoadUserRepliesAction> = (username: string, pageSize: number) => ({
-  type: UserPageActionTypes.LOAD_USER_REPLIES,
-  username,
-  pageSize
-});
+export const loadUserReplies = createAction(UserPageActionTypes.LOAD_USER_REPLIES, withPayloadType<ILoadUserReplies>());
 
-export const updateUserReplies: ActionCreator<UpdateUserRepliesAction> = (
-  replies: TopicReply[],
-  couldExistOlder: boolean
-) => ({
-  type: UserPageActionTypes.UPDATE_USER_REPLIES,
-  replies: replies,
-  couldExistOlderReplies: couldExistOlder
-});
+export const updateUserReplies = createAction(UserPageActionTypes.UPDATE_USER_REPLIES, withPayloadType<IUpdateUserReplies>());
 
-export const loadUserFollowedChannels: ActionCreator<LoadUserFollowedChannelsAction> = (username: string) => ({
-  type: UserPageActionTypes.LOAD_USER_FOLLOWED_CHANNELS,
-  username
-});
+export const loadUserFollowedChannels = createAction(UserPageActionTypes.LOAD_USER_FOLLOWED_CHANNELS, withPayloadType<string>());
 
-export const updateUserFollowedChannels: ActionCreator<UpdateUserFollowedChannelsAction> = (channels: string[]) => ({
-  type: UserPageActionTypes.UPDATE_USER_FOLLOWED_CHANNELS,
-  channels: channels
-});
+export const updateUserFollowedChannels = createAction(UserPageActionTypes.UPDATE_USER_FOLLOWED_CHANNELS, withPayloadType<string[]>());

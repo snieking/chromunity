@@ -22,91 +22,54 @@ export enum WallType {
   CHANNEL
 }
 
-export interface UpdateTopicWallFromCacheAction {
-  type: WallActionTypes.UPDATE_TOPICS_WALL_FROM_CACHE;
-  wallType: WallType;
-}
-
-export interface UpdateTopicsAction {
-  type: WallActionTypes.UPDATE_TOPICS_WALL;
+export interface IUpdateTopics {
   topics: Topic[];
   couldExistOlder: boolean;
   wallType: WallType;
 }
 
-export interface LoadAllTopicWallAction {
-  type: WallActionTypes.LOAD_ALL_TOPIC_WALL;
+export interface ILoadAllTopicWall {
   pageSize: number;
   ignoreCache: boolean;
 }
 
-export interface LoadOlderAllTopicsAction {
-  type: WallActionTypes.LOAD_OLDER_ALL_TOPICS;
-  pageSize: number;
-}
-
-export interface LoadAllTopicsByPopularityAction {
-  type: WallActionTypes.LOAD_ALL_TOPICS_BY_POPULARITY;
+export interface ILoadAllTopicsByPopularity {
   timestamp: number;
   pageSize: number;
 }
 
-export interface LoadFollowedUsersTopicWallAction {
-  type: WallActionTypes.LOAD_FOLLOWED_USERS_TOPIC_WALL;
+export interface ILoadFollowedUsersTopicWall {
   username: string;
   pageSize: number;
 }
 
-export interface LoadOlderFollowedUsersTopicsAction {
-  type: WallActionTypes.LOAD_OLDER_FOLLOWED_USERS_TOPICS;
+export interface ILoadOlderFollowedUsersTopics {
   username: string;
   pageSize: number;
 }
 
-export interface LoadFollowedUsersTopicsByPopularityAction {
-  type: WallActionTypes.LOAD_FOLLOWED_USERS_TOPICS_BY_POPULARITY;
+export interface ILoadFollowedUsersTopicsByPopularity {
   username: string;
   timestamp: number;
   pageSize: number;
 }
 
-export interface LoadFollowedChannelsTopicWallAction {
-  type: WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPIC_WALL;
+export interface ILoadFollowedChannelsTopicWall {
   username: string;
   pageSize: number;
   ignoreCache: boolean;
 }
 
-export interface LoadOlderFollowedChannelsTopicsAction {
-  type: WallActionTypes.LOAD_OLDER_FOLLOWED_CHANNELS_TOPICS;
+export interface ILoadOlderFollowedChannelsTopics {
   username: string;
   pageSize: number;
 }
 
-export interface LoadFollowedChannelsTopicsByPopularityAction {
-  type: WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPICS_BY_POPULARITY;
+export interface ILoadFollowedChannelsTopicsByPopularity {
   username: string;
   timestamp: number;
   pageSize: number;
 }
-
-export interface IClearTopicsCache {
-  type: WallActionTypes.CLEAR_TOPICS_CACHE
-}
-
-export type TopicWallActions =
-  | UpdateTopicWallFromCacheAction
-  | UpdateTopicsAction
-  | LoadAllTopicWallAction
-  | LoadOlderAllTopicsAction
-  | LoadAllTopicsByPopularityAction
-  | LoadFollowedUsersTopicWallAction
-  | LoadOlderFollowedUsersTopicsAction
-  | LoadFollowedUsersTopicsByPopularityAction
-  | LoadFollowedChannelsTopicWallAction
-  | LoadOlderFollowedChannelsTopicsAction
-  | LoadFollowedChannelsTopicsByPopularityAction
-  | IClearTopicsCache;
 
 export interface TopicWallState {
   topics: Topic[];

@@ -1,14 +1,5 @@
 import { setQueryPending } from './../../../shared/redux/CommonActions';
 import {
-  LoadAllTopicsByPopularityAction,
-  LoadAllTopicWallAction,
-  LoadFollowedChannelsTopicsByPopularityAction,
-  LoadFollowedChannelsTopicWallAction,
-  LoadFollowedUsersTopicsByPopularityAction,
-  LoadFollowedUsersTopicWallAction,
-  LoadOlderAllTopicsAction,
-  LoadOlderFollowedChannelsTopicsAction,
-  LoadOlderFollowedUsersTopicsAction,
   WallActionTypes,
   WallType
 } from "./wallTypes";
@@ -25,22 +16,23 @@ import {
   getTopicsFromFollowsPriorToTimestamp,
   getTopicsPriorToTimestamp
 } from "../../../core/services/TopicService";
-import { updateTopicWallFromCache, updateTopics } from "./wallActions";
-import { ApplicationState } from "../../../core/store";
+import { updateTopicWallFromCache, updateTopics, loadAllTopicWall, loadOlderAllTopics, loadAllTopicsByPopularity, loadFollowedUsersTopicWall, loadOlderFollowedUsersTopics, loadFollowedUsersTopicsByPopularity, loadFollowedChannelsTopicWall, loadOlderFollowedChannelsTopics, loadFollowedChannelsTopicsByPopularity } from "./wallActions";
+import ApplicationState from "../../../core/application-state";
 import { removeDuplicateTopicsFromFirst } from "../../../shared/util/util";
+import { Action } from 'redux';
 
 export function* topicWallWatcher() {
-  yield takeLatest(WallActionTypes.LOAD_ALL_TOPIC_WALL, loadAllTopics);
-  yield takeLatest(WallActionTypes.LOAD_OLDER_ALL_TOPICS, loadOlderAllTopics);
-  yield takeLatest(WallActionTypes.LOAD_ALL_TOPICS_BY_POPULARITY, loadAllTopicsByPopularity);
+  yield takeLatest(WallActionTypes.LOAD_ALL_TOPIC_WALL, loadAllTopicsSaga);
+  yield takeLatest(WallActionTypes.LOAD_OLDER_ALL_TOPICS, loadOlderAllTopicsSaga);
+  yield takeLatest(WallActionTypes.LOAD_ALL_TOPICS_BY_POPULARITY, loadAllTopicsByPopularitySaga);
 
-  yield takeLatest(WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPIC_WALL, loadFollowedChannelsTopics);
-  yield takeLatest(WallActionTypes.LOAD_OLDER_FOLLOWED_CHANNELS_TOPICS, loadOlderFollowedChannelsTopics);
-  yield takeLatest(WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPICS_BY_POPULARITY, loadFollowedChannelsTopicsByPopularity);
+  yield takeLatest(WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPIC_WALL, loadFollowedChannelsTopicsSaga);
+  yield takeLatest(WallActionTypes.LOAD_OLDER_FOLLOWED_CHANNELS_TOPICS, loadOlderFollowedChannelsTopicsSaga);
+  yield takeLatest(WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPICS_BY_POPULARITY, loadFollowedChannelsTopicsByPopularitySaga);
 
-  yield takeLatest(WallActionTypes.LOAD_FOLLOWED_USERS_TOPIC_WALL, loadFollowedUsersTopics);
-  yield takeLatest(WallActionTypes.LOAD_OLDER_FOLLOWED_USERS_TOPICS, loadOlderFollowedUsersTopics);
-  yield takeLatest(WallActionTypes.LOAD_FOLLOWED_USERS_TOPICS_BY_POPULARITY, loadFollowedUsersTopicsByPopularity);
+  yield takeLatest(WallActionTypes.LOAD_FOLLOWED_USERS_TOPIC_WALL, loadFollowedUsersTopicsSaga);
+  yield takeLatest(WallActionTypes.LOAD_OLDER_FOLLOWED_USERS_TOPICS, loadOlderFollowedUsersTopicsSaga);
+  yield takeLatest(WallActionTypes.LOAD_FOLLOWED_USERS_TOPICS_BY_POPULARITY, loadFollowedUsersTopicsByPopularitySaga);
 }
 
 export const getAllTopics = (state: ApplicationState) => state.topicWall.all.topics;
@@ -62,187 +54,217 @@ const cacheExpired = (updated: number): boolean => {
   return Date.now() - updated >= CACHE_DURATION_MILLIS;
 };
 
-export function* loadAllTopics(action: LoadAllTopicWallAction) {
-  const updated: number = yield select(getAllUpdatedTime);
-  let topics: Topic[] = [];
-  if (!action.ignoreCache && !cacheExpired(updated)) {
-    yield put(updateTopicWallFromCache(WallType.ALL));
-    return;
-  } else {
+export function* loadAllTopicsSaga(action: Action) {
+  if (loadAllTopicWall.match(action)) {
+    const updated: number = yield select(getAllUpdatedTime);
+    let topics: Topic[] = [];
+    if (!action.payload.ignoreCache && !cacheExpired(updated)) {
+      yield put(updateTopicWallFromCache(WallType.ALL));
+      return;
+    } else {
+      yield put(setQueryPending(true));
+      topics = yield select(getAllTopics);
+    }
+
+    let retrievedTopics: Topic[];
+    let couldExistOlder = false;
+    if (topics.length > 0) {
+      // Load recent topics
+      retrievedTopics = yield getTopicsAfterTimestamp(topics[0].last_modified, action.payload.pageSize);
+      couldExistOlder = yield select(getAllCouldExistOlder);
+    } else {
+      retrievedTopics = yield getTopicsPriorToTimestamp(Date.now(), action.payload.pageSize);
+      couldExistOlder = retrievedTopics.length >= action.payload.pageSize;
+    }
+
+    yield put(
+      updateTopics({
+        topics: retrievedTopics.concat(removeDuplicateTopicsFromFirst(topics, retrievedTopics)),
+        couldExistOlder,
+        wallType: WallType.ALL
+      })
+    );
+
+    yield put(setQueryPending(false));
+  }
+}
+
+export function* loadOlderAllTopicsSaga(action: Action) {
+  if (loadOlderAllTopics.match(action)) {
+    const topics: Topic[] = yield select(getAllTopics);
     yield put(setQueryPending(true));
-    topics = yield select(getAllTopics);
+
+    let retrievedTopics: Topic[] = [];
+    if (topics.length > 0) {
+      retrievedTopics = yield getTopicsPriorToTimestamp(topics[topics.length - 1].last_modified, action.payload);
+    } else {
+      retrievedTopics = yield getTopicsPriorToTimestamp(Date.now(), action.payload);
+    }
+
+    const updatedTopics: Topic[] = topics.concat(retrievedTopics);
+
+    yield put(updateTopics({
+      topics: updatedTopics,
+      couldExistOlder: retrievedTopics.length >= action.payload,
+      wallType: WallType.ALL
+    }));
+    yield put(setQueryPending(false));
   }
-
-  let retrievedTopics: Topic[];
-  let couldExistOlder = false;
-  if (topics.length > 0) {
-    // Load recent topics
-    retrievedTopics = yield getTopicsAfterTimestamp(topics[0].last_modified, action.pageSize);
-    couldExistOlder = yield select(getAllCouldExistOlder);
-  } else {
-    retrievedTopics = yield getTopicsPriorToTimestamp(Date.now(), action.pageSize);
-    couldExistOlder = retrievedTopics.length >= action.pageSize;
-  }
-
-  yield put(
-    updateTopics(
-      retrievedTopics.concat(removeDuplicateTopicsFromFirst(topics, retrievedTopics)),
-      couldExistOlder,
-      WallType.ALL
-    )
-  );
-
-  yield put(setQueryPending(false));
 }
 
-export function* loadOlderAllTopics(action: LoadOlderAllTopicsAction) {
-  const topics: Topic[] = yield select(getAllTopics);
-  yield put(setQueryPending(true));
-
-  let retrievedTopics: Topic[] = [];
-  if (topics.length > 0) {
-    retrievedTopics = yield getTopicsPriorToTimestamp(topics[topics.length - 1].last_modified, action.pageSize);
-  } else {
-    retrievedTopics = yield getTopicsPriorToTimestamp(Date.now(), action.pageSize);
-  }
-
-  const updatedTopics: Topic[] = topics.concat(retrievedTopics);
-
-  yield put(updateTopics(updatedTopics, retrievedTopics.length >= action.pageSize, WallType.ALL));
-  yield put(setQueryPending(false));
-}
-
-export function* loadAllTopicsByPopularity(action: LoadAllTopicsByPopularityAction) {
-  yield put(setQueryPending(true));
-  const topics: Topic[] = yield getAllTopicsByPopularityAfterTimestamp(action.timestamp, action.pageSize);
-  yield put(updateTopics(topics, false, WallType.NONE));
-  yield put(setQueryPending(false));
-}
-
-export function* loadFollowedUsersTopics(action: LoadFollowedUsersTopicWallAction) {
-  const updated: number = yield select(getFollowedUsersUpdatedTime);
-
-  if (!cacheExpired(updated)) {
-    yield put(updateTopicWallFromCache(WallType.USER));
-    return;
-  }
-
-  yield put(setQueryPending(true));
-  const topics: Topic[] = yield select(getFollowedUsersTopics);
-
-  let retrievedTopics: Topic[];
-  let couldExistOlder = false;
-  if (topics.length > 0) {
-    retrievedTopics = yield getTopicsFromFollowsAfterTimestamp(
-      action.username,
-      topics[0].last_modified,
-      action.pageSize
-    );
-    couldExistOlder = yield select(getFollowedUsersCouldExistOlder);
-  } else {
-    retrievedTopics = yield getTopicsFromFollowsPriorToTimestamp(action.username, Date.now(), action.pageSize);
-    couldExistOlder = retrievedTopics.length >= action.pageSize;
-  }
-
-  yield put(
-    updateTopics(
-      retrievedTopics.concat(removeDuplicateTopicsFromFirst(topics, retrievedTopics)),
-      couldExistOlder,
-      WallType.USER
-    )
-  );
-
-  yield put(setQueryPending(false));
-}
-
-export function* loadOlderFollowedUsersTopics(action: LoadOlderFollowedUsersTopicsAction) {
-  const topics: Topic[] = yield select(getFollowedUsersTopics);
-
-  let retrievedTopics: Topic[] = [];
-  if (topics.length > 0) {
+export function* loadAllTopicsByPopularitySaga(action: Action) {
+  if (loadAllTopicsByPopularity.match(action)) {
     yield put(setQueryPending(true));
-    retrievedTopics = yield getTopicsFromFollowsPriorToTimestamp(
-      action.username,
-      topics[topics.length - 1].last_modified,
-      action.pageSize
-    );
+    const topics: Topic[] = yield getAllTopicsByPopularityAfterTimestamp(action.payload.timestamp, action.payload.pageSize);
+    yield put(updateTopics({ topics, couldExistOlder: false, wallType: WallType.NONE }));
+    yield put(setQueryPending(false));
   }
-
-  yield put(updateTopics(topics.concat(retrievedTopics), retrievedTopics.length >= action.pageSize, WallType.USER));
-  yield put(setQueryPending(false));
 }
 
-export function* loadFollowedUsersTopicsByPopularity(action: LoadFollowedUsersTopicsByPopularityAction) {
-  yield put(setQueryPending(true));
-  const topics: Topic[] = yield getTopicsByFollowsSortedByPopularityAfterTimestamp(
-    action.username,
-    action.timestamp,
-    action.pageSize
-  );
-  yield put(updateTopics(topics, false, WallType.NONE));
-  yield put(setQueryPending(false));
-}
+export function* loadFollowedUsersTopicsSaga(action: Action) {
+  if (loadFollowedUsersTopicWall.match(action)) {
+    const updated: number = yield select(getFollowedUsersUpdatedTime);
 
-export function* loadFollowedChannelsTopics(action: LoadFollowedChannelsTopicWallAction) {
-  const updated: number = yield select(getFollowedChannelsUpdatedTime);
+    if (!cacheExpired(updated)) {
+      yield put(updateTopicWallFromCache(WallType.USER));
+      return;
+    }
 
-  if (!action.ignoreCache && !cacheExpired(updated)) {
-    yield put(updateTopicWallFromCache(WallType.CHANNEL));
-    return;
-  }
-
-  yield put(setQueryPending(true));
-  const topics: Topic[] = yield select(getFollowedChannelsTopics);
-
-  let retrievedTopics: Topic[];
-  let couldExistOlder: boolean;
-  if (topics.length > 0) {
-    // Load recent topics
-    retrievedTopics = yield getTopicsFromFollowedChannelsAfterTimestamp(
-      action.username,
-      topics[0].last_modified,
-      action.pageSize
-    );
-    couldExistOlder = yield select(getFollowedChannelsCouldExistOlder);
-  } else {
-    retrievedTopics = yield getTopicsFromFollowedChannelsPriorToTimestamp(action.username, Date.now(), action.pageSize);
-    couldExistOlder = retrievedTopics.length >= action.pageSize;
-  }
-
-  yield put(
-    updateTopics(
-      retrievedTopics.concat(removeDuplicateTopicsFromFirst(topics, retrievedTopics)),
-      couldExistOlder,
-      WallType.CHANNEL
-    )
-  );
-  yield put(setQueryPending(false));
-}
-
-export function* loadOlderFollowedChannelsTopics(action: LoadOlderFollowedChannelsTopicsAction) {
-  const topics: Topic[] = yield select(getFollowedChannelsTopics);
-
-  let retrievedTopics: Topic[] = [];
-  if (topics.length > 0) {
     yield put(setQueryPending(true));
-    retrievedTopics = yield getTopicsFromFollowedChannelsPriorToTimestamp(
-      action.username,
-      topics[topics.length - 1].last_modified,
-      action.pageSize
-    );
-  }
+    const topics: Topic[] = yield select(getFollowedUsersTopics);
 
-  yield put(updateTopics(topics.concat(retrievedTopics), retrievedTopics.length >= action.pageSize, WallType.CHANNEL));
-  yield put(setQueryPending(false));
+    let retrievedTopics: Topic[];
+    let couldExistOlder = false;
+    if (topics.length > 0) {
+      retrievedTopics = yield getTopicsFromFollowsAfterTimestamp(
+        action.payload.username,
+        topics[0].last_modified,
+        action.payload.pageSize
+      );
+      couldExistOlder = yield select(getFollowedUsersCouldExistOlder);
+    } else {
+      retrievedTopics = yield getTopicsFromFollowsPriorToTimestamp(action.payload.username, Date.now(), action.payload.pageSize);
+      couldExistOlder = retrievedTopics.length >= action.payload.pageSize;
+    }
+
+    yield put(
+      updateTopics({
+        topics: retrievedTopics.concat(removeDuplicateTopicsFromFirst(topics, retrievedTopics)),
+        couldExistOlder,
+        wallType: WallType.USER
+      })
+    );
+
+    yield put(setQueryPending(false));
+  }
 }
 
-export function* loadFollowedChannelsTopicsByPopularity(action: LoadFollowedChannelsTopicsByPopularityAction) {
-  yield put(setQueryPending(true));
-  const topics: Topic[] = yield getTopicsByFollowedChannelSortedByPopularityAfterTimestamp(
-    action.username,
-    action.timestamp,
-    action.pageSize
-  );
-  yield put(updateTopics(topics, false, WallType.NONE));
-  yield put(setQueryPending(false));
+export function* loadOlderFollowedUsersTopicsSaga(action: Action) {
+  if (loadOlderFollowedUsersTopics.match(action)) {
+    const topics: Topic[] = yield select(getFollowedUsersTopics);
+
+    let retrievedTopics: Topic[] = [];
+    if (topics.length > 0) {
+      yield put(setQueryPending(true));
+      retrievedTopics = yield getTopicsFromFollowsPriorToTimestamp(
+        action.payload.username,
+        topics[topics.length - 1].last_modified,
+        action.payload.pageSize
+      );
+    }
+
+    yield put(updateTopics({
+      topics: topics.concat(retrievedTopics),
+      couldExistOlder: retrievedTopics.length >= action.payload.pageSize,
+      wallType: WallType.USER
+    }));
+    yield put(setQueryPending(false));
+  }
+}
+
+export function* loadFollowedUsersTopicsByPopularitySaga(action: Action) {
+  if (loadFollowedUsersTopicsByPopularity.match(action)) {
+    yield put(setQueryPending(true));
+    const topics: Topic[] = yield getTopicsByFollowsSortedByPopularityAfterTimestamp(
+      action.payload.username,
+      action.payload.timestamp,
+      action.payload.pageSize
+    );
+    yield put(updateTopics({ topics, couldExistOlder: false, wallType: WallType.NONE }));
+    yield put(setQueryPending(false));
+  }
+}
+
+export function* loadFollowedChannelsTopicsSaga(action: Action) {
+  if (loadFollowedChannelsTopicWall.match(action)) {
+    const updated: number = yield select(getFollowedChannelsUpdatedTime);
+
+    if (!action.payload.ignoreCache && !cacheExpired(updated)) {
+      yield put(updateTopicWallFromCache(WallType.CHANNEL));
+      return;
+    }
+
+    yield put(setQueryPending(true));
+    const topics: Topic[] = yield select(getFollowedChannelsTopics);
+
+    let retrievedTopics: Topic[];
+    let couldExistOlder: boolean;
+    if (topics.length > 0) {
+      // Load recent topics
+      retrievedTopics = yield getTopicsFromFollowedChannelsAfterTimestamp(
+        action.payload.username,
+        topics[0].last_modified,
+        action.payload.pageSize
+      );
+      couldExistOlder = yield select(getFollowedChannelsCouldExistOlder);
+    } else {
+      retrievedTopics = yield getTopicsFromFollowedChannelsPriorToTimestamp(action.payload.username, Date.now(), action.payload.pageSize);
+      couldExistOlder = retrievedTopics.length >= action.payload.pageSize;
+    }
+
+    yield put(
+      updateTopics({
+        topics: retrievedTopics.concat(removeDuplicateTopicsFromFirst(topics, retrievedTopics)),
+        couldExistOlder,
+        wallType: WallType.CHANNEL
+      })
+    );
+    yield put(setQueryPending(false));
+  }
+}
+
+export function* loadOlderFollowedChannelsTopicsSaga(action: Action) {
+  if (loadOlderFollowedChannelsTopics.match(action)) {
+    const topics: Topic[] = yield select(getFollowedChannelsTopics);
+
+    let retrievedTopics: Topic[] = [];
+    if (topics.length > 0) {
+      yield put(setQueryPending(true));
+      retrievedTopics = yield getTopicsFromFollowedChannelsPriorToTimestamp(
+        action.payload.username,
+        topics[topics.length - 1].last_modified,
+        action.payload.pageSize
+      );
+    }
+
+    yield put(updateTopics({
+      topics: topics.concat(retrievedTopics),
+      couldExistOlder: retrievedTopics.length >= action.payload.pageSize,
+      wallType: WallType.CHANNEL
+    }));
+    yield put(setQueryPending(false));
+  }
+}
+
+export function* loadFollowedChannelsTopicsByPopularitySaga(action: Action) {
+  if (loadFollowedChannelsTopicsByPopularity.match(action)) {
+    yield put(setQueryPending(true));
+    const topics: Topic[] = yield getTopicsByFollowedChannelSortedByPopularityAfterTimestamp(
+      action.payload.username,
+      action.payload.timestamp,
+      action.payload.pageSize
+    );
+    yield put(updateTopics({ topics, couldExistOlder: false, wallType: WallType.NONE }));
+    yield put(setQueryPending(false));
+  }
 }

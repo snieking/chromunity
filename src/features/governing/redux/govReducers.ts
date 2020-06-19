@@ -1,5 +1,6 @@
-import { GovernmentActions, GovernmentActionTypes, GovernmentState } from "./govTypes";
-import { Reducer } from "redux";
+import { GovernmentState } from "./govTypes";
+import { createReducer } from "@reduxjs/toolkit";
+import { updateRepresentatives, updateReports, updateLogbookRecentEntryTimestamp, updateActiveElection, updatePinnedTopic, updatePinnedTopicByRep } from "./govActions";
 
 const initialGovernmentState: GovernmentState = {
   representatives: [],
@@ -15,53 +16,28 @@ const initialGovernmentState: GovernmentState = {
   topicIdPinnedByMe: null,
 };
 
-export const governmentReducer: Reducer<GovernmentState, GovernmentActions> = (
-  state = initialGovernmentState,
-  action
-) => {
-  switch (action.type) {
-    case GovernmentActionTypes.UPDATE_REPRESENTATIVES: {
-      return {
-        ...state,
-        representatives: action.representatives,
-        representativesLastUpdated: Date.now(),
-      };
-    }
-    case GovernmentActionTypes.UPDATE_REPORTS: {
-      return {
-        ...state,
-        reports: action.reports,
-        unhandledReportsLastUpdated: Date.now(),
-      };
-    }
-    case GovernmentActionTypes.UPDATE_ACTIVE_ELECTION: {
-      return {
-        ...state,
-        activeElection: action.activeElection,
-        activeElectionLastUpdated: Date.now(),
-      };
-    }
-    case GovernmentActionTypes.UPDATE_LOGBOOK_RECENT_ENTRY_TIMESTAMP: {
-      return {
-        ...state,
-        recentLogbookEntryTimestamp: action.timestamp,
-        lastNewLogbookCheck: Date.now(),
-      };
-    }
-    case GovernmentActionTypes.UPDATE_PINNED_TOPIC: {
-      return {
-        ...state,
-        pinnedTopic: action.topic,
-        pinnedTopicLastChecked: Date.now(),
-      };
-    }
-    case GovernmentActionTypes.UPDATE_PINNED_TOPIC_BY_REP: {
-      return {
-        ...state,
-        topicIdPinnedByMe: action.topicId,
-      };
-    }
-  }
-
-  return state;
-};
+export const governmentReducer = createReducer(initialGovernmentState, builder =>
+  builder
+    .addCase(updateRepresentatives, (state, action) => {
+      state.representatives = action.payload;
+      state.representativesLastUpdated = Date.now();
+    })
+    .addCase(updateReports, (state, action) => {
+      state.reports = action.payload;
+    })
+    .addCase(updateLogbookRecentEntryTimestamp, (state, action) => {
+      state.recentLogbookEntryTimestamp = action.payload;
+      state.lastNewLogbookCheck = Date.now();
+    })
+    .addCase(updateActiveElection, (state, action) => {
+      state.activeElection = action.payload;
+      state.activeElectionLastUpdated = Date.now();
+    })
+    .addCase(updatePinnedTopic, (state, action) => {
+      state.pinnedTopic = action.payload;
+      state.pinnedTopicLastChecked = Date.now();
+    })
+    .addCase(updatePinnedTopicByRep, (state, action) => {
+      state.topicIdPinnedByMe = action.payload;
+    })
+)

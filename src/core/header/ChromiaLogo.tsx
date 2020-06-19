@@ -1,7 +1,7 @@
 import React from "react";
 import { COLOR_CHROMIA_DARKER, COLOR_OFF_WHITE, COLOR_SOFT_PINK } from "../../theme";
 import { Theme } from "@material-ui/core";
-import { ApplicationState } from "../store";
+import ApplicationState from "../application-state";
 import { connect } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 

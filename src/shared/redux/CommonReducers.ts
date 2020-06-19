@@ -1,5 +1,6 @@
-import { CommonActions, CommonActionTypes, CommonState } from "./CommonTypes";
-import { Reducer } from "redux";
+import { CommonState } from "./CommonTypes";
+import { createReducer } from "@reduxjs/toolkit";
+import { toggleTutorial, updateRateLimited, setOperationPending, setQueryPending } from "./CommonActions";
 
 const initialCommonState: CommonState = {
   tutorial: false,
@@ -8,33 +9,18 @@ const initialCommonState: CommonState = {
   operationPending: false,
 };
 
-export const commonReducer: Reducer<CommonState, CommonActions> = (state = initialCommonState, action) => {
-  switch (action.type) {
-    case CommonActionTypes.TOGGLE_TUTORIAL: {
-      return {
-        ...state,
-        tutorial: !state.tutorial,
-      };
-    }
-    case CommonActionTypes.UPDATE_RATE_LIMITED: {
-      return {
-        ...state,
-        rateLimited: action.rateLimited,
-      };
-    }
-    case CommonActionTypes.SET_OPERATION_PENDING: {
-      return {
-        ...state,
-        operationPending: action.operationPending,
-      };
-    }
-    case CommonActionTypes.SET_QUERY_PENDING: {
-      return {
-        ...state,
-        queryPending: action.queryPending,
-      };
-    }
-  }
-
-  return state;
-};
+export const commonReducer = createReducer(initialCommonState, builder =>
+  builder
+    .addCase(toggleTutorial, (state, action) => {
+      state.tutorial = action.payload;
+    })
+    .addCase(updateRateLimited, (state, action) => {
+      state.rateLimited = action.payload;
+    })
+    .addCase(setOperationPending, (state, action) => {
+      state.operationPending = action.payload;
+    })
+    .addCase(setQueryPending, (state, action) => {
+      state.queryPending = action.payload;
+    })
+)

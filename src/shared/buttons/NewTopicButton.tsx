@@ -18,20 +18,20 @@ import withTheme from "@material-ui/core/styles/withTheme";
 import { parseEmojis } from "../util/text-parsing";
 import "emoji-mart/css/emoji-mart.css";
 import Tooltip from "@material-ui/core/Tooltip";
-import { ApplicationState } from "../../core/store";
+import ApplicationState from "../../core/application-state";
 import { connect } from "react-redux";
 import TextToolbar from "../textToolbar/TextToolbar";
 import PollCreator from "../../features/topic/poll/PollCreator";
 import PollIcon from "@material-ui/icons/Poll";
-import { notifySuccess, setError } from "../../core/snackbar/redux/snackbarTypes";
+import { notifySuccess, notifyError } from "../../core/snackbar/redux/snackbarActions";
 
 export interface NewTopicButtonProps extends WithStyles<typeof largeButtonStyles> {
   updateFunction: Function;
   channel: string;
   theme: Theme;
   user: ChromunityUser;
-  setSuccess: typeof notifySuccess;
-  setError: typeof setError;
+  notifySuccess: typeof notifySuccess;
+  notifyError: typeof notifyError;
 }
 
 export interface NewTopicButtonState {
@@ -110,26 +110,26 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         const channel: string = this.state.channel;
 
         if (channel == null) {
-          this.props.setError("A channel must be supplied");
+          this.props.notifyError("A channel must be supplied");
         } else {
           if (topicTitle.length > maxTitleLength) {
-            this.props.setError("Title is too long");
+            this.props.notifyError("Title is too long");
           } else if (!/^[a-zA-Z0-9]+$/.test(channel)) {
-            this.props.setError("Channel may only contain a-z, A-Z & 0-9 characters");
+            this.props.notifyError("Channel may only contain a-z, A-Z & 0-9 characters");
           } else if (channel.length > maxChannelLength) {
-            this.props.setError("Channel is too long");
+            this.props.notifyError("Channel is too long");
           } else if (topicTitle.length < 3 || topicTitle.startsWith(" ")) {
-            this.props.setError("Title must be longer than 3 characters, and must not start with a whitespace");
+            this.props.notifyError("Title must be longer than 3 characters, and must not start with a whitespace");
           } else {
             const topicMessage = this.state.topicMessage;
             this.setState({ topicTitle: "", topicMessage: "" });
 
             createTopic(this.props.user, channel, topicTitle, topicMessage, this.state.poll)
               .then(() => {
-                this.props.setSuccess("Topic created");
+                this.props.notifySuccess("Topic created");
                 this.props.updateFunction();
               })
-              .catch((error) => this.props.setError(error.message));
+              .catch((error) => this.props.notifyError(error.message));
             this.toggleNewTopicDialog();
           }
         }
@@ -333,8 +333,8 @@ const mapStateToProps = (store: ApplicationState) => {
 
 const mapDispatchToProps = (dispatch: any) => {
   return {
-    setError: (msg: string) => dispatch(setError(msg)),
-    setSuccess: (msg: string) => dispatch(notifySuccess(msg)),
+    notifyError,
+    notifySuccess
   };
 };
 

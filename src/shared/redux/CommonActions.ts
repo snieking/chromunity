@@ -1,32 +1,13 @@
-import {
-  CommonActionTypes,
-  IToggleTutorial,
-  ISetRateLimited,
-  IUpdateRateLimited,
-  ISetOperationPending,
-  ISetQueryPending,
-} from "./CommonTypes";
-import { ActionCreator } from "redux";
+import { CommonActionTypes } from "./CommonTypes";
+import { createAction } from "@reduxjs/toolkit";
+import { withPayloadType } from "./util";
 
-export const toggleTutorial: ActionCreator<IToggleTutorial> = () => ({
-  type: CommonActionTypes.TOGGLE_TUTORIAL,
-});
+export const toggleTutorial = createAction(CommonActionTypes.TOGGLE_TUTORIAL);
 
-export const setRateLimited: ActionCreator<ISetRateLimited> = () => ({
-  type: CommonActionTypes.SET_RATE_LIMITED,
-});
+export const setRateLimited = createAction(CommonActionTypes.SET_RATE_LIMITED);
 
-export const updateRateLimited: ActionCreator<IUpdateRateLimited> = (rateLimited: boolean) => ({
-  type: CommonActionTypes.UPDATE_RATE_LIMITED,
-  rateLimited,
-});
+export const updateRateLimited = createAction(CommonActionTypes.UPDATE_RATE_LIMITED, withPayloadType<boolean>());
 
-export const setOperationPending: ActionCreator<ISetOperationPending> = (operationPending: boolean) => ({
-  type: CommonActionTypes.SET_OPERATION_PENDING,
-  operationPending,
-});
+export const setOperationPending = createAction(CommonActionTypes.SET_OPERATION_PENDING, withPayloadType<boolean>());
 
-export const setQueryPending: ActionCreator<ISetQueryPending> = (queryPending: boolean) => ({
-  type: CommonActionTypes.SET_QUERY_PENDING,
-  queryPending,
-});
+export const setQueryPending = createAction(CommonActionTypes.SET_QUERY_PENDING, withPayloadType<boolean>());

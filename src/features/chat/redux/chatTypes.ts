@@ -25,141 +25,53 @@ export enum ChatActionTypes {
   MARK_CHAT_AS_READ = "MARK/CHAT/AS/READ"
 }
 
-export interface CheckChatAuthenticationAction {
-  type: ChatActionTypes.CHECK_CHAT_AUTH_ACTION;
-}
-
-export interface CreateChatKeyPairAction {
-  type: ChatActionTypes.CREATE_CHAT_KEY_PAIR;
+export interface ICreateChatKeyPair {
   user: ChromunityUser;
   password: string;
 }
 
-export interface StoreChatKeyPairAction {
-  type: ChatActionTypes.STORE_CHAT_KEY_PAIR;
-  rsaKey: any;
-}
-
-export interface CreateNewChatAction {
-  type: ChatActionTypes.CREATE_NEW_CHAT;
-  user: ChromunityUser;
-}
-
-export interface AddUserToChatAction {
-  type: ChatActionTypes.ADD_USER_TO_CHAT;
+export interface IAddUserToChat {
   username: string;
   user: ChromunityUser;
 }
 
-export interface LeaveChatAction {
-  type: ChatActionTypes.LEAVE_CHAT;
-  user: ChromunityUser;
-}
-
-export interface LoadUserChatsAction {
-  type: ChatActionTypes.LOAD_USER_CHATS;
+export interface ILoadUserChats {
   force?: boolean;
   user: ChromunityUser;
 }
 
-export interface StoreUserChatsAction {
-  type: ChatActionTypes.STORE_USER_CHATS;
-  chats: Chat[];
-}
-
-export interface OpenChatAction {
-  type: ChatActionTypes.OPEN_CHAT;
+export interface IOpenChat {
   chat: Chat;
   user: ChromunityUser;
 }
 
-export interface RefreshOpenChatAction {
-  type: ChatActionTypes.REFRESH_OPEN_CHAT;
-  user: ChromunityUser;
-}
-
-export interface StoreDecryptedChatAction {
-  type: ChatActionTypes.STORE_DECRYPTED_CHAT;
+export interface IStoreDecryptedChat {
   chat: Chat;
   messages: ChatMessageDecrypted[];
   couldExistOlderMessages: boolean;
 }
 
-export interface StoreChatParticipants {
-  type: ChatActionTypes.STORE_CHAT_PARTICIPANTS;
-  chatParticipants: string[];
-}
-
-export interface SendMessageAction {
-  type: ChatActionTypes.SEND_MESSAGE;
+export interface ISendMessage {
   user: ChromunityUser;
   chat: Chat;
   message: string;
 }
 
-export interface ModifyTitleAction {
-  type: ChatActionTypes.MODIFY_TITLE;
+export interface IModifyTitle {
   user: ChromunityUser;
   chat: Chat;
   title: string;
 }
 
-export interface LoadChatUsersAction {
-  type: ChatActionTypes.LOAD_CHAT_USERS;
-  user: ChromunityUser;
-}
-
-export interface StoreChatUsersAction {
-  type: ChatActionTypes.STORE_CHAT_USERS;
+export interface IStoreChatUsers {
   followedChatUsers: string[];
   chatUsers: string[];
 }
 
-export interface LoadOlderMessagesAction {
-  type: ChatActionTypes.LOAD_OLDER_MESSAGES
-}
-
-export interface DeleteChatUserAction {
-  type: ChatActionTypes.DELETE_CHAT_USER;
-  user: ChromunityUser;
-}
-
-export interface CountUnreadChatsAction {
-  type: ChatActionTypes.COUNT_UNREAD_CHATS;
-  user: ChromunityUser;
-}
-
-export interface StoreUnreadChatsCountAction {
-  type: ChatActionTypes.STORE_UNREAD_CHATS_COUNT;
-  count: number;
-}
-
-export interface MarkChatAsReadAction {
-  type: ChatActionTypes.MARK_CHAT_AS_READ;
+export interface IMarkChatAsRead {
   user: ChromunityUser;
   chat: Chat;
 }
-
-export type ChatActions =
-  | CheckChatAuthenticationAction
-  | CreateChatKeyPairAction
-  | StoreChatKeyPairAction
-  | CreateNewChatAction
-  | AddUserToChatAction
-  | LoadUserChatsAction
-  | StoreUserChatsAction
-  | OpenChatAction
-  | LeaveChatAction
-  | StoreDecryptedChatAction
-  | StoreChatParticipants
-  | SendMessageAction
-  | LoadChatUsersAction
-  | StoreChatUsersAction
-  | LoadOlderMessagesAction
-  | DeleteChatUserAction
-  | CountUnreadChatsAction
-  | StoreUnreadChatsCountAction
-  | MarkChatAsReadAction;
 
 export interface ChatState {
   rsaKey: any;

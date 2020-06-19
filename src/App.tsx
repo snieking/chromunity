@@ -2,7 +2,6 @@ import * as React from "react";
 import { Router } from "react-router-dom";
 import { Provider } from "react-redux";
 import { Store } from "redux";
-import { ApplicationState } from "./core/store";
 import HeaderNav from "./core/header/HeaderNav";
 import Footer from "./core/footer/Footer";
 import { CssBaseline } from "@material-ui/core";
@@ -14,6 +13,7 @@ import * as Sentry from "@sentry/browser";
 import * as config from "./config";
 import logger from "./shared/util/logger";
 import Spinners from "./core/spinners/Spinners";
+import ApplicationState from "./core/application-state";
 
 interface Props {
   store: Store<ApplicationState>;

@@ -1,60 +1,40 @@
-import { SnackbarState, SnackbarActionTypes, SnackbarActions } from './snackbarTypes';
-import { Reducer } from 'redux';
+import { SnackbarState } from './snackbarTypes';
+import { createReducer } from '@reduxjs/toolkit';
+import { notifyError, clearError, notifySuccess, clearSuccess, notifyInfo, clearInfo } from './snackbarActions';
 
 const initialSnackbarState: SnackbarState = {
-    error: false,
-    errorMsg: null,
-    info: false,
-    infoMsg: null,
-    success: false,
-    successMsg: null
+  error: false,
+  errorMsg: null,
+  info: false,
+  infoMsg: null,
+  success: false,
+  successMsg: null
 };
 
-export const snackbarReducer: Reducer<SnackbarState, SnackbarActions> = (state = initialSnackbarState, action) => {
-    switch (action.type) {
-        case SnackbarActionTypes.SET_ERROR: {
-            return {
-                ...state,
-                error: true,
-                errorMsg: action.msg
-            }
-        }
-        case SnackbarActionTypes.CLEAR_ERROR: {
-            return {
-                ...state,
-                error: false,
-                errorMsg: null
-            }
-        }
-        case SnackbarActionTypes.NOTIFY_SUCCESS: {
-            return {
-                ...state,
-                success: true,
-                successMsg: action.msg
-            }
-        }
-        case SnackbarActionTypes.CLEAR_SUCCESS: {
-            return {
-                ...state,
-                success: false,
-                successMsg: null
-            }
-        }
-        case SnackbarActionTypes.NOTIFY_INFO: {
-          return {
-              ...state,
-              info: true,
-              infoMsg: action.msg
-          }
-      }
-      case SnackbarActionTypes.CLEAR_INFO: {
-          return {
-              ...state,
-              info: false,
-              infoMsg: null
-          }
-      }
-    }
-
-    return state;
-}
+export const snackbarReducer = createReducer(initialSnackbarState, builder =>
+  builder
+    .addCase(notifyError, (state, action) => {
+      state.errorMsg = action.payload;
+      state.error = true;
+    })
+    .addCase(clearError, (state, _) => {
+      state.error = false;
+      state.errorMsg = null;
+    })
+    .addCase(notifySuccess, (state, action) => {
+      state.successMsg = action.payload;
+      state.success = true;
+    })
+    .addCase(clearSuccess, (state, _) => {
+      state.success = false;
+      state.successMsg = null;
+    })
+    .addCase(notifyInfo, (state, action) => {
+      state.infoMsg = action.payload;
+      state.info = true;
+    })
+    .addCase(clearInfo, (state, _) => {
+      state.info = false;
+      state.infoMsg = null;
+    })
+)

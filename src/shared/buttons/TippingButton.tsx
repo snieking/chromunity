@@ -1,5 +1,5 @@
 import React from "react";
-import { ApplicationState } from "../../core/store";
+import ApplicationState from "../../core/application-state";
 import { connect } from "react-redux";
 import { ChromunityUser } from "../../types";
 import MoneyIcon from "@material-ui/icons/Money";
@@ -14,7 +14,7 @@ import {
   Button,
   TextField,
 } from "@material-ui/core";
-import { setError } from "../../core/snackbar/redux/snackbarTypes";
+import { notifyError } from "../../core/snackbar/redux/snackbarActions";
 import * as config from "../../config";
 import { sendKudos } from "../../features/user/redux/accountActions";
 import { toLowerCase } from "../util/util";
@@ -23,7 +23,7 @@ interface Props {
   receiver: string;
   user: ChromunityUser;
   kudos: number;
-  setError: typeof setError;
+  notifyError: typeof notifyError;
   sendKudos: typeof sendKudos;
 }
 
@@ -43,11 +43,11 @@ const TippingButton: React.FunctionComponent<Props> = (props) => {
     handleClose();
     const kudos = parseInt(amount);
     if (kudos < 1) {
-      props.setError(`Can't send amount of ${kudos}`);
+      props.notifyError(`Can't send amount of ${kudos}`);
     } else if (kudos > props.kudos) {
-      props.setError(`Can't send more kudos than you have, you need ${kudos - props.kudos} more`);
+      props.notifyError(`Can't send more kudos than you have, you need ${kudos - props.kudos} more`);
     } else {
-      props.sendKudos(props.receiver, kudos);
+      props.sendKudos({ receiver: props.receiver, kudos });
     }
 
     setAmount("");
@@ -115,11 +115,9 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    setError: (msg: string) => dispatch(setError(msg)),
-    sendKudos: (receiver: string, kudos: number) => dispatch(sendKudos(receiver, kudos)),
-  };
+const mapDispatchToProps = {
+  notifyError,
+  sendKudos,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(TippingButton);

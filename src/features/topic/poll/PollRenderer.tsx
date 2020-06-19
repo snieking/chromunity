@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ChromunityUser, PollData } from "../../../types";
 import { Card, CardContent } from "@material-ui/core";
 import { getPollVote, voteForOptionInPoll } from "../../../core/services/TopicService";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { connect } from "react-redux";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import PollOptionStats from "./PollOptionStats";

@@ -1,5 +1,6 @@
-import { Reducer } from "redux";
-import { AccountActions, AccountActionTypes, AccountState, AuthenticationStep } from "./accountTypes";
+import { AccountState, AuthenticationStep } from "./accountTypes";
+import { createReducer } from "@reduxjs/toolkit";
+import { vaultCancel, setUser, saveVaultAccount, setAuthenticationStep, autoLogin, autoLoginAttempted, storeDistrustedUsers, storeUserKudos } from "./accountActions";
 
 const initialAccountState: AccountState = {
   authenticationStep: null,
@@ -20,58 +21,31 @@ function getCancellationStep(step: AuthenticationStep): AuthenticationStep {
   }
 }
 
-export const loginReducer: Reducer<AccountState, AccountActions> = (state = initialAccountState, action) => {
-  if (action.type === AccountActionTypes.VAULT_CANCEL) {
-    return {
-      ...state,
-      authenticationStep: getCancellationStep(state.authenticationStep),
-    };
-  } else if (action.type === AccountActionTypes.SET_USER) {
-    return {
-      ...state,
-      user: action.user,
-    };
-  } else if (action.type === AccountActionTypes.LOGIN_ACCOUNT) {
-    return {
-      ...state,
-    };
-  } else if (action.type === AccountActionTypes.RESET_LOGIN_STATE) {
-    return {
-      ...state,
-      error: null,
-    };
-  } else if (action.type === AccountActionTypes.SAVE_VAULT_ACCOUNT) {
-    return {
-      ...state,
-      accountId: action.accountId,
-      ft3User: action.ft3User,
-    };
-  } else if (action.type === AccountActionTypes.SET_AUTHENTICATION_STEP) {
-    return {
-      ...state,
-      authenticationStep: action.authenticationStep,
-    };
-  } else if (action.type === AccountActionTypes.AUTO_LOGIN) {
-    return {
-      ...state,
-      autoLoginInProgress: true,
-    };
-  } else if (action.type === AccountActionTypes.AUTO_LOGIN_ATTEMPTED) {
-    return {
-      ...state,
-      autoLoginInProgress: false,
-    };
-  } else if (action.type === AccountActionTypes.STORE_DISTRUSTED_USERS) {
-    return {
-      ...state,
-      distrustedUsers: action.distrustedUsers,
-    };
-  } else if (action.type === AccountActionTypes.STORE_USER_KUDOS) {
-    return {
-      ...state,
-      kudos: action.kudos,
-    };
-  }
-
-  return state;
-};
+export const loginReducer = createReducer(initialAccountState, builder =>
+  builder
+    .addCase(vaultCancel, (state, _) => {
+      state.authenticationStep = getCancellationStep(state.authenticationStep);
+    })
+    .addCase(setUser, (state, action) => {
+      state.user = action.payload;
+    })
+    .addCase(saveVaultAccount, (state, action) => {
+      state.accountId = action.payload.accountId;
+      state.ft3User = action.payload.ft3User;
+    })
+    .addCase(setAuthenticationStep, (state, action) => {
+      state.authenticationStep = action.payload;
+    })
+    .addCase(autoLogin, (state, _) => {
+      state.autoLoginInProgress = true;
+    })
+    .addCase(autoLoginAttempted, (state, _) => {
+      state.autoLoginInProgress = false;
+    })
+    .addCase(storeDistrustedUsers, (state, action) => {
+      state.distrustedUsers = action.payload;
+    })
+    .addCase(storeUserKudos, (state, action) => {
+      state.kudos = action.payload;
+    })
+)

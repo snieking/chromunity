@@ -5,10 +5,10 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import { LocationCity } from "@material-ui/icons";
 
-import { ApplicationState } from "../store";
+import ApplicationState from "../application-state";
 import { connect } from "react-redux";
 import Badge from "@material-ui/core/Badge";
-import { countUnreadChatsAction } from "../../features/chat/redux/chatActions";
+import { countUnreadChats } from "../../features/chat/redux/chatActions";
 import { ChromunityUser, RepresentativeReport } from "../../types";
 import { toLowerCase, useInterval } from "../../shared/util/util";
 import { retrieveLogbookLastRead, retrieveReportsLastRead } from "../services/RepresentativesService";
@@ -38,7 +38,7 @@ interface Props {
   loadRepresentatives: typeof loadRepresentatives;
   loadReports: typeof loadReports;
   checkActiveElection: typeof checkActiveElection;
-  countUnreadChats: typeof countUnreadChatsAction;
+  countUnreadChats: typeof countUnreadChats;
   checkNewLogbookEntries: typeof checkNewLogbookEntries;
   checkUserKudos: typeof checkUserKudos;
 }
@@ -243,28 +243,26 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   );
 };
 
-const mapStateToProps = (store: ApplicationState) => {
+const mapDispatch = {
+  checkActiveElection,
+  checkNewLogbookEntries,
+  loadRepresentatives,
+  loadReports,
+  countUnreadChats,
+  autoLogin,
+  checkUserKudos
+}
+
+const mapState = (state: ApplicationState) => {
   return {
-    representatives: store.government.representatives.map((rep) => toLowerCase(rep)),
-    reports: store.government.reports,
-    activeElection: store.government.activeElection,
-    unreadChats: store.chat.unreadChats,
-    recentLogbookEntryTimestamp: store.government.recentLogbookEntryTimestamp,
-    user: store.account.user,
-    kudos: store.account.kudos
-  };
+    representatives: state.government.representatives.map((rep) => toLowerCase(rep)),
+    reports: state.government.reports,
+    activeElection: state.government.activeElection,
+    unreadChats: state.chat.unreadChats,
+    recentLogbookEntryTimestamp: state.government.recentLogbookEntryTimestamp,
+    user: state.account.user,
+    kudos: state.account.kudos
+  }
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    checkActiveElection: (user: ChromunityUser) => dispatch(checkActiveElection(user)),
-    checkNewLogbookEntries: (user: ChromunityUser) => dispatch(checkNewLogbookEntries(user)),
-    countUnreadChats: (user: ChromunityUser) => dispatch(countUnreadChatsAction(user)),
-    loadRepresentatives: () => dispatch(loadRepresentatives()),
-    loadReports: () => dispatch(loadReports()),
-    autoLogin: () => dispatch(autoLogin()),
-    checkUserKudos: () => dispatch(checkUserKudos())
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(HeaderNav);
+export default connect(mapState, mapDispatch)(HeaderNav);

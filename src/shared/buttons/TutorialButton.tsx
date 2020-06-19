@@ -13,9 +13,6 @@ export interface Props {
 
 const useStyles = makeStyles(theme =>
   createStyles({
-    wrapper: {
-
-    },
     helpBtn: {
       position: "fixed",
       bottom: "1px",
@@ -34,20 +31,16 @@ const TutorialButton: React.FunctionComponent<Props> = props => {
   const classes = useStyles(props);
 
   return (
-    <div className={classes.wrapper}>
-      <Tooltip title={"Tutorial"}>
-        <IconButton className={classes.helpBtn} onClick={props.toggleTutorial}>
-          <Help fontSize="inherit" className={classes.helpIcon} />
-        </IconButton>
-      </Tooltip>
-    </div>
+    <Tooltip title={"Tutorial"}>
+      <IconButton className={classes.helpBtn} onClick={props.toggleTutorial}>
+        <Help fontSize="inherit" className={classes.helpIcon} />
+      </IconButton>
+    </Tooltip>
   );
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    toggleTutorial: () => dispatch(toggleTutorial())
-  };
+const mapDispatchToProps = {
+  toggleTutorial
 };
 
 export default connect(null, mapDispatchToProps)(TutorialButton);

@@ -8,7 +8,7 @@ import LoadMoreButton from "../../shared/buttons/LoadMoreButton";
 import { TrendingChannels } from "../tags/TrendingTags";
 import ChromiaPageHeader from "../../shared/ChromiaPageHeader";
 import { TOPIC_VIEW_SELECTOR_OPTION } from "./WallCommon";
-import { ApplicationState } from "../../core/store";
+import ApplicationState from "../../core/application-state";
 import {
   loadAllTopicsByPopularity,
   loadAllTopicWall,
@@ -36,13 +36,13 @@ interface Props {
   distrustedUsers: string[];
   user: ChromunityUser;
   pinnedTopic: Topic;
-  loadAllTopics: typeof loadAllTopicWall;
-  loadOlderTopics: typeof loadOlderAllTopics;
+  loadAllTopicWall: typeof loadAllTopicWall;
+  loadOlderAllTopics: typeof loadOlderAllTopics;
   loadAllTopicsByPopularity: typeof loadAllTopicsByPopularity;
-  loadFollowedUsersTopics: typeof loadFollowedUsersTopicWall;
+  loadFollowedUsersTopicWall: typeof loadFollowedUsersTopicWall;
   loadOlderFollowedUsersTopics: typeof loadOlderFollowedUsersTopics;
   loadFollowedUsersTopicsByPopularity: typeof loadFollowedUsersTopicsByPopularity;
-  loadFollowedChannelsTopics: typeof loadFollowedChannelsTopicWall;
+  loadFollowedChannelsTopicWall: typeof loadFollowedChannelsTopicWall;
   loadOlderFollowedChannelsTopics: typeof loadOlderFollowedChannelsTopics;
   loadFollowedChannelsTopicsByPopularity: typeof loadFollowedChannelsTopicsByPopularity;
 }
@@ -98,8 +98,8 @@ class TopicWall extends React.Component<Props, State> {
               <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_ALL_TIME}>All time</MenuItem>
             </StyledSelector>
           ) : (
-            <div />
-          )}
+              <div />
+            )}
           <br />
           <br />
           <PinnedTopic />
@@ -121,8 +121,8 @@ class TopicWall extends React.Component<Props, State> {
         {this.props.user != null ? (
           <NewTopicButton channel="" updateFunction={() => this.retrieveLatestTopics(true)} />
         ) : (
-          <div />
-        )}
+            <div />
+          )}
         {this.renderTour()}
       </div>
     );
@@ -214,11 +214,11 @@ class TopicWall extends React.Component<Props, State> {
 
   retrieveLatestTopics(ignoreCache: boolean) {
     if (this.props.type === "userFollowings" && this.props.user) {
-      this.props.loadFollowedUsersTopics(this.props.user.name, topicsPageSize);
+      this.props.loadFollowedUsersTopicWall({ username: this.props.user.name, pageSize: topicsPageSize });
     } else if (this.props.type === "tagFollowings" && this.props.user) {
-      this.props.loadFollowedChannelsTopics(this.props.user.name, topicsPageSize, ignoreCache);
+      this.props.loadFollowedChannelsTopicWall({ username: this.props.user.name, pageSize: topicsPageSize, ignoreCache });
     } else {
-      this.props.loadAllTopics(topicsPageSize, ignoreCache);
+      this.props.loadAllTopicWall({ pageSize: topicsPageSize, ignoreCache });
     }
   }
 
@@ -243,46 +243,37 @@ class TopicWall extends React.Component<Props, State> {
     }
 
     if (this.props.type === "userFollowings") {
-      this.props.loadFollowedUsersTopicsByPopularity(this.props.user.name, timestamp, topicsPageSize);
+      this.props.loadFollowedUsersTopicsByPopularity({ username: this.props.user.name, timestamp, pageSize: topicsPageSize });
     } else if (this.props.type === "tagFollowings") {
-      this.props.loadFollowedChannelsTopicsByPopularity(this.props.user.name, timestamp, topicsPageSize);
+      this.props.loadFollowedChannelsTopicsByPopularity({ username: this.props.user.name, timestamp, pageSize: topicsPageSize });
     } else {
-      this.props.loadAllTopicsByPopularity(timestamp, topicsPageSize);
+      this.props.loadAllTopicsByPopularity({ timestamp, pageSize: topicsPageSize });
     }
   }
 
   retrieveOlderTopics() {
     if (this.props.topics.length > 0) {
       if (this.props.type === "userFollowings") {
-        this.props.loadOlderFollowedUsersTopics(this.props.user.name, topicsPageSize);
+        this.props.loadOlderFollowedUsersTopics({ username: this.props.user.name, pageSize: topicsPageSize });
       } else if (this.props.type === "tagFollowings") {
-        this.props.loadOlderFollowedChannelsTopics(this.props.user.name, topicsPageSize);
+        this.props.loadOlderFollowedChannelsTopics({ username: this.props.user.name, pageSize: topicsPageSize });
       } else {
-        this.props.loadOlderTopics(topicsPageSize);
+        this.props.loadOlderAllTopics(topicsPageSize);
       }
     }
   }
 }
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    loadAllTopics: (pageSize: number, ignoreCache: boolean) => dispatch(loadAllTopicWall(pageSize, ignoreCache)),
-    loadOlderTopics: (pageSize: number) => dispatch(loadOlderAllTopics(pageSize)),
-    loadAllTopicsByPopularity: (timestamp: number, pageSize: number) =>
-      dispatch(loadAllTopicsByPopularity(timestamp, pageSize)),
-    loadFollowedUsersTopics: (username: string, pageSize: number) =>
-      dispatch(loadFollowedUsersTopicWall(username, pageSize)),
-    loadOlderFollowedUsersTopics: (username: string, pageSize: number) =>
-      dispatch(loadOlderFollowedUsersTopics(username, pageSize)),
-    loadFollowedUsersTopicsByPopularity: (username: string, timestamp: number, pageSize: number) =>
-      dispatch(loadFollowedUsersTopicsByPopularity(username, timestamp, pageSize)),
-    loadFollowedChannelsTopics: (username: string, pageSize: number, ignoreCache: boolean) =>
-      dispatch(loadFollowedChannelsTopicWall(username, pageSize, ignoreCache)),
-    loadOlderFollowedChannelsTopics: (username: string, pageSize: number) =>
-      dispatch(loadOlderFollowedChannelsTopics(username, pageSize)),
-    loadFollowedChannelsTopicsByPopularity: (username: string, timestamp: number, pageSize: number) =>
-      dispatch(loadFollowedChannelsTopicsByPopularity(username, timestamp, pageSize)),
-  };
+const mapDispatchToProps = {
+  loadAllTopicWall,
+  loadOlderAllTopics,
+  loadAllTopicsByPopularity,
+  loadFollowedUsersTopicWall,
+  loadOlderFollowedUsersTopics,
+  loadFollowedUsersTopicsByPopularity,
+  loadFollowedChannelsTopicWall,
+  loadOlderFollowedChannelsTopics,
+  loadFollowedChannelsTopicsByPopularity
 };
 
 const mapStateToProps = (store: ApplicationState) => {

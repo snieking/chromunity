@@ -1,12 +1,8 @@
 import { setOperationPending, setQueryPending } from './../../../shared/redux/CommonActions';
-import { notifySuccess, setError } from '../../../core/snackbar/redux/snackbarTypes';
+import { notifySuccess, notifyError } from '../../../core/snackbar/redux/snackbarActions';
 import {
   AccountActionTypes,
-  AuthenticationStep,
-  ICheckDistrustedUsers,
-  IRegisterUser,
-  IVaultSuccess,
-  ISendKudos
+  AuthenticationStep
 } from "./accountTypes";
 import { takeLatest, put, select } from "redux-saga/effects";
 import { op, SSOStoreLocalStorage } from "ft3-lib";
@@ -26,12 +22,16 @@ import {
   storeDistrustedUsers,
   vaultCancel,
   storeUserKudos,
-  checkUserKudos
+  checkUserKudos,
+  registerUser,
+  vaultSuccess,
+  sendKudos as sendKudosAction
 } from "./accountActions";
 import { ChromunityUser } from "../../../types";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { toLowerCase } from "../../../shared/util/util";
 import { userEvent } from "../../../shared/util/matomo";
+import { Action } from '@reduxjs/toolkit';
 
 SSO.vaultUrl = config.vault.url;
 
@@ -47,11 +47,10 @@ export function* accountWatcher() {
   yield takeLatest(AccountActionTypes.LOGOUT_ACCOUNT, logoutSaga);
   yield takeLatest(AccountActionTypes.CHECK_DISTRUSTED_USERS, checkDistrustedUsersSaga);
   yield takeLatest(AccountActionTypes.CHECK_USER_KUDOS, checkUserKudosSaga);
-  yield takeLatest(AccountActionTypes.SEND_KUDOS, sendVibesSaga);
+  yield takeLatest(AccountActionTypes.SEND_KUDOS, sendKudosSaga);
 }
 
 function* loginSaga() {
-  logger.silly("[SAGA - STARTED]: Login process started");
   const successUrl = encodeURI(`${config.vault.callbackBaseUrl}/vault/success/`);
   const cancelUrl = encodeURI(`${config.vault.callbackBaseUrl}/vault/cancel`);
 
@@ -73,71 +72,68 @@ function* logoutSaga() {
   yield put(notifySuccess("Successfully signed out"));
 }
 
-function* vaultSuccessSaga(action: IVaultSuccess): Generator<any, any, any> {
-  logger.silly("[SAGA - STARTED] Received success from vault");
-  yield put(setQueryPending(true));
-  yield put(setAuthenticationStep(AuthenticationStep.CONFIRMING_VAULT_TRANSACTION));
-  const BC = yield BLOCKCHAIN;
+function* vaultSuccessSaga(action: Action): Generator<any, any, any> {
+  if (vaultSuccess.match(action)) {
+    yield put(setQueryPending(true));
+    yield put(setAuthenticationStep(AuthenticationStep.CONFIRMING_VAULT_TRANSACTION));
+    const BC = yield BLOCKCHAIN;
 
-  try {
-    const sso = new SSO(BC, new SSOStoreLocalStorage());
-    logger.silly("RawTx: [%s]", action.rawTx);
-    const [account, user] = yield sso.finalizeLogin(action.rawTx);
-    logger.silly("Account [%s], user [%s]", JSON.stringify(account), JSON.stringify(user));
+    try {
+      const sso = new SSO(BC, new SSOStoreLocalStorage());
+      logger.silly("RawTx: [%s]", action.payload);
+      const [account, user] = yield sso.finalizeLogin(action.payload);
+      logger.silly("Account [%s], user [%s]", JSON.stringify(account), JSON.stringify(user));
 
-    const username = yield getUsernameByAccountId(account.id);
-    logger.silly("Username linked to accountId: %s", username);
+      const username = yield getUsernameByAccountId(account.id);
+      logger.silly("Username linked to accountId: %s", username);
 
-    if (username) {
-      yield authorizeUser(username, user);
-      yield put(notifySuccess("Successfully signed in"));
-      userEvent("sign-in");
-    } else {
-      yield put(saveVaultAccount(account.id, user));
-      yield put(setAuthenticationStep(AuthenticationStep.USERNAME_INPUT_REQUIRED));
+      if (username) {
+        yield authorizeUser(username, user);
+        yield put(notifySuccess("Successfully signed in"));
+        userEvent("sign-in");
+      } else {
+        yield put(saveVaultAccount({ accountId: account.id, ft3User: user }));
+        yield put(setAuthenticationStep(AuthenticationStep.USERNAME_INPUT_REQUIRED));
+      }
+    } catch (error) {
+      yield put(vaultCancel());
+      yield put(notifyError("Error signing in: " + error.message));
+    } finally {
+      yield put(setQueryPending(false));
     }
-  } catch (error) {
-    yield put(vaultCancel());
-    yield put(setError("Error signing in: " + error.message));
-  } finally {
-    yield put(setQueryPending(false));
   }
 }
 
-function* registerUserSaga(action: IRegisterUser) {
-  yield put(setAuthenticationStep(AuthenticationStep.REGISTERING_USER));
-  const accountId = yield select(getAccountId);
-  const user = yield select(getFt3User);
+function* registerUserSaga(action: Action) {
+  if (registerUser.match(action)) {
+    yield put(setAuthenticationStep(AuthenticationStep.REGISTERING_USER));
+    const accountId = yield select(getAccountId);
+    const user = yield select(getFt3User);
 
-  if (!accountId || !user) {
-    yield put(vaultCancel());
-    yield put(setError("Login session was interrupted"));
-    return;
-  }
+    if (!accountId || !user) {
+      yield put(vaultCancel());
+      yield put(notifyError("Login session was interrupted"));
+      return;
+    }
 
-  yield put(setOperationPending(true));
+    yield put(setOperationPending(true));
 
-  try {
-    yield executeOperations(user, op("register_user", action.username, accountId));
-    yield authorizeUser(action.username, user);
-    userEvent("register");
-  } catch (error) {
-    yield put(vaultCancel());
-    yield put(setError("Error signing in: " + error.message))
-  } finally {
-    yield put(setOperationPending(false));
+    try {
+      yield executeOperations(user, op("register_user", action.payload, accountId));
+      yield authorizeUser(action.payload, user);
+      userEvent("register");
+    } catch (error) {
+      yield put(vaultCancel());
+      yield put(notifyError("Error signing in: " + error.message))
+    } finally {
+      yield put(setOperationPending(false));
+    }
   }
 }
 
 function* autoLoginSaga(): Generator<any, any, any> {
   const foundUser = yield select(getUser);
   const username = getUsername();
-
-  logger.silly(
-    "[SAGA - STARTED] Attempting auto-login for username: [%s] and user [%s]",
-    username,
-    JSON.stringify(foundUser)
-  );
 
   yield put(setQueryPending(true));
 
@@ -183,35 +179,30 @@ function* authorizeUser(username: string, user: User) {
   }
 }
 
-export function* checkDistrustedUsersSaga(action: ICheckDistrustedUsers) {
-  logger.silly("[SAGA - STARTED]: Checking distrusted reps");
-  const distrustedReps = action.user != null ? yield getDistrustedUsers(action.user) : [];
-  yield put(storeDistrustedUsers(distrustedReps));
-  logger.silly("[SAGA - FINISHED]: Checking distrusted reps");
+export function* checkDistrustedUsersSaga(action: Action) {
+  if (checkDistrustedUsers.match(action)) {
+    const distrustedReps = action.payload != null ? yield getDistrustedUsers(action.payload) : [];
+    yield put(storeDistrustedUsers(distrustedReps));
+  }
 }
 
 export function* checkUserKudosSaga() {
-  logger.silly("[SAGA - STARTED]: Checking user kudos");
   const user = yield select(getUser);
 
   if (user && config.features.kudosEnabled) {
     const kudos = yield getKudos(user.name);
     yield put(storeUserKudos(kudos));
   }
-
-  logger.silly("[SAGA - FINISHED]: Checking user kudos");
 }
 
-export function* sendVibesSaga(action: ISendKudos) {
-  logger.silly("[SAGA - STARTED]: Send kudos");
+export function* sendKudosSaga(action: Action) {
+  if (sendKudosAction.match(action)) {
+    const user = yield select(getUser);
 
-  const user = yield select(getUser);
-
-  if (user && config.features.kudosEnabled) {
-    yield sendKudos(user, action.receiver, action.kudos);
-    yield put(checkUserKudos());
-    yield put(notifySuccess(`Sent ${action.kudos} kudos to ${action.receiver}`));
+    if (user && config.features.kudosEnabled) {
+      yield sendKudos(user, action.payload.receiver, action.payload.kudos);
+      yield put(checkUserKudos());
+      yield put(notifySuccess(`Sent ${action.payload.kudos} kudos to ${action.payload.receiver}`));
+    }
   }
-
-  logger.silly("[SAGA - FINISHED]: Send kudos");
 }

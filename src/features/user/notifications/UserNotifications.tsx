@@ -10,7 +10,7 @@ import { ChromunityUser, UserNotification } from "../../../types";
 import NotificationCard from "./NotificationCard";
 import ChromiaPageHeader from "../../../shared/ChromiaPageHeader";
 import LoadMoreButton from "../../../shared/buttons/LoadMoreButton";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { connect } from "react-redux";
 import { setQueryPending } from "../../../shared/redux/CommonActions";
 
@@ -81,10 +81,8 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    setQueryPending: (pending: boolean) => dispatch(setQueryPending(pending)),
-  };
+const mapDispatchToProps = {
+  setQueryPending
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(UserNotifications);

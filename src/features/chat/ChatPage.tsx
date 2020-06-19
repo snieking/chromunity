@@ -1,18 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ApplicationState } from "../../core/store";
+import ApplicationState from "../../core/application-state";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { connect } from "react-redux";
 import {
-  addUserToChatAction,
+  addUserToChat,
   checkChatAuthentication,
   createChatKeyPair,
   createNewChat,
-  deleteChatUserAction,
-  leaveChatAction,
-  loadChatUsersAction,
-  loadOlderMessagesAction,
+  deleteChatUser,
+  leaveChat,
+  loadChatUsers,
+  loadOlderMessages,
   loadUserChats,
-  modifyTitleAction,
+  modifyTitle,
   openChat,
   refreshOpenChat,
   sendMessage,
@@ -47,7 +47,7 @@ import TutorialButton from "../../shared/buttons/TutorialButton";
 import { step } from "../../shared/TutorialStep";
 import { Redirect } from "react-router";
 import TextToolbar from "../../shared/textToolbar/TextToolbar";
-import { notifySuccess, setError } from "../../core/snackbar/redux/snackbarTypes";
+import { notifySuccess, notifyError } from "../../core/snackbar/redux/snackbarActions";
 
 interface Props {
   autoLoginInProgress: boolean;
@@ -65,19 +65,19 @@ interface Props {
   operationPending: boolean;
   checkChatAuthentication: typeof checkChatAuthentication;
   createChatKeyPair: typeof createChatKeyPair;
-  deleteChatUser: typeof deleteChatUserAction;
+  deleteChatUser: typeof deleteChatUser;
   createNewChat: typeof createNewChat;
-  addUserToChat: typeof addUserToChatAction;
+  addUserToChat: typeof addUserToChat;
   loadUserChats: typeof loadUserChats;
   openChat: typeof openChat;
   refreshOpenChat: typeof refreshOpenChat;
   sendMessage: typeof sendMessage;
-  leaveChat: typeof leaveChatAction;
-  modifyTitle: typeof modifyTitleAction;
-  loadChatUsers: typeof loadChatUsersAction;
-  loadOlderMessages: typeof loadOlderMessagesAction;
+  leaveChat: typeof leaveChat;
+  modifyTitle: typeof modifyTitle;
+  loadChatUsers: typeof loadChatUsers;
+  loadOlderMessages: typeof loadOlderMessages;
   setInfo: typeof notifySuccess;
-  setError: typeof setError;
+  setError: typeof notifyError;
   theme: Theme;
 }
 
@@ -148,7 +148,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   useEffect(() => {
     if (props.user) {
       if (props.successfullyAuthorized && props.activeChat == null) {
-        props.loadUserChats(props.user);
+        props.loadUserChats({ user: props.user, force: false });
       } else if (props.successfullyAuthorized && props.activeChat != null) {
         props.loadChatUsers(props.user);
       } else if (!props.successfullyAuthorized) {
@@ -256,7 +256,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function selectChat(chat: Chat) {
     setValues({ ...values, selectedChatId: chat.id, drawerOpen: false });
-    props.openChat(chat, props.user);
+    props.openChat({ chat, user: props.user });
   }
 
   function renderOpenChat() {
@@ -351,7 +351,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function confirmUpdatedTitle() {
     setValues({ ...values, modifyTitle: false });
-    props.modifyTitle(props.user, props.activeChat, values.updatedTitle);
+    props.modifyTitle({ user: props.user, chat: props.activeChat, title: values.updatedTitle });
   }
 
   function leaveChatDialog() {
@@ -373,7 +373,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     const chat = props.chats.find((value) => value.id !== props.activeChat.id);
 
     props.leaveChat(props.user);
-    props.openChat(chat, props.user);
+    props.openChat({ chat, user: props.user });
 
     setValues({ ...values, showLeaveChatDialog: false, selectedChatId: chat != null ? chat.id : "" });
   }
@@ -439,7 +439,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   function confirmAddUser() {
     const selected = values.userToAdd;
     if (selected != null) {
-      props.addUserToChat(selected, props.user);
+      props.addUserToChat({ username: selected, user: props.user });
     }
     setValues({ ...values, userToAdd: null, showAddDialog: false });
   }
@@ -521,7 +521,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function sendMessage() {
     if (values.message.length > 0) {
-      props.sendMessage(props.user, props.activeChat, values.message.trim());
+      props.sendMessage({ user: props.user, chat: props.activeChat, message: values.message.trim() });
       setValues({ ...values, message: "" });
     }
   }
@@ -599,7 +599,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function proceed(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    props.createChatKeyPair(props.user, values.password);
+    props.createChatKeyPair({ user: props.user, password: values.password });
     setValues({ ...values, password: "" });
   }
 
@@ -648,25 +648,23 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   return <Container fixed>{renderContent()}</Container>;
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    checkChatAuthentication: () => dispatch(checkChatAuthentication()),
-    createChatKeyPair: (user: ChromunityUser, password: string) => dispatch(createChatKeyPair(user, password)),
-    deleteChatUser: (user: ChromunityUser) => dispatch(deleteChatUserAction(user)),
-    createNewChat: (user: ChromunityUser) => dispatch(createNewChat(user)),
-    addUserToChat: (targetUser: string, user: ChromunityUser) => dispatch(addUserToChatAction(targetUser, user)),
-    loadUserChats: (user: ChromunityUser) => dispatch(loadUserChats(user)),
-    openChat: (chat: Chat, user: ChromunityUser) => dispatch(openChat(chat, user)),
-    refreshOpenChat: (user: string) => dispatch(refreshOpenChat(user)),
-    sendMessage: (user: ChromunityUser, chat: Chat, message: string) => dispatch(sendMessage(user, chat, message)),
-    leaveChat: (user: ChromunityUser) => dispatch(leaveChatAction(user)),
-    modifyTitle: (user: ChromunityUser, chat: Chat, title: string) => dispatch(modifyTitleAction(user, chat, title)),
-    loadChatUsers: (user: ChromunityUser) => dispatch(loadChatUsersAction(user)),
-    loadOlderMessages: () => dispatch(loadOlderMessagesAction()),
-    setError: (msg: string) => dispatch(setError(msg)),
-    setInfo: (msg: string) => dispatch(notifySuccess(msg)),
-  };
-};
+const mapDispatchToProps = {
+    checkChatAuthentication,
+    createChatKeyPair,
+    deleteChatUser,
+    createNewChat,
+    addUserToChat,
+    loadUserChats,
+    openChat,
+    refreshOpenChat,
+    sendMessage,
+    leaveChat,
+    modifyTitle,
+    loadChatUsers,
+    loadOlderMessages,
+    notifyError,
+    notifySuccess
+}
 
 const mapStateToProps = (store: ApplicationState) => {
   return {

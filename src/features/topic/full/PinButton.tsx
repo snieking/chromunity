@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PinDropIcon from "@material-ui/icons/PinDrop";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { ChromunityUser } from "../../../types";
 import { connect } from "react-redux";
 import { toLowerCase } from "../../../shared/util/util";
@@ -17,7 +17,7 @@ interface Props {
   representatives: string[];
   topicIdPinnedByMe: string;
   pinTopic: typeof pinTopic;
-  checkPinnedByRep: typeof checkPinnedTopicByRep;
+  checkPinnedTopicByRep: typeof checkPinnedTopicByRep;
 }
 
 const PinButton: React.FunctionComponent<Props> = (props) => {
@@ -25,7 +25,7 @@ const PinButton: React.FunctionComponent<Props> = (props) => {
 
   useEffect(() => {
     if (isRepresentative()) {
-      props.checkPinnedByRep();
+      props.checkPinnedTopicByRep();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.representatives, props.user]);
@@ -79,11 +79,9 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    pinTopic: (topicId: string) => dispatch(pinTopic(topicId)),
-    checkPinnedByRep: () => dispatch(checkPinnedTopicByRep()),
-  };
+const mapDispatchToProps = {
+  pinTopic,
+  checkPinnedTopicByRep
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(PinButton);

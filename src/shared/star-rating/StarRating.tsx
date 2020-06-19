@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { ChromunityUser } from "../../types";
-import { ApplicationState } from "../../core/store";
+import ApplicationState from "../../core/application-state";
 import { connect } from "react-redux";
 import StarRatingPresentation from "./StarRatingPresentation";
 import { toLowerCase } from "../util/util";
 import { setRateLimited, setOperationPending } from "../redux/CommonActions";
-import { setError } from "../../core/snackbar/redux/snackbarTypes";
+import { notifyError } from "../../core/snackbar/redux/snackbarActions";
 
 interface Props {
   starRatingFetcher: () => Promise<string[]>;
@@ -14,7 +14,7 @@ interface Props {
   user: ChromunityUser;
   rateLimited: boolean;
   setRateLimited: typeof setRateLimited;
-  setError: typeof setError;
+  notifyError: typeof notifyError;
   setOperationPending: typeof setOperationPending;
 }
 
@@ -43,7 +43,7 @@ const StarRating: React.FunctionComponent<Props> = (props) => {
         props
           .removeRating()
           .catch((error) => {
-            props.setError(error.message);
+            props.notifyError(error.message);
             props.setRateLimited();
           })
           .then(() => setRatedBy(ratedBy.filter((u) => toLowerCase(u) !== toLowerCase(props.user.name))))
@@ -55,7 +55,7 @@ const StarRating: React.FunctionComponent<Props> = (props) => {
         props
           .incrementRating()
           .catch((error) => {
-            props.setError(error.message);
+            props.notifyError(error.message);
             props.setRateLimited();
           })
           .then(() => setRatedBy(ratedBy.concat([props.user.name])))
@@ -84,12 +84,10 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    setRateLimited: () => dispatch(setRateLimited()),
-    setError: (msg: string) => dispatch(setError(msg)),
-    setOperationPending: (pending: boolean) => dispatch(setOperationPending(pending)),
-  };
+const mapDispatchToProps = {
+  setRateLimited,
+  notifyError,
+  setOperationPending
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(StarRating);

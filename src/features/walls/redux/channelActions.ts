@@ -1,46 +1,18 @@
-import { ActionCreator } from "redux";
 import {
-  ChannelActionTypes, ChannelInitAction,
-  LoadChannelAction,
-  LoadChannelByPopularityAction,
-  LoadOlderTopicsInChannelAction,
-  UpdateChannelAction
+  ChannelActionTypes,
+  ILoadChannel,
+  ILoadChannelByPopularity,
+  IUpdateChannel
 } from "./channelTypes";
-import { Topic } from "../../../types";
+import { createAction } from "@reduxjs/toolkit";
+import { withPayloadType } from "../../../shared/redux/util";
 
-export const channelInit: ActionCreator<ChannelInitAction> = () => ({
-  type: ChannelActionTypes.INIT_CHANNEL
-});
+export const channelInit = createAction(ChannelActionTypes.INIT_CHANNEL);
 
-export const loadChannel: ActionCreator<LoadChannelAction> = (name: string, pageSize: number) => ({
-  type: ChannelActionTypes.LOAD_CHANNEL,
-  name: name,
-  pageSize: pageSize
-});
+export const loadChannel = createAction(ChannelActionTypes.LOAD_CHANNEL, withPayloadType<ILoadChannel>());
 
-export const loadOlderTopicsInChannel: ActionCreator<LoadOlderTopicsInChannelAction> = (pageSize: number) => ({
-  type: ChannelActionTypes.LOAD_OLDER_CHANNEL_TOPICS,
-  pageSize: pageSize
-});
+export const loadOlderTopicsInChannel = createAction(ChannelActionTypes.LOAD_OLDER_CHANNEL_TOPICS, withPayloadType<number>());
 
-export const loadChannelByPopularity: ActionCreator<LoadChannelByPopularityAction> = (
-  name: string,
-  timestamp: number,
-  pageSize: number
-) => ({
-  type: ChannelActionTypes.LOAD_CHANNEL_POPULARITY,
-  name: name,
-  timestamp: timestamp,
-  pageSize: pageSize
-});
+export const loadChannelByPopularity = createAction(ChannelActionTypes.LOAD_CHANNEL_POPULARITY, withPayloadType<ILoadChannelByPopularity>());
 
-export const updateChannel: ActionCreator<UpdateChannelAction> = (
-  name: string,
-  topics: Topic[],
-  couldExistOlder: boolean
-) => ({
-  type: ChannelActionTypes.UPDATE_CHANNEL,
-  name: name,
-  topics: topics,
-  couldExistOlder: couldExistOlder
-});
+export const updateChannel = createAction(ChannelActionTypes.UPDATE_CHANNEL, withPayloadType<IUpdateChannel>());

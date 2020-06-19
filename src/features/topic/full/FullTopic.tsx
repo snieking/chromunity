@@ -18,7 +18,7 @@ import {
 import { Notifications, NotificationsActive, Report, SubdirectoryArrowRight } from "@material-ui/icons";
 import TopicReplyCard from "../TopicReplyCard";
 import { Link, Redirect } from "react-router-dom";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { connect } from "react-redux";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../../theme";
@@ -52,7 +52,7 @@ import PreviewLinks from "../../../shared/PreviewLinks";
 import PageMeta from "../../../shared/PageMeta";
 import PollRenderer from "../poll/PollRenderer";
 import SocialShareButton from "../SocialShareButton";
-import { setError, notifySuccess } from "../../../core/snackbar/redux/snackbarTypes";
+import { notifyError, notifyInfo } from "../../../core/snackbar/redux/snackbarActions";
 import StarRating from "../../../shared/star-rating/StarRating";
 import { setRateLimited, setOperationPending, setQueryPending } from "../../../shared/redux/CommonActions";
 import FullTopicTutorial from "./FullTopicTutorial";
@@ -70,8 +70,8 @@ interface Props extends RouteComponentProps<MatchParams> {
   distrustedUsers: string[];
   rateLimited: boolean;
   user: ChromunityUser;
-  setError: typeof setError;
-  setInfo: typeof notifySuccess;
+  notifyError: typeof notifyError;
+  notifyInfo: typeof notifyInfo;
   setRateLimited: typeof setRateLimited;
   setOperationPending: typeof setOperationPending;
   setQueryPending: typeof setQueryPending;
@@ -381,7 +381,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           unsubscribeFromTopic(user, id)
             .then(() => setSubscribed(false))
             .catch((error) => {
-              setError(error.message);
+              props.notifyError(error.message);
               setRateLimited();
             })
             .finally(() => {
@@ -392,7 +392,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           subscribeToTopic(user, id)
             .then(() => setSubscribed(true))
             .catch((error) => {
-              setError(error.message);
+              props.notifyError(error.message);
               setRateLimited();
             })
             .finally(() => {
@@ -426,7 +426,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           setTopic(updatedTopic);
         })
         .catch((error) => {
-          setError(error.message);
+          props.notifyError(error.message);
           setRateLimited();
         })
         .finally(() => {
@@ -440,7 +440,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     props.setOperationPending(true);
     deleteTopic(props.user, topic.id)
       .catch((error) => {
-        setError(error.message);
+        props.notifyError(error.message);
         setRateLimited();
       })
       .then(() => (window.location.href = "/"))
@@ -459,7 +459,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
       props.setOperationPending(true);
       reportTopic(user, topic)
         .catch((error) => {
-          setError(error.message);
+          props.notifyError(error.message);
           setRateLimited();
         })
         .then(() => setTopicReported(true))
@@ -541,11 +541,11 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
       props.setOperationPending(true);
       createTopicReply(props.user, topic.id, replyMessage)
         .catch((error) => {
-          setError(error.message);
+          props.notifyError(error.message);
           setRateLimited();
         })
         .then(() => {
-          props.setInfo("Reply sent");
+          props.notifyInfo("Reply sent");
           retrieveLatestReplies();
           setReplyMessage("");
         })
@@ -631,14 +631,12 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    setError: (msg: string) => dispatch(setError(msg)),
-    setInfo: (msg: string) => dispatch(notifySuccess(msg)),
-    setRateLimited: () => dispatch(setRateLimited()),
-    setOperationPending: (pending: boolean) => dispatch(setOperationPending(pending)),
-    setQueryPending: (pending: boolean) => dispatch(setQueryPending(pending)),
-  };
+const mapDispatchToProps = {
+    notifyError,
+    notifyInfo,
+    setRateLimited,
+    setOperationPending,
+    setQueryPending,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(FullTopic);

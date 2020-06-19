@@ -2,7 +2,7 @@ import React from "react";
 import { toggleTutorial } from "./redux/CommonActions";
 import Tour from 'reactour'
 import { connect } from "react-redux";
-import { ApplicationState } from "../core/store";
+import ApplicationState from "../core/application-state";
 import { Theme } from "@material-ui/core";
 import { COLOR_SOFT_PINK, COLOR_STEEL_BLUE } from "../theme";
 
@@ -18,9 +18,9 @@ const Tutorial: React.FunctionComponent<Props> = (props: React.PropsWithChildren
 
   return (
     <Tour steps={props.steps}
-          isOpen={props.tutorial}
-          onRequestClose={props.toggleTutorial}
-          accentColor={props.theme.palette.type === "dark" ? COLOR_SOFT_PINK : COLOR_STEEL_BLUE}
+      isOpen={props.tutorial}
+      onRequestClose={props.toggleTutorial}
+      accentColor={props.theme.palette.type === "dark" ? COLOR_SOFT_PINK : COLOR_STEEL_BLUE}
     />
   )
 };
@@ -32,10 +32,8 @@ const mapStateToProps = (store: ApplicationState) => {
   }
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    toggleTutorial: () => dispatch(toggleTutorial())
-  }
+const mapDispatchToProps = {
+  toggleTutorial
 };
 
-export default connect(mapStateToProps, mapDispatchToProps) (Tutorial);
+export default connect(mapStateToProps, mapDispatchToProps)(Tutorial);

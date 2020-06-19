@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { ChromunityUser } from "../../../types";
 import { connect } from "react-redux";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import ConfirmDialog from "../../../shared/ConfirmDialog";
 import { removeTopic, REMOVE_TOPIC_OP_ID, hasReportedId } from "../../../core/services/RepresentativesService";
-import { setError } from "../../../core/snackbar/redux/snackbarTypes";
+import { notifyError } from "../../../core/snackbar/redux/snackbarActions";
 import { setRateLimited } from "../../../shared/redux/CommonActions";
 import { MenuItem, ListItemIcon, Typography } from "@material-ui/core";
 import { Delete } from "@material-ui/icons";
@@ -15,7 +15,7 @@ interface Props {
   handleClose: Function;
   user: ChromunityUser;
   rateLimited: boolean;
-  setError: typeof setError;
+  notifyError: typeof notifyError;
   setRateLimited: typeof setRateLimited;
 }
 
@@ -33,7 +33,7 @@ const DeleteButton: React.FunctionComponent<Props> = (props) => {
     close();
     removeTopic(props.user, props.topicId)
       .catch((error) => {
-        setError(error.message);
+        props.notifyError(error.message);
         setRateLimited();
       })
       .then(() => window.location.reload());
@@ -68,11 +68,9 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    setError: (msg: string) => dispatch(setError(msg)),
-    setRateLimited: () => dispatch(setRateLimited())
-  };
+const mapDispatchToProps = {
+  notifyError,
+  setRateLimited
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(DeleteButton);

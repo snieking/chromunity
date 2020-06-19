@@ -4,7 +4,7 @@ import { parse } from "query-string";
 import { connect } from "react-redux";
 import { createStyles, CircularProgress } from "@material-ui/core";
 import { registerUser, resetLoginState, vaultCancel, vaultSuccess } from "../redux/accountActions";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { ChromunityUser } from "../../../types";
 import ChromiaPageHeader from "../../../shared/ChromiaPageHeader";
 import Container from "@material-ui/core/Container";
@@ -14,15 +14,14 @@ import { AuthenticationStep } from "../redux/accountTypes";
 import Button from "@material-ui/core/Button";
 import { ReactComponent as LeftShapes } from "../../../shared/graphics/left-shapes.svg";
 import { ReactComponent as RightShapes } from "../../../shared/graphics/right-shapes.svg";
-import { setError, notifySuccess } from "../../../core/snackbar/redux/snackbarTypes";
+import { notifyError } from "../../../core/snackbar/redux/snackbarActions";
 
 interface Props extends RouteComponentProps {
   vaultSuccess: typeof vaultSuccess;
   vaultCancel: typeof vaultCancel;
   resetLoginState: typeof resetLoginState;
   registerUser: typeof registerUser;
-  setv : typeof notifySuccess;
-  setError: typeof setError;
+  notifyError: typeof notifyError;
   authenticationStep: AuthenticationStep;
   user: ChromunityUser;
   error: string;
@@ -69,17 +68,18 @@ const VaultSuccess: React.FunctionComponent<Props> = (props) => {
     if (rawTx) {
       props.vaultSuccess(rawTx);
     } else {
-      props.vaultCancel("Bad data received from vault");
+      props.notifyError("Bad data received from vault");
+      props.vaultCancel();
     }
     // eslint-disable-next-line
   }, []);
 
   const selectUsername = () => {
     if (/\s/.test(name)) {
-      props.setError("Username may not contain whitespace");
+      props.notifyError("Username may not contain whitespace");
       setName("");
     } else if (!/[a-zA-Z0-9]{3,16}/.test(name)) {
-      props.setError(
+      props.notifyError(
         "Username must start with a a-z, A-Z or 0-9 character. Username should have a size between 3-16 characters."
       );
       setName("");
@@ -161,15 +161,11 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    vaultSuccess: (accountId: string, username: string, vaultPubKey: string) =>
-      dispatch(vaultSuccess(accountId, username, vaultPubKey)),
-    vaultCancel: (error: string) => dispatch(vaultCancel(error)),
-    registerUser: (username: string) => dispatch(registerUser(username)),
-    setError: (msg: string) => dispatch(setError(msg)),
-    setInfo: (msg: string) => dispatch(notifySuccess(msg)),
-  };
+const mapDispatchToProps = {
+  vaultSuccess,
+  vaultCancel,
+  registerUser,
+  notifyError
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(VaultSuccess);

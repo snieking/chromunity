@@ -18,7 +18,7 @@ import TopicOverviewCard from "../topic/TopicOverviewCard";
 import LoadMoreButton from "../../shared/buttons/LoadMoreButton";
 import TopicReplyOverviewCard from "../topic/TopicReplyOverviewCard";
 import { connect } from "react-redux";
-import { ApplicationState } from "../../core/store";
+import ApplicationState from "../../core/application-state";
 import {
   userPageInit,
   loadUserTopics,
@@ -90,8 +90,8 @@ const UserWall = withStyles(styles)(
     update() {
       const username = this.props.match.params.userId;
       this.props.userPageInit();
-      this.props.loadUserTopics(username, topicsPageSize);
-      this.props.loadUserReplies(username, topicsPageSize);
+      this.props.loadUserTopics({ username, pageSize: topicsPageSize });
+      this.props.loadUserReplies({ username, pageSize: topicsPageSize });
       this.props.loadUserFollowedChannels(username);
     }
 
@@ -120,7 +120,10 @@ const UserWall = withStyles(styles)(
 
     renderLoadMoreButton() {
       if (this.state.couldExistOlderTopics) {
-        return <LoadMoreButton onClick={() => this.props.loadUserTopics(topicsPageSize)} />;
+        return <LoadMoreButton onClick={() => this.props.loadUserTopics({
+          username: this.props.match.params.userId,
+          pageSize: topicsPageSize
+        })} />;
       }
     }
 
@@ -147,7 +150,7 @@ const UserWall = withStyles(styles)(
               {this.props.userFollowedChannels.map(channel => {
                 return (
                   <Link key={channel} to={"/c/" + channel.replace("#", "")}>
-                    <CustomChip tag={channel}/>
+                    <CustomChip tag={channel} />
                   </Link>
                 );
               })}
@@ -171,16 +174,11 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    userPageInit: () => dispatch(userPageInit()),
-    loadUserTopics: (username: string, pageSize: number) => dispatch(loadUserTopics(username, pageSize)),
-    loadUserReplies: (username: string, pageSize: number) => dispatch(loadUserReplies(username, pageSize)),
-    loadUserFollowedChannels: (username: string, ) => dispatch(loadUserFollowedChannels(username))
-  };
+const mapDispatchToProps = {
+  userPageInit,
+  loadUserTopics,
+  loadUserReplies,
+  loadUserFollowedChannels
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(UserWall);
+export default connect(mapStateToProps, mapDispatchToProps)(UserWall);

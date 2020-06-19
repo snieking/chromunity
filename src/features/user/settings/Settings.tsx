@@ -22,12 +22,12 @@ import AvatarChanger from "./AvatarChanger";
 import { getUserSettings, updateUserSettings } from "../../../core/services/UserService";
 import ChromiaPageHeader from "../../../shared/ChromiaPageHeader";
 import Avatar, { AVATAR_SIZE } from "../../../shared/Avatar";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { connect } from "react-redux";
 import { Socials } from "../socials/socialTypes";
 import { TwitterIcon, LinkedinIcon, FacebookIcon } from "react-share";
 import GitHubLogo from "../../../shared/logos/GitHubLogo";
-import { setError, notifySuccess } from "../../../core/snackbar/redux/snackbarTypes";
+import { notifyError, notifyInfo } from "../../../core/snackbar/redux/snackbarActions";
 import { setOperationPending, setRateLimited } from "../../../shared/redux/CommonActions";
 import {
   parseTwitterUsername,
@@ -88,8 +88,8 @@ const styles = (theme: Theme) =>
 interface Props extends WithStyles<typeof styles> {
   user: ChromunityUser;
   rateLimited: boolean;
-  setInfo: typeof notifySuccess;
-  setError: typeof setError;
+  notifyInfo: typeof notifyInfo;
+  notifyError: typeof notifyError;
   setOperationPending: typeof setOperationPending;
   setRateLimited: typeof setRateLimited;
 }
@@ -398,9 +398,9 @@ const Settings = withStyles(styles)(
       this.setState({ socials });
 
       updateUserSettings(this.props.user, this.state.avatar, this.state.description, socials)
-        .then(() => this.props.setInfo("Settings saved"))
+        .then(() => this.props.notifyInfo("Settings saved"))
         .catch(() => {
-          this.props.setError("Error updating settings");
+          this.props.notifyError("Error updating settings");
           this.props.setRateLimited();
         })
         .finally(() => this.props.setOperationPending(false));
@@ -415,13 +415,11 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    setError: (msg: string) => dispatch(setError(msg)),
-    setInfo: (msg: string) => dispatch(notifySuccess(msg)),
-    setOperationPending: (pending: boolean) => dispatch(setOperationPending(pending)),
-    setRateLimited: () => dispatch(setRateLimited()),
-  };
+const mapDispatchToProps = {
+    notifyError,
+    notifyInfo,
+    setOperationPending,
+    setRateLimited
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Settings);

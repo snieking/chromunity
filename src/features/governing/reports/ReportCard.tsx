@@ -4,7 +4,7 @@ import { RepresentativeReport } from "../../../types";
 import { Card, CardContent, Typography } from "@material-ui/core";
 import { parseContent } from "../../../shared/util/text-parsing";
 import Timestamp from "../../../shared/Timestamp";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { connect } from "react-redux";
 
 interface ReportCardProps {

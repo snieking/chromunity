@@ -1,6 +1,6 @@
 import React from "react";
 import { Theme } from "@material-ui/core";
-import { ApplicationState } from "../../core/store";
+import ApplicationState from "../../core/application-state";
 import { connect } from "react-redux";
 import { COLOR_CHROMIA_LIGHT, COLOR_STEEL_BLUE } from "../../theme";
 

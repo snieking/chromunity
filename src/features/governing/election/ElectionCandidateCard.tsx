@@ -21,11 +21,11 @@ import { countUserFollowers } from "../../../core/services/FollowingService";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { toLowerCase } from "../../../shared/util/util";
 import { electionCandidateCardStyles } from "../sharedStyles";
-import { ApplicationState } from "../../../core/store";
+import ApplicationState from "../../../core/application-state";
 import { connect } from "react-redux";
 import { ChromunityUser } from "../../../types";
 import ConfirmDialog from "../../../shared/ConfirmDialog";
-import { setError, notifySuccess } from "../../../core/snackbar/redux/snackbarTypes";
+import { notifyError, notifyInfo } from "../../../core/snackbar/redux/snackbarActions";
 
 interface Props {
   candidate: string;
@@ -33,8 +33,8 @@ interface Props {
   voteForCandidate: Function;
   userIsEligibleToVote: boolean;
   user: ChromunityUser;
-  setInfo: typeof notifySuccess;
-  setError: typeof setError;
+  notifyInfo: typeof notifyInfo;
+  notifyError: typeof notifyError;
 }
 
 const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => {
@@ -185,7 +185,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
               "/gov/vote/" +
               name
             }
-            onCopy={() => props.setInfo("Copied to clipboard")}
+            onCopy={() => props.notifyInfo("Copied to clipboard")}
           >
             <Button fullWidth size="small" variant="contained" color="secondary">
               Share Vote Link
@@ -218,8 +218,8 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
               Vote
             </Button>
           ) : (
-            <div />
-          )}
+              <div />
+            )}
           <CopyToClipboard
             text={
               window.location.protocol +
@@ -229,7 +229,7 @@ const ElectionCandidateCard: React.FunctionComponent<Props> = (props: Props) => 
               "/gov/vote/" +
               name
             }
-            onCopy={() => notifySuccess("Copied to clipboard")}
+            onCopy={() => props.notifyInfo("Copied to clipboard")}
           >
             <Button fullWidth size="small" variant="contained" color="secondary">
               Share Vote Link
@@ -247,11 +247,9 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    setError: (msg: string) => dispatch(setError(msg)),
-    setInfo: (msg: string) => dispatch(notifySuccess(msg))
-  };
+const mapDispatchToProps = {
+  notifyError,
+  notifyInfo
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ElectionCandidateCard);
