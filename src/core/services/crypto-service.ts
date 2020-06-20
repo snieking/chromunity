@@ -53,8 +53,8 @@ export function rsaDecrypt(data: string, rsaKey: any): any {
 export function makeKeyPair() {
   let privKey;
   do {
-    privKey = crypto.randomBytes(32);
+    privKey = Uint8Array.from(crypto.randomBytes(32));
   } while (!secp256k1.privateKeyVerify(privKey));
   const pubKey = secp256k1.publicKeyCreate(privKey);
-  return { pubKey, privKey };
+  return { pubKey: Buffer.from(pubKey.buffer), privKey: Buffer.from(privKey.buffer) };
 }
