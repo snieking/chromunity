@@ -1,10 +1,10 @@
-import { updateRateLimited } from "./common-actions";
-import { CommonActionTypes } from "./common-types";
-import { put, takeLatest, select, call } from "redux-saga/effects";
-import ApplicationState from "../../core/application-state";
+import { put, takeLatest, select, call } from 'redux-saga/effects';
+import { updateRateLimited } from './common-actions';
+import { CommonActionTypes } from './common-types';
+import ApplicationState from '../../core/application-state';
 
 const RATE_LIMIT_DURATION = 30000;
-const delay = (time: number) => new Promise(resolve => setTimeout(resolve, time));
+const delay = (time: number) => new Promise((resolve) => setTimeout(resolve, time));
 
 export function* commonWatcher() {
   yield takeLatest(CommonActionTypes.SET_RATE_LIMITED, setRateLimitedSaga);

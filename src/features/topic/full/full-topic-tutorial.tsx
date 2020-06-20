@@ -1,21 +1,20 @@
-import React from "react";
-import Tutorial from "../../../shared/tutorial";
-import TutorialButton from "../../../shared/buttons/tutorial-button";
-import { step } from "../../../shared/tutorial-step";
-import { ChromunityUser } from "../../../types";
-import ApplicationState from "../../../core/application-state";
-import { connect } from "react-redux";
+import React from 'react';
+import { connect } from 'react-redux';
+import Tutorial from '../../../shared/tutorial';
+import TutorialButton from '../../../shared/buttons/tutorial-button';
+import { step } from '../../../shared/tutorial-step';
+import { ChromunityUser } from '../../../types';
+import ApplicationState from '../../../core/application-state';
 
 interface Props {
   user: ChromunityUser;
 }
 
 const FullTopicTutorial: React.FunctionComponent<Props> = (props) => {
-
   function steps(): any[] {
-    const steps: any[] = [
+    const theSteps: any[] = [
       step(
-        ".first-step",
+        '.first-step',
         <p>This is a topic. A topic contains hopefully some interesting subject to discuss with the community.</p>
       ),
       step(
@@ -28,16 +27,16 @@ const FullTopicTutorial: React.FunctionComponent<Props> = (props) => {
     ];
 
     if (props.user != null) {
-      steps.push(
+      theSteps.push(
         step(
           '[data-tut="subscribe_btn"]',
           <p>Subscribing to a post will keep you updated with notifications when someone replies to it.</p>
         )
       );
 
-      steps.push(step('[data-tut="reply_btn"]', <p>Join in the conversation by sending a reply to the topic.</p>));
+      theSteps.push(step('[data-tut="reply_btn"]', <p>Join in the conversation by sending a reply to the topic.</p>));
 
-      steps.push(
+      theSteps.push(
         step(
           '[data-tut="report_btn"]',
           <p>
@@ -48,20 +47,20 @@ const FullTopicTutorial: React.FunctionComponent<Props> = (props) => {
       );
     }
 
-    return steps;
+    return theSteps;
   }
 
   return (
     <>
-        <Tutorial steps={steps()} />
-        <TutorialButton />
-      </>
+      <Tutorial steps={steps()} />
+      <TutorialButton />
+    </>
   );
-}
+};
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    user: store.account.user
+    user: store.account.user,
   };
 };
 

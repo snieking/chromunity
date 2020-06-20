@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { Card, makeStyles, CardContent, CircularProgress, Typography } from "@material-ui/core";
-import {
-  blocksUntilElectionWrapsUp,
-  blocksUntilNextElection,
-} from "../../../core/services/election-service";
-import { ElectionStatus } from "./election-status";
-import { useInterval } from "../../../shared/util/util";
+import React, { useState, useEffect } from 'react';
+import { Card, makeStyles, CardContent, CircularProgress, Typography } from '@material-ui/core';
+import { blocksUntilElectionWrapsUp, blocksUntilNextElection } from '../../../core/services/election-service';
+import { ElectionStatus } from './election-status';
+import { useInterval } from '../../../shared/util/util';
 
 interface Props {
   electionStatus: ElectionStatus;
@@ -13,9 +10,9 @@ interface Props {
 
 const useStyles = makeStyles({
   electionCard: {
-    textAlign: "center",
-    marginTop: "28px",
-  }
+    textAlign: 'center',
+    marginTop: '28px',
+  },
 });
 
 const ElectionDetails: React.FunctionComponent<Props> = (props) => {
@@ -24,17 +21,17 @@ const ElectionDetails: React.FunctionComponent<Props> = (props) => {
 
   useEffect(() => {
     if (ElectionStatus.ONGOING === props.electionStatus) {
-      blocksUntilElectionWrapsUp().then((blocks) => setBlocks(blocks));
+      blocksUntilElectionWrapsUp().then((b) => setBlocks(b));
     } else if (ElectionStatus.FINISHED === props.electionStatus) {
-      blocksUntilNextElection().then((blocks) => setBlocks(blocks));
+      blocksUntilNextElection().then((b) => setBlocks(b));
     }
   }, [props.electionStatus]);
 
   useInterval(() => {
     if (ElectionStatus.ONGOING === props.electionStatus) {
-      blocksUntilElectionWrapsUp().then((blocks) => setBlocks(blocks));
+      blocksUntilElectionWrapsUp().then((b) => setBlocks(b));
     } else if (ElectionStatus.FINISHED === props.electionStatus) {
-      blocksUntilNextElection().then((blocks) => setBlocks(blocks));
+      blocksUntilNextElection().then((b) => setBlocks(b));
     }
   }, 30000);
 
@@ -55,7 +52,7 @@ const ElectionDetails: React.FunctionComponent<Props> = (props) => {
     return (
       <>
         {blocksCounter()}
-        {description("blocks until the election wraps up")}
+        {description('blocks until the election wraps up')}
       </>
     );
   }
@@ -64,7 +61,7 @@ const ElectionDetails: React.FunctionComponent<Props> = (props) => {
     return (
       <>
         {blocksCounter()}
-        {description("blocks until the next election starts")}
+        {description('blocks until the next election starts')}
       </>
     );
   }
@@ -77,16 +74,16 @@ const ElectionDetails: React.FunctionComponent<Props> = (props) => {
     );
   }
 
-  function description(description: string) {
+  function description(desc: string) {
     return (
       <Typography variant="body2" component="p">
-        {description}
+        {desc}
       </Typography>
     );
   }
 
   return (
-    <Card key={"election-status"} className={classes.electionCard}>
+    <Card key="election-status" className={classes.electionCard}>
       <CardContent>{content()}</CardContent>
     </Card>
   );

@@ -1,3 +1,5 @@
 export enum ElectionStatus {
-  NOT_CHECKED, ONGOING, FINISHED
+  NOT_CHECKED,
+  ONGOING,
+  FINISHED,
 }

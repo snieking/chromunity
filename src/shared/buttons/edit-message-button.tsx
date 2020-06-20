@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 import {
   Badge,
@@ -10,32 +10,32 @@ import {
   Tooltip,
   Typography,
   WithStyles,
-} from "@material-ui/core";
-import Button from "@material-ui/core/Button";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import TextField from "@material-ui/core/TextField";
-import IconButton from "@material-ui/core/IconButton";
-import { ChromunityUser } from "../../types";
-import { Delete, Edit, MoreHoriz } from "@material-ui/icons";
-import { parseEmojis } from "../util/text-parsing";
-import withStyles from "@material-ui/core/styles/withStyles";
-import ConfirmDialog from "../confirm-dialog";
-import ApplicationState from "../../core/application-state";
-import { connect } from "react-redux";
-import TextToolbar from "../text-toolbar/text-toolbar";
-import { notifyInfo, notifyError } from "../../core/snackbar/redux/snackbar-actions";
-import { setRateLimited } from "../redux/common-actions";
+} from '@material-ui/core';
+import Button from '@material-ui/core/Button';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import TextField from '@material-ui/core/TextField';
+import IconButton from '@material-ui/core/IconButton';
+import { Delete, Edit, MoreHoriz } from '@material-ui/icons';
+import withStyles from '@material-ui/core/styles/withStyles';
+import { connect } from 'react-redux';
+import { ChromunityUser } from '../../types';
+import { parseEmojis } from '../util/text-parsing';
+import ConfirmDialog from '../confirm-dialog';
+import ApplicationState from '../../core/application-state';
+import TextToolbar from '../text-toolbar/text-toolbar';
+import { notifyInfo, notifyError } from '../../core/snackbar/redux/snackbar-actions';
+import { setRateLimited } from '../redux/common-actions';
 
 const styles = createStyles({
   editorWrapper: {
-    position: "relative",
+    position: 'relative',
   },
 });
 
 export interface EditMessageButtonProps extends WithStyles<typeof styles> {
-  editFunction: Function;
-  deleteFunction: Function;
+  editFunction: (text: string) => void;
+  deleteFunction: () => void;
   value: string;
   modifiableUntil: number;
   user: ChromunityUser;
@@ -93,30 +93,18 @@ const EditMessageButton = withStyles(styles)(
 
     submitEdit() {
       this.toggleEditDialog();
-      this.props
-        .editFunction(this.state.message)
-        .catch((error: Error) => {
-          this.props.notifyError(error.message);
-          this.props.setRateLimited();
-        })
-        .then(() => this.props.notifyInfo("Message successfully edited"));
+      this.props.editFunction(this.state.message);
     }
 
     submitDelete() {
       this.toggleDeleteDialog();
-      this.props
-        .deleteFunction()
-        .catch((error: Error) => {
-          this.props.notifyError(error.message);
-          this.props.setRateLimited();
-        })
-        .then(() => this.props.notifyInfo("Message successfully deleted"));
+      this.props.deleteFunction();
     }
 
     editDialog() {
       return (
         <div>
-          <Dialog open={this.state.editDialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"md"}>
+          <Dialog open={this.state.editDialogOpen} aria-labelledby="form-dialog-title" fullWidth maxWidth="md">
             <form>
               <DialogContent>
                 <br />
@@ -144,7 +132,7 @@ const EditMessageButton = withStyles(styles)(
                   Cancel
                 </Button>
                 <Button
-                  onKeyPress={(e) => (e.key === "Enter" ? this.submitEdit() : "")}
+                  onKeyPress={(e) => (e.key === 'Enter' ? this.submitEdit() : '')}
                   onClick={() => this.submitEdit()}
                   color="primary"
                   variant="contained"
@@ -163,7 +151,7 @@ const EditMessageButton = withStyles(styles)(
       const startPosition = this.textInput.current.selectionStart;
 
       this.setState((prevState) => ({
-        message: [prevState.message.slice(0, startPosition), text, prevState.message.slice(startPosition)].join(""),
+        message: [prevState.message.slice(0, startPosition), text, prevState.message.slice(startPosition)].join(''),
       }));
 
       setTimeout(() => {
@@ -204,7 +192,7 @@ const EditMessageButton = withStyles(styles)(
     render() {
       if (this.props.user != null) {
         return (
-          <div style={{ display: "inline-block" }}>
+          <div style={{ display: 'inline-block' }}>
             <Tooltip title="Edit">
               <IconButton
                 aria-label="Edit"
@@ -226,9 +214,8 @@ const EditMessageButton = withStyles(styles)(
             />
           </div>
         );
-      } else {
-        return null;
       }
+      return null;
     }
   }
 );
@@ -243,7 +230,7 @@ const mapStateToProps = (store: ApplicationState) => {
 const mapDispatchToProps = {
   notifyError,
   notifyInfo,
-  setRateLimited
+  setRateLimited,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(EditMessageButton);

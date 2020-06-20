@@ -1,6 +1,6 @@
-import { createAction } from "@reduxjs/toolkit";
-import { SnackbarActionTypes } from "./snackbar-types";
-import { withPayloadType } from "../../../shared/redux/util";
+import { createAction } from '@reduxjs/toolkit';
+import { SnackbarActionTypes } from './snackbar-types';
+import { withPayloadType } from '../../../shared/redux/util';
 
 export const notifyError = createAction(SnackbarActionTypes.SET_ERROR, withPayloadType<string>());
 

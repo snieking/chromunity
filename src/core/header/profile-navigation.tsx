@@ -1,13 +1,13 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import IconButton from "@material-ui/core/IconButton";
-import { ListItemIcon, Menu, MenuItem, Tooltip, Typography } from "@material-ui/core";
-import Badge from "@material-ui/core/Badge/Badge";
-import { AccountCircle, Chat, ExitToApp, Settings } from "@material-ui/icons";
-import NotificationsButton from "../../shared/buttons/notifications-button";
-import ThemeSwitcher from "../theme-switcher";
-import { ChromunityUser } from "../../types";
-import { nFormatter } from "../../shared/util/util";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import IconButton from '@material-ui/core/IconButton';
+import { ListItemIcon, Menu, MenuItem, Tooltip, Typography } from '@material-ui/core';
+import Badge from '@material-ui/core/Badge/Badge';
+import { AccountCircle, Chat, ExitToApp, Settings } from '@material-ui/icons';
+import NotificationsButton from '../../shared/buttons/notifications-button';
+import ThemeSwitcher from '../theme-switcher';
+import { ChromunityUser } from '../../types';
+import { nFormatter } from '../../shared/util/util';
 
 interface Props {
   user: ChromunityUser;
@@ -43,7 +43,7 @@ const ProfileNavigation: React.FunctionComponent<Props> = (props: Props) => {
             </Tooltip>
           </IconButton>
         </Link>
-        <Link to={"/notifications/" + props.user.name}>
+        <Link to={`/notifications/${props.user.name}`}>
           <div className={props.classes.rightMenuButton}>
             <NotificationsButton username={props.user.name} />
           </div>
@@ -69,7 +69,7 @@ const ProfileNavigation: React.FunctionComponent<Props> = (props: Props) => {
           open={Boolean(profileAnchorEl)}
           onClose={handleProfileClose}
         >
-          <Link style={{ width: "100%" }} to={"/u/" + props.user.name}>
+          <Link style={{ width: '100%' }} to={`/u/${props.user.name}`}>
             <MenuItem onClick={handleProfileClose}>
               <ListItemIcon>
                 <AccountCircle />
@@ -78,7 +78,7 @@ const ProfileNavigation: React.FunctionComponent<Props> = (props: Props) => {
             </MenuItem>
           </Link>
           <br />
-          <Link style={{ width: "100%" }} to={"/user/settings"}>
+          <Link style={{ width: '100%' }} to="/user/settings">
             <MenuItem onClick={handleProfileClose}>
               <ListItemIcon>
                 <Settings />
@@ -88,7 +88,7 @@ const ProfileNavigation: React.FunctionComponent<Props> = (props: Props) => {
           </Link>
           <br />
           <ThemeSwitcher />
-          <Link style={{ width: "100%" }} to="/user/logout">
+          <Link style={{ width: '100%' }} to="/user/logout">
             <MenuItem onClick={handleProfileClose}>
               <ListItemIcon>
                 <ExitToApp />
@@ -99,19 +99,18 @@ const ProfileNavigation: React.FunctionComponent<Props> = (props: Props) => {
         </Menu>
       </div>
     );
-  } else {
-    return (
-      <div style={{ float: "right" }}>
-        <Tooltip title="account">
-          <Link to="/user/login">
-            <IconButton>
-              <AccountCircle className={props.classes.navIcon} />
-            </IconButton>
-          </Link>
-        </Tooltip>
-      </div>
-    );
   }
+  return (
+    <div style={{ float: 'right' }}>
+      <Tooltip title="account">
+        <Link to="/user/login">
+          <IconButton>
+            <AccountCircle className={props.classes.navIcon} />
+          </IconButton>
+        </Link>
+      </Tooltip>
+    </div>
+  );
 };
 
 export default ProfileNavigation;

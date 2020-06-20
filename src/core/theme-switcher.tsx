@@ -1,12 +1,12 @@
-import React from "react";
-import { Theme } from "@material-ui/core";
-import { connect } from "react-redux";
-import ApplicationState from "./application-state";
-import { toggleTheme } from "./dynamic-theme/redux/styling-actions";
-import MenuItem from "@material-ui/core/MenuItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import Typography from "@material-ui/core/Typography";
-import { ColorLens } from "@material-ui/icons";
+import React from 'react';
+import { Theme } from '@material-ui/core';
+import { connect } from 'react-redux';
+import MenuItem from '@material-ui/core/MenuItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import Typography from '@material-ui/core/Typography';
+import { ColorLens } from '@material-ui/icons';
+import { toggleTheme } from './dynamic-theme/redux/styling-actions';
+import ApplicationState from './application-state';
 
 interface Props {
   theme: Theme;
@@ -19,21 +19,19 @@ const ThemeSwitcher: React.FunctionComponent<Props> = (props: Props) => {
       <ListItemIcon>
         <ColorLens />
       </ListItemIcon>
-      <Typography>{props.theme.palette.type === "dark" ? "Light theme" : "Dark theme"}</Typography>
+      <Typography>{props.theme.palette.type === 'dark' ? 'Light theme' : 'Dark theme'}</Typography>
     </MenuItem>
   );
 };
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    theme: store.styling.theme
+    theme: store.styling.theme,
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    toggleTheme: () => dispatch(toggleTheme())
-  };
+const mapDispatchToProps = {
+  toggleTheme,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ThemeSwitcher);

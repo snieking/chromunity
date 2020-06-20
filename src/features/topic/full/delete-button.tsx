@@ -1,18 +1,18 @@
-import React, { useState } from "react";
-import { ChromunityUser } from "../../../types";
-import { connect } from "react-redux";
-import ApplicationState from "../../../core/application-state";
-import ConfirmDialog from "../../../shared/confirm-dialog";
-import { removeTopic, REMOVE_TOPIC_OP_ID, hasReportedId } from "../../../core/services/representatives-service";
-import { notifyError } from "../../../core/snackbar/redux/snackbar-actions";
-import { setRateLimited } from "../../../shared/redux/common-actions";
-import { MenuItem, ListItemIcon, Typography } from "@material-ui/core";
-import { Delete } from "@material-ui/icons";
-import { COLOR_RED } from "../../../theme";
+import React, { useState } from 'react';
+import { connect } from 'react-redux';
+import { MenuItem, ListItemIcon, Typography } from '@material-ui/core';
+import { Delete } from '@material-ui/icons';
+import { ChromunityUser } from '../../../types';
+import ApplicationState from '../../../core/application-state';
+import ConfirmDialog from '../../../shared/confirm-dialog';
+import { removeTopic, REMOVE_TOPIC_OP_ID, hasReportedId } from '../../../core/services/representatives-service';
+import { notifyError } from '../../../core/snackbar/redux/snackbar-actions';
+import { setRateLimited } from '../../../shared/redux/common-actions';
+import { COLOR_RED } from '../../../theme';
 
 interface Props {
   topicId: string;
-  handleClose: Function;
+  handleClose: () => void;
   user: ChromunityUser;
   rateLimited: boolean;
   notifyError: typeof notifyError;
@@ -27,7 +27,7 @@ const DeleteButton: React.FunctionComponent<Props> = (props) => {
   const open = () => {
     props.handleClose();
     setDialogOpen(true);
-  }
+  };
 
   const confirm = () => {
     close();
@@ -37,16 +37,14 @@ const DeleteButton: React.FunctionComponent<Props> = (props) => {
         setRateLimited();
       })
       .then(() => window.location.reload());
-  }
+  };
 
-  const isDisabled = () => props.rateLimited || hasReportedId(REMOVE_TOPIC_OP_ID + ":" + props.topicId);
+  const isDisabled = () => props.rateLimited || hasReportedId(`${REMOVE_TOPIC_OP_ID}:${props.topicId}`);
 
   return (
     <>
       <ConfirmDialog
-        text={
-          "This action will remove the topic, which makes sure that no one will be able to read the initial message."
-        }
+        text="This action will remove the topic, which makes sure that no one will be able to read the initial message."
         open={dialogOpen}
         onClose={close}
         onConfirm={confirm}
@@ -59,18 +57,18 @@ const DeleteButton: React.FunctionComponent<Props> = (props) => {
       </MenuItem>
     </>
   );
-}
+};
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
     user: store.account.user,
-    rateLimited: store.common.rateLimited
+    rateLimited: store.common.rateLimited,
   };
 };
 
 const mapDispatchToProps = {
   notifyError,
-  setRateLimited
+  setRateLimited,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(DeleteButton);

@@ -1,16 +1,16 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { ListItemIcon, Menu, MenuItem, Typography } from "@material-ui/core";
-import { Face, Gavel, HowToVote, Report } from "@material-ui/icons";
-import Badge from "@material-ui/core/Badge/Badge";
-import { retrieveLogbookLastRead, retrieveReportsLastRead } from "../services/representatives-service";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { ListItemIcon, Menu, MenuItem, Typography } from '@material-ui/core';
+import { Face, Gavel, HowToVote, Report } from '@material-ui/icons';
+import Badge from '@material-ui/core/Badge/Badge';
+import { retrieveLogbookLastRead, retrieveReportsLastRead } from '../services/representatives-service';
 
 interface Props {
   activeElection: boolean;
   recentLogbookEntryTimestamp: number;
   recentReportEntryTimestamp: number;
   govAnchorEl: HTMLElement;
-  handleGovClose: Function;
+  handleGovClose: () => void;
   isRepresentative: () => boolean;
 }
 
@@ -23,7 +23,7 @@ const GovMenu: React.FunctionComponent<Props> = (props: Props) => {
       open={Boolean(props.govAnchorEl)}
       onClose={() => props.handleGovClose()}
     >
-      <Link style={{ width: "100%" }} to="/gov/representatives">
+      <Link style={{ width: '100%' }} to="/gov/representatives">
         <MenuItem onClick={() => props.handleGovClose()}>
           <ListItemIcon>
             <Face className="menu-item-button" />
@@ -32,7 +32,7 @@ const GovMenu: React.FunctionComponent<Props> = (props: Props) => {
         </MenuItem>
       </Link>
       <br />
-      <Link style={{ width: "100%" }} to="/gov/election">
+      <Link style={{ width: '100%' }} to="/gov/election">
         <MenuItem onClick={() => props.handleGovClose()}>
           <ListItemIcon>
             <Badge variant="dot" invisible={!props.activeElection} color="secondary">
@@ -43,7 +43,7 @@ const GovMenu: React.FunctionComponent<Props> = (props: Props) => {
         </MenuItem>
       </Link>
       <br />
-      <Link style={{ width: "100%" }} to="/gov/log">
+      <Link style={{ width: '100%' }} to="/gov/log">
         <MenuItem onClick={() => props.handleGovClose()}>
           <ListItemIcon>
             <Badge
@@ -58,7 +58,7 @@ const GovMenu: React.FunctionComponent<Props> = (props: Props) => {
         </MenuItem>
       </Link>
       <br />
-      <Link style={{ width: "100%" }} to="/gov/reports">
+      <Link style={{ width: '100%' }} to="/gov/reports">
         <MenuItem onClick={() => props.handleGovClose()}>
           <ListItemIcon>
             <Badge

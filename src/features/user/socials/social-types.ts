@@ -1,6 +1,6 @@
 export interface Socials {
-    twitter: string;
-    linkedin: string;
-    facebook: string;
-    github: string;
+  twitter: string;
+  linkedin: string;
+  facebook: string;
+  github: string;
 }

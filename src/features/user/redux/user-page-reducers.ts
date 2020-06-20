@@ -1,18 +1,18 @@
-import { UserPageState } from "./user-types";
-import { createReducer } from "@reduxjs/toolkit";
-import { userPageInit, updateUserTopics, updateUserReplies, updateUserFollowedChannels } from "./user-page-actions";
+import { createReducer } from '@reduxjs/toolkit';
+import { UserPageState } from './user-types';
+import { userPageInit, updateUserTopics, updateUserReplies, updateUserFollowedChannels } from './user-page-actions';
 
 const initialUserPageState: UserPageState = {
   topics: [],
   couldExistOlderTopics: false,
   replies: [],
   couldExistOlderReplies: false,
-  followedChannels: []
+  followedChannels: [],
 };
 
-export const userPageReducer = createReducer(initialUserPageState, builder =>
+export const userPageReducer = createReducer(initialUserPageState, (builder) =>
   builder
-    .addCase(userPageInit, (state, _) => {
+    .addCase(userPageInit, (state) => {
       state.topics = [];
       state.replies = [];
       state.followedChannels = [];
@@ -30,4 +30,4 @@ export const userPageReducer = createReducer(initialUserPageState, builder =>
     .addCase(updateUserFollowedChannels, (state, action) => {
       state.followedChannels = action.payload;
     })
-)
+);

@@ -1,25 +1,18 @@
-import React from "react";
-import { COLOR_CHROMIA_DARKER, COLOR_OFF_WHITE, COLOR_SOFT_PINK } from "../../theme";
-import { Theme } from "@material-ui/core";
-import ApplicationState from "../application-state";
-import { connect } from "react-redux";
-import { makeStyles } from "@material-ui/core/styles";
+import React from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import { COLOR_CHROMIA_DARKER, COLOR_OFF_WHITE, COLOR_SOFT_PINK } from '../../theme';
 
-interface Props {
-  theme: Theme;
-}
-
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles({
   logo: {
     backgroundColor: COLOR_CHROMIA_DARKER,
-    paddingLeft: "6px",
-    paddingRight: "6px",
-    paddingTop: "4px",
-    borderRadius: "5px"
-  }
-}));
+    paddingLeft: '6px',
+    paddingRight: '6px',
+    paddingTop: '4px',
+    borderRadius: '5px',
+  },
+});
 
-const ChromiaLogo: React.FunctionComponent<Props> = (props: React.PropsWithChildren<Props>) => {
+const ChromiaLogo: React.FunctionComponent = () => {
   const classes = useStyles();
   return (
     <div>
@@ -39,11 +32,11 @@ const ChromiaLogo: React.FunctionComponent<Props> = (props: React.PropsWithChild
           />
           <path
             d="M20.897 10.489a5.876 5.876 0 0 0 2.157-4.558c0-3.246-2.622-5.878-5.855-5.878-3.235 0-5.856 2.632-5.856 5.878v.005c.108-.003.217-.005.327-.005 3.758 0 7.096 1.786 9.227 4.558z"
-            fill={"#CC91F0"}
+            fill="#CC91F0"
           />
           <path
             d="M17.202 11.816c1.403 0 2.69-.495 3.7-1.321-2.132-2.771-5.47-4.557-9.228-4.557-.11 0-.218.002-.327.005.002 3.244 2.623 5.873 5.855 5.873z"
-            fill={"#CC66B8"}
+            fill="#CC66B8"
           />
         </svg>
       </a>
@@ -51,10 +44,4 @@ const ChromiaLogo: React.FunctionComponent<Props> = (props: React.PropsWithChild
   );
 };
 
-const mapStateToProps = (store: ApplicationState) => {
-  return {
-    theme: store.styling.theme
-  };
-};
-
-export default connect(mapStateToProps)(ChromiaLogo);
+export default ChromiaLogo;

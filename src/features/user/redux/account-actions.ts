@@ -1,16 +1,17 @@
-import {
-  AccountActionTypes,
-  ISaveVaultAccount,
-  ISendKudos,
-  AuthenticationStep
-} from "./account-types";
-import { ChromunityUser } from "../../../types";
-import { createAction } from "@reduxjs/toolkit";
-import { withPayloadType } from "../../../shared/redux/util";
+import { createAction } from '@reduxjs/toolkit';
+import { AccountActionTypes, ISaveVaultAccount, ISendKudos, AuthenticationStep } from './account-types';
+import { ChromunityUser } from '../../../types';
+import { withPayloadType } from '../../../shared/redux/util';
 
-export const setAuthenticationStep = createAction(AccountActionTypes.SET_AUTHENTICATION_STEP, withPayloadType<AuthenticationStep>());
+export const setAuthenticationStep = createAction(
+  AccountActionTypes.SET_AUTHENTICATION_STEP,
+  withPayloadType<AuthenticationStep>()
+);
 
-export const saveVaultAccount = createAction(AccountActionTypes.SAVE_VAULT_ACCOUNT, withPayloadType<ISaveVaultAccount>());
+export const saveVaultAccount = createAction(
+  AccountActionTypes.SAVE_VAULT_ACCOUNT,
+  withPayloadType<ISaveVaultAccount>()
+);
 
 export const loginAccount = createAction(AccountActionTypes.LOGIN_ACCOUNT);
 
@@ -30,9 +31,15 @@ export const registerUser = createAction(AccountActionTypes.REGISTER_USER, withP
 
 export const autoLoginAttempted = createAction(AccountActionTypes.AUTO_LOGIN_ATTEMPTED);
 
-export const checkDistrustedUsers = createAction(AccountActionTypes.CHECK_DISTRUSTED_USERS, withPayloadType<ChromunityUser>());
+export const checkDistrustedUsers = createAction(
+  AccountActionTypes.CHECK_DISTRUSTED_USERS,
+  withPayloadType<ChromunityUser>()
+);
 
-export const storeDistrustedUsers = createAction(AccountActionTypes.STORE_DISTRUSTED_USERS, withPayloadType<string[]>());
+export const storeDistrustedUsers = createAction(
+  AccountActionTypes.STORE_DISTRUSTED_USERS,
+  withPayloadType<string[]>()
+);
 
 export const checkUserKudos = createAction(AccountActionTypes.CHECK_USER_KUDOS);
 

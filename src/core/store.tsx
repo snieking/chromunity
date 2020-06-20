@@ -1,8 +1,8 @@
 import logger from 'redux-logger';
-import { configureStore, Middleware } from '@reduxjs/toolkit'
-import createSagaMiddleware from "redux-saga";
-import reducer from "./root-reducer";
-import saga from "./root-saga";
+import { configureStore, Middleware, EnhancedStore } from '@reduxjs/toolkit';
+import createSagaMiddleware from 'redux-saga';
+import reducer from './root-reducer';
+import saga from './root-saga';
 
 // Create Saga MiddleWare
 const sagaMiddleware = createSagaMiddleware();
@@ -15,11 +15,11 @@ if (devEnv) {
   middleware.push(logger);
 }
 
-export default () => {
+export default (): EnhancedStore => {
   const store = configureStore({
     reducer,
     devTools: devEnv,
-    middleware
+    middleware,
   });
   sagaMiddleware.run(saga);
   return store;

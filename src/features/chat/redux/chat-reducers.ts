@@ -1,6 +1,13 @@
-import { ChatState } from "./chat-types";
-import { createReducer } from "@reduxjs/toolkit";
-import { storeChatKeyPair, storeUserChats, storeDecryptedChat, storeChatParticipants, storeChatUsers, storeUnreadChatsCount } from "./chat-actions";
+import { createReducer } from '@reduxjs/toolkit';
+import { ChatState } from './chat-types';
+import {
+  storeChatKeyPair,
+  storeUserChats,
+  storeDecryptedChat,
+  storeChatParticipants,
+  storeChatUsers,
+  storeUnreadChatsCount,
+} from './chat-actions';
 
 const initialChatState: ChatState = {
   rsaKey: null,
@@ -14,12 +21,12 @@ const initialChatState: ChatState = {
   followedChatUsers: [],
   chatUsers: [],
   chatUsersLastUpdate: 0,
-  unreadChats: 0
+  unreadChats: 0,
 };
 
-export const chatReducer = createReducer(initialChatState, builder =>
+export const chatReducer = createReducer(initialChatState, (builder) =>
   builder
-    .addCase(storeChatKeyPair, (state, action) => {
+    .addCase(storeChatKeyPair, (state: ChatState, action) => {
       state.rsaKey = action.payload;
       state.successfullyAuthorized = true;
     })
@@ -43,4 +50,4 @@ export const chatReducer = createReducer(initialChatState, builder =>
     .addCase(storeUnreadChatsCount, (state, action) => {
       state.unreadChats = action.payload;
     })
-)
+);

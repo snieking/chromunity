@@ -1,31 +1,31 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Button, Card, CardContent, Grid, Tooltip, Typography, withStyles, WithStyles } from "@material-ui/core";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button, Card, CardContent, Grid, Tooltip, Typography, withStyles, WithStyles } from '@material-ui/core';
+import { ChatBubble, Face, Favorite, Report, SentimentVeryDissatisfiedSharp, Star } from '@material-ui/icons';
+import Badge from '@material-ui/core/Badge';
 import {
   getTimesUserDistrustedSomeone,
   getTimesUserWasDistrusted,
-  getUserSettingsCached
-} from "../../../core/services/user-service";
-import { ifEmptyAvatarThenPlaceholder } from "../../../shared/util/user-util";
-import Avatar, { AVATAR_SIZE } from "../../../shared/avatar";
-import { ChatBubble, Face, Favorite, Report, SentimentVeryDissatisfiedSharp, Star } from "@material-ui/icons";
-import Badge from "@material-ui/core/Badge";
+  getUserSettingsCached,
+} from '../../../core/services/user-service';
+import { ifEmptyAvatarThenPlaceholder } from '../../../shared/util/user-util';
+import Avatar, { AVATAR_SIZE } from '../../../shared/avatar';
 import {
   distrustRepresentative,
   getTimesRepresentative,
-  isDistrustedByMe
-} from "../../../core/services/representatives-service";
+  isDistrustedByMe,
+} from '../../../core/services/representatives-service';
 import {
   countRepliesByUser,
   countReplyStarRatingForUser,
   countTopicsByUser,
-  countTopicStarRatingForUser
-} from "../../../core/services/topic-service";
-import { countUserFollowers } from "../../../core/services/following-service";
-import { representativeCardStyles } from "../shared-styles";
-import ConfirmDialog from "../../../shared/confirm-dialog";
-import { ChromunityUser } from "../../../types";
-import { toLowerCase } from "../../../shared/util/util";
+  countTopicStarRatingForUser,
+} from '../../../core/services/topic-service';
+import { countUserFollowers } from '../../../core/services/following-service';
+import { representativeCardStyles } from '../shared-styles';
+import ConfirmDialog from '../../../shared/confirm-dialog';
+import { ChromunityUser } from '../../../types';
+import { toLowerCase } from '../../../shared/util/util';
 
 export interface RepresentativeCardProps extends WithStyles<typeof representativeCardStyles> {
   name: string;
@@ -51,7 +51,7 @@ const RepresentativeCard = withStyles(representativeCardStyles)(
     constructor(props: RepresentativeCardProps) {
       super(props);
       this.state = {
-        avatar: "",
+        avatar: '',
         timesRepresentative: 0,
         topicRating: 0,
         replyRating: 0,
@@ -61,7 +61,7 @@ const RepresentativeCard = withStyles(representativeCardStyles)(
         distrusters: 0,
         distrusted: 0,
         distrustDialogOpen: false,
-        distrustedByMe: isDistrustedByMe(props.name)
+        distrustedByMe: isDistrustedByMe(props.name),
       };
 
       this.renderDistrustBtn = this.renderDistrustBtn.bind(this);
@@ -69,124 +69,24 @@ const RepresentativeCard = withStyles(representativeCardStyles)(
     }
 
     componentDidMount() {
-      getUserSettingsCached(this.props.name, 1440).then(settings =>
+      getUserSettingsCached(this.props.name, 1440).then((settings) =>
         this.setState({ avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.name) })
       );
 
-      getTimesRepresentative(this.props.name).then(count => this.setState({ timesRepresentative: count }));
-      countUserFollowers(this.props.name).then(count => this.setState({ followers: count }));
-      countTopicStarRatingForUser(this.props.name).then(count => this.setState({ topicRating: count }));
-      countReplyStarRatingForUser(this.props.name).then(count => this.setState({ replyRating: count }));
-      countTopicsByUser(this.props.name).then(count => this.setState({ topics: count }));
-      countRepliesByUser(this.props.name).then(count => this.setState({ replies: count }));
-      getTimesUserWasDistrusted(this.props.name).then(count => this.setState({ distrusters: count }));
-      getTimesUserDistrustedSomeone(this.props.name).then(count => this.setState({ distrusted: count }));
+      getTimesRepresentative(this.props.name).then((count) => this.setState({ timesRepresentative: count }));
+      countUserFollowers(this.props.name).then((count) => this.setState({ followers: count }));
+      countTopicStarRatingForUser(this.props.name).then((count) => this.setState({ topicRating: count }));
+      countReplyStarRatingForUser(this.props.name).then((count) => this.setState({ replyRating: count }));
+      countTopicsByUser(this.props.name).then((count) => this.setState({ topics: count }));
+      countRepliesByUser(this.props.name).then((count) => this.setState({ replies: count }));
+      getTimesUserWasDistrusted(this.props.name).then((count) => this.setState({ distrusters: count }));
+      getTimesUserDistrustedSomeone(this.props.name).then((count) => this.setState({ distrusted: count }));
     }
 
-    render() {
-      if (this.props.name != null) {
-        return (
-          <Grid item xs={6} sm={6} md={3}>
-            <Card key={"representative-" + this.props.name} className={this.props.classes.representativeCard}>
-              <CardContent>
-                <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} name={this.props.name} />
-                <Typography gutterBottom variant="h6" component="p">
-                  <Link className={this.props.classes.link} to={"/u/" + this.props.name}>
-                    @{this.props.name}
-                  </Link>
-                </Typography>
-                <br />
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <Tooltip title={"Number of times @" + this.props.name + " has won elections"}>
-                      <div>
-                        <Badge badgeContent={this.state.timesRepresentative} color="secondary" showZero>
-                          <Face fontSize="large" />
-                        </Badge>
-                        <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
-                          Elected
-                        </Typography>
-                      </div>
-                    </Tooltip>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Tooltip title={"Number of star ratings that @" + this.props.name + " received"}>
-                      <div>
-                        <Badge
-                          badgeContent={this.state.topicRating + this.state.replyRating}
-                          color="secondary"
-                          showZero
-                        >
-                          <Star fontSize="large" />
-                        </Badge>
-                        <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
-                          Ratings
-                        </Typography>
-                      </div>
-                    </Tooltip>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Tooltip title={"Number of users who follow @" + this.props.name}>
-                      <div>
-                        <Badge badgeContent={this.state.followers} color="secondary" showZero>
-                          <Favorite fontSize="large" />
-                        </Badge>
-                        <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
-                          Followers
-                        </Typography>
-                      </div>
-                    </Tooltip>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Tooltip title={"Messages sent by @" + this.props.name}>
-                      <div>
-                        <Badge badgeContent={this.state.topics + this.state.replies} color="secondary" showZero>
-                          <ChatBubble fontSize="large" />
-                        </Badge>
-                        <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
-                          Messages
-                        </Typography>
-                      </div>
-                    </Tooltip>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Tooltip title={"Users who doesn't trust @" + this.props.name + " as a representative"}>
-                      <div>
-                        <Badge badgeContent={this.state.distrusters} color="secondary" showZero max={99999}>
-                          <SentimentVeryDissatisfiedSharp fontSize="large" />
-                        </Badge>
-                        <Typography variant="body2" component="span" className={this.props.classes.statsDescr}>
-                          Distrusts
-                        </Typography>
-                      </div>
-                    </Tooltip>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Tooltip title={"Number of users that @" + this.props.name + " have distrusted"}>
-                      <div>
-                        <Badge badgeContent={this.state.distrusted} color="secondary" showZero max={99999}>
-                          <Report fontSize="large" />
-                        </Badge>
-                        <Typography variant="body2" component="span" className={this.props.classes.statsDescr}>
-                          Distrusted
-                        </Typography>
-                      </div>
-                    </Tooltip>
-                  </Grid>
-                </Grid>
-                {this.renderDistrustBtn()}
-              </CardContent>
-            </Card>
-          </Grid>
-        );
-      } else {
-        return <div />;
-      }
+    distrustUser() {
+      distrustRepresentative(this.props.user, this.props.name).finally(() =>
+        this.setState({ distrustDialogOpen: false, distrustedByMe: true })
+      );
     }
 
     renderDistrustBtn() {
@@ -208,7 +108,7 @@ const RepresentativeCard = withStyles(representativeCardStyles)(
               Vote to Remove
             </Button>
             <ConfirmDialog
-              text={"Are you sure that you lost your trust in '" + this.props.name + "'?"}
+              text={`Are you sure that you lost your trust in '${this.props.name}'?`}
               open={this.state.distrustDialogOpen}
               onClose={() => this.setState({ distrustDialogOpen: false })}
               onConfirm={this.distrustUser}
@@ -218,10 +118,109 @@ const RepresentativeCard = withStyles(representativeCardStyles)(
       }
     }
 
-    distrustUser() {
-      distrustRepresentative(this.props.user, this.props.name).finally(() =>
-        this.setState({ distrustDialogOpen: false, distrustedByMe: true })
-      );
+    render() {
+      if (this.props.name != null) {
+        return (
+          <Grid item xs={6} sm={6} md={3}>
+            <Card key={`representative-${this.props.name}`} className={this.props.classes.representativeCard}>
+              <CardContent>
+                <Avatar src={this.state.avatar} size={AVATAR_SIZE.LARGE} name={this.props.name} />
+                <Typography gutterBottom variant="h6" component="p">
+                  <Link className={this.props.classes.link} to={`/u/${this.props.name}`}>
+                    @{this.props.name}
+                  </Link>
+                </Typography>
+                <br />
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <Tooltip title={`Number of times @${this.props.name} has won elections`}>
+                      <div>
+                        <Badge badgeContent={this.state.timesRepresentative} color="secondary" showZero>
+                          <Face fontSize="large" />
+                        </Badge>
+                        <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
+                          Elected
+                        </Typography>
+                      </div>
+                    </Tooltip>
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <Tooltip title={`Number of star ratings that @${this.props.name} received`}>
+                      <div>
+                        <Badge
+                          badgeContent={this.state.topicRating + this.state.replyRating}
+                          color="secondary"
+                          showZero
+                        >
+                          <Star fontSize="large" />
+                        </Badge>
+                        <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
+                          Ratings
+                        </Typography>
+                      </div>
+                    </Tooltip>
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <Tooltip title={`Number of users who follow @${this.props.name}`}>
+                      <div>
+                        <Badge badgeContent={this.state.followers} color="secondary" showZero>
+                          <Favorite fontSize="large" />
+                        </Badge>
+                        <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
+                          Followers
+                        </Typography>
+                      </div>
+                    </Tooltip>
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <Tooltip title={`Messages sent by @${this.props.name}`}>
+                      <div>
+                        <Badge badgeContent={this.state.topics + this.state.replies} color="secondary" showZero>
+                          <ChatBubble fontSize="large" />
+                        </Badge>
+                        <Typography variant="body2" component="p" className={this.props.classes.statsDescr}>
+                          Messages
+                        </Typography>
+                      </div>
+                    </Tooltip>
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <Tooltip title={`Users who doesn't trust @${this.props.name} as a representative`}>
+                      <div>
+                        <Badge badgeContent={this.state.distrusters} color="secondary" showZero max={99999}>
+                          <SentimentVeryDissatisfiedSharp fontSize="large" />
+                        </Badge>
+                        <Typography variant="body2" component="span" className={this.props.classes.statsDescr}>
+                          Distrusts
+                        </Typography>
+                      </div>
+                    </Tooltip>
+                  </Grid>
+
+                  <Grid item xs={6}>
+                    <Tooltip title={`Number of users that @${this.props.name} have distrusted`}>
+                      <div>
+                        <Badge badgeContent={this.state.distrusted} color="secondary" showZero max={99999}>
+                          <Report fontSize="large" />
+                        </Badge>
+                        <Typography variant="body2" component="span" className={this.props.classes.statsDescr}>
+                          Distrusted
+                        </Typography>
+                      </div>
+                    </Tooltip>
+                  </Grid>
+                </Grid>
+                {this.renderDistrustBtn()}
+              </CardContent>
+            </Card>
+          </Grid>
+        );
+      }
+      return <div />;
     }
   }
 );

@@ -1,3 +1,4 @@
+import { createAction } from '@reduxjs/toolkit';
 import {
   ChatActionTypes,
   ICreateChatKeyPair,
@@ -8,15 +9,17 @@ import {
   ISendMessage,
   IStoreChatUsers,
   IMarkChatAsRead,
-  IModifyTitle
-} from "./chat-types";
-import { Chat, ChromunityUser } from "../../../types";
-import { createAction } from "@reduxjs/toolkit";
-import { withPayloadType } from "../../../shared/redux/util";
+  IModifyTitle,
+} from './chat-types';
+import { Chat, ChromunityUser } from '../../../types';
+import { withPayloadType } from '../../../shared/redux/util';
 
 export const checkChatAuthentication = createAction(ChatActionTypes.CHECK_CHAT_AUTH_ACTION);
 
-export const createChatKeyPair = createAction(ChatActionTypes.CREATE_CHAT_KEY_PAIR, withPayloadType<ICreateChatKeyPair>());
+export const createChatKeyPair = createAction(
+  ChatActionTypes.CREATE_CHAT_KEY_PAIR,
+  withPayloadType<ICreateChatKeyPair>()
+);
 
 export const storeChatKeyPair = createAction(ChatActionTypes.STORE_CHAT_KEY_PAIR, withPayloadType<string>());
 
@@ -34,7 +37,10 @@ export const openChat = createAction(ChatActionTypes.OPEN_CHAT, withPayloadType<
 
 export const refreshOpenChat = createAction(ChatActionTypes.REFRESH_OPEN_CHAT, withPayloadType<ChromunityUser>());
 
-export const storeDecryptedChat = createAction(ChatActionTypes.STORE_DECRYPTED_CHAT, withPayloadType<IStoreDecryptedChat>());
+export const storeDecryptedChat = createAction(
+  ChatActionTypes.STORE_DECRYPTED_CHAT,
+  withPayloadType<IStoreDecryptedChat>()
+);
 
 export const storeChatParticipants = createAction(ChatActionTypes.STORE_CHAT_PARTICIPANTS, withPayloadType<string[]>());
 

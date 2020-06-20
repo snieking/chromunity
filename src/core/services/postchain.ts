@@ -1,22 +1,22 @@
-import * as pcl from "postchain-client";
-import config from "../../config.js";
-import { Operation, User } from "ft3-lib";
-import * as BoomerangCache from "boomerang-cache";
-import logger from "../../shared/util/logger";
-import Postchain from "ft3-lib/dist/ft3/core/postchain";
-import { Stopwatch } from "ts-stopwatch";
-import { metricEvent } from "../../shared/util/matomo";
+import * as pcl from 'postchain-client';
+import { Operation, User } from 'ft3-lib';
+import * as BoomerangCache from 'boomerang-cache';
+import Postchain from 'ft3-lib/dist/ft3/core/postchain';
+import { Stopwatch } from 'ts-stopwatch';
+import logger from '../../shared/util/logger';
+import config from '../../config';
+import { metricEvent } from '../../shared/util/matomo';
 
-const IF_NULL_CLEAR_CACHE = "clear-cache";
+const IF_NULL_CLEAR_CACHE = 'clear-cache';
 
-const OP_LOCK = BoomerangCache.create("op-lock", {
-  storage: "session",
+const OP_LOCK = BoomerangCache.create('op-lock', {
+  storage: 'session',
   encrypt: false,
 });
 
-const QUERY_CACHE_NAME = "query-cache";
+const QUERY_CACHE_NAME = 'query-cache';
 const QUERY_CACHE = BoomerangCache.create(QUERY_CACHE_NAME, {
-  storage: "session",
+  storage: 'session',
   encrypt: false,
 });
 
@@ -24,25 +24,24 @@ const NODE_API_URL = config.blockchain.nodeApiUrl;
 const BLOCKCHAIN_RID = config.blockchain.rid;
 
 export const REST_CLIENT = pcl.restClient.createRestClient(NODE_API_URL, BLOCKCHAIN_RID, 10);
-export const GTX = pcl.gtxClient.createClient(REST_CLIENT, Buffer.from(BLOCKCHAIN_RID, "hex"), []);
+export const GTX = pcl.gtxClient.createClient(REST_CLIENT, Buffer.from(BLOCKCHAIN_RID, 'hex'), []);
 
 export const BLOCKCHAIN = new Postchain(NODE_API_URL).blockchain(BLOCKCHAIN_RID);
 
 export const executeOperations = async (user: User, ...operations: Operation[]) => {
-  if (operations.length < 1) return new Promise<unknown>(resolve => resolve());
+  if (operations.length < 1) return new Promise<unknown>((resolve) => resolve());
 
-  operations.every((op) => logger.debug("Executing operation [%s] for user [%o]", op.name, JSON.stringify(user)));
+  operations.every((op) => logger.debug('Executing operation [%s] for user [%o]', op.name, JSON.stringify(user)));
   const lockId = JSON.stringify(operations[0].name);
 
   const ongoing = OP_LOCK.get(lockId) != null;
 
   if (ongoing) {
-    logger.info("An operation is already in progress for user");
+    logger.info('An operation is already in progress for user');
     return new Promise<unknown>((resolve) => resolve());
-  } else {
-    if (!test) {
-      OP_LOCK.set(lockId, operations, 60);
-    }
+  }
+  if (!test) {
+    OP_LOCK.set(lockId, operations, 60);
   }
 
   const BC = await BLOCKCHAIN;
@@ -57,7 +56,7 @@ export const executeOperations = async (user: User, ...operations: Operation[]) 
     .post()
     .finally(() => {
       OP_LOCK.remove(lockId);
-      finalizeMetrics("transactions", operations[0].name, stopwatch);
+      finalizeMetrics('transactions', operations[0].name, stopwatch);
     });
 };
 
@@ -68,7 +67,7 @@ export const executeQuery = async (name: string, params: any) => {
     QUERY_CACHE.set(IF_NULL_CLEAR_CACHE, false, 10);
   }
 
-  const cacheId = name + ":" + JSON.stringify(params);
+  const cacheId = `${name}:${JSON.stringify(params)}`;
 
   const cachedResult = QUERY_CACHE.get(cacheId);
   if (cachedResult != null) {
@@ -99,7 +98,7 @@ const removeSessionObjects = () => {
 
     const keys = Object.keys(sessionStorage);
     for (let i = 0; i < items; i++) {
-      const keySplit = keys[i].split(":");
+      const keySplit = keys[i].split(':');
 
       if (QUERY_CACHE_NAME === keySplit[0]) {
         sessionStorage.removeItem(keys[i]);

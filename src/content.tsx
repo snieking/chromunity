@@ -1,25 +1,25 @@
-import React from "react";
-import VaultSuccess from "./features/user/authentication/vault-success";
-import Logout from "./features/user/authentication/logout";
-import Settings from "./features/user/settings/settings";
-import UserWall from "./features/walls/user-wall";
-import UserNotifications from "./features/user/notifications/user-notifications";
-import ChannelWall from "./features/walls/channel/channel-wall";
-import Representatives from "./features/governing/representatives/representatives";
-import Election from "./features/governing/election/election";
-import GovLog from "./features/governing/gov-log";
-import FullTopic from "./features/topic/full/full-topic";
-import { Route, Switch, withRouter } from "react-router";
-import TopicWall from "./features/walls/topic-wall";
-import { ErrorPage } from "./features/error-pages/error-page";
-import CandidateElectionVoteLink from "./features/governing/election/candidate-election-vote-link";
-import ChatPage from "./features/chat/chat-page";
-import VaultCancel from "./features/user/authentication/vault-cancel";
-import Reports from "./features/governing/reports/reports";
-import MetaTags from "react-meta-tags";
-import * as config from "./config";
-import SnackbarHolder from "./core/snackbar/snackbar-holder";
-import VaultLogin from "./features/user/authentication/vault-login/vault-login";
+import React from 'react';
+import { Route, Switch, withRouter } from 'react-router';
+import MetaTags from 'react-meta-tags';
+import VaultSuccess from './features/user/authentication/vault-success';
+import Logout from './features/user/authentication/logout';
+import Settings from './features/user/settings/settings';
+import UserWall from './features/walls/user-wall';
+import UserNotifications from './features/user/notifications/user-notifications';
+import ChannelWall from './features/walls/channel/channel-wall';
+import Representatives from './features/governing/representatives/representatives';
+import Election from './features/governing/election/election';
+import GovLog from './features/governing/gov-log';
+import FullTopic from './features/topic/full/full-topic';
+import TopicWall from './features/walls/topic-wall';
+import { ErrorPage } from './features/error-pages/error-page';
+import CandidateElectionVoteLink from './features/governing/election/candidate-election-vote-link';
+import ChatPage from './features/chat/chat-page';
+import VaultCancel from './features/user/authentication/vault-cancel';
+import Reports from './features/governing/reports/reports';
+import * as config from './config';
+import SnackbarHolder from './core/snackbar/snackbar-holder';
+import VaultLogin from './features/user/authentication/vault-login/vault-login';
 
 const Content: React.FunctionComponent = () => {
   return (

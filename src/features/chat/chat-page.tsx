@@ -1,7 +1,35 @@
-import React, { useEffect, useRef, useState } from "react";
-import ApplicationState from "../../core/application-state";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import { connect } from "react-redux";
+import React, { useEffect, useRef, useState } from 'react';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import { connect } from 'react-redux';
+import { Container, Theme } from '@material-ui/core';
+import Typography from '@material-ui/core/Typography';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
+import List from '@material-ui/core/List';
+import { GroupAdd, ListAlt, RemoveCircle } from '@material-ui/icons';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogActions from '@material-ui/core/DialogActions';
+import Drawer from '@material-ui/core/Drawer';
+import Box from '@material-ui/core/Box';
+import { Redirect } from 'react-router';
+import ConfirmDialog from '../../shared/confirm-dialog';
+import ChatParticipantListItem from './chat-participant-list-item';
+import LoadMoreButton from '../../shared/buttons/load-more-button';
+import { toLowerCase, useInterval } from '../../shared/util/util';
+import { chatPageStyles } from './styles';
+import Tutorial from '../../shared/tutorial';
+import TutorialButton from '../../shared/buttons/tutorial-button';
+import { step } from '../../shared/tutorial-step';
+import ChatMessage from './chat-message';
+import ChatListItem from './chat-list-item';
+import { Chat, ChatMessageDecrypted, ChromunityUser } from '../../types';
+import ChromiaPageHeader from '../../shared/chromia-page-header';
 import {
   addUserToChat,
   checkChatAuthentication,
@@ -16,38 +44,10 @@ import {
   openChat,
   refreshOpenChat,
   sendMessage,
-} from "./redux/chat-actions";
-import { Container, Theme } from "@material-ui/core";
-import ChromiaPageHeader from "../../shared/chromia-page-header";
-import Typography from "@material-ui/core/Typography";
-import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
-import { Chat, ChatMessageDecrypted, ChromunityUser } from "../../types";
-import Grid from "@material-ui/core/Grid";
-import List from "@material-ui/core/List";
-import ChatListItem from "./chat-list-item";
-import ChatMessage from "./chat-message";
-import { GroupAdd, ListAlt, RemoveCircle } from "@material-ui/icons";
-import IconButton from "@material-ui/core/IconButton";
-import Tooltip from "@material-ui/core/Tooltip";
-import Dialog from "@material-ui/core/Dialog";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogActions from "@material-ui/core/DialogActions";
-import ConfirmDialog from "../../shared/confirm-dialog";
-import Drawer from "@material-ui/core/Drawer";
-import ChatParticipantListItem from "./chat-participant-list-item";
-import Box from "@material-ui/core/Box";
-import LoadMoreButton from "../../shared/buttons/load-more-button";
-import { toLowerCase, useInterval } from "../../shared/util/util";
-import { chatPageStyles } from "./styles";
-import Tutorial from "../../shared/tutorial";
-import TutorialButton from "../../shared/buttons/tutorial-button";
-import { step } from "../../shared/tutorial-step";
-import { Redirect } from "react-router";
-import TextToolbar from "../../shared/text-toolbar/text-toolbar";
-import { notifySuccess, notifyError } from "../../core/snackbar/redux/snackbar-actions";
+} from './redux/chat-actions';
+import ApplicationState from '../../core/application-state';
+import TextToolbar from '../../shared/text-toolbar/text-toolbar';
+import { notifySuccess, notifyError } from '../../core/snackbar/redux/snackbar-actions';
 
 interface Props {
   autoLoginInProgress: boolean;
@@ -101,14 +101,14 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   const textInput = useRef<HTMLInputElement>(null);
 
   const [values, setValues] = useState<State>({
-    password: "",
-    selectedChatId: "",
-    message: "",
+    password: '',
+    selectedChatId: '',
+    message: '',
     showAddDialog: false,
     userToAdd: null,
     showLeaveChatDialog: false,
     modifyTitle: false,
-    updatedTitle: "",
+    updatedTitle: '',
     drawerOpen: false,
     participantsDrawerOpen: false,
     scrolledToTop: true,
@@ -174,15 +174,15 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function updateChats() {
-    if (window.location.href.includes("chat")) {
+    if (window.location.href.includes('chat')) {
       props.refreshOpenChat(props.user);
     }
   }
 
   const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
     if (
-      event.type === "keydown" &&
-      ((event as React.KeyboardEvent).key === "Tab" || (event as React.KeyboardEvent).key === "Shift")
+      event.type === 'keydown' &&
+      ((event as React.KeyboardEvent).key === 'Tab' || (event as React.KeyboardEvent).key === 'Shift')
     ) {
       return;
     }
@@ -192,8 +192,8 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   const toggleParticipantsDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
     if (
-      event.type === "keydown" &&
-      ((event as React.KeyboardEvent).key === "Tab" || (event as React.KeyboardEvent).key === "Shift")
+      event.type === 'keydown' &&
+      ((event as React.KeyboardEvent).key === 'Tab' || (event as React.KeyboardEvent).key === 'Shift')
     ) {
       return;
     }
@@ -230,7 +230,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function renderChatCreationActions() {
     return (
-      <div style={{ textAlign: "center", marginTop: "15px", marginLeft: "10px", marginRight: "10px" }}>
+      <div style={{ textAlign: 'center', marginTop: '15px', marginLeft: '10px', marginRight: '10px' }}>
         <Button
           type="button"
           color="secondary"
@@ -264,7 +264,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       return (
         <Grid item xs={12} md={9} className={classes.chatWrapper}>
           <div className={classes.chatActions}>
-            <div style={{ float: "right" }}>
+            <div style={{ float: 'right' }}>
               <IconButton onClick={() => setValues({ ...values, showLeaveChatDialog: true })}>
                 <Tooltip title="Leave chat">
                   <RemoveCircle fontSize="inherit" className={classes.chatActionBtn} />
@@ -333,7 +333,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
             label="Title"
             type="text"
             fullWidth
-            onChange={handleChange("updatedTitle")}
+            onChange={handleChange('updatedTitle')}
             value={values.updatedTitle}
           />
         </DialogContent>
@@ -360,7 +360,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
         text="This action will leave the chat"
         open={values.showLeaveChatDialog}
         onClose={closeLeaveChatDialog}
-        onConfirm={leaveChat}
+        onConfirm={leaveTheChat}
       />
     );
   }
@@ -369,19 +369,19 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     setValues({ ...values, showLeaveChatDialog: false });
   }
 
-  function leaveChat() {
+  function leaveTheChat() {
     const chat = props.chats.find((value) => value.id !== props.activeChat.id);
 
     props.leaveChat(props.user);
     props.openChat({ chat, user: props.user });
 
-    setValues({ ...values, showLeaveChatDialog: false, selectedChatId: chat != null ? chat.id : "" });
+    setValues({ ...values, showLeaveChatDialog: false, selectedChatId: chat != null ? chat.id : '' });
   }
 
   const suggestions = () => {
     return props.chatUsers
       .filter((user) => toLowerCase(user) !== toLowerCase(props.user.name))
-      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
   };
 
   function addUserDialog() {
@@ -389,8 +389,8 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
       <Dialog
         open={values.showAddDialog}
         onClose={closeAddUserDialog}
-        fullWidth={true}
-        maxWidth={"md"}
+        fullWidth
+        maxWidth="md"
         PaperProps={{ className: classes.dialogStyle }}
       >
         <DialogTitle>Add user to chat</DialogTitle>
@@ -402,7 +402,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
           <Autocomplete
             id="combo-box-demo"
             options={suggestions()}
-            style={{ maxWidth: "300px", width: "95%" }}
+            style={{ maxWidth: '300px', width: '95%' }}
             freeSolo
             value={values.userToAdd}
             onChange={(event: any, newValue: string | null) => {
@@ -458,12 +458,12 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.shiftKey && event.keyCode === 13) {
-      setValues({ ...values, message: values.message + "\n" });
+      setValues({ ...values, message: `${values.message}\n` });
       event.preventDefault();
     } else if (!event.shiftKey && event.keyCode === 13) {
       event.preventDefault();
       if (!props.rateLimited && !props.operationPending) {
-        sendMessage();
+        sendChatMessage();
       }
     }
   };
@@ -478,7 +478,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
             className={classes.messageField}
             label="Message"
             value={values.message}
-            onChange={handleChange("message")}
+            onChange={handleChange('message')}
             rowsMax={5}
             multiline
             fullWidth
@@ -506,7 +506,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     const startPosition = textInput.current.selectionStart;
     setValues({
       ...values,
-      message: [values.message.slice(0, startPosition), text, values.message.slice(startPosition)].join(""),
+      message: [values.message.slice(0, startPosition), text, values.message.slice(startPosition)].join(''),
     });
     setTimeout(() => {
       textInput.current.selectionStart = startPosition + text.length;
@@ -516,13 +516,13 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 
   function submitMessage(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    sendMessage();
+    sendChatMessage();
   }
 
-  function sendMessage() {
+  function sendChatMessage() {
     if (values.message.length > 0) {
       props.sendMessage({ user: props.user, chat: props.activeChat, message: values.message.trim() });
-      setValues({ ...values, message: "" });
+      setValues({ ...values, message: '' });
     }
   }
 
@@ -534,7 +534,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     return (
       <>
         <form className={classes.content} onSubmit={proceed}>
-          <ChromiaPageHeader text={"Enter or Create Chat Password"} />
+          <ChromiaPageHeader text="Enter or Create Chat Password" />
           <Typography variant="body2" component="p">
             If you forget your password, resetting it will leave all your chats.
           </Typography>
@@ -547,7 +547,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
             label="Password"
             className={classes.textField}
             value={values.password}
-            onChange={handleChange("password")}
+            onChange={handleChange('password')}
             variant="outlined"
             margin="normal"
           />
@@ -558,7 +558,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
             type="button"
             variant="contained"
             color="secondary"
-            style={{ marginRight: "5px" }}
+            style={{ marginRight: '5px' }}
             onClick={() => setValues({ ...values, showResetChatAccountDialog: true })}
             disabled={props.rateLimited}
           >
@@ -592,7 +592,7 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
     props.deleteChatUser(props.user);
     setValues({
       ...values,
-      password: "",
+      password: '',
       showResetChatAccountDialog: false,
     });
   }
@@ -600,25 +600,26 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   function proceed(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     props.createChatKeyPair({ user: props.user, password: values.password });
-    setValues({ ...values, password: "" });
+    setValues({ ...values, password: '' });
   }
 
   function renderContent() {
     if (props.autoLoginInProgress) {
       return (
-        <div style={{ textAlign: "center", marginTop: "25px" }}>
+        <div style={{ textAlign: 'center', marginTop: '25px' }}>
           <Typography variant="h5" component="h5">
             Authorizing...
           </Typography>
         </div>
       );
-    } else if (!props.autoLoginInProgress && !props.user) {
-      return <Redirect to={"/user/login"} />;
-    } else if (props.successfullyAuthorized && props.rsaKey != null) {
-      return renderChat();
-    } else {
-      return renderLogin();
     }
+    if (!props.autoLoginInProgress && !props.user) {
+      return <Redirect to="/user/login" />;
+    }
+    if (props.successfullyAuthorized && props.rsaKey != null) {
+      return renderChat();
+    }
+    return renderLogin();
   }
 
   const renderTour = () => {
@@ -633,12 +634,12 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
   const steps = (): any[] => {
     return [
       step(
-        ".first-step",
+        '.first-step',
         <>
           <p>Chromunity offers an end-to-end encrypted group chat.</p>
           <p>
-            Messages are encrypted using a shared secret which is stored encrypted for each user by it's chat key. The
-            private chat key is not stored on the blockchain.
+            Messages are encrypted using a shared secret which is stored encrypted for each user by it&#39;s chat key.
+            The private chat key is not stored on the blockchain.
           </p>
         </>
       ),
@@ -649,22 +650,22 @@ const ChatPage: React.FunctionComponent<Props> = (props: Props) => {
 };
 
 const mapDispatchToProps = {
-    checkChatAuthentication,
-    createChatKeyPair,
-    deleteChatUser,
-    createNewChat,
-    addUserToChat,
-    loadUserChats,
-    openChat,
-    refreshOpenChat,
-    sendMessage,
-    leaveChat,
-    modifyTitle,
-    loadChatUsers,
-    loadOlderMessages,
-    notifyError,
-    notifySuccess
-}
+  checkChatAuthentication,
+  createChatKeyPair,
+  deleteChatUser,
+  createNewChat,
+  addUserToChat,
+  loadUserChats,
+  openChat,
+  refreshOpenChat,
+  sendMessage,
+  leaveChat,
+  modifyTitle,
+  loadChatUsers,
+  loadOlderMessages,
+  notifyError,
+  notifySuccess,
+};
 
 const mapStateToProps = (store: ApplicationState) => {
   return {

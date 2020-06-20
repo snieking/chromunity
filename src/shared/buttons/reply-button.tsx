@@ -1,19 +1,19 @@
-import React from "react";
-import { Button, makeStyles } from "@material-ui/core";
-import ApplicationState from "../../core/application-state";
-import { connect } from "react-redux";
+import React from 'react';
+import { Button, makeStyles } from '@material-ui/core';
+import { connect } from 'react-redux';
+import ApplicationState from '../../core/application-state';
 
 interface Props {
-  size: "small" | "medium" | "large";
+  size: 'small' | 'medium' | 'large';
   toggled: boolean;
-  onClick: Function;
+  onClick: () => void;
   rateLimited: boolean;
 }
 
 const useStyles = makeStyles({
   buttonWrapper: {
-    marginLeft: "auto",
-    marginRight: "5px",
+    marginLeft: 'auto',
+    marginRight: '5px',
   },
 });
 
@@ -23,13 +23,13 @@ const ReplyButton: React.FunctionComponent<Props> = (props) => {
     <>
       <div className={classes.buttonWrapper}>
         <Button
-          color={"primary"}
-          variant={props.toggled ? "contained" : "outlined"}
+          color="primary"
+          variant={props.toggled ? 'contained' : 'outlined'}
           size={props.size}
           onClick={() => props.onClick()}
           disabled={props.rateLimited}
         >
-          {props.toggled ? "Hide" : "Reply"}
+          {props.toggled ? 'Hide' : 'Reply'}
         </Button>
       </div>
     </>

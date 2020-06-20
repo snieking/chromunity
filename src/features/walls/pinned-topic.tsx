@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
-import { Topic } from "../../types";
-import { connect } from "react-redux";
-import ApplicationState from "../../core/application-state";
-import TopicOverviewCard from "../topic/topic-overview-card";
-import { checkPinnedTopic } from "../governing/redux/gov-actions";
+import React, { useEffect } from 'react';
+import { connect } from 'react-redux';
+import { Topic } from '../../types';
+import ApplicationState from '../../core/application-state';
+import TopicOverviewCard from '../topic/topic-overview-card';
+import { checkPinnedTopic } from '../governing/redux/gov-actions';
 
 interface Props {
   topic?: Topic;
@@ -36,7 +36,7 @@ const mapStateToProps = (store: ApplicationState) => {
 };
 
 const mapDispatchToProps = {
-  checkPinnedTopic
+  checkPinnedTopic,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(PinnedTopic);

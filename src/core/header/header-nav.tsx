@@ -1,30 +1,30 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from 'react';
 
-import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import { LocationCity } from "@material-ui/icons";
+import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import { LocationCity } from '@material-ui/icons';
 
-import ApplicationState from "../application-state";
-import { connect } from "react-redux";
-import Badge from "@material-ui/core/Badge";
-import { countUnreadChats } from "../../features/chat/redux/chat-actions";
-import { ChromunityUser, RepresentativeReport } from "../../types";
-import { toLowerCase, useInterval } from "../../shared/util/util";
-import { retrieveLogbookLastRead, retrieveReportsLastRead } from "../services/representatives-service";
+import { connect } from 'react-redux';
+import Badge from '@material-ui/core/Badge';
+import ApplicationState from '../application-state';
+import { countUnreadChats } from '../../features/chat/redux/chat-actions';
+import { ChromunityUser, RepresentativeReport } from '../../types';
+import { toLowerCase, useInterval } from '../../shared/util/util';
+import { retrieveLogbookLastRead, retrieveReportsLastRead } from '../services/representatives-service';
 import {
   checkActiveElection,
   checkNewLogbookEntries,
   loadRepresentatives,
   loadReports,
-} from "../../features/governing/redux/gov-actions";
-import ProfileNavigation from "./profile-navigation";
-import MobileWallNavigation from "./mobile-wall-navigation";
-import DesktopWallNavigation from "./desktop-wall-navigation";
-import TestInfoBar from "./test-info-bar";
-import GovMenu from "./gov-menu";
-import ChromiaLogo from "./chromia-logo";
-import { autoLogin, checkUserKudos } from "../../features/user/redux/account-actions";
+} from '../../features/governing/redux/gov-actions';
+import ProfileNavigation from './profile-navigation';
+import MobileWallNavigation from './mobile-wall-navigation';
+import DesktopWallNavigation from './desktop-wall-navigation';
+import TestInfoBar from './test-info-bar';
+import GovMenu from './gov-menu';
+import ChromiaLogo from './chromia-logo';
+import { autoLogin, checkUserKudos } from '../../features/user/redux/account-actions';
 
 interface Props {
   representatives: string[];
@@ -46,18 +46,18 @@ interface Props {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     testInfo: {
-      textAlign: "center",
+      textAlign: 'center',
     },
     desktopWallNav: {
-      display: "inherit",
-      [theme.breakpoints.down("sm")]: {
-        display: "none",
+      display: 'inherit',
+      [theme.breakpoints.down('sm')]: {
+        display: 'none',
       },
     },
     mobileWallNav: {
-      display: "inherit",
-      [theme.breakpoints.up("md")]: {
-        display: "none",
+      display: 'inherit',
+      [theme.breakpoints.up('md')]: {
+        display: 'none',
       },
     },
     navIcon: {
@@ -67,69 +67,69 @@ const useStyles = makeStyles((theme: Theme) =>
       flexGrow: 1,
     },
     leftMenuButton: {
-      [theme.breakpoints.up("sm")]: {
+      [theme.breakpoints.up('sm')]: {
         marginRight: theme.spacing(1),
       },
-      [theme.breakpoints.up("md")]: {
+      [theme.breakpoints.up('md')]: {
         marginRight: theme.spacing(2),
       },
-      [theme.breakpoints.up("lg")]: {
+      [theme.breakpoints.up('lg')]: {
         marginRight: theme.spacing(3),
       },
     },
     rightMenuButton: {
-      [theme.breakpoints.up("sm")]: {
+      [theme.breakpoints.up('sm')]: {
         marginLeft: theme.spacing(1),
       },
-      [theme.breakpoints.up("md")]: {
+      [theme.breakpoints.up('md')]: {
         marginLeft: theme.spacing(2),
       },
-      [theme.breakpoints.up("lg")]: {
+      [theme.breakpoints.up('lg')]: {
         marginLeft: theme.spacing(3),
       },
     },
     inputRoot: {
-      color: "inherit",
+      color: 'inherit',
     },
     inputInput: {
       padding: theme.spacing(1, 1, 1, 7),
-      transition: theme.transitions.create("width"),
-      width: "100%",
-      [theme.breakpoints.up("md")]: {
+      transition: theme.transitions.create('width'),
+      width: '100%',
+      [theme.breakpoints.up('md')]: {
         width: 200,
       },
     },
     leftGroup: {
-      float: "left",
-      display: "flex",
-      width: "40%",
-      [theme.breakpoints.down("sm")]: {
-        width: "50%",
+      float: 'left',
+      display: 'flex',
+      width: '40%',
+      [theme.breakpoints.down('sm')]: {
+        width: '50%',
       },
     },
     middleGroup: {
-      textAlign: "center",
-      float: "none",
-      width: "0%",
-      [theme.breakpoints.up("md")]: {
-        width: "20%",
+      textAlign: 'center',
+      float: 'none',
+      width: '0%',
+      [theme.breakpoints.up('md')]: {
+        width: '20%',
       },
     },
     logo: {
-      display: "none",
-      [theme.breakpoints.up("md")]: {
-        display: "block",
+      display: 'none',
+      [theme.breakpoints.up('md')]: {
+        display: 'block',
       },
     },
     rightGroup: {
-      width: "40%",
-      float: "right",
-      [theme.breakpoints.down("sm")]: {
-        width: "50%",
+      width: '40%',
+      float: 'right',
+      [theme.breakpoints.down('sm')]: {
+        width: '50%',
       },
     },
     profileMenu: {
-      float: "right",
+      float: 'right',
     },
   })
 );
@@ -142,6 +142,12 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   useInterval(() => {
     props.countUnreadChats(props.user);
   }, 30000);
+
+  function isRepresentative() {
+    return (
+      props.user != null && props.user.name != null && props.representatives.includes(toLowerCase(props.user.name))
+    );
+  }
 
   useEffect(() => {
     if (!props.user) {
@@ -173,12 +179,6 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
     setGovAnchorEl(null);
   }
 
-  function isRepresentative() {
-    return (
-      props.user != null && props.user.name != null && props.representatives.includes(toLowerCase(props.user.name))
-    );
-  }
-
   function renderGovernmentIcon() {
     if (!props.activeElection && isRepresentative()) {
       return (
@@ -192,13 +192,12 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
           <LocationCity className={classes.navIcon} />
         </Badge>
       );
-    } else {
-      return (
-        <Badge invisible={!props.activeElection} color="secondary">
-          <LocationCity className={classes.navIcon} />
-        </Badge>
-      );
     }
+    return (
+      <Badge invisible={!props.activeElection} color="secondary">
+        <LocationCity className={classes.navIcon} />
+      </Badge>
+    );
   }
 
   return (
@@ -235,7 +234,12 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
             </div>
           </div>
           <div className={classes.rightGroup}>
-            <ProfileNavigation user={props.user} classes={classes} unreadChats={props.unreadChats} kudos={props.kudos} />
+            <ProfileNavigation
+              user={props.user}
+              classes={classes}
+              unreadChats={props.unreadChats}
+              kudos={props.kudos}
+            />
           </div>
         </Toolbar>
       </AppBar>
@@ -250,8 +254,8 @@ const mapDispatch = {
   loadReports,
   countUnreadChats,
   autoLogin,
-  checkUserKudos
-}
+  checkUserKudos,
+};
 
 const mapState = (state: ApplicationState) => {
   return {
@@ -261,8 +265,8 @@ const mapState = (state: ApplicationState) => {
     unreadChats: state.chat.unreadChats,
     recentLogbookEntryTimestamp: state.government.recentLogbookEntryTimestamp,
     user: state.account.user,
-    kudos: state.account.kudos
-  }
+    kudos: state.account.kudos,
+  };
 };
 
 export default connect(mapState, mapDispatch)(HeaderNav);

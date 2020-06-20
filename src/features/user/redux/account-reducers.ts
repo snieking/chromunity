@@ -1,6 +1,15 @@
-import { AccountState, AuthenticationStep } from "./account-types";
-import { createReducer } from "@reduxjs/toolkit";
-import { vaultCancel, setUser, saveVaultAccount, setAuthenticationStep, autoLogin, autoLoginAttempted, storeDistrustedUsers, storeUserKudos } from "./account-actions";
+import { createReducer } from '@reduxjs/toolkit';
+import { AccountState, AuthenticationStep } from './account-types';
+import {
+  vaultCancel,
+  setUser,
+  saveVaultAccount,
+  setAuthenticationStep,
+  autoLogin,
+  autoLoginAttempted,
+  storeDistrustedUsers,
+  storeUserKudos,
+} from './account-actions';
 
 const initialAccountState: AccountState = {
   authenticationStep: null,
@@ -21,9 +30,9 @@ function getCancellationStep(step: AuthenticationStep): AuthenticationStep {
   }
 }
 
-export const loginReducer = createReducer(initialAccountState, builder =>
+export const loginReducer = createReducer(initialAccountState, (builder) =>
   builder
-    .addCase(vaultCancel, (state, _) => {
+    .addCase(vaultCancel, (state) => {
       state.authenticationStep = getCancellationStep(state.authenticationStep);
     })
     .addCase(setUser, (state, action) => {
@@ -36,10 +45,10 @@ export const loginReducer = createReducer(initialAccountState, builder =>
     .addCase(setAuthenticationStep, (state, action) => {
       state.authenticationStep = action.payload;
     })
-    .addCase(autoLogin, (state, _) => {
+    .addCase(autoLogin, (state) => {
       state.autoLoginInProgress = true;
     })
-    .addCase(autoLoginAttempted, (state, _) => {
+    .addCase(autoLoginAttempted, (state) => {
       state.autoLoginInProgress = false;
     })
     .addCase(storeDistrustedUsers, (state, action) => {
@@ -48,4 +57,4 @@ export const loginReducer = createReducer(initialAccountState, builder =>
     .addCase(storeUserKudos, (state, action) => {
       state.kudos = action.payload;
     })
-)
+);

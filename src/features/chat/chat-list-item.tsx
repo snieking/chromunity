@@ -1,27 +1,27 @@
-import React, { useEffect, useState } from "react";
-import { Chat } from "../../types";
-import { ListItem } from "@material-ui/core";
-import ListItemText from "@material-ui/core/ListItemText";
-import { timeAgoReadable } from "../../shared/util/util";
-import { getUserSettingsCached } from "../../core/services/user-service";
-import { ifEmptyAvatarThenPlaceholder } from "../../shared/util/user-util";
-import Avatar, { AVATAR_SIZE } from "../../shared/avatar";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import { chatListItemStyles } from "./styles";
+import React, { useEffect, useState } from 'react';
+import { ListItem } from '@material-ui/core';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import { Chat } from '../../types';
+import { timeAgoReadable } from '../../shared/util/util';
+import { getUserSettingsCached } from '../../core/services/user-service';
+import { ifEmptyAvatarThenPlaceholder } from '../../shared/util/user-util';
+import Avatar, { AVATAR_SIZE } from '../../shared/avatar';
+import { chatListItemStyles } from './styles';
 
 interface Props {
   chat: Chat;
   selectedId?: string;
-  onClick: Function;
+  onClick: (chat: Chat) => void;
 }
 
 const ChatListItem: React.FunctionComponent<Props> = (props: Props) => {
   const classes = chatListItemStyles(props);
-  const [avatar, setAvatar] = useState("");
+  const [avatar, setAvatar] = useState('');
 
   useEffect(() => {
     if (props.chat.last_message != null) {
-      getUserSettingsCached(props.chat.last_message.sender, 600).then(settings =>
+      getUserSettingsCached(props.chat.last_message.sender, 600).then((settings) =>
         setAvatar(ifEmptyAvatarThenPlaceholder(settings.avatar, props.chat.last_message.sender))
       );
     }
@@ -30,11 +30,11 @@ const ChatListItem: React.FunctionComponent<Props> = (props: Props) => {
   return (
     <ListItem
       button
-      className={props.chat.id === props.selectedId ? classes.selected : ""}
+      className={props.chat.id === props.selectedId ? classes.selected : ''}
       onClick={() => props.onClick(props.chat)}
     >
       {avatar.length !== 0 && (
-        <ListItemIcon style={{ float: "left" }}>
+        <ListItemIcon style={{ float: 'left' }}>
           <Avatar src={avatar} size={AVATAR_SIZE.SMALL} name={props.chat.last_message.sender} />
         </ListItemIcon>
       )}

@@ -1,38 +1,29 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import {
-  Container,
-  createStyles,
-  Paper,
-  Tab,
-  Tabs,
-  Theme,
-  withStyles,
-  WithStyles
-} from "@material-ui/core";
-import { Topic, TopicReply } from "../../types";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Container, createStyles, Paper, Tab, Tabs, Theme, withStyles, WithStyles } from '@material-ui/core';
+import { RouteComponentProps } from 'react-router';
+import { connect } from 'react-redux';
+import { Topic, TopicReply } from '../../types';
 
-import { RouteComponentProps } from "react-router";
-import ProfileCard from "../user/profile-card";
-import TopicOverviewCard from "../topic/topic-overview-card";
-import LoadMoreButton from "../../shared/buttons/load-more-button";
-import TopicReplyOverviewCard from "../topic/topic-reply-overview-card";
-import { connect } from "react-redux";
-import ApplicationState from "../../core/application-state";
+import ProfileCard from '../user/profile-card';
+import TopicOverviewCard from '../topic/topic-overview-card';
+import LoadMoreButton from '../../shared/buttons/load-more-button';
+import TopicReplyOverviewCard from '../topic/topic-reply-overview-card';
+import ApplicationState from '../../core/application-state';
 import {
   userPageInit,
   loadUserTopics,
   loadUserReplies,
-  loadUserFollowedChannels
-} from "../user/redux/user-page-actions";
-import CustomChip from "../../shared/custom-chip";
-import { markTopicWallRefreshed } from "../../shared/util/user-util";
+  loadUserFollowedChannels,
+} from '../user/redux/user-page-actions';
+import CustomChip from '../../shared/custom-chip';
+import { markTopicWallRefreshed } from '../../shared/util/user-util';
 
 const styles = (theme: Theme) =>
   createStyles({
     text: {
-      color: theme.palette.primary.main
-    }
+      color: theme.palette.primary.main,
+    },
   });
 
 interface MatchParams {
@@ -58,7 +49,7 @@ interface UserWallState {
   activeTab: number;
 }
 
-const topicsPageSize: number = 15;
+const topicsPageSize = 15;
 
 const UserWall = withStyles(styles)(
   class extends React.Component<UserWallProps, UserWallState> {
@@ -68,7 +59,7 @@ const UserWall = withStyles(styles)(
         representatives: [],
         couldExistOlderTopics: false,
         couldExistOlderTopicReplies: false,
-        activeTab: 0
+        activeTab: 0,
       };
 
       this.renderUserPageIntro = this.renderUserPageIntro.bind(this);
@@ -95,21 +86,30 @@ const UserWall = withStyles(styles)(
       this.props.loadUserFollowedChannels(username);
     }
 
-    render() {
-      return (
-        <div>
-          <Container fixed>
-            {this.renderUserPageIntro()}
-            <Tabs value={this.state.activeTab} onChange={this.handleChange} aria-label="User activity">
-              <Tab data-tut="topics_nav" label="Topics" {...this.a11yProps(0)} className={this.props.classes.text} />
-              <Tab data-tut="replies_nav" label="Replies" {...this.a11yProps(1)} className={this.props.classes.text} />
-              <Tab data-tut="channels_nav" label="Channels" {...this.a11yProps(2)} className={this.props.classes.text} />
-            </Tabs>
-            {this.renderUserContent()}
-            {this.renderLoadMoreButton()}
-          </Container>
-        </div>
-      );
+    a11yProps(index: number) {
+      return {
+        id: `simple-tab-${index}`,
+        'aria-controls': `simple-tabpanel-${index}`,
+      };
+    }
+
+    handleChange(event: React.ChangeEvent<unknown>, newValue: number) {
+      this.setState({ activeTab: newValue });
+    }
+
+    renderLoadMoreButton() {
+      if (this.state.couldExistOlderTopics) {
+        return (
+          <LoadMoreButton
+            onClick={() =>
+              this.props.loadUserTopics({
+                username: this.props.match.params.userId,
+                pageSize: topicsPageSize,
+              })
+            }
+          />
+        );
+      }
     }
 
     renderUserPageIntro() {
@@ -118,38 +118,20 @@ const UserWall = withStyles(styles)(
       }
     }
 
-    renderLoadMoreButton() {
-      if (this.state.couldExistOlderTopics) {
-        return <LoadMoreButton onClick={() => this.props.loadUserTopics({
-          username: this.props.match.params.userId,
-          pageSize: topicsPageSize
-        })} />;
-      }
-    }
-
-    a11yProps(index: number) {
-      return {
-        id: `simple-tab-${index}`,
-        "aria-controls": `simple-tabpanel-${index}`
-      };
-    }
-
-    handleChange(event: React.ChangeEvent<{}>, newValue: number) {
-      this.setState({ activeTab: newValue });
-    }
-
     renderUserContent() {
       if (this.state.activeTab === 0) {
-        return this.props.topics.map(topic => <TopicOverviewCard key={topic.id} topic={topic} />);
-      } else if (this.state.activeTab === 1) {
-        return this.props.replies.map(reply => <TopicReplyOverviewCard key={reply.id} reply={reply} />);
-      } else if (this.state.activeTab === 2 && this.props.userFollowedChannels.length > 0) {
+        return this.props.topics.map((topic) => <TopicOverviewCard key={topic.id} topic={topic} />);
+      }
+      if (this.state.activeTab === 1) {
+        return this.props.replies.map((reply) => <TopicReplyOverviewCard key={reply.id} reply={reply} />);
+      }
+      if (this.state.activeTab === 2 && this.props.userFollowedChannels.length > 0) {
         return (
           <Paper>
-            <div style={{ padding: "15px" }}>
-              {this.props.userFollowedChannels.map(channel => {
+            <div style={{ padding: '15px' }}>
+              {this.props.userFollowedChannels.map((channel) => {
                 return (
-                  <Link key={channel} to={"/c/" + channel.replace("#", "")}>
+                  <Link key={channel} to={`/c/${channel.replace('#', '')}`}>
                     <CustomChip tag={channel} />
                   </Link>
                 );
@@ -157,9 +139,30 @@ const UserWall = withStyles(styles)(
             </div>
           </Paper>
         );
-      } else {
-        return <div />;
       }
+      return <div />;
+    }
+
+    render() {
+      return (
+        <div>
+          <Container fixed>
+            {this.renderUserPageIntro()}
+            <Tabs value={this.state.activeTab} onChange={this.handleChange} aria-label="User activity">
+              <Tab data-tut="topics_nav" label="Topics" {...this.a11yProps(0)} className={this.props.classes.text} />
+              <Tab data-tut="replies_nav" label="Replies" {...this.a11yProps(1)} className={this.props.classes.text} />
+              <Tab
+                data-tut="channels_nav"
+                label="Channels"
+                {...this.a11yProps(2)}
+                className={this.props.classes.text}
+              />
+            </Tabs>
+            {this.renderUserContent()}
+            {this.renderLoadMoreButton()}
+          </Container>
+        </div>
+      );
     }
   }
 );
@@ -170,7 +173,7 @@ const mapStateToProps = (store: ApplicationState) => {
     replies: store.userPage.replies,
     couldExistOlderTopics: store.userPage.couldExistOlderTopics,
     couldExistOlderReplies: store.userPage.couldExistOlderReplies,
-    userFollowedChannels: store.userPage.followedChannels
+    userFollowedChannels: store.userPage.followedChannels,
   };
 };
 
@@ -178,7 +181,7 @@ const mapDispatchToProps = {
   userPageInit,
   loadUserTopics,
   loadUserReplies,
-  loadUserFollowedChannels
+  loadUserFollowedChannels,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(UserWall);

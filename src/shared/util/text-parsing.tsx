@@ -1,4 +1,4 @@
-import emoji from "emoji-dictionary";
+import emoji from 'emoji-dictionary';
 
 export function parseContent(message: string): string {
   return parseUsers(parseHashtags(parseTopics(message)));
@@ -27,15 +27,15 @@ export function getUsers(message: string): string[] {
   }
 
   const users: string[] = message.match(USER_REGEX);
-  return users != null ? users.map(user => user.substring(1, user.length)) : [];
+  return users != null ? users.map((user) => user.substring(1, user.length)) : [];
 }
 
 function parseHashtagsMarkdown(message: string) {
-  return message.replace(HASHTAG_REGEX, "$1[$2$3](/c/$3)");
+  return message.replace(HASHTAG_REGEX, '$1[$2$3](/c/$3)');
 }
 
 function parseUsersMarkdown(message: string) {
-  return message.replace(USER_REGEX, "[$1$2](/u/$2)");
+  return message.replace(USER_REGEX, '[$1$2](/u/$2)');
 }
 
 function parseHashtags(message: string): string {
@@ -52,12 +52,12 @@ function parseTopics(message: string): string {
 
 export const parseEmojis = (text: string) =>
   text
-    .replace(/:[dD]\b/gi, ":smiley:")
-    .replace(/;\)\B/gi, ":wink:")
-    .replace(/:\|\B/gi, ":expressionless:")
-    .replace(/:[sS]\b/gi, ":confounded:")
-    .replace(/:'\)\B/gi, ":sweat_smile:")
-    .replace(/<3\b/gi, ":heart:")
-    .replace(/:[pP]\b/gi, ":stuck_out_tongue:")
-    .replace(/:[oO]\b/gi, ":open_mouth:")
-    .replace(/:\w+:/gi, name => emoji.getUnicode(name));
+    .replace(/:[dD]\b/gi, ':smiley:')
+    .replace(/;\)\B/gi, ':wink:')
+    .replace(/:\|\B/gi, ':expressionless:')
+    .replace(/:[sS]\b/gi, ':confounded:')
+    .replace(/:'\)\B/gi, ':sweat_smile:')
+    .replace(/<3\b/gi, ':heart:')
+    .replace(/:[pP]\b/gi, ':stuck_out_tongue:')
+    .replace(/:[oO]\b/gi, ':open_mouth:')
+    .replace(/:\w+:/gi, (name) => emoji.getUnicode(name));

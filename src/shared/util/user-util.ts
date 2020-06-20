@@ -1,32 +1,32 @@
-import * as BoomerangCache from "boomerang-cache";
-import ReactPiwik from "react-piwik";
+import * as BoomerangCache from 'boomerang-cache';
+import ReactPiwik from 'react-piwik';
 import * as Sentry from '@sentry/browser';
-import logger from "./logger";
+import logger from './logger';
 
-const LOCAL_CACHE = BoomerangCache.create("local-bucket", {
-  storage: "local",
-  encrypt: false
+const LOCAL_CACHE = BoomerangCache.create('local-bucket', {
+  storage: 'local',
+  encrypt: false,
 });
-const ENCRYPTED_LOCAL_CACHE = BoomerangCache.create("encrypted-local-bucket", {
-  storage: "local",
-  encrypt: true
+const ENCRYPTED_LOCAL_CACHE = BoomerangCache.create('encrypted-local-bucket', {
+  storage: 'local',
+  encrypt: true,
 });
-const SESSION_CACHE = BoomerangCache.create("session-bucket", {
-  storage: "session",
-  encrypt: true
+const SESSION_CACHE = BoomerangCache.create('session-bucket', {
+  storage: 'session',
+  encrypt: true,
 });
 
-const USER_KEY = "user";
-const USER_META_KEY = "user_meta";
-const RSA_PASS = "rsaPassPhrase";
+const USER_KEY = 'user';
+const USER_META_KEY = 'user_meta';
+const RSA_PASS = 'rsaPassPhrase';
 
-const WALL_UPDATED_IN_SESSION = "wallUpdatedInSession";
-const WALL_REFRESHED = "wallRefreshed";
-const WALL_PREVIOUSLY_REFRESHED = "wallPreviouslyRefreshed";
+const WALL_UPDATED_IN_SESSION = 'wallUpdatedInSession';
+const WALL_REFRESHED = 'wallRefreshed';
+const WALL_PREVIOUSLY_REFRESHED = 'wallPreviouslyRefreshed';
 
-const TOPIC_READ_PREFIX = "topicRead:";
+const TOPIC_READ_PREFIX = 'topicRead:';
 
-let debugUserSet: boolean = false;
+let debugUserSet = false;
 
 export function clearSession(): void {
   ENCRYPTED_LOCAL_CACHE.clear();
@@ -47,7 +47,7 @@ export function markTopicWallRefreshed() {
 
   if (!updatedInTheSession) {
     const wallLatestRefresh = LOCAL_CACHE.get(WALL_REFRESHED);
-    LOCAL_CACHE.set(WALL_PREVIOUSLY_REFRESHED, wallLatestRefresh ? wallLatestRefresh : 0);
+    LOCAL_CACHE.set(WALL_PREVIOUSLY_REFRESHED, wallLatestRefresh || 0);
     LOCAL_CACHE.set(WALL_REFRESHED, Date.now());
     SESSION_CACHE.set(WALL_UPDATED_IN_SESSION, true, 300);
   }
@@ -55,7 +55,7 @@ export function markTopicWallRefreshed() {
 
 export function getWallPreviouslyRefreshed(): number {
   const prevRefreshed = LOCAL_CACHE.get(WALL_PREVIOUSLY_REFRESHED);
-  return prevRefreshed ? prevRefreshed : 0;
+  return prevRefreshed || 0;
 }
 
 export function markTopicReadInSession(topicId: string) {
@@ -80,15 +80,15 @@ export function setUsername(username: string): void {
 function pushUsernameToMatomo(username: string) {
   if (Sentry != null && ReactPiwik != null && username != null && !debugUserSet) {
     try {
-      Sentry.configureScope(scope => scope.setUser({"username": username}));
+      Sentry.configureScope((scope) => scope.setUser({ username }));
       ReactPiwik.push(['setUserId', username]);
       debugUserSet = true;
-    } catch(error) {
-      logger.error("Error adding username [%s] for debug", username, error);
+    } catch (error) {
+      logger.error('Error adding username [%s] for debug', username, error);
     }
   }
 }
 
 export function ifEmptyAvatarThenPlaceholder(avatar: string, seed: string) {
-  return avatar !== "" && avatar != null ? avatar : "https://avatars.dicebear.com/v2/gridy/" + seed + ".svg";
+  return avatar !== '' && avatar != null ? avatar : `https://avatars.dicebear.com/v2/gridy/${seed}.svg`;
 }

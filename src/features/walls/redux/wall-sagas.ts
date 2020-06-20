@@ -1,10 +1,8 @@
+import { put, select, takeLatest } from 'redux-saga/effects';
+import { Action } from 'redux';
 import { setQueryPending } from '../../../shared/redux/common-actions';
-import {
-  WallActionTypes,
-  WallType
-} from "./wall-types";
-import { put, select, takeLatest } from "redux-saga/effects";
-import { Topic } from "../../../types";
+import { WallActionTypes, WallType } from './wall-types';
+import { Topic } from '../../../types';
 import {
   getAllTopicsByPopularityAfterTimestamp,
   getTopicsAfterTimestamp,
@@ -14,12 +12,23 @@ import {
   getTopicsFromFollowedChannelsPriorToTimestamp,
   getTopicsFromFollowsAfterTimestamp,
   getTopicsFromFollowsPriorToTimestamp,
-  getTopicsPriorToTimestamp
-} from "../../../core/services/topic-service";
-import { updateTopicWallFromCache, updateTopics, loadAllTopicWall, loadOlderAllTopics, loadAllTopicsByPopularity, loadFollowedUsersTopicWall, loadOlderFollowedUsersTopics, loadFollowedUsersTopicsByPopularity, loadFollowedChannelsTopicWall, loadOlderFollowedChannelsTopics, loadFollowedChannelsTopicsByPopularity } from "./wall-actions";
-import ApplicationState from "../../../core/application-state";
-import { removeDuplicateTopicsFromFirst } from "../../../shared/util/util";
-import { Action } from 'redux';
+  getTopicsPriorToTimestamp,
+} from '../../../core/services/topic-service';
+import {
+  updateTopicWallFromCache,
+  updateTopics,
+  loadAllTopicWall,
+  loadOlderAllTopics,
+  loadAllTopicsByPopularity,
+  loadFollowedUsersTopicWall,
+  loadOlderFollowedUsersTopics,
+  loadFollowedUsersTopicsByPopularity,
+  loadFollowedChannelsTopicWall,
+  loadOlderFollowedChannelsTopics,
+  loadFollowedChannelsTopicsByPopularity,
+} from './wall-actions';
+import ApplicationState from '../../../core/application-state';
+import { removeDuplicateTopicsFromFirst } from '../../../shared/util/util';
 
 export function* topicWallWatcher() {
   yield takeLatest(WallActionTypes.LOAD_ALL_TOPIC_WALL, loadAllTopicsSaga);
@@ -28,7 +37,10 @@ export function* topicWallWatcher() {
 
   yield takeLatest(WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPIC_WALL, loadFollowedChannelsTopicsSaga);
   yield takeLatest(WallActionTypes.LOAD_OLDER_FOLLOWED_CHANNELS_TOPICS, loadOlderFollowedChannelsTopicsSaga);
-  yield takeLatest(WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPICS_BY_POPULARITY, loadFollowedChannelsTopicsByPopularitySaga);
+  yield takeLatest(
+    WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPICS_BY_POPULARITY,
+    loadFollowedChannelsTopicsByPopularitySaga
+  );
 
   yield takeLatest(WallActionTypes.LOAD_FOLLOWED_USERS_TOPIC_WALL, loadFollowedUsersTopicsSaga);
   yield takeLatest(WallActionTypes.LOAD_OLDER_FOLLOWED_USERS_TOPICS, loadOlderFollowedUsersTopicsSaga);
@@ -61,10 +73,9 @@ export function* loadAllTopicsSaga(action: Action) {
     if (!action.payload.ignoreCache && !cacheExpired(updated)) {
       yield put(updateTopicWallFromCache(WallType.ALL));
       return;
-    } else {
-      yield put(setQueryPending(true));
-      topics = yield select(getAllTopics);
     }
+    yield put(setQueryPending(true));
+    topics = yield select(getAllTopics);
 
     let retrievedTopics: Topic[];
     let couldExistOlder = false;
@@ -81,7 +92,7 @@ export function* loadAllTopicsSaga(action: Action) {
       updateTopics({
         topics: retrievedTopics.concat(removeDuplicateTopicsFromFirst(topics, retrievedTopics)),
         couldExistOlder,
-        wallType: WallType.ALL
+        wallType: WallType.ALL,
       })
     );
 
@@ -103,11 +114,13 @@ export function* loadOlderAllTopicsSaga(action: Action) {
 
     const updatedTopics: Topic[] = topics.concat(retrievedTopics);
 
-    yield put(updateTopics({
-      topics: updatedTopics,
-      couldExistOlder: retrievedTopics.length >= action.payload,
-      wallType: WallType.ALL
-    }));
+    yield put(
+      updateTopics({
+        topics: updatedTopics,
+        couldExistOlder: retrievedTopics.length >= action.payload,
+        wallType: WallType.ALL,
+      })
+    );
     yield put(setQueryPending(false));
   }
 }
@@ -115,7 +128,10 @@ export function* loadOlderAllTopicsSaga(action: Action) {
 export function* loadAllTopicsByPopularitySaga(action: Action) {
   if (loadAllTopicsByPopularity.match(action)) {
     yield put(setQueryPending(true));
-    const topics: Topic[] = yield getAllTopicsByPopularityAfterTimestamp(action.payload.timestamp, action.payload.pageSize);
+    const topics: Topic[] = yield getAllTopicsByPopularityAfterTimestamp(
+      action.payload.timestamp,
+      action.payload.pageSize
+    );
     yield put(updateTopics({ topics, couldExistOlder: false, wallType: WallType.NONE }));
     yield put(setQueryPending(false));
   }
@@ -143,7 +159,11 @@ export function* loadFollowedUsersTopicsSaga(action: Action) {
       );
       couldExistOlder = yield select(getFollowedUsersCouldExistOlder);
     } else {
-      retrievedTopics = yield getTopicsFromFollowsPriorToTimestamp(action.payload.username, Date.now(), action.payload.pageSize);
+      retrievedTopics = yield getTopicsFromFollowsPriorToTimestamp(
+        action.payload.username,
+        Date.now(),
+        action.payload.pageSize
+      );
       couldExistOlder = retrievedTopics.length >= action.payload.pageSize;
     }
 
@@ -151,7 +171,7 @@ export function* loadFollowedUsersTopicsSaga(action: Action) {
       updateTopics({
         topics: retrievedTopics.concat(removeDuplicateTopicsFromFirst(topics, retrievedTopics)),
         couldExistOlder,
-        wallType: WallType.USER
+        wallType: WallType.USER,
       })
     );
 
@@ -173,11 +193,13 @@ export function* loadOlderFollowedUsersTopicsSaga(action: Action) {
       );
     }
 
-    yield put(updateTopics({
-      topics: topics.concat(retrievedTopics),
-      couldExistOlder: retrievedTopics.length >= action.payload.pageSize,
-      wallType: WallType.USER
-    }));
+    yield put(
+      updateTopics({
+        topics: topics.concat(retrievedTopics),
+        couldExistOlder: retrievedTopics.length >= action.payload.pageSize,
+        wallType: WallType.USER,
+      })
+    );
     yield put(setQueryPending(false));
   }
 }
@@ -218,7 +240,11 @@ export function* loadFollowedChannelsTopicsSaga(action: Action) {
       );
       couldExistOlder = yield select(getFollowedChannelsCouldExistOlder);
     } else {
-      retrievedTopics = yield getTopicsFromFollowedChannelsPriorToTimestamp(action.payload.username, Date.now(), action.payload.pageSize);
+      retrievedTopics = yield getTopicsFromFollowedChannelsPriorToTimestamp(
+        action.payload.username,
+        Date.now(),
+        action.payload.pageSize
+      );
       couldExistOlder = retrievedTopics.length >= action.payload.pageSize;
     }
 
@@ -226,7 +252,7 @@ export function* loadFollowedChannelsTopicsSaga(action: Action) {
       updateTopics({
         topics: retrievedTopics.concat(removeDuplicateTopicsFromFirst(topics, retrievedTopics)),
         couldExistOlder,
-        wallType: WallType.CHANNEL
+        wallType: WallType.CHANNEL,
       })
     );
     yield put(setQueryPending(false));
@@ -247,11 +273,13 @@ export function* loadOlderFollowedChannelsTopicsSaga(action: Action) {
       );
     }
 
-    yield put(updateTopics({
-      topics: topics.concat(retrievedTopics),
-      couldExistOlder: retrievedTopics.length >= action.payload.pageSize,
-      wallType: WallType.CHANNEL
-    }));
+    yield put(
+      updateTopics({
+        topics: topics.concat(retrievedTopics),
+        couldExistOlder: retrievedTopics.length >= action.payload.pageSize,
+        wallType: WallType.CHANNEL,
+      })
+    );
     yield put(setQueryPending(false));
   }
 }

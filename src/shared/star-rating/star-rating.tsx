@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { ChromunityUser } from "../../types";
-import ApplicationState from "../../core/application-state";
-import { connect } from "react-redux";
-import StarRatingPresentation from "./star-rating-presentation";
-import { toLowerCase } from "../util/util";
-import { setRateLimited, setOperationPending } from "../redux/common-actions";
-import { notifyError } from "../../core/snackbar/redux/snackbar-actions";
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import { ChromunityUser } from '../../types';
+import ApplicationState from '../../core/application-state';
+import StarRatingPresentation from './star-rating-presentation';
+import { toLowerCase } from '../util/util';
+import { setRateLimited, setOperationPending } from '../redux/common-actions';
+import { notifyError } from '../../core/snackbar/redux/snackbar-actions';
 
 interface Props {
   starRatingFetcher: () => Promise<string[]>;
@@ -87,7 +87,7 @@ const mapStateToProps = (store: ApplicationState) => {
 const mapDispatchToProps = {
   setRateLimited,
   notifyError,
-  setOperationPending
+  setOperationPending,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(StarRating);

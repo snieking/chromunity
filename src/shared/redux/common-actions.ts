@@ -1,6 +1,6 @@
-import { CommonActionTypes } from "./common-types";
-import { createAction } from "@reduxjs/toolkit";
-import { withPayloadType } from "./util";
+import { createAction } from '@reduxjs/toolkit';
+import { CommonActionTypes } from './common-types';
+import { withPayloadType } from './util';
 
 export const toggleTutorial = createAction(CommonActionTypes.TOGGLE_TUTORIAL);
 

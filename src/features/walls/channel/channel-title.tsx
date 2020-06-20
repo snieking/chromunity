@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { Badge, makeStyles } from "@material-ui/core";
-import ChromiaPageHeader from "../../../shared/chromia-page-header";
-import { countTopicsInChannel } from "../../../core/services/topic-service";
+import React, { useState, useEffect } from 'react';
+import { Badge, makeStyles } from '@material-ui/core';
+import ChromiaPageHeader from '../../../shared/chromia-page-header';
+import { countTopicsInChannel } from '../../../core/services/topic-service';
 
 interface Props {
   channel: string;
@@ -9,7 +9,7 @@ interface Props {
 
 const useStyles = makeStyles({
   title: {
-    position: "relative",
+    position: 'relative',
     top: -10,
   },
 });
@@ -27,7 +27,7 @@ const ChannelTitle: React.FunctionComponent<Props> = (props) => {
   return (
     <Badge badgeContent={nrOfTopics} color="secondary" overlap="rectangle">
       <div className={classes.title}>
-        <ChromiaPageHeader text={"#" + props.channel} />
+        <ChromiaPageHeader text={`#${props.channel}`} />
       </div>
     </Badge>
   );

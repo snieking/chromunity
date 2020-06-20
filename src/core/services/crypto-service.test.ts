@@ -1,9 +1,7 @@
-import {generateRandomMnemonic} from "./crypto-service";
+import { generateRandomMnemonic } from './crypto-service';
 
-describe("crypto tests", () => {
-
-    it("generate mnemonic", async () => {
-        expect(generateRandomMnemonic().length).toBeGreaterThan(32);
-    });
-
+describe('crypto tests', () => {
+  it('generate mnemonic', async () => {
+    expect(generateRandomMnemonic().length).toBeGreaterThan(32);
+  });
 });

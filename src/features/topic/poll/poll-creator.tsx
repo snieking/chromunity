@@ -1,38 +1,38 @@
-import React, { useState } from "react";
-import { Grid, makeStyles } from "@material-ui/core";
-import TextField from "@material-ui/core/TextField";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
-import IconButton from "@material-ui/core/IconButton";
-import { COLOR_RED } from "../../../theme";
-import { PollSpecification } from "../../../types";
-import Typography from "@material-ui/core/Typography";
+import React, { useState } from 'react';
+import { Grid, makeStyles } from '@material-ui/core';
+import TextField from '@material-ui/core/TextField';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
+import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
+import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
+import { COLOR_RED } from '../../../theme';
+import { PollSpecification } from '../../../types';
 
 interface Props {
   poll: PollSpecification;
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles({
   question: {
-    marginTop: "30px",
-    marginBottom: "15px"
+    marginTop: '30px',
+    marginBottom: '15px',
   },
   optionWrapper: {
-    marginTop: "1px",
-    display: "inline"
+    marginTop: '1px',
+    display: 'inline',
   },
   textField: {
-    width: "80%"
+    width: '80%',
   },
   actions: {
-    display: "inline"
-  }
-}));
+    display: 'inline',
+  },
+});
 
 const MAX_OPTIONS = 6;
 const MIN_OPTIONS = 2;
 
-const PollCreator: React.FunctionComponent<Props> = props => {
+const PollCreator: React.FunctionComponent<Props> = (props) => {
   const classes = useStyles();
 
   const [counter, setCounter] = useState(MIN_OPTIONS);
@@ -56,7 +56,7 @@ const PollCreator: React.FunctionComponent<Props> = props => {
 
   function optionChange(index: number, text: string) {
     if (props.poll.options == null) {
-      props.poll.options = new Array<string>();
+      props.poll.options = [];
     }
 
     props.poll.options[index] = text;
@@ -66,14 +66,14 @@ const PollCreator: React.FunctionComponent<Props> = props => {
     const toRender = [];
     for (let i = 1; i <= counter; i++) {
       toRender.push(
-        <Grid item xs={12} className={classes.optionWrapper} key={"opt-" + i}>
+        <Grid item xs={12} className={classes.optionWrapper} key={`opt-${i}`}>
           <TextField
-            label={"Option " + i}
+            label={`Option ${i}`}
             type="text"
             color="secondary"
             variant="outlined"
             className={classes.textField}
-            onChange={event => optionChange(i - 1, event.target.value)}
+            onChange={(event) => optionChange(i - 1, event.target.value)}
           />
           {counter === i && counter > MIN_OPTIONS && (
             <IconButton onClick={decrementCounter} className={classes.actions}>
@@ -96,12 +96,14 @@ const PollCreator: React.FunctionComponent<Props> = props => {
     <>
       <Grid container spacing={1}>
         <Grid item xs={12} className={classes.question}>
-          <Typography variant="h6" component="h6" style={{ marginBottom: "5px" }}>Poll</Typography>
+          <Typography variant="h6" component="h6" style={{ marginBottom: '5px' }}>
+            Poll
+          </Typography>
           <TextField
             label="Question"
             variant="outlined"
             className={classes.textField}
-            onChange={event => questionChange(event.target.value)}
+            onChange={(event) => questionChange(event.target.value)}
           />
         </Grid>
         {renderOptions()}

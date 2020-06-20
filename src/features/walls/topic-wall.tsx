@@ -1,14 +1,15 @@
-import React from "react";
-import { styled } from "@material-ui/core/styles";
-import { ChromunityUser, Topic } from "../../types";
-import { Container, MenuItem, Select } from "@material-ui/core";
-import TopicOverviewCard from "../topic/topic-overview-card";
-import NewTopicButton from "../../shared/buttons/new-topic-button";
-import LoadMoreButton from "../../shared/buttons/load-more-button";
-import { TrendingChannels } from "../tags/trending-tags";
-import ChromiaPageHeader from "../../shared/chromia-page-header";
-import { TOPIC_VIEW_SELECTOR_OPTION } from "./wall-common";
-import ApplicationState from "../../core/application-state";
+import React from 'react';
+import { styled } from '@material-ui/core/styles';
+import { Container, MenuItem, Select } from '@material-ui/core';
+import { connect } from 'react-redux';
+import { ChromunityUser, Topic } from '../../types';
+import TopicOverviewCard from '../topic/topic-overview-card';
+import NewTopicButton from '../../shared/buttons/new-topic-button';
+import LoadMoreButton from '../../shared/buttons/load-more-button';
+import { TrendingChannels } from '../tags/trending-tags';
+import ChromiaPageHeader from '../../shared/chromia-page-header';
+import { TOPIC_VIEW_SELECTOR_OPTION } from './wall-common';
+import ApplicationState from '../../core/application-state';
 import {
   loadAllTopicsByPopularity,
   loadAllTopicWall,
@@ -19,14 +20,13 @@ import {
   loadOlderAllTopics,
   loadOlderFollowedChannelsTopics,
   loadOlderFollowedUsersTopics,
-} from "./redux/wall-actions";
-import { connect } from "react-redux";
-import { shouldBeFiltered, toLowerCase, uniqueId } from "../../shared/util/util";
-import { COLOR_CHROMIA_DARK } from "../../theme";
-import Tutorial from "../../shared/tutorial";
-import TutorialButton from "../../shared/buttons/tutorial-button";
-import { markTopicWallRefreshed } from "../../shared/util/user-util";
-import PinnedTopic from "./pinned-topic";
+} from './redux/wall-actions';
+import { shouldBeFiltered, toLowerCase, uniqueId } from '../../shared/util/util';
+import { COLOR_CHROMIA_DARK } from '../../theme';
+import Tutorial from '../../shared/tutorial';
+import TutorialButton from '../../shared/buttons/tutorial-button';
+import { markTopicWallRefreshed } from '../../shared/util/user-util';
+import PinnedTopic from './pinned-topic';
 
 interface Props {
   type: string;
@@ -54,11 +54,11 @@ interface State {
 
 const StyledSelector = styled(Select)((style) => ({
   color: style.theme.palette.primary.main,
-  float: "left",
-  marginRight: "10px",
+  float: 'left',
+  marginRight: '10px',
 }));
 
-const topicsPageSize: number = 15;
+const topicsPageSize = 15;
 
 class TopicWall extends React.Component<Props, State> {
   constructor(props: Props) {
@@ -79,68 +79,20 @@ class TopicWall extends React.Component<Props, State> {
     markTopicWallRefreshed();
   }
 
-  render() {
-    return (
-      <div>
-        <Container fixed>
-          <ChromiaPageHeader text={this.getHeader()} />
-          {this.props.type === "tagFollowings" ? <TrendingChannels /> : <div />}
-          {this.props.type === "tagFollowings" ? <ChromiaPageHeader text="Followed Channels" /> : <div />}
-          <StyledSelector data-tut="main_selector" value={this.state.selector} onChange={this.handleSelectorChange}>
-            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.RECENT}>Recent</MenuItem>
-            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR}>Popular</MenuItem>
-          </StyledSelector>
-          {this.state.selector === TOPIC_VIEW_SELECTOR_OPTION.POPULAR ? (
-            <StyledSelector value={this.state.popularSelector} onChange={this.handlePopularChange}>
-              <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_DAY}>Last day</MenuItem>
-              <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK}>Last week</MenuItem>
-              <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_MONTH}>Last month</MenuItem>
-              <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_ALL_TIME}>All time</MenuItem>
-            </StyledSelector>
-          ) : (
-              <div />
-            )}
-          <br />
-          <br />
-          <PinnedTopic />
-          {this.props.topics.map((topic) => {
-            if (
-              (this.props.pinnedTopic == null || this.props.pinnedTopic.id !== topic.id) &&
-              ((this.props.user != null && this.props.representatives.includes(toLowerCase(this.props.user.name))) ||
-                (this.props.user != null && toLowerCase(topic.author) === toLowerCase(this.props.user.name)) ||
-                (!this.props.distrustedUsers.includes(topic.author) &&
-                  !shouldBeFiltered(topic.moderated_by, this.props.distrustedUsers)))
-            ) {
-              return <TopicOverviewCard key={"card-" + topic.id} topic={topic} />;
-            } else {
-              return <div key={uniqueId()} />;
-            }
-          })}
-          {this.renderLoadMoreButton()}
-        </Container>
-        {this.props.user != null ? (
-          <NewTopicButton channel="" updateFunction={() => this.retrieveLatestTopics(true)} />
-        ) : (
-            <div />
-          )}
-        {this.renderTour()}
-      </div>
-    );
-  }
-
-  renderTour() {
-    return (
-      <>
-        <Tutorial steps={this.steps()} />
-        <TutorialButton />
-      </>
-    );
+  getHeader() {
+    if (this.props.type === 'userFollowings') {
+      return 'Followed Users';
+    }
+    if (this.props.type === 'tagFollowings') {
+      return 'Trending Channels';
+    }
+    return 'All Topics';
   }
 
   steps(): any[] {
     const steps = [
       {
-        selector: ".first-step",
+        selector: '.first-step',
         content: () => (
           <div style={{ color: COLOR_CHROMIA_DARK }}>
             <p>This page displays a wall of summarized topics.</p>
@@ -173,22 +125,6 @@ class TopicWall extends React.Component<Props, State> {
     return steps;
   }
 
-  renderLoadMoreButton() {
-    if (this.props.couldExistOlderTopics) {
-      return <LoadMoreButton onClick={this.retrieveOlderTopics} />;
-    }
-  }
-
-  getHeader() {
-    if (this.props.type === "userFollowings") {
-      return "Followed Users";
-    } else if (this.props.type === "tagFollowings") {
-      return "Trending Channels";
-    } else {
-      return "All Topics";
-    }
-  }
-
   handleSelectorChange(event: React.ChangeEvent<{ value: unknown }>) {
     const selected = event.target.value as TOPIC_VIEW_SELECTOR_OPTION;
 
@@ -213,17 +149,21 @@ class TopicWall extends React.Component<Props, State> {
   }
 
   retrieveLatestTopics(ignoreCache: boolean) {
-    if (this.props.type === "userFollowings" && this.props.user) {
+    if (this.props.type === 'userFollowings' && this.props.user) {
       this.props.loadFollowedUsersTopicWall({ username: this.props.user.name, pageSize: topicsPageSize });
-    } else if (this.props.type === "tagFollowings" && this.props.user) {
-      this.props.loadFollowedChannelsTopicWall({ username: this.props.user.name, pageSize: topicsPageSize, ignoreCache });
+    } else if (this.props.type === 'tagFollowings' && this.props.user) {
+      this.props.loadFollowedChannelsTopicWall({
+        username: this.props.user.name,
+        pageSize: topicsPageSize,
+        ignoreCache,
+      });
     } else {
       this.props.loadAllTopicWall({ pageSize: topicsPageSize, ignoreCache });
     }
   }
 
   retrievePopularTopics(selected: TOPIC_VIEW_SELECTOR_OPTION) {
-    const dayInMilliSeconds: number = 86400000;
+    const dayInMilliSeconds = 86400000;
     let timestamp: number;
 
     switch (selected) {
@@ -242,10 +182,18 @@ class TopicWall extends React.Component<Props, State> {
         break;
     }
 
-    if (this.props.type === "userFollowings") {
-      this.props.loadFollowedUsersTopicsByPopularity({ username: this.props.user.name, timestamp, pageSize: topicsPageSize });
-    } else if (this.props.type === "tagFollowings") {
-      this.props.loadFollowedChannelsTopicsByPopularity({ username: this.props.user.name, timestamp, pageSize: topicsPageSize });
+    if (this.props.type === 'userFollowings') {
+      this.props.loadFollowedUsersTopicsByPopularity({
+        username: this.props.user.name,
+        timestamp,
+        pageSize: topicsPageSize,
+      });
+    } else if (this.props.type === 'tagFollowings') {
+      this.props.loadFollowedChannelsTopicsByPopularity({
+        username: this.props.user.name,
+        timestamp,
+        pageSize: topicsPageSize,
+      });
     } else {
       this.props.loadAllTopicsByPopularity({ timestamp, pageSize: topicsPageSize });
     }
@@ -253,14 +201,77 @@ class TopicWall extends React.Component<Props, State> {
 
   retrieveOlderTopics() {
     if (this.props.topics.length > 0) {
-      if (this.props.type === "userFollowings") {
+      if (this.props.type === 'userFollowings') {
         this.props.loadOlderFollowedUsersTopics({ username: this.props.user.name, pageSize: topicsPageSize });
-      } else if (this.props.type === "tagFollowings") {
+      } else if (this.props.type === 'tagFollowings') {
         this.props.loadOlderFollowedChannelsTopics({ username: this.props.user.name, pageSize: topicsPageSize });
       } else {
         this.props.loadOlderAllTopics(topicsPageSize);
       }
     }
+  }
+
+  renderLoadMoreButton() {
+    if (this.props.couldExistOlderTopics) {
+      return <LoadMoreButton onClick={this.retrieveOlderTopics} />;
+    }
+  }
+
+  renderTour() {
+    return (
+      <>
+        <Tutorial steps={this.steps()} />
+        <TutorialButton />
+      </>
+    );
+  }
+
+  render() {
+    return (
+      <div>
+        <Container fixed>
+          <ChromiaPageHeader text={this.getHeader()} />
+          {this.props.type === 'tagFollowings' ? <TrendingChannels /> : <div />}
+          {this.props.type === 'tagFollowings' ? <ChromiaPageHeader text="Followed Channels" /> : <div />}
+          <StyledSelector data-tut="main_selector" value={this.state.selector} onChange={this.handleSelectorChange}>
+            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.RECENT}>Recent</MenuItem>
+            <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR}>Popular</MenuItem>
+          </StyledSelector>
+          {this.state.selector === TOPIC_VIEW_SELECTOR_OPTION.POPULAR ? (
+            <StyledSelector value={this.state.popularSelector} onChange={this.handlePopularChange}>
+              <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_DAY}>Last day</MenuItem>
+              <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_WEEK}>Last week</MenuItem>
+              <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_MONTH}>Last month</MenuItem>
+              <MenuItem value={TOPIC_VIEW_SELECTOR_OPTION.POPULAR_ALL_TIME}>All time</MenuItem>
+            </StyledSelector>
+          ) : (
+            <div />
+          )}
+          <br />
+          <br />
+          <PinnedTopic />
+          {this.props.topics.map((topic) => {
+            if (
+              (this.props.pinnedTopic == null || this.props.pinnedTopic.id !== topic.id) &&
+              ((this.props.user != null && this.props.representatives.includes(toLowerCase(this.props.user.name))) ||
+                (this.props.user != null && toLowerCase(topic.author) === toLowerCase(this.props.user.name)) ||
+                (!this.props.distrustedUsers.includes(topic.author) &&
+                  !shouldBeFiltered(topic.moderated_by, this.props.distrustedUsers)))
+            ) {
+              return <TopicOverviewCard key={`card-${topic.id}`} topic={topic} />;
+            }
+            return <div key={uniqueId()} />;
+          })}
+          {this.renderLoadMoreButton()}
+        </Container>
+        {this.props.user != null ? (
+          <NewTopicButton channel="" updateFunction={() => this.retrieveLatestTopics(true)} />
+        ) : (
+          <div />
+        )}
+        {this.renderTour()}
+      </div>
+    );
   }
 }
 
@@ -273,7 +284,7 @@ const mapDispatchToProps = {
   loadFollowedUsersTopicsByPopularity,
   loadFollowedChannelsTopicWall,
   loadOlderFollowedChannelsTopics,
-  loadFollowedChannelsTopicsByPopularity
+  loadFollowedChannelsTopicsByPopularity,
 };
 
 const mapStateToProps = (store: ApplicationState) => {

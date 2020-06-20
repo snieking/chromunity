@@ -1,16 +1,16 @@
-import { ChannelState } from "./channel-types";
-import { createReducer } from "@reduxjs/toolkit";
-import { channelInit, updateChannel } from "./channel-actions";
+import { createReducer } from '@reduxjs/toolkit';
+import { ChannelState } from './channel-types';
+import { channelInit, updateChannel } from './channel-actions';
 
 const initialChannelState: ChannelState = {
-  name: "",
+  name: '',
   topics: [],
-  couldExistOlder: false
+  couldExistOlder: false,
 };
 
-export const channelReducer = createReducer(initialChannelState, builder =>
+export const channelReducer = createReducer(initialChannelState, (builder) =>
   builder
-    .addCase(channelInit, (state, _) => {
+    .addCase(channelInit, (state) => {
       state.topics = [];
     })
     .addCase(updateChannel, (state, action) => {
@@ -18,4 +18,4 @@ export const channelReducer = createReducer(initialChannelState, builder =>
       state.topics = action.payload.topics;
       state.couldExistOlder = action.payload.couldExistOlder;
     })
-)
+);

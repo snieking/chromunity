@@ -1,9 +1,9 @@
-import React from "react";
-import ApplicationState from "../../../../core/application-state";
-import { connect } from "react-redux";
-import { loginAccount, setAuthenticationStep } from "../../redux/account-actions";
-import { AuthenticationStep } from "../../redux/account-types";
-import VaultLoginPresentation from "./vault-login-presentation";
+import React from 'react';
+import { connect } from 'react-redux';
+import ApplicationState from '../../../../core/application-state';
+import { loginAccount, setAuthenticationStep } from '../../redux/account-actions';
+import { AuthenticationStep } from '../../redux/account-types';
+import VaultLoginPresentation from './vault-login-presentation';
 
 interface Props {
   authenticationStep: AuthenticationStep;
@@ -22,12 +22,12 @@ const VaultLogin: React.FunctionComponent<Props> = (props) => {
 
 const mapDispatchToProps = {
   loginAccount,
-  setAuthenticationStep
+  setAuthenticationStep,
 };
 
 const mapStateToProps = (store: ApplicationState) => {
   return {
-    authenticationStep: store.account.authenticationStep
+    authenticationStep: store.account.authenticationStep,
   };
 };
 

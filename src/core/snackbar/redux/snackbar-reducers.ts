@@ -1,5 +1,5 @@
-import { SnackbarState } from './snackbar-types';
 import { createReducer } from '@reduxjs/toolkit';
+import { SnackbarState } from './snackbar-types';
 import { notifyError, clearError, notifySuccess, clearSuccess, notifyInfo, clearInfo } from './snackbar-actions';
 
 const initialSnackbarState: SnackbarState = {
@@ -8,16 +8,16 @@ const initialSnackbarState: SnackbarState = {
   info: false,
   infoMsg: null,
   success: false,
-  successMsg: null
+  successMsg: null,
 };
 
-export const snackbarReducer = createReducer(initialSnackbarState, builder =>
+export const snackbarReducer = createReducer(initialSnackbarState, (builder) =>
   builder
     .addCase(notifyError, (state, action) => {
       state.errorMsg = action.payload;
       state.error = true;
     })
-    .addCase(clearError, (state, _) => {
+    .addCase(clearError, (state) => {
       state.error = false;
       state.errorMsg = null;
     })
@@ -25,7 +25,7 @@ export const snackbarReducer = createReducer(initialSnackbarState, builder =>
       state.successMsg = action.payload;
       state.success = true;
     })
-    .addCase(clearSuccess, (state, _) => {
+    .addCase(clearSuccess, (state) => {
       state.success = false;
       state.successMsg = null;
     })
@@ -33,8 +33,8 @@ export const snackbarReducer = createReducer(initialSnackbarState, builder =>
       state.infoMsg = action.payload;
       state.info = true;
     })
-    .addCase(clearInfo, (state, _) => {
+    .addCase(clearInfo, (state) => {
       state.info = false;
       state.infoMsg = null;
     })
-)
+);

@@ -1,5 +1,16 @@
 {
   "extends": "./tsconfig.json",
   "include": ["./src/**/*.ts", "./src/**/*.tsx", "./test/**/*.ts"],
-  "exclude": ["node_modules", "build", "coverage", "config", "doc", "env", "public", "scripts", "rell", "typings-custom"]
+  "exclude": [
+    "node_modules",
+    "build",
+    "coverage",
+    "config",
+    "doc",
+    "env",
+    "public",
+    "scripts",
+    "rell",
+    "typings-custom"
+  ]
 }

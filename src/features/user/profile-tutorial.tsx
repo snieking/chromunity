@@ -1,12 +1,15 @@
-import React from "react";
-import Tutorial from "../../shared/tutorial";
-import TutorialButton from "../../shared/buttons/tutorial-button";
-import { step } from "../../shared/tutorial-step";
+import React from 'react';
+import Tutorial from '../../shared/tutorial';
+import TutorialButton from '../../shared/buttons/tutorial-button';
+import { step } from '../../shared/tutorial-step';
 
 const ProfileTutorial: React.FunctionComponent = () => {
   function steps() {
     return [
-      step(".first-step", <p>This is a user page. Here you get an overview of the user and it's recent activity.</p>),
+      step(
+        '.first-step',
+        <p>This is a user page. Here you get an overview of the user and it&#39;s recent activity.</p>
+      ),
       step(
         '[data-tut="actions_stats"]',
         <p>

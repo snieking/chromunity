@@ -1,12 +1,12 @@
-import { executeOperations, executeQuery } from "./postchain";
-import * as BoomerangCache from "boomerang-cache";
-import { ChromunityUser, UserNotification } from "../../types";
-import { toLowerCase, uniqueId } from "../../shared/util/util";
-import { nop, op } from "ft3-lib";
+import * as BoomerangCache from 'boomerang-cache';
+import { nop, op } from 'ft3-lib';
+import { executeOperations, executeQuery } from './postchain';
+import { ChromunityUser, UserNotification } from '../../types';
+import { toLowerCase, uniqueId } from '../../shared/util/util';
 
-const boomerang = BoomerangCache.create("notification-bucket", {
-  storage: "session",
-  encrypt: false
+const boomerang = BoomerangCache.create('notification-bucket', {
+  storage: 'session',
+  encrypt: false,
 });
 
 export function sendNotifications(fromUser: ChromunityUser, trigger: string, content: string, usernames: string[]) {
@@ -24,7 +24,7 @@ export function sendNotificationWithDeterministicId(
 }
 
 export function removeNotificationsForId(fromUser: ChromunityUser, id: string, usernames: string[]) {
-  const operation = "remove_notifications_for_users";
+  const operation = 'remove_notifications_for_users';
 
   return executeOperations(
     fromUser.ft3User,
@@ -33,7 +33,7 @@ export function removeNotificationsForId(fromUser: ChromunityUser, id: string, u
       toLowerCase(fromUser.name),
       fromUser.ft3User.authDescriptor.id,
       id,
-      usernames.map(name => toLowerCase(name))
+      usernames.map((name) => toLowerCase(name))
     ),
     nop()
   );
@@ -46,7 +46,7 @@ function sendNotificationsInternal(
   content: string,
   usernames: string[]
 ) {
-  const operation = "create_notifications_for_users";
+  const operation = 'create_notifications_for_users';
 
   return executeOperations(
     fromUser.ft3User,
@@ -57,17 +57,17 @@ function sendNotificationsInternal(
       id,
       trigger,
       content,
-      usernames.map(name => toLowerCase(name)).filter(name => name !== toLowerCase(fromUser.name))
+      usernames.map((name) => toLowerCase(name)).filter((name) => name !== toLowerCase(fromUser.name))
     ),
     nop()
   );
 }
 
 export function markNotificationsRead(user: ChromunityUser) {
-  boomerang.remove("notis-" + user.name.toLocaleLowerCase());
+  boomerang.remove(`notis-${user.name.toLocaleLowerCase()}`);
   const epochSeconds = Math.round(new Date().getTime() / 1000);
 
-  const operation = "mark_notifications_since_timestamp_read";
+  const operation = 'mark_notifications_since_timestamp_read';
 
   return executeOperations(
     user.ft3User,
@@ -81,20 +81,19 @@ export function getUserNotificationsPriorToTimestamp(
   timestamp: number,
   pageSize: number
 ): Promise<UserNotification[]> {
-  const query = "get_user_notifications_prior_to_timestamp";
+  const query = 'get_user_notifications_prior_to_timestamp';
   return executeQuery(query, { name: toLowerCase(user), timestamp, page_size: pageSize });
 }
 
 export function countUnreadUserNotifications(user: string): Promise<number> {
-  const count = boomerang.get("notis-" + user.toLocaleLowerCase());
+  const count = boomerang.get(`notis-${user.toLocaleLowerCase()}`);
 
   if (count == null) {
-    const query = "count_unread_user_notifications";
+    const query = 'count_unread_user_notifications';
     return executeQuery(query, { name: toLowerCase(user) }).then((arr: unknown[]) => {
-      boomerang.set("notis-" + user, arr.length, 60);
+      boomerang.set(`notis-${user}`, arr.length, 60);
       return arr.length;
     });
-  } else {
-    return new Promise<number>(resolve => resolve(count));
   }
+  return new Promise<number>((resolve) => resolve(count));
 }

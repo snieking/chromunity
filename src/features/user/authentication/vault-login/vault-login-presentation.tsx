@@ -1,44 +1,44 @@
-import React from "react";
-import { createStyles, makeStyles } from "@material-ui/core";
-import ChromiaPageHeader from "../../../../shared/chromia-page-header";
-import Container from "@material-ui/core/Container";
-import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
-import { ReactComponent as LeftShapes } from "../../../../shared/graphics/left-shapes.svg";
-import { ReactComponent as RightShapes } from "../../../../shared/graphics/right-shapes.svg";
-import { AuthenticationStep } from "../../redux/account-types";
+import React from 'react';
+import { createStyles, makeStyles } from '@material-ui/core';
+import Container from '@material-ui/core/Container';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
+import ChromiaPageHeader from '../../../../shared/chromia-page-header';
+import { ReactComponent as LeftShapes } from '../../../../shared/graphics/left-shapes.svg';
+import { ReactComponent as RightShapes } from '../../../../shared/graphics/right-shapes.svg';
+import { AuthenticationStep } from '../../redux/account-types';
 
-const useStyles = makeStyles(theme =>
+const useStyles = makeStyles((theme) =>
   createStyles({
     contentWrapper: {
-      textAlign: "center",
-      padding: "20px"
+      textAlign: 'center',
+      padding: '20px',
     },
     outerWrapper: {
-      position: "relative"
+      position: 'relative',
     },
     innerWrapper: {
-      maxWidth: "400px",
-      margin: "0 auto"
+      maxWidth: '400px',
+      margin: '0 auto',
     },
     input: {
-      marginTop: "10px"
+      marginTop: '10px',
     },
     textField: {
-      marginBottom: "5px"
+      marginBottom: '5px',
     },
     leftShapes: {
-      [theme.breakpoints.down("sm")]: {
-        display: "none"
+      [theme.breakpoints.down('sm')]: {
+        display: 'none',
       },
-      float: "left"
+      float: 'left',
     },
     rightShapes: {
-      [theme.breakpoints.down("sm")]: {
-        display: "none"
+      [theme.breakpoints.down('sm')]: {
+        display: 'none',
       },
-      float: "right"
-    }
+      float: 'right',
+    },
   })
 );
 
@@ -47,12 +47,12 @@ interface Props {
   login: () => void;
 }
 
-const VaultLoginPresentation: React.FunctionComponent<Props> = props => {
+const VaultLoginPresentation: React.FunctionComponent<Props> = (props) => {
   const classes = useStyles(props);
 
   return (
     <Container maxWidth="md" className={classes.contentWrapper}>
-      <ChromiaPageHeader text={"Login"} />
+      <ChromiaPageHeader text="Login" />
       {props.authenticationStep == null && (
         <div>
           <LeftShapes className={classes.leftShapes} />

@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { ChromunityUser } from "../../../types";
-import { notifyError } from "../../../core/snackbar/redux/snackbar-actions";
-import { setRateLimited, setOperationPending } from "../../../shared/redux/common-actions";
-import { connect } from "react-redux";
-import ApplicationState from "../../../core/application-state";
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import { IconButton, Badge, Tooltip } from '@material-ui/core';
+import { Favorite, FavoriteBorder } from '@material-ui/icons';
+import { ChromunityUser } from '../../../types';
+import { notifyError } from '../../../core/snackbar/redux/snackbar-actions';
+import { setRateLimited, setOperationPending } from '../../../shared/redux/common-actions';
+import ApplicationState from '../../../core/application-state';
 import {
   unfollowChannel,
   followChannel,
   getFollowedChannels,
   countChannelFollowers,
-} from "../../../core/services/channel-service";
-import { clearTopicsCache } from "../redux/wall-actions";
-import { IconButton, Badge, Tooltip } from "@material-ui/core";
-import { Favorite, FavoriteBorder } from "@material-ui/icons";
-import { toLowerCase } from "../../../shared/util/util";
+} from '../../../core/services/channel-service';
+import { clearTopicsCache } from '../redux/wall-actions';
+import { toLowerCase } from '../../../shared/util/util';
 
 interface Props {
   channel: string;
@@ -84,12 +84,12 @@ const ChannelFollowingButton: React.FunctionComponent<Props> = (props) => {
   return (
     <IconButton onClick={() => toggleChannelFollow()} disabled={props.user == null || props.rateLimited}>
       <Badge badgeContent={nrOfFollowers} color="primary">
-        <Tooltip title={followed ? "Unfollow channel" : "Follow channel"}>
+        <Tooltip title={followed ? 'Unfollow channel' : 'Follow channel'}>
           {followed ? (
             <Favorite className="red-color" fontSize="large" />
           ) : (
-              <FavoriteBorder className="pink-color" fontSize="large" />
-            )}
+            <FavoriteBorder className="pink-color" fontSize="large" />
+          )}
         </Tooltip>
       </Badge>
     </IconButton>
@@ -100,7 +100,7 @@ const mapDispatchToProps = {
   notifyError,
   setRateLimited,
   clearTopicsCache,
-  setOperationPending
+  setOperationPending,
 };
 
 const mapStateToProps = (store: ApplicationState) => {

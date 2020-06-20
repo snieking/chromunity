@@ -1,7 +1,7 @@
-import React from "react";
-import { Badge, makeStyles, IconButton, Tooltip } from "@material-ui/core";
-import { StarRate, StarBorder } from "@material-ui/icons";
-import { COLOR_YELLOW } from "../../theme";
+import React from 'react';
+import { Badge, makeStyles, IconButton, Tooltip } from '@material-ui/core';
+import { StarRate, StarBorder } from '@material-ui/icons';
+import { COLOR_YELLOW } from '../../theme';
 
 interface Props {
   ratedBy: string[];
@@ -27,9 +27,8 @@ const StarRatingPresentation: React.FunctionComponent<Props> = (props) => {
           {icon()}
         </IconButton>
       );
-    } else {
-      return icon();
     }
+    return icon();
   }
 
   function icon() {
@@ -49,7 +48,7 @@ const StarRatingPresentation: React.FunctionComponent<Props> = (props) => {
           <p key={u}>@{u}</p>
         ))}
         {props.ratedBy.length > maxRenderItems ? (
-          <p key={"more"}>
+          <p key="more">
             <i>
               ...and <b>{props.ratedBy.length - maxRenderItems}</b> more
             </i>
