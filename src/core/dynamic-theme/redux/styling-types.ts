@@ -1,7 +1,7 @@
-import { Theme } from "@material-ui/core";
+import { Theme } from '@material-ui/core';
 
 export enum StylingActionTypes {
-  TOGGLE_THEME = "STYLING/THEME/TOGGLE"
+  TOGGLE_THEME = 'STYLING/THEME/TOGGLE',
 }
 
 export interface ToggleThemeAction {
@@ -11,5 +11,5 @@ export interface ToggleThemeAction {
 export type StylingActions = ToggleThemeAction;
 
 export interface StylingState {
-  theme: Theme
+  theme: Theme;
 }

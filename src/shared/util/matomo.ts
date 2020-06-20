@@ -1,15 +1,15 @@
-import ReactPiwik from "react-piwik";
-import * as config from "../../config";
+import ReactPiwik from 'react-piwik';
+import * as config from '../../config';
 
-const CATEGORY_USER = "user";
-const CATEGORY_CHAT = "chat";
-const CATEGORY_TOPIC = "topic";
-const CATEGORY_ELECTION = "election";
-const CATEGORY_REPRESENTATIVE = "representative";
-const CATEGORY_CHANNEL = "channel";
-const CATEGORY_GENERAL = "general";
+const CATEGORY_USER = 'user';
+const CATEGORY_CHAT = 'chat';
+const CATEGORY_TOPIC = 'topic';
+const CATEGORY_ELECTION = 'election';
+const CATEGORY_REPRESENTATIVE = 'representative';
+const CATEGORY_CHANNEL = 'channel';
+const CATEGORY_GENERAL = 'general';
 
-const CATEGORY_METRICS = "metrics";
+const CATEGORY_METRICS = 'metrics';
 
 export const userEvent = (name: string) => sendEvent(CATEGORY_USER, name);
 export const chatEvent = (name: string) => sendEvent(CATEGORY_CHAT, name);
@@ -25,12 +25,12 @@ export const metricEvent = (type: string, name: string, value: number) =>
 
 function sendEvent(category: string, name: string) {
   if (config.matomo.enabled && ReactPiwik != null) {
-    ReactPiwik.push(["trackEvent", category, name]);
+    ReactPiwik.push(['trackEvent', category, name]);
   }
 }
 
 function sendEventValue(category: string, type: string, name: string, value: number) {
   if (config.matomo.enabled && ReactPiwik != null) {
-    ReactPiwik.push(["trackEvent", category, type, name, value]);
+    ReactPiwik.push(['trackEvent', category, type, name, value]);
   }
 }

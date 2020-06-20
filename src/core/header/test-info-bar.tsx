@@ -1,7 +1,7 @@
-import React from "react";
-import config from "../../config";
-import AppBar from "@material-ui/core/AppBar/AppBar";
-import { Typography } from "@material-ui/core";
+import React from 'react';
+import AppBar from '@material-ui/core/AppBar/AppBar';
+import { Typography } from '@material-ui/core';
+import config from '../../config';
 
 interface Props {
   classes: Record<string, string>;
@@ -16,9 +16,8 @@ const TestInfoBar: React.FunctionComponent<Props> = (props: Props) => {
         </Typography>
       </AppBar>
     );
-  } else {
-    return null;
   }
+  return null;
 };
 
 export default TestInfoBar;

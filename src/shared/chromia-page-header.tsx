@@ -1,22 +1,22 @@
-import React from "react";
-import { createStyles, Theme, Typography } from "@material-ui/core";
-import makeStyles from "@material-ui/core/styles/makeStyles";
+import React from 'react';
+import { createStyles, Theme, Typography } from '@material-ui/core';
+import makeStyles from '@material-ui/core/styles/makeStyles';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     header: {
-      textAlign: "center",
-      marginTop: "20px",
-      marginBottom: "5px"
+      textAlign: 'center',
+      marginTop: '20px',
+      marginBottom: '5px',
     },
     text: {
-      [theme.breakpoints.down("md")]: {
-        fontSize: "22px"
+      [theme.breakpoints.down('md')]: {
+        fontSize: '22px',
       },
-      [theme.breakpoints.down("sm")]: {
-        fontSize: "18px"
-      }
-    }
+      [theme.breakpoints.down('sm')]: {
+        fontSize: '18px',
+      },
+    },
   })
 );
 

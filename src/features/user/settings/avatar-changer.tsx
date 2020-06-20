@@ -1,19 +1,20 @@
-import React from "react";
+/* eslint-disable func-names */
+import React from 'react';
 
-import Avatar from "react-avatar-edit";
-import { createStyles, WithStyles, withStyles } from "@material-ui/core";
-import { COLOR_OFF_WHITE } from "../../../theme";
+import Avatar from 'react-avatar-edit';
+import { createStyles, WithStyles, withStyles } from '@material-ui/core';
+import { COLOR_OFF_WHITE } from '../../../theme';
 
 const styles = createStyles({
   avatarChanger: {
-    margin: "0 auto",
-    border: "none",
-    width: "100%"
-  }
+    margin: '0 auto',
+    border: 'none',
+    width: '100%',
+  },
 });
 
 interface AvatarChangerProps extends WithStyles<typeof styles> {
-  updateFunction: Function;
+  updateFunction: (img: string) => void;
   previousPicture: string;
 }
 
@@ -23,40 +24,28 @@ interface AvatarChangerState {
 
 const AvatarChanger = withStyles(styles)(
   class extends React.Component<AvatarChangerProps, AvatarChangerState> {
-
     constructor(props: AvatarChangerProps) {
       super(props);
-      this.state = { src: "" };
+      this.state = { src: '' };
 
       this.onCrop = this.onCrop.bind(this);
     }
 
-    render() {
-      return (
-        <Avatar
-          width={"99%"}
-          height={128}
-          onCrop={this.onCrop}
-          src={this.state.src}
-          className={this.props.classes.avatarChanger}
-          labelStyle={{
-            textShadow: `-0.7px -0.7px 0 ${COLOR_OFF_WHITE}, 0.7px -0.7px 0 ${COLOR_OFF_WHITE } -0.7px 0.7px 0 ${COLOR_OFF_WHITE}, 0.7px 0.7px 0 ${COLOR_OFF_WHITE}`,
-            fontSize: "18px",
-            fontFamily: '"International", "Roboto", "Helvetica", "Arial", sans-serif',
-            cursor: "pointer"
-          }}
-        />
-      );
+    onCrop(preview: string) {
+      this.compressImage(preview).then((img) => {
+        this.setState({ src: img });
+        this.props.updateFunction(img);
+      });
     }
 
     compressImage(base64: string): Promise<string> {
-      const canvas = document.createElement("canvas");
-      const img = document.createElement("img");
+      const canvas = document.createElement('canvas');
+      const img = document.createElement('img');
 
       return new Promise((resolve, reject) => {
-        img.onload = function() {
-          let width = img.width;
-          let height = img.height;
+        img.onload = function () {
+          let { width } = img;
+          let { height } = img;
           const maxHeight = 128;
           const maxWidth = 128;
 
@@ -65,21 +54,19 @@ const AvatarChanger = withStyles(styles)(
               height = Math.round((height *= maxWidth / width));
               width = maxWidth;
             }
-          } else {
-            if (height > maxHeight) {
-              width = Math.round((width *= maxHeight / height));
-              height = maxHeight;
-            }
+          } else if (height > maxHeight) {
+            width = Math.round((width *= maxHeight / height));
+            height = maxHeight;
           }
           canvas.width = width;
           canvas.height = height;
 
-          const ctx = canvas.getContext("2d");
+          const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
 
-          resolve(canvas.toDataURL("image/jpeg", 0.9));
+          resolve(canvas.toDataURL('image/jpeg', 0.9));
         };
-        img.onerror = function(err) {
+        img.onerror = function (err) {
           reject(err);
         };
 
@@ -87,11 +74,22 @@ const AvatarChanger = withStyles(styles)(
       });
     }
 
-    onCrop(preview: string) {
-      this.compressImage(preview).then(img => {
-        this.setState({ src: img });
-        this.props.updateFunction(img);
-      });
+    render() {
+      return (
+        <Avatar
+          width="99%"
+          height={128}
+          onCrop={this.onCrop}
+          src={this.state.src}
+          className={this.props.classes.avatarChanger}
+          labelStyle={{
+            textShadow: `-0.7px -0.7px 0 ${COLOR_OFF_WHITE}, 0.7px -0.7px 0 ${COLOR_OFF_WHITE} -0.7px 0.7px 0 ${COLOR_OFF_WHITE}, 0.7px 0.7px 0 ${COLOR_OFF_WHITE}`,
+            fontSize: '18px',
+            fontFamily: '"International", "Roboto", "Helvetica", "Arial", sans-serif',
+            cursor: 'pointer',
+          }}
+        />
+      );
     }
   }
 );

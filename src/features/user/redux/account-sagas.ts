@@ -1,18 +1,16 @@
+import { takeLatest, put, select } from 'redux-saga/effects';
+import { op, SSOStoreLocalStorage } from 'ft3-lib';
+import SSO from 'ft3-lib/dist/ft3/user/sso/sso';
+import User from 'ft3-lib/dist/ft3/user/user';
+import { Action } from '@reduxjs/toolkit';
 import { setOperationPending, setQueryPending } from '../../../shared/redux/common-actions';
 import { notifySuccess, notifyError } from '../../../core/snackbar/redux/snackbar-actions';
-import {
-  AccountActionTypes,
-  AuthenticationStep
-} from "./account-types";
-import { takeLatest, put, select } from "redux-saga/effects";
-import { op, SSOStoreLocalStorage } from "ft3-lib";
-import config from "../../../config.js";
-import { getDistrustedUsers, getUsernameByAccountId, getKudos, sendKudos } from "../../../core/services/user-service";
-import { BLOCKCHAIN, executeOperations } from "../../../core/services/postchain";
-import { clearSession, getUsername, setUsername } from "../../../shared/util/user-util";
-import logger from "../../../shared/util/logger";
-import SSO from "ft3-lib/dist/ft3/user/sso/sso";
-import User from "ft3-lib/dist/ft3/user/user";
+import { AccountActionTypes, AuthenticationStep } from './account-types';
+import config from '../../../config';
+import { getDistrustedUsers, getUsernameByAccountId, getKudos, sendKudos } from '../../../core/services/user-service';
+import { BLOCKCHAIN, executeOperations } from '../../../core/services/postchain';
+import { clearSession, getUsername, setUsername } from '../../../shared/util/user-util';
+import logger from '../../../shared/util/logger';
 import {
   autoLoginAttempted,
   checkDistrustedUsers,
@@ -25,13 +23,12 @@ import {
   checkUserKudos,
   registerUser,
   vaultSuccess,
-  sendKudos as sendKudosAction
-} from "./account-actions";
-import { ChromunityUser } from "../../../types";
-import ApplicationState from "../../../core/application-state";
-import { toLowerCase } from "../../../shared/util/util";
-import { userEvent } from "../../../shared/util/matomo";
-import { Action } from '@reduxjs/toolkit';
+  sendKudos as sendKudosAction,
+} from './account-actions';
+import { ChromunityUser } from '../../../types';
+import ApplicationState from '../../../core/application-state';
+import { toLowerCase } from '../../../shared/util/util';
+import { userEvent } from '../../../shared/util/matomo';
 
 SSO.vaultUrl = config.vault.url;
 
@@ -69,7 +66,7 @@ function* logoutSaga() {
   yield put(setUser(null));
   yield put(setAuthenticationStep(null));
   yield put(setOperationPending(false));
-  yield put(notifySuccess("Successfully signed out"));
+  yield put(notifySuccess('Successfully signed out'));
 }
 
 function* vaultSuccessSaga(action: Action): Generator<any, any, any> {
@@ -80,24 +77,24 @@ function* vaultSuccessSaga(action: Action): Generator<any, any, any> {
 
     try {
       const sso = new SSO(BC, new SSOStoreLocalStorage());
-      logger.silly("RawTx: [%s]", action.payload);
+      logger.silly('RawTx: [%s]', action.payload);
       const [account, user] = yield sso.finalizeLogin(action.payload);
-      logger.silly("Account [%s], user [%s]", JSON.stringify(account), JSON.stringify(user));
+      logger.silly('Account [%s], user [%s]', JSON.stringify(account), JSON.stringify(user));
 
       const username = yield getUsernameByAccountId(account.id);
-      logger.silly("Username linked to accountId: %s", username);
+      logger.silly('Username linked to accountId: %s', username);
 
       if (username) {
         yield authorizeUser(username, user);
-        yield put(notifySuccess("Successfully signed in"));
-        userEvent("sign-in");
+        yield put(notifySuccess('Successfully signed in'));
+        userEvent('sign-in');
       } else {
         yield put(saveVaultAccount({ accountId: account.id, ft3User: user }));
         yield put(setAuthenticationStep(AuthenticationStep.USERNAME_INPUT_REQUIRED));
       }
     } catch (error) {
       yield put(vaultCancel());
-      yield put(notifyError("Error signing in: " + error.message));
+      yield put(notifyError(`Error signing in: ${error.message}`));
     } finally {
       yield put(setQueryPending(false));
     }
@@ -112,19 +109,19 @@ function* registerUserSaga(action: Action) {
 
     if (!accountId || !user) {
       yield put(vaultCancel());
-      yield put(notifyError("Login session was interrupted"));
+      yield put(notifyError('Login session was interrupted'));
       return;
     }
 
     yield put(setOperationPending(true));
 
     try {
-      yield executeOperations(user, op("register_user", action.payload, accountId));
+      yield executeOperations(user, op('register_user', action.payload, accountId));
       yield authorizeUser(action.payload, user);
-      userEvent("register");
+      userEvent('register');
     } catch (error) {
       yield put(vaultCancel());
-      yield put(notifyError("Error signing in: " + error.message))
+      yield put(notifyError(`Error signing in: ${error.message}`));
     } finally {
       yield put(setOperationPending(false));
     }
@@ -144,7 +141,7 @@ function* autoLoginSaga(): Generator<any, any, any> {
     try {
       const [account, user] = yield sso.autoLogin();
 
-      logger.silly("Account [%s] and user [%s] found", JSON.stringify(account), JSON.stringify(user));
+      logger.silly('Account [%s] and user [%s] found', JSON.stringify(account), JSON.stringify(user));
       if (account && user) {
         const usernameLinkedToAccount = yield getUsernameByAccountId(account.id);
         if (usernameLinkedToAccount && toLowerCase(username) === toLowerCase(usernameLinkedToAccount)) {
@@ -168,14 +165,14 @@ function* authorizeUser(username: string, user: User) {
   if (username && user) {
     setUsername(username);
 
-    logger.silly("Authorizing user: [%s]", username);
+    logger.silly('Authorizing user: [%s]', username);
     const chromunityUser: ChromunityUser = { name: username, ft3User: user };
     yield put(setUser(chromunityUser));
     yield put(setAuthenticationStep(AuthenticationStep.AUTHENTICATED));
     yield put(checkDistrustedUsers(chromunityUser));
-    userEvent("authenticate");
+    userEvent('authenticate');
   } else {
-    logger.info("Username [%s], or [%s] was null", username, JSON.stringify(user));
+    logger.info('Username [%s], or [%s] was null', username, JSON.stringify(user));
   }
 }
 

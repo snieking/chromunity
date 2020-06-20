@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { Container } from "@material-ui/core";
+import React, { useEffect, useState } from 'react';
+import { Container } from '@material-ui/core';
 
-import { RouteComponentProps } from "react-router";
+import { RouteComponentProps } from 'react-router';
+import { connect } from 'react-redux';
 import {
   getUserNotificationsPriorToTimestamp,
   markNotificationsRead,
-} from "../../../core/services/notification-service";
-import { ChromunityUser, UserNotification } from "../../../types";
-import NotificationCard from "./notification-card";
-import ChromiaPageHeader from "../../../shared/chromia-page-header";
-import LoadMoreButton from "../../../shared/buttons/load-more-button";
-import ApplicationState from "../../../core/application-state";
-import { connect } from "react-redux";
-import { setQueryPending } from "../../../shared/redux/common-actions";
+} from '../../../core/services/notification-service';
+import { ChromunityUser, UserNotification } from '../../../types';
+import NotificationCard from './notification-card';
+import ChromiaPageHeader from '../../../shared/chromia-page-header';
+import LoadMoreButton from '../../../shared/buttons/load-more-button';
+import ApplicationState from '../../../core/application-state';
+import { setQueryPending } from '../../../shared/redux/common-actions';
 
 interface MatchParams {
   userId: string;
@@ -23,7 +23,7 @@ interface UserNotificationsProps extends RouteComponentProps<MatchParams> {
   setQueryPending: typeof setQueryPending;
 }
 
-const notificationsPageSize: number = 25;
+const notificationsPageSize = 25;
 
 const UserNotifications: React.FunctionComponent<UserNotificationsProps> = (props) => {
   const [notifications, setNotifications] = useState<UserNotification[]>([]);
@@ -35,7 +35,7 @@ const UserNotifications: React.FunctionComponent<UserNotificationsProps> = (prop
   }, []);
 
   function retrieveNotifications() {
-    const userId = props.match.params.userId;
+    const { userId } = props.match.params;
 
     props.setQueryPending(true);
     const timestamp: number =
@@ -82,7 +82,7 @@ const mapStateToProps = (store: ApplicationState) => {
 };
 
 const mapDispatchToProps = {
-  setQueryPending
+  setQueryPending,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(UserNotifications);

@@ -1,6 +1,13 @@
-import { GovernmentState } from "./gov-types";
-import { createReducer } from "@reduxjs/toolkit";
-import { updateRepresentatives, updateReports, updateLogbookRecentEntryTimestamp, updateActiveElection, updatePinnedTopic, updatePinnedTopicByRep } from "./gov-actions";
+import { createReducer } from '@reduxjs/toolkit';
+import { GovernmentState } from './gov-types';
+import {
+  updateRepresentatives,
+  updateReports,
+  updateLogbookRecentEntryTimestamp,
+  updateActiveElection,
+  updatePinnedTopic,
+  updatePinnedTopicByRep,
+} from './gov-actions';
 
 const initialGovernmentState: GovernmentState = {
   representatives: [],
@@ -16,7 +23,7 @@ const initialGovernmentState: GovernmentState = {
   topicIdPinnedByMe: null,
 };
 
-export const governmentReducer = createReducer(initialGovernmentState, builder =>
+export const governmentReducer = createReducer(initialGovernmentState, (builder) =>
   builder
     .addCase(updateRepresentatives, (state, action) => {
       state.representatives = action.payload;
@@ -40,4 +47,4 @@ export const governmentReducer = createReducer(initialGovernmentState, builder =
     .addCase(updatePinnedTopicByRep, (state, action) => {
       state.topicIdPinnedByMe = action.payload;
     })
-)
+);

@@ -1,16 +1,16 @@
-import React from "react";
-import ChromiaPageHeader from "../../shared/chromia-page-header";
-import { RepresentativeAction } from "../../types";
+import React from 'react';
+import { Card, CardContent, Container, Typography } from '@material-ui/core';
+import { connect } from 'react-redux';
+import ChromiaPageHeader from '../../shared/chromia-page-header';
+import { RepresentativeAction } from '../../types';
 import {
   getAllRepresentativeActionsPriorToTimestamp,
   updateLogbookLastRead,
-} from "../../core/services/representatives-service";
-import { Card, CardContent, Container, Typography } from "@material-ui/core";
-import LoadMoreButton from "../../shared/buttons/load-more-button";
-import { parseContent } from "../../shared/util/text-parsing";
-import Timestamp from "../../shared/timestamp";
-import { connect } from "react-redux";
-import { setQueryPending } from "../../shared/redux/common-actions";
+} from '../../core/services/representatives-service';
+import LoadMoreButton from '../../shared/buttons/load-more-button';
+import { parseContent } from '../../shared/util/text-parsing';
+import Timestamp from '../../shared/timestamp';
+import { setQueryPending } from '../../shared/redux/common-actions';
 
 interface GovLogState {
   actions: RepresentativeAction[];
@@ -39,16 +39,6 @@ class GovLog extends React.Component<Props, GovLogState> {
     updateLogbookLastRead(Date.now());
   }
 
-  render() {
-    return (
-      <Container>
-        <ChromiaPageHeader text="Logbook" />
-        {this.state.actions.map((action) => this.representativeActionCard(action))}
-        {this.renderLoadMoreButton()}
-      </Container>
-    );
-  }
-
   representativeActionCard(action: RepresentativeAction) {
     return (
       <Card key={action.id}>
@@ -71,7 +61,6 @@ class GovLog extends React.Component<Props, GovLogState> {
       .then((actions) => {
         this.setState((prevState) => ({
           actions: Array.from(new Set(prevState.actions.concat(actions))),
-          isLoading: false,
           couldExistOlderActions: actions.length >= actionsPageSize,
         }));
       })
@@ -84,10 +73,20 @@ class GovLog extends React.Component<Props, GovLogState> {
       return <LoadMoreButton onClick={this.retrieveActions} />;
     }
   }
+
+  render() {
+    return (
+      <Container>
+        <ChromiaPageHeader text="Logbook" />
+        {this.state.actions.map((action) => this.representativeActionCard(action))}
+        {this.renderLoadMoreButton()}
+      </Container>
+    );
+  }
 }
 
 const mapDispatchToProps = {
-  setQueryPending
+  setQueryPending,
 };
 
 export default connect(null, mapDispatchToProps)(GovLog);

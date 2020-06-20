@@ -1,13 +1,6 @@
-import React from "react";
-import ShareIcon from "@material-ui/icons/Share";
-import {
-  IconButton,
-  makeStyles,
-  Tooltip,
-  Menu,
-  MenuItem,
-  Typography,
-} from "@material-ui/core";
+import React from 'react';
+import ShareIcon from '@material-ui/icons/Share';
+import { IconButton, makeStyles, Tooltip, Menu, MenuItem, Typography } from '@material-ui/core';
 import {
   LinkedinIcon,
   LinkedinShareButton,
@@ -17,7 +10,7 @@ import {
   TelegramShareButton,
   TwitterIcon,
   TwitterShareButton,
-} from "react-share";
+} from 'react-share';
 
 interface Props {
   text: string;
@@ -25,12 +18,11 @@ interface Props {
 
 const useStyles = makeStyles({
   menu: {},
-  item: {
-  },
+  item: {},
   icon: {
-    position: "relative",
+    position: 'relative',
     top: 8,
-    marginRight: "10px",
+    marginRight: '10px',
   },
 });
 
@@ -56,59 +48,46 @@ const SocialShareButton: React.FunctionComponent<Props> = (props) => {
           <TwitterShareButton
             url={window.location.href}
             onClick={handleClose}
-            children={
-              <>
-                <TwitterIcon className={classes.icon} size={ICON_SIZE} round={true} />
-                <Typography variant="body2" component="span">
-                  Twitter
-                </Typography>
-              </>
-            }
             title={props.text}
-            hashtags={["chromunity"]}
-          />
+            hashtags={['chromunity']}
+          >
+            <>
+              <TwitterIcon className={classes.icon} size={ICON_SIZE} round />
+              <Typography variant="body2" component="span">
+                Twitter
+              </Typography>
+            </>
+          </TwitterShareButton>
         </MenuItem>
         <MenuItem>
-          <TelegramShareButton
-            url={window.location.href}
-            onClick={handleClose}
-            children={
-              <>
-                <TelegramIcon className={classes.icon} size={ICON_SIZE} round={true} />
-                <Typography variant="body2" component="span">
-                  Telegram
-                </Typography>
-              </>
-            }
-          />
+          <TelegramShareButton url={window.location.href} onClick={handleClose}>
+            <>
+              <TelegramIcon className={classes.icon} size={ICON_SIZE} round />
+              <Typography variant="body2" component="span">
+                Telegram
+              </Typography>
+            </>
+          </TelegramShareButton>
         </MenuItem>
         <MenuItem>
-          <RedditShareButton
-            url={window.location.href}
-            onClick={handleClose}
-            children={
-              <>
-                <RedditIcon className={classes.icon} size={ICON_SIZE} round={true} />
-                <Typography variant="body2" component="span">
-                  Reddit
-                </Typography>
-              </>
-            }
-          />
+          <RedditShareButton url={window.location.href} onClick={handleClose}>
+            <>
+              <RedditIcon className={classes.icon} size={ICON_SIZE} round />
+              <Typography variant="body2" component="span">
+                Reddit
+              </Typography>
+            </>
+          </RedditShareButton>
         </MenuItem>
         <MenuItem>
-          <LinkedinShareButton
-            url={window.location.href}
-            onClick={handleClose}
-            children={
-              <>
-                <LinkedinIcon className={classes.icon} size={ICON_SIZE} round={true} />
-                <Typography variant="body2" component="span">
-                  LinkedIn
-                </Typography>
-              </>
-            }
-          />
+          <LinkedinShareButton url={window.location.href} onClick={handleClose}>
+            <>
+              <LinkedinIcon className={classes.icon} size={ICON_SIZE} round />
+              <Typography variant="body2" component="span">
+                LinkedIn
+              </Typography>
+            </>
+          </LinkedinShareButton>
         </MenuItem>
       </Menu>
     );

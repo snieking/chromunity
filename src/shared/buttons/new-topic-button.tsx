@@ -1,32 +1,32 @@
-import React, { FormEvent } from "react";
+import React, { FormEvent } from 'react';
 
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import { Badge, Dialog, Tab, Tabs, withStyles, WithStyles, Typography, Theme } from "@material-ui/core";
-import Button from "@material-ui/core/Button";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import TextField from "@material-ui/core/TextField";
-import IconButton from "@material-ui/core/IconButton";
-import { Forum } from "@material-ui/icons";
-import { createTopic } from "../../core/services/topic-service";
-import { ChromunityUser, PollSpecification } from "../../types";
-import { getTrendingChannels } from "../../core/services/channel-service";
-import { largeButtonStyles } from "./button-styles";
-import { COLOR_RED } from "../../theme";
-import MarkdownRenderer from "../markdown-renderer";
-import withTheme from "@material-ui/core/styles/withTheme";
-import { parseEmojis } from "../util/text-parsing";
-import "emoji-mart/css/emoji-mart.css";
-import Tooltip from "@material-ui/core/Tooltip";
-import ApplicationState from "../../core/application-state";
-import { connect } from "react-redux";
-import TextToolbar from "../text-toolbar/text-toolbar";
-import PollCreator from "../../features/topic/poll/poll-creator";
-import PollIcon from "@material-ui/icons/Poll";
-import { notifySuccess, notifyError } from "../../core/snackbar/redux/snackbar-actions";
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import { Badge, Dialog, Tab, Tabs, withStyles, WithStyles, Typography, Theme } from '@material-ui/core';
+import Button from '@material-ui/core/Button';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import TextField from '@material-ui/core/TextField';
+import IconButton from '@material-ui/core/IconButton';
+import { Forum } from '@material-ui/icons';
+import withTheme from '@material-ui/core/styles/withTheme';
+import PollIcon from '@material-ui/icons/Poll';
+import Tooltip from '@material-ui/core/Tooltip';
+import { connect } from 'react-redux';
+import { createTopic } from '../../core/services/topic-service';
+import { ChromunityUser, PollSpecification } from '../../types';
+import { getTrendingChannels } from '../../core/services/channel-service';
+import { largeButtonStyles } from './button-styles';
+import { COLOR_RED } from '../../theme';
+import MarkdownRenderer from '../markdown-renderer';
+import { parseEmojis } from '../util/text-parsing';
+import 'emoji-mart/css/emoji-mart.css';
+import ApplicationState from '../../core/application-state';
+import TextToolbar from '../text-toolbar/text-toolbar';
+import PollCreator from '../../features/topic/poll/poll-creator';
+import { notifySuccess, notifyError } from '../../core/snackbar/redux/snackbar-actions';
 
 export interface NewTopicButtonProps extends WithStyles<typeof largeButtonStyles> {
-  updateFunction: Function;
+  updateFunction: () => void;
   channel: string;
   theme: Theme;
   user: ChromunityUser;
@@ -45,8 +45,8 @@ export interface NewTopicButtonState {
   poll: PollSpecification;
 }
 
-const maxTitleLength: number = 40;
-const maxChannelLength: number = 20;
+const maxTitleLength = 40;
+const maxChannelLength = 20;
 
 const NewTopicButton = withStyles(largeButtonStyles)(
   withTheme(
@@ -57,16 +57,16 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         super(props);
 
         this.state = {
-          topicTitle: "",
+          topicTitle: '',
           channel: this.props.channel ? this.props.channel : null,
-          topicMessage: "",
+          topicMessage: '',
           dialogOpen: false,
           displayPoll: false,
           suggestions: [],
           activeTab: 0,
           poll: {
-            question: "",
-            options: new Array<string>(),
+            question: '',
+            options: [],
           },
         };
 
@@ -83,7 +83,7 @@ const NewTopicButton = withStyles(largeButtonStyles)(
       componentDidMount() {
         getTrendingChannels(7, 100).then((channels) =>
           this.setState({
-            suggestions: channels.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" })),
+            suggestions: channels.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' })),
           })
         );
       }
@@ -106,32 +106,30 @@ const NewTopicButton = withStyles(largeButtonStyles)(
 
       createNewTopic(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        const topicTitle: string = this.state.topicTitle;
-        const channel: string = this.state.channel;
+        const { topicTitle } = this.state;
+        const { channel } = this.state;
 
         if (channel == null) {
-          this.props.notifyError("A channel must be supplied");
+          this.props.notifyError('A channel must be supplied');
+        } else if (topicTitle.length > maxTitleLength) {
+          this.props.notifyError('Title is too long');
+        } else if (!/^[a-zA-Z0-9]+$/.test(channel)) {
+          this.props.notifyError('Channel may only contain a-z, A-Z & 0-9 characters');
+        } else if (channel.length > maxChannelLength) {
+          this.props.notifyError('Channel is too long');
+        } else if (topicTitle.length < 3 || topicTitle.startsWith(' ')) {
+          this.props.notifyError('Title must be longer than 3 characters, and must not start with a whitespace');
         } else {
-          if (topicTitle.length > maxTitleLength) {
-            this.props.notifyError("Title is too long");
-          } else if (!/^[a-zA-Z0-9]+$/.test(channel)) {
-            this.props.notifyError("Channel may only contain a-z, A-Z & 0-9 characters");
-          } else if (channel.length > maxChannelLength) {
-            this.props.notifyError("Channel is too long");
-          } else if (topicTitle.length < 3 || topicTitle.startsWith(" ")) {
-            this.props.notifyError("Title must be longer than 3 characters, and must not start with a whitespace");
-          } else {
-            const topicMessage = this.state.topicMessage;
-            this.setState({ topicTitle: "", topicMessage: "" });
+          const { topicMessage } = this.state;
+          this.setState({ topicTitle: '', topicMessage: '' });
 
-            createTopic(this.props.user, channel, topicTitle, topicMessage, this.state.poll)
-              .then(() => {
-                this.props.notifySuccess("Topic created");
-                this.props.updateFunction();
-              })
-              .catch((error) => this.props.notifyError(error.message));
-            this.toggleNewTopicDialog();
-          }
+          createTopic(this.props.user, channel, topicTitle, topicMessage, this.state.poll)
+            .then(() => {
+              this.props.notifySuccess('Topic created');
+              this.props.updateFunction();
+            })
+            .catch((error) => this.props.notifyError(error.message));
+          this.toggleNewTopicDialog();
         }
       }
 
@@ -155,14 +153,14 @@ const NewTopicButton = withStyles(largeButtonStyles)(
 
       newThreadDialog() {
         return (
-          <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"md"}>
+          <Dialog open={this.state.dialogOpen} aria-labelledby="form-dialog-title" fullWidth maxWidth="md">
             <form onSubmit={this.createNewTopic}>
               <DialogContent>
                 <br />
                 <Autocomplete
                   id="combo-box-demo"
                   options={this.state.suggestions}
-                  style={{ maxWidth: "300px", width: "95%" }}
+                  style={{ maxWidth: '300px', width: '95%' }}
                   freeSolo
                   value={this.state.channel}
                   onChange={(event: any, newValue: string | null) => {
@@ -181,10 +179,10 @@ const NewTopicButton = withStyles(largeButtonStyles)(
                 />
                 <br />
                 <Badge
-                  color={maxTitleLength - this.state.topicTitle.length < 0 ? "error" : "primary"}
+                  color={maxTitleLength - this.state.topicTitle.length < 0 ? 'error' : 'primary'}
                   badgeContent={maxTitleLength - this.state.topicTitle.length}
                   showZero
-                  style={{ maxWidth: "350px", width: "95%" }}
+                  style={{ maxWidth: '350px', width: '95%' }}
                 >
                   <TextField
                     autoFocus
@@ -235,23 +233,47 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         );
       }
 
-      renderPoll() {
-        return (
-          <>
-            {this.state.displayPoll && (
-              <div className={this.props.classes.pollWrapper}>
-                <PollCreator poll={this.state.poll} />
-              </div>
-            )}
-          </>
-        );
-      }
-
       pollToggleButton() {
         return (
           <IconButton onClick={() => this.setState((prevState) => ({ displayPoll: !prevState.displayPoll }))}>
-            <PollIcon style={{ color: this.state.displayPoll ? COLOR_RED : "" }} />
+            <PollIcon style={{ color: this.state.displayPoll ? COLOR_RED : '' }} />
           </IconButton>
+        );
+      }
+
+      addText(text: string) {
+        const startPosition = this.textInput.current.selectionStart;
+
+        this.setState((prevState) => ({
+          topicMessage: [
+            prevState.topicMessage.slice(0, startPosition),
+            text,
+            prevState.topicMessage.slice(startPosition),
+          ].join(''),
+        }));
+
+        setTimeout(() => {
+          this.textInput.current.selectionStart = startPosition + text.length;
+          this.textInput.current.selectionEnd = startPosition + text.length;
+        }, 100);
+      }
+
+      a11yProps(index: number) {
+        return {
+          id: `simple-tab-${index}`,
+          'aria-controls': `simple-tabpanel-${index}`,
+        };
+      }
+
+      handleTabChange(event: React.ChangeEvent<unknown>, newValue: number) {
+        this.setState({ activeTab: newValue });
+      }
+
+      renderPreview() {
+        return (
+          <div>
+            <MarkdownRenderer text={this.state.topicMessage} />
+          </div>
         );
       }
 
@@ -277,40 +299,16 @@ const NewTopicButton = withStyles(largeButtonStyles)(
         );
       }
 
-      addText(text: string) {
-        const startPosition = this.textInput.current.selectionStart;
-
-        this.setState((prevState) => ({
-          topicMessage: [
-            prevState.topicMessage.slice(0, startPosition),
-            text,
-            prevState.topicMessage.slice(startPosition),
-          ].join(""),
-        }));
-
-        setTimeout(() => {
-          this.textInput.current.selectionStart = startPosition + text.length;
-          this.textInput.current.selectionEnd = startPosition + text.length;
-        }, 100);
-      }
-
-      renderPreview() {
+      renderPoll() {
         return (
-          <div>
-            <MarkdownRenderer text={this.state.topicMessage} />
-          </div>
+          <>
+            {this.state.displayPoll && (
+              <div className={this.props.classes.pollWrapper}>
+                <PollCreator poll={this.state.poll} />
+              </div>
+            )}
+          </>
         );
-      }
-
-      a11yProps(index: number) {
-        return {
-          id: `simple-tab-${index}`,
-          "aria-controls": `simple-tabpanel-${index}`,
-        };
-      }
-
-      handleTabChange(event: React.ChangeEvent<{}>, newValue: number) {
-        this.setState({ activeTab: newValue });
       }
 
       render() {
@@ -331,11 +329,9 @@ const mapStateToProps = (store: ApplicationState) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: any) => {
-  return {
-    notifyError,
-    notifySuccess
-  };
+const mapDispatchToProps = {
+  notifyError,
+  notifySuccess,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(NewTopicButton);

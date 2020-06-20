@@ -1,8 +1,6 @@
-import React from "react";
-import ApplicationState from "../../core/application-state";
-import { connect } from "react-redux";
-import { ChromunityUser } from "../../types";
-import MoneyIcon from "@material-ui/icons/Money";
+import React from 'react';
+import { connect } from 'react-redux';
+import MoneyIcon from '@material-ui/icons/Money';
 import {
   Tooltip,
   IconButton,
@@ -13,11 +11,13 @@ import {
   DialogActions,
   Button,
   TextField,
-} from "@material-ui/core";
-import { notifyError } from "../../core/snackbar/redux/snackbar-actions";
-import * as config from "../../config";
-import { sendKudos } from "../../features/user/redux/account-actions";
-import { toLowerCase } from "../util/util";
+} from '@material-ui/core';
+import { ChromunityUser } from '../../types';
+import ApplicationState from '../../core/application-state';
+import { notifyError } from '../../core/snackbar/redux/snackbar-actions';
+import * as config from '../../config';
+import { sendKudos } from '../../features/user/redux/account-actions';
+import { toLowerCase } from '../util/util';
 
 interface Props {
   receiver: string;
@@ -29,7 +29,7 @@ interface Props {
 
 const TippingButton: React.FunctionComponent<Props> = (props) => {
   const [open, setOpen] = React.useState(false);
-  const [amount, setAmount] = React.useState<string>("");
+  const [amount, setAmount] = React.useState<string>('');
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -50,15 +50,15 @@ const TippingButton: React.FunctionComponent<Props> = (props) => {
       props.sendKudos({ receiver: props.receiver, kudos });
     }
 
-    setAmount("");
+    setAmount('');
   };
 
   function updateAmount(event: any) {
-    const value: string = event.target.value;
+    const { value } = event.target;
     if (value && value.match(/^[1-9][0-9]*/)) {
-      setAmount("" + parseInt(value));
+      setAmount(`${parseInt(value)}`);
     } else {
-      setAmount("");
+      setAmount('');
     }
   }
 
@@ -93,8 +93,9 @@ const TippingButton: React.FunctionComponent<Props> = (props) => {
     );
   }
 
-  if (!props.user || toLowerCase(props.user.name) === toLowerCase(props.receiver) || !config.features.kudosEnabled)
+  if (!props.user || toLowerCase(props.user.name) === toLowerCase(props.receiver) || !config.features.kudosEnabled) {
     return null;
+  }
 
   return (
     <>

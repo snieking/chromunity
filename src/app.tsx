@@ -1,26 +1,26 @@
-import * as React from "react";
-import { Router } from "react-router-dom";
-import { Provider } from "react-redux";
-import { Store } from "redux";
-import HeaderNav from "./core/header/header-nav";
-import Footer from "./core/footer/footer";
-import { CssBaseline } from "@material-ui/core";
-import Content from "./content";
-import DynamicTheme from "./core/dynamic-theme/dynamic-theme";
-import ReactPiwik from "react-piwik";
-import history from "./history";
-import * as Sentry from "@sentry/browser";
-import * as config from "./config";
-import logger from "./shared/util/logger";
-import Spinners from "./core/spinners/spinners";
-import ApplicationState from "./core/application-state";
+import * as React from 'react';
+import { Router } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { Store } from 'redux';
+import { CssBaseline } from '@material-ui/core';
+import ReactPiwik from 'react-piwik';
+import * as Sentry from '@sentry/browser';
+import HeaderNav from './core/header/header-nav';
+import Footer from './core/footer/footer';
+import Content from './content';
+import DynamicTheme from './core/dynamic-theme/dynamic-theme';
+import history from './history';
+import * as config from './config';
+import logger from './shared/util/logger';
+import Spinners from './core/spinners/spinners';
+import ApplicationState from './core/application-state';
 
 interface Props {
   store: Store<ApplicationState>;
 }
 
-if (config.sentry.environment !== "Local") {
-  logger.debug("Initializing Sentry with dsn: %s for env: %s", config.sentry.dsn, config.sentry.environment);
+if (config.sentry.environment !== 'Local') {
+  logger.debug('Initializing Sentry with dsn: %s for env: %s', config.sentry.dsn, config.sentry.environment);
   Sentry.init({
     dsn: config.sentry.dsn,
     environment: config.sentry.environment,
@@ -38,8 +38,8 @@ const piwik = config.matomo.enabled
   : null;
 
 if (piwik != null) {
-  ReactPiwik.push(["enableHeartBeatTimer"]);
-  ReactPiwik.push(["trackPageView"]);
+  ReactPiwik.push(['enableHeartBeatTimer']);
+  ReactPiwik.push(['trackPageView']);
 }
 
 const App: React.FunctionComponent<Props> = (props) => {

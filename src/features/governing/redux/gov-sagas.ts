@@ -1,7 +1,8 @@
-import ApplicationState from "../../../core/application-state";
-import { ChromunityUser, Topic } from "../../../types";
-import { put, select, takeLatest } from "redux-saga/effects";
-import logger from "../../../shared/util/logger";
+import { put, select, takeLatest } from 'redux-saga/effects';
+import { Action } from '@reduxjs/toolkit';
+import ApplicationState from '../../../core/application-state';
+import { ChromunityUser, Topic, RepresentativeReport } from '../../../types';
+import logger from '../../../shared/util/logger';
 import {
   getAllRepresentativeActionsPriorToTimestamp,
   getRepresentatives,
@@ -9,7 +10,7 @@ import {
   getPinnedTopicId,
   getPinnedTopicByRep,
   pinTopic,
-} from "../../../core/services/representatives-service";
+} from '../../../core/services/representatives-service';
 import {
   updateActiveElection,
   updateLogbookRecentEntryTimestamp,
@@ -19,16 +20,15 @@ import {
   updatePinnedTopicByRep,
   checkActiveElection,
   checkNewLogbookEntries,
-  pinTopic as pinTopicAction
-} from "./gov-actions";
-import { RepresentativeReport } from "../../../types";
-import { GovernmentActionTypes } from "./gov-types";
-import { getUncompletedElection, processElection } from "../../../core/services/election-service";
-import { toLowerCase } from "../../../shared/util/util";
-import { setOperationPending } from "../../../shared/redux/common-actions";
-import { getTopicById } from "../../../core/services/topic-service";
-import * as config from "../../../config";
-import { Action } from "@reduxjs/toolkit";
+  pinTopic as pinTopicAction,
+} from './gov-actions';
+
+import { GovernmentActionTypes } from './gov-types';
+import { getUncompletedElection, processElection } from '../../../core/services/election-service';
+import { toLowerCase } from '../../../shared/util/util';
+import { setOperationPending } from '../../../shared/redux/common-actions';
+import { getTopicById } from '../../../core/services/topic-service';
+import * as config from '../../../config';
 
 export function* governmentWatcher() {
   yield takeLatest(GovernmentActionTypes.LOAD_REPRESENTATIVES, getCurrentRepresentativesSaga);
@@ -77,8 +77,8 @@ export function* checkPinnedTopicSaga() {
   if (topic == null && cacheExpired(lastChecked)) {
     const topicId = yield getPinnedTopicId(user ? user.name : null);
     if (topicId) {
-      const topic = yield getTopicById(topicId, user);
-      yield put(updatePinnedTopic(topic));
+      const t = yield getTopicById(topicId, user);
+      yield put(updatePinnedTopic(t));
     }
   }
 }
@@ -92,7 +92,7 @@ export function* checkPinnedTopicByRepSaga() {
 
   if (topicId == null && user && reps && reps.map((n) => toLowerCase(n).includes(toLowerCase(user.name)))) {
     const id = yield getPinnedTopicByRep(user.name);
-    yield put(updatePinnedTopicByRep(id ? id : ""));
+    yield put(updatePinnedTopicByRep(id || ''));
   }
 }
 
@@ -100,9 +100,9 @@ export function* getCurrentRepresentativesSaga() {
   const lastUpdated = yield select(getRepresentativesLastUpdated);
 
   if (cacheExpired(lastUpdated)) {
-    const representatives: string[] = yield getRepresentatives();
-    if (representatives != null) {
-      yield put(updateRepresentatives(representatives));
+    const r: string[] = yield getRepresentatives();
+    if (r != null) {
+      yield put(updateRepresentatives(r));
     }
   }
 }
@@ -123,7 +123,7 @@ export function* checkActiveElectionSaga(action: Action) {
     if (cacheExpired(lastUpdated)) {
       if (action.payload != null) {
         yield processElection(action.payload).catch((error: Error) =>
-          logger.debug("Error while processing election, probably expected", error)
+          logger.debug('Error while processing election, probably expected', error)
         );
       }
       const electionId = yield getUncompletedElection();
@@ -135,13 +135,13 @@ export function* checkActiveElectionSaga(action: Action) {
 export function* checkLogbookEntriesSaga(action: Action) {
   if (checkNewLogbookEntries.match(action)) {
     const lastRead = yield select(getLogbookLastUpdated);
-    const representatives: Array<string> = yield select(getRepresentativesCached);
+    const r: string[] = yield select(getRepresentativesCached);
 
     if (
       action.payload != null &&
-      representatives != null &&
+      r != null &&
       cacheExpired(lastRead) &&
-      representatives.map((rep) => toLowerCase(rep)).includes(toLowerCase(action.payload.name))
+      r.map((rep) => toLowerCase(rep)).includes(toLowerCase(action.payload.name))
     ) {
       const logs = yield getAllRepresentativeActionsPriorToTimestamp(Date.now(), 1);
       yield put(updateLogbookRecentEntryTimestamp(logs.length > 0 ? logs[0].timestamp : Date.now()));

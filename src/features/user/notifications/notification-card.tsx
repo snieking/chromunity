@@ -1,17 +1,17 @@
-import React from "react";
+import React from 'react';
 
-import { Card, CardContent, createStyles, makeStyles, Typography } from "@material-ui/core";
-import { UserNotification } from "../../../types";
-import { parseContent } from "../../../shared/util/text-parsing";
+import { Card, CardContent, createStyles, makeStyles, Typography } from '@material-ui/core';
+import { UserNotification } from '../../../types';
+import { parseContent } from '../../../shared/util/text-parsing';
 
-import Timestamp from "../../../shared/timestamp";
-import MarkdownRenderer from "../../../shared/markdown-renderer";
+import Timestamp from '../../../shared/timestamp';
+import MarkdownRenderer from '../../../shared/markdown-renderer';
 
 const useStyles = makeStyles(
   createStyles({
     notificationRead: {
-      opacity: 0.6
-    }
+      opacity: 0.6,
+    },
   })
 );
 
@@ -19,7 +19,7 @@ interface NotificationCardProps {
   notification: UserNotification;
 }
 
-const NotificationCard: React.FunctionComponent<NotificationCardProps> = props => {
+const NotificationCard: React.FunctionComponent<NotificationCardProps> = (props) => {
   const classes = useStyles(props);
 
   function renderTimeAgo() {
@@ -27,12 +27,12 @@ const NotificationCard: React.FunctionComponent<NotificationCardProps> = props =
   }
 
   function renderTrigger() {
-    if (props.notification.trigger !== "") {
+    if (props.notification.trigger !== '') {
       return (
         <Typography gutterBottom variant="subtitle1" component="h6">
           <span
             dangerouslySetInnerHTML={{
-              __html: parseContent(props.notification.trigger)
+              __html: parseContent(props.notification.trigger),
             }}
           />
         </Typography>
@@ -41,13 +41,13 @@ const NotificationCard: React.FunctionComponent<NotificationCardProps> = props =
   }
 
   function renderContent() {
-    if (props.notification.content !== "") {
+    if (props.notification.content !== '') {
       return <MarkdownRenderer text={props.notification.content} />;
     }
   }
 
   return (
-    <Card className={props.notification.read ? classes.notificationRead : ""}>
+    <Card className={props.notification.read ? classes.notificationRead : ''}>
       <CardContent>
         {renderTimeAgo()}
         {renderTrigger()}

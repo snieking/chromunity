@@ -1,13 +1,7 @@
-import React from "react";
+import React from 'react';
 
-import {
-  Button,
-  Container,
-  createStyles,
-  Grid,
-  withStyles,
-  WithStyles,
-} from "@material-ui/core";
+import { Button, Container, createStyles, Grid, withStyles, WithStyles } from '@material-ui/core';
+import { connect } from 'react-redux';
 import {
   getElectionCandidates,
   getElectionVoteForUser,
@@ -15,27 +9,26 @@ import {
   isEligibleForVoting,
   signUpForElection,
   voteForCandidate,
-} from "../../../core/services/election-service";
-import ChromiaPageHeader from "../../../shared/chromia-page-header";
-import { ChromunityUser } from "../../../types";
-import ElectionCandidateCard from "./election-candidate-card";
-import ApplicationState from "../../../core/application-state";
-import { connect } from "react-redux";
-import { toLowerCase } from "../../../shared/util/util";
-import ElectionTutorial from "./election-tutorial";
-import ElectionDetails from "./election-details";
-import { ElectionStatus } from "./election-status";
+} from '../../../core/services/election-service';
+import ChromiaPageHeader from '../../../shared/chromia-page-header';
+import { ChromunityUser } from '../../../types';
+import ElectionCandidateCard from './election-candidate-card';
+import ApplicationState from '../../../core/application-state';
+import { toLowerCase } from '../../../shared/util/util';
+import ElectionTutorial from './election-tutorial';
+import ElectionDetails from './election-details';
+import { ElectionStatus } from './election-status';
 
 const styles = createStyles({
   actionBtn: {
-    textAlign: "center",
-    margin: "0 auto",
+    textAlign: 'center',
+    margin: '0 auto',
   },
   participateBtn: {
-    textAlign: "center",
-    marginTop: "10px",
-    marginBottom: "10px"
-  }
+    textAlign: 'center',
+    marginTop: '10px',
+    marginBottom: '10px',
+  },
 });
 
 interface Props extends WithStyles<typeof styles> {
@@ -58,7 +51,7 @@ const Election = withStyles(styles)(
       this.state = {
         electionStatus: ElectionStatus.NOT_CHECKED,
         timestamp: Date.now(),
-        votedFor: "",
+        votedFor: '',
         isACandidate: false,
         electionCandidates: [],
         isEligibleForVoting: false,
@@ -77,11 +70,11 @@ const Election = withStyles(styles)(
             .then((candidates) => this.setState({ electionCandidates: candidates }))
             .then(() => {
               if (this.props.user != null) {
-                this.setState({
-                  isACandidate: this.state.electionCandidates
+                this.setState((_prevState) => ({
+                  isACandidate: _prevState.electionCandidates
                     .map((name) => toLowerCase(name))
                     .includes(toLowerCase(this.props.user.name)),
-                });
+                }));
               }
             });
 
@@ -97,11 +90,11 @@ const Election = withStyles(styles)(
     componentDidUpdate(prevProps: Readonly<Props>): void {
       if (this.props.user != null && prevProps.user !== this.props.user) {
         this.handleUserExists();
-        this.setState({
-          isACandidate: this.state.electionCandidates
+        this.setState((_prevState) => ({
+          isACandidate: _prevState.electionCandidates
             .map((name) => toLowerCase(name))
             .includes(toLowerCase(this.props.user.name)),
-        });
+        }));
       }
     }
 
@@ -113,6 +106,14 @@ const Election = withStyles(styles)(
           this.setState({ votedFor: candidate });
         }
       });
+    }
+
+    registerForElection() {
+      signUpForElection(this.props.user).then(() => window.location.reload());
+    }
+
+    voteForCandidate(name: string) {
+      voteForCandidate(this.props.user, name).then(() => this.setState({ votedFor: name }));
     }
 
     renderParticipateButton() {
@@ -138,14 +139,6 @@ const Election = withStyles(styles)(
       }
     }
 
-    registerForElection() {
-      signUpForElection(this.props.user).then(() => window.location.reload());
-    }
-
-    voteForCandidate(name: string) {
-      voteForCandidate(this.props.user, name).then(() => this.setState({ votedFor: name }));
-    }
-
     render() {
       return (
         <Container fixed>
@@ -159,7 +152,7 @@ const Election = withStyles(styles)(
                 candidate={candidate}
                 votedFor={this.state.votedFor}
                 voteForCandidate={this.voteForCandidate}
-                key={"candiate-" + candidate}
+                key={`candiate-${candidate}`}
                 userIsEligibleToVote={this.state.isEligibleForVoting}
               />
             ))}

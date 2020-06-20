@@ -1,6 +1,6 @@
-import { CommonState } from "./common-types";
-import { createReducer } from "@reduxjs/toolkit";
-import { toggleTutorial, updateRateLimited, setOperationPending, setQueryPending } from "./common-actions";
+import { createReducer } from '@reduxjs/toolkit';
+import { CommonState } from './common-types';
+import { toggleTutorial, updateRateLimited, setOperationPending, setQueryPending } from './common-actions';
 
 const initialCommonState: CommonState = {
   tutorial: false,
@@ -9,7 +9,7 @@ const initialCommonState: CommonState = {
   operationPending: false,
 };
 
-export const commonReducer = createReducer(initialCommonState, builder =>
+export const commonReducer = createReducer(initialCommonState, (builder) =>
   builder
     .addCase(toggleTutorial, (state, action) => {
       state.tutorial = action.payload;
@@ -23,4 +23,4 @@ export const commonReducer = createReducer(initialCommonState, builder =>
     .addCase(setQueryPending, (state, action) => {
       state.queryPending = action.payload;
     })
-)
+);

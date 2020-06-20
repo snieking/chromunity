@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from "react";
-import PinDropIcon from "@material-ui/icons/PinDrop";
-import ApplicationState from "../../../core/application-state";
-import { ChromunityUser } from "../../../types";
-import { connect } from "react-redux";
-import { toLowerCase } from "../../../shared/util/util";
-import { ListItemIcon, MenuItem, Typography } from "@material-ui/core";
-import { pinTopic, checkPinnedTopicByRep } from "../../governing/redux/gov-actions";
-import { COLOR_ORANGE } from "../../../theme";
-import ConfirmDialog from "../../../shared/confirm-dialog";
+import React, { useEffect, useState } from 'react';
+import PinDropIcon from '@material-ui/icons/PinDrop';
+import { connect } from 'react-redux';
+import { ListItemIcon, MenuItem, Typography } from '@material-ui/core';
+import ApplicationState from '../../../core/application-state';
+import { ChromunityUser } from '../../../types';
+import { toLowerCase } from '../../../shared/util/util';
+import { pinTopic, checkPinnedTopicByRep } from '../../governing/redux/gov-actions';
+import { COLOR_ORANGE } from '../../../theme';
+import ConfirmDialog from '../../../shared/confirm-dialog';
 
 interface Props {
   topicId: string;
-  handleClose: Function;
+  handleClose: () => void;
   user: ChromunityUser;
   rateLimited: boolean;
   representatives: string[];
@@ -27,25 +27,26 @@ const PinButton: React.FunctionComponent<Props> = (props) => {
     if (isRepresentative()) {
       props.checkPinnedTopicByRep();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line
   }, [props.representatives, props.user]);
 
-  const isRepresentative = () => props.user && props.representatives && props.representatives.includes(toLowerCase(props.user.name));
+  const isRepresentative = () =>
+    props.user && props.representatives && props.representatives.includes(toLowerCase(props.user.name));
   const isPinnedByMe = () => isRepresentative() && props.topicIdPinnedByMe && props.topicIdPinnedByMe === props.topicId;
 
   const openDialog = () => {
     props.handleClose();
     setDialogOpen(true);
-  }
+  };
 
   const confirm = () => {
     setDialogOpen(false);
     props.pinTopic(props.topicId);
-  }
+  };
 
   const cancel = () => {
     setDialogOpen(false);
-  }
+  };
 
   const pinButton = () => {
     return (
@@ -59,13 +60,13 @@ const PinButton: React.FunctionComponent<Props> = (props) => {
         />
         <MenuItem onClick={openDialog} disabled={props.rateLimited || isPinnedByMe()}>
           <ListItemIcon>
-            <PinDropIcon style={{ color: isPinnedByMe() ? COLOR_ORANGE : "" }} />
+            <PinDropIcon style={{ color: isPinnedByMe() ? COLOR_ORANGE : '' }} />
           </ListItemIcon>
           <Typography>Pin topic</Typography>
         </MenuItem>
       </>
     );
-  }
+  };
 
   return isRepresentative() && pinButton();
 };
@@ -81,7 +82,7 @@ const mapStateToProps = (store: ApplicationState) => {
 
 const mapDispatchToProps = {
   pinTopic,
-  checkPinnedTopicByRep
+  checkPinnedTopicByRep,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(PinButton);

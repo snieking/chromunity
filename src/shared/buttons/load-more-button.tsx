@@ -1,22 +1,23 @@
 import React from 'react';
-import {Button} from '@material-ui/core';
+import { Button } from '@material-ui/core';
 
 export interface LoadMoreButtonProps {
-    onClick: Function
+  onClick: () => void;
 }
 
 const LoadMoreButton: React.FunctionComponent<LoadMoreButtonProps> = (props) => {
-    return (
-        <Button type="submit"
-                fullWidth
-                color="primary"
-                onClick={() => props.onClick()}
-                variant="contained"
-                style={{marginTop: "5px"}}
-        >
-            Load more
-        </Button>
-    );
+  return (
+    <Button
+      type="submit"
+      fullWidth
+      color="primary"
+      onClick={() => props.onClick()}
+      variant="contained"
+      style={{ marginTop: '5px' }}
+    >
+      Load more
+    </Button>
+  );
 };
 
 export default LoadMoreButton;

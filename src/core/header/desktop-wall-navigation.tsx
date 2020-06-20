@@ -1,22 +1,21 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import IconButton from "@material-ui/core/IconButton";
-import { Tooltip } from "@material-ui/core";
-import { Home, People, RssFeed } from "@material-ui/icons";
-import { ChromunityUser } from "../../types";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import IconButton from '@material-ui/core/IconButton';
+import { Tooltip } from '@material-ui/core';
+import { Home, People, RssFeed } from '@material-ui/icons';
+import { ChromunityUser } from '../../types';
 
 interface Props {
   user: ChromunityUser;
   classes: Record<string, string>;
   handleGovClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  renderGovernmentIcon: Function;
+  renderGovernmentIcon: () => JSX.Element;
 }
 
 const DesktopWallNavigation: React.FunctionComponent<Props> = (props: Props) => {
-
-  function renderFavoriteWalls() {
-    if (props.user != null) {
-      return (
+  function renderFavoriteWalls(): JSX.Element {
+    return (
+      props.user && (
         <div>
           <Link to="/channels">
             <IconButton edge="start" className={props.classes.leftMenuButton} aria-label="Open drawer">
@@ -34,8 +33,8 @@ const DesktopWallNavigation: React.FunctionComponent<Props> = (props: Props) => 
             </IconButton>
           </Link>
         </div>
-      );
-    }
+      )
+    );
   }
 
   return (
@@ -57,7 +56,7 @@ const DesktopWallNavigation: React.FunctionComponent<Props> = (props: Props) => 
         <Tooltip title="Governing">{props.renderGovernmentIcon()}</Tooltip>
       </IconButton>
     </div>
-  )
+  );
 };
 
 export default DesktopWallNavigation;

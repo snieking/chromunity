@@ -1,11 +1,9 @@
-import * as React from "react";
+import * as React from 'react';
 
-import { RepresentativeReport } from "../../../types";
-import { Card, CardContent, Typography } from "@material-ui/core";
-import { parseContent } from "../../../shared/util/text-parsing";
-import Timestamp from "../../../shared/timestamp";
-import ApplicationState from "../../../core/application-state";
-import { connect } from "react-redux";
+import { Card, CardContent, Typography } from '@material-ui/core';
+import { RepresentativeReport } from '../../../types';
+import { parseContent } from '../../../shared/util/text-parsing';
+import Timestamp from '../../../shared/timestamp';
 
 interface ReportCardProps {
   report: RepresentativeReport;
@@ -19,7 +17,7 @@ const ReportCard: React.FunctionComponent<ReportCardProps> = (props: ReportCardP
         <Typography variant="subtitle1" component="span">
           <span
             dangerouslySetInnerHTML={{
-              __html: parseContent(props.report.text)
+              __html: parseContent(props.report.text),
             }}
           />
         </Typography>
@@ -28,10 +26,4 @@ const ReportCard: React.FunctionComponent<ReportCardProps> = (props: ReportCardP
   );
 };
 
-const mapStateToProps = (store: ApplicationState) => {
-  return {
-
-  };
-};
-
-export default connect(mapStateToProps, null)(ReportCard);
+export default ReportCard;

@@ -1,6 +1,8 @@
-import { Topic } from "../../types";
-import { Stopwatch } from "ts-stopwatch";
-import { useEffect, useRef } from "react";
+/* eslint-disable func-names */
+import { Stopwatch } from 'ts-stopwatch';
+import { useEffect, useRef } from 'react';
+import { Topic } from '../../types';
+import logger from './logger';
 
 export const createStopwatchStarted = (): Stopwatch => {
   const sw = new Stopwatch();
@@ -15,17 +17,17 @@ export const stopStopwatch = (sw: Stopwatch): number => {
 
 export const uniqueId = function () {
   let dt = new Date().getTime();
-  const uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+  const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     const r = (dt + Math.random() * 16) % 16 | 0;
     dt = Math.floor(dt / 16);
-    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
   });
 
   return uuid.substr(0, 13);
 };
 
 export function prepareUrlPath(path: string): string {
-  return encodeURI(path.toLocaleLowerCase().replace(/ /g, "-").replace("%", ""));
+  return encodeURI(path.toLocaleLowerCase().replace(/ /g, '-').replace('%', ''));
 }
 
 export function sortByFrequency(array: string[]): string[] {
@@ -44,38 +46,38 @@ export function sortByFrequency(array: string[]): string[] {
   });
 }
 
-const monthInMillis: number = 2629743000;
-const dayInMillis: number = 86400000;
-const hourInMillis: number = 3600000;
-const minuteInMillis: number = 60000;
+const monthInMillis = 2629743000;
+const dayInMillis = 86400000;
+const hourInMillis = 3600000;
+const minuteInMillis = 60000;
 
 export function timeAgoReadable(timestamp: number): string {
   const timeAgo: number = Date.now() - timestamp;
 
   if (timeAgo >= monthInMillis) {
     const monthsAgo: number = Math.round(timeAgo / monthInMillis);
-    return `${monthsAgo} ${monthsAgo === 1 ? "month" : "months"} ago`;
-  } else if (timeAgo >= dayInMillis) {
-    const daysAgo: number = Math.round(timeAgo / dayInMillis);
-    return `${daysAgo} ${daysAgo === 1 ? "day" : "days"} ago`;
-  } else if (timeAgo >= hourInMillis) {
-    const hoursAgo: number = Math.round(timeAgo / hourInMillis);
-    return `${hoursAgo} ${hoursAgo === 1 ? "hour" : "hours"} ago`;
-  } else {
-    const minutesAgo: number = Math.round(timeAgo / minuteInMillis);
-    return `${minutesAgo} ${minutesAgo === 1 ? "minute" : "minutes"} ago`;
+    return `${monthsAgo} ${monthsAgo === 1 ? 'month' : 'months'} ago`;
   }
+  if (timeAgo >= dayInMillis) {
+    const daysAgo: number = Math.round(timeAgo / dayInMillis);
+    return `${daysAgo} ${daysAgo === 1 ? 'day' : 'days'} ago`;
+  }
+  if (timeAgo >= hourInMillis) {
+    const hoursAgo: number = Math.round(timeAgo / hourInMillis);
+    return `${hoursAgo} ${hoursAgo === 1 ? 'hour' : 'hours'} ago`;
+  }
+  const minutesAgo: number = Math.round(timeAgo / minuteInMillis);
+  return `${minutesAgo} ${minutesAgo === 1 ? 'minute' : 'minutes'} ago`;
 }
 
 export function printableMinutes(seconds: number): string {
   if (seconds < 60) {
-    return seconds + "s";
-  } else {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-
-    return m + "m " + s + "s";
+    return `${seconds}s`;
   }
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+
+  return `${m}m ${s}s`;
 }
 
 export function useInterval(callback: any, delay: number) {
@@ -93,7 +95,7 @@ export function useInterval(callback: any, delay: number) {
       savedCallback.current();
     }
     if (delay !== null) {
-      let id = setInterval(tick, delay);
+      const id = setInterval(tick, delay);
       return () => clearInterval(id);
     }
   }, [delay]);
@@ -104,11 +106,11 @@ export function needsToBeSliced(message: string): boolean {
 }
 
 export function stringToHexColor(str: string): string {
-  return "#" + intToARGB(hashCode(str));
+  return `#${intToARGB(hashCode(str))}`;
 }
 
 export function isBright(hex: string): boolean {
-  const color = hex.replace("#", "");
+  const color = hex.replace('#', '');
   const rgb = parseInt(color, 16);
 
   const r = (rgb >> 16) & 0xff; // extract red
@@ -121,8 +123,8 @@ export function isBright(hex: string): boolean {
 }
 
 function hashCode(str: string): number {
-  var hash = 0;
-  for (var i = 0; i < str.length; i++) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
     hash = str.charCodeAt(i) + ((hash << 6) - hash);
   }
   return hash;
@@ -131,7 +133,7 @@ function hashCode(str: string): number {
 // Convert an int to hexadecimal with a max length
 // of six characters.
 function intToARGB(i: number): string {
-  var hex =
+  let hex =
     ((i >> 24) & 0xff).toString(16) +
     ((i >> 16) & 0xff).toString(16) +
     ((i >> 8) & 0xff).toString(16) +
@@ -139,7 +141,7 @@ function intToARGB(i: number): string {
   // Sometimes the string returned will be too short so we
   // add zeros to pad it out, which later get removed if
   // the length is greater than six.
-  hex += "000000";
+  hex += '000000';
   return hex.substring(0, 6);
 }
 
@@ -149,13 +151,13 @@ export function shuffle(array: string[]) {
   // While there are elements in the array
   while (counter > 0) {
     // Pick a random index
-    let index = Math.floor(Math.random() * counter);
+    const index = Math.floor(Math.random() * counter);
 
     // Decrease counter by 1
     counter--;
 
     // And swap the last element with it
-    let temp = array[counter];
+    const temp = array[counter];
     array[counter] = array[index];
     array[index] = temp;
   }
@@ -168,7 +170,7 @@ export function removeDuplicateTopicsFromFirst(firstArr: Topic[], secondArr: Top
     return firstArr;
   }
 
-  let filteredArr: Topic[] = [];
+  const filteredArr: Topic[] = [];
   for (let i = 0; i < firstArr.length; i++) {
     let duplicateFound = false;
     for (let j = 0; j < secondArr.length; j++) {
@@ -204,7 +206,7 @@ export function useTraceUpdate(props: any) {
       return ps;
     }, {});
     if (Object.keys(changedProps).length > 0) {
-      console.log("Changed props:", changedProps);
+      logger.info('Changed props:', changedProps);
     }
     prev.current = props;
   });
@@ -233,25 +235,25 @@ export function parseFacebookUsername(input: string): string {
 
 function parseUsername(regexp: RegExp, input: string): string {
   const matches = regexp.exec(input);
-  return matches[matches.length - 1].replace(/\//g, "");
+  return matches[matches.length - 1].replace(/\//g, '');
 }
 
 export function nFormatter(num: number, digits: number) {
-  var si = [
-    { value: 1, symbol: "" },
-    { value: 1E3, symbol: "k" },
-    { value: 1E6, symbol: "M" },
-    { value: 1E9, symbol: "G" },
-    { value: 1E12, symbol: "T" },
-    { value: 1E15, symbol: "P" },
-    { value: 1E18, symbol: "E" }
+  const si = [
+    { value: 1, symbol: '' },
+    { value: 1e3, symbol: 'k' },
+    { value: 1e6, symbol: 'M' },
+    { value: 1e9, symbol: 'G' },
+    { value: 1e12, symbol: 'T' },
+    { value: 1e15, symbol: 'P' },
+    { value: 1e18, symbol: 'E' },
   ];
-  var rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
-  var i;
+  const rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
+  let i;
   for (i = si.length - 1; i > 0; i--) {
     if (num >= si[i].value) {
       break;
     }
   }
-  return (num / si[i].value).toFixed(digits).replace(rx, "$1") + si[i].symbol;
+  return (num / si[i].value).toFixed(digits).replace(rx, '$1') + si[i].symbol;
 }

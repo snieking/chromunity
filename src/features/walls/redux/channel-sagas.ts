@@ -1,17 +1,15 @@
-import {
-  ChannelActionTypes
-} from "./channel-types";
-import { select, takeLatest, put } from "redux-saga/effects";
-import ApplicationState from "../../../core/application-state";
-import { Topic } from "../../../types";
+import { select, takeLatest, put } from 'redux-saga/effects';
+import { Action } from 'redux';
+import { ChannelActionTypes } from './channel-types';
+import ApplicationState from '../../../core/application-state';
+import { Topic } from '../../../types';
 import {
   getTopicsByChannelAfterTimestamp,
   getTopicsByChannelPriorToTimestamp,
-  getTopicsByChannelSortedByPopularityAfterTimestamp
-} from "../../../core/services/topic-service";
-import { updateChannel, loadChannel, loadOlderTopicsInChannel, loadChannelByPopularity } from "./channel-actions";
-import { setQueryPending } from "../../../shared/redux/common-actions";
-import { Action } from "redux";
+  getTopicsByChannelSortedByPopularityAfterTimestamp,
+} from '../../../core/services/topic-service';
+import { updateChannel, loadChannel, loadOlderTopicsInChannel, loadChannelByPopularity } from './channel-actions';
+import { setQueryPending } from '../../../shared/redux/common-actions';
 
 export function* channelWatcher() {
   yield takeLatest(ChannelActionTypes.LOAD_CHANNEL, loadChannelSaga);
@@ -36,11 +34,13 @@ export function* loadChannelSaga(action: Action) {
       topics = yield getTopicsByChannelPriorToTimestamp(action.payload.name, Date.now(), action.payload.pageSize);
     }
 
-    yield put(updateChannel({
-      name: action.payload.name,
-      topics: topics,
-      couldExistOlder: topics.length >= action.payload.pageSize
-    }));
+    yield put(
+      updateChannel({
+        name: action.payload.name,
+        topics,
+        couldExistOlder: topics.length >= action.payload.pageSize,
+      })
+    );
     yield put(setQueryPending(false));
   }
 }
@@ -60,11 +60,13 @@ export function* loadOlderTopicsInChannelSaga(action: Action) {
       );
     }
 
-    yield put(updateChannel({
-      name: previousChannel,
-      topics: previousTopics.concat(topics),
-      couldExistOlder: topics.length >= action.payload
-    }));
+    yield put(
+      updateChannel({
+        name: previousChannel,
+        topics: previousTopics.concat(topics),
+        couldExistOlder: topics.length >= action.payload,
+      })
+    );
     yield put(setQueryPending(false));
   }
 }
@@ -78,11 +80,13 @@ export function* loadChannelByPopularitySaga(action: Action) {
       action.payload.pageSize
     );
 
-    yield put(updateChannel({
-      name: "",
-      topics,
-      couldExistOlder: false
-    }));
+    yield put(
+      updateChannel({
+        name: '',
+        topics,
+        couldExistOlder: false,
+      })
+    );
     yield put(setQueryPending(false));
   }
 }

@@ -1,20 +1,20 @@
-import React, { useState } from "react";
-import ImageIcon from "@material-ui/icons/Image";
-import IconButton from "@material-ui/core/IconButton";
-import { Button, Dialog, DialogActions, DialogContent, TextField } from "@material-ui/core";
-import Tooltip from "@material-ui/core/Tooltip";
+import React, { useState } from 'react';
+import ImageIcon from '@material-ui/icons/Image';
+import IconButton from '@material-ui/core/IconButton';
+import { Button, Dialog, DialogActions, DialogContent, TextField } from '@material-ui/core';
+import Tooltip from '@material-ui/core/Tooltip';
 
 interface Props {
-  addText: Function;
+  addText: (text: string) => void;
 }
 
 const AddImageButton: React.FunctionComponent<Props> = (props: Props) => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [url, setUrl] = useState("");
+  const [url, setUrl] = useState('');
 
   function dialog() {
     return (
-      <Dialog open={dialogOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth="sm">
+      <Dialog open={dialogOpen} aria-labelledby="form-dialog-title" fullWidth maxWidth="sm">
         <DialogContent>
           <TextField
             autoFocus
@@ -52,7 +52,7 @@ const AddImageButton: React.FunctionComponent<Props> = (props: Props) => {
     }
 
     setDialogOpen(false);
-    setUrl("");
+    setUrl('');
   }
 
   return (

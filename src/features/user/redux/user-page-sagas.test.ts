@@ -1,23 +1,22 @@
-import { ChromunityUser, Topic, TopicReply } from "../../../types";
-import { CREATE_LOGGED_IN_USER } from "../../../shared/test-utility/users";
-import { CREATE_RANDOM_TOPIC } from "../../../shared/test-utility/topics";
-import { createTopicReply, getTopicsByUserPriorToTimestamp } from "../../../core/services/topic-service";
-import {
-  UserPageActionTypes, IUpdateUserTopics, IUpdateUserReplies,
-} from "./user-types";
-import { loadUserTopicsSaga, loadUserRepliesSaga, loadUserFollowedChannelsSaga } from "./user-page-sagas";
-import { runSaga } from "redux-saga";
-import { getANumber } from "../../../shared/test-utility/helper";
-import { followChannel } from "../../../core/services/channel-service";
-import { Action } from "@reduxjs/toolkit";
+/* eslint-disable no-restricted-syntax */
+import { runSaga } from 'redux-saga';
+import { Action } from '@reduxjs/toolkit';
+import { ChromunityUser, Topic, TopicReply } from '../../../types';
+import { createLoggedInUser } from '../../../shared/test-utility/users';
+import { createRandomTopic } from '../../../shared/test-utility/topics';
+import { createTopicReply, getTopicsByUserPriorToTimestamp } from '../../../core/services/topic-service';
+import { UserPageActionTypes, IUpdateUserTopics, IUpdateUserReplies } from './user-types';
+import { loadUserTopicsSaga, loadUserRepliesSaga, loadUserFollowedChannelsSaga } from './user-page-sagas';
+import { getANumber } from '../../../shared/test-utility/helper';
+import { followChannel } from '../../../core/services/channel-service';
 
-describe("User page saga tests", () => {
-  const topicsTitle = "load user topics";
-  const repliesTitle = "load user replies";
-  const channelsTitle = "load user channels";
+describe('User page saga tests', () => {
+  const topicsTitle = 'load user topics';
+  const repliesTitle = 'load user replies';
+  const channelsTitle = 'load user channels';
 
   const pageSize = 25;
-  const channel = "";
+  const channel = '';
 
   const emptyTopics: Topic[] = [];
   const emptyReplies: TopicReply[] = [];
@@ -37,13 +36,13 @@ describe("User page saga tests", () => {
   const createFakeTopics = (timestamp: number): Topic[] => {
     return [
       {
-        id: "id-" + getANumber(),
-        author: "author",
-        title: "title",
-        message: "message",
-        timestamp: timestamp,
+        id: `id-${getANumber()}`,
+        author: 'author',
+        title: 'title',
+        message: 'message',
+        timestamp,
         last_modified: timestamp,
-        latest_poster: "author",
+        latest_poster: 'author',
         moderated_by: [],
       },
     ];
@@ -52,11 +51,11 @@ describe("User page saga tests", () => {
   const createFakeReplies = (timestamp: number): TopicReply[] => {
     return [
       {
-        id: "id-" + getANumber(),
-        topic_id: "id-" + getANumber(),
-        author: "author",
-        message: "message",
-        timestamp: timestamp,
+        id: `id-${getANumber()}`,
+        topic_id: `id-${getANumber()}`,
+        author: 'author',
+        message: 'message',
+        timestamp,
         isSubReply: false,
         moderated_by: [],
       },
@@ -85,14 +84,14 @@ describe("User page saga tests", () => {
   };
 
   beforeAll(async () => {
-    user = await CREATE_LOGGED_IN_USER();
-    secondUser = await CREATE_LOGGED_IN_USER();
+    user = await createLoggedInUser();
+    secondUser = await createLoggedInUser();
 
-    await CREATE_RANDOM_TOPIC(user, channel);
+    await createRandomTopic(user, channel);
     const topics: Topic[] = await getTopicsByUserPriorToTimestamp(user.name, Date.now(), 1);
     const topic: Topic = topics[0];
 
-    await createTopicReply(secondUser, topic.id, "A test reply..");
+    await createTopicReply(secondUser, topic.id, 'A test reply..');
     await followChannel(secondUser, channel);
   });
 
@@ -104,8 +103,8 @@ describe("User page saga tests", () => {
       type: UserPageActionTypes.LOAD_USER_TOPICS,
       payload: {
         username: user.name,
-        pageSize: pageSize
-      }
+        pageSize,
+      },
     } as Action).toPromise();
     const updateUserTopicsAction = getUpdateUserTopicsAction(actions);
 
@@ -113,7 +112,7 @@ describe("User page saga tests", () => {
     expect(updateUserTopicsAction.couldExistOlderTopics).toBe(false);
   });
 
-  it(topicsTitle + " | none exists", async () => {
+  it(`${topicsTitle} | none exists`, async () => {
     const actions: any[] = [];
     const fakeStore = createFakeStore(actions, { topics: emptyTopics });
 
@@ -121,8 +120,8 @@ describe("User page saga tests", () => {
       type: UserPageActionTypes.LOAD_USER_TOPICS,
       payload: {
         username: secondUser.name,
-        pageSize: pageSize
-      }
+        pageSize,
+      },
     } as Action).toPromise();
     const updateUserTopicsAction = getUpdateUserTopicsAction(actions);
 
@@ -130,7 +129,7 @@ describe("User page saga tests", () => {
     expect(updateUserTopicsAction.couldExistOlderTopics).toBe(false);
   });
 
-  it(topicsTitle + " | pageSize returned", async () => {
+  it(`${topicsTitle} | pageSize returned`, async () => {
     const actions: any[] = [];
     const fakeStore = createFakeStore(actions, { topics: emptyTopics });
 
@@ -138,8 +137,8 @@ describe("User page saga tests", () => {
       type: UserPageActionTypes.LOAD_USER_TOPICS,
       payload: {
         username: user.name,
-        pageSize: 1
-      }
+        pageSize: 1,
+      },
     } as Action).toPromise();
     const updateUserTopicsAction = getUpdateUserTopicsAction(actions);
 
@@ -147,7 +146,7 @@ describe("User page saga tests", () => {
     expect(updateUserTopicsAction.couldExistOlderTopics).toBe(true);
   });
 
-  it(topicsTitle + " | older already loaded", async () => {
+  it(`${topicsTitle} | older already loaded`, async () => {
     const actions: any[] = [];
     const fakeStore = createFakeStore(actions, { topics: createFakeTopics(Date.now()) });
 
@@ -155,8 +154,8 @@ describe("User page saga tests", () => {
       type: UserPageActionTypes.LOAD_USER_TOPICS,
       payload: {
         username: user.name,
-        pageSize: pageSize
-      }
+        pageSize,
+      },
     } as Action).toPromise();
     const updateUserTopicsAction = getUpdateUserTopicsAction(actions);
 
@@ -172,8 +171,8 @@ describe("User page saga tests", () => {
       type: UserPageActionTypes.LOAD_USER_REPLIES,
       payload: {
         username: secondUser.name,
-        pageSize: pageSize
-      }
+        pageSize,
+      },
     } as Action).toPromise();
     const updateUserRepliesAction = getUpdateUserRepliesAction(actions);
 
@@ -181,7 +180,7 @@ describe("User page saga tests", () => {
     expect(updateUserRepliesAction.couldExistOlderReplies).toBe(false);
   });
 
-  it(repliesTitle + " | none exists", async () => {
+  it(`${repliesTitle} | none exists`, async () => {
     const actions: any[] = [];
     const fakeStore = createFakeStore(actions, { replies: emptyReplies });
 
@@ -189,8 +188,8 @@ describe("User page saga tests", () => {
       type: UserPageActionTypes.LOAD_USER_REPLIES,
       payload: {
         username: user.name,
-        pageSize: pageSize
-      }
+        pageSize,
+      },
     } as Action).toPromise();
     const updateUserRepliesAction = getUpdateUserRepliesAction(actions);
 
@@ -198,7 +197,7 @@ describe("User page saga tests", () => {
     expect(updateUserRepliesAction.couldExistOlderReplies).toBe(false);
   });
 
-  it(repliesTitle + " | pageSize returned", async () => {
+  it(`${repliesTitle} | pageSize returned`, async () => {
     const actions: any[] = [];
     const fakeStore = createFakeStore(actions, { replies: emptyReplies });
 
@@ -206,8 +205,8 @@ describe("User page saga tests", () => {
       type: UserPageActionTypes.LOAD_USER_REPLIES,
       payload: {
         username: secondUser.name,
-        pageSize: 1
-      }
+        pageSize: 1,
+      },
     } as Action).toPromise();
     const updateUserRepliesAction = getUpdateUserRepliesAction(actions);
 
@@ -215,7 +214,7 @@ describe("User page saga tests", () => {
     expect(updateUserRepliesAction.couldExistOlderReplies).toBe(true);
   });
 
-  it(repliesTitle + " | older already loaded", async () => {
+  it(`${repliesTitle} | older already loaded`, async () => {
     const actions: any[] = [];
     const fakeStore = createFakeStore(actions, { replies: createFakeReplies(Date.now()) });
 
@@ -223,8 +222,8 @@ describe("User page saga tests", () => {
       type: UserPageActionTypes.LOAD_USER_REPLIES,
       payload: {
         username: secondUser.name,
-        pageSize: pageSize
-      }
+        pageSize,
+      },
     } as Action).toPromise();
     const updateUserRepliesAction = getUpdateUserRepliesAction(actions);
 
@@ -246,7 +245,7 @@ describe("User page saga tests", () => {
     expect(updateUserFollowedChannelsAction.length).toBe(1);
   });
 
-  it(channelsTitle + " | none returned", async () => {
+  it(`${channelsTitle} | none returned`, async () => {
     const actions: any[] = [];
     const fakeStore = createFakeStore(actions, {});
 

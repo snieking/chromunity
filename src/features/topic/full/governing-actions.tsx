@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { ChromunityUser } from "../../../types";
-import { connect } from "react-redux";
-import { toLowerCase } from "../../../shared/util/util";
-import ApplicationState from "../../../core/application-state";
-import { IconButton, Tooltip, Menu } from "@material-ui/core";
-import { LocationCity } from "@material-ui/icons";
-import PinButton from "./pin-button";
-import DeleteButton from "./delete-button";
+import React, { useState } from 'react';
+import { connect } from 'react-redux';
+import { IconButton, Tooltip, Menu } from '@material-ui/core';
+import { LocationCity } from '@material-ui/icons';
+import { ChromunityUser } from '../../../types';
+import { toLowerCase } from '../../../shared/util/util';
+import ApplicationState from '../../../core/application-state';
+import PinButton from './pin-button';
+import DeleteButton from './delete-button';
 
 interface Props {
   topicId: string;
@@ -22,7 +22,7 @@ const GoverningActions: React.FunctionComponent<Props> = (props) => {
     return (
       props.user != null && props.user.name != null && props.representatives.includes(toLowerCase(props.user.name))
     );
-  }
+  };
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -32,20 +32,22 @@ const GoverningActions: React.FunctionComponent<Props> = (props) => {
     setAnchorEl(null);
   };
 
-  return isRepresentative() && (
-    <>
-      <Menu id="gov-actions" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-        <PinButton topicId={props.topicId} handleClose={handleClose} />
-        <DeleteButton topicId={props.topicId} handleClose={handleClose} />
-      </Menu>
-      <IconButton onClick={handleClick}>
-        <Tooltip title="Governing">
-          <LocationCity />
-        </Tooltip>
-      </IconButton>
-    </>
+  return (
+    isRepresentative() && (
+      <>
+        <Menu id="gov-actions" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+          <PinButton topicId={props.topicId} handleClose={handleClose} />
+          <DeleteButton topicId={props.topicId} handleClose={handleClose} />
+        </Menu>
+        <IconButton onClick={handleClick}>
+          <Tooltip title="Governing">
+            <LocationCity />
+          </Tooltip>
+        </IconButton>
+      </>
+    )
   );
-}
+};
 
 const mapStateToProps = (store: ApplicationState) => {
   return {

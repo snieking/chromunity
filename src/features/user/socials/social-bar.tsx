@@ -1,10 +1,10 @@
-import React from "react";
-import { Socials } from "./social-types";
-import { IconButton } from "@material-ui/core";
-import TwitterLogo from "../../../shared/logos/twitter-logo";
-import LinkedInLogo from "../../../shared/logos/linkedin-logo";
-import GitHubLogo from "../../../shared/logos/github-logo";
-import FacebookLogo from "../../../shared/logos/facebook-logo";
+import React from 'react';
+import { IconButton } from '@material-ui/core';
+import { Socials } from './social-types';
+import TwitterLogo from '../../../shared/logos/twitter-logo';
+import LinkedInLogo from '../../../shared/logos/linkedin-logo';
+import GitHubLogo from '../../../shared/logos/github-logo';
+import FacebookLogo from '../../../shared/logos/facebook-logo';
 
 interface Props {
   socials: Socials;

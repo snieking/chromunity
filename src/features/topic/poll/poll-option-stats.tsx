@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import Typography from "@material-ui/core/Typography";
-import useTheme from "@material-ui/core/styles/useTheme";
-import makeStyles from "@material-ui/core/styles/makeStyles";
-import { COLOR_CHROMIA_DARKER } from "../../../theme";
+import React, { useEffect, useState } from 'react';
+import Typography from '@material-ui/core/Typography';
+import useTheme from '@material-ui/core/styles/useTheme';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+import { COLOR_CHROMIA_DARKER } from '../../../theme';
 
 interface Props {
   text: string;
@@ -11,26 +11,26 @@ interface Props {
   selected: boolean;
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles({
   wrapper: {
-    border: "1px solid",
+    border: '1px solid',
     borderColor: COLOR_CHROMIA_DARKER,
-    position: "relative",
-    marginTop: "5px",
-    marginBottom: "10px"
+    position: 'relative',
+    marginTop: '5px',
+    marginBottom: '10px',
   },
   textWrapper: {
-    margin: "10px"
+    margin: '10px',
   },
   text: {
-    zIndex: 9999
+    zIndex: 9999,
   },
   percentage: {
-    marginRight: "20px"
-  }
-}));
+    marginRight: '20px',
+  },
+});
 
-const PollOptionStats: React.FunctionComponent<Props> = props => {
+const PollOptionStats: React.FunctionComponent<Props> = (props) => {
   const theme = useTheme();
   const classes = useStyles();
 
@@ -54,12 +54,12 @@ const PollOptionStats: React.FunctionComponent<Props> = props => {
         style={{
           opacity: props.selected ? 1 : 0.5,
           backgroundColor: theme.palette.secondary.main,
-          transition: "width .2s ease-in",
-          width: `${percentageOfVotes}%`
+          transition: 'width .2s ease-in',
+          width: `${percentageOfVotes}%`,
         }}
       >
         <div className={classes.textWrapper}>
-          <Typography id={props.text} className={classes.text} style={{ minWidth: width*0.7 }} gutterBottom>
+          <Typography id={props.text} className={classes.text} style={{ minWidth: width * 0.7 }} gutterBottom>
             <span className={classes.percentage}>{Math.round(percentageOfVotes)}%</span>
             {props.text}
           </Typography>

@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { ChatMessageDecrypted } from "../../types";
-import { ListItem, Typography } from "@material-ui/core";
-import ListItemText from "@material-ui/core/ListItemText";
-import { timeAgoReadable } from "../../shared/util/util";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import Avatar, { AVATAR_SIZE } from "../../shared/avatar";
-import { Link } from "react-router-dom";
-import { ifEmptyAvatarThenPlaceholder } from "../../shared/util/user-util";
-import { getUserSettingsCached } from "../../core/services/user-service";
-import { chatMessageStyles } from "./styles";
-import MarkdownRenderer from "../../shared/markdown-renderer";
-import PreviewLinks from "../../shared/preview-links";
+import React, { useEffect, useState } from 'react';
+import { ListItem, Typography } from '@material-ui/core';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import { Link } from 'react-router-dom';
+import { timeAgoReadable } from '../../shared/util/util';
+import Avatar, { AVATAR_SIZE } from '../../shared/avatar';
+import { ChatMessageDecrypted } from '../../types';
+import { ifEmptyAvatarThenPlaceholder } from '../../shared/util/user-util';
+import { getUserSettingsCached } from '../../core/services/user-service';
+import { chatMessageStyles } from './styles';
+import MarkdownRenderer from '../../shared/markdown-renderer';
+import PreviewLinks from '../../shared/preview-links';
 
 interface Props {
   message: ChatMessageDecrypted;
@@ -18,32 +18,35 @@ interface Props {
 
 const ChatMessage: React.FunctionComponent<Props> = (props: Props) => {
   const classes = chatMessageStyles(props);
-  const [avatar, setAvatar] = useState("");
+  const [avatar, setAvatar] = useState('');
 
   useEffect(() => {
-    getUserSettingsCached(props.message.sender, 600).then(settings =>
+    getUserSettingsCached(props.message.sender, 600).then((settings) =>
       setAvatar(ifEmptyAvatarThenPlaceholder(settings.avatar, props.message.sender))
     );
   }, [props]);
 
   return (
-    <ListItem style={{ marginBottom: "0px"}}>
+    <ListItem style={{ marginBottom: '0px' }}>
       <ListItemText
         disableTypography
         primary={
           <div>
-            <MarkdownRenderer text={props.message.msg}/>
-            <div className={classes.linkPreviewWrapper}><PreviewLinks text={props.message.msg}/></div>
-          </div>}
+            <MarkdownRenderer text={props.message.msg} />
+            <div className={classes.linkPreviewWrapper}>
+              <PreviewLinks text={props.message.msg} />
+            </div>
+          </div>
+        }
         secondary={<Typography className={classes.timestamp}>{timeAgoReadable(props.message.timestamp)}</Typography>}
         classes={{ primary: classes.message }}
       />
       <div className={classes.author}>
-        <ListItemIcon style={{ float: "right" }}>
-          <Avatar src={avatar} size={AVATAR_SIZE.SMALL} name={props.message.sender}/>
+        <ListItemIcon style={{ float: 'right' }}>
+          <Avatar src={avatar} size={AVATAR_SIZE.SMALL} name={props.message.sender} />
         </ListItemIcon>
         <br />
-        <Link to={"/u/" + props.message.sender}>
+        <Link to={`/u/${props.message.sender}`}>
           <Typography gutterBottom variant="subtitle2" component="p" className={classes.authorName}>
             @{props.message.sender}
           </Typography>

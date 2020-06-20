@@ -1,27 +1,26 @@
 {
-    "env": {
-        "browser": true,
-        "es2020": true
-    },
     "extends": [
-        "plugin:react/recommended",
-        "google"
-    ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-        "ecmaFeatures": {
-            "jsx": true
-        },
-        "ecmaVersion": 11,
-        "sourceType": "module"
-    },
-    "plugins": [
-        "react",
-        "@typescript-eslint"
+        "airbnb-typescript-prettier"
     ],
     "rules": {
       "camelcase": "off",
-      "max-len": [2, 120, 2],
-      "require-jsdoc": "off"
+      "no-bitwise": "off",
+      "react/destructuring-assignment": "off",
+      "import/prefer-default-export": "off",
+      "jsx-a11y/click-events-have-key-events": "off",
+      "jsx-a11y/no-noninteractive-element-interactions": "off",
+      "no-param-reassign": "off",
+      "no-use-before-define": "off",
+      "@typescript-eslint/explicit-module-boundary-types": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "no-plusplus": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
+      "consistent-return": "off",
+      "prefer-destructuring": "off",
+      "react/jsx-props-no-spreading": "off",
+      "react/no-did-update-set-state": "off",
+      "react/no-danger": "off",
+      "class-methods-use-this": "off",
+      "radix": "off"
     }
 }

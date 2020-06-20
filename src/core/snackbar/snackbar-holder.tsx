@@ -1,9 +1,9 @@
-import React from "react";
-import ApplicationState from "../application-state";
-import { clearError, clearSuccess, clearInfo } from "./redux/snackbar-actions";
-import { connect } from "react-redux";
-import { Snackbar } from "@material-ui/core";
-import { CustomSnackbarContentWrapper } from "../../shared/custom-snackbar";
+import React from 'react';
+import { connect } from 'react-redux';
+import { Snackbar } from '@material-ui/core';
+import ApplicationState from '../application-state';
+import { clearError, clearSuccess, clearInfo } from './redux/snackbar-actions';
+import { CustomSnackbarContentWrapper } from '../../shared/custom-snackbar';
 
 interface Props {
   error: boolean;
@@ -22,11 +22,11 @@ const SnackbarHolder: React.FunctionComponent<Props> = (props) => {
     <>
       <Snackbar
         anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
+          vertical: 'bottom',
+          horizontal: 'left',
         }}
         style={{
-          zIndex: 10000
+          zIndex: 10000,
         }}
         open={props.success}
         autoHideDuration={3000}
@@ -36,11 +36,11 @@ const SnackbarHolder: React.FunctionComponent<Props> = (props) => {
       </Snackbar>
       <Snackbar
         anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
+          vertical: 'bottom',
+          horizontal: 'left',
         }}
         style={{
-          zIndex: 10000
+          zIndex: 10000,
         }}
         open={props.error}
         autoHideDuration={3000}
@@ -50,11 +50,11 @@ const SnackbarHolder: React.FunctionComponent<Props> = (props) => {
       </Snackbar>
       <Snackbar
         anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right",
+          vertical: 'bottom',
+          horizontal: 'right',
         }}
         style={{
-          zIndex: 10000
+          zIndex: 10000,
         }}
         open={props.info}
         autoHideDuration={3000}
@@ -73,14 +73,14 @@ const mapStateToProps = (store: ApplicationState) => {
     info: store.snackbar.info,
     infoMsg: store.snackbar.infoMsg,
     success: store.snackbar.success,
-    successMsg: store.snackbar.successMsg
+    successMsg: store.snackbar.successMsg,
   };
 };
 
 const mapDispatchToProps = {
   clearError,
   clearSuccess,
-  clearInfo
+  clearInfo,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(SnackbarHolder);

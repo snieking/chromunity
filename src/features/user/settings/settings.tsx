@@ -1,6 +1,5 @@
-import React from "react";
-import { ifEmptyAvatarThenPlaceholder } from "../../../shared/util/user-util";
-import { ChromunityUser, UserSettings } from "../../../types";
+/* eslint-disable react/no-access-state-in-setstate */
+import React from 'react';
 import {
   Button,
   Card,
@@ -16,72 +15,74 @@ import {
   Grid,
   Theme,
   Typography,
-} from "@material-ui/core";
-import AvatarChanger from "./avatar-changer";
+} from '@material-ui/core';
+import { connect } from 'react-redux';
+import { TwitterIcon, LinkedinIcon, FacebookIcon } from 'react-share';
+import { ifEmptyAvatarThenPlaceholder } from '../../../shared/util/user-util';
+import { ChromunityUser, UserSettings } from '../../../types';
+import AvatarChanger from './avatar-changer';
 
-import { getUserSettings, updateUserSettings } from "../../../core/services/user-service";
-import ChromiaPageHeader from "../../../shared/chromia-page-header";
-import Avatar, { AVATAR_SIZE } from "../../../shared/avatar";
-import ApplicationState from "../../../core/application-state";
-import { connect } from "react-redux";
-import { Socials } from "../socials/social-types";
-import { TwitterIcon, LinkedinIcon, FacebookIcon } from "react-share";
-import GitHubLogo from "../../../shared/logos/github-logo";
-import { notifyError, notifyInfo } from "../../../core/snackbar/redux/snackbar-actions";
-import { setOperationPending, setRateLimited } from "../../../shared/redux/common-actions";
+import { getUserSettings, updateUserSettings } from '../../../core/services/user-service';
+import ChromiaPageHeader from '../../../shared/chromia-page-header';
+import Avatar, { AVATAR_SIZE } from '../../../shared/avatar';
+import ApplicationState from '../../../core/application-state';
+import { Socials } from '../socials/social-types';
+import GitHubLogo from '../../../shared/logos/github-logo';
+import { notifyError, notifyInfo } from '../../../core/snackbar/redux/snackbar-actions';
+import { setOperationPending, setRateLimited } from '../../../shared/redux/common-actions';
 import {
   parseTwitterUsername,
   parseLinkedinUsername,
   parseGithubUsername,
   parseFacebookUsername,
-} from "../../../shared/util/util";
+} from '../../../shared/util/util';
 
 const styles = (theme: Theme) =>
   createStyles({
     settingsCard: {
-      marginBottom: "10px",
+      marginBottom: '10px',
     },
     chapterHeader: {
-      marginTop: "5px",
-      textAlign: "center",
+      marginTop: '5px',
+      textAlign: 'center',
     },
     avatarWrapper: {
-      float: "left",
-      marginTop: "10px",
-      marginLeft: "10px",
+      float: 'left',
+      marginTop: '10px',
+      marginLeft: '10px',
       opacity: 0.8,
-      "&:hover": {
-        cursor: "pointer",
+      '&:hover': {
+        cursor: 'pointer',
         opacity: 1,
       },
     },
     description: {
-      marginTop: "15px",
-      marginLeft: "10px",
-      width: "80%",
-      [theme.breakpoints.down("xs")]: {
-        width: "55%",
+      marginTop: '15px',
+      marginLeft: '10px',
+      width: '80%',
+      [theme.breakpoints.down('xs')]: {
+        width: '55%',
       },
     },
     commitBtnWrapper: {
-      textAlign: "center",
-      marginTop: "5px",
+      textAlign: 'center',
+      marginTop: '5px',
     },
     socialsWrapper: {
-      margin: "10px",
+      margin: '10px',
     },
     socialsBlock: {},
     socialsField: {
-      width: "80%",
-      [theme.breakpoints.down("xs")]: {
-        width: "55%",
+      width: '80%',
+      [theme.breakpoints.down('xs')]: {
+        width: '55%',
       },
     },
     socialsIcon: {
-      marginRight: "10px",
-      position: "relative",
+      marginRight: '10px',
+      position: 'relative',
       top: 15,
-      display: "inline",
+      display: 'inline',
     },
   });
 
@@ -102,7 +103,7 @@ interface SettingsState {
   socials: Socials;
 }
 
-const DEFAULT_SOCIALS: Socials = { twitter: "", linkedin: "", facebook: "", github: "" };
+const DEFAULT_SOCIALS: Socials = { twitter: '', linkedin: '', facebook: '', github: '' };
 const ICON_SIZE = 24;
 
 const Settings = withStyles(styles)(
@@ -110,10 +111,10 @@ const Settings = withStyles(styles)(
     constructor(props: Props) {
       super(props);
       this.state = {
-        avatar: "",
-        editedAvatar: "",
+        avatar: '',
+        editedAvatar: '',
         editAvatarOpen: false,
-        description: "",
+        description: '',
         socials: DEFAULT_SOCIALS,
       };
 
@@ -129,9 +130,9 @@ const Settings = withStyles(styles)(
     }
 
     componentDidMount() {
-      const user: ChromunityUser = this.props.user;
+      const { user } = this.props;
       if (user == null) {
-        window.location.href = "/user/login";
+        window.location.href = '/user/login';
       } else {
         getUserSettings(user).then((settings: UserSettings) => {
           this.setState({
@@ -143,32 +144,10 @@ const Settings = withStyles(styles)(
       }
     }
 
-    render() {
-      return (
-        <Container fixed maxWidth="sm">
-          <ChromiaPageHeader text="Edit Settings" />
-          <Card key={"user-card"} className={this.props.classes.settingsCard}>
-            <Typography variant="h6" component="h6" className={this.props.classes.chapterHeader}>
-              General
-            </Typography>
-            {this.avatarEditor()}
-            {this.descriptionEditor()}
-          </Card>
-          <Card key={"socials-card"} className={this.props.classes.settingsCard}>
-            <Typography variant="h6" component="h6" className={this.props.classes.chapterHeader}>
-              Social Profiles
-            </Typography>
-            {this.socialsEditor()}
-          </Card>
-          {this.saveButton()}
-        </Container>
-      );
-    }
-
     private avatarEditor() {
       return (
         <>
-          <Dialog open={this.state.editAvatarOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth={"sm"}>
+          <Dialog open={this.state.editAvatarOpen} aria-labelledby="form-dialog-title" fullWidth maxWidth="sm">
             <DialogTitle>Edit your avatar</DialogTitle>
             <DialogContent>
               <AvatarChanger updateFunction={this.updateAvatar} previousPicture={this.state.avatar} />
@@ -398,12 +377,34 @@ const Settings = withStyles(styles)(
       this.setState({ socials });
 
       updateUserSettings(this.props.user, this.state.avatar, this.state.description, socials)
-        .then(() => this.props.notifyInfo("Settings saved"))
+        .then(() => this.props.notifyInfo('Settings saved'))
         .catch(() => {
-          this.props.notifyError("Error updating settings");
+          this.props.notifyError('Error updating settings');
           this.props.setRateLimited();
         })
         .finally(() => this.props.setOperationPending(false));
+    }
+
+    render() {
+      return (
+        <Container fixed maxWidth="sm">
+          <ChromiaPageHeader text="Edit Settings" />
+          <Card key="user-card" className={this.props.classes.settingsCard}>
+            <Typography variant="h6" component="h6" className={this.props.classes.chapterHeader}>
+              General
+            </Typography>
+            {this.avatarEditor()}
+            {this.descriptionEditor()}
+          </Card>
+          <Card key="socials-card" className={this.props.classes.settingsCard}>
+            <Typography variant="h6" component="h6" className={this.props.classes.chapterHeader}>
+              Social Profiles
+            </Typography>
+            {this.socialsEditor()}
+          </Card>
+          {this.saveButton()}
+        </Container>
+      );
     }
   }
 );
@@ -416,10 +417,10 @@ const mapStateToProps = (store: ApplicationState) => {
 };
 
 const mapDispatchToProps = {
-    notifyError,
-    notifyInfo,
-    setOperationPending,
-    setRateLimited
+  notifyError,
+  notifyInfo,
+  setOperationPending,
+  setRateLimited,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Settings);

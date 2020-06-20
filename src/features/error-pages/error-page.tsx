@@ -1,11 +1,11 @@
-import React from "react";
-import ChromiaPageHeader from "../../shared/chromia-page-header";
-import { makeStyles } from "@material-ui/core/styles";
+import React from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import ChromiaPageHeader from '../../shared/chromia-page-header';
 
 const useStyles = makeStyles({
   text: {
-    textAlign: "center"
-  }
+    textAlign: 'center',
+  },
 });
 
 export const ErrorPage: React.FunctionComponent = () => {

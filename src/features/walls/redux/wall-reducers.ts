@@ -1,9 +1,6 @@
-import {
-  TopicWallState,
-  WallType
-} from "./wall-types";
-import { createReducer } from "@reduxjs/toolkit";
-import { updateTopicWallFromCache, updateTopics, clearTopicsCache } from "./wall-actions";
+import { createReducer } from '@reduxjs/toolkit';
+import { TopicWallState, WallType } from './wall-types';
+import { updateTopicWallFromCache, updateTopics, clearTopicsCache } from './wall-actions';
 
 const initialTopicWallState: TopicWallState = {
   topics: [],
@@ -11,21 +8,21 @@ const initialTopicWallState: TopicWallState = {
   all: {
     topics: [],
     updated: 0,
-    couldExistOlder: false
+    couldExistOlder: false,
   },
   followedChannels: {
     topics: [],
     updated: 0,
-    couldExistOlder: false
+    couldExistOlder: false,
   },
   followedUsers: {
     topics: [],
     updated: 0,
-    couldExistOlder: false
-  }
+    couldExistOlder: false,
+  },
 };
 
-export const topicWallReducer = createReducer(initialTopicWallState, builder =>
+export const topicWallReducer = createReducer(initialTopicWallState, (builder) =>
   builder
     .addCase(updateTopicWallFromCache, (state, action) => {
       switch (action.payload) {
@@ -44,6 +41,8 @@ export const topicWallReducer = createReducer(initialTopicWallState, builder =>
           state.couldExistOlder = state.followedUsers.couldExistOlder;
           break;
         }
+        default:
+          break;
       }
     })
     .addCase(updateTopics, (state, action) => {
@@ -69,9 +68,11 @@ export const topicWallReducer = createReducer(initialTopicWallState, builder =>
           state.followedUsers.updated = Date.now();
           break;
         }
+        default:
+          break;
       }
     })
-    .addCase(clearTopicsCache, (state, _) => {
+    .addCase(clearTopicsCache, (state) => {
       state.followedChannels.topics = [];
       state.followedChannels.couldExistOlder = false;
       state.followedChannels.updated = 0;
@@ -79,4 +80,4 @@ export const topicWallReducer = createReducer(initialTopicWallState, builder =>
       state.followedUsers.couldExistOlder = false;
       state.followedUsers.updated = 0;
     })
-)
+);

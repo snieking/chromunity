@@ -1,28 +1,28 @@
-import React from "react";
-import { Tooltip } from "@material-ui/core";
-import makeStyles from "@material-ui/core/styles/makeStyles";
-import GitHubLogo from "../../shared/logos/github-logo";
-import TwitterLogo from "../../shared/logos/twitter-logo";
-import TelegramLogo from "../../shared/logos/telegram-logo";
-import BlockExplorerLogo from "../../shared/logos/block-explorer-logo";
+import React from 'react';
+import { Tooltip } from '@material-ui/core';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+import GitHubLogo from '../../shared/logos/github-logo';
+import TwitterLogo from '../../shared/logos/twitter-logo';
+import TelegramLogo from '../../shared/logos/telegram-logo';
+import BlockExplorerLogo from '../../shared/logos/block-explorer-logo';
 
 const useStyles = makeStyles((theme) => ({
   footer: {
-    width: "100%",
-    position: "relative",
-    textAlign: "center",
-    marginBottom: "10px",
+    width: '100%',
+    position: 'relative',
+    textAlign: 'center',
+    marginBottom: '10px',
   },
   link: {
-    textDecoration: "none",
-    color: "inherit",
-    margin: "3px",
+    textDecoration: 'none',
+    color: 'inherit',
+    margin: '3px',
   },
   text: {
-    fontSize: "12px",
+    fontSize: '12px',
     color: theme.palette.primary.main,
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-  }
+  },
 }));
 
 const Footer: React.FunctionComponent = (props) => {

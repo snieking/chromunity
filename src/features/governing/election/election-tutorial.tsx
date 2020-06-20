@@ -1,7 +1,7 @@
-import React from "react";
-import Tutorial from "../../../shared/tutorial";
-import TutorialButton from "../../../shared/buttons/tutorial-button";
-import { COLOR_CHROMIA_DARK } from "../../../theme";
+import React from 'react';
+import Tutorial from '../../../shared/tutorial';
+import TutorialButton from '../../../shared/buttons/tutorial-button';
+import { COLOR_CHROMIA_DARK } from '../../../theme';
 
 interface Props {
   candidates: number;
@@ -17,9 +17,9 @@ const ElectionTutorial: React.FunctionComponent<Props> = (props) => {
 };
 
 const steps = (candidates: number) => {
-  const steps = [
+  const theSteps = [
     {
-      selector: ".first-step",
+      selector: '.first-step',
       content: () => (
         <div style={{ color: COLOR_CHROMIA_DARK }}>
           <p>
@@ -34,7 +34,7 @@ const steps = (candidates: number) => {
       ),
     },
     {
-      selector: ".second-step",
+      selector: '.second-step',
       content: () => (
         <div style={{ color: COLOR_CHROMIA_DARK }}>
           <p>As an active member of Chromunity you are able to both participate and vote in elections.</p>
@@ -54,7 +54,7 @@ const steps = (candidates: number) => {
   ];
 
   if (candidates > 0) {
-    steps.push({
+    theSteps.push({
       selector: '[data-tut="candidates"]',
       content: () => (
         <div style={{ color: COLOR_CHROMIA_DARK }}>
@@ -69,7 +69,7 @@ const steps = (candidates: number) => {
     });
   }
 
-  return steps;
+  return theSteps;
 };
 
 export default ElectionTutorial;

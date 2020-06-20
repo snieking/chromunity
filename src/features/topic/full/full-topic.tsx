@@ -1,7 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { RouteComponentProps } from "react-router";
-import { ChromunityUser, PollData, Topic, TopicReply } from "../../../types";
-import { shouldBeFiltered, toLowerCase, useInterval } from "../../../shared/util/util";
+import React, { useEffect, useRef, useState } from 'react';
+import { RouteComponentProps } from 'react-router';
 import {
   Button,
   Card,
@@ -14,19 +12,22 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from "@material-ui/core";
-import { Notifications, NotificationsActive, Report, SubdirectoryArrowRight } from "@material-ui/icons";
-import TopicReplyCard from "../topic-reply-card";
-import { Link, Redirect } from "react-router-dom";
-import ApplicationState from "../../../core/application-state";
-import { connect } from "react-redux";
-import makeStyles from "@material-ui/core/styles/makeStyles";
-import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from "../../../theme";
-import Timestamp from "../../../shared/timestamp";
-import MarkdownRenderer from "../../../shared/markdown-renderer";
-import EditMessageButton from "../../../shared/buttons/edit-message-button";
-import ConfirmDialog from "../../../shared/confirm-dialog";
-import { reportTopic, hasReportedTopic } from "../../../core/services/representatives-service";
+} from '@material-ui/core';
+import { Notifications, NotificationsActive, Report, SubdirectoryArrowRight } from '@material-ui/icons';
+import { Link, Redirect } from 'react-router-dom';
+import { connect } from 'react-redux';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+import Divider from '@material-ui/core/Divider';
+import { ChromunityUser, PollData, Topic, TopicReply } from '../../../types';
+import { shouldBeFiltered, toLowerCase, useInterval } from '../../../shared/util/util';
+import TopicReplyCard from '../topic-reply-card';
+import ApplicationState from '../../../core/application-state';
+import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from '../../../theme';
+import Timestamp from '../../../shared/timestamp';
+import MarkdownRenderer from '../../../shared/markdown-renderer';
+import EditMessageButton from '../../../shared/buttons/edit-message-button';
+import ConfirmDialog from '../../../shared/confirm-dialog';
+import { reportTopic, hasReportedTopic } from '../../../core/services/representatives-service';
 import {
   createTopicReply,
   deleteTopic,
@@ -41,24 +42,23 @@ import {
   removeTopicStarRating,
   subscribeToTopic,
   unsubscribeFromTopic,
-} from "../../../core/services/topic-service";
-import Divider from "@material-ui/core/Divider";
-import TextToolbar from "../../../shared/text-toolbar/text-toolbar";
-import LoadMoreButton from "../../../shared/buttons/load-more-button";
-import { getUserSettingsCached } from "../../../core/services/user-service";
-import { ifEmptyAvatarThenPlaceholder, markTopicReadInSession } from "../../../shared/util/user-util";
-import Avatar, { AVATAR_SIZE } from "../../../shared/avatar";
-import PreviewLinks from "../../../shared/preview-links";
-import PageMeta from "../../../shared/page-meta";
-import PollRenderer from "../poll/poll-renderer";
-import SocialShareButton from "../social-share-button";
-import { notifyError, notifyInfo } from "../../../core/snackbar/redux/snackbar-actions";
-import StarRating from "../../../shared/star-rating/star-rating";
-import { setRateLimited, setOperationPending, setQueryPending } from "../../../shared/redux/common-actions";
-import FullTopicTutorial from "./full-topic-tutorial";
-import ReplyButton from "../../../shared/buttons/reply-button";
-import TippingButton from "../../../shared/buttons/tipping-button";
-import GoverningActions from "./governing-actions";
+} from '../../../core/services/topic-service';
+import TextToolbar from '../../../shared/text-toolbar/text-toolbar';
+import LoadMoreButton from '../../../shared/buttons/load-more-button';
+import { getUserSettingsCached } from '../../../core/services/user-service';
+import { ifEmptyAvatarThenPlaceholder, markTopicReadInSession } from '../../../shared/util/user-util';
+import Avatar, { AVATAR_SIZE } from '../../../shared/avatar';
+import PreviewLinks from '../../../shared/preview-links';
+import PageMeta from '../../../shared/page-meta';
+import PollRenderer from '../poll/poll-renderer';
+import SocialShareButton from '../social-share-button';
+import { notifyError, notifyInfo } from '../../../core/snackbar/redux/snackbar-actions';
+import StarRating from '../../../shared/star-rating/star-rating';
+import { setRateLimited, setOperationPending, setQueryPending } from '../../../shared/redux/common-actions';
+import FullTopicTutorial from './full-topic-tutorial';
+import ReplyButton from '../../../shared/buttons/reply-button';
+import TippingButton from '../../../shared/buttons/tipping-button';
+import GoverningActions from './governing-actions';
 
 interface MatchParams {
   id: string;
@@ -83,22 +83,22 @@ const useStyles = makeStyles((theme) =>
       opacity: 0.25,
     },
     authorName: {
-      display: "block",
-      paddingTop: "2px",
-      paddingLeft: "5px",
-      paddingRight: "5px",
+      display: 'block',
+      paddingTop: '2px',
+      paddingLeft: '5px',
+      paddingRight: '5px',
     },
     authorLink: {
-      float: "right",
-      borderRadius: "0 0 0 5px",
-      marginTop: "-18px",
-      marginBottom: "7px",
-      marginRight: "-16px",
+      float: 'right',
+      borderRadius: '0 0 0 5px',
+      marginTop: '-18px',
+      marginBottom: '7px',
+      marginRight: '-16px',
     },
     content: {
-      marginRight: "5px",
-      whiteSpace: "normal",
-      maxWidth: "95%",
+      marginRight: '5px',
+      whiteSpace: 'normal',
+      maxWidth: '95%',
     },
     userColor: {
       backgroundColor: theme.palette.secondary.main,
@@ -116,12 +116,12 @@ const useStyles = makeStyles((theme) =>
       color: COLOR_RED,
     },
     ratingWrapper: {
-      display: "inline",
+      display: 'inline',
     },
     cardActions: {
-      width: "100%",
-      display: "flex"
-    }
+      width: '100%',
+      display: 'flex',
+    },
   })
 );
 
@@ -131,11 +131,11 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
   const [isLoading, setLoading] = useState(true);
   const [topic, setTopic] = useState<Topic>(null);
   const [notFound, setNotFound] = useState(false);
-  const [avatar, setAvatar] = useState("");
+  const [avatar, setAvatar] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [topicReplies, setTopicReplies] = useState<TopicReply[]>([]);
   const [replyBoxOpen, setReplyBoxOpen] = useState(false);
-  const [replyMessage, setReplyMessage] = useState("");
+  const [replyMessage, setReplyMessage] = useState('');
   const [couldExistOlderReplies, setCouldExistOlderReplies] = useState(false);
   const [reportTopicDialogOpen, setReportTopicDialogOpen] = useState(false);
   const [timeLeftUntilNoLongerModifiable, setTimeLeftUntilNoLongerModifiable] = useState(0);
@@ -148,15 +148,14 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
   const allowedEditTimeMillis = 300000;
 
   useEffect(() => {
-    const id = props.match.params.id;
-
+    const { id } = props.match.params;
 
     props.setQueryPending(true);
     getTopicById(id, props.user)
-      .then((topic) => {
-        if (topic != null) {
-          consumeTopicData(topic);
-          markTopicReadInSession(topic.id);
+      .then((t) => {
+        if (t != null) {
+          consumeTopicData(t);
+          markTopicReadInSession(t.id);
         } else {
           setNotFound(true);
         }
@@ -178,7 +177,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
 
     retrieveLatestReplies();
 
-    getPoll(t.id).then((poll) => setPoll(poll));
+    getPoll(t.id).then((p) => setPoll(p));
     getTopicSubscribers(t.id).then((subscribers) =>
       setSubscribed(props.user != null && subscribers.map((n) => toLowerCase(n)).includes(toLowerCase(props.user.name)))
     );
@@ -203,7 +202,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     return currentTime < until ? Math.floor((until - currentTime) / 1000) : 0;
   }
 
-  function retrieveLatestReplies(notifyLoading: boolean = true): void {
+  function retrieveLatestReplies(notifyLoading = true): void {
     setLoading(true);
     props.setQueryPending(notifyLoading);
     const topicId: string = props.match.params.id;
@@ -235,9 +234,9 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
 
     if (authorIsMe || iAmRepresentative || !filtered) {
       return (
-        <div className={filtered ? classes.removed : ""}>
+        <div className={filtered ? classes.removed : ''}>
           <PageMeta title={topic ? topic.title : null} description={topic ? topic.message : null} />
-          <Card raised={true} key={topic.id}>
+          <Card raised key={topic.id}>
             {renderCardContent()}
             {renderCardActions()}
             {replyBoxOpen ? renderReplyForm() : <div />}
@@ -265,19 +264,19 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
 
   function renderAuthor() {
     return (
-      <div style={{ float: "right" }}>
+      <div style={{ float: 'right' }}>
         <Link
           className={`${classes.authorLink} ${
             props.representatives.includes(topic.author.toLocaleLowerCase()) ? classes.repColor : classes.userColor
-            }`}
-          to={"/u/" + topic.author}
+          }`}
+          to={`/u/${topic.author}`}
         >
           <Typography gutterBottom variant="subtitle1" component="span" className="typography">
             <span className={classes.authorName}>@{topic.author}</span>
           </Typography>
         </Link>
         <br />
-        <div style={{ float: "right" }}>
+        <div style={{ float: 'right' }}>
           <Avatar src={avatar} size={AVATAR_SIZE.LARGE} name={topic.author} />
         </div>
       </div>
@@ -285,8 +284,8 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function renderCardActions() {
-    const user: ChromunityUser = props.user;
-    const id: string = props.match.params.id;
+    const { user } = props;
+    const { id } = props.match.params;
 
     if (user != null) {
       return (
@@ -309,26 +308,26 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
                 <NotificationsActive className={classes.iconOrange} />
               </Tooltip>
             ) : (
-                <Tooltip title="Subscribe">
-                  <Notifications />
-                </Tooltip>
-              )}
+              <Tooltip title="Subscribe">
+                <Notifications />
+              </Tooltip>
+            )}
           </IconButton>
 
           <TippingButton receiver={topic.author} />
 
           {topic.timestamp + allowedEditTimeMillis > Date.now() &&
-            user != null &&
-            toLowerCase(topic.author) === toLowerCase(user.name) ? (
-              <EditMessageButton
-                value={topic.message}
-                modifiableUntil={timeLeftUntilNoLongerModifiable}
-                editFunction={editTopicMessage}
-                deleteFunction={deleteTheTopic}
-              />
-            ) : (
-              <div style={{ display: "inline" }} />
-            )}
+          user != null &&
+          toLowerCase(topic.author) === toLowerCase(user.name) ? (
+            <EditMessageButton
+              value={topic.message}
+              modifiableUntil={timeLeftUntilNoLongerModifiable}
+              editFunction={editTopicMessage}
+              deleteFunction={deleteTheTopic}
+            />
+          ) : (
+            <div style={{ display: 'inline' }} />
+          )}
 
           <GoverningActions topicId={topic.id} />
 
@@ -357,24 +356,23 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           <ReplyButton onClick={toggleReplyBox} toggled={replyBoxOpen} size="medium" />
         </CardActions>
       );
-    } else {
-      return (
-        <CardActions>
-          <div className={classes.ratingWrapper}>
-            <StarRating starRatingFetcher={() => getTopicStarRaters(props.match.params.id)} />
-          </div>
-          <SocialShareButton text={topic.title} />
-        </CardActions>
-      );
     }
+    return (
+      <CardActions>
+        <div className={classes.ratingWrapper}>
+          <StarRating starRatingFetcher={() => getTopicStarRaters(props.match.params.id)} />
+        </div>
+        <SocialShareButton text={topic.title} />
+      </CardActions>
+    );
   }
 
   function toggleSubscription() {
     if (!isLoading) {
       setLoading(true);
       props.setOperationPending(true);
-      const id: string = topic.id;
-      const user: ChromunityUser = props.user;
+      const { id } = topic;
+      const { user } = props;
 
       if (user != null) {
         if (subscribed) {
@@ -401,7 +399,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
             });
         }
       } else {
-        window.location.href = "/user/login";
+        window.location.href = '/user/login';
       }
     }
   }
@@ -443,7 +441,9 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
         props.notifyError(error.message);
         setRateLimited();
       })
-      .then(() => (window.location.href = "/"))
+      .then(() => {
+        window.location.href = '/';
+      })
       .finally(() => props.setOperationPending(false));
   }
 
@@ -453,7 +453,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
 
   function reportTheTopic() {
     closeReportTopic();
-    const user: ChromunityUser = props.user;
+    const { user } = props;
 
     if (user != null) {
       props.setOperationPending(true);
@@ -465,18 +465,18 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
         .then(() => setTopicReported(true))
         .finally(() => props.setOperationPending(false));
     } else {
-      window.location.href = "/user/login";
+      window.location.href = '/user/login';
     }
   }
 
   function isRepresentative() {
-    const user: ChromunityUser = props.user;
+    const { user } = props;
     return user != null && props.representatives.includes(toLowerCase(user.name));
   }
 
   function renderReplyForm() {
     return (
-      <div style={{ margin: "15px", position: "relative" }}>
+      <div style={{ margin: '15px', position: 'relative' }}>
         <Divider />
         <TextToolbar addText={addTextFromToolbarInReply} />
         <TextField
@@ -494,7 +494,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           inputRef={textInput}
           autoFocus
         />
-        <div style={{ float: "right" }}>
+        <div style={{ float: 'right' }}>
           <Button type="button" onClick={() => toggleReplyBox()} color="secondary" variant="contained">
             Cancel
           </Button>
@@ -503,7 +503,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
             onClick={handleReplySubmit}
             color="primary"
             variant="contained"
-            style={{ marginLeft: "5px" }}
+            style={{ marginLeft: '5px' }}
             disabled={props.rateLimited}
           >
             Reply
@@ -522,7 +522,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
   function addTextFromToolbarInReply(text: string) {
     const startPosition = textInput.current.selectionStart;
 
-    setReplyMessage([replyMessage.slice(0, startPosition), text, replyMessage.slice(startPosition)].join(""));
+    setReplyMessage([replyMessage.slice(0, startPosition), text, replyMessage.slice(startPosition)].join(''));
 
     setTimeout(() => {
       textInput.current.selectionStart = startPosition + text.length;
@@ -545,9 +545,9 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           setRateLimited();
         })
         .then(() => {
-          props.notifyInfo("Reply sent");
+          props.notifyInfo('Reply sent');
           retrieveLatestReplies();
-          setReplyMessage("");
+          setReplyMessage('');
         })
         .finally(() => {
           setLoading(false);
@@ -592,7 +592,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
         {topicReplies.length > 0 ? <SubdirectoryArrowRight /> : <div />}
         {topicReplies.map((reply) => (
           <TopicReplyCard
-            key={"reply-" + reply.id}
+            key={`reply-${reply.id}`}
             reply={reply}
             indention={0}
             topicId={topic.id}
@@ -603,11 +603,13 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
         <FullTopicTutorial />
       </Container>
     );
-  } else if (notFound) {
-    return <Redirect to={"/"} />;
-  } else if (distrustedUser && !isLoading) {
+  }
+  if (notFound) {
+    return <Redirect to="/" />;
+  }
+  if (distrustedUser && !isLoading) {
     return (
-      <Container fixed style={{ textAlign: "center" }}>
+      <Container fixed style={{ textAlign: 'center' }}>
         <br />
         <Typography component="h6" variant="h6">
           You have distrusted the author <a href={`/u/${topic.author}`}>@{topic.author}</a>
@@ -617,9 +619,8 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
         </Typography>
       </Container>
     );
-  } else {
-    return <LinearProgress variant="query" />;
   }
+  return <LinearProgress variant="query" />;
 };
 
 const mapStateToProps = (store: ApplicationState) => {
@@ -632,11 +633,11 @@ const mapStateToProps = (store: ApplicationState) => {
 };
 
 const mapDispatchToProps = {
-    notifyError,
-    notifyInfo,
-    setRateLimited,
-    setOperationPending,
-    setQueryPending,
+  notifyError,
+  notifyInfo,
+  setRateLimited,
+  setOperationPending,
+  setQueryPending,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(FullTopic);

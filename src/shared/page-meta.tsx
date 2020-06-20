@@ -1,5 +1,5 @@
-import React from "react";
-import MetaTags from "react-meta-tags";
+import React from 'react';
+import MetaTags from 'react-meta-tags';
 
 interface Props {
   description: string;
@@ -7,7 +7,6 @@ interface Props {
 }
 
 const PageMeta: React.FunctionComponent<Props> = (props) => {
-
   function getDescription() {
     return props.description.slice(0, 160);
   }
@@ -15,12 +14,12 @@ const PageMeta: React.FunctionComponent<Props> = (props) => {
   return (
     <div>
       <MetaTags>
-        {props.description && (<meta name="description" content={getDescription()} />)}
-        {props.title && (<meta property="og:title" content={props.title} />)}
+        {props.description && <meta name="description" content={getDescription()} />}
+        {props.title && <meta property="og:title" content={props.title} />}
         <meta property="og:image" content="/ms-icon-144x144.png" />
       </MetaTags>
     </div>
-  )
+  );
 };
 
 export default PageMeta;

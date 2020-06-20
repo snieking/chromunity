@@ -1,6 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Topic, ChromunityUser } from "../../types";
+import React from 'react';
+import { Link } from 'react-router-dom';
 import {
   Badge,
   Card,
@@ -11,26 +10,27 @@ import {
   Typography,
   withStyles,
   WithStyles,
-} from "@material-ui/core";
-import { prepareUrlPath, shouldBeFiltered, toLowerCase } from "../../shared/util/util";
+} from '@material-ui/core';
+import { Redirect } from 'react-router';
+import { connect } from 'react-redux';
+import { Topic, ChromunityUser } from '../../types';
+import { prepareUrlPath, shouldBeFiltered, toLowerCase } from '../../shared/util/util';
 import {
   getWallPreviouslyRefreshed,
   ifEmptyAvatarThenPlaceholder,
   isTopicReadInSession,
-} from "../../shared/util/user-util";
-import { getUserSettingsCached } from "../../core/services/user-service";
-import { Redirect } from "react-router";
-import { countTopicReplies, getTopicStarRaters } from "../../core/services/topic-service";
-import { getTopicChannelBelongings } from "../../core/services/channel-service";
-import { COLOR_ORANGE, COLOR_YELLOW } from "../../theme";
-import Avatar, { AVATAR_SIZE } from "../../shared/avatar";
-import Timestamp from "../../shared/timestamp";
-import ApplicationState from "../../core/application-state";
-import { connect } from "react-redux";
-import CustomChip from "../../shared/custom-chip";
-import NewBadge from "./new-badge";
-import StarRating from "../../shared/star-rating/star-rating";
-import PinBadge from "./pin-badge";
+} from '../../shared/util/user-util';
+import { getUserSettingsCached } from '../../core/services/user-service';
+import { countTopicReplies, getTopicStarRaters } from '../../core/services/topic-service';
+import { getTopicChannelBelongings } from '../../core/services/channel-service';
+import { COLOR_ORANGE, COLOR_YELLOW } from '../../theme';
+import Avatar, { AVATAR_SIZE } from '../../shared/avatar';
+import Timestamp from '../../shared/timestamp';
+import ApplicationState from '../../core/application-state';
+import CustomChip from '../../shared/custom-chip';
+import NewBadge from './new-badge';
+import StarRating from '../../shared/star-rating/star-rating';
+import PinBadge from './pin-badge';
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -38,30 +38,30 @@ const styles = (theme: Theme) =>
       color: COLOR_ORANGE,
     },
     authorName: {
-      display: "block",
-      marginTop: "10px",
-      marginRight: "10px",
-      marginLeft: "5px",
+      display: 'block',
+      marginTop: '10px',
+      marginRight: '10px',
+      marginLeft: '5px',
     },
     ratingWrapper: {
-      float: "left",
-      marginTop: "10px",
+      float: 'left',
+      marginTop: '10px',
     },
     overviewDetails: {
-      marginLeft: "42px",
+      marginLeft: '42px',
     },
     iconYellow: {
       color: COLOR_YELLOW,
     },
     tagChips: {
-      display: "inline",
+      display: 'inline',
     },
     removed: {
       opacity: 0.5,
     },
     replyStatusText: {
-      [theme.breakpoints.down("md")]: {
-        display: "none",
+      [theme.breakpoints.down('md')]: {
+        display: 'none',
       },
     },
   });
@@ -91,7 +91,7 @@ const TopicOverviewCard = withStyles(styles)(
       this.state = {
         channels: [],
         redirectToFullCard: false,
-        avatar: "",
+        avatar: '',
         numberOfReplies: 0,
       };
 
@@ -100,7 +100,7 @@ const TopicOverviewCard = withStyles(styles)(
     }
 
     componentDidMount() {
-      getTopicChannelBelongings(this.props.topic.id).then((channels) => this.setState({ channels: channels }));
+      getTopicChannelBelongings(this.props.topic.id).then((channels) => this.setState({ channels }));
       this.setAvatar();
       countTopicReplies(this.props.topic.id).then((count) => this.setState({ numberOfReplies: count }));
     }
@@ -111,30 +111,18 @@ const TopicOverviewCard = withStyles(styles)(
       }
     }
 
-    render() {
-      if (this.state.redirectToFullCard) {
-        return <Redirect to={"/t/" + this.props.topic.id + "/" + prepareUrlPath(this.props.topic.title)} push />;
-      } else {
-        return (
-          <div
-            className={
-              this.props.user != null &&
-              this.props.representatives.includes(toLowerCase(this.props.user.name)) &&
-              shouldBeFiltered(this.props.topic.moderated_by, this.props.distrustedUsers)
-                ? this.props.classes.removed
-                : ""
-            }
-          >
-            <Card raised={true} key={this.props.topic.id} style={{ zIndex: 0 }}>
-              <CardActionArea onClick={() => this.setState({ redirectToFullCard: true })}>
-                {this.props.pinned && <PinBadge />}
-                {this.isNewTopic() && <NewBadge />}
-                {this.renderCardContent()}
-              </CardActionArea>
-            </Card>
-          </div>
-        );
-      }
+    setAvatar() {
+      getUserSettingsCached(
+        this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author,
+        1440
+      ).then((settings) =>
+        this.setState({
+          avatar: ifEmptyAvatarThenPlaceholder(
+            settings.avatar,
+            this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author
+          ),
+        })
+      );
     }
 
     isNewTopic() {
@@ -152,20 +140,6 @@ const TopicOverviewCard = withStyles(styles)(
       );
     }
 
-    setAvatar() {
-      getUserSettingsCached(
-        this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author,
-        1440
-      ).then((settings) =>
-        this.setState({
-          avatar: ifEmptyAvatarThenPlaceholder(
-            settings.avatar,
-            this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author
-          ),
-        })
-      );
-    }
-
     authorIsRepresentative(): boolean {
       return this.props.representatives.includes(
         this.props.topic.latest_poster != null
@@ -176,25 +150,24 @@ const TopicOverviewCard = withStyles(styles)(
 
     renderReplyStatus() {
       return (
-        <div style={{ float: "right" }}>
+        <div style={{ float: 'right' }}>
           <Link
-            to={
-              "/u/" +
-              (this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author)
-            }
+            to={`/u/${
+              this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author
+            }`}
           >
             <Typography
               gutterBottom
               variant="subtitle2"
               component="span"
-              className={this.authorIsRepresentative() ? this.props.classes.representativeColor : ""}
+              className={this.authorIsRepresentative() ? this.props.classes.representativeColor : ''}
             >
               <span className={this.props.classes.authorName}>
                 @{this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author}
               </span>
             </Typography>
           </Link>
-          <div style={{ float: "right" }}>
+          <div style={{ float: 'right' }}>
             <Badge color="primary" badgeContent={this.state.numberOfReplies} max={999}>
               <Avatar
                 src={this.state.avatar}
@@ -213,7 +186,7 @@ const TopicOverviewCard = withStyles(styles)(
           <div className={this.props.classes.tagChips}>
             {this.state.channels.map((tag) => {
               return (
-                <Link key={this.props.topic.id + ":" + tag} to={"/c/" + tag.replace("#", "")}>
+                <Link key={`${this.props.topic.id}:${tag}`} to={`/c/${tag.replace('#', '')}`}>
                   <CustomChip tag={tag} />
                 </Link>
               );
@@ -232,12 +205,37 @@ const TopicOverviewCard = withStyles(styles)(
           {this.renderReplyStatus()}
           <div className={this.props.classes.overviewDetails}>
             <Timestamp milliseconds={this.props.topic.last_modified} />
-            <Typography variant="subtitle1" component="span" style={{ marginRight: "10px" }}>
+            <Typography variant="subtitle1" component="span" style={{ marginRight: '10px' }}>
               {this.props.topic.title}
             </Typography>
             {this.renderTagChips()}
           </div>
         </CardContent>
+      );
+    }
+
+    render() {
+      if (this.state.redirectToFullCard) {
+        return <Redirect to={`/t/${this.props.topic.id}/${prepareUrlPath(this.props.topic.title)}`} push />;
+      }
+      return (
+        <div
+          className={
+            this.props.user != null &&
+            this.props.representatives.includes(toLowerCase(this.props.user.name)) &&
+            shouldBeFiltered(this.props.topic.moderated_by, this.props.distrustedUsers)
+              ? this.props.classes.removed
+              : ''
+          }
+        >
+          <Card raised key={this.props.topic.id} style={{ zIndex: 0 }}>
+            <CardActionArea onClick={() => this.setState({ redirectToFullCard: true })}>
+              {this.props.pinned && <PinBadge />}
+              {this.isNewTopic() && <NewBadge />}
+              {this.renderCardContent()}
+            </CardActionArea>
+          </Card>
+        </div>
       );
     }
   }

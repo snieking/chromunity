@@ -1,9 +1,9 @@
-import { getANumber } from "./helper";
-import { makeKeyPair } from "../../core/services/crypto-service";
-import { Account, FlagsType, KeyPair, op, SingleSignatureAuthDescriptor, User } from "ft3-lib";
-import { BLOCKCHAIN } from "../../core/services/postchain";
-import { ChromunityUser } from "../../types";
-import Transaction from "ft3-lib/dist/ft3/core/transaction";
+import { Account, FlagsType, KeyPair, op, SingleSignatureAuthDescriptor, User } from 'ft3-lib';
+import Transaction from 'ft3-lib/dist/ft3/core/transaction';
+import { getANumber } from './helper';
+import { makeKeyPair } from '../../core/services/crypto-service';
+import { BLOCKCHAIN } from '../../core/services/postchain';
+import { ChromunityUser } from '../../types';
 
 interface TestUser {
   name: string;
@@ -11,44 +11,44 @@ interface TestUser {
 }
 
 const names: string[] = [
-  "Anastasia",
-  "Viktor",
-  "Alex",
-  "Riccardo",
-  "Henrik",
-  "Gus",
-  "Irene",
-  "Amy",
-  "Todd",
-  "Olle",
-  "Alisa",
-  "Or",
-  "Joso"
+  'Anastasia',
+  'Viktor',
+  'Alex',
+  'Riccardo',
+  'Henrik',
+  'Gus',
+  'Irene',
+  'Amy',
+  'Todd',
+  'Olle',
+  'Alisa',
+  'Or',
+  'Joso',
 ];
 
-const CREATE_LOGGED_IN_USER = async (name?: string) => {
-  const user = name ? CREATE_USER(name) : CREATE_RANDOM_USER();
+const createLoggedInUser = async (name?: string) => {
+  const user = name ? createUser(name) : createRandomUser();
   return loginDappUser(user);
 };
 
-const CREATE_USER = (name: string): TestUser => {
+const createUser = (name: string): TestUser => {
   const keyPair = makeKeyPair();
   return {
     name: name + getANumber(),
-    keyPair: new KeyPair(keyPair.privKey.toString("hex"))
+    keyPair: new KeyPair(keyPair.privKey.toString('hex')),
   };
 };
 
-const CREATE_RANDOM_USER = (): TestUser => {
+const createRandomUser = (): TestUser => {
   const randomNumber = Math.floor(Math.random() * names.length);
-  return CREATE_USER(names[randomNumber]);
+  return createUser(names[randomNumber]);
 };
 
 const loginDappUser = async (user: TestUser): Promise<ChromunityUser> => {
-  const walletKeyPair = new KeyPair(makeKeyPair().privKey.toString("hex"));
+  const walletKeyPair = new KeyPair(makeKeyPair().privKey.toString('hex'));
   const walletAuthDescriptor = new SingleSignatureAuthDescriptor(walletKeyPair.pubKey, [
     FlagsType.Account,
-    FlagsType.Transfer
+    FlagsType.Transfer,
   ]);
   const walletUser = new User(walletKeyPair, walletAuthDescriptor);
 
@@ -58,17 +58,13 @@ const loginDappUser = async (user: TestUser): Promise<ChromunityUser> => {
   const bc = await BLOCKCHAIN;
   const account = await bc.registerAccount(walletAuthDescriptor, walletUser);
 
-  const rawTx = Account.rawTransactionAddAuthDescriptor(
-    account.id, walletUser, authDescriptor, bc
-  );
+  const rawTx = Account.rawTransactionAddAuthDescriptor(account.id, walletUser, authDescriptor, bc);
 
-  await Transaction.fromRawTransaction(rawTx, bc)
-    .sign(ft3User.keyPair)
-    .post();
+  await Transaction.fromRawTransaction(rawTx, bc).sign(ft3User.keyPair).post();
 
-  await bc.call(op("register_user", user.name, account.id), ft3User);
+  await bc.call(op('register_user', user.name, account.id), ft3User);
 
-  return new Promise<ChromunityUser>(resolve => resolve({ name: user.name, ft3User: ft3User }));
+  return new Promise<ChromunityUser>((resolve) => resolve({ name: user.name, ft3User }));
 };
 
-export { CREATE_LOGGED_IN_USER };
+export { createLoggedInUser };
