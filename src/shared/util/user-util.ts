@@ -31,7 +31,9 @@ const TOPIC_READ_PREFIX = 'topicRead:';
 let debugUserSet = false;
 
 export function isRepresentative(user: ChromunityUser, representatives: string[]): boolean {
-  return user && representatives && user.name && representatives.includes(toLowerCase(user.name));
+  return (
+    user && representatives && user.name && representatives.map((n) => toLowerCase(n)).includes(toLowerCase(user.name))
+  );
 }
 
 export function clearSession(): void {
