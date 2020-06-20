@@ -66,7 +66,8 @@
     "test": "jest --config jest.config.js --setupFiles dotenv/config",
     "eject": "react-scripts eject",
     "format": "prettier --write '{**/*,*}.{js,ts,tsx}'",
-    "lint": "eslint --fix 'src/**/*.{ts,tsx}'"
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "fix-lint": "eslint --fix 'src/**/*.{ts,tsx}'"
   },
   "browserslist": {
     "production": [

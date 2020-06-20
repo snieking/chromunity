@@ -1,0 +1,24 @@
+name: Formatter
+
+on:
+  schedule:
+    - cron:  '0 6 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run prettier
+        run: npm run format
+
+      - name: Lint
+        run: npm run fix-lint
+
+      - uses: EndBug/add-and-commit@v4
+        with:
+          message: 'Code formatting'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
