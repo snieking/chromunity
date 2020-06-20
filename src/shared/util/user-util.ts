@@ -2,6 +2,8 @@ import * as BoomerangCache from 'boomerang-cache';
 import ReactPiwik from 'react-piwik';
 import * as Sentry from '@sentry/browser';
 import logger from './logger';
+import { ChromunityUser } from '../../types';
+import { toLowerCase } from './util';
 
 const LOCAL_CACHE = BoomerangCache.create('local-bucket', {
   storage: 'local',
@@ -27,6 +29,12 @@ const WALL_PREVIOUSLY_REFRESHED = 'wallPreviouslyRefreshed';
 const TOPIC_READ_PREFIX = 'topicRead:';
 
 let debugUserSet = false;
+
+export function isRepresentative(user: ChromunityUser, representatives: string[]): boolean {
+  return (
+    user && representatives && user.name && representatives.map((n) => toLowerCase(n)).includes(toLowerCase(user.name))
+  );
+}
 
 export function clearSession(): void {
   ENCRYPTED_LOCAL_CACHE.clear();

@@ -7,6 +7,7 @@ import { toLowerCase } from '../../../shared/util/util';
 import ApplicationState from '../../../core/application-state';
 import PinButton from './pin-button';
 import DeleteButton from './delete-button';
+import { isRepresentative } from '../../../shared/util/user-util';
 
 interface Props {
   topicId: string;
@@ -18,12 +19,6 @@ interface Props {
 const GoverningActions: React.FunctionComponent<Props> = (props) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement>(null);
 
-  const isRepresentative = () => {
-    return (
-      props.user != null && props.user.name != null && props.representatives.includes(toLowerCase(props.user.name))
-    );
-  };
-
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -33,7 +28,7 @@ const GoverningActions: React.FunctionComponent<Props> = (props) => {
   };
 
   return (
-    isRepresentative() && (
+    isRepresentative(props.user, props.representatives) && (
       <>
         <Menu id="gov-actions" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
           <PinButton topicId={props.topicId} handleClose={handleClose} />

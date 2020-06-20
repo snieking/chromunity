@@ -25,7 +25,7 @@ import { connect } from 'react-redux';
 import CardActions from '@material-ui/core/CardActions';
 import Divider from '@material-ui/core/Divider';
 import { TopicReply, ChromunityUser } from '../../types';
-import { ifEmptyAvatarThenPlaceholder } from '../../shared/util/user-util';
+import { ifEmptyAvatarThenPlaceholder, isRepresentative } from '../../shared/util/user-util';
 import { getUserSettingsCached } from '../../core/services/user-service';
 import {
   createTopicSubReply,
@@ -206,7 +206,6 @@ const TopicReplyCard = withStyles(styles)(
       this.deleteReplyMessage = this.deleteReplyMessage.bind(this);
       this.reportReply = this.reportReply.bind(this);
       this.closeReportReply = this.closeReportReply.bind(this);
-      this.isRepresentative = this.isRepresentative.bind(this);
       this.addTextFromToolbarInReply = this.addTextFromToolbarInReply.bind(this);
       this.openSubReplies = this.openSubReplies.bind(this);
     }
@@ -310,7 +309,7 @@ const TopicReplyCard = withStyles(styles)(
               onConfirm={this.reportReply}
             />
 
-            {!this.isRepresentative() && !this.state.replyReported && (
+            {!isRepresentative(this.props.user, this.props.representatives) && !this.state.replyReported && (
               <IconButton
                 aria-label="Report"
                 onClick={() => this.setState({ reportReplyDialogOpen: true })}
@@ -410,11 +409,6 @@ const TopicReplyCard = withStyles(styles)(
       }
     }
 
-    isRepresentative() {
-      const { user } = this.props;
-      return user != null && this.props.representatives.includes(user.name.toLocaleLowerCase());
-    }
-
     addTextFromToolbarInReply(text: string) {
       const startPosition = this.textInput.current.selectionStart;
 
@@ -507,7 +501,10 @@ const TopicReplyCard = withStyles(styles)(
     }
 
     renderAdminActions() {
-      if (this.isRepresentative() && !hasReportedId(`${REMOVE_TOPIC_REPLY_OP_ID}:${this.props.reply.id}`)) {
+      if (
+        isRepresentative(this.props.user, this.props.representatives) &&
+        !hasReportedId(`${REMOVE_TOPIC_REPLY_OP_ID}:${this.props.reply.id}`)
+      ) {
         return (
           <div style={{ display: 'inline-block' }}>
             <IconButton

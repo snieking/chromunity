@@ -8,6 +8,7 @@ import { toLowerCase } from '../../../shared/util/util';
 import { pinTopic, checkPinnedTopicByRep } from '../../governing/redux/gov-actions';
 import { COLOR_ORANGE } from '../../../theme';
 import ConfirmDialog from '../../../shared/confirm-dialog';
+import { isRepresentative } from '../../../shared/util/user-util';
 
 interface Props {
   topicId: string;
@@ -24,15 +25,16 @@ const PinButton: React.FunctionComponent<Props> = (props) => {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
-    if (isRepresentative()) {
+    if (isRepresentative(props.user, props.representatives)) {
       props.checkPinnedTopicByRep();
     }
     // eslint-disable-next-line
   }, [props.representatives, props.user]);
 
-  const isRepresentative = () =>
-    props.user && props.representatives && props.representatives.includes(toLowerCase(props.user.name));
-  const isPinnedByMe = () => isRepresentative() && props.topicIdPinnedByMe && props.topicIdPinnedByMe === props.topicId;
+  const isPinnedByMe = () =>
+    isRepresentative(props.user, props.representatives) &&
+    props.topicIdPinnedByMe &&
+    props.topicIdPinnedByMe === props.topicId;
 
   const openDialog = () => {
     props.handleClose();
@@ -68,7 +70,7 @@ const PinButton: React.FunctionComponent<Props> = (props) => {
     );
   };
 
-  return isRepresentative() && pinButton();
+  return isRepresentative(props.user, props.representatives) && pinButton();
 };
 
 const mapStateToProps = (store: ApplicationState) => {
