@@ -11,7 +11,7 @@ interface Props {
   recentReportEntryTimestamp: number;
   govAnchorEl: HTMLElement;
   handleGovClose: () => void;
-  isRepresentative: () => boolean;
+  isRepresentative: boolean;
 }
 
 const GovMenu: React.FunctionComponent<Props> = (props: Props) => {
@@ -48,7 +48,7 @@ const GovMenu: React.FunctionComponent<Props> = (props: Props) => {
           <ListItemIcon>
             <Badge
               variant="dot"
-              invisible={!(props.isRepresentative() && props.recentLogbookEntryTimestamp > retrieveLogbookLastRead())}
+              invisible={!(props.isRepresentative && props.recentLogbookEntryTimestamp > retrieveLogbookLastRead())}
               color="secondary"
             >
               <Gavel className="menu-item-button" />
@@ -63,7 +63,7 @@ const GovMenu: React.FunctionComponent<Props> = (props: Props) => {
           <ListItemIcon>
             <Badge
               variant="dot"
-              invisible={!props.isRepresentative() || props.recentReportEntryTimestamp <= retrieveReportsLastRead()}
+              invisible={!props.isRepresentative || props.recentReportEntryTimestamp <= retrieveReportsLastRead()}
               color="secondary"
             >
               <Report className="menu-item-button" />

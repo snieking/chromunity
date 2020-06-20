@@ -46,7 +46,7 @@ import {
 import TextToolbar from '../../../shared/text-toolbar/text-toolbar';
 import LoadMoreButton from '../../../shared/buttons/load-more-button';
 import { getUserSettingsCached } from '../../../core/services/user-service';
-import { ifEmptyAvatarThenPlaceholder, markTopicReadInSession } from '../../../shared/util/user-util';
+import { ifEmptyAvatarThenPlaceholder, markTopicReadInSession, isRepresentative } from '../../../shared/util/user-util';
 import Avatar, { AVATAR_SIZE } from '../../../shared/avatar';
 import PreviewLinks from '../../../shared/preview-links';
 import PageMeta from '../../../shared/page-meta';
@@ -338,7 +338,7 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
             onConfirm={reportTheTopic}
           />
 
-          {!isRepresentative() && !topicReported && (
+          {!isRepresentative(props.user, props.representatives) && !topicReported && (
             <IconButton
               data-tut="report_btn"
               aria-label="Report-test"
@@ -467,11 +467,6 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     } else {
       window.location.href = '/user/login';
     }
-  }
-
-  function isRepresentative() {
-    const { user } = props;
-    return user != null && props.representatives.includes(toLowerCase(user.name));
   }
 
   function renderReplyForm() {

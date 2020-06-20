@@ -25,6 +25,7 @@ import TestInfoBar from './test-info-bar';
 import GovMenu from './gov-menu';
 import ChromiaLogo from './chromia-logo';
 import { autoLogin, checkUserKudos } from '../../features/user/redux/account-actions';
+import { isRepresentative } from '../../shared/util/user-util';
 
 interface Props {
   representatives: string[];
@@ -143,12 +144,6 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
     props.countUnreadChats(props.user);
   }, 30000);
 
-  function isRepresentative() {
-    return (
-      props.user != null && props.user.name != null && props.representatives.includes(toLowerCase(props.user.name))
-    );
-  }
-
   useEffect(() => {
     if (!props.user) {
       props.autoLogin();
@@ -165,7 +160,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   }, [props.user]);
 
   useEffect(() => {
-    if (isRepresentative()) {
+    if (isRepresentative(props.user, props.representatives)) {
       props.checkNewLogbookEntries(props.user);
     }
     // eslint-disable-next-line
@@ -180,7 +175,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
   }
 
   function renderGovernmentIcon() {
-    if (!props.activeElection && isRepresentative()) {
+    if (!props.activeElection && isRepresentative(props.user, props.representatives)) {
       return (
         <Badge
           invisible={
@@ -220,7 +215,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
             <GovMenu
               govAnchorEl={govAnchorEl}
               handleGovClose={handleGovClose}
-              isRepresentative={isRepresentative}
+              isRepresentative={isRepresentative(props.user, props.representatives)}
               activeElection={props.activeElection}
               recentLogbookEntryTimestamp={props.recentLogbookEntryTimestamp}
               recentReportEntryTimestamp={
