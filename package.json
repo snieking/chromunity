@@ -96,7 +96,7 @@
     "dotenv": "^8.2.0",
     "enzyme-adapter-react-16": "^1.15.2",
     "enzyme-to-json": "^3.5.0",
-    "eslint-config-airbnb-typescript-prettier": "^2.1.1",
+    "eslint-config-airbnb-typescript-prettier": "^2.2.0",
     "eslint-plugin-react": "^7.20.0",
     "jest-cli": "^26.0.1",
     "jest-styled-components": "^7.0.2",
