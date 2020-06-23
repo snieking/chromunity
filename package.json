@@ -24,7 +24,6 @@
     "enzyme": "^3.11.0",
     "ft3-lib": "^3.3.1",
     "hdkey": "2.0.1",
-    "history": "^5.0.0",
     "jsencrypt": "^3.0.0-rc.1",
     "jsdom-global": "3.0.2",
     "keypair": "^1.0.1",

@@ -14,9 +14,9 @@ module.exports = {
     environment: 'Local',
   },
   matomo: {
-    enabled: false,
+    enabled: true,
     url: 'https://matomo.chromia.dev/',
-    siteId: 4,
+    siteId: 3,
     trackErrors: true,
     jsFileName: 'js/',
     phpFilename: 'js/',
