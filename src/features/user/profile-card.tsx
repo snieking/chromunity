@@ -129,6 +129,7 @@ interface ProfileCardState {
   socials: Socials;
   suspendUserDialogOpen: boolean;
   distrusted: boolean;
+  dataFetchedForUser: string;
 }
 
 const MAX_BADGE_NR = 9999999;
@@ -152,6 +153,7 @@ const ProfileCard = withStyles(styles)(
         socials: null,
         suspendUserDialogOpen: false,
         distrusted: false,
+        dataFetchedForUser: null,
       };
 
       this.toggleFollowing = this.toggleFollowing.bind(this);
@@ -167,7 +169,7 @@ const ProfileCard = withStyles(styles)(
     }
 
     componentDidUpdate(prevProps: Readonly<ProfileCardProps>): void {
-      if (prevProps.username !== this.props.username) {
+      if (prevProps.username !== this.props.username || prevProps.user !== this.props.user) {
         this.update();
       }
     }
@@ -189,19 +191,23 @@ const ProfileCard = withStyles(styles)(
             );
           }
 
-          getUserSettingsCached(this.props.username, 1440).then((settings) =>
-            this.setState({
-              avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.username),
-              description: settings.description,
-              socials: settings.socials ? (JSON.parse(settings.socials) as Socials) : null,
-            })
-          );
-          countUserFollowers(this.props.username).then((count) => this.setState({ followers: count }));
-          countUserFollowings(this.props.username).then((count) => this.setState({ userFollowings: count }));
-          countTopicsByUser(this.props.username).then((count) => this.setState({ countOfTopics: count }));
-          countRepliesByUser(this.props.username).then((count) => this.setState({ countOfReplies: count }));
-          countTopicStarRatingForUser(this.props.username).then((count) => this.setState({ topicStars: count }));
-          countReplyStarRatingForUser(this.props.username).then((count) => this.setState({ replyStars: count }));
+          if (this.props.username !== this.state.dataFetchedForUser) {
+            this.setState({ dataFetchedForUser: this.props.username });
+
+            getUserSettingsCached(this.props.username, 1440).then((settings) =>
+              this.setState({
+                avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.username),
+                description: settings.description,
+                socials: settings.socials ? (JSON.parse(settings.socials) as Socials) : null,
+              })
+            );
+            countUserFollowers(this.props.username).then((count) => this.setState({ followers: count }));
+            countUserFollowings(this.props.username).then((count) => this.setState({ userFollowings: count }));
+            countTopicsByUser(this.props.username).then((count) => this.setState({ countOfTopics: count }));
+            countRepliesByUser(this.props.username).then((count) => this.setState({ countOfReplies: count }));
+            countTopicStarRatingForUser(this.props.username).then((count) => this.setState({ topicStars: count }));
+            countReplyStarRatingForUser(this.props.username).then((count) => this.setState({ replyStars: count }));
+          }
         }
       });
     }
