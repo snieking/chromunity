@@ -12,7 +12,7 @@
     "@types/node": "14.0.13",
     "@types/react": "16.9.38",
     "@types/react-dom": "16.9.8",
-    "@types/react-router": "^5.1.7",
+    "@types/react-router": "^5.1.8",
     "@types/redux-logger": "^3.0.8",
     "bip39": "3.0.2",
     "boomerang-cache": "1.2.0",
