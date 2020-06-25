@@ -7,13 +7,11 @@ import {
   CardContent,
   Container,
   createStyles,
-  IconButton,
   LinearProgress,
   TextField,
-  Tooltip,
   Typography,
 } from '@material-ui/core';
-import { Notifications, NotificationsActive, Report, SubdirectoryArrowRight } from '@material-ui/icons';
+import { SubdirectoryArrowRight } from '@material-ui/icons';
 import { Link, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import makeStyles from '@material-ui/core/styles/makeStyles';
@@ -26,8 +24,6 @@ import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from '../../../theme';
 import Timestamp from '../../../shared/timestamp';
 import MarkdownRenderer from '../../../shared/markdown-renderer';
 import EditMessageButton from '../../../shared/buttons/edit-message-button';
-import ConfirmDialog from '../../../shared/confirm-dialog';
-import { reportTopic, hasReportedTopic } from '../../../core/services/representatives-service';
 import {
   createTopicReply,
   deleteTopic,
@@ -36,22 +32,18 @@ import {
   getTopicRepliesAfterTimestamp,
   getTopicRepliesPriorToTimestamp,
   getTopicStarRaters,
-  getTopicSubscribers,
   giveTopicStarRating,
   modifyTopic,
   removeTopicStarRating,
-  subscribeToTopic,
-  unsubscribeFromTopic,
 } from '../../../core/services/topic-service';
 import TextToolbar from '../../../shared/text-toolbar/text-toolbar';
 import LoadMoreButton from '../../../shared/buttons/load-more-button';
 import { getUserSettingsCached } from '../../../core/services/user-service';
-import { ifEmptyAvatarThenPlaceholder, markTopicReadInSession, isRepresentative } from '../../../shared/util/user-util';
+import { ifEmptyAvatarThenPlaceholder, markTopicReadInSession } from '../../../shared/util/user-util';
 import Avatar, { AVATAR_SIZE } from '../../../shared/avatar';
 import PreviewLinks from '../../../shared/preview-links';
 import PageMeta from '../../../shared/page-meta';
 import PollRenderer from '../poll/poll-renderer';
-import SocialShareButton from '../social-share-button';
 import { notifyError, notifyInfo } from '../../../core/snackbar/redux/snackbar-actions';
 import StarRating from '../../../shared/star-rating/star-rating';
 import { setRateLimited, setOperationPending, setQueryPending } from '../../../shared/redux/common-actions';
@@ -59,6 +51,7 @@ import FullTopicTutorial from './full-topic-tutorial';
 import ReplyButton from '../../../shared/buttons/reply-button';
 import TippingButton from '../../../shared/buttons/tipping-button';
 import GoverningActions from './governing-actions';
+import GeneralTopicActionsButton from './general-topic-actions-button';
 
 interface MatchParams {
   id: string;
@@ -132,15 +125,12 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
   const [topic, setTopic] = useState<Topic>(null);
   const [notFound, setNotFound] = useState(false);
   const [avatar, setAvatar] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
   const [topicReplies, setTopicReplies] = useState<TopicReply[]>([]);
   const [replyBoxOpen, setReplyBoxOpen] = useState(false);
   const [replyMessage, setReplyMessage] = useState('');
   const [couldExistOlderReplies, setCouldExistOlderReplies] = useState(false);
-  const [reportTopicDialogOpen, setReportTopicDialogOpen] = useState(false);
   const [timeLeftUntilNoLongerModifiable, setTimeLeftUntilNoLongerModifiable] = useState(0);
   const [poll, setPoll] = useState<PollData>(null);
-  const [topicReported, setTopicReported] = useState(false);
 
   const textInput: React.RefObject<HTMLInputElement> = useRef();
 
@@ -166,21 +156,12 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
     // eslint-disable-next-line
   }, [props.match.params.id]);
 
-  useEffect(() => {
-    if (props.user && topic) {
-      setTopicReported(hasReportedTopic(props.user, topic));
-    }
-  }, [props.user, topic]);
-
   function consumeTopicData(t: Topic): void {
     setTopic(t);
 
     retrieveLatestReplies();
 
     getPoll(t.id).then((p) => setPoll(p));
-    getTopicSubscribers(t.id).then((subscribers) =>
-      setSubscribed(props.user != null && subscribers.map((n) => toLowerCase(n)).includes(toLowerCase(props.user.name)))
-    );
 
     getUserSettingsCached(t.author, 86400).then((settings) =>
       setAvatar(ifEmptyAvatarThenPlaceholder(settings.avatar, t.author))
@@ -297,24 +278,8 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
               removeRating={() => removeTopicStarRating(user, id)}
             />
           </div>
-          <IconButton
-            data-tut="subscribe_btn"
-            aria-label="Subscribe"
-            onClick={() => toggleSubscription()}
-            disabled={props.rateLimited}
-          >
-            {subscribed ? (
-              <Tooltip title="Unsubscribe">
-                <NotificationsActive className={classes.iconOrange} />
-              </Tooltip>
-            ) : (
-              <Tooltip title="Subscribe">
-                <Notifications />
-              </Tooltip>
-            )}
-          </IconButton>
-
           <TippingButton receiver={topic.author} />
+          <GeneralTopicActionsButton topic={topic} />
 
           {topic.timestamp + allowedEditTimeMillis > Date.now() &&
           user != null &&
@@ -330,29 +295,6 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
           )}
 
           <GoverningActions topicId={topic.id} />
-
-          <ConfirmDialog
-            text="This action will report the topic"
-            open={reportTopicDialogOpen}
-            onClose={closeReportTopic}
-            onConfirm={reportTheTopic}
-          />
-
-          {!isRepresentative(props.user, props.representatives) && !topicReported && (
-            <IconButton
-              data-tut="report_btn"
-              aria-label="Report-test"
-              onClick={() => setReportTopicDialogOpen(true)}
-              disabled={props.rateLimited}
-            >
-              <Tooltip title="Report">
-                <Report />
-              </Tooltip>
-            </IconButton>
-          )}
-
-          <SocialShareButton text={topic.title} />
-
           <ReplyButton onClick={toggleReplyBox} toggled={replyBoxOpen} size="medium" />
         </CardActions>
       );
@@ -362,46 +304,9 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
         <div className={classes.ratingWrapper}>
           <StarRating starRatingFetcher={() => getTopicStarRaters(props.match.params.id)} />
         </div>
-        <SocialShareButton text={topic.title} />
+        <GeneralTopicActionsButton topic={topic} />
       </CardActions>
     );
-  }
-
-  function toggleSubscription() {
-    if (!isLoading) {
-      setLoading(true);
-      props.setOperationPending(true);
-      const { id } = topic;
-      const { user } = props;
-
-      if (user != null) {
-        if (subscribed) {
-          unsubscribeFromTopic(user, id)
-            .then(() => setSubscribed(false))
-            .catch((error) => {
-              props.notifyError(error.message);
-              setRateLimited();
-            })
-            .finally(() => {
-              setLoading(false);
-              props.setOperationPending(false);
-            });
-        } else {
-          subscribeToTopic(user, id)
-            .then(() => setSubscribed(true))
-            .catch((error) => {
-              props.notifyError(error.message);
-              setRateLimited();
-            })
-            .finally(() => {
-              setLoading(false);
-              props.setOperationPending(false);
-            });
-        }
-      } else {
-        window.location.href = '/user/login';
-      }
-    }
   }
 
   function editTopicMessage(text: string) {
@@ -445,28 +350,6 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
         window.location.href = '/';
       })
       .finally(() => props.setOperationPending(false));
-  }
-
-  function closeReportTopic() {
-    setReportTopicDialogOpen(false);
-  }
-
-  function reportTheTopic() {
-    closeReportTopic();
-    const { user } = props;
-
-    if (user != null) {
-      props.setOperationPending(true);
-      reportTopic(user, topic)
-        .catch((error) => {
-          props.notifyError(error.message);
-          setRateLimited();
-        })
-        .then(() => setTopicReported(true))
-        .finally(() => props.setOperationPending(false));
-    } else {
-      window.location.href = '/user/login';
-    }
   }
 
   function renderReplyForm() {
