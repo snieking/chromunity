@@ -29,8 +29,8 @@ export const retrieveReportsLastRead = (): number => {
   return lastRead != null ? lastRead : 0;
 };
 
-export const hasReportedTopic = (user: ChromunityUser, topic: Topic): boolean =>
-  user && topic && representativesCache.get(`${topic.id}:${user.name}`);
+export const hasReportedTopic = (user: ChromunityUser, topicId: string): boolean =>
+  user && topicId && representativesCache.get(`${topicId}:${user.name}`);
 
 export const hasReportedReply = (user: ChromunityUser, reply: TopicReply): boolean =>
   user && reply && representativesCache.get(`${reply.id}:${user.name}`);
@@ -113,9 +113,9 @@ export function suspendUser(user: ChromunityUser, userToBeSuspended: string) {
   }
 }
 
-export function reportTopic(user: ChromunityUser, topic: Topic) {
-  const id = `${topic.id}:${user.name}`;
-  return report(user, id, `topic /t/${topic.id} was reported by @${user.name}`);
+export function reportTopic(user: ChromunityUser, topicId: string) {
+  const id = `${topicId}:${user.name}`;
+  return report(user, id, `topic /t/${topicId} was reported by @${user.name}`);
 }
 
 export function reportReply(user: ChromunityUser, reply: TopicReply) {
