@@ -1,6 +1,6 @@
 import React from 'react';
 import ShareIcon from '@material-ui/icons/Share';
-import { IconButton, makeStyles, Tooltip, Menu, MenuItem, Typography } from '@material-ui/core';
+import { makeStyles, Menu, MenuItem, Typography, ListItemIcon } from '@material-ui/core';
 import {
   LinkedinIcon,
   LinkedinShareButton,
@@ -14,6 +14,7 @@ import {
 
 interface Props {
   text: string;
+  onClick: () => void;
 }
 
 const useStyles = makeStyles({
@@ -34,6 +35,7 @@ const SocialShareButton: React.FunctionComponent<Props> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    props.onClick();
     setAnchorEl(event.currentTarget);
   };
 
@@ -94,14 +96,15 @@ const SocialShareButton: React.FunctionComponent<Props> = (props) => {
   }
 
   return (
-    <div>
-      <Tooltip title="Share">
-        <IconButton aria-controls="social-menu" aria-haspopup="true" onClick={handleClick}>
+    <>
+      <MenuItem onClick={handleClick}>
+        <ListItemIcon>
           <ShareIcon />
-        </IconButton>
-      </Tooltip>
+        </ListItemIcon>
+        <Typography>Share</Typography>
+      </MenuItem>
       {menu()}
-    </div>
+    </>
   );
 };
 
