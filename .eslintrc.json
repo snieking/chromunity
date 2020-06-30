@@ -21,6 +21,8 @@
       "react/no-did-update-set-state": "off",
       "react/no-danger": "off",
       "class-methods-use-this": "off",
-      "radix": "off"
+      "radix": "off",
+      "react/no-unused-prop-types": "off",
+      "react/require-default-props": "off"
     }
 }
