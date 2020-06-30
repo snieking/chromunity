@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { MenuItem, ListItemIcon, Typography } from '@material-ui/core';
-import { connect } from 'react-redux';
+import { ListItemIcon, MenuItem, Typography } from '@material-ui/core';
 import { Report } from '@material-ui/icons';
+import { connect } from 'react-redux';
+import { ChromunityUser, TopicReply } from '../../../types';
+import { hasReportedReply, reportReply } from '../../../core/services/representatives-service';
 import ConfirmDialog from '../../../shared/confirm-dialog';
-import { ChromunityUser } from '../../../types';
-import { setOperationPending, setRateLimited } from '../../../shared/redux/common-actions';
-import { notifyError, notifyInfo } from '../../../core/snackbar/redux/snackbar-actions';
-import ApplicationState from '../../../core/application-state';
-import { reportTopic, hasReportedTopic } from '../../../core/services/representatives-service';
 import { isRepresentative } from '../../../shared/util/user-util';
+import ApplicationState from '../../../core/application-state';
+import { setOperationPending, setRateLimited } from '../../../shared/redux/common-actions';
+import { notifyInfo, notifyError } from '../../../core/snackbar/redux/snackbar-actions';
 
 interface Props {
-  topicId: string;
   user: ChromunityUser;
+  reply: TopicReply;
   representatives: string[];
   rateLimited: boolean;
   setOperationPending: typeof setOperationPending;
@@ -22,15 +22,15 @@ interface Props {
   onConfirm: () => void;
 }
 
-const ReportButton: React.FunctionComponent<Props> = (props) => {
+const ReportReplyButton: React.FunctionComponent<Props> = (props) => {
   const [reported, setReported] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
-    if (props.user && props.topicId) {
-      setReported(hasReportedTopic(props.user, props.topicId));
+    if (props.user && props.reply) {
+      setReported(hasReportedReply(props.user, props.reply));
     }
-  }, [props.user, props.topicId]);
+  }, [props.user, props.reply]);
 
   const openDialog = () => {
     setDialogOpen(true);
@@ -40,24 +40,22 @@ const ReportButton: React.FunctionComponent<Props> = (props) => {
     setDialogOpen(false);
   };
 
-  const reportTheTopic = () => {
-    const { user } = props;
-
+  function reportTheReply() {
     closeDialog();
-    props.setOperationPending(true);
     props.onConfirm();
+    props.setOperationPending(true);
 
-    reportTopic(user, props.topicId)
+    reportReply(props.user, props.reply)
       .catch((error) => {
         props.notifyError(error.message);
         props.setRateLimited();
       })
       .then(() => {
         setReported(true);
-        props.notifyInfo('Topic has been reported');
+        props.notifyInfo('Reply has been reported');
       })
       .finally(() => props.setOperationPending(false));
-  };
+  }
 
   if (!props.user) {
     return null;
@@ -66,10 +64,10 @@ const ReportButton: React.FunctionComponent<Props> = (props) => {
   return (
     <>
       <ConfirmDialog
-        text="This action will report the topic"
+        text="This action will report the reply"
         open={dialogOpen}
         onClose={closeDialog}
-        onConfirm={reportTheTopic}
+        onConfirm={reportTheReply}
       />
       <MenuItem
         onClick={openDialog}
@@ -99,4 +97,4 @@ const mapDispatchToProps = {
   setOperationPending,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(ReportButton);
+export default connect(mapStateToProps, mapDispatchToProps)(ReportReplyButton);

@@ -18,7 +18,7 @@ import makeStyles from '@material-ui/core/styles/makeStyles';
 import Divider from '@material-ui/core/Divider';
 import { ChromunityUser, PollData, Topic, TopicReply } from '../../../types';
 import { shouldBeFiltered, toLowerCase, useInterval } from '../../../shared/util/util';
-import TopicReplyCard from '../topic-reply-card';
+import TopicReplyCard from '../reply/topic-reply-card';
 import ApplicationState from '../../../core/application-state';
 import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from '../../../theme';
 import Timestamp from '../../../shared/timestamp';
