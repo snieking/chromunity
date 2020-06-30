@@ -13,9 +13,9 @@ interface Props {
 }
 
 const DesktopWallNavigation: React.FunctionComponent<Props> = (props: Props) => {
-  function renderFavoriteWalls(): JSX.Element {
+  function renderFavoriteWalls(user: ChromunityUser): JSX.Element {
     return (
-      props.user && (
+      user && (
         <div>
           <Link to="/channels">
             <IconButton edge="start" className={props.classes.leftMenuButton} aria-label="Open drawer">
@@ -46,7 +46,7 @@ const DesktopWallNavigation: React.FunctionComponent<Props> = (props: Props) => 
           </Tooltip>
         </IconButton>
       </Link>
-      {renderFavoriteWalls()}
+      {renderFavoriteWalls(props.user)}
       <IconButton
         className={props.classes.leftMenuButton}
         onClick={props.handleGovClick}
