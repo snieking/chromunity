@@ -19,14 +19,14 @@ import {
   withStyles,
   WithStyles,
 } from '@material-ui/core';
-import { Delete, Report, UnfoldMore } from '@material-ui/icons';
+import { Delete, UnfoldMore } from '@material-ui/icons';
 import * as BoomerangCache from 'boomerang-cache';
 import { connect } from 'react-redux';
 import CardActions from '@material-ui/core/CardActions';
 import Divider from '@material-ui/core/Divider';
-import { TopicReply, ChromunityUser } from '../../types';
-import { ifEmptyAvatarThenPlaceholder, isRepresentative } from '../../shared/util/user-util';
-import { getUserSettingsCached } from '../../core/services/user-service';
+import { TopicReply, ChromunityUser } from '../../../types';
+import { ifEmptyAvatarThenPlaceholder, isRepresentative } from '../../../shared/util/user-util';
+import { getUserSettingsCached } from '../../../core/services/user-service';
 import {
   createTopicSubReply,
   deleteReply,
@@ -35,30 +35,28 @@ import {
   giveReplyStarRating,
   modifyReply,
   removeReplyStarRating,
-} from '../../core/services/topic-service';
+} from '../../../core/services/topic-service';
 
 import {
-  reportReply,
   removeTopicReply,
   hasReportedId,
   REMOVE_TOPIC_REPLY_OP_ID,
-  hasReportedReply,
-} from '../../core/services/representatives-service';
-import EditMessageButton from '../../shared/buttons/edit-message-button';
-import Avatar, { AVATAR_SIZE } from '../../shared/avatar';
-import Timestamp from '../../shared/timestamp';
-import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from '../../theme';
-import MarkdownRenderer from '../../shared/markdown-renderer';
-import ConfirmDialog from '../../shared/confirm-dialog';
-import ApplicationState from '../../core/application-state';
-import { shouldBeFiltered, toLowerCase, uniqueId } from '../../shared/util/util';
-import TextToolbar from '../../shared/text-toolbar/text-toolbar';
-import PreviewLinks from '../../shared/preview-links';
-import { notifyError, notifySuccess } from '../../core/snackbar/redux/snackbar-actions';
-import StarRating from '../../shared/star-rating/star-rating';
-import { setRateLimited, setQueryPending, setOperationPending } from '../../shared/redux/common-actions';
-import ReplyButton from '../../shared/buttons/reply-button';
-import TippingButton from '../../shared/buttons/tipping-button';
+} from '../../../core/services/representatives-service';
+import EditMessageButton from '../../../shared/buttons/edit-message-button';
+import Avatar, { AVATAR_SIZE } from '../../../shared/avatar';
+import Timestamp from '../../../shared/timestamp';
+import { COLOR_ORANGE, COLOR_RED, COLOR_YELLOW } from '../../../theme';
+import MarkdownRenderer from '../../../shared/markdown-renderer';
+import ApplicationState from '../../../core/application-state';
+import { shouldBeFiltered, toLowerCase, uniqueId } from '../../../shared/util/util';
+import TextToolbar from '../../../shared/text-toolbar/text-toolbar';
+import PreviewLinks from '../../../shared/preview-links';
+import { notifyError, notifySuccess } from '../../../core/snackbar/redux/snackbar-actions';
+import StarRating from '../../../shared/star-rating/star-rating';
+import { setRateLimited, setQueryPending, setOperationPending } from '../../../shared/redux/common-actions';
+import ReplyButton from '../../../shared/buttons/reply-button';
+import TippingButton from '../../../shared/buttons/tipping-button';
+import GeneralReplyActionsButton from './general-reply-actions-button';
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -149,8 +147,6 @@ interface State {
   avatar: string;
   subReplies: TopicReply[];
   removeReplyDialogOpen: boolean;
-  reportReplyDialogOpen: boolean;
-  replyReported: boolean;
   timeLeftUntilNoLongerModifiable: number;
   renderSubReplies: boolean;
   interval: NodeJS.Timeout;
@@ -186,8 +182,6 @@ const TopicReplyCard = withStyles(styles)(
         avatar: '',
         subReplies: [],
         removeReplyDialogOpen: false,
-        reportReplyDialogOpen: false,
-        replyReported: false,
         timeLeftUntilNoLongerModifiable: 0,
         renderSubReplies: previouslyFoldedSubReplies ? decisionToRenderSubReplies : shouldRenderDueToTimestamp,
         interval: null,
@@ -204,8 +198,6 @@ const TopicReplyCard = withStyles(styles)(
       this.sendReply = this.sendReply.bind(this);
       this.editReplyMessage = this.editReplyMessage.bind(this);
       this.deleteReplyMessage = this.deleteReplyMessage.bind(this);
-      this.reportReply = this.reportReply.bind(this);
-      this.closeReportReply = this.closeReportReply.bind(this);
       this.addTextFromToolbarInReply = this.addTextFromToolbarInReply.bind(this);
       this.openSubReplies = this.openSubReplies.bind(this);
     }
@@ -224,8 +216,6 @@ const TopicReplyCard = withStyles(styles)(
           ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase()),
         })
       );
-
-      this.setState({ replyReported: hasReportedReply(user, this.props.reply) });
 
       getTopicSubReplies(this.props.reply.id, user).then((replies) => this.setState({ subReplies: replies }));
 
@@ -302,24 +292,7 @@ const TopicReplyCard = withStyles(styles)(
               />
             ) : null}
 
-            <ConfirmDialog
-              text="This action will report the message"
-              open={this.state.reportReplyDialogOpen}
-              onClose={this.closeReportReply}
-              onConfirm={this.reportReply}
-            />
-
-            {!isRepresentative(this.props.user, this.props.representatives) && !this.state.replyReported && (
-              <IconButton
-                aria-label="Report"
-                onClick={() => this.setState({ reportReplyDialogOpen: true })}
-                disabled={this.props.rateLimited}
-              >
-                <Tooltip title="Report">
-                  <Report />
-                </Tooltip>
-              </IconButton>
-            )}
+            <GeneralReplyActionsButton reply={this.props.reply} />
 
             {this.subRepliesButton()}
             {this.renderAdminActions()}
@@ -386,27 +359,6 @@ const TopicReplyCard = withStyles(styles)(
           this.props.setRateLimited();
         })
         .finally(() => this.props.setOperationPending(false));
-    }
-
-    closeReportReply() {
-      this.setState({ reportReplyDialogOpen: false });
-    }
-
-    reportReply() {
-      this.closeReportReply();
-
-      if (this.props.user != null) {
-        this.props.setOperationPending(true);
-        reportReply(this.props.user, this.props.reply)
-          .catch((error) => {
-            this.props.notifyError(error.message);
-            this.props.setRateLimited();
-          })
-          .then(() => this.setState({ replyReported: true }))
-          .finally(() => this.props.setOperationPending(false));
-      } else {
-        window.location.href = '/user/login';
-      }
     }
 
     addTextFromToolbarInReply(text: string) {
