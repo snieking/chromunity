@@ -6,11 +6,6 @@ import {
   Card,
   CardContent,
   createStyles,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   IconButton,
   TextField,
   Theme,
@@ -19,13 +14,13 @@ import {
   withStyles,
   WithStyles,
 } from '@material-ui/core';
-import { Delete, UnfoldMore } from '@material-ui/icons';
+import { UnfoldMore } from '@material-ui/icons';
 import * as BoomerangCache from 'boomerang-cache';
 import { connect } from 'react-redux';
 import CardActions from '@material-ui/core/CardActions';
 import Divider from '@material-ui/core/Divider';
 import { TopicReply, ChromunityUser } from '../../../types';
-import { ifEmptyAvatarThenPlaceholder, isRepresentative } from '../../../shared/util/user-util';
+import { ifEmptyAvatarThenPlaceholder } from '../../../shared/util/user-util';
 import { getUserSettingsCached } from '../../../core/services/user-service';
 import {
   createTopicSubReply,
@@ -36,12 +31,8 @@ import {
   modifyReply,
   removeReplyStarRating,
 } from '../../../core/services/topic-service';
+import GoverningReplyActions from './governing-reply-actions';
 
-import {
-  removeTopicReply,
-  hasReportedId,
-  REMOVE_TOPIC_REPLY_OP_ID,
-} from '../../../core/services/representatives-service';
 import EditMessageButton from '../../../shared/buttons/edit-message-button';
 import Avatar, { AVATAR_SIZE } from '../../../shared/avatar';
 import Timestamp from '../../../shared/timestamp';
@@ -146,7 +137,6 @@ interface State {
   hideThreadConfirmDialogOpen: boolean;
   avatar: string;
   subReplies: TopicReply[];
-  removeReplyDialogOpen: boolean;
   timeLeftUntilNoLongerModifiable: number;
   renderSubReplies: boolean;
   interval: NodeJS.Timeout;
@@ -181,7 +171,6 @@ const TopicReplyCard = withStyles(styles)(
         hideThreadConfirmDialogOpen: false,
         avatar: '',
         subReplies: [],
-        removeReplyDialogOpen: false,
         timeLeftUntilNoLongerModifiable: 0,
         renderSubReplies: previouslyFoldedSubReplies ? decisionToRenderSubReplies : shouldRenderDueToTimestamp,
         interval: null,
@@ -293,9 +282,8 @@ const TopicReplyCard = withStyles(styles)(
             ) : null}
 
             <GeneralReplyActionsButton reply={this.props.reply} />
-
             {this.subRepliesButton()}
-            {this.renderAdminActions()}
+            <GoverningReplyActions reply={this.props.reply} />
 
             <ReplyButton
               onClick={() =>
@@ -447,66 +435,6 @@ const TopicReplyCard = withStyles(styles)(
               <br />
               <br />
             </div>
-          </div>
-        );
-      }
-    }
-
-    renderAdminActions() {
-      if (
-        isRepresentative(this.props.user, this.props.representatives) &&
-        !hasReportedId(`${REMOVE_TOPIC_REPLY_OP_ID}:${this.props.reply.id}`)
-      ) {
-        return (
-          <div style={{ display: 'inline-block' }}>
-            <IconButton
-              aria-label="Remove reply"
-              onClick={() => this.setState({ removeReplyDialogOpen: true })}
-              disabled={this.props.rateLimited}
-            >
-              <Tooltip title="Remove reply">
-                <Delete className={this.props.classes.iconRed} />
-              </Tooltip>
-            </IconButton>
-
-            <Dialog
-              open={this.state.removeReplyDialogOpen}
-              onClose={() => this.setState({ removeReplyDialogOpen: false })}
-              aria-labelledby="dialog-title"
-            >
-              <DialogTitle id="dialog-title">Are you sure?</DialogTitle>
-              <DialogContent>
-                <DialogContentText>
-                  This action will remove the topic, which makes sure that no one will be able to read the initial
-                  message.
-                </DialogContentText>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={() => this.setState({ removeReplyDialogOpen: false })} color="secondary">
-                  No
-                </Button>
-                <Button
-                  onClick={() =>
-                    this.setState(
-                      {
-                        removeReplyDialogOpen: false,
-                      },
-                      () =>
-                        removeTopicReply(this.props.user, this.props.reply.id)
-                          .catch((error) => {
-                            this.props.notifyError(error.message);
-                            this.props.setRateLimited();
-                          })
-                          .then(() => window.location.reload())
-                    )
-                  }
-                  color="primary"
-                  disabled={this.props.rateLimited}
-                >
-                  Yes
-                </Button>
-              </DialogActions>
-            </Dialog>
           </div>
         );
       }
