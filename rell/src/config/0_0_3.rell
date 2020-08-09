@@ -14,7 +14,7 @@ operation update_block_79000(){
 }
 
 operation update_at_block_300000(){
-	val update_at_block = 1;
+	val update_at_block = 30000;
 	require(op_context.block_height>=update_at_block);
   	require(ft3_core.my_blockchain_info.last_update < update_at_block);
   	
