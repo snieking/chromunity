@@ -32,12 +32,18 @@ describe('User tests', () => {
     expect(userSettings.description).toBe('');
     expect(userSettings.socials).toBe('{}');
 
-    await updateUserSettings(loggedInUser, 'BB==', 'Description', {
-      twitter: '',
-      linkedin: '',
-      facebook: '',
-      github: '',
-    });
+    await updateUserSettings(
+      loggedInUser,
+      'BB==',
+      'Description',
+      {
+        twitter: '',
+        linkedin: '',
+        facebook: '',
+        github: '',
+      },
+      ''
+    );
     userSettings = await getUserSettings(loggedInUser);
     expect(userSettings.avatar).toBe('BB==');
     expect(userSettings.description).toBe('Description');
