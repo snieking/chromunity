@@ -1,5 +1,6 @@
 import ft3_acc: lib.ft3.account;
 import ft3_core: lib.ft3.core;
+import store;
 
 operation update_block_79000(){
   val update_at_block = 79000;
@@ -10,6 +11,35 @@ operation update_block_79000(){
   update_previous_users_limit();
 
   ft3_core.my_blockchain_info.last_update = update_at_block;
+}
+
+operation update_at_block_300000(){
+	val update_at_block = 1;
+	require(op_context.block_height>=update_at_block);
+  	require(ft3_core.my_blockchain_info.last_update < update_at_block);
+  	
+  	val name_coloring = create store.category("Name Coloring");
+  	create store.item(
+  		id = 'NameColoring:Blue', 
+  		name = "Blue", 
+  		description = "Blue is the only color which maintains its own character in all its tones.", 
+  		name_coloring, 
+  		9
+  	);
+  	create store.item(
+  		id = 'NameColoring:Dark', 
+  		name = "Dark", 
+  		description = "Once you start down the dark path, forever will it dominate your destiny.", 
+  		name_coloring, 
+  		2
+  	);
+  	create store.item(
+  		id = 'NameColoring:Light', 
+  		name = "Light", 
+  		description = "In the end, cowards are those who follow the dark side.", 
+  		name_coloring, 
+  		3
+  	);
 }
 
 function update_new_users_limit() {

@@ -1,0 +1,166 @@
+import user;
+import noti: notifications;
+
+entity category {
+	key name;
+}
+
+entity item {
+	key id: text;
+	name;
+	mutable description: text;
+	index category;
+	uniqueness: integer;
+}
+
+entity item_auction {
+	key item, auction;
+}
+
+entity item_bid {
+	key item_auction, user.user;
+	bid: integer;
+}
+
+entity item_ownership {
+	key user.user, item;
+	paid: integer;
+}
+
+entity auction {
+	key start_height: integer;
+	mutable completed: boolean = false;
+	completion_height: integer;
+}
+
+function auction_blocks(): integer {
+	return 30000;
+}
+
+function auction_cooldown(): integer {
+	return auction_blocks() * 2;
+}
+
+query auction_in_progress(): boolean {
+	return auction@?{ .completed == false } != null;
+}
+
+query get_store_categories() {
+	return category@*{} (.name);
+}
+
+query get_store_items_by_category(name) {
+	val auction_id = auction@?{ .completed == false } ( @omit @sort_desc .start_height, .rowid ) limit 1;
+	if (auction_id == null) {
+		return list<(id: text, name: text, description: text, category: text)>();
+	}
+	
+	return item_auction@*{ .item.category.name == name, .auction.rowid == auction_id } (
+		id = .item.id,
+		name = .item.name,
+		description = .item.description,
+		category = .item.category.name
+	);
+}
+
+query get_current_bid(id: text) {
+	val auction_id = auction@{} ( @omit @sort_desc .start_height, .rowid ) limit 1;
+	return (item_auction, item_bid)@?{
+		item_auction.auction.rowid == auction_id,
+		item_auction == item_bid.item_auction,
+		item_auction.item.id == id
+	} ( amount = .bid, bidder = .user.display_name ) limit 1;
+}
+
+query get_owned_items(name) {
+	return item_ownership@*{ .user.name == name.lower_case() } (
+		id = .item.id,
+		name = .item.name,
+		description = .item.description,
+		category = .item.category.name
+	);
+}
+
+query get_owned_items_by_category(name, category: name) {
+	return item_ownership@*{ 
+		.user.name == name.lower_case(),
+		.item.category.name == category
+	} (
+		id = .item.id,
+		name = .item.name,
+		description = .item.description,
+		category = .item.category.name
+	);
+}
+
+operation put_bid(descriptor_id: byte_array, username: text, id: text, bid: integer) {
+	require(bid > 1, "Bid must be positive");
+	
+	val the_user = user.get_and_charge_verified_user(username, descriptor_id);
+	require(item_ownership@?{ .item.id == id, .user == the_user } == null, "Item already owned");
+	
+	
+	val auction_id = auction@{} ( @omit @sort_desc .start_height, .rowid ) limit 1;
+	val item_auction = item_auction@{ .item.id == id, .auction.rowid == auction_id };
+	
+	val highest_bid = item_bid@?{ item_auction } ( @sort_desc .bid, .user );
+	if (highest_bid == null) {
+		user.deduct_asset(the_user, bid);
+		create item_bid(item_auction, the_user, bid);
+		return;
+	}
+	
+	require(bid > highest_bid.bid, "New bid must be higher than existing one");
+	
+	// Perform transactions
+	user.deduct_asset(the_user, bid);
+	user.reward_asset(highest_bid.user, highest_bid.bid);
+	
+	// Delete any previous bid if exists
+	delete item_bid@?{ item_auction, .user == the_user };
+	create item_bid(item_auction, the_user, bid);
+}
+
+operation start_auction() {
+	val current_block = op_context.block_height;
+	val latest_auction = auction@?{} ( @omit @sort_desc .start_height, .completion_height, .rowid ) limit 1;
+	
+	if (latest_auction != null) {
+		require(current_block > latest_auction.completion_height + auction_cooldown(), "Can't trigger new auction yet");
+	}
+	
+	val auction = create auction(start_height = current_block, completion_height = current_block + auction_blocks());
+	
+	val uniqueness_cut_off = current_block % 10;
+	
+	for (item in item@*{}) {
+		if (item.uniqueness >= uniqueness_cut_off) {
+			create item_auction(auction, item);
+		}
+	}
+}
+
+operation finalize_auction() {
+	val current_block = op_context.block_height;
+	val latest_auction = auction@{} ( @omit @sort_desc .start_height, .completion_height, .rowid ) limit 1;
+	require(latest_auction.completion_height <= current_block, "Not enough blocks has passed");
+	
+	val items = item_auction@*{ .auction == auction@{ latest_auction.rowid } };
+	for (i in items) {
+		val highest_bid = item_bid@?{ .item_auction == i } ( @sort_desc .bid, .user ) limit 1;
+		if (highest_bid != null) {
+			create item_ownership(i.item, highest_bid.user, highest_bid.bid);
+			create noti.notification(
+				id = i.item.id,
+				highest_bid.user,
+				trigger = "Auction won",
+				content = "You won '" + i.item.category.name + ": " + i.item.name + "' for " + highest_bid.bid + " kudos",
+				false,
+				op_context.last_block_time
+			);
+		}
+	}
+
+	update auction@{ .rowid == latest_auction.rowid } (completed = true);
+}
+

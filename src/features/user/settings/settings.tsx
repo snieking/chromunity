@@ -36,6 +36,7 @@ import {
   parseGithubUsername,
   parseFacebookUsername,
 } from '../../../shared/util/util';
+import NameBadgeChanger from './name-badge-changer';
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -101,6 +102,7 @@ interface SettingsState {
   editAvatarOpen: boolean;
   description: string;
   socials: Socials;
+  nameBadgeId: string;
 }
 
 const DEFAULT_SOCIALS: Socials = { twitter: '', linkedin: '', facebook: '', github: '' };
@@ -116,6 +118,7 @@ const Settings = withStyles(styles)(
         editAvatarOpen: false,
         description: '',
         socials: DEFAULT_SOCIALS,
+        nameBadgeId: '',
       };
 
       this.updateAvatar = this.updateAvatar.bind(this);
@@ -127,6 +130,7 @@ const Settings = withStyles(styles)(
       this.handleLinkedInChange = this.handleLinkedInChange.bind(this);
       this.handleFacebookChange = this.handleFacebookChange.bind(this);
       this.handleGithubChange = this.handleGithubChange.bind(this);
+      this.updateNameBadgeId = this.updateNameBadgeId.bind(this);
     }
 
     componentDidMount() {
@@ -139,6 +143,7 @@ const Settings = withStyles(styles)(
             avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, user.name),
             description: settings.description,
             socials: settings.socials ? (JSON.parse(settings.socials) as Socials) : DEFAULT_SOCIALS,
+            nameBadgeId: settings.name_badge_id,
           });
         });
       }
@@ -218,7 +223,7 @@ const Settings = withStyles(styles)(
             type="text"
             variant="outlined"
             onChange={this.handleTwitterChange}
-            value={this.state.socials.twitter}
+            value={this.state.socials.twitter || ''}
           />
         </>
       );
@@ -230,14 +235,14 @@ const Settings = withStyles(styles)(
           <LinkedinIcon size={ICON_SIZE} className={this.props.classes.socialsIcon} />
           <TextField
             className={this.props.classes.socialsField}
-            id="twitter"
+            id="linkedin"
             margin="dense"
             label="LinkedIn user"
             placeholder="Username"
             type="text"
             variant="outlined"
             onChange={this.handleLinkedInChange}
-            value={this.state.socials.linkedin}
+            value={this.state.socials.linkedin || ''}
           />
         </>
       );
@@ -256,7 +261,7 @@ const Settings = withStyles(styles)(
             type="text"
             variant="outlined"
             onChange={this.handleFacebookChange}
-            value={this.state.socials.facebook}
+            value={this.state.socials.facebook || ''}
           />
         </>
       );
@@ -272,12 +277,12 @@ const Settings = withStyles(styles)(
             className={this.props.classes.socialsField}
             id="github"
             margin="dense"
-            label="Github user"
+            label="GitHub user"
             placeholder="Username"
             type="text"
             variant="outlined"
             onChange={this.handleGithubChange}
-            value={this.state.socials.github}
+            value={this.state.socials.github || ''}
           />
         </>
       );
@@ -376,13 +381,17 @@ const Settings = withStyles(styles)(
 
       this.setState({ socials });
 
-      updateUserSettings(this.props.user, this.state.avatar, this.state.description, socials)
+      updateUserSettings(this.props.user, this.state.avatar, this.state.description, socials, this.state.nameBadgeId)
         .then(() => this.props.notifyInfo('Settings saved'))
         .catch(() => {
           this.props.notifyError('Error updating settings');
           this.props.setRateLimited();
         })
         .finally(() => this.props.setOperationPending(false));
+    }
+
+    private updateNameBadgeId(value: string) {
+      this.setState({ nameBadgeId: value });
     }
 
     render() {
@@ -395,6 +404,12 @@ const Settings = withStyles(styles)(
             </Typography>
             {this.avatarEditor()}
             {this.descriptionEditor()}
+          </Card>
+          <Card key="name-badge-card" className={this.props.classes.settingsCard}>
+            <Typography variant="h6" component="h6" className={this.props.classes.chapterHeader}>
+              Name Badge
+            </Typography>
+            <NameBadgeChanger nameBadgeId={this.state.nameBadgeId} updateNameBadgeId={this.updateNameBadgeId} />
           </Card>
           <Card key="socials-card" className={this.props.classes.settingsCard}>
             <Typography variant="h6" component="h6" className={this.props.classes.chapterHeader}>

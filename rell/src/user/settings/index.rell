@@ -5,4 +5,5 @@ entity user_settings {
     mutable avatar: text;
     mutable description: text;
     mutable socials: json = json("{}");
+    mutable name_badge_id: text = "";
 }

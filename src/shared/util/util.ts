@@ -234,6 +234,7 @@ export function parseFacebookUsername(input: string): string {
 }
 
 function parseUsername(regexp: RegExp, input: string): string {
+  if (!input || !regexp) return '';
   const matches = regexp.exec(input);
   return matches[matches.length - 1].replace(/\//g, '');
 }

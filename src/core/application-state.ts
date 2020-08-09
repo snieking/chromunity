@@ -7,6 +7,7 @@ import { GovernmentState } from '../features/governing/redux/gov-types';
 import { ChatState } from '../features/chat/redux/chat-types';
 import { CommonState } from '../shared/redux/common-types';
 import { SnackbarState } from './snackbar/redux/snackbar-types';
+import { StoreState } from '../features/store/redux/store-types';
 
 export default interface ApplicationState {
   account: AccountState;
@@ -18,4 +19,5 @@ export default interface ApplicationState {
   chat: ChatState;
   common: CommonState;
   snackbar: SnackbarState;
+  store: StoreState;
 }

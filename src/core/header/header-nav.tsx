@@ -26,6 +26,7 @@ import GovMenu from './gov-menu';
 import ChromiaLogo from './chromia-logo';
 import { autoLogin, checkUserKudos } from '../../features/user/redux/account-actions';
 import { isRepresentative } from '../../shared/util/user-util';
+import { processAuctions, checkIsAuctionInProgress } from '../../features/store/redux/store-actions';
 
 interface Props {
   representatives: string[];
@@ -35,6 +36,7 @@ interface Props {
   recentLogbookEntryTimestamp: number;
   user: ChromunityUser;
   kudos: number;
+  auctionInProgress: boolean;
   autoLogin: typeof autoLogin;
   loadRepresentatives: typeof loadRepresentatives;
   loadReports: typeof loadReports;
@@ -42,6 +44,8 @@ interface Props {
   countUnreadChats: typeof countUnreadChats;
   checkNewLogbookEntries: typeof checkNewLogbookEntries;
   checkUserKudos: typeof checkUserKudos;
+  processAuctions: typeof processAuctions;
+  checkIsAuctionInProgress: typeof checkIsAuctionInProgress;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -155,6 +159,8 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
     if (props.user != null) {
       props.checkActiveElection(props.user);
       props.checkUserKudos();
+      props.processAuctions(props.user);
+      props.checkIsAuctionInProgress();
     }
     // eslint-disable-next-line
   }, [props.user]);
@@ -179,8 +185,9 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
       return (
         <Badge
           invisible={
-            (props.reports.length > 0 && props.reports[0].timestamp > retrieveReportsLastRead()) ||
-            props.recentLogbookEntryTimestamp < retrieveLogbookLastRead()
+            ((props.reports.length > 0 && props.reports[0].timestamp > retrieveReportsLastRead()) ||
+              props.recentLogbookEntryTimestamp < retrieveLogbookLastRead()) &&
+            !props.auctionInProgress
           }
           color="secondary"
         >
@@ -217,6 +224,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
               handleGovClose={handleGovClose}
               isRepresentative={isRepresentative(props.user, props.representatives)}
               activeElection={props.activeElection}
+              auctionInProgress={props.auctionInProgress}
               recentLogbookEntryTimestamp={props.recentLogbookEntryTimestamp}
               recentReportEntryTimestamp={
                 props.reports != null && props.reports.length > 0 ? props.reports[0].timestamp : 0
@@ -250,6 +258,8 @@ const mapDispatch = {
   countUnreadChats,
   autoLogin,
   checkUserKudos,
+  processAuctions,
+  checkIsAuctionInProgress,
 };
 
 const mapState = (state: ApplicationState) => {
@@ -261,6 +271,7 @@ const mapState = (state: ApplicationState) => {
     recentLogbookEntryTimestamp: state.government.recentLogbookEntryTimestamp,
     user: state.account.user,
     kudos: state.account.kudos,
+    auctionInProgress: state.store.auctionInProgress,
   };
 };
 

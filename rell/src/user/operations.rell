@@ -10,5 +10,5 @@ operation register_user(name, account_id: byte_array) {
     val user = create user(name = name.lower_case(), display_name = name, account, op_context.block_height);
     create_balance(user);
     
-    create settings.user_settings(user, avatar = "" , description = "");
+    create settings.user_settings(user, avatar = "" , description = "", name_badge_id = '');
 }

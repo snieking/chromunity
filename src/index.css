@@ -24,6 +24,10 @@ code {
   display: none;
 }
 
+.content {
+  margin-top: 25px;
+}
+
 .content::after {
   content: '';
   display: block;

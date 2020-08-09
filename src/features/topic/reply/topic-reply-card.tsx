@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import {
   Badge,
   Button,
@@ -15,7 +14,6 @@ import {
   TextField,
   Theme,
   Tooltip,
-  Typography,
   withStyles,
   WithStyles,
 } from '@material-ui/core';
@@ -51,6 +49,7 @@ import ApplicationState from '../../../core/application-state';
 import { shouldBeFiltered, toLowerCase, uniqueId } from '../../../shared/util/util';
 import TextToolbar from '../../../shared/text-toolbar/text-toolbar';
 import PreviewLinks from '../../../shared/preview-links';
+import NameBadge from '../../../shared/name-displays/name-badge';
 import { notifyError, notifySuccess } from '../../../core/snackbar/redux/snackbar-actions';
 import StarRating from '../../../shared/star-rating/star-rating';
 import { setRateLimited, setQueryPending, setOperationPending } from '../../../shared/redux/common-actions';
@@ -62,6 +61,9 @@ const styles = (theme: Theme) =>
   createStyles({
     removed: {
       opacity: 0.25,
+    },
+    author: {
+      float: 'right',
     },
     authorName: {
       display: 'block',
@@ -552,19 +554,8 @@ const TopicReplyCard = withStyles(styles)(
 
     renderAuthor() {
       return (
-        <div style={{ float: 'right' }}>
-          <Link
-            className={`${this.props.classes.authorLink} ${
-              this.props.representatives.includes(this.props.reply.author.toLocaleLowerCase())
-                ? this.props.classes.repColor
-                : this.props.classes.userColor
-            }`}
-            to={`/u/${this.props.reply.author}`}
-          >
-            <Typography gutterBottom variant="subtitle1" component="span">
-              <span className={this.props.classes.authorName}>@{this.props.reply.author}</span>
-            </Typography>
-          </Link>
+        <div className={this.props.classes.author}>
+          <NameBadge name={this.props.reply.author} />
           <br />
           <div style={{ float: 'right' }}>
             <Avatar src={this.state.avatar} size={AVATAR_SIZE.MEDIUM} name={this.props.reply.author} />

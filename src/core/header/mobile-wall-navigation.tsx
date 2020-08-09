@@ -70,7 +70,7 @@ const MobileWallNavigation: React.FunctionComponent<Props> = (props: Props) => {
         aria-controls="gov-menu"
         aria-haspopup="true"
       >
-        <Tooltip title="Governing">{props.renderGovernmentIcon()}</Tooltip>
+        <Tooltip title="Town hall">{props.renderGovernmentIcon()}</Tooltip>
       </IconButton>
     </div>
   );

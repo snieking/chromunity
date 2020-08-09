@@ -9,6 +9,7 @@ import { chatReducer } from '../features/chat/redux/chat-reducers';
 import { commonReducer } from '../shared/redux/common-reducers';
 import { snackbarReducer } from './snackbar/redux/snackbar-reducers';
 import ApplicationState from './application-state';
+import { storeReducer } from '../features/store/redux/store-reducers';
 
 const reducer = combineReducers<ApplicationState>({
   account: loginReducer,
@@ -20,6 +21,7 @@ const reducer = combineReducers<ApplicationState>({
   chat: chatReducer,
   common: commonReducer,
   snackbar: snackbarReducer,
+  store: storeReducer,
 });
 
 export default reducer;

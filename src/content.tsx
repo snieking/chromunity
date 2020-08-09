@@ -20,6 +20,7 @@ import Reports from './features/governing/reports/reports';
 import * as config from './config';
 import SnackbarHolder from './core/snackbar/snackbar-holder';
 import VaultLogin from './features/user/authentication/vault-login/vault-login';
+import Store from './features/store/store';
 
 const Content: React.FunctionComponent = () => {
   return (
@@ -44,6 +45,7 @@ const Content: React.FunctionComponent = () => {
         <Route path="/gov/reports" component={Reports} />
         <Route path="/t/:id" component={FullTopic} />
         <Route path="/chat" component={ChatPage} />
+        <Route path="/store" component={Store} />
         <Route path="/error" component={ErrorPage} />
       </Switch>
       <SnackbarHolder />

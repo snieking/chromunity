@@ -36,6 +36,10 @@ export function isRepresentative(user: ChromunityUser, representatives: string[]
   );
 }
 
+export function isUserRepresentative(user: string, representatives: string[]): boolean {
+  return user && representatives && representatives.map((n) => toLowerCase(n)).includes(toLowerCase(user));
+}
+
 export function clearSession(): void {
   ENCRYPTED_LOCAL_CACHE.clear();
   LOCAL_CACHE.remove(USER_KEY);
