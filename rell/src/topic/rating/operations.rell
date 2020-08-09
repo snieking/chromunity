@@ -28,11 +28,23 @@ operation remove_topic_star_rating(username: text, descriptor_id: byte_array, id
 }
 
 operation give_reply_star_rating(username: text, descriptor_id: byte_array, id: text, unique_id: text) {
-    val user = user.get_and_charge_verified_user(username, descriptor_id);
-    create reply_star_rating(topic.topic_reply@{ .id == id }, user);
+    val my_user = user.get_and_charge_verified_user(username, descriptor_id);
+    
+    val reply = topic.topic_reply@{ .id == id };
+    create reply_star_rating(reply, my_user);
+    
+    if (my_user.name != reply.author.name) {
+        user.reward_asset(reply.author, 2);
+    }
 }
 
 operation remove_reply_star_rating(username: text, descriptor_id: byte_array, id: text, unique_id: text) {
-    val user = user.get_and_charge_verified_user(username, descriptor_id);
-    delete reply_star_rating@{ topic.topic_reply@{ .id == id }, user };
+    val my_user = user.get_and_charge_verified_user(username, descriptor_id);
+    
+    val reply = topic.topic_reply@{ .id == id };
+    delete reply_star_rating@{ reply, my_user };
+    
+    if (my_user.name != reply.author.name) {
+        user.deduct_asset(reply.author, 2);
+    }
 }
