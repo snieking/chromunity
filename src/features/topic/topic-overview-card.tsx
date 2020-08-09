@@ -31,6 +31,7 @@ import CustomChip from '../../shared/custom-chip';
 import NewBadge from './new-badge';
 import StarRating from '../../shared/star-rating/star-rating';
 import PinBadge from './pin-badge';
+import NameText from '../../shared/name-displays/name-text';
 
 const styles = (theme: Theme) =>
   createStyles({
@@ -95,7 +96,6 @@ const TopicOverviewCard = withStyles(styles)(
         numberOfReplies: 0,
       };
 
-      this.authorIsRepresentative = this.authorIsRepresentative.bind(this);
       this.setAvatar = this.setAvatar.bind(this);
     }
 
@@ -140,33 +140,12 @@ const TopicOverviewCard = withStyles(styles)(
       );
     }
 
-    authorIsRepresentative(): boolean {
-      return this.props.representatives.includes(
-        this.props.topic.latest_poster != null
-          ? this.props.topic.latest_poster.toLocaleLowerCase()
-          : this.props.topic.author.toLocaleLowerCase()
-      );
-    }
-
     renderReplyStatus() {
       return (
         <div style={{ float: 'right' }}>
-          <Link
-            to={`/u/${
-              this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author
-            }`}
-          >
-            <Typography
-              gutterBottom
-              variant="subtitle2"
-              component="span"
-              className={this.authorIsRepresentative() ? this.props.classes.representativeColor : ''}
-            >
-              <span className={this.props.classes.authorName}>
-                @{this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author}
-              </span>
-            </Typography>
-          </Link>
+          <NameText
+            name={this.props.topic.latest_poster != null ? this.props.topic.latest_poster : this.props.topic.author}
+          />
           <div style={{ float: 'right' }}>
             <Badge color="primary" badgeContent={this.state.numberOfReplies} max={999}>
               <Avatar

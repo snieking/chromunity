@@ -1,12 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ListItemIcon, Menu, MenuItem, Typography } from '@material-ui/core';
-import { Face, Gavel, HowToVote, Report } from '@material-ui/icons';
+import { Face, Gavel, HowToVote, Report, Shop } from '@material-ui/icons';
 import Badge from '@material-ui/core/Badge/Badge';
 import { retrieveLogbookLastRead, retrieveReportsLastRead } from '../services/representatives-service';
 
 interface Props {
   activeElection: boolean;
+  auctionInProgress: boolean;
   recentLogbookEntryTimestamp: number;
   recentReportEntryTimestamp: number;
   govAnchorEl: HTMLElement;
@@ -70,6 +71,17 @@ const GovMenu: React.FunctionComponent<Props> = (props: Props) => {
             </Badge>
           </ListItemIcon>
           <Typography className="menu-item-text">Reports</Typography>
+        </MenuItem>
+      </Link>
+      <br />
+      <Link style={{ width: '100%' }} to="/store">
+        <MenuItem onClick={() => props.handleGovClose()}>
+          <ListItemIcon>
+            <Badge variant="dot" invisible={!props.auctionInProgress} color="secondary">
+              <Shop className="menu-item-button" />
+            </Badge>
+          </ListItemIcon>
+          <Typography className="menu-item-text">Market</Typography>
         </MenuItem>
       </Link>
     </Menu>

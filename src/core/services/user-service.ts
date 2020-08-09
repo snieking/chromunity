@@ -50,7 +50,13 @@ export function getUserSettingsCached(name: string, cacheDuration: number): Prom
   });
 }
 
-export function updateUserSettings(user: ChromunityUser, avatar: string, description: string, socials: Socials) {
+export function updateUserSettings(
+  user: ChromunityUser,
+  avatar: string,
+  description: string,
+  socials: Socials,
+  nameBadgeId: string
+) {
   const userLC: string = toLowerCase(user.name);
   boomerang.remove(userLC);
 
@@ -60,7 +66,7 @@ export function updateUserSettings(user: ChromunityUser, avatar: string, descrip
 
   return executeOperations(
     user.ft3User,
-    op(operation, userLC, user.ft3User.authDescriptor.id, avatar, description, JSON.stringify(socials)),
+    op(operation, userLC, user.ft3User.authDescriptor.id, avatar, description, JSON.stringify(socials), nameBadgeId),
     nop()
   );
 }

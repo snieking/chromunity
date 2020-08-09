@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Card, CardActionArea, CardContent, createStyles, Typography, withStyles, WithStyles } from '@material-ui/core';
 import { Redirect } from 'react-router';
 import { connect } from 'react-redux';
@@ -10,18 +9,13 @@ import { getUserSettingsCached } from '../../core/services/user-service';
 import { getReplyStarRaters } from '../../core/services/topic-service';
 import Avatar, { AVATAR_SIZE } from '../../shared/avatar';
 import Timestamp from '../../shared/timestamp';
-import { COLOR_ORANGE, COLOR_YELLOW } from '../../theme';
+import { COLOR_YELLOW } from '../../theme';
 import MarkdownRenderer from '../../shared/markdown-renderer';
 import ApplicationState from '../../core/application-state';
 import StarRating from '../../shared/star-rating/star-rating';
+import NameText from '../../shared/name-displays/name-text';
 
 const styles = createStyles({
-  authorName: {
-    display: 'block',
-    marginTop: '10px',
-    marginRight: '10px',
-    marginLeft: '10px',
-  },
   ratingWrapper: {
     float: 'left',
     marginTop: '10px',
@@ -29,9 +23,6 @@ const styles = createStyles({
   overviewDetails: {
     marginLeft: '42px',
     marginBottom: '-15px',
-  },
-  representativeColor: {
-    color: COLOR_ORANGE,
   },
   message: {
     marginTop: '-15px',
@@ -65,8 +56,6 @@ const TopicReplyOverviewCard = withStyles(styles)(
         redirectToTopic: false,
         avatar: '',
       };
-
-      this.authorIsRepresentative = this.authorIsRepresentative.bind(this);
     }
 
     componentDidMount() {
@@ -77,23 +66,10 @@ const TopicReplyOverviewCard = withStyles(styles)(
       });
     }
 
-    authorIsRepresentative(): boolean {
-      return this.props.representatives.includes(this.props.reply.author.toLocaleLowerCase());
-    }
-
     renderAuthor() {
       return (
         <div style={{ float: 'right' }}>
-          <Link to={`/u/${this.props.reply.author}`}>
-            <Typography
-              gutterBottom
-              variant="subtitle2"
-              component="span"
-              className={this.authorIsRepresentative() ? this.props.classes.representativeColor : ''}
-            >
-              <span className={this.props.classes.authorName}>@{this.props.reply.author}</span>
-            </Typography>
-          </Link>
+          <NameText name={this.props.reply.author} />
           <div style={{ float: 'right' }}>
             <Avatar src={this.state.avatar} size={AVATAR_SIZE.SMALL} name={this.props.reply.author} />
           </div>

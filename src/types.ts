@@ -43,6 +43,7 @@ export interface UserSettings {
   avatar: string;
   description: string;
   socials: string;
+  name_badge_id: string;
 }
 
 export interface RepresentativeAction {

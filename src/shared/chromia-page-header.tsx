@@ -6,8 +6,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     header: {
       textAlign: 'center',
-      marginTop: '20px',
-      marginBottom: '5px',
+      marginBottom: '10px',
     },
     text: {
       [theme.breakpoints.down('md')]: {

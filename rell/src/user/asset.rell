@@ -72,6 +72,11 @@ function reward_asset(user, amount: integer) {
 	ft3_core.process_transfer_output(output, 0, available_assets);
 }
 
+function deduct_asset(user, amount: integer) {
+	val asset = ensure_asset();
+	ft3_core.deduct_balance(user.account, asset, amount);
+}
+
 function get_balance(user): ft3_core.balance? {
 	return ft3_core.balance@?{ 
 		user.account,

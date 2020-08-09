@@ -1,11 +1,17 @@
 import user;
+import store;
 
-operation create_user_settings(name, descriptor_id: byte_array, avatar: text, description: text, socials: json) {
+operation create_user_settings(name, descriptor_id: byte_array, avatar: text, description: text, socials: json, name_badge_id: text) {
     val user = user.get_and_charge_verified_user(name, descriptor_id);
-    create user_settings(user, avatar = avatar, description = description, socials);
+    create user_settings(user, avatar = avatar, description = description, socials, name_badge_id = name_badge_id);
 }
 
-operation update_user_settings(name, descriptor_id: byte_array, avatar: text, description: text, socials: json) {
+operation update_user_settings(name, descriptor_id: byte_array, avatar: text, description: text, socials: json, name_badge_id: text) {
     val user = user.get_and_charge_verified_user(name, descriptor_id);
-    update user_settings@{ .user == user }( avatar = avatar, description = description, socials);
+    
+    if (name_badge_id != "") {
+    	require(store.item_ownership@?{ .item.id == name_badge_id, user } != null, "You do not own that name badge");
+    }
+
+    update user_settings@{ .user == user }( avatar = avatar, description = description, socials, name_badge_id);
 }

@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import { SubdirectoryArrowRight } from '@material-ui/icons';
-import { Link, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Divider from '@material-ui/core/Divider';
@@ -50,6 +50,7 @@ import { setRateLimited, setOperationPending, setQueryPending } from '../../../s
 import FullTopicTutorial from './full-topic-tutorial';
 import ReplyButton from '../../../shared/buttons/reply-button';
 import TippingButton from '../../../shared/buttons/tipping-button';
+import NameBadge from '../../../shared/name-displays/name-badge';
 import GoverningActions from './governing-actions';
 import GeneralTopicActionsButton from './general-topic-actions-button';
 
@@ -72,21 +73,11 @@ interface Props extends RouteComponentProps<MatchParams> {
 
 const useStyles = makeStyles((theme) =>
   createStyles({
+    author: {
+      float: 'right',
+    },
     removed: {
       opacity: 0.25,
-    },
-    authorName: {
-      display: 'block',
-      paddingTop: '2px',
-      paddingLeft: '5px',
-      paddingRight: '5px',
-    },
-    authorLink: {
-      float: 'right',
-      borderRadius: '0 0 0 5px',
-      marginTop: '-18px',
-      marginBottom: '7px',
-      marginRight: '-16px',
     },
     content: {
       marginRight: '5px',
@@ -245,17 +236,8 @@ const FullTopic: React.FunctionComponent<Props> = (props: Props) => {
 
   function renderAuthor() {
     return (
-      <div style={{ float: 'right' }}>
-        <Link
-          className={`${classes.authorLink} ${
-            props.representatives.includes(topic.author.toLocaleLowerCase()) ? classes.repColor : classes.userColor
-          }`}
-          to={`/u/${topic.author}`}
-        >
-          <Typography gutterBottom variant="subtitle1" component="span" className="typography">
-            <span className={classes.authorName}>@{topic.author}</span>
-          </Typography>
-        </Link>
+      <div className={classes.author}>
+        <NameBadge name={topic.author} />
         <br />
         <div style={{ float: 'right' }}>
           <Avatar src={avatar} size={AVATAR_SIZE.LARGE} name={topic.author} />
