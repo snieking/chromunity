@@ -46,7 +46,7 @@ const NameBadgeChanger: React.FunctionComponent<Props> = (props) => {
         }}
         style={{ margin: '0 auto' }}
       >
-        <option aria-label="Default" value="">
+        <option aria-label="Default" value="[default]">
           Default
         </option>
         {items.map((i) => (
