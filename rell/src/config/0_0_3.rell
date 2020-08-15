@@ -13,7 +13,7 @@ operation update_block_79000(){
   ft3_core.my_blockchain_info.last_update = update_at_block;
 }
 
-operation update_at_block_300000(){
+operation seed_store(){
 	val update_at_block = 300000;
 	require(op_context.block_height>=update_at_block, "Block is not high enough yet for the update");
   	require(ft3_core.my_blockchain_info.last_update < update_at_block, "Recent update was done with a higher update block");
@@ -39,6 +39,27 @@ operation update_at_block_300000(){
   		description = "In the end, cowards are those who follow the dark side.", 
   		name_coloring, 
   		3
+  	);
+  	create store.item(
+  		id = 'NameColoring:PinkBordered', 
+  		name = "Bordered Pink", 
+  		description = "On Wednesdays, we wear pink.", 
+  		store.category@{ .name == "Name Coloring" }, 
+  		5
+  	);
+}
+
+operation update_at_block_310000(){
+	val update_at_block = 310000;
+	require(op_context.block_height>=update_at_block, "Block is not high enough yet for the update");
+  	require(ft3_core.my_blockchain_info.last_update < update_at_block, "Recent update was done with a higher update block");
+  	
+  	create store.item(
+  		id = 'NameColoring:PinkBordered', 
+  		name = "Bordered Pink", 
+  		description = "On Wednesdays, we wear pink.", 
+  		store.category@{ .name == "Name Coloring" }, 
+  		5
   	);
 }
 
