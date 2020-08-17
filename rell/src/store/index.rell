@@ -129,11 +129,14 @@ operation start_auction() {
 		require(current_block > latest_auction.completion_height + auction_cooldown(), "Can't trigger new auction yet");
 	}
 	
+	val items = item@*{};
+	require(items.size() > 0, "No items to put on auction");
+	
 	val auction = create auction(start_height = current_block, completion_height = current_block + auction_blocks());
 	
 	val uniqueness_cut_off = current_block % 10;
 	
-	for (item in item@*{}) {
+	for (item in items) {
 		if (item.uniqueness >= uniqueness_cut_off) {
 			create item_auction(auction, item);
 		}
