@@ -36,7 +36,6 @@ interface Props extends WithStyles<typeof styles> {
 }
 
 export interface ElectionState {
-  timestamp: number;
   electionStatus: ElectionStatus;
   votedFor: string;
   isACandidate: boolean;
@@ -50,7 +49,6 @@ const Election = withStyles(styles)(
       super(props);
       this.state = {
         electionStatus: ElectionStatus.NOT_CHECKED,
-        timestamp: Date.now(),
         votedFor: '',
         isACandidate: false,
         electionCandidates: [],
