@@ -43,9 +43,7 @@ interface UserWallProps extends RouteComponentProps<MatchParams>, WithStyles<typ
 }
 
 interface UserWallState {
-  representatives: string[];
   couldExistOlderTopics: boolean;
-  couldExistOlderTopicReplies: boolean;
   activeTab: number;
 }
 
@@ -56,9 +54,7 @@ const UserWall = withStyles(styles)(
     constructor(props: UserWallProps) {
       super(props);
       this.state = {
-        representatives: [],
         couldExistOlderTopics: false,
-        couldExistOlderTopicReplies: false,
         activeTab: 0,
       };
 

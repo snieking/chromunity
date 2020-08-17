@@ -132,11 +132,8 @@ interface Props extends WithStyles<typeof styles> {
 }
 
 interface State {
-  stars: number;
-  ratedByMe: boolean;
   replyBoxOpen: boolean;
   replyMessage: string;
-  hideThreadConfirmDialogOpen: boolean;
   avatar: string;
   subReplies: TopicReply[];
   timeLeftUntilNoLongerModifiable: number;
@@ -166,11 +163,8 @@ const TopicReplyCard = withStyles(styles)(
       const shouldRenderDueToTimestamp: boolean = props.reply.timestamp + replyMaxRenderAgeMillis > Date.now();
 
       this.state = {
-        stars: 0,
-        ratedByMe: false,
         replyBoxOpen: false,
         replyMessage: '',
-        hideThreadConfirmDialogOpen: false,
         avatar: '',
         subReplies: [],
         timeLeftUntilNoLongerModifiable: 0,
@@ -201,12 +195,6 @@ const TopicReplyCard = withStyles(styles)(
           avatar: ifEmptyAvatarThenPlaceholder(settings.avatar, this.props.reply.author),
         });
       });
-      getReplyStarRaters(this.props.reply.id).then((usersWhoStarRated) =>
-        this.setState({
-          stars: usersWhoStarRated.length,
-          ratedByMe: usersWhoStarRated.includes(user != null && user.name.toLocaleLowerCase()),
-        })
-      );
 
       getTopicSubReplies(this.props.reply.id, user).then((replies) => this.setState({ subReplies: replies }));
 
