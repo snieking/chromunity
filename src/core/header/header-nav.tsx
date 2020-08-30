@@ -196,7 +196,7 @@ const HeaderNav: React.FunctionComponent<Props> = (props: Props) => {
       );
     }
     return (
-      <Badge invisible={!props.activeElection} color="secondary">
+      <Badge invisible={!props.activeElection && !props.auctionInProgress} color="secondary">
         <LocationCity className={classes.navIcon} />
       </Badge>
     );
