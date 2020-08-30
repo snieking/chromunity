@@ -45,8 +45,12 @@ query auction_in_progress(): boolean {
 	return auction@?{ .completed == false } != null;
 }
 
-query get_store_categories() {
-	return category@*{} (.name);
+query get_store_categories(): set<name> {
+	return set<name>((auction, item_auction, category)@*{
+		auction.completed == false,
+		item_auction.auction == auction,
+		category == item_auction.item.category
+	} ( .name ));
 }
 
 query get_store_items_by_category(name) {
