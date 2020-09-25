@@ -2,6 +2,7 @@
     "extends": [
         "airbnb-typescript-prettier"
     ],
+    "plugins": ["jest"],
     "rules": {
       "camelcase": "off",
       "no-bitwise": "off",

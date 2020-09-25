@@ -2,7 +2,7 @@
 module.exports = {
   blockchain: {
     nodeApiUrl: 'https://cg7tt9fhch.execute-api.eu-central-1.amazonaws.com/dev/',
-    rid: '58771843CE58B890CF6FDE8C57F3F564DF741F0C05C5444D24D3A48BB3674497',
+    rid: 'E024F8A9DC745A3A89923746BEEEF2F9CE088AADCAC8E0239216AF5D7E9B2FB3',
     explorerBaseUrl: 'https://explorer-testnet.chromia.com/',
   },
   vault: {
