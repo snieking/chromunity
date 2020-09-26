@@ -12,7 +12,6 @@ import {
   createTopic,
   getTopicsByChannelAfterTimestamp,
   getTopicsByChannelPriorToTimestamp,
-  getTopicsByChannelSortedByPopularityAfterTimestamp,
   getTopicsFromFollowedChannelsPriorToTimestamp,
 } from './topic-service';
 import { createLoggedInUser } from '../../shared/test-utility/users';
@@ -22,8 +21,9 @@ jest.setTimeout(60000);
 describe('channel tests', () => {
   let loggedInUser: ChromunityUser;
 
-  beforeAll(async () => {
+  beforeAll(async (done) => {
     loggedInUser = await createLoggedInUser();
+    done();
   });
 
   it('retrieve topics by channels queries', async () => {
@@ -58,9 +58,6 @@ describe('channel tests', () => {
     let followedChannels: string[] = await getFollowedChannels(loggedInUser.name);
     expect(topicsWithFollowedChannel.length).toBeGreaterThanOrEqual(1);
     expect(followedChannels.length).toBe(1);
-
-    const topicsByChannelPopularity: Topic[] = await getTopicsByChannelSortedByPopularityAfterTimestamp(channel, 0, 10);
-    expect(topicsByChannelPopularity.length).toBeGreaterThanOrEqual(1);
 
     const countOfFollowers = await countChannelFollowers(channel);
     expect(countOfFollowers).toBeGreaterThanOrEqual(1);

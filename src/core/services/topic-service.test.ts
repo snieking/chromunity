@@ -8,7 +8,6 @@ import {
   createTopicReply,
   createTopicSubReply,
   deleteTopic,
-  getAllTopicsByPopularityAfterTimestamp,
   getReplyStarRaters,
   getTopicById,
   getTopicRepliesByUserPriorToTimestamp,
@@ -217,10 +216,5 @@ describe('topic tests', () => {
 
     expect(countOfTopics).toBeGreaterThan(0);
     expect(countOfReplies).toBeGreaterThan(0);
-  });
-
-  it('get all topics by popularity', async () => {
-    const topics: Topic[] = await getAllTopicsByPopularityAfterTimestamp(0, 10);
-    expect(topics.length).toBeGreaterThanOrEqual(1);
   });
 });
