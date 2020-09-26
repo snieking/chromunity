@@ -316,17 +316,17 @@ query get_topic_by_id(username: name, id: text) {
 	);
 }
 
-query get_all_topics_by_stars_since_timestamp(timestamp, page_size: integer) {
-    val topics = rating.tmp_topic_rating@*{
+query get_all_topics_by_stars_since_timestamp(timestamp, page_size: integer) {    
+    val topics = rating.topic_star_rating@*{
         .topic.last_modified > timestamp
     } (
-        @sort_desc .stars,
-        id = .topic.id,
-        author=.topic.author.display_name,
-        title=.topic.title,
-        message=.topic.message,
-        last_modified=.topic.last_modified,
-        timestamp=.topic.timestamp
+        @sum @sort_desc stars = 1,
+        @group id = .topic.id,
+        @group author = .topic.author.display_name,
+        @group title = .topic.title,
+        @group message = .topic.message,
+        @group last_modified = .topic.last_modified,
+        @group timestamp = .topic.timestamp
     ) limit page_size;
     
     val ext_topics = list<ext_topic>();
@@ -349,18 +349,18 @@ query get_all_topics_by_stars_since_timestamp(timestamp, page_size: integer) {
 }
 
 query get_topics_by_follows_and_stars_since_timestamp(name, timestamp, page_size: integer) {
-    val topics = (rating.tmp_topic_rating, follow.follow) @*{
+    val topics = (rating.topic_star_rating, follow.follow) @*{
             follow.follower.name == name,
-            tmp_topic_rating.topic.author == follow.follows,
-            tmp_topic_rating.topic.last_modified > timestamp
+            topic_star_rating.topic.author == follow.follows,
+            topic_star_rating.topic.last_modified > timestamp
         } (
-        @sort_desc tmp_topic_rating.stars,
-        id = tmp_topic_rating.topic.id,
-        author = tmp_topic_rating.topic.author.display_name,
-        title = tmp_topic_rating.topic.title,
-        message = tmp_topic_rating.topic.message,
-        last_modified = tmp_topic_rating.topic.last_modified,
-        timestamp = tmp_topic_rating.topic.timestamp
+        @sum @sort_desc stars = 1,
+        @group id = .topic.id,
+        @group author = .topic.author.display_name,
+        @group title = .topic.title,
+        @group message = .topic.message,
+        @group last_modified = .topic.last_modified,
+        @group timestamp = .topic.timestamp
     ) limit page_size;
     
     val ext_topics = list<ext_topic>();
@@ -383,18 +383,18 @@ query get_topics_by_follows_and_stars_since_timestamp(name, timestamp, page_size
 }
 
 query get_topics_by_channel_after_timestamp_sorted_by_popularity(name, timestamp, page_size: integer) {
-    val topics = (rating.tmp_topic_rating, channel.channel)@*{
+    val topics = (rating.topic_star_rating, channel.channel)@*{
         name == channel.name,
-        tmp_topic_rating.topic == channel.topic,
-        tmp_topic_rating.topic.last_modified > timestamp
+        topic_star_rating.topic == channel.topic,
+        topic_star_rating.topic.last_modified > timestamp
     } (
-        @sort_desc .stars,
-        id = channel.topic.id,
-        author = channel.topic.author.display_name,
-        title = channel.topic.title,
-        message = channel.topic.message,
-        last_modified = channel.topic.last_modified,
-        timestamp = channel.topic.timestamp
+        @sum @sort_desc stars = 1,
+        @group id = channel.topic.id,
+        @group author = channel.topic.author.display_name,
+        @group title = channel.topic.title,
+        @group message = channel.topic.message,
+        @group last_modified = channel.topic.last_modified,
+        @group timestamp = channel.topic.timestamp
     ) limit page_size;
     
     val ext_topics = list<ext_topic>();
@@ -417,19 +417,19 @@ query get_topics_by_channel_after_timestamp_sorted_by_popularity(name, timestamp
 }
 
 query get_topics_by_followed_channels_after_timestamp_sorted_by_popularity(name, timestamp, page_size: integer) {
-    val topics = (rating.tmp_topic_rating, channel.channel_following, channel.channel)@*{
+    val topics = (rating.topic_star_rating, channel.channel_following, channel.channel)@*{
         channel_following.user == user.user@{ name },
         channel_following.name == channel.name,
-        tmp_topic_rating.topic == channel.topic,
-        tmp_topic_rating.topic.last_modified > timestamp
+        topic_star_rating.topic == channel.topic,
+        topic_star_rating.topic.last_modified > timestamp
     } (
-        @sort_desc .stars,
-        id = channel.topic.id,
-        author = channel.topic.author.display_name,
-        title = channel.topic.title,
-        message = channel.topic.message,
-        last_modified = channel.topic.last_modified,
-        timestamp = channel.topic.timestamp
+        @sum @sort_desc stars = 1,
+        @group id = channel.topic.id,
+        @group author = channel.topic.author.display_name,
+        @group title = channel.topic.title,
+        @group message = channel.topic.message,
+        @group last_modified = channel.topic.last_modified,
+        @group timestamp = channel.topic.timestamp
     ) limit page_size;
     
     val ext_topics = list<ext_topic>();

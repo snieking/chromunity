@@ -6,11 +6,7 @@ import { ChromunityUser, Topic } from '../../../types';
 import { createLoggedInUser } from '../../../shared/test-utility/users';
 import { createRandomTopic } from '../../../shared/test-utility/topics';
 import { createFollowing } from '../../../core/services/following-service';
-import {
-  loadFollowedUsersTopicsSaga,
-  loadFollowedUsersTopicsByPopularitySaga,
-  loadOlderFollowedUsersTopicsSaga,
-} from './wall-sagas';
+import { loadFollowedUsersTopicsSaga, loadOlderFollowedUsersTopicsSaga } from './wall-sagas';
 import { getANumber } from '../../../shared/test-utility/helper';
 
 describe('Topic wall [FOLLOWED USERS] saga tests', () => {
@@ -188,31 +184,6 @@ describe('Topic wall [FOLLOWED USERS] saga tests', () => {
     expect(updateTopicsAction.topics.length).toBe(pageSize + 1);
     expect(updateTopicsAction.couldExistOlder).toBe(true);
     expect(updateTopicsAction.wallType).toBe(WallType.USER);
-  });
-
-  it(`${testPrefix} | by popularity`, async () => {
-    const dispatchedActions: any[] = [];
-    const fakeStore = createFakeStore(dispatchedActions, {
-      followedUsers: {
-        updated: 0,
-        topics: [],
-      },
-    });
-
-    await runSaga(fakeStore, loadFollowedUsersTopicsByPopularitySaga, {
-      type: WallActionTypes.LOAD_FOLLOWED_USERS_TOPICS_BY_POPULARITY,
-      payload: {
-        username: secondUser.name,
-        timestamp: 0,
-        pageSize,
-      },
-    } as Action).toPromise();
-
-    const updateTopicsAction = getUpdateTopicsAction(dispatchedActions);
-
-    expect(updateTopicsAction.topics.length).toBe(pageSize);
-    expect(updateTopicsAction.couldExistOlder).toBe(false);
-    expect(updateTopicsAction.wallType).toBe(WallType.NONE);
   });
 
   it(`${testPrefix} | no followed users`, async () => {

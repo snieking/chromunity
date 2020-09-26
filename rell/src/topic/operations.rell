@@ -20,7 +20,6 @@ operation create_topic(id: text, descriptor_id: byte_array, username: text, chan
     );
 
     create channel.channel(name = channel_key.lower_case(), topic, op_context.last_block_time, display_name = channel_name);
-    create rating.tmp_topic_rating (topic, 0);
         
     for (suspension in user.user_suspension@*{ .user == author, .suspended_until > op_context.last_block_time }) {
     	create topic_moderation(suspension.suspended_by, topic);
@@ -42,7 +41,6 @@ operation delete_topic(id: text, descriptor_id: byte_array, username: text) {
     val topic = topic@{ .id == id, .author == author };
     require_mutable(topic.timestamp, op_context.last_block_time, "Delete topic");
     delete channel.channel@{ topic };
-    delete rating.tmp_topic_rating@{ topic };
     delete subscription.subscription@?{ topic };
     
     val opt_poll = poll.poll@?{ topic };

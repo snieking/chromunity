@@ -6,12 +6,7 @@ import {
   createFollowing,
   removeFollowing,
 } from './following-service';
-import {
-  createTopic,
-  getTopicsByFollowsSortedByPopularityAfterTimestamp,
-  getTopicsFromFollowsAfterTimestamp,
-  getTopicsFromFollowsPriorToTimestamp,
-} from './topic-service';
+import { createTopic, getTopicsFromFollowsAfterTimestamp, getTopicsFromFollowsPriorToTimestamp } from './topic-service';
 import { createLoggedInUser } from '../../shared/test-utility/users';
 
 jest.setTimeout(30000);
@@ -48,13 +43,6 @@ describe('following tests', () => {
       10
     );
     expect(followingsTopics2.length).toBe(1);
-
-    const followingTopics3: Topic[] = await getTopicsByFollowsSortedByPopularityAfterTimestamp(
-      loggedInUser.name,
-      0,
-      10
-    );
-    expect(followingTopics3.length).toBe(1);
 
     await removeFollowing(loggedInUser, loggedInUser2.name);
     expect(await amIAFollowerOf(loggedInUser, loggedInUser2.name)).toBe(false);

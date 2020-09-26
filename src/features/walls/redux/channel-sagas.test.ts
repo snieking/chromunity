@@ -8,7 +8,7 @@ import { ChromunityUser, Topic } from '../../../types';
 import { createRandomTopic } from '../../../shared/test-utility/topics';
 import { getANumber } from '../../../shared/test-utility/helper';
 import { ChannelActionTypes, IUpdateChannel } from './channel-types';
-import { loadChannelSaga, loadChannelByPopularitySaga, loadOlderTopicsInChannelSaga } from './channel-sagas';
+import { loadChannelSaga, loadOlderTopicsInChannelSaga } from './channel-sagas';
 
 describe('Channel saga tests', () => {
   const pageSize = 2;
@@ -45,11 +45,12 @@ describe('Channel saga tests', () => {
     ];
   };
 
-  beforeEach(async () => {
+  beforeEach(async (done) => {
     channel = bip39.generateMnemonic(128).split(' ')[0];
     const user: ChromunityUser = await createLoggedInUser();
     await createRandomTopic(user, channel);
     await createRandomTopic(user, channel);
+    done();
   });
 
   jest.setTimeout(30000);
@@ -186,27 +187,5 @@ describe('Channel saga tests', () => {
     expect(action.topics.length).toBeGreaterThanOrEqual(3);
     expect(action.couldExistOlder).toBe(false);
     expect(action.name).toBe(channel);
-  });
-
-  it(`${testPrefix} | by popularity`, async () => {
-    const dispatchedActions: any[] = [];
-    const fakeStore = createFakeStore(dispatchedActions, {
-      name: channel,
-    });
-
-    await runSaga(fakeStore, loadChannelByPopularitySaga, {
-      type: ChannelActionTypes.LOAD_CHANNEL_POPULARITY,
-      payload: {
-        name: channel,
-        timestamp: 0,
-        pageSize,
-      },
-    } as Action).toPromise();
-
-    const action = getUpdateChannelAction(dispatchedActions);
-
-    expect(action.topics.length).toBe(pageSize);
-    expect(action.couldExistOlder).toBe(false);
-    expect(action.name).toBe('');
   });
 });

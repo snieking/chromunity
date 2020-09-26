@@ -4,7 +4,7 @@ import { Action } from 'redux';
 import { createLoggedInUser } from '../../../shared/test-utility/users';
 import { createRandomTopic } from '../../../shared/test-utility/topics';
 import { WallActionTypes, WallType, IUpdateTopics } from './wall-types';
-import { loadAllTopicsSaga, loadAllTopicsByPopularitySaga, loadOlderAllTopicsSaga } from './wall-sagas';
+import { loadAllTopicsSaga, loadOlderAllTopicsSaga } from './wall-sagas';
 import { ChromunityUser, Topic } from '../../../types';
 import { getANumber } from '../../../shared/test-utility/helper';
 
@@ -207,29 +207,5 @@ describe('Topic wall [ALL] saga tests', () => {
     expect(updateTopicsAction.topics.length).toBe(pageSize);
     expect(updateTopicsAction.couldExistOlder).toBe(true);
     expect(updateTopicsAction.wallType).toBe(WallType.ALL);
-  });
-
-  it('load all topics by popularity', async () => {
-    const dispatchedActions: any[] = [];
-    const fakeStore = createFakeStore(dispatchedActions, {
-      all: {
-        topics: [],
-        updated: 0,
-      },
-      wallType: WallType.ALL,
-    });
-
-    await runSaga(fakeStore, loadAllTopicsByPopularitySaga, {
-      type: WallActionTypes.LOAD_ALL_TOPICS_BY_POPULARITY,
-      payload: {
-        timestamp: 0,
-        pageSize,
-      },
-    } as Action).toPromise();
-
-    const updateTopicsAction: IUpdateTopics = getUpdateTopicAction(dispatchedActions);
-    expect(updateTopicsAction.topics.length).toBe(pageSize);
-    expect(updateTopicsAction.couldExistOlder).toBe(false);
-    expect(updateTopicsAction.wallType).toBe(WallType.NONE);
   });
 });

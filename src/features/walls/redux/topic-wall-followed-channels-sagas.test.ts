@@ -5,11 +5,7 @@ import { WallActionTypes, WallType, IUpdateTopics } from './wall-types';
 import { ChromunityUser, Topic } from '../../../types';
 import { createLoggedInUser } from '../../../shared/test-utility/users';
 import { createRandomTopic } from '../../../shared/test-utility/topics';
-import {
-  loadFollowedChannelsTopicsSaga,
-  loadFollowedChannelsTopicsByPopularitySaga,
-  loadOlderFollowedChannelsTopicsSaga,
-} from './wall-sagas';
+import { loadFollowedChannelsTopicsSaga, loadOlderFollowedChannelsTopicsSaga } from './wall-sagas';
 import { followChannel } from '../../../core/services/channel-service';
 import { getANumber } from '../../../shared/test-utility/helper';
 import logger from '../../../shared/util/logger';
@@ -63,7 +59,7 @@ describe('Topic wall [FOLLOWED CHANNELS] saga tests', () => {
     return action.payload;
   };
 
-  beforeAll(async () => {
+  beforeAll(async (done) => {
     const channel = 'AnotherTestChannel';
     user = await createLoggedInUser();
 
@@ -73,6 +69,7 @@ describe('Topic wall [FOLLOWED CHANNELS] saga tests', () => {
 
     await followChannel(user, channel);
     await sleep(5000);
+    done();
   });
 
   it(testPrefix, async () => {
@@ -200,30 +197,5 @@ describe('Topic wall [FOLLOWED CHANNELS] saga tests', () => {
 
     const action = getUpdateTopicsFromCacheAction(dispatchedActions);
     expect(action).toBe(WallType.CHANNEL);
-  });
-
-  it(`${testPrefix} | by popularity`, async () => {
-    const dispatchedActions: any[] = [];
-    const fakeStore = createFakeStore(dispatchedActions, {
-      followedChannels: {
-        updated: 0,
-        topics: [],
-      },
-    });
-
-    await runSaga(fakeStore, loadFollowedChannelsTopicsByPopularitySaga, {
-      type: WallActionTypes.LOAD_FOLLOWED_CHANNELS_TOPICS_BY_POPULARITY,
-      payload: {
-        username: user.name,
-        timestamp: 0,
-        pageSize,
-      },
-    } as Action).toPromise();
-
-    const updateTopicsAction = getUpdateTopicAction(dispatchedActions);
-
-    expect(updateTopicsAction.topics.length).toBe(pageSize);
-    expect(updateTopicsAction.couldExistOlder).toBe(false);
-    expect(updateTopicsAction.wallType).toBe(WallType.NONE);
   });
 });
