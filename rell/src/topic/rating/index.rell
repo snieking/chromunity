@@ -5,7 +5,7 @@ entity topic_star_rating {
     key topic.topic, user.user;
 }
 
-// To be deleted when GROUP BY and COUNT is supported, then will use topic_star_rating instead
+// Safe to delete, but kept since entity already exists on TestNet
 entity tmp_topic_rating {
     key topic.topic;
     mutable stars: integer;
