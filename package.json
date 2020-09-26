@@ -106,6 +106,6 @@
     "mock-local-storage": "^1.1.15",
     "prettier": "^2.1.1",
     "react-test-renderer": "^16.13.1",
-    "ts-jest": "^26.3.0"
+    "ts-jest": "^26.4.0"
   }
 }
