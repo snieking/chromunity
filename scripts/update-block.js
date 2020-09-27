@@ -16,7 +16,7 @@ const gtx = pcl.gtxClient.createClient(rest, Buffer.from(blockchainRID, 'hex'), 
   const pubKey = new pcl.util.createPublicKey(privKey);
 
   const tx = gtx.newTransaction([pubKey]);
-  tx.addOperation('update_at_block_310000');
+  tx.addOperation('init');
   tx.addOperation('nop');
 
   tx.sign(privKey, pubKey);
