@@ -2,21 +2,13 @@ import ft3_acc: lib.ft3.account;
 import ft3_core: lib.ft3.core;
 import store;
 
-operation update_block_79000(){
-  val update_at_block = 79000;
-  require(op_context.block_height>=update_at_block);
-  require(ft3_core.my_blockchain_info.last_update < update_at_block);
-
-  update_new_users_limit();
-  update_previous_users_limit();
-
-  ft3_core.my_blockchain_info.last_update = update_at_block;
+operation init() {
+	seed_store(1);
 }
 
-operation seed_store(){
-	val update_at_block = 300000;
-	require(op_context.block_height>=update_at_block, "Block is not high enough yet for the update");
-  	require(ft3_core.my_blockchain_info.last_update < update_at_block, "Recent update was done with a higher update block");
+function seed_store(block: integer) {
+	require(op_context.block_height >= block, "Block is not high enough yet for the update");
+  	require(ft3_core.my_blockchain_info.last_update < block, "Recent update was done with a higher update block");
   	
   	val name_coloring = create store.category("Name Coloring");
   	create store.item(
@@ -49,18 +41,15 @@ operation seed_store(){
   	);
 }
 
-operation update_at_block_310000(){
-	val update_at_block = 310000;
-	require(op_context.block_height>=update_at_block, "Block is not high enough yet for the update");
-  	require(ft3_core.my_blockchain_info.last_update < update_at_block, "Recent update was done with a higher update block");
-  	
-  	create store.item(
-  		id = 'NameColoring:PinkBordered', 
-  		name = "Bordered Pink", 
-  		description = "On Wednesdays, we wear pink.", 
-  		store.category@{ .name == "Name Coloring" }, 
-  		5
-  	);
+operation update_block_79000(){
+  val update_at_block = 79000;
+  require(op_context.block_height>=update_at_block);
+  require(ft3_core.my_blockchain_info.last_update < update_at_block);
+
+  update_new_users_limit();
+  update_previous_users_limit();
+
+  ft3_core.my_blockchain_info.last_update = update_at_block;
 }
 
 function update_new_users_limit() {
